@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "panel": {
+    "rpg": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -57,10 +57,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "panel:build:production"
+              "buildTarget": "rpg:build:production"
             },
             "development": {
-              "buildTarget": "panel:build:development"
+              "buildTarget": "rpg:build:development"
             }
           },
           "defaultConfiguration": "development"
