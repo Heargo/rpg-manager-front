@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavBarComponent } from './core/components/nav-bar/nav-bar.component';
 import { Toast, ToastModule } from 'primeng/toast';
@@ -10,17 +10,4 @@ import { Toast, ToastModule } from 'primeng/toast';
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App implements OnInit {
-  // private readonly authService: AuthService = inject(AuthService);
-
-  ngOnInit(): void {
-    // this.authService
-    //   .isTokenValid()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe((res) => {
-    //     if (!res) {
-    //       this.authService.logout();
-    //     }
-    //   });
-  }
-}
+export class App {}

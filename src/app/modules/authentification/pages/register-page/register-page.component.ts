@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, inject, OnInit } from '@angular/core';
 import {
   FormBuilder,
+  FormControl,
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
@@ -12,6 +13,8 @@ import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { AuthentificationBusiness } from '../../business/authentification.business';
 
 @Component({
   standalone: true,
@@ -27,61 +30,54 @@ import { MessageModule } from 'primeng/message';
     MessageModule,
   ],
 })
-export class RegisterPageComponent implements OnInit {
-  signupForm!: FormGroup;
+export class RegisterPageComponent {
   errorMessage: string = '';
   errorInForm: boolean = false;
-  formObserver$!: any;
+  signupForm: FormGroup = new FormGroup(
+    {
+      login: new FormControl<string>('', {
+        validators: [Validators.required],
+      }),
+      password: new FormControl<string>('', {
+        validators: [Validators.required, Validators.minLength(8)],
+      }),
+      passwordVerification: new FormControl<string>('', {
+        validators: [Validators.required, Validators.minLength(8)],
+      }),
+    },
+    passwordMatchValidator
+  );
 
-  constructor(private formBuilder: FormBuilder, private router: Router) {}
+  private readonly authBusiness = inject(AuthentificationBusiness);
+
+  private readonly $formChange = toSignal(this.signupForm?.valueChanges);
+
+  constructor(private formBuilder: FormBuilder, private router: Router) {
+    effect(() => {
+      const changes = this.$formChange();
+      if (!changes) return;
+      if (changes.password !== changes.passwordVerification) {
+        this.errorInForm = true;
+        this.errorMessage = 'Passwords do not match';
+      } else {
+        this.errorInForm = false;
+        this.errorMessage = '';
+      }
+    });
+  }
 
   async onSubmitForm() {
-    if (
-      this.signupForm.value.password !=
-      this.signupForm.value.passwordVerification
-    ) {
-      this.errorInForm = true;
-      this.errorMessage = 'Passwords do not match';
-      return;
-    }
+    const form = this.signupForm.getRawValue();
 
-    const registered = false;
+    const registered = await this.authBusiness.register(
+      form.login,
+      form.password
+    );
     if (registered) {
       this.router.navigate(['auth/login']);
     } else {
       this.errorInForm = true;
       this.errorMessage = 'An error occured';
     }
-  }
-
-  ngOnInit(): void {
-    this.signupForm = this.formBuilder.group(
-      {
-        login: [null, [Validators.required]],
-        password: [null, [Validators.required, Validators.minLength(8)]],
-        passwordVerification: [
-          null,
-          [Validators.required, Validators.minLength(8)],
-        ],
-      },
-      passwordMatchValidator
-    );
-
-    //listen to changes in the form and update the error message accordingly
-    // this.formObserver$ = this.signupForm.valueChanges
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe((value) => {
-    //     if (
-    //       value.password != value.passwordVerification &&
-    //       value.password != null &&
-    //       value.passwordVerification != null
-    //     ) {
-    //       this.errorInForm = true;
-    //       this.errorMessage = 'Passwords do not match';
-    //     } else {
-    //       this.errorInForm = false;
-    //       this.errorMessage = '';
-    //     }
-    //   });
   }
 }

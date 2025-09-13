@@ -5,27 +5,27 @@ import {
   Router,
   CanActivateFn,
 } from '@angular/router';
-import { catchError, from, of } from 'rxjs';
-import { map, take } from 'rxjs/operators';
-import { AuthService } from '../services/auth.service';
+import { catchError, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { AuthentificationBusiness } from '../../modules/authentification/business/authentification.business';
 
 export const AuthGuard: CanActivateFn = (
-  route: ActivatedRouteSnapshot,
-  state: RouterStateSnapshot
+  _route: ActivatedRouteSnapshot,
+  _state: RouterStateSnapshot
 ) => {
   const router = inject(Router);
-  const authService = inject(AuthService);
+  const authBusiness = inject(AuthentificationBusiness);
 
-  return from(authService.isLoggedIn()).pipe(
-    take(1),
-    map((isLoggedIn) => {
+  return of(authBusiness.$connected()).pipe(
+    map((isLoggedIn: boolean) => {
       if (isLoggedIn) {
         return true;
+      } else {
+        router.navigate(['auth/login']);
+        return false;
       }
-      router.navigate(['auth/login']);
-      return false;
     }),
-    catchError((err) => {
+    catchError(() => {
       router.navigate(['auth/login']);
       return of(false);
     })

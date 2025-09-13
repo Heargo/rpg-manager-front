@@ -22,9 +22,9 @@
   </ng-template>
   <ng-template #end>
     <div class="flex-row center middle">
-      @if(loggedIn()) {
+      @if(authBusiness.$connected()) {
       <p-avatar
-        label="{{ label }}"
+        label="{{ $label() }}"
         class="pointer"
         shape="circle"
         (click)="usermenu.toggle($event)"

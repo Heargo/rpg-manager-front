@@ -11,7 +11,7 @@ import { ButtonModule } from 'primeng/button';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthentificationBusiness } from '../../business/authentification.business';
 
 @Component({
   standalone: true,
@@ -32,12 +32,14 @@ export class LoginPageComponent implements OnInit {
   errorMessage: string = '';
   errorInForm: boolean = false;
 
-  private readonly authService: AuthService = inject(AuthService);
+  private readonly authBusiness: AuthentificationBusiness = inject(
+    AuthentificationBusiness
+  );
 
   constructor(private formBuilder: FormBuilder, private router: Router) {}
 
   async onSubmitForm() {
-    const loggedIn = await this.authService.login(
+    const loggedIn = await this.authBusiness.login(
       this.loginForm.value.login,
       this.loginForm.value.password
     );

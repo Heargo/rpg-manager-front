@@ -1,5 +1,9 @@
 @use "../../../../styles/mixins.scss" as *;
 
+form {
+  width: 300px;
+}
+
 .illustration {
   width: 50vw;
   max-width: 500px;
