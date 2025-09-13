@@ -1,0 +1,10 @@
+@use "../../../../styles/mixins.scss" as *;
+
+.illustration {
+  width: 50vw;
+  max-width: 500px;
+
+  @include width-under(600px) {
+    display: none;
+  }
+}

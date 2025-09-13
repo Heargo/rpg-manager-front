@@ -1,0 +1,51 @@
+/* You can add global styles to this file, and also import other style files */
+@use "./app/styles/mixins.scss" as *;
+@use "./app/styles/layout.scss" as *;
+@use "./app/styles/utilities.scss" as *;
+@forward "./app/styles/mixins.scss";
+@forward "./app/styles/layout.scss";
+@forward "./app/styles/utilities.scss";
+
+@import "primeicons/primeicons.css";
+@import url("https://fonts.googleapis.com/css2?family=Recursive:wght@300;400;500;600;700;800;900;1000&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Recursive", sans-serif;
+
+  --small: 0.8rem;
+  --medium: 1rem;
+  --large: 1.2rem;
+  --ground-background: var(--p-surface-50);
+  // theme color
+  --color-paper-0: #f9f6ef;
+  --color-paper-50: #f1ecda;
+  --color-paper-100: #e5ddc0;
+  --color-paper-200: #cbc4aa;
+  --color-paper-300: #afa992;
+  --color-paper-400: #938e7b;
+  --color-paper-500: #797564;
+  --color-paper-600: #5f5c4f;
+  --color-paper-700: #47443a;
+  --color-paper-800: #323029;
+  --color-paper-900: #1d1c16;
+  --color-paper-950: #12110d;
+}
+
+$nav-height: 60px;
+
+.main-container {
+  margin-top: $nav-height;
+  min-height: calc(100vh - $nav-height - 2rem);
+  padding: 1rem;
+}
+
+html,
+body {
+  background-color: var(--ground-background);
+}
+
+body {
+  margin: 0.5rem;
+}
