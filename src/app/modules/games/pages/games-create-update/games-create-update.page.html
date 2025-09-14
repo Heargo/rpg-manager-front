@@ -1,0 +1,153 @@
+<div class="flex-col main-container py-medium">
+  <h1>Create your game</h1>
+  <div class="flex-row w-100 left top">
+    <form>
+      <p-accordion [value]="[0, 1, 2]" [multiple]="true">
+        <p-accordion-panel [value]="0">
+          <!-- ---------------------------------------------------------- -->
+          <!--------------------- General informations --------------------->
+          <!-- ---------------------------------------------------------- -->
+          <p-accordion-header>General informations</p-accordion-header>
+          <p-accordion-content>
+            <div class="flex-col left middle w-100 wrap">
+              <div class="flex-row left bottom w-100">
+                @if($gameImagePreview()) {
+                <img
+                  [src]="$gameImagePreview()"
+                  alt="Game Image Preview"
+                  class="preview"
+                />
+                }@else {
+                <p class="info-empty">No image selected.</p>
+                }
+                <div class="flex-col w-100">
+                  <!-- Title -->
+                  <p-floatlabel variant="on">
+                    <input pInputText id="on_label" autocomplete="off" />
+                    <label for="on_label">Name</label>
+                  </p-floatlabel>
+                  <!-- Image -->
+                  <p-fileUpload
+                    accept="image/*"
+                    maxFileSize="1000000"
+                    chooseLabel="Select an image"
+                    mode="basic"
+                    [customUpload]="true"
+                    [auto]="true"
+                    (uploadHandler)="onUpload($event)"
+                  ></p-fileUpload>
+                </div>
+              </div>
+              <!-- Description -->
+              <p-floatlabel variant="on">
+                <textarea
+                  pTextarea
+                  id="over_label"
+                  rows="10"
+                  style="resize: none"
+                ></textarea>
+                <label for="on_label">Description</label>
+              </p-floatlabel>
+            </div>
+          </p-accordion-content>
+        </p-accordion-panel>
+
+        <!-- ---------------------------------------------------------- -->
+        <!------------------------- Attributes --------------------------->
+        <!-- ---------------------------------------------------------- -->
+        <p-accordion-panel [value]="1">
+          <p-accordion-header>Attributes</p-accordion-header>
+          <p-accordion-content>
+            <div class="flex-col">
+              <p>
+                Attributes are the foundation of your game's mechanics. It will
+                be used to create Player characters, NPCs, items, and more.
+              </p>
+              <!-- 2 inputs (name, maxValue) and a add button -->
+              <form
+                [formGroup]="attributeForm"
+                class="flex-row w-100 left middle mb-small"
+              >
+                <p-floatlabel variant="on" class="w-100 mr-small">
+                  <input
+                    pInputText
+                    id="attribute_name"
+                    autocomplete="off"
+                    formControlName="name"
+                  />
+                  <label for="attribute_name">Name</label>
+                </p-floatlabel>
+                <p-floatlabel variant="on" class="w-100 mr-small">
+                  <input
+                    pInputText
+                    id="attribute_maxValue"
+                    type="number"
+                    formControlName="maxValue"
+                    autocomplete="off"
+                  />
+                  <label for="attribute_maxValue">Max Value</label>
+                </p-floatlabel>
+                <p-button
+                  icon="pi pi-plus"
+                  (click)="onAddAttribute()"
+                ></p-button>
+              </form>
+
+              <table>
+                <tr>
+                  <th>Name</th>
+                  <th>Max Value</th>
+                  <th></th>
+                </tr>
+                @for(attr of $attributes(); track attr.name) {
+                <tr>
+                  <td>{{ attr.name }}</td>
+                  <td>{{ attr.maxValue ? attr.maxValue : "∞" }}</td>
+                  <td class="action-col">
+                    <p-button
+                      icon="pi pi-trash"
+                      severity="contrast"
+                      [rounded]="true"
+                      size="small"
+                      [text]="true"
+                      (click)="onRemoveAttribute($index)"
+                    ></p-button>
+                  </td>
+                </tr>
+                }@empty {
+                <tr>
+                  <td colspan="3" class="text-center">
+                    No attribute added yet.
+                  </td>
+                </tr>
+                }
+              </table>
+            </div>
+          </p-accordion-content>
+        </p-accordion-panel>
+
+        <!-- ---------------------------------------------------------- -->
+        <!-------------------------- Other ---------------------------- -->
+        <!-- ---------------------------------------------------------- -->
+        <p-accordion-panel [value]="2">
+          <p-accordion-header>Other</p-accordion-header>
+          <p-accordion-content>
+            <div class="flex-col">
+              <!-- input number for base amount of points -->
+              <p-floatlabel variant="on">
+                <input pInputText id="base_points" type="number" />
+                <label for="base_points">Starting amount of stats points</label>
+              </p-floatlabel>
+              <!-- Base money -->
+              <p-floatlabel variant="on">
+                <input pInputText id="base_money" type="number" />
+                <label for="base_money">Starting amount of money</label>
+              </p-floatlabel>
+            </div>
+          </p-accordion-content>
+        </p-accordion-panel>
+      </p-accordion>
+    </form>
+    <img class="w-100" src="assets/illustrations/galaxie.svg" alt="galaxie" />
+  </div>
+</div>

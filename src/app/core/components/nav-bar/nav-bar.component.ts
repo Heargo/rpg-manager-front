@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MenubarModule } from 'primeng/menubar';
 import { AvatarModule } from 'primeng/avatar';
@@ -37,15 +37,24 @@ export class NavBarComponent {
   });
 
   protected profileItems = computed<MenuItem[]>(() => {
-    return this.calculateNavBarItems(null, this.authBusiness.$connected());
+    return this.calculateProfileItems(null, this.authBusiness.$connected());
   });
 
   async onGoHome() {
     await this.router.navigate(['/']);
+    console.log('Navigated to home');
   }
 
-  calculateNavBarItems(user: User | null, isLoggedIn: boolean) {
+  constructor() {
+    effect(() => {
+      const connected = this.authBusiness.$connected();
+      this.menuService.setMenuItems(this.calculateMenuItems(connected));
+    });
+  }
+
+  calculateProfileItems(user: User | null, isLoggedIn: boolean) {
     let profileItems: MenuItem[] = [];
+
     if (isLoggedIn) {
       profileItems = [
         {
@@ -76,5 +85,13 @@ export class NavBarComponent {
       ];
     }
     return profileItems;
+  }
+
+  calculateMenuItems(connected: boolean): MenuItem[] {
+    if (connected) {
+      return [{ label: 'Games', icon: 'pi pi-play', routerLink: '/games' }];
+    } else {
+      return [];
+    }
   }
 }

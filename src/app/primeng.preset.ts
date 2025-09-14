@@ -1,5 +1,5 @@
 import { definePreset } from '@primeuix/themes';
-import Aura from '@primeuix/themes/aura';
+import Nora from '@primeuix/themes/nora';
 
 // theme color
 //  --color-paper-0: #f9f6ef;
@@ -15,8 +15,21 @@ import Aura from '@primeuix/themes/aura';
 //   --color-paper-900: #1d1c16;
 //   --color-paper-950: #12110d;
 
-export const PrimeNgRpgPreset = definePreset(Aura, {
+export const PrimeNgRpgPreset = definePreset(Nora, {
   semantic: {
+    primary: {
+      50: '#fbe6e6',
+      100: '#f8cdcd',
+      200: '#f29494',
+      300: '#ef5252',
+      400: '#bc2a2a',
+      500: '#7f1919',
+      600: '#691313',
+      700: '#560e0e',
+      800: '#400808',
+      900: '#2d0404',
+      950: '#1f0202',
+    },
     colorScheme: {
       light: {
         surface: {

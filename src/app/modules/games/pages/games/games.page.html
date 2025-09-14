@@ -1,0 +1,22 @@
+<div class="flex-row center middle main-container">
+  @if($games().length==0) {
+  <div class="flex-col center w-100">
+    <img
+      class="no-games w-50"
+      src="assets/illustrations/galaxie.svg"
+      alt="no games"
+    />
+    <div class="flex-row center middle">
+      <p-button routerLink="/games/create">Create Game</p-button>
+      <p-button routerLink="/games/join" severity="contrast"
+        >Join Game</p-button
+      >
+    </div>
+    <p class="info-empty">
+      You haven't join or created a game yet, feel free to start !
+    </p>
+  </div>
+  }@else {
+  <p>preview</p>
+  }
+</div>

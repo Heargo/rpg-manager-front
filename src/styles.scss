@@ -33,12 +33,10 @@
   --color-paper-950: #12110d;
 }
 
-$nav-height: 60px;
+$nav-height: 50px;
 
 .main-container {
-  margin-top: $nav-height;
-  min-height: calc(100vh - $nav-height - 2rem);
-  padding: 1rem;
+  min-height: calc(100vh - $nav-height - 1rem);
 }
 
 html,
@@ -48,4 +46,21 @@ body {
 
 body {
   margin: 0.5rem;
+}
+
+// alternate row colors for tables (color-paper-50 and color-paper-100)
+table tr:nth-child(odd) {
+  background-color: var(--color-paper-0);
+}
+
+table tr:nth-child(even) {
+  background-color: var(--color-paper-50);
+}
+// no space between table cells
+table {
+  border-collapse: collapse;
+}
+td,
+th {
+  padding: 0.2rem 0.5rem;
 }

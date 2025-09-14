@@ -1,0 +1,31 @@
+input,
+textarea,
+p-floatlabel {
+  width: 100%;
+}
+
+.preview {
+  width: 100%;
+  max-width: 100px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+form {
+  width: 100%;
+  max-width: 600px;
+}
+
+app-loading {
+  width: 50%;
+  // max-width: 100vh;
+}
+
+th {
+  text-align: left;
+}
+
+.action-col {
+  text-align: right;
+}

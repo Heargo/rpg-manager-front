@@ -1,93 +1,142 @@
-svg {
-  height: 100%;
-  width: fit-content;
-  #cloud_1,
-  #cloud_2,
-  #cloud_3 {
+// svg {
+//   display: block;
+//   // margin: 2rem auto;
+//   width: 100%;
+//   //decrease the size of the svg for devices larger than a tablet
+//   @media screen and (min-width: 768px) {
+//     margin-top: 2rem;
+//     width: 50%;
+//   }
+//   @media screen and (min-width: 1024px) {
+//     margin-top: 3rem;
+//   }
+// }
+
+//svg classes
+.cls-1 {
+  fill: var(--p-primary-500); // #d8568b;
+}
+.cls-2 {
+  fill: transparent; // #d9d9fe;
+}
+.cls-3,
+.cls-4 {
+  fill: none;
+  stroke: var(--color-paper-950); // #494982;
+  stroke-linecap: round;
+  stroke-width: 2px;
+}
+.cls-3 {
+  stroke-linejoin: round;
+}
+.cls-4 {
+  stroke-miterlimit: 10;
+}
+.cls-5 {
+  fill: var(--color-paper-950); // #494982;
+}
+
+#Turbine {
+  animation: rotate 8s linear infinite;
+  transform-origin: 145px 92.5px;
+}
+
+.cloud {
+  stroke-linejoin: round;
+
+  //loop through each cloud
+  @for $i from 1 through 8 {
+    &-#{$i} {
+      opacity: 0;
+      //scss random function to the duration and the delay
+      animation: moveRight
+        #{(random(7) / 2) +
+        8}s
+        linear
+        infinite
+        #{random(7) /
+        2}s;
+    }
+  }
+}
+
+.water {
+  path {
+    stroke-linejoin: round;
+  }
+  .drop {
+    stroke-linejoin: round;
+    //loop through each drop
+    @for $i from 1 through 8 {
+      &-#{$i} {
+        opacity: 0;
+        //scss random function to the duration of the animation and the delay
+        animation: fall
+          #{(random(5) / 2) +
+          1}s
+          linear
+          infinite
+          #{random(5) /
+          10}s;
+      }
+    }
+  }
+}
+
+@keyframes hideshow {
+  from {
     opacity: 0;
+    transform: translateY(-15em);
   }
-  #cloud_1 {
-    animation: cloud 25s linear infinite;
-  }
-  #cloud_2 {
-    animation: cloud_reverse 15s linear infinite;
-    animation-delay: 1s;
-  }
-  #cloud_3 {
-    animation: cloud 9s linear infinite;
-    animation-delay: 0.5s;
-  }
-
-  #ballon_bg_1 {
-    animation: ballon_bg 15s ease-in-out infinite;
-  }
-
-  #ballon_bg_2 {
-    animation: ballon_bg 20s ease-in-out infinite;
-  }
-  #ballon_main {
-    animation: ballon_main 7s ease-in-out infinite;
-  }
-}
-
-@keyframes ballon_bg {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-20%);
-  }
-  100% {
+  to {
+    opacity: 1;
     transform: translateY(0);
   }
 }
+//animations
 
-@keyframes ballon_main {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10%);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes cloud {
-  0% {
-    opacity: 0;
-  }
+//cloud animation
+@keyframes moveRight {
+  0%,
   10% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  20%,
+  80% {
     opacity: 1;
   }
-  90% {
-    transform: translateX(90%);
-    opacity: 0;
-  }
+  90%,
   100% {
-    transform: translateX(100%);
+    transform: translateX(10em);
     opacity: 0;
   }
 }
-
-@keyframes cloud_reverse {
+//turbine animation
+@keyframes rotate {
   0% {
+    transform: rotateZ(0deg);
+  }
+  100% {
+    transform: rotateZ(-360deg);
+  }
+}
+
+//waterfall animation
+
+@keyframes fall {
+  0%,
+  10% {
+    transform: translateY(0);
     opacity: 0;
   }
-  10% {
+  20%,
+  80% {
     opacity: 1;
   }
-  90% {
-    transform: translateX(-90%);
-    opacity: 0;
-  }
+  90%,
   100% {
-    transform: translateX(-100%);
+    transform: translateY(11em);
     opacity: 0;
   }
-}
-
-svg {
-  overflow: visible;
 }

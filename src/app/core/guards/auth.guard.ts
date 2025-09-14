@@ -15,7 +15,6 @@ export const AuthGuard: CanActivateFn = (
 ) => {
   const router = inject(Router);
   const authBusiness = inject(AuthentificationBusiness);
-
   return of(authBusiness.$connected()).pipe(
     map((isLoggedIn: boolean) => {
       if (isLoggedIn) {

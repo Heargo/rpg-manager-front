@@ -180,6 +180,36 @@
   }
 }
 
+.px {
+  &-small {
+    padding-left: var(--small);
+    padding-right: var(--small);
+  }
+  &-medium {
+    padding-left: var(--medium);
+    padding-right: var(--medium);
+  }
+  &-large {
+    padding-left: var(--large);
+    padding-right: var(--large);
+  }
+}
+
+.py {
+  &-small {
+    padding-top: var(--small);
+    padding-bottom: var(--small);
+  }
+  &-medium {
+    padding-top: var(--medium);
+    padding-bottom: var(--medium);
+  }
+  &-large {
+    padding-top: var(--large);
+    padding-bottom: var(--large);
+  }
+}
+
 .m {
   &-small {
     margin: var(--small);

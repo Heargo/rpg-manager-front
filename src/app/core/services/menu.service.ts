@@ -8,21 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class MenuService {
   private menuItems: WritableSignal<MenuItem[]> = signal<MenuItem[]>([]);
   private actions: WritableSignal<MenuAction[]> = signal<MenuAction[]>([]);
-  private actionByRoute: Record<string, MenuAction> = {};
-
-  private staticItems: MenuItem[] = [
-    {
-      label: 'Games',
-      icon: 'pi pi-play',
-      // items: [
-      //   {
-      //     label: 'Bookmarks',
-      //     icon: 'pi pi-bookmark',
-      //     routerLink: '/bookmarks',
-      //   },
-      // ],
-    },
-  ];
+  private staticItems: MenuItem[] = [];
 
   constructor() {
     this.menuItems.set([...this.staticItems]);
