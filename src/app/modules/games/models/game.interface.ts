@@ -1,6 +1,12 @@
 import { User } from '../../user/models/user.interface';
 import { Attribute } from './attributes.interface';
 
+export interface AppFile {
+  id?: string;
+  mimeType: string;
+  name: string;
+}
+
 export interface Game {
   id: string;
   name: string;
@@ -9,7 +15,7 @@ export interface Game {
   startingStatsPoints: number;
   startingMoney: number;
   attributes: Attribute[];
-  // image: string;
+  imageId?: string;
 }
 
 export interface CreateGame extends Omit<Game, 'id' | 'gameMaster'> {}

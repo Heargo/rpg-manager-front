@@ -16,7 +16,13 @@
       You haven't join or created a game yet, feel free to start !
     </p>
   </div>
-  }@else {
-  <p>preview</p>
+  }@else { @for(game of $games();track game.id) {
+  <!-- <img [src]="`http://localhost:3000/file/${game.imageId}`" alt="" /> -->
+  <app-game-preview [game]="game"></app-game-preview>
+  }
+  <div class="flex-row center middle">
+    <p-button routerLink="/games/create">Create Game</p-button>
+    <p-button routerLink="/games/join" severity="contrast">Join Game</p-button>
+  </div>
   }
 </div>

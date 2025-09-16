@@ -9,10 +9,20 @@ import { environment } from '../../../../environments/environment';
 })
 export class GamesService {
   private readonly http = inject(HttpClient);
-  public async createGame(game: CreateGame) {
-    // TODO implement create game logic
+  public async createGame(game: CreateGame, image?: File) {
+    const formData = new FormData();
+    //for each key in game, append to formData
+    Object.keys(game).forEach((key) => {
+      const value = (game as any)[key];
+      formData.append(key, value);
+    });
+
+    if (image) {
+      formData.append('image', image);
+    }
+
     return firstValueFrom(
-      this.http.post<Game>(`${environment.API_URL}/games`, game)
+      this.http.post<Game>(`${environment.API_URL}/games`, formData)
     );
   }
 
@@ -24,13 +34,13 @@ export class GamesService {
     );
   }
 
-  public async getGameById(id: string) {
+  public async getGameById(id: string): Promise<Game> {
     return firstValueFrom(
       this.http.get<Game>(`${environment.API_URL}/games/${id}`)
     );
   }
 
-  public async getAllGames() {
+  public async getAllGames(): Promise<Game[]> {
     return firstValueFrom(
       this.http.get<Game[]>(`${environment.API_URL}/games`)
     );

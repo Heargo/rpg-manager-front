@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { CreateGame } from '../models/game.interface';
+import { CreateGame, Game } from '../models/game.interface';
 import { MessageService } from 'primeng/api';
 import { GamesService } from '../services/games.service';
 
@@ -9,8 +9,11 @@ import { GamesService } from '../services/games.service';
 export class GamesBusiness {
   private readonly messageService = inject(MessageService);
   private readonly gamesService = inject(GamesService);
-  public async createGame(game: CreateGame): Promise<CreateGame | null> {
-    return this.gamesService.createGame(game).catch(() => {
+  public async createGame(
+    game: CreateGame,
+    image?: File
+  ): Promise<CreateGame | null> {
+    return this.gamesService.createGame(game, image).catch(() => {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
@@ -18,6 +21,18 @@ export class GamesBusiness {
         life: 3000,
       });
       return null;
+    });
+  }
+
+  public async getGames(): Promise<Game[]> {
+    return this.gamesService.getAllGames().catch(() => {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load games',
+        life: 3000,
+      });
+      return [];
     });
   }
 }

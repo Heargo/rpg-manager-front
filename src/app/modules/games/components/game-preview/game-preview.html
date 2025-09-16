@@ -1,0 +1,22 @@
+<div
+  class="preview"
+  [style]="{ 'background-image': 'url(' + $imageUrl() + ')' }"
+>
+  <div class="top-shadow">
+    <!-- <div>
+            <button (click)="showOptions=!showOptions">
+                <img src="assets/icons/dots.svg" alt="">
+            </button>
+            <ul *ngIf="showOptions" (mouseleave)="showOptions=false" >
+                <li *ngIf="!isHost()" (click)="DeletePlayer()">Delete player</li>
+                <li *ngIf="!isHost()" (click)="LeaveGame()">Leave</li>
+                <li *ngIf="isHost()" (click)="CopyInvitationCodeToClipboard()">Copy invitation code</li>
+                <li *ngIf="isHost()" (click)="DeleteGame()">Delete</li>
+            </ul>
+        </div> -->
+  </div>
+  <button class="play-button">
+    <img src="assets/icons/play.svg" alt="" />
+  </button>
+  <div class="bottom-shadow">{{ $game().name }}</div>
+</div>

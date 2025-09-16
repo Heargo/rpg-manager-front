@@ -23,7 +23,7 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { ButtonModule } from 'primeng/button';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { Attribute } from '../../models/attributes.interface';
-import { Game } from '../../models/game.interface';
+import { AppFile, Game } from '../../models/game.interface';
 import { GamesBusiness } from '../../business/games.business';
 import { StepperModule } from 'primeng/stepper';
 import { CardModule } from 'primeng/card';
@@ -55,6 +55,7 @@ export class GamesCreateUpdatePage {
 
   protected $gameImagePreview = signal<string | null>(null);
   protected $attributes = signal<Attribute[]>([]);
+  protected file?: File;
 
   protected form = new FormGroup({
     name: new FormControl<string>('', {
@@ -62,7 +63,9 @@ export class GamesCreateUpdatePage {
       validators: [Validators.required],
     }),
     description: new FormControl<string>('', { nonNullable: true }),
-    image: new FormControl<File | null>(null),
+    image: new FormControl<AppFile | undefined>(undefined, {
+      nonNullable: true,
+    }),
     startingMoney: new FormControl<number>(0, { nonNullable: true }),
     startingStatsPoints: new FormControl<number>(0, { nonNullable: true }),
   });
@@ -116,10 +119,10 @@ export class GamesCreateUpdatePage {
   }
 
   onUpload(event: any) {
-    console.log(event);
     this.$gameImagePreview.set(
       event.files[0] ? event.files[0].objectURL : null
     );
+    this.file = event.files[0];
   }
 
   onSubmit() {
@@ -130,10 +133,13 @@ export class GamesCreateUpdatePage {
       console.log('Update game');
     } else {
       // Create new game
-      this.gameBusiness.createGame({
-        ...formValue,
-        attributes,
-      });
+      this.gameBusiness.createGame(
+        {
+          ...formValue,
+          attributes,
+        },
+        this.file
+      );
     }
   }
 }
