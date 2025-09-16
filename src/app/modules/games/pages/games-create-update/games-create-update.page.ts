@@ -1,4 +1,12 @@
-import { Component, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  OnInit,
+  signal,
+} from '@angular/core';
 import {
   FormArray,
   FormControl,
@@ -13,8 +21,14 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ButtonModule } from 'primeng/button';
+import { ColorPickerModule } from 'primeng/colorpicker';
 import { Attribute } from '../../models/attributes.interface';
-
+import { Game } from '../../models/game.interface';
+import { GamesBusiness } from '../../business/games.business';
+import { StepperModule } from 'primeng/stepper';
+import { CardModule } from 'primeng/card';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { InputNumberModule } from 'primeng/inputnumber';
 @Component({
   selector: 'app-games-create-update',
   imports: [
@@ -26,18 +40,31 @@ import { Attribute } from '../../models/attributes.interface';
     FileUploadModule,
     ButtonModule,
     ReactiveFormsModule,
+    StepperModule,
+    CardModule,
+    ColorPickerModule,
+    SelectButtonModule,
+    InputNumberModule,
   ],
   templateUrl: './games-create-update.page.html',
   styleUrl: './games-create-update.page.scss',
 })
 export class GamesCreateUpdatePage {
+  private readonly gameBusiness = inject(GamesBusiness);
+  public $game = input<Game | null>(null, { alias: 'game' });
+
   protected $gameImagePreview = signal<string | null>(null);
   protected $attributes = signal<Attribute[]>([]);
 
   protected form = new FormGroup({
-    name: new FormControl<string>(''),
-    description: new FormControl<string>(''),
+    name: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
+    description: new FormControl<string>('', { nonNullable: true }),
     image: new FormControl<File | null>(null),
+    startingMoney: new FormControl<number>(0, { nonNullable: true }),
+    startingStatsPoints: new FormControl<number>(0, { nonNullable: true }),
   });
 
   protected attributeForm = new FormGroup({
@@ -48,7 +75,21 @@ export class GamesCreateUpdatePage {
     maxValue: new FormControl<number | undefined>(undefined, {
       nonNullable: true,
     }),
+    dynamic: new FormControl<boolean>(false, { nonNullable: true }),
+    color: new FormControl<string>('#5077b1ff', { nonNullable: true }),
+    statsPointCost: new FormControl<number>(1, { nonNullable: true }),
   });
+
+  constructor() {
+    effect(() => {
+      const game = this.$game();
+      if (game) {
+        this.form.patchValue(game);
+        this.$attributes.set(game.attributes ?? []);
+        this.$gameImagePreview.set(null); //TODO add game image
+      }
+    });
+  }
 
   onAddAttribute() {
     if (this.attributeForm.valid) {
@@ -63,11 +104,36 @@ export class GamesCreateUpdatePage {
   onRemoveAttribute(index: number) {
     this.$attributes.update((attrs) => attrs.filter((_, i) => i !== index));
   }
+  onMoveAttributeUp(index: number) {
+    if (index <= 0) return;
+    this.$attributes.update((attrs) => {
+      const newAttrs = [...attrs];
+      const temp = newAttrs[index - 1];
+      newAttrs[index - 1] = newAttrs[index];
+      newAttrs[index] = temp;
+      return newAttrs;
+    });
+  }
 
   onUpload(event: any) {
     console.log(event);
     this.$gameImagePreview.set(
       event.files[0] ? event.files[0].objectURL : null
     );
+  }
+
+  onSubmit() {
+    const formValue = this.form.getRawValue();
+    const attributes = this.$attributes();
+    if (this.$game()) {
+      // Update existing game
+      console.log('Update game');
+    } else {
+      // Create new game
+      this.gameBusiness.createGame({
+        ...formValue,
+        attributes,
+      });
+    }
   }
 }

@@ -1,6 +1,7 @@
 input,
 textarea,
-p-floatlabel {
+p-floatlabel,
+p-inputnumber {
   width: 100%;
 }
 
@@ -14,7 +15,7 @@ p-floatlabel {
 
 form {
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
 }
 
 app-loading {
@@ -28,4 +29,22 @@ th {
 
 .action-col {
   text-align: right;
+}
+
+.color-preview {
+  width: 1rem;
+  aspect-ratio: 1 / 1;
+  border-radius: 0.25rem;
+}
+
+.show-actions-on-hover {
+  .action-hover {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  &:hover {
+    .action-hover {
+      opacity: 1;
+    }
+  }
 }

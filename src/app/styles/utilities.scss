@@ -13,3 +13,12 @@
 .text-center {
   text-align: center;
 }
+
+.show-on-hover {
+  opacity: 0;
+  transition: opacity 0.3s;
+  cursor: pointer;
+  &:hover {
+    opacity: 1;
+  }
+}
