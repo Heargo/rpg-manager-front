@@ -29,6 +29,8 @@ import { StepperModule } from 'primeng/stepper';
 import { CardModule } from 'primeng/card';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-games-create-update',
   imports: [
@@ -51,7 +53,32 @@ import { InputNumberModule } from 'primeng/inputnumber';
 })
 export class GamesCreateUpdatePage {
   private readonly gameBusiness = inject(GamesBusiness);
-  public $game = input<Game | null>(null, { alias: 'game' });
+  private readonly route = inject(ActivatedRoute);
+  private readonly $routeParams = toSignal(this.route.params);
+  private readonly $gameId = computed(() => {
+    const params = this.$routeParams();
+    return params ? params['id'] : null;
+  });
+
+  public $game = signal<Game | null>(null);
+
+  constructor() {
+    // when gameId changes, load the appropriate game
+    effect(() => {
+      const gameId = this.$gameId();
+      if (gameId) {
+        console.log('Loading game for editing with id:', gameId);
+        this.gameBusiness.getGameById(gameId).then((game) => {
+          this.$game.set(game);
+          if (!game) return;
+          console.log('Loaded game for editing:', game);
+          this.form.patchValue(game);
+          this.$attributes.set(game.attributes ?? []);
+          this.$gameImagePreview.set(this.gameBusiness.getGameImageUrl(game));
+        });
+      }
+    });
+  }
 
   protected $gameImagePreview = signal<string | null>(null);
   protected $attributes = signal<Attribute[]>([]);
@@ -82,17 +109,6 @@ export class GamesCreateUpdatePage {
     color: new FormControl<string>('#5077b1ff', { nonNullable: true }),
     statsPointCost: new FormControl<number>(1, { nonNullable: true }),
   });
-
-  constructor() {
-    effect(() => {
-      const game = this.$game();
-      if (game) {
-        this.form.patchValue(game);
-        this.$attributes.set(game.attributes ?? []);
-        this.$gameImagePreview.set(null); //TODO add game image
-      }
-    });
-  }
 
   onAddAttribute() {
     if (this.attributeForm.valid) {
@@ -128,10 +144,20 @@ export class GamesCreateUpdatePage {
   onSubmit() {
     const formValue = this.form.getRawValue();
     const attributes = this.$attributes();
-    if (this.$game()) {
+    const game = this.$game();
+    if (game) {
+      console.log('Updating game with id:', game.id);
       // Update existing game
-      console.log('Update game');
+      this.gameBusiness.updateGame(
+        game.id,
+        {
+          ...formValue,
+          attributes,
+        },
+        this.file
+      );
     } else {
+      console.log('Creating new game');
       // Create new game
       this.gameBusiness.createGame(
         {

@@ -31,6 +31,12 @@
   --color-paper-800: #323029;
   --color-paper-900: #1d1c16;
   --color-paper-950: #12110d;
+
+  --border: 3px solid var(--color-paper-900);
+  --container-shadow: var(--p-card-shadow);
+
+  --glass-dark: rgba(0, 0, 0, 0.2);
+  --glass-light: rgba(255, 255, 255, 0.2);
 }
 
 $nav-height: 50px;

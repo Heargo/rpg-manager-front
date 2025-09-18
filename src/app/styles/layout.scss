@@ -225,3 +225,18 @@
     margin: var(--large);
   }
 }
+
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+
+  &-center {
+    @extend .absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}

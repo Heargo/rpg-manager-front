@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { CreateGame, Game } from '../models/game.interface';
+import { CreateGame, Game, UpdateGame } from '../models/game.interface';
 import { MessageService } from 'primeng/api';
 import { GamesService } from '../services/games.service';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -34,5 +35,37 @@ export class GamesBusiness {
       });
       return [];
     });
+  }
+
+  public async getGameById(id: string): Promise<Game | null> {
+    return this.gamesService.getGameById(id).catch(() => {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load the game',
+        life: 3000,
+      });
+      return null;
+    });
+  }
+
+  public async updateGame(
+    id: string,
+    game: UpdateGame,
+    image?: File
+  ): Promise<Game | null> {
+    return this.gamesService.updateGame({ id, ...game }, image).catch(() => {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to update the game',
+        life: 3000,
+      });
+      return null;
+    });
+  }
+
+  public getGameImageUrl(game: Game): string {
+    return `${environment.API_URL}/file/${game.imageId}`;
   }
 }

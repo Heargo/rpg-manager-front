@@ -1,9 +1,37 @@
 .preview {
   width: 80vw;
   aspect-ratio: 1 / 1;
-  max-width: 250px;
+  max-width: 200px;
   //background image cover
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  border: var(--border);
+  box-shadow: var(--container-shadow);
+}
+
+:host {
+  --p-button-text-contrast-hover-background: var(--glass-light);
+}
+
+.options-container {
+  height: 2.25rem;
+  background: linear-gradient(to bottom, var(--glass-dark), transparent);
+  // Override PrimeNG button icon color
+  --p-button-text-contrast-color: var(--color-paper-50);
+}
+
+.name-container {
+  height: 2rem;
+  background: linear-gradient(to top, var(--glass-dark), transparent);
+  color: var(--color-paper-50);
+
+  h2 {
+    text-transform: capitalize;
+    font-weight: normal;
+  }
+}
+
+.color-paper {
+  color: var(--color-paper-50) !important;
 }

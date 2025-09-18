@@ -1,9 +1,8 @@
 <div
-  class="preview"
+  class="preview flex-col center btw relative"
   [style]="{ 'background-image': 'url(' + $imageUrl() + ')' }"
 >
-  <div class="top-shadow">
-    <!-- <div>
+  <!-- <div>
             <button (click)="showOptions=!showOptions">
                 <img src="assets/icons/dots.svg" alt="">
             </button>
@@ -14,9 +13,37 @@
                 <li *ngIf="isHost()" (click)="DeleteGame()">Delete</li>
             </ul>
         </div> -->
+  <!-- options -->
+  <div class="flex-row right top w-100 gap-0 relative options-container">
+    <p-button
+      icon="pi pi-ellipsis-h"
+      [rounded]="false"
+      severity="contrast"
+      [text]="true"
+      size="small"
+      (click)="menu.toggle($event)"
+    />
+    <p-tieredmenu
+      appendTo="body"
+      class="relative"
+      #menu
+      [model]="$items()"
+      [popup]="true"
+    />
   </div>
-  <button class="play-button">
-    <img src="assets/icons/play.svg" alt="" />
-  </button>
-  <div class="bottom-shadow">{{ $game().name }}</div>
+  <!-- play/join -->
+  <p-button
+    icon="pi pi-play"
+    size="large"
+    [rounded]="true"
+    severity="contrast"
+    class="absolute-center"
+  ></p-button>
+
+  <!-- game name -->
+  <div class="flex-col center bottom name-container w-100">
+    <h2>
+      {{ $game().name }}
+    </h2>
+  </div>
 </div>

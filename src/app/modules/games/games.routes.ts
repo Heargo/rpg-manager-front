@@ -20,6 +20,13 @@ export const routesGames: Routes = [
             (m) => m.GamesCreateUpdatePage
           ),
       },
+      {
+        path: ':id/edit',
+        loadComponent: () =>
+          import('./pages/games-create-update/games-create-update.page').then(
+            (m) => m.GamesCreateUpdatePage
+          ),
+      },
     ],
   },
 ];

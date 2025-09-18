@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { CreateGame, Game } from '../models/game.interface';
+import { CreateGame, Game, UpdateGame } from '../models/game.interface';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { FormsHelper } from '../../../core/helper/forms.helper';
 
 @Injectable({
   providedIn: 'root',
@@ -10,12 +11,7 @@ import { environment } from '../../../../environments/environment';
 export class GamesService {
   private readonly http = inject(HttpClient);
   public async createGame(game: CreateGame, image?: File) {
-    const formData = new FormData();
-    //for each key in game, append to formData
-    Object.keys(game).forEach((key) => {
-      const value = (game as any)[key];
-      formData.append(key, value);
-    });
+    const formData = FormsHelper.toFormData(game);
 
     if (image) {
       formData.append('image', image);
@@ -27,10 +23,15 @@ export class GamesService {
   }
 
   // update existing game
-  public async updateGame(game: Game) {
-    // TODO implement update game logic
+  public async updateGame(game: UpdateGame, image?: File): Promise<Game> {
+    const formData = FormsHelper.toFormData(game);
+
+    if (image) {
+      formData.append('image', image);
+    }
+    console.log('Updating game with data:', formData);
     return firstValueFrom(
-      this.http.put<Game>(`${environment.API_URL}/games/${game.id}`, game)
+      this.http.patch<Game>(`${environment.API_URL}/games/${game.id}`, formData)
     );
   }
 
