@@ -65,6 +65,29 @@ export class GamesBusiness {
     });
   }
 
+  public async deleteGame(id: string): Promise<boolean> {
+    return this.gamesService
+      .deleteGame(id)
+      .then(() => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Game deleted successfully',
+          life: 3000,
+        });
+        return true;
+      })
+      .catch(() => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to delete the game',
+          life: 3000,
+        });
+        return false;
+      });
+  }
+
   public getGameImageUrl(game: Game): string {
     return `${environment.API_URL}/file/${game.imageId}`;
   }

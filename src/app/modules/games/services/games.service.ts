@@ -46,4 +46,10 @@ export class GamesService {
       this.http.get<Game[]>(`${environment.API_URL}/games`)
     );
   }
+
+  public async deleteGame(id: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(`${environment.API_URL}/games/${id}`)
+    );
+  }
 }

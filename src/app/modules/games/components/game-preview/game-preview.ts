@@ -1,9 +1,8 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Game } from '../../models/game.interface';
-import { environment } from '../../../../../environments/environment';
 import { ButtonModule } from 'primeng/button';
 import { TieredMenuModule } from 'primeng/tieredmenu';
-import { MenuItem } from 'primeng/api';
+import { ConfirmationService, MenuItem } from 'primeng/api';
 import { GamesBusiness } from '../../business/games.business';
 
 @Component({
@@ -15,6 +14,7 @@ import { GamesBusiness } from '../../business/games.business';
 export class GamePreview {
   public $game = input.required<Game>({ alias: 'game' });
   private readonly gameBusiness = inject(GamesBusiness);
+  private readonly confirmationService = inject(ConfirmationService);
 
   public $items = computed<MenuItem[]>(() => {
     return [
@@ -26,11 +26,32 @@ export class GamePreview {
       {
         label: 'Delete',
         icon: 'pi pi-trash',
-        routerLink: ['/games', this.$game().id, 'delete'],
+        command: () => this.onDelete(),
       },
     ];
   });
   public $imageUrl = computed(() => {
     return this.gameBusiness.getGameImageUrl(this.$game());
   });
+
+  protected onDelete() {
+    this.confirmationService.confirm({
+      message:
+        'Deleting a game is irreversible. You will lose all related data (characters, items, npc etc...) Are you sure you want to proceed?',
+      header: 'Confirmation',
+      closable: true,
+      closeOnEscape: true,
+      icon: 'pi pi-exclamation-triangle',
+
+      rejectButtonProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: { label: 'Delete', severity: 'danger' },
+      accept: async () => {
+        await this.gameBusiness.deleteGame(this.$game().id);
+      },
+    });
+  }
 }
