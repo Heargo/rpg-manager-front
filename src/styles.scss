@@ -37,12 +37,12 @@
 
   --glass-dark: rgba(0, 0, 0, 0.5);
   --glass-light: rgba(255, 255, 255, 0.2);
+  --nav-height: 50px;
+  --top-offset: calc(var(--nav-height) + 1rem);
 }
 
-$nav-height: 50px;
-
 .main-container {
-  min-height: calc(100vh - $nav-height - 1rem);
+  min-height: calc(100vh - var(--nav-height) - 1rem);
 }
 
 html,
@@ -69,4 +69,7 @@ table {
 td,
 th {
   padding: 0.2rem 0.5rem;
+}
+th {
+  text-align: left;
 }

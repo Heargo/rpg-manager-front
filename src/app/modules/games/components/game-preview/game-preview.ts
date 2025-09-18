@@ -4,6 +4,8 @@ import { ButtonModule } from 'primeng/button';
 import { TieredMenuModule } from 'primeng/tieredmenu';
 import { ConfirmationService, MenuItem } from 'primeng/api';
 import { GamesBusiness } from '../../business/games.business';
+import { UsersBusiness } from '../../../user/business/users.business';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-game-preview',
@@ -15,6 +17,8 @@ export class GamePreview {
   public $game = input.required<Game>({ alias: 'game' });
   private readonly gameBusiness = inject(GamesBusiness);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly userBusiness = inject(UsersBusiness);
+  private readonly router = inject(Router);
 
   public $items = computed<MenuItem[]>(() => {
     return [
@@ -53,5 +57,15 @@ export class GamePreview {
         await this.gameBusiness.deleteGame(this.$game().id);
       },
     });
+  }
+
+  protected onPlay() {
+    const currentUser = this.userBusiness.$currentUser();
+    this.router.navigate(['/games', this.$game().id, 'dashboard', 'player']);
+    // if (currentUser?.id === this.$game().gameMaster.id) {
+    //   this.router.navigate(['/games', this.$game().id, 'dashboard', 'gm']);
+    // } else {
+    //   this.router.navigate(['/games', this.$game().id, 'dashboard', 'player']);
+    // }
   }
 }

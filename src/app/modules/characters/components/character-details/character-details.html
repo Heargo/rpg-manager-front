@@ -1,0 +1,99 @@
+<div class="flex-row p-medium container">
+  <!-- Character Portrait & dynamic attributes -->
+  <img
+    class="portrait"
+    src="https://fondlyframed.com/cdn/shop/files/fantasy-portrait-from-photo-190910.png?v=1742367521&width=1946"
+    alt="character-portrait"
+  />
+  <div class="flex-col">
+    <div class="flex-col w-100 left top titles">
+      <h2>Character Name</h2>
+      <!-- TODO feature: add level and class information -->
+      <!-- <h4>Level 5 - Class (Subclass)</h4> -->
+    </div>
+    @for(dynamicAttribute of $dynamicAttributes();track dynamicAttribute.id){
+    <div class="flex-row left middle gap-small">
+      <p
+        class="attribute-name"
+        pTooltip="{{ dynamicAttribute.attribute.name }}"
+        tooltipPosition="top"
+        tooltipOnlyWithEllipsis
+      >
+        {{ dynamicAttribute.attribute.name }}
+      </p>
+      <div class="attribute-bar relative">
+        <span class="numerical-value absolute">
+          {{ dynamicAttribute.dynamicValue }} /
+          {{
+            dynamicAttribute.investedStatPoints /
+              dynamicAttribute.attribute.statsPointCost
+          }}
+        </span>
+        <div
+          class="attribute-fill"
+          [style.width.%]="
+            ((dynamicAttribute.dynamicValue ?? 0) /
+              (dynamicAttribute.investedStatPoints /
+                dynamicAttribute.attribute.statsPointCost)) *
+            100
+          "
+          [style.background-color]="dynamicAttribute.attribute.color"
+        ></div>
+      </div>
+    </div>
+    }
+    <!-- Details informations -->
+    <p-accordion value="0">
+      <p-accordion-panel value="0">
+        <p-accordion-header>Informations</p-accordion-header>
+        <p-accordion-content>
+          <p class="m-0">
+            {{ $character().description }}
+          </p>
+        </p-accordion-content>
+      </p-accordion-panel>
+
+      <p-accordion-panel value="1">
+        <p-accordion-header>Attributes</p-accordion-header>
+        <p-accordion-content>
+          <table class="w-100">
+            <tr>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Points invested</th>
+              <th>Cost</th>
+              <th></th>
+            </tr>
+            @for(attr of this.$character().attributes; track attr.id) {
+            <tr class="show-actions-on-hover">
+              <td>{{ attr.attribute.name }}</td>
+              <td>
+                {{ attr.investedStatPoints / attr.attribute.statsPointCost }}
+                / {{ attr.attribute.maxValue ? attr.attribute.maxValue : "∞" }}
+              </td>
+              <td>{{ attr.investedStatPoints }}</td>
+              <td>{{ attr.attribute.statsPointCost }}</td>
+              <td class="action-col"></td>
+            </tr>
+            }
+          </table>
+        </p-accordion-content>
+      </p-accordion-panel>
+
+      <p-accordion-panel value="2">
+        <p-accordion-header>Equipement</p-accordion-header>
+        <p-accordion-content>
+          <p class="m-0">
+            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+            accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
+            quae ab illo inventore veritatis et quasi architecto beatae vitae
+            dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit
+            aspernatur aut odit aut fugit, sed quia consequuntur magni dolores
+            eos qui ratione voluptatem sequi nesciunt. Consectetur, adipisci
+            velit, sed quia non numquam eius modi.
+          </p>
+        </p-accordion-content>
+      </p-accordion-panel>
+    </p-accordion>
+  </div>
+</div>

@@ -2,7 +2,7 @@ export interface Attribute {
   id?: string;
   name: string;
   maxValue?: number;
-  dynamic?: boolean;
+  dynamic: boolean;
   color?: string;
-  statsPointCost?: number;
+  statsPointCost: number;
 }

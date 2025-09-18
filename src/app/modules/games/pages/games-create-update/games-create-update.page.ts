@@ -107,7 +107,10 @@ export class GamesCreateUpdatePage {
     }),
     dynamic: new FormControl<boolean>(false, { nonNullable: true }),
     color: new FormControl<string>('#5077b1ff', { nonNullable: true }),
-    statsPointCost: new FormControl<number>(1, { nonNullable: true }),
+    statsPointCost: new FormControl<number>(1, {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
   });
 
   onAddAttribute() {

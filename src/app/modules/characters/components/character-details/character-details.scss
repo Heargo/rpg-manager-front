@@ -1,0 +1,57 @@
+.container {
+  .portrait {
+    height: calc(100vh - var(--top-offset) - 2rem);
+    aspect-ratio: 10/16;
+    object-fit: cover;
+  }
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+.attribute-name {
+  width: 100%;
+  max-width: 200px;
+  //ellipsis
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attribute-bar {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-paper-0);
+  padding: 0.2rem;
+  height: 1.4rem;
+  .numerical-value {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0.5rem;
+    z-index: 1;
+    font-size: 0.8rem;
+  }
+  .attribute-fill {
+    top: 0;
+    left: 0;
+    z-index: 1;
+    height: 100%;
+  }
+}
+
+@media (max-width: 800px) {
+  .container {
+    flex-direction: column;
+    .portrait {
+      height: auto;
+      width: 100%;
+      aspect-ratio: auto;
+    }
+    .titles {
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
