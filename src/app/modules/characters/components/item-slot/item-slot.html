@@ -1,0 +1,9 @@
+<div class="flex-col center middle slot">
+  @if(!$item()){ @if($placeHolderIconPath()){
+  <img [src]="$placeHolderIconPath()" class="placeholder" [alt]="$slot()" />
+  }@else {
+  <div class="placeholder"></div>
+  } } @else if($item()) {
+  <p>custom item</p>
+  }
+</div>

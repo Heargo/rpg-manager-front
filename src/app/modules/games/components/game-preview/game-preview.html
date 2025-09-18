@@ -2,17 +2,6 @@
   class="preview flex-col center btw relative"
   [style]="{ 'background-image': 'url(' + $imageUrl() + ')' }"
 >
-  <!-- <div>
-            <button (click)="showOptions=!showOptions">
-                <img src="assets/icons/dots.svg" alt="">
-            </button>
-            <ul *ngIf="showOptions" (mouseleave)="showOptions=false" >
-                <li *ngIf="!isHost()" (click)="DeletePlayer()">Delete player</li>
-                <li *ngIf="!isHost()" (click)="LeaveGame()">Leave</li>
-                <li *ngIf="isHost()" (click)="CopyInvitationCodeToClipboard()">Copy invitation code</li>
-                <li *ngIf="isHost()" (click)="DeleteGame()">Delete</li>
-            </ul>
-        </div> -->
   <!-- options -->
   <div class="flex-row right top w-100 gap-0 relative options-container">
     <p-button
@@ -38,6 +27,7 @@
     [rounded]="true"
     severity="contrast"
     class="absolute-center"
+    (click)="onPlay()"
   ></p-button>
 
   <!-- game name -->

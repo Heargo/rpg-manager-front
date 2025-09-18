@@ -1,0 +1,12 @@
+.slot {
+  width: 64px;
+  aspect-ratio: 1;
+  background-color: var(--color-paper-100);
+  .placeholder {
+    width: 100%;
+    opacity: 0.4;
+  }
+  img {
+    image-rendering: pixelated;
+  }
+}

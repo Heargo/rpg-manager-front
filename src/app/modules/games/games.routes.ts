@@ -1,6 +1,4 @@
 import { Routes } from '@angular/router';
-import { GamesPage } from './pages/games/games.page';
-import { AuthGuard } from '../../core/guards/auth.guard';
 
 export const routesGames: Routes = [
   {
@@ -25,6 +23,20 @@ export const routesGames: Routes = [
         loadComponent: () =>
           import('./pages/games-create-update/games-create-update.page').then(
             (m) => m.GamesCreateUpdatePage
+          ),
+      },
+      {
+        path: ':id/dashboard/gm',
+        loadComponent: () =>
+          import('./pages/game-master-dashboard/game-master-dashboard').then(
+            (m) => m.GameMasterDashboard
+          ),
+      },
+      {
+        path: ':id/dashboard/player',
+        loadComponent: () =>
+          import('./pages/player-dashboard/player-dashboard').then(
+            (m) => m.PlayerDashboard
           ),
       },
     ],

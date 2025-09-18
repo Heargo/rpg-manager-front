@@ -1,0 +1,116 @@
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { AccordionModule } from 'primeng/accordion';
+import { UsersBusiness } from '../../../user/business/users.business';
+import { Character } from '../../models/character.interface';
+import { Tooltip } from 'primeng/tooltip';
+import { EllipsisActiveDirective } from '../../../../core/directives/tooltip-ellipsis.directive';
+import { TabsModule } from 'primeng/tabs';
+import { ItemSlot } from '../item-slot/item-slot';
+import { Slot } from '../../../items/models/slot.enum';
+import { Item } from '../../../items/models/item.interface';
+import { TextareaModule } from 'primeng/textarea';
+import { MenuService } from '../../../../core/services/menu.service';
+
+@Component({
+  selector: 'app-character-details',
+  imports: [
+    AccordionModule,
+    Tooltip,
+    EllipsisActiveDirective,
+    TabsModule,
+    ItemSlot,
+    TextareaModule,
+  ],
+  templateUrl: './character-details.html',
+  styleUrl: './character-details.scss',
+})
+export class CharacterDetails {
+  private readonly userBusiness = inject(UsersBusiness);
+  private readonly menuService = inject(MenuService);
+  protected $character = computed<Character>(() => {
+    const user = this.userBusiness.$currentUser();
+    //TODO CALL API
+    const c: Character = {
+      id: '1',
+      name: 'Character Name',
+      game: {
+        id: '1',
+        name: 'Game Name',
+        gameMaster: user!,
+        startingStatsPoints: 10,
+        startingMoney: 100,
+        attributes: [],
+      },
+      user: { id: 'dza', login: 'djiaz', name: 'ndao' }, //user!,
+      description:
+        'This is a detailed description of the character. It can include background story, personality traits, and other relevant information that adds depth to the character within the game world.',
+      attributes: [
+        {
+          id: '0',
+          dynamicValue: 32,
+          investedStatPoints: 20,
+          attribute: {
+            name: 'Life',
+            dynamic: true,
+            color: 'red',
+            statsPointCost: 0.2,
+          },
+        },
+        {
+          id: '02',
+          dynamicValue: 12,
+          investedStatPoints: 20,
+          attribute: {
+            name: 'mana with a very ',
+            dynamic: true,
+            color: 'blue',
+            statsPointCost: 0.2,
+          },
+        },
+        {
+          id: '1',
+          dynamicValue: 15,
+          investedStatPoints: 5,
+          attribute: {
+            name: 'Strength',
+            dynamic: false,
+            statsPointCost: 1,
+          },
+        },
+      ],
+      inventory: [],
+    };
+    return c;
+  });
+
+  protected $editMode = signal<boolean>(false);
+
+  protected $isCharacterOwner = computed<boolean>(() => {
+    const user = this.userBusiness.$currentUser();
+    return user ? user.id === this.$character().user.id : false;
+  });
+
+  protected $gameMasterView = computed<boolean>(() => {
+    const user = this.userBusiness.$currentUser();
+    return user ? user.id === this.$character().game.gameMaster.id : false;
+  });
+
+  protected $dynamicAttributes = computed(() => {
+    return this.$character()
+      ? this.$character().attributes.filter((attr) => attr.attribute.dynamic)
+      : [];
+  });
+  protected SLOT = Slot;
+
+  protected isEllipsisActive = (e: HTMLElement): boolean => {
+    return e.offsetWidth < e.scrollWidth;
+  };
+
+  constructor() {
+    // When the character change, update the menu if needed
+    effect(() => {
+      const character = this.$character();
+      console.log('CharacterDetails: user or character changed', character);
+    });
+  }
+}

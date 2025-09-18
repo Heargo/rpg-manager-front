@@ -1,0 +1,218 @@
+<div class="flex-row p-medium container">
+  <!-- Character Portrait & dynamic attributes -->
+  <img
+    class="portrait"
+    src="https://fondlyframed.com/cdn/shop/files/fantasy-portrait-from-photo-190910.png?v=1742367521&width=1946"
+    alt="character-portrait"
+  />
+  <div class="flex-col">
+    <div class="flex-col w-100 left top titles">
+      <h2>Character Name</h2>
+      <!-- TODO feature: add level and class information -->
+      <!-- <h4>Level 5 - Class (Subclass)</h4> -->
+    </div>
+    @for(dynamicAttribute of $dynamicAttributes();track dynamicAttribute.id){
+    <div class="flex-row left middle gap-small">
+      <p
+        class="attribute-name"
+        pTooltip="{{ dynamicAttribute.attribute.name }}"
+        tooltipPosition="top"
+        tooltipOnlyWithEllipsis
+      >
+        {{ dynamicAttribute.attribute.name }}
+      </p>
+      <div class="attribute-bar relative">
+        <span class="numerical-value absolute">
+          {{ dynamicAttribute.dynamicValue }} /
+          {{
+            dynamicAttribute.investedStatPoints /
+              dynamicAttribute.attribute.statsPointCost
+          }}
+        </span>
+        <div
+          class="attribute-fill"
+          [style.width.%]="
+            ((dynamicAttribute.dynamicValue ?? 0) /
+              (dynamicAttribute.investedStatPoints /
+                dynamicAttribute.attribute.statsPointCost)) *
+            100
+          "
+          [style.background-color]="dynamicAttribute.attribute.color"
+        ></div>
+      </div>
+    </div>
+    }
+    <!-- Details informations -->
+    <p-accordion value="0">
+      <p-accordion-panel value="0">
+        <p-accordion-header>Informations</p-accordion-header>
+        <p-accordion-content>
+          <!-- edit description -->
+          @if($editMode()){
+          <textarea
+            class="w-100"
+            rows="10"
+            [autoResize]="true"
+            pTextarea
+          ></textarea>
+          } @else {
+          <p class="m-0">
+            {{ $character().description }}
+          </p>
+          }
+        </p-accordion-content>
+      </p-accordion-panel>
+
+      <p-accordion-panel value="1">
+        <p-accordion-header>Attributes</p-accordion-header>
+        <p-accordion-content>
+          <table class="w-100">
+            <tr>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Points invested</th>
+              <th>Cost</th>
+              <th></th>
+            </tr>
+            @for(attr of this.$character().attributes; track attr.id) {
+            <tr class="show-actions-on-hover">
+              <td>{{ attr.attribute.name }}</td>
+              <td>
+                {{ attr.investedStatPoints / attr.attribute.statsPointCost }}
+                / {{ attr.attribute.maxValue ? attr.attribute.maxValue : "∞" }}
+              </td>
+              <td>{{ attr.investedStatPoints }}</td>
+              <td>{{ attr.attribute.statsPointCost }}</td>
+              <td class="action-col"></td>
+            </tr>
+            }
+          </table>
+        </p-accordion-content>
+      </p-accordion-panel>
+
+      <p-accordion-panel value="2">
+        <p-accordion-header>Equipement</p-accordion-header>
+        <p-accordion-content>
+          <p-tabs value="0" scrollable>
+            <p-tablist>
+              <p-tab value="0">Weapons</p-tab>
+              <p-tab value="1">Armor</p-tab>
+              <p-tab value="2">Accessories</p-tab>
+            </p-tablist>
+            <p-tabpanels>
+              <p-tabpanel value="0">
+                <div class="flex-row wrap">
+                  <app-item-slot
+                    [slot]="SLOT.WEAPON"
+                    pTooltip="{{ SLOT.WEAPON }}"
+                    tooltipPosition="bottom"
+                  ></app-item-slot>
+                  <app-item-slot
+                    [slot]="SLOT.SHIELD"
+                    pTooltip="{{ SLOT.SHIELD }}"
+                    tooltipPosition="bottom"
+                  ></app-item-slot>
+                </div>
+              </p-tabpanel>
+              <p-tabpanel value="1">
+                <div class="flex-row wrap">
+                  <app-item-slot
+                    [slot]="SLOT.HEAD"
+                    pTooltip="{{ SLOT.HEAD }}"
+                    tooltipPosition="bottom"
+                  ></app-item-slot>
+                  <app-item-slot
+                    [slot]="SLOT.BODY"
+                    pTooltip="{{ SLOT.BODY }}"
+                    tooltipPosition="bottom"
+                  ></app-item-slot>
+                  <app-item-slot
+                    [slot]="SLOT.HANDS"
+                    pTooltip="{{ SLOT.HANDS }}"
+                    tooltipPosition="bottom"
+                  ></app-item-slot>
+                  <app-item-slot
+                    [slot]="SLOT.LEGS"
+                    pTooltip="{{ SLOT.LEGS }}"
+                    tooltipPosition="bottom"
+                  ></app-item-slot>
+                  <app-item-slot
+                    [slot]="SLOT.FEET"
+                    pTooltip="{{ SLOT.FEET }}"
+                    tooltipPosition="bottom"
+                  ></app-item-slot>
+                </div>
+              </p-tabpanel>
+              <p-tabpanel value="2">
+                <div class="flex-row wrap">
+                  <app-item-slot
+                    [slot]="SLOT.RING"
+                    pTooltip="{{ SLOT.RING }}"
+                    tooltipPosition="bottom"
+                  ></app-item-slot>
+                  <app-item-slot
+                    [slot]="SLOT.AMULET"
+                    pTooltip="{{ SLOT.AMULET }}"
+                    tooltipPosition="bottom"
+                  ></app-item-slot>
+                  <app-item-slot
+                    [slot]="SLOT.EARING"
+                    pTooltip="{{ SLOT.EARING }}"
+                    tooltipPosition="bottom"
+                  ></app-item-slot>
+                </div>
+              </p-tabpanel>
+            </p-tabpanels>
+          </p-tabs>
+        </p-accordion-content>
+      </p-accordion-panel>
+      <p-accordion-panel value="3">
+        <p-accordion-header>Inventory</p-accordion-header>
+        <p-accordion-content>
+          <div class="flex-row wrap">
+            @for(item of $character().inventory; track item) {
+            <app-item-slot [slot]="SLOT.OTHER" [item]="item"></app-item-slot>
+            } @empty {
+            <p>Inventory is empty</p>
+            }
+          </div>
+        </p-accordion-content>
+      </p-accordion-panel>
+      <!-- TODO feature: skills -->
+      <p-accordion-panel value="4">
+        <p-accordion-header>Skills</p-accordion-header>
+        <p-accordion-content>
+          <p>List of your skills.</p>
+        </p-accordion-content>
+      </p-accordion-panel>
+      <!-- TODO feature: quests -->
+      <p-accordion-panel value="5">
+        <p-accordion-header>Quests</p-accordion-header>
+        <p-accordion-content>
+          <p>List of your quests.</p>
+        </p-accordion-content>
+      </p-accordion-panel>
+      <!-- TODO feature: notes -->
+      @if($isCharacterOwner()){
+
+      <p-accordion-panel value="6">
+        <p-accordion-header>Privates notes</p-accordion-header>
+        <p-accordion-content>
+          <div class="flex-col w-100">
+            <p>
+              This is a general notes section. It's private and only visible to
+              you.
+            </p>
+            <textarea
+              class="w-100"
+              rows="10"
+              [autoResize]="true"
+              pTextarea
+            ></textarea>
+          </div>
+        </p-accordion-content>
+      </p-accordion-panel>
+      }
+    </p-accordion>
+  </div>
+</div>

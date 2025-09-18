@@ -1,8 +1,6 @@
-import { inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal, WritableSignal } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { MenuAction } from '../models/menu.interface';
-import { Router } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Injectable({ providedIn: 'root' })
 export class MenuService {

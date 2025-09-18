@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { AuthentificationBusiness } from '../../../modules/authentification/business/authentification.business';
 import { User } from '../../../modules/user/models/user.interface';
 import { UsersBusiness } from '../../../modules/user/business/users.business';
+import { MenuBusiness } from '../../business/menu.business';
 
 @Component({
   standalone: true,
@@ -26,11 +27,11 @@ import { UsersBusiness } from '../../../modules/user/business/users.business';
 })
 export class NavBarComponent {
   protected readonly authBusiness = inject(AuthentificationBusiness);
-  private readonly menuService = inject(MenuService);
+  private readonly menuBusiness = inject(MenuBusiness);
   private readonly usersBusiness = inject(UsersBusiness);
   private readonly router = inject(Router);
 
-  public items = this.menuService.getMenuItems();
+  public items = this.menuBusiness.getMenuItems();
   public $label = computed(() => {
     const user = this.usersBusiness.$currentUser();
     return user?.login ? user.login.charAt(0).toUpperCase() : '?';
@@ -48,7 +49,8 @@ export class NavBarComponent {
   constructor() {
     effect(() => {
       const connected = this.authBusiness.$connected();
-      this.menuService.setMenuItems(this.calculateMenuItems(connected));
+      //TODO : load correct if current game is set
+      this.menuBusiness.setGeneralMenu();
     });
   }
 
@@ -85,13 +87,5 @@ export class NavBarComponent {
       ];
     }
     return profileItems;
-  }
-
-  calculateMenuItems(connected: boolean): MenuItem[] {
-    if (connected) {
-      return [{ label: 'Games', icon: 'pi pi-play', routerLink: '/games' }];
-    } else {
-      return [];
-    }
   }
 }
