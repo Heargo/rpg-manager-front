@@ -1,16 +1,27 @@
-import { inject, Injectable, WritableSignal } from '@angular/core';
+import { effect, inject, Injectable, WritableSignal } from '@angular/core';
 import { MenuService } from '../services/menu.service';
 import { MenuItem } from 'primeng/api';
-import { GamesBusiness } from '../../modules/games/business/games.business';
 import { UsersBusiness } from '../../modules/user/business/users.business';
 import { Game } from '../../modules/games/models/game.interface';
+import { GamesBusiness } from '../../modules/games/business/games.business';
 
 @Injectable({ providedIn: 'root' })
 export class MenuBusiness {
   private readonly menuService = inject(MenuService);
-  private readonly gamesBusiness = inject(GamesBusiness);
   private readonly usersBusiness = inject(UsersBusiness);
-  constructor() {}
+  private readonly gameBusiness = inject(GamesBusiness);
+
+  constructor() {
+    effect(() => {
+      const currentGame = this.gameBusiness.$currentGame();
+      console.log('MenuBusiness: detected currentGame change:', currentGame);
+      if (currentGame) {
+        this.setInGameMenu(currentGame);
+      } else {
+        this.setGeneralMenu();
+      }
+    });
+  }
 
   getMenuItems(): WritableSignal<MenuItem[]> {
     return this.menuService.getMenuItems();
@@ -58,7 +69,7 @@ export class MenuBusiness {
         label: 'Exit Game',
         icon: 'pi pi-fw pi-sign-out',
         command: () => {
-          console.log('Exit game');
+          this.gameBusiness.exitGame();
           this.setGeneralMenu();
         },
       },

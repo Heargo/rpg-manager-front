@@ -1,1 +1,52 @@
-<p>character-create-update works!</p>
+@if($character()){
+<app-character-details [character]="$character()!"></app-character-details>
+} @else {
+<div class="flex-col center main-container py-large gap-large">
+  <h1>Create a new character</h1>
+  <!-- form -->
+  <form class="flex-col center middle w-50" [formGroup]="form">
+    <div class="flex-row left middle">
+      @if($gameImagePreview()) {
+      <p-avatar [image]="$gameImagePreview()" size="xlarge" shape="circle" />
+      } @else {
+      <p-avatar label="?" size="xlarge" shape="circle" />
+      }
+      <p-fileUpload
+        accept="image/*"
+        maxFileSize="5000000"
+        mode="basic"
+        [chooseIcon]="'pi pi-upload'"
+        [uploadIcon]="'pi pi-check'"
+        [customUpload]="true"
+        [auto]="true"
+        (uploadHandler)="onUpload($event)"
+      ></p-fileUpload>
+    </div>
+
+    <p-float-label variant="on" class="w-100">
+      <input
+        pInputText
+        id="name"
+        autocomplete="off"
+        fluid="true"
+        formControlName="name"
+      />
+      <label for="name">Character Name</label>
+    </p-float-label>
+    <p-float-label variant="on" class="mt-2" class="w-100">
+      <textarea
+        fluid="true"
+        pInputTextarea
+        id="description"
+        rows="5"
+        style="resize: none"
+        formControlName="description"
+      ></textarea>
+      <label for="description">Character Description</label>
+    </p-float-label>
+    <button type="button" pButton (click)="createCharacter()">
+      Create Character
+    </button>
+  </form>
+</div>
+}

@@ -63,7 +63,7 @@ export class GamePreview {
 
   protected onPlay() {
     const currentUser = this.userBusiness.$currentUser();
-    this.menuBusiness.setInGameMenu(this.$game());
+    this.gameBusiness.joinGame(this.$game());
     this.router.navigate(['/games', this.$game().id, 'dashboard', 'player']);
     // if (currentUser?.id === this.$game().gameMaster.id) {
     //   this.router.navigate(['/games', this.$game().id, 'dashboard', 'gm']);

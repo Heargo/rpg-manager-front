@@ -1,8 +1,10 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { CreateGame, Game, UpdateGame } from '../models/game.interface';
 import { MessageService } from 'primeng/api';
 import { GamesService } from '../services/games.service';
 import { environment } from '../../../../environments/environment';
+import { UsersBusiness } from '../../user/business/users.business';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -10,10 +12,38 @@ import { environment } from '../../../../environments/environment';
 export class GamesBusiness {
   private readonly messageService = inject(MessageService);
   private readonly gamesService = inject(GamesService);
+  private readonly userBusiness = inject(UsersBusiness);
+  private readonly router = inject(Router);
+
+  private $_currentGame = signal<Game | null>(
+    localStorage.getItem('currentGame')
+      ? JSON.parse(localStorage.getItem('currentGame')!)
+      : null
+  );
+  public readonly $currentGame = this.$_currentGame.asReadonly();
+
+  public joinGame(game: Game) {
+    const currentUser = this.userBusiness.$currentUser();
+    this.$_currentGame.set(game);
+    localStorage.setItem('currentGame', JSON.stringify(game));
+    // this.router.navigate(['/games', game.id, 'dashboard', 'player']);
+    if (currentUser?.id === game.gameMaster.id) {
+      this.router.navigate(['/games', game.id, 'dashboard', 'gm']);
+    } else {
+      this.router.navigate(['/games', game.id, 'dashboard', 'player']);
+    }
+  }
+
+  public exitGame() {
+    this.$_currentGame.set(null);
+    localStorage.removeItem('currentGame');
+    this.router.navigate(['/games']);
+  }
+
   public async createGame(
     game: CreateGame,
     image?: File
-  ): Promise<CreateGame | null> {
+  ): Promise<Game | null> {
     return this.gamesService.createGame(game, image).catch(() => {
       this.messageService.add({
         severity: 'error',

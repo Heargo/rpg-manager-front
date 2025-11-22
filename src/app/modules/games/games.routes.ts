@@ -39,6 +39,13 @@ export const routesGames: Routes = [
             (m) => m.PlayerDashboard
           ),
       },
+      {
+        path: ':id/players',
+        loadComponent: () =>
+          import('../characters/pages/character-list/character-list').then(
+            (m) => m.CharacterList
+          ),
+      },
     ],
   },
 ];

@@ -19,3 +19,10 @@ export interface CharacterAttribute {
   investedStatPoints: number;
   dynamicValue?: number;
 }
+
+export interface CharacterCreationPayload {
+  name: string;
+  description?: string;
+  userId: string;
+  gameId: string;
+}

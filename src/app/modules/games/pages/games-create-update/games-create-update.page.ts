@@ -29,8 +29,9 @@ import { StepperModule } from 'primeng/stepper';
 import { CardModule } from 'primeng/card';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MessageService } from 'primeng/api';
 @Component({
   selector: 'app-games-create-update',
   imports: [
@@ -54,6 +55,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class GamesCreateUpdatePage {
   private readonly gameBusiness = inject(GamesBusiness);
   private readonly route = inject(ActivatedRoute);
+  private readonly messageService = inject(MessageService);
+  private readonly router = inject(Router);
   private readonly $routeParams = toSignal(this.route.params);
   private readonly $gameId = computed(() => {
     const params = this.$routeParams();
@@ -144,14 +147,14 @@ export class GamesCreateUpdatePage {
     this.file = event.files[0];
   }
 
-  onSubmit() {
+  async onSubmit() {
     const formValue = this.form.getRawValue();
     const attributes = this.$attributes();
     const game = this.$game();
     if (game) {
       console.log('Updating game with id:', game.id);
       // Update existing game
-      this.gameBusiness.updateGame(
+      const updatedGame = await this.gameBusiness.updateGame(
         game.id,
         {
           ...formValue,
@@ -159,16 +162,32 @@ export class GamesCreateUpdatePage {
         },
         this.file
       );
+      if (updatedGame) {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Game updated',
+          detail: `Game "${updatedGame.name}" has been updated successfully.`,
+        });
+        await this.router.navigate(['/games']);
+      }
     } else {
       console.log('Creating new game');
       // Create new game
-      this.gameBusiness.createGame(
+      const newGame = await this.gameBusiness.createGame(
         {
           ...formValue,
           attributes,
         },
         this.file
       );
+      if (newGame) {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Game created',
+          detail: `Game "${newGame.name}" has been created successfully.`,
+        });
+        this.router.navigate(['/games']);
+      }
     }
   }
 }

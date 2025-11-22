@@ -1,1 +1,10 @@
-<app-character-details></app-character-details>
+<p>Welcome to player dashboard</p>
+
+@if(characterBusiness.$currentCharacter()){
+<a routerLink="/characters/{{ characterBusiness.$currentCharacter()!.id }}"
+  >See my character</a
+>
+} @else {
+<p>You don't have a character yet.</p>
+<button pButton routerLink="/characters/create">Create Character</button>
+}

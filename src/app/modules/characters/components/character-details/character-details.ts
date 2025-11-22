@@ -1,4 +1,11 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { AccordionModule } from 'primeng/accordion';
 import { UsersBusiness } from '../../../user/business/users.business';
 import { Character } from '../../models/character.interface';
@@ -10,6 +17,7 @@ import { Slot } from '../../../items/models/slot.enum';
 import { Item } from '../../../items/models/item.interface';
 import { TextareaModule } from 'primeng/textarea';
 import { MenuService } from '../../../../core/services/menu.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-character-details',
@@ -26,62 +34,7 @@ import { MenuService } from '../../../../core/services/menu.service';
 })
 export class CharacterDetails {
   private readonly userBusiness = inject(UsersBusiness);
-  private readonly menuService = inject(MenuService);
-  protected $character = computed<Character>(() => {
-    const user = this.userBusiness.$currentUser();
-    //TODO CALL API
-    const c: Character = {
-      id: '1',
-      name: 'Character Name',
-      game: {
-        id: '1',
-        name: 'Game Name',
-        gameMaster: user!,
-        startingStatsPoints: 10,
-        startingMoney: 100,
-        attributes: [],
-      },
-      user: { id: 'dza', login: 'djiaz', name: 'ndao' }, //user!,
-      description:
-        'This is a detailed description of the character. It can include background story, personality traits, and other relevant information that adds depth to the character within the game world.',
-      attributes: [
-        {
-          id: '0',
-          dynamicValue: 32,
-          investedStatPoints: 20,
-          attribute: {
-            name: 'Life',
-            dynamic: true,
-            color: 'red',
-            statsPointCost: 0.2,
-          },
-        },
-        {
-          id: '02',
-          dynamicValue: 12,
-          investedStatPoints: 20,
-          attribute: {
-            name: 'mana with a very ',
-            dynamic: true,
-            color: 'blue',
-            statsPointCost: 0.2,
-          },
-        },
-        {
-          id: '1',
-          dynamicValue: 15,
-          investedStatPoints: 5,
-          attribute: {
-            name: 'Strength',
-            dynamic: false,
-            statsPointCost: 1,
-          },
-        },
-      ],
-      inventory: [],
-    };
-    return c;
-  });
+  public $character = input.required<Character>({ alias: 'character' });
 
   protected $editMode = signal<boolean>(false);
 
@@ -105,12 +58,4 @@ export class CharacterDetails {
   protected isEllipsisActive = (e: HTMLElement): boolean => {
     return e.offsetWidth < e.scrollWidth;
   };
-
-  constructor() {
-    // When the character change, update the menu if needed
-    effect(() => {
-      const character = this.$character();
-      console.log('CharacterDetails: user or character changed', character);
-    });
-  }
 }
