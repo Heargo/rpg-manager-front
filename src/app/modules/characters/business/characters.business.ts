@@ -8,18 +8,29 @@ import { CharactersService } from '../services/characters.service';
 @Injectable({
   providedIn: 'root',
 })
-export class CharacterBusiness {
+export class CharactersBusiness {
   private readonly charactersService = inject(CharactersService);
-  public $currentCharacter = signal<Character | null>(null);
+  public $_currentCharacter = signal<Character | null>(null);
+  public readonly $currentCharacter = this.$_currentCharacter.asReadonly();
 
-  async getCharactersByGameId(gameId: string): Promise<Character[] | null> {
-    return this.charactersService.getCharactersByGameId(gameId);
+  async loadCharacterForGame(gameId: string, userId: string): Promise<void> {
+    const characters = await this.getCharactersByGameId(gameId);
+    const character = characters.find((char) => char.user.id === userId);
+    if (character) {
+      this.$_currentCharacter.set(character);
+    }
+  }
+
+  async getCharactersByGameId(gameId: string): Promise<Character[]> {
+    try {
+      return this.charactersService.getCharactersByGameId(gameId);
+    } catch {
+      return [];
+    }
   }
 
   async getCharacterById(id: string): Promise<Character | null> {
-    const character = await this.charactersService.getCharacterById(id);
-    this.$currentCharacter.set(character);
-    return character;
+    return this.charactersService.getCharacterById(id);
   }
 
   async createCharacter(

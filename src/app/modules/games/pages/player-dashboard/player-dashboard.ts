@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CharacterBusiness } from '../../../characters/business/characters.business';
+import { CharactersBusiness } from '../../../characters/business/characters.business';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 
@@ -10,7 +10,7 @@ import { ButtonModule } from 'primeng/button';
   styleUrl: './player-dashboard.scss',
 })
 export class PlayerDashboard implements OnInit {
-  protected characterBusiness = inject(CharacterBusiness);
+  protected characterBusiness = inject(CharactersBusiness);
   private readonly route = inject(ActivatedRoute);
 
   ngOnInit() {

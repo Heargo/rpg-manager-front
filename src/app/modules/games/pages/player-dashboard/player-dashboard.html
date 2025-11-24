@@ -1,10 +1,17 @@
-<p>Welcome to player dashboard</p>
-
 @if(characterBusiness.$currentCharacter()){
-<a routerLink="/characters/{{ characterBusiness.$currentCharacter()!.id }}"
-  >See my character</a
->
+<div class="flex-col top left main-container">
+  <a routerLink="/characters/{{ characterBusiness.$currentCharacter()!.id }}"
+    >See my character</a
+  >
+</div>
 } @else {
-<p>You don't have a character yet.</p>
-<button pButton routerLink="/characters/create">Create Character</button>
+<div class="flex-col center middle main-container">
+  <img
+    class="w-50"
+    src="assets/illustrations/galaxie.svg"
+    alt="missing character"
+  />
+  <p>You don't have a character yet. Let's create one and start the journey!</p>
+  <button pButton routerLink="/characters/create">Create Character</button>
+</div>
 }

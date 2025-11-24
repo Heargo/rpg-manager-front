@@ -5,6 +5,7 @@ import { GamesService } from '../services/games.service';
 import { environment } from '../../../../environments/environment';
 import { UsersBusiness } from '../../user/business/users.business';
 import { Router } from '@angular/router';
+import { CharactersBusiness } from '../../characters/business/characters.business';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +14,7 @@ export class GamesBusiness {
   private readonly messageService = inject(MessageService);
   private readonly gamesService = inject(GamesService);
   private readonly userBusiness = inject(UsersBusiness);
+  private readonly characterBusiness = inject(CharactersBusiness);
   private readonly router = inject(Router);
 
   private $_currentGame = signal<Game | null>(
@@ -23,11 +25,14 @@ export class GamesBusiness {
   public readonly $currentGame = this.$_currentGame.asReadonly();
 
   public joinGame(game: Game) {
-    const currentUser = this.userBusiness.$currentUser();
     this.$_currentGame.set(game);
     localStorage.setItem('currentGame', JSON.stringify(game));
-    // this.router.navigate(['/games', game.id, 'dashboard', 'player']);
-    if (currentUser?.id === game.gameMaster.id) {
+    this.characterBusiness.loadCharacterForGame(
+      game.id,
+      this.userBusiness.$currentUser()!.id
+    );
+    this.router.navigate(['/games', game.id, 'dashboard', 'player']);
+    if (this.userBusiness.$currentUser()!.id === game.gameMaster.id) {
       this.router.navigate(['/games', game.id, 'dashboard', 'gm']);
     } else {
       this.router.navigate(['/games', game.id, 'dashboard', 'player']);

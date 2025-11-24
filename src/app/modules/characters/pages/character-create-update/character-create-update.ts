@@ -14,7 +14,7 @@ import {
   Character,
   CharacterCreationPayload,
 } from '../../models/character.interface';
-import { CharacterBusiness } from '../../business/characters.business';
+import { CharactersBusiness } from '../../business/characters.business';
 import { InputTextModule } from 'primeng/inputtext';
 import { FileUploadModule } from 'primeng/fileupload';
 import { TextareaModule } from 'primeng/textarea';
@@ -51,7 +51,7 @@ import { GamesBusiness } from '../../../games/business/games.business';
 })
 export class CharacterCreateUpdate implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly characterBusiness = inject(CharacterBusiness);
+  private readonly characterBusiness = inject(CharactersBusiness);
   private readonly userBusiness = inject(UsersBusiness);
   private readonly gameBusiness = inject(GamesBusiness);
 
