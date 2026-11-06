@@ -11,3 +11,4 @@ Spec: `../spec.md` (The handshake, Rooms).
 - Client lobby: host, other players, status. Leave for both roles.
 
 Done when: a host on one device and a player on another join through link + pasted answer, and through QR display.
+- Delete the temporary dev-only lab `src/app/modules/dev/p2p-lab/` and its `dev/p2p` route (added in ticket 02).

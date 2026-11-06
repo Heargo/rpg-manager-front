@@ -11,15 +11,19 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
 
   beforeEach(() => {
     globalThis.indexedDB = new IDBFactory();
+    vi.restoreAllMocks();
     TestBed.configureTestingModule({});
     library = TestBed.inject(WorldLibraryBusiness);
     images = TestBed.inject(ImageBusiness);
   });
 
   it('creates, lists, saves and removes worlds', async () => {
+    // A ticking clock, so "most recently changed first" never depends on two calls landing in the same millisecond.
+    let clock = 1_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => (clock += 10));
     const first = await library.create({ name: 'First', attributes: [] });
-    const second = await library.create({ name: 'Second', attributes: [] });
-    await library.save({ ...first, description: 'edited', updatedAt: second.updatedAt });
+    await library.create({ name: 'Second', attributes: [] });
+    await library.save({ ...first, description: 'edited' });
 
     // A fresh business sees what was stored.
     TestBed.resetTestingModule();
