@@ -90,7 +90,7 @@ modules/<feature>/             same pattern per game feature (character, item, t
 All wire messages are envelopes `{ v: 1, id, kind, route, payload }`:
 
 - `request` (client → host) → `response` or `error { code, message }` with the same `id`. This is what `service.foo()` returns as a `Promise`.
-- `publish { topic, seq, payload }` (host → clients): pushed state, what `service.watchFoo()` returns as an `Observable`. Start with full snapshots per topic; add patches only if needed. `seq` per topic lets a client detect gaps and re-request the snapshot.
+- `publish { topic, seq, payload }` (host → clients): pushed state, what `service.watchFoo()` returns as an `Observable`. Every publish is the topic's **full** state, so a missed one is harmless: clients drop anything with a `seq` not above the last one they applied, and a player who joins gets every topic's latest state at once. A resync message would only be needed with partial updates (patches), which aren't used (decided in ticket 03).
 - Session routes on `room/*`: `room/hello { playerId, name, rev, hash }` → `{ you, snapshot }`, `room/leave`, `room/kicked` (publish).
 - The host is the **single source of truth**: clients never change shared state locally (except the host-offline features); they call a service, the host's handler validates and applies the rules, then publishes.
 - The host is also a player: its UI calls the same services, which run the handlers in-process.
@@ -168,7 +168,7 @@ One file per ticket in `issues/` (01–11 below). Game features on top of rooms 
 
 1. **Local profile replaces accounts**: remove auth/users services, interceptor, guards, login/register pages and `@supabase/supabase-js`; add the `localStorage` profile and its edit page.
 2. **Signal codec + WebRTC transport**: `core/p2p/helpers/signal-codec.ts`, `RoomTransport` with invites, `core/p2p/webrtc-transport.ts`, `fake-transport.ts`.
-3. **PeerApi + room service/business**: envelope, correlation and error helpers; `PeerApi` (request/watch/serve/publish, in-process on host); `room.service` + `room.business` + `room-host.business` (hello, leave, kick, `seq` resync); tested over the fake transport with one host and two clients.
+3. **PeerApi + room service/business**: envelope, correlation and error helpers; `PeerApi` (request/watch/serve/publish, in-process on host); `room.service` + `room.business` + `room-host.business` (hello, leave, kick, rejoin); tested over the fake transport with one host and two clients.
 4. **Invite, join and lobby pages**: host invite panel (link, share, QR, paste answer, cancel), `/join#…` page (answer code, copy, share, QR), lobby lists, leave.
 5. **Host persistence and re-invite**: IndexedDB snapshot, restore on reopen, offline seats with "Re-invite", seat recovery by `playerId`.
 6. **Offline and failure states**: offline banner, "host disconnected", connection timeout ("try the same Wi-Fi"), bad or expired code errors.
