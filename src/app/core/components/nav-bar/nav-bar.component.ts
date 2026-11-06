@@ -1,44 +1,73 @@
-import { Component, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MenubarModule } from 'primeng/menubar';
-import { AvatarModule } from 'primeng/avatar';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+
+import { MenubarModule } from '@openng/optimus-ui/menubar';
+import { AvatarModule } from '@openng/optimus-ui/avatar';
 import { MenuService } from '../../services/menu.service';
-import { ButtonModule } from 'primeng/button';
-import { TieredMenu } from 'primeng/tieredmenu';
-import { MenuItem } from 'primeng/api';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { TieredMenu } from '@openng/optimus-ui/tieredmenu';
+import { MenuItem } from '@openng/optimus-ui/api';
 import { Router } from '@angular/router';
 import { AuthentificationBusiness } from '../../../modules/authentification/business/authentification.business';
 import { User } from '../../../modules/user/models/user.interface';
 import { UsersBusiness } from '../../../modules/user/business/users.business';
+import { LanguageBusiness } from '../../business/language.business';
 
 @Component({
   standalone: true,
   selector: 'app-nav-bar',
   templateUrl: './nav-bar.component.html',
   styleUrls: ['./nav-bar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
-    CommonModule,
     MenubarModule,
     AvatarModule,
     ButtonModule,
-    TieredMenu,
-  ],
+    TieredMenu
+],
 })
 export class NavBarComponent {
   protected readonly authBusiness = inject(AuthentificationBusiness);
   private readonly menuService = inject(MenuService);
   private readonly usersBusiness = inject(UsersBusiness);
   private readonly router = inject(Router);
+  private readonly languageBusiness = inject(LanguageBusiness);
 
-  public items = this.menuService.getMenuItems();
+  private readonly rawItems = this.menuService.getMenuItems();
+  /** Menu labels are translation keys; translate them for the active language. */
+  public items = computed(() => this.translateItems(this.rawItems()));
   public $label = computed(() => {
     const user = this.usersBusiness.$currentUser();
     return user?.login ? user.login.charAt(0).toUpperCase() : '?';
   });
 
   protected profileItems = computed<MenuItem[]>(() => {
-    return this.calculateNavBarItems(null, this.authBusiness.$connected());
+    return [
+      ...this.calculateNavBarItems(null, this.authBusiness.$connected()),
+      { separator: true },
+      this.languageItem(),
+    ];
   });
+
+  private languageItem(): MenuItem {
+    const active = this.languageBusiness.$language();
+    return {
+      label: this.languageBusiness.t('nav.language'),
+      icon: 'pi pi-language',
+      items: this.languageBusiness.languages.map((language) => ({
+        label: language.label,
+        icon: language.code === active ? 'pi pi-check' : undefined,
+        command: () => this.languageBusiness.setLanguage(language.code),
+      })),
+    };
+  }
+
+  private translateItems(items: MenuItem[]): MenuItem[] {
+    return items.map((item) => ({
+      ...item,
+      label: item.label ? this.languageBusiness.t(item.label) : item.label,
+      items: item.items ? this.translateItems(item.items) : item.items,
+    }));
+  }
 
   async onGoHome() {
     await this.router.navigate(['/']);
@@ -49,12 +78,12 @@ export class NavBarComponent {
     if (isLoggedIn) {
       profileItems = [
         {
-          label: 'Profile',
+          label: this.languageBusiness.t('nav.profile'),
           icon: 'pi pi-user',
           routerLink: '/user/profile',
         },
         {
-          label: 'Logout',
+          label: this.languageBusiness.t('nav.logout'),
           icon: 'pi pi-sign-out',
           command: () => {
             this.authBusiness.logout();
@@ -64,13 +93,13 @@ export class NavBarComponent {
     } else {
       profileItems = [
         {
-          label: 'Login',
+          label: this.languageBusiness.t('nav.login'),
           icon: 'pi pi-sign-in',
           routerLink: '/auth/login',
         },
         {
-          label: 'Register',
-          icon: 'pi pi-register',
+          label: this.languageBusiness.t('nav.register'),
+          icon: 'pi pi-user-plus',
           routerLink: '/auth/register',
         },
       ];

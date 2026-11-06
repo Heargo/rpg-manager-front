@@ -1,0 +1,62 @@
+{
+  "nav": {
+    "games": "Parties",
+    "profile": "Profil",
+    "logout": "Se déconnecter",
+    "login": "Se connecter",
+    "register": "S'inscrire",
+    "language": "Langue"
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion"
+    },
+    "register": {
+      "title": "Inscription",
+      "passwordHint": "Le mot de passe doit contenir au moins 8 caractères"
+    },
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "submit": "Valider",
+    "errors": {
+      "invalidCredentials": "Identifiants invalides",
+      "passwordsMismatch": "Les mots de passe ne correspondent pas",
+      "generic": "Une erreur est survenue"
+    }
+  },
+  "profile": {
+    "welcome": "Bienvenue {{ name }}",
+    "logout": "Se déconnecter"
+  },
+  "notFound": {
+    "title": "Page introuvable"
+  },
+  "optimus": {
+    "accept": "Oui",
+    "reject": "Non",
+    "choose": "Choisir",
+    "upload": "Envoyer",
+    "cancel": "Annuler",
+    "clear": "Effacer",
+    "apply": "Appliquer",
+    "emptyMessage": "Aucun résultat",
+    "emptyFilterMessage": "Aucun résultat",
+    "emptySearchMessage": "Aucun résultat",
+    "emptySelectionMessage": "Aucun élément sélectionné",
+    "searchMessage": "{0} résultats disponibles",
+    "selectionMessage": "{0} éléments sélectionnés",
+    "pending": "En attente",
+    "fileSizeTypes": [
+      "o",
+      "Ko",
+      "Mo",
+      "Go",
+      "To",
+      "Po",
+      "Eo",
+      "Zo",
+      "Yo"
+    ]
+  }
+}

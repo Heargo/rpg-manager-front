@@ -1,8 +1,8 @@
 <div class="main-container flex-row middle center">
   <form [formGroup]="signupForm" class="flex-col center middle">
-    <h1 i18n>Register</h1>
+    <h1>{{ 'auth.register.title' | transloco }}</h1>
     <p-floatlabel variant="on" class="w-100">
-      <label for="username">Username</label>
+      <label for="login">{{ 'auth.username' | transloco }}</label>
       <input
         pInputText
         type="text"
@@ -14,7 +14,7 @@
     </p-floatlabel>
 
     <p-floatlabel variant="on" class="w-100">
-      <label for="username">Password</label>
+      <label for="password">{{ 'auth.password' | transloco }}</label>
       <input
         pInputText
         type="password"
@@ -26,13 +26,13 @@
     </p-floatlabel>
 
     <p-floatlabel variant="on" class="w-100">
-      <label for="username">Confirm password</label>
+      <label for="passwordVerification">{{ 'auth.confirmPassword' | transloco }}</label>
       <input
         pInputText
         type="password"
         formControlName="passwordVerification"
         class="basic"
-        id="password"
+        id="passwordVerification"
         class="w-100"
       />
     </p-floatlabel>
@@ -41,11 +41,11 @@
     <p-message severity="error" size="small">{{ errorMessage }}</p-message>
     } @else {
     <p-message severity="secondary" size="small"
-      >Password must have 8 character minimum</p-message
+      >{{ 'auth.register.passwordHint' | transloco }}</p-message
     >
     }
     <p-button
-      label="Submit"
+      [label]="'auth.submit' | transloco"
       (click)="onSubmitForm()"
       [disabled]="signupForm.invalid"
     />

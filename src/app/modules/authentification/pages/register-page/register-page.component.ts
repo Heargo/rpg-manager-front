@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit } from '@angular/core';
+import { Component, effect, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -9,10 +9,12 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { passwordMatchValidator } from '../../../../core/validators/password-match.validator';
-import { ButtonModule } from 'primeng/button';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { FloatLabelModule } from '@openng/optimus-ui/floatlabel';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { MessageModule } from '@openng/optimus-ui/message';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { LanguageBusiness } from '../../../../core/business/language.business';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthentificationBusiness } from '../../business/authentification.business';
 
@@ -21,7 +23,9 @@ import { AuthentificationBusiness } from '../../business/authentification.busine
   selector: 'app-register-page',
   templateUrl: './register-page.component.html',
   styleUrls: ['./register-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
+    TranslocoPipe,
     ReactiveFormsModule,
     ButtonModule,
     FloatLabelModule,
@@ -49,6 +53,7 @@ export class RegisterPageComponent {
   );
 
   private readonly authBusiness = inject(AuthentificationBusiness);
+  private readonly languageBusiness = inject(LanguageBusiness);
 
   private readonly $formChange = toSignal(this.signupForm?.valueChanges);
 
@@ -58,7 +63,7 @@ export class RegisterPageComponent {
       if (!changes) return;
       if (changes.password !== changes.passwordVerification) {
         this.errorInForm = true;
-        this.errorMessage = 'Passwords do not match';
+        this.errorMessage = this.languageBusiness.t('auth.errors.passwordsMismatch');
       } else {
         this.errorInForm = false;
         this.errorMessage = '';
@@ -77,7 +82,7 @@ export class RegisterPageComponent {
       this.router.navigate(['auth/login']);
     } else {
       this.errorInForm = true;
-      this.errorMessage = 'An error occured';
+      this.errorMessage = this.languageBusiness.t('auth.errors.generic');
     }
   }
 }

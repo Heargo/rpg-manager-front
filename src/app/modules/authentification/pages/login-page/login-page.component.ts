@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -7,10 +7,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { FloatLabelModule } from 'primeng/floatlabel';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { FloatLabelModule } from '@openng/optimus-ui/floatlabel';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { MessageModule } from '@openng/optimus-ui/message';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { LanguageBusiness } from '../../../../core/business/language.business';
 import { AuthentificationBusiness } from '../../business/authentification.business';
 
 @Component({
@@ -18,7 +20,9 @@ import { AuthentificationBusiness } from '../../business/authentification.busine
   selector: 'app-login-page',
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
+    TranslocoPipe,
     ReactiveFormsModule,
     ButtonModule,
     FloatLabelModule,
@@ -32,6 +36,7 @@ export class LoginPageComponent implements OnInit {
   errorMessage: string = '';
   errorInForm: boolean = false;
 
+  private readonly languageBusiness = inject(LanguageBusiness);
   private readonly authBusiness: AuthentificationBusiness = inject(
     AuthentificationBusiness
   );
@@ -47,7 +52,7 @@ export class LoginPageComponent implements OnInit {
       this.router.navigate(['/']);
     } else {
       this.errorInForm = true;
-      this.errorMessage = 'Invalid credentials';
+      this.errorMessage = this.languageBusiness.t('auth.errors.invalidCredentials');
     }
   }
 

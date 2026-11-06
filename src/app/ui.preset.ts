@@ -1,5 +1,5 @@
-import { definePreset } from '@primeuix/themes';
-import Aura from '@primeuix/themes/aura';
+import { definePreset } from '@openng/optimus-ui-themes';
+import Aura from '@openng/optimus-ui-themes/aura';
 
 // theme color
 //  --color-paper-0: #f9f6ef;
@@ -15,7 +15,7 @@ import Aura from '@primeuix/themes/aura';
 //   --color-paper-900: #1d1c16;
 //   --color-paper-950: #12110d;
 
-export const PrimeNgRpgPreset = definePreset(Aura, {
+export const UiRpgPreset = definePreset(Aura, {
   semantic: {
     colorScheme: {
       light: {

@@ -1,9 +1,9 @@
 <div class="main-container flex-row middle center">
   <form [formGroup]="loginForm" class="flex-col center middle">
-    <h1 i18n>Login</h1>
+    <h1>{{ 'auth.login.title' | transloco }}</h1>
 
     <p-floatlabel variant="on">
-      <label for="username">Username</label>
+      <label for="login">{{ 'auth.username' | transloco }}</label>
       <input
         pInputText
         type="text"
@@ -14,7 +14,7 @@
     </p-floatlabel>
 
     <p-floatlabel variant="on">
-      <label for="username">Password</label>
+      <label for="password">{{ 'auth.password' | transloco }}</label>
       <input
         pInputText
         type="password"
@@ -27,7 +27,7 @@
     <p-message severity="error" size="small">{{ errorMessage }}</p-message>
     }
     <p-button
-      label="Submit"
+      [label]="'auth.submit' | transloco"
       (click)="onSubmitForm()"
       [disabled]="loginForm.invalid"
     />

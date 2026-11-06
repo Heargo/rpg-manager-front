@@ -1,4 +1,4 @@
 <div class="main-container flex-col center middle">
-  <h2 i18n>Welcome {{ login }}</h2>
-  <button i18n class="danger" (click)="logout()">Logout</button>
+  <h2>{{ 'profile.welcome' | transloco: { name: login } }}</h2>
+  <button class="danger" (click)="logout()">{{ 'profile.logout' | transloco }}</button>
 </div>
