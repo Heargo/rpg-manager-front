@@ -3,7 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { ProfileBusiness } from '../../../core/business/profile.business';
 import { PeerApi } from '../../../core/p2p/peer-api.service';
 import { createPeerNetwork, flush } from '../../../../testing/peer-network';
-import { RoomHostBusiness } from './room-host.business';
+import { provideTestTranslations } from '../../../../testing/test-providers';
+import { KICK_DISCONNECT_DELAY_MS, RoomHostBusiness } from './room-host.business';
 import { RoomBusiness } from './room.business';
 import { RoomService } from '../services/room.service';
 
@@ -31,7 +32,7 @@ describe('RoomBusiness (host and two players)', () => {
     room.$room()?.members.map((m) => `${m.name}${m.isHost ? '*' : ''}${m.online ? '' : ' (offline)'}`);
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({ providers: [provideTestTranslations()] });
     net = createPeerNetwork([RoomService, RoomHostBusiness, RoomBusiness]);
     devices = [net.device([profile('gm', 'Gm')]), net.device([profile('ada', 'Ada')]), net.device([profile('bob', 'Bob')])];
     [gm, ada, bob] = devices.map((device) => device.get(RoomBusiness));
@@ -79,7 +80,11 @@ describe('RoomBusiness (host and two players)', () => {
 
     expect(names(gm)).toEqual(['Gm*', 'Bob']);
     expect(names(bob)).toEqual(['Gm*', 'Bob']);
-    expect(ada.$status()).toBe('host-offline');
+    // Ada gets the room without her before the connection closes.
+    expect(ada.$status()).toBe('removed');
+    await new Promise((resolve) => setTimeout(resolve, KICK_DISCONNECT_DELAY_MS + 20));
+    expect(devices[1].get(PeerApi).$hostOnline()).toBe(false);
+    expect(ada.$status()).toBe('removed');
   });
 
   it('shows players the host went offline', async () => {

@@ -1,6 +1,6 @@
 {
   "nav": {
-    "games": "Parties",
+    "play": "Jouer",
     "profile": "Profil",
     "language": "Langue"
   },
@@ -14,6 +14,76 @@
     "saved": "Profil enregistré",
     "playerId": "Identifiant de joueur",
     "playerIdHint": "Vous identifie sur cet appareil ; il vous rend votre place quand vous rejoignez une salle."
+  },
+  "room": {
+    "title": "Salle",
+    "start": {
+      "title": "Jouer ensemble",
+      "hostTitle": "Créer une salle",
+      "hostHint": "Vous serez le maître du jeu. Les joueurs rejoignent avec un lien d'invitation.",
+      "roomName": "Nom de la salle",
+      "defaultName": "La table de {{ name }}",
+      "host": "Créer",
+      "joinTitle": "Rejoindre une salle",
+      "joinHint": "Collez le lien ou le code d'invitation envoyé par l'hôte.",
+      "inviteCode": "Lien ou code d'invitation",
+      "join": "Rejoindre"
+    },
+    "members": {
+      "title": "Joueurs",
+      "host": "Hôte",
+      "online": "En ligne",
+      "offline": "Hors ligne",
+      "kick": "Retirer de la salle",
+      "you": "vous"
+    },
+    "invite": {
+      "add": "Inviter un joueur",
+      "title": "Invitation",
+      "step1": "1. Envoyez ce lien au joueur",
+      "step2": "2. Collez le code qu'il vous renvoie",
+      "copy": "Copier",
+      "copied": "Copié",
+      "share": "Partager",
+      "shareTitle": "Rejoins ma salle",
+      "showQr": "Afficher le QR code",
+      "hideQr": "Masquer le QR code",
+      "qrAlt": "QR code du lien d'invitation",
+      "answerPlaceholder": "Code de réponse du joueur",
+      "accept": "Connecter",
+      "cancel": "Annuler l'invitation",
+      "privacy": "Le lien contient votre adresse réseau : ne l'envoyez qu'aux joueurs que vous invitez."
+    },
+    "join": {
+      "title": "Vous êtes invité",
+      "preparing": "Préparation de votre réponse…",
+      "step": "Renvoyez ce code à l'hôte",
+      "hint": "L'hôte le colle pour vous faire entrer. Gardez cette page ouverte.",
+      "qrAlt": "QR code de votre réponse",
+      "waiting": "En attente de l'hôte…",
+      "noCode": "Ce lien ne contient pas de code d'invitation."
+    },
+    "lobby": {
+      "hosting": "Vous êtes l'hôte",
+      "connected": "Connecté",
+      "joining": "Connexion…",
+      "hostOffline": "L'hôte est hors ligne. Demandez-lui un nouveau lien pour vous reconnecter.",
+      "leave": "Quitter la salle",
+      "close": "Fermer la salle",
+      "removed": "L'hôte vous a retiré de cette salle."
+    },
+    "errors": {
+      "code": {
+        "empty": "Collez d'abord un code.",
+        "version": "Ce code vient d'une autre version de l'application.",
+        "corrupt": "Ce code est incomplet ou abîmé. Copiez-le à nouveau.",
+        "wrongType": "Mauvais type de code : l'hôte a besoin de la réponse du joueur, le joueur de l'invitation."
+      },
+      "timeout": "Connexion impossible. Réessayez sur le même Wi-Fi.",
+      "unknownInvite": "Cette invitation n'existe plus. Demandez-en une nouvelle.",
+      "seatTaken": "Vous êtes déjà dans cette salle sur un autre appareil.",
+      "generic": "Une erreur est survenue."
+    }
   },
   "notFound": {
     "title": "Page introuvable"

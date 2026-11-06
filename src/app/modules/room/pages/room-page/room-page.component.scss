@@ -1,0 +1,47 @@
+.room {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 64rem;
+  margin-inline: auto;
+
+  h1 {
+    margin: 0;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+}
+
+.start,
+.lobby {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  p-button {
+    align-self: flex-start;
+  }
+}
+
+.hint {
+  margin: 0;
+  color: var(--p-text-muted-color);
+}
+
+.lobby-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}

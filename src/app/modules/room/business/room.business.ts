@@ -1,11 +1,14 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, DOCUMENT, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { LanguageBusiness } from '../../../core/business/language.business';
 import { ProfileBusiness } from '../../../core/business/profile.business';
+import { roomErrorKey } from '../helpers/room-errors';
+import { QrService } from '../services/qr.service';
 import { RoomMember, RoomState } from '../models/room';
 import { RoomService } from '../services/room.service';
 import { RoomHostBusiness } from './room-host.business';
 
-export type RoomStatus = 'idle' | 'hosting' | 'joining' | 'connected' | 'host-offline';
+export type RoomStatus = 'idle' | 'hosting' | 'joining' | 'connected' | 'host-offline' | 'removed';
 
 export interface PendingInvite {
   id: string;
@@ -19,6 +22,9 @@ export class RoomBusiness {
   private readonly service = inject(RoomService);
   private readonly host = inject(RoomHostBusiness);
   private readonly profile = inject(ProfileBusiness);
+  private readonly qr = inject(QrService);
+  private readonly language = inject(LanguageBusiness);
+  private readonly document = inject(DOCUMENT);
 
   private readonly joinState = signal<'idle' | 'joining' | 'joined'>('idle');
   private readonly invites = signal<PendingInvite[]>([]);
@@ -33,6 +39,9 @@ export class RoomBusiness {
     if (role === 'host') return 'hosting';
     if (role === 'none') return 'idle';
     if (this.joinState() === 'joining') return 'joining';
+    const me = this.me();
+    const room = this.$room();
+    if (me && room && !room.members.some((member) => member.playerId === me.playerId)) return 'removed';
     return this.service.$hostOnline() ? 'connected' : 'host-offline';
   });
 
@@ -94,6 +103,24 @@ export class RoomBusiness {
   }
 
   // ---- Both ----
+
+  /** The link a player opens to join: the code sits after `#`, so it never reaches the server hosting the app. */
+  inviteLink(offerCode: string): string {
+    return `${this.document.location.origin}/join#${offerCode}`;
+  }
+
+  qrCode(text: string): Promise<string> {
+    return this.qr.toDataUrl(text);
+  }
+
+  /** A translated message for anything the handshake or the room failed with. */
+  describeError(error: unknown): string {
+    return this.language.t(roomErrorKey(error));
+  }
+
+  defaultRoomName(): string {
+    return this.language.t('room.start.defaultName', { name: this.profile.$profile().name });
+  }
 
   leave(): void {
     if (this.service.$role() === 'host') this.host.close();

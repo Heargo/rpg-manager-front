@@ -15,12 +15,12 @@ describe('LanguageBusiness', () => {
   });
 
   it('translates in the active language and follows a switch', () => {
-    expect(business.t('nav.games')).toBe('Games');
+    expect(business.t('nav.play')).toBe('Play');
 
     business.setLanguage('fr');
 
     expect(business.$language()).toBe('fr');
-    expect(business.t('nav.games')).toBe('Parties');
+    expect(business.t('nav.play')).toBe('Jouer');
   });
 
   it('saves the chosen language and sets the html lang attribute', () => {

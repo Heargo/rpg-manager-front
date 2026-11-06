@@ -1,6 +1,6 @@
 {
   "nav": {
-    "games": "Games",
+    "play": "Play",
     "profile": "Profile",
     "language": "Language"
   },
@@ -14,6 +14,76 @@
     "saved": "Profile saved",
     "playerId": "Player ID",
     "playerIdHint": "Identifies you on this device; it gives you your seat back when you rejoin a room."
+  },
+  "room": {
+    "title": "Room",
+    "start": {
+      "title": "Play together",
+      "hostTitle": "Host a room",
+      "hostHint": "You'll be the game master. Players join with an invite link.",
+      "roomName": "Room name",
+      "defaultName": "{{ name }}'s table",
+      "host": "Host",
+      "joinTitle": "Join a room",
+      "joinHint": "Paste the invite link or code the host sent you.",
+      "inviteCode": "Invite link or code",
+      "join": "Join"
+    },
+    "members": {
+      "title": "Players",
+      "host": "Host",
+      "online": "Online",
+      "offline": "Offline",
+      "kick": "Remove from the room",
+      "you": "you"
+    },
+    "invite": {
+      "add": "Invite a player",
+      "title": "Invite",
+      "step1": "1. Send this link to the player",
+      "step2": "2. Paste the code they send back",
+      "copy": "Copy",
+      "copied": "Copied",
+      "share": "Share",
+      "shareTitle": "Join my room",
+      "showQr": "Show QR code",
+      "hideQr": "Hide QR code",
+      "qrAlt": "QR code of the invite link",
+      "answerPlaceholder": "Player's answer code",
+      "accept": "Connect",
+      "cancel": "Cancel invite",
+      "privacy": "The link contains your network address: only send it to players you're inviting."
+    },
+    "join": {
+      "title": "You've been invited",
+      "preparing": "Preparing your answer…",
+      "step": "Send this code back to the host",
+      "hint": "The host pastes it to let you in. Keep this page open.",
+      "qrAlt": "QR code of your answer",
+      "waiting": "Waiting for the host…",
+      "noCode": "This link has no invite code."
+    },
+    "lobby": {
+      "hosting": "You're hosting",
+      "connected": "Connected",
+      "joining": "Joining…",
+      "hostOffline": "The host is offline. Ask them for a new invite link to reconnect.",
+      "leave": "Leave the room",
+      "close": "Close the room",
+      "removed": "The host removed you from this room."
+    },
+    "errors": {
+      "code": {
+        "empty": "Paste a code first.",
+        "version": "This code comes from another version of the app.",
+        "corrupt": "This code is incomplete or damaged. Copy it again.",
+        "wrongType": "Wrong kind of code: the host needs the player's answer, the player needs the invite."
+      },
+      "timeout": "Couldn't connect. Try again on the same Wi-Fi.",
+      "unknownInvite": "This invite no longer exists. Ask for a new one.",
+      "seatTaken": "You're already in this room on another device.",
+      "generic": "Something went wrong."
+    }
   },
   "notFound": {
     "title": "Page not found"

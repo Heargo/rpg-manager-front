@@ -12,8 +12,9 @@ export class MenuService {
 
   private staticItems: MenuItem[] = [
     {
-      label: 'nav.games',
-      icon: 'pi pi-play',
+      label: 'nav.play',
+      icon: 'pi pi-users',
+      routerLink: '/room',
       // items: [
       //   {
       //     label: 'Bookmarks',

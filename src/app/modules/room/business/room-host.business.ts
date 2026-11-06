@@ -7,6 +7,9 @@ import { createRoomState, findMember, isValidHello, joinRoom, markOffline, remov
 import { HelloResponse, RoomState } from '../models/room';
 import { RoomService } from '../services/room.service';
 
+/** Time for a kicked player to receive the room state without them before the connection closes. */
+export const KICK_DISCONNECT_DELAY_MS = 300;
+
 /** Host side of a room: answers `room/hello`, keeps seats, publishes the room state. */
 @Injectable({ providedIn: 'root' })
 export class RoomHostBusiness {
@@ -29,18 +32,21 @@ export class RoomHostBusiness {
     return state;
   }
 
-  /** Disconnects a player and frees their seat. */
+  /**
+   * Frees a player's seat and disconnects them. The new room state goes out first, so the player sees they
+   * were removed rather than a lost connection.
+   */
   kick(playerId: string): void {
     const state = this.requireState();
     const member = findMember(state, playerId);
     if (!member || member.isHost) return;
-    for (const [peer, id] of this.playerByPeer) {
+    this.update(removeMember(state, playerId));
+    for (const [peer, id] of [...this.playerByPeer]) {
       if (id === playerId) {
         this.playerByPeer.delete(peer);
-        this.service.disconnect(peer);
+        setTimeout(() => this.service.disconnect(peer), KICK_DISCONNECT_DELAY_MS);
       }
     }
-    this.update(removeMember(this.requireState(), playerId));
   }
 
   close(): void {
