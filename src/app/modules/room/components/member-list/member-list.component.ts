@@ -28,6 +28,15 @@ import { RoomMember } from '../../models/room';
             [value]="(member.online ? 'room.members.online' : 'room.members.offline') | transloco"
             [severity]="member.online ? 'success' : 'secondary'"
           />
+          @if (canKick() && !member.isHost && !member.online) {
+            <p-button
+              icon="pi pi-user-plus"
+              size="small"
+              severity="secondary"
+              [label]="'room.members.reinvite' | transloco"
+              (onClick)="reinvite.emit(member.playerId)"
+            />
+          }
           @if (canKick() && !member.isHost) {
             <p-button
               icon="pi pi-user-minus"
@@ -56,4 +65,5 @@ export class MemberListComponent {
   readonly myPlayerId = input<string | undefined>();
   readonly canKick = input(false);
   readonly kick = output<string>();
+  readonly reinvite = output<string>();
 }

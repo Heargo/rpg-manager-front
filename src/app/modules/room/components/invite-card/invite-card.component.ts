@@ -20,6 +20,9 @@ import { PendingInvite, RoomBusiness } from '../../business/room.business';
   template: `
     <p-card styleClass="invite">
       <div class="steps">
+        @if (invite().forPlayer; as player) {
+          <strong class="for"><i class="pi pi-user"></i> {{ 'room.invite.forPlayer' | transloco: { name: player.name } }}</strong>
+        }
         <label [for]="'link-' + invite().id">{{ 'room.invite.step1' | transloco }}</label>
         <input pInputText readonly [id]="'link-' + invite().id" [value]="link()" (focus)="select($event)" />
         <div class="actions">
@@ -74,6 +77,7 @@ import { PendingInvite, RoomBusiness } from '../../business/room.business';
     .qr { width: min(16rem, 100%); align-self: center; image-rendering: pixelated; }
     .privacy { color: var(--p-text-muted-color); }
     label { font-weight: 600; margin-top: 0.5rem; }
+    .for { display: flex; align-items: center; gap: 0.5rem; }
   `,
 })
 export class InviteCardComponent {

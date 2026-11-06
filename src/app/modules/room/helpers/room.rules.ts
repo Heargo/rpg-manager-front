@@ -36,3 +36,21 @@ export function removeMember(state: RoomState, playerId: string): RoomState {
 export function findMember(state: RoomState, playerId: string): RoomMember | undefined {
   return state.members.find((member) => member.playerId === playerId);
 }
+
+/**
+ * A saved room reopened after a reload: connections are gone, so every player is offline until they rejoin;
+ * the host is online with their current name.
+ */
+export function resumeRoom(state: RoomState, host: { playerId: string; name: string }): RoomState {
+  return {
+    ...state,
+    members: state.members.map((member) =>
+      member.isHost ? { ...member, playerId: host.playerId, name: host.name, online: true } : { ...member, online: false },
+    ),
+  };
+}
+
+/** True when a saved room belongs to this host (another profile on the same device must not reopen it). */
+export function isHostedBy(state: RoomState, playerId: string): boolean {
+  return state.members.some((member) => member.isHost && member.playerId === playerId);
+}

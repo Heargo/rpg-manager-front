@@ -29,3 +29,18 @@ export const ROOM_ROUTES = {
 export const ROOM_TOPICS = {
   state: 'room/state',
 } as const;
+
+/** What the host saves, to reopen the room after a reload. */
+export interface HostedRoomRecord {
+  state: RoomState;
+  savedAt: number;
+}
+
+/** What a player keeps about a room they joined: the last state they saw. */
+export interface JoinedRoomRecord {
+  id: string;
+  name: string;
+  hostName: string;
+  members: RoomMember[];
+  lastSeenAt: number;
+}

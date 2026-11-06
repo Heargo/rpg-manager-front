@@ -10,6 +10,9 @@
             <label for="room-name">{{ 'room.start.roomName' | transloco }}</label>
             <input pInputText id="room-name" name="roomName" [(ngModel)]="roomName" maxlength="48" />
             <p-button type="submit" icon="pi pi-crown" [label]="'room.start.host' | transloco" [disabled]="!roomName().trim()" />
+            @if (error()) {
+              <p-message severity="error" size="small" variant="simple">{{ error() }}</p-message>
+            }
           </form>
         </p-card>
         <p-card>
@@ -22,6 +25,33 @@
           </form>
         </p-card>
       </div>
+      @if (room.$recentRooms().length) {
+        <p-card [header]="'room.recent.title' | transloco">
+          <p class="hint">{{ 'room.recent.hint' | transloco }}</p>
+          <ul class="recent">
+            @for (recent of room.$recentRooms(); track recent.id) {
+              <li>
+                <div class="recent-text">
+                  <strong>{{ recent.name }}</strong>
+                  <small>
+                    {{ 'room.recent.hostedBy' | transloco: { name: recent.hostName } }} ·
+                    {{ 'room.recent.lastSeen' | transloco: { date: (recent.lastSeenAt | date: 'short') } }} ·
+                    {{ recent.members.length }} <i class="pi pi-users"></i>
+                  </small>
+                </div>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="secondary"
+                  [text]="true"
+                  [rounded]="true"
+                  [ariaLabel]="'room.recent.forget' | transloco"
+                  (onClick)="forget(recent.id)"
+                />
+              </li>
+            }
+          </ul>
+        </p-card>
+      }
     }
 
     @case ('hosting') {
@@ -32,10 +62,19 @@
         </div>
         <p-button icon="pi pi-times" [label]="'room.lobby.close' | transloco" severity="secondary" [text]="true" (onClick)="leave()" />
       </header>
+      @if (room.$restored()) {
+        <p-message severity="info" icon="pi pi-replay">{{ 'room.lobby.restored' | transloco }}</p-message>
+      }
       <div class="lobby">
         <p-card [header]="'room.members.title' | transloco">
           @if (room.$room(); as state) {
-            <app-member-list [members]="state.members" [myPlayerId]="profile.$profile().playerId" [canKick]="true" (kick)="kick($event)" />
+            <app-member-list
+              [members]="state.members"
+              [myPlayerId]="profile.$profile().playerId"
+              [canKick]="true"
+              (kick)="kick($event)"
+              (reinvite)="invite($event)"
+            />
           }
         </p-card>
         <section class="stack">

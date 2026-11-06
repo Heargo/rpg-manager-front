@@ -35,7 +35,8 @@
       "online": "Online",
       "offline": "Offline",
       "kick": "Remove from the room",
-      "you": "you"
+      "you": "you",
+      "reinvite": "Re-invite"
     },
     "invite": {
       "add": "Invite a player",
@@ -52,7 +53,8 @@
       "answerPlaceholder": "Player's answer code",
       "accept": "Connect",
       "cancel": "Cancel invite",
-      "privacy": "The link contains your network address: only send it to players you're inviting."
+      "privacy": "The link contains your network address: only send it to players you're inviting.",
+      "forPlayer": "Re-invite {{ name }}"
     },
     "join": {
       "title": "You've been invited",
@@ -70,7 +72,8 @@
       "hostOffline": "The host is offline. Ask them for a new invite link to reconnect.",
       "leave": "Leave the room",
       "close": "Close the room",
-      "removed": "The host removed you from this room."
+      "removed": "The host removed you from this room.",
+      "restored": "Room reopened after a reload. Connections don't survive a reload: use Re-invite next to each player."
     },
     "errors": {
       "code": {
@@ -82,7 +85,15 @@
       "timeout": "Couldn't connect. Try again on the same Wi-Fi.",
       "unknownInvite": "This invite no longer exists. Ask for a new one.",
       "seatTaken": "You're already in this room on another device.",
-      "generic": "Something went wrong."
+      "generic": "Something went wrong.",
+      "otherTab": "This app is already hosting a room in another tab. Use that tab, or close it first."
+    },
+    "recent": {
+      "title": "Rooms you joined",
+      "hint": "To rejoin, ask the host for a new invite link.",
+      "hostedBy": "Host: {{ name }}",
+      "lastSeen": "last seen {{ date }}",
+      "forget": "Forget this room"
     }
   },
   "notFound": {

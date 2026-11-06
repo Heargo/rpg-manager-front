@@ -35,7 +35,8 @@
       "online": "En ligne",
       "offline": "Hors ligne",
       "kick": "Retirer de la salle",
-      "you": "vous"
+      "you": "vous",
+      "reinvite": "Réinviter"
     },
     "invite": {
       "add": "Inviter un joueur",
@@ -52,7 +53,8 @@
       "answerPlaceholder": "Code de réponse du joueur",
       "accept": "Connecter",
       "cancel": "Annuler l'invitation",
-      "privacy": "Le lien contient votre adresse réseau : ne l'envoyez qu'aux joueurs que vous invitez."
+      "privacy": "Le lien contient votre adresse réseau : ne l'envoyez qu'aux joueurs que vous invitez.",
+      "forPlayer": "Réinviter {{ name }}"
     },
     "join": {
       "title": "Vous êtes invité",
@@ -70,7 +72,8 @@
       "hostOffline": "L'hôte est hors ligne. Demandez-lui un nouveau lien pour vous reconnecter.",
       "leave": "Quitter la salle",
       "close": "Fermer la salle",
-      "removed": "L'hôte vous a retiré de cette salle."
+      "removed": "L'hôte vous a retiré de cette salle.",
+      "restored": "Salle rouverte après un rechargement. Les connexions ne survivent pas à un rechargement : utilisez Réinviter à côté de chaque joueur."
     },
     "errors": {
       "code": {
@@ -82,7 +85,15 @@
       "timeout": "Connexion impossible. Réessayez sur le même Wi-Fi.",
       "unknownInvite": "Cette invitation n'existe plus. Demandez-en une nouvelle.",
       "seatTaken": "Vous êtes déjà dans cette salle sur un autre appareil.",
-      "generic": "Une erreur est survenue."
+      "generic": "Une erreur est survenue.",
+      "otherTab": "Une salle est déjà ouverte dans un autre onglet de l'application. Utilisez cet onglet, ou fermez-le d'abord."
+    },
+    "recent": {
+      "title": "Salles rejointes",
+      "hint": "Pour revenir, demandez un nouveau lien d'invitation à l'hôte.",
+      "hostedBy": "Hôte : {{ name }}",
+      "lastSeen": "vue {{ date }}",
+      "forget": "Oublier cette salle"
     }
   },
   "notFound": {

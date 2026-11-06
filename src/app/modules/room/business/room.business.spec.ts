@@ -1,3 +1,5 @@
+import 'fake-indexeddb/auto';
+import { IDBFactory } from 'fake-indexeddb';
 import { EnvironmentInjector, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ProfileBusiness } from '../../../core/business/profile.business';
@@ -7,6 +9,7 @@ import { provideTestTranslations } from '../../../../testing/test-providers';
 import { KICK_DISCONNECT_DELAY_MS, RoomHostBusiness } from './room-host.business';
 import { RoomBusiness } from './room.business';
 import { RoomService } from '../services/room.service';
+import { HostLockService } from '../services/host-lock.service';
 
 function profile(playerId: string, name: string) {
   return { provide: ProfileBusiness, useValue: { $profile: signal({ playerId, name }) } };
@@ -31,12 +34,13 @@ describe('RoomBusiness (host and two players)', () => {
   const names = (room: RoomBusiness) =>
     room.$room()?.members.map((m) => `${m.name}${m.isHost ? '*' : ''}${m.online ? '' : ' (offline)'}`);
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    globalThis.indexedDB = new IDBFactory();
     TestBed.configureTestingModule({ providers: [provideTestTranslations()] });
     net = createPeerNetwork([RoomService, RoomHostBusiness, RoomBusiness]);
     devices = [net.device([profile('gm', 'Gm')]), net.device([profile('ada', 'Ada')]), net.device([profile('bob', 'Bob')])];
     [gm, ada, bob] = devices.map((device) => device.get(RoomBusiness));
-    gm.hostRoom('Friday table');
+    await gm.hostRoom('Friday table');
   });
 
   afterEach(() => devices.forEach((device) => device.destroy()));
@@ -122,5 +126,96 @@ describe('RoomBusiness (host and two players)', () => {
 
     await expect(adaApi.request('room/hello', { playerId: 'x', name: ' ' })).rejects.toMatchObject({ code: 'invalid' });
     impostor.destroy();
+  });
+
+  describe('after a host reload', () => {
+    /** Destroys the host's device and starts a fresh one on the same storage, like reloading the page. */
+    async function reloadHost(): Promise<RoomBusiness> {
+      devices[0].destroy();
+      devices[0] = net.device([profile('gm', 'Gm')]);
+      gm = devices[0].get(RoomBusiness);
+      await gm.whenReady();
+      await flush();
+      return gm;
+    }
+
+    it('reopens the room with the same seats, players offline', async () => {
+      await join(ada);
+      await join(bob);
+      await new Promise((resolve) => setTimeout(resolve, 20)); // let the last save land
+
+      await reloadHost();
+
+      expect(gm.$status()).toBe('hosting');
+      expect(gm.$restored()).toBe(true);
+      expect(names(gm)).toEqual(['Gm*', 'Ada (offline)', 'Bob (offline)']);
+    });
+
+    it('re-invites a player to their seat', async () => {
+      await join(ada);
+      const roomId = gm.$room()!.id;
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      await reloadHost();
+      ada.leave();
+
+      const invite = await gm.invite('ada');
+      expect(invite.forPlayer).toEqual({ playerId: 'ada', name: 'Ada' });
+      const { answerCode, joined } = await ada.join(invite.offerCode);
+      await gm.accept(invite.id, answerCode);
+      await joined;
+      await flush();
+
+      expect(names(gm)).toEqual(['Gm*', 'Ada']);
+      expect(ada.$room()?.id).toBe(roomId);
+    });
+
+    it("doesn't reopen a closed room, nor one hosted by another profile", async () => {
+      await join(ada);
+      gm.leave();
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect((await reloadHost()).$status()).toBe('idle');
+
+      await gm.hostRoom('Mine');
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      devices[0].destroy();
+      devices[0] = net.device([profile('someone-else', 'Other')]);
+      const other = devices[0].get(RoomBusiness);
+      await other.whenReady();
+      expect(other.$status()).toBe('idle');
+    });
+  });
+
+  it('remembers the rooms a player joined, and forgets them on request', async () => {
+    await join(ada);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // A fresh device for Ada on the same storage.
+    devices[1].destroy();
+    devices[1] = net.device([profile('ada', 'Ada')]);
+    ada = devices[1].get(RoomBusiness);
+    await ada.whenReady();
+
+    expect(ada.$recentRooms().map((room) => [room.name, room.hostName, room.members.length])).toEqual([
+      ['Friday table', 'Gm', 2],
+    ]);
+
+    await ada.forgetRecentRoom(ada.$recentRooms()[0].id);
+    expect(ada.$recentRooms()).toEqual([]);
+  });
+
+  it("refuses to host or reopen a room while another tab holds the host lock", async () => {
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const busyLock = { provide: HostLockService, useValue: { acquire: async () => false, releaseLock: () => undefined } };
+
+    // Reopening: the saved room stays closed in this tab.
+    const otherTab = net.device([profile('gm', 'Gm'), busyLock]);
+    const other = otherTab.get(RoomBusiness);
+    await other.whenReady();
+    expect(other.$status()).toBe('idle');
+
+    // Hosting a new one is refused.
+    expect(await other.hostRoom('Second room')).toBe(false);
+    expect(other.$status()).toBe('idle');
+    otherTab.destroy();
   });
 });

@@ -12,6 +12,7 @@ import { detectInitialLanguage } from './core/i18n/initial-language';
 import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
 import { translocoSettings } from './core/i18n/transloco-config';
 import { LanguageBusiness } from './core/business/language.business';
+import { RoomBusiness } from './modules/room/business/room.business';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -38,6 +39,10 @@ export const appConfig: ApplicationConfig = {
       const transloco = inject(TranslocoService);
       inject(LanguageBusiness);
       return firstValueFrom(transloco.load(transloco.getActiveLang()));
+    }),
+    // Reopen the room this device was hosting before a reload (doesn't block startup).
+    provideAppInitializer(() => {
+      inject(RoomBusiness);
     }),
     MessageService,
     DialogService,

@@ -1,5 +1,7 @@
 import { Clipboard } from '@angular/cdk/clipboard';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { distinctUntilChanged } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
@@ -58,7 +60,7 @@ import { RoomBusiness } from '../../business/room.business';
     :host ::ng-deep .spinner { width: 1.5rem; height: 1.5rem; }
   `,
 })
-export class JoinPageComponent implements OnInit {
+export class JoinPageComponent {
   private readonly room = inject(RoomBusiness);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -71,8 +73,17 @@ export class JoinPageComponent implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly canShare = typeof navigator !== 'undefined' && 'share' in navigator;
 
-  async ngOnInit(): Promise<void> {
-    const code = this.route.snapshot.fragment;
+  constructor() {
+    // Follow the fragment, not a snapshot: opening another invite link while on /join only changes the `#` part.
+    this.route.fragment
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe((code) => void this.start(code));
+  }
+
+  private async start(code: string | null): Promise<void> {
+    this.answerCode.set('');
+    this.qr.set(null);
+    this.error.set(null);
     if (!code) {
       this.error.set(this.language.t('room.join.noCode'));
       return;

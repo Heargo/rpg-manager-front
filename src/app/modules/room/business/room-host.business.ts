@@ -4,6 +4,7 @@ import { PeerApiError } from '../../../core/p2p/helpers/peer-api-error';
 import { SELF_PEER } from '../../../core/p2p/peer-api.service';
 import { PeerId } from '../../../core/p2p/room-transport';
 import { createRoomState, findMember, isValidHello, joinRoom, markOffline, removeMember } from '../helpers/room.rules';
+import { RoomStorageService } from '../services/room-storage.service';
 import { HelloResponse, RoomState } from '../models/room';
 import { RoomService } from '../services/room.service';
 
@@ -14,6 +15,7 @@ export const KICK_DISCONNECT_DELAY_MS = 300;
 @Injectable({ providedIn: 'root' })
 export class RoomHostBusiness {
   private readonly service = inject(RoomService);
+  private readonly storage = inject(RoomStorageService);
 
   private readonly state = signal<RoomState | null>(null);
   private readonly playerByPeer = new Map<PeerId, string>();
@@ -22,9 +24,17 @@ export class RoomHostBusiness {
   readonly $state = this.state.asReadonly();
 
   open(roomName: string, host: { playerId: string; name: string }): RoomState {
+    return this.start(createRoomState(crypto.randomUUID(), roomName, host));
+  }
+
+  /** Reopens a saved room (after a reload): same id and seats, players offline until they rejoin. */
+  resume(state: RoomState): RoomState {
+    return this.start(state);
+  }
+
+  private start(state: RoomState): RoomState {
     this.close();
     this.service.startHosting();
-    const state = createRoomState(crypto.randomUUID(), roomName, host);
     const stopHello = this.service.serveHello((payload, { from }) => this.onHello(payload, from));
     const left: Subscription = this.service.peerLeft$.subscribe((peer) => this.onPeerLeft(peer));
     this.cleanup = [stopHello, () => left.unsubscribe()];
@@ -49,12 +59,17 @@ export class RoomHostBusiness {
     }
   }
 
+  /** Closes the room for good: connections closed and the saved copy deleted. */
   close(): void {
+    const wasOpen = !!this.state();
     this.cleanup.forEach((stop) => stop());
     this.cleanup = [];
     this.playerByPeer.clear();
-    if (this.state()) this.service.leave();
     this.state.set(null);
+    if (wasOpen) {
+      this.service.leave();
+      this.storage.clearHosted().catch((error) => console.warn('Could not delete the saved room', error));
+    }
   }
 
   private onHello(payload: unknown, from: PeerId): HelloResponse {
@@ -79,9 +94,13 @@ export class RoomHostBusiness {
     this.update(markOffline(this.requireState(), playerId));
   }
 
+  /** Every change is published and saved, so a reload can reopen the room. */
   private update(state: RoomState): void {
     this.state.set(state);
     this.service.publishRoom(state);
+    this.storage
+      .saveHosted({ state, savedAt: Date.now() })
+      .catch((error) => console.warn('Could not save the room', error));
   }
 
   private requireState(): RoomState {
