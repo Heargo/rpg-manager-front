@@ -1,0 +1,312 @@
+{
+  "version": 1,
+  "templates": {
+    "common": [
+      "{adjective} {base}",
+      "{base}"
+    ],
+    "uncommon": [
+      "{adjective} {base}"
+    ],
+    "rare": [
+      "{adjective} {base}",
+      "{base} {suffix}"
+    ],
+    "mythic": [
+      "{adjective} {base} {suffix}",
+      "{base} {suffix}"
+    ],
+    "legendary": [
+      "{adjective} {base} {suffix}"
+    ]
+  },
+  "bases": {
+    "head": [
+      {
+        "text": "Helm"
+      },
+      {
+        "text": "Hood"
+      },
+      {
+        "text": "Circlet"
+      },
+      {
+        "text": "Cap"
+      },
+      {
+        "text": "Crown"
+      }
+    ],
+    "earring": [
+      {
+        "text": "Earring"
+      },
+      {
+        "text": "Ear Cuff"
+      },
+      {
+        "text": "Stud"
+      }
+    ],
+    "necklace": [
+      {
+        "text": "Amulet"
+      },
+      {
+        "text": "Pendant"
+      },
+      {
+        "text": "Necklace"
+      },
+      {
+        "text": "Torc"
+      }
+    ],
+    "ring": [
+      {
+        "text": "Ring"
+      },
+      {
+        "text": "Band"
+      },
+      {
+        "text": "Signet"
+      }
+    ],
+    "chest": [
+      {
+        "text": "Breastplate"
+      },
+      {
+        "text": "Tunic"
+      },
+      {
+        "text": "Robe"
+      },
+      {
+        "text": "Hauberk"
+      },
+      {
+        "text": "Jerkin"
+      }
+    ],
+    "hand": [
+      {
+        "text": "Gloves"
+      },
+      {
+        "text": "Gauntlets"
+      },
+      {
+        "text": "Bracers"
+      },
+      {
+        "text": "Wraps"
+      }
+    ],
+    "legs": [
+      {
+        "text": "Greaves"
+      },
+      {
+        "text": "Leggings"
+      },
+      {
+        "text": "Trousers"
+      },
+      {
+        "text": "Tassets"
+      }
+    ],
+    "foot": [
+      {
+        "text": "Boots"
+      },
+      {
+        "text": "Sandals"
+      },
+      {
+        "text": "Sabatons"
+      },
+      {
+        "text": "Shoes"
+      }
+    ],
+    "weapon1": [
+      {
+        "text": "Sword"
+      },
+      {
+        "text": "Axe"
+      },
+      {
+        "text": "Mace"
+      },
+      {
+        "text": "Spear"
+      },
+      {
+        "text": "Staff"
+      },
+      {
+        "text": "Dagger"
+      },
+      {
+        "text": "Bow"
+      }
+    ],
+    "weapon2": [
+      {
+        "text": "Shield"
+      },
+      {
+        "text": "Buckler"
+      },
+      {
+        "text": "Tome"
+      },
+      {
+        "text": "Orb"
+      },
+      {
+        "text": "Parrying Dagger"
+      }
+    ],
+    "item": [
+      {
+        "text": "Map"
+      },
+      {
+        "text": "Key"
+      },
+      {
+        "text": "Gem"
+      },
+      {
+        "text": "Idol"
+      },
+      {
+        "text": "Lantern"
+      },
+      {
+        "text": "Compass"
+      },
+      {
+        "text": "Scroll Case"
+      }
+    ],
+    "consumable": [
+      {
+        "text": "Potion"
+      },
+      {
+        "text": "Elixir"
+      },
+      {
+        "text": "Draught"
+      },
+      {
+        "text": "Tonic"
+      },
+      {
+        "text": "Ration"
+      },
+      {
+        "text": "Salve"
+      },
+      {
+        "text": "Scroll"
+      }
+    ]
+  },
+  "adjectives": {
+    "common": [
+      "Worn",
+      "Plain",
+      "Rusty",
+      "Simple",
+      "Patched",
+      "Sturdy"
+    ],
+    "uncommon": [
+      "Fine",
+      "Polished",
+      "Reinforced",
+      "Keen",
+      "Tempered",
+      "Balanced"
+    ],
+    "rare": [
+      "Enchanted",
+      "Runed",
+      "Gleaming",
+      "Masterwork",
+      "Arcane",
+      "Silvered"
+    ],
+    "mythic": [
+      "Celestial",
+      "Dread",
+      "Starforged",
+      "Ancient",
+      "Wyrmscale",
+      "Phantom"
+    ],
+    "legendary": [
+      "Eternal",
+      "Godforged",
+      "Sovereign",
+      "Fabled",
+      "Worldbreaker",
+      "Undying"
+    ]
+  },
+  "suffixes": {
+    "common": [],
+    "uncommon": [
+      "of Vigor",
+      "of the Fox"
+    ],
+    "rare": [
+      "of Vigor",
+      "of the Fox",
+      "of the Bear",
+      "of Embers",
+      "of the Tides",
+      "of Swiftness"
+    ],
+    "mythic": [
+      "of the Fallen Star",
+      "of the Wyrm",
+      "of the Silent Moon",
+      "of Ten Storms"
+    ],
+    "legendary": [
+      "of the Ancient Kings",
+      "of the First Dawn",
+      "of the Endless Night",
+      "of the Last Hero"
+    ]
+  },
+  "descriptions": {
+    "item": [
+      "An odd find that someone, somewhere, must be looking for.",
+      "It hums faintly when nobody is watching.",
+      "Worth more to the right buyer.",
+      "Its maker left a mark you don't recognise."
+    ],
+    "consumable": [
+      "Smells worse than it tastes. Mostly.",
+      "Best used before the fight, not after.",
+      "A traveller's favourite, sold in every tavern.",
+      "The label is half torn, but the colour looks right."
+    ],
+    "equipment": [
+      "Light enough to forget you're wearing it.",
+      "Built for a long road and a hard fight.",
+      "Scratches on it tell a story of its own.",
+      "It fits as if it was made for you."
+    ]
+  }
+}
