@@ -1,11 +1,12 @@
 # rpg-manager-front — rules
 
-Angular 22 app (TypeScript 6.0), zoneless, standalone components, Optimus UI 2 (MIT fork of PrimeNG 21, see `docs/adr/0001-replace-primeng-with-optimus-ui.md`; Aura preset in `src/app/ui.preset.ts`), installable as a PWA (`@angular/service-worker`). No backend: players talk peer-to-peer over WebRTC in host-dispatched rooms (`.scratch/p2p-rooms/spec.md`). The HTTP auth code (`AuthService`, `UsersService`, `token.interceptor.ts`) is legacy, removed by p2p ticket 01.
+Angular 22 app (TypeScript 6.0), zoneless, standalone components, Optimus UI 2 (MIT fork of PrimeNG 21, see `docs/adr/0001-replace-primeng-with-optimus-ui.md`; Aura preset in `src/app/ui.preset.ts`), installable as a PWA (`@angular/service-worker`). No backend: players talk peer-to-peer over WebRTC in host-dispatched rooms (`.scratch/p2p-rooms/spec.md`). There are no accounts: the player is a local profile (`core/business/profile.business.ts`) with a stable `playerId`. `HttpClient` only loads the app's own static files.
 
 ## Structure
 
-- `src/app/core/`: shared components, constants, guards, interceptors, models, services, utils, validators.
-- `src/app/modules/`: one folder per feature (`authentification`, `home`, `user`), each with its own `*.routes.ts`, `pages/`, `business/`, `services/`, `models/`.
+- `src/app/core/`: app-wide business (language, profile), components, constants, guards, helpers, i18n, models, services.
+- `src/app/modules/`: one folder per feature (`home`, `profile`, then `room`, `character`, …), each with its own `*.routes.ts`, `pages/`, `business/`, `services/`, `helpers/`, `models/`.
+- Something every feature needs (the player's identity, the language) lives in `core/`, so the app shell and any feature can use it.
 - `src/app/styles/`: global SCSS (layout, mixins, utilities), imported from `src/styles.scss`.
 
 ## Layering

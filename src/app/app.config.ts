@@ -18,12 +18,7 @@ import { routes } from './app.routes';
 import { provideOptimus } from '@openng/optimus-ui/config';
 import { MessageService } from '@openng/optimus-ui/api';
 import { DialogService } from '@openng/optimus-ui/dynamicdialog';
-import {
-  provideHttpClient,
-  withFetch,
-  withInterceptors,
-} from '@angular/common/http';
-import { tokenInterceptor } from './core/interceptors/token.interceptor';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { UiRpgPreset } from './ui.preset';
 import { provideServiceWorker } from '@angular/service-worker';
 
@@ -32,7 +27,8 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([tokenInterceptor]), withFetch()),
+    // HttpClient only loads the app's own static files (translations, word lists): there is no backend.
+    provideHttpClient(withFetch()),
     provideTransloco({
       config: translocoSettings(detectInitialLanguage()),
       loader: TranslocoHttpLoader,

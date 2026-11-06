@@ -1,0 +1,38 @@
+.profile-card {
+  width: min(28rem, 100%);
+}
+
+.profile-form {
+  gap: 0.5rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  small {
+    color: var(--p-text-muted-color);
+  }
+
+  p-button {
+    margin-top: 0.5rem;
+    align-self: flex-end;
+  }
+}
+
+.profile-header {
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.player-id {
+  gap: 0.25rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--p-content-border-color);
+  font-size: 0.875rem;
+
+  code {
+    word-break: break-all;
+  }
+}

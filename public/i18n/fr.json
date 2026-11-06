@@ -2,32 +2,18 @@
   "nav": {
     "games": "Parties",
     "profile": "Profil",
-    "logout": "Se déconnecter",
-    "login": "Se connecter",
-    "register": "S'inscrire",
     "language": "Langue"
   },
-  "auth": {
-    "login": {
-      "title": "Connexion"
-    },
-    "register": {
-      "title": "Inscription",
-      "passwordHint": "Le mot de passe doit contenir au moins 8 caractères"
-    },
-    "username": "Nom d'utilisateur",
-    "password": "Mot de passe",
-    "confirmPassword": "Confirmer le mot de passe",
-    "submit": "Valider",
-    "errors": {
-      "invalidCredentials": "Identifiants invalides",
-      "passwordsMismatch": "Les mots de passe ne correspondent pas",
-      "generic": "Une erreur est survenue"
-    }
-  },
   "profile": {
-    "welcome": "Bienvenue {{ name }}",
-    "logout": "Se déconnecter"
+    "title": "Votre profil",
+    "defaultName": "Aventurier",
+    "name": "Nom",
+    "nameHint": "Visible par les autres joueurs de vos salles.",
+    "nameRequired": "Saisissez un nom.",
+    "save": "Enregistrer",
+    "saved": "Profil enregistré",
+    "playerId": "Identifiant de joueur",
+    "playerIdHint": "Vous identifie sur cet appareil ; il vous rend votre place quand vous rejoignez une salle."
   },
   "notFound": {
     "title": "Page introuvable"

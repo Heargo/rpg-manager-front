@@ -23,10 +23,6 @@ describe('LanguageBusiness', () => {
     expect(business.t('nav.games')).toBe('Parties');
   });
 
-  it('interpolates params', () => {
-    expect(business.t('profile.welcome', { name: 'Ada' })).toBe('Welcome Ada');
-  });
-
   it('saves the chosen language and sets the html lang attribute', () => {
     business.setLanguage('fr');
     TestBed.tick();

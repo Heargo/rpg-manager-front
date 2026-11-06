@@ -2,32 +2,18 @@
   "nav": {
     "games": "Games",
     "profile": "Profile",
-    "logout": "Log out",
-    "login": "Log in",
-    "register": "Sign up",
     "language": "Language"
   },
-  "auth": {
-    "login": {
-      "title": "Log in"
-    },
-    "register": {
-      "title": "Sign up",
-      "passwordHint": "Password must be at least 8 characters"
-    },
-    "username": "Username",
-    "password": "Password",
-    "confirmPassword": "Confirm password",
-    "submit": "Submit",
-    "errors": {
-      "invalidCredentials": "Invalid credentials",
-      "passwordsMismatch": "Passwords do not match",
-      "generic": "Something went wrong"
-    }
-  },
   "profile": {
-    "welcome": "Welcome {{ name }}",
-    "logout": "Log out"
+    "title": "Your profile",
+    "defaultName": "Adventurer",
+    "name": "Name",
+    "nameHint": "Shown to the other players in your rooms.",
+    "nameRequired": "Enter a name.",
+    "save": "Save",
+    "saved": "Profile saved",
+    "playerId": "Player ID",
+    "playerIdHint": "Identifies you on this device; it gives you your seat back when you rejoin a room."
   },
   "notFound": {
     "title": "Page not found"
