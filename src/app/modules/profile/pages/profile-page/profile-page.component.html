@@ -1,0 +1,37 @@
+<div class="main-container flex-col center middle">
+  <p-card class="profile-card">
+    <form class="flex-col profile-form" (ngSubmit)="save()">
+      <div class="flex-row middle profile-header">
+        <p-avatar [label]="profileBusiness.$initial()" size="xlarge" shape="circle" />
+        <h1>{{ 'profile.title' | transloco }}</h1>
+      </div>
+
+      <label for="profile-name">{{ 'profile.name' | transloco }}</label>
+      <input
+        pInputText
+        id="profile-name"
+        name="name"
+        autocomplete="nickname"
+        [maxlength]="maxLength"
+        [(ngModel)]="name"
+        [invalid]="!isValid()"
+        aria-describedby="profile-name-hint"
+      />
+      @if (isValid()) {
+        <small id="profile-name-hint">{{ 'profile.nameHint' | transloco }}</small>
+      } @else {
+        <p-message id="profile-name-hint" severity="error" size="small" variant="simple">
+          {{ 'profile.nameRequired' | transloco }}
+        </p-message>
+      }
+
+      <p-button type="submit" [label]="'profile.save' | transloco" [disabled]="!isValid() || !isDirty()" />
+
+      <div class="flex-col player-id">
+        <span>{{ 'profile.playerId' | transloco }}</span>
+        <code>{{ profileBusiness.$profile().playerId }}</code>
+        <small>{{ 'profile.playerIdHint' | transloco }}</small>
+      </div>
+    </form>
+  </p-card>
+</div>

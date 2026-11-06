@@ -2,34 +2,53 @@ import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
+  isDevMode,
+  inject,
+  provideAppInitializer,
 } from '@angular/core';
+import { provideTransloco, TranslocoService } from '@jsverse/transloco';
+import { firstValueFrom } from 'rxjs';
+import { detectInitialLanguage } from './core/i18n/initial-language';
+import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
+import { translocoSettings } from './core/i18n/transloco-config';
+import { LanguageBusiness } from './core/business/language.business';
+import { RoomBusiness } from './modules/room/business/room.business';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { providePrimeNG } from 'primeng/config';
-import { MessageService } from 'primeng/api';
-import { DialogService } from 'primeng/dynamicdialog';
-import {
-  provideHttpClient,
-  withFetch,
-  withInterceptors,
-} from '@angular/common/http';
-import { tokenInterceptor } from './core/interceptors/token.interceptor';
-import { PrimeNgRpgPreset } from './primeng.preset';
+import { provideOptimus } from '@openng/optimus-ui/config';
+import { MessageService } from '@openng/optimus-ui/api';
+import { DialogService } from '@openng/optimus-ui/dynamicdialog';
+import { provideHttpClient, withFetch } from '@angular/common/http';
+import { UiRpgPreset } from './ui.preset';
+import { provideServiceWorker } from '@angular/service-worker';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideAnimationsAsync(),
-    provideHttpClient(withInterceptors([tokenInterceptor]), withFetch()),
+    // HttpClient only loads the app's own static files (translations, word lists): there is no backend.
+    provideHttpClient(withFetch()),
+    provideTransloco({
+      config: translocoSettings(detectInitialLanguage()),
+      loader: TranslocoHttpLoader,
+    }),
+    // Load the starting language before the first render (no flash of keys), and start LanguageBusiness.
+    provideAppInitializer(() => {
+      const transloco = inject(TranslocoService);
+      inject(LanguageBusiness);
+      return firstValueFrom(transloco.load(transloco.getActiveLang()));
+    }),
+    // Reopen the room this device was hosting before a reload (doesn't block startup).
+    provideAppInitializer(() => {
+      inject(RoomBusiness);
+    }),
     MessageService,
     DialogService,
-    providePrimeNG({
+    provideOptimus({
       theme: {
-        preset: PrimeNgRpgPreset,
+        preset: UiRpgPreset,
         options: {
           darkModeSelector: '.dark',
         },
@@ -40,6 +59,10 @@ export const appConfig: ApplicationConfig = {
         menu: 1000, // overlay menus
         tooltip: 1100, // tooltip
       },
+    }),
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
     }),
   ],
 };

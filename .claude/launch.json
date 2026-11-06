@@ -1,0 +1,28 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "front",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "start"
+      ],
+      "port": 4200
+    },
+    {
+      "name": "front-prod",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "-y",
+        "http-server@14.1.1",
+        "dist/panel/browser",
+        "-p",
+        "4300",
+        "-c-1",
+        "--proxy",
+        "http://localhost:4300?"
+      ],
+      "port": 4300
+    }
+  ]
+}

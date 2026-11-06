@@ -1,5 +1,5 @@
 import { inject, Injectable, signal, WritableSignal } from '@angular/core';
-import { MenuItem } from 'primeng/api';
+import { MenuItem } from '@openng/optimus-ui/api';
 import { MenuAction } from '../models/menu.interface';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -12,8 +12,9 @@ export class MenuService {
 
   private staticItems: MenuItem[] = [
     {
-      label: 'Games',
-      icon: 'pi pi-play',
+      label: 'nav.play',
+      icon: 'pi pi-users',
+      routerLink: '/room',
       // items: [
       //   {
       //     label: 'Bookmarks',

@@ -22,21 +22,13 @@
   </ng-template>
   <ng-template #end>
     <div class="flex-row center middle">
-      @if(authBusiness.$connected()) {
       <p-avatar
-        label="{{ $label() }}"
+        [label]="profileBusiness.$initial()"
+        [attr.title]="profileBusiness.$profile().name"
         class="pointer"
         shape="circle"
         (click)="usermenu.toggle($event)"
       />
-      }@else {
-      <p-avatar
-        icon="pi pi-user"
-        class="pointer"
-        shape="circle"
-        (click)="usermenu.toggle($event)"
-      />
-      }
       <p-tieredmenu #usermenu [model]="profileItems()" [popup]="true" />
     </div>
   </ng-template>

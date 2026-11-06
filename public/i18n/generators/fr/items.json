@@ -1,0 +1,460 @@
+{
+  "version": 1,
+  "templates": {
+    "common": [
+      "{base} {adjective}",
+      "{base}"
+    ],
+    "uncommon": [
+      "{base} {adjective}"
+    ],
+    "rare": [
+      "{base} {adjective}",
+      "{base} {suffix}"
+    ],
+    "mythic": [
+      "{base} {adjective} {suffix}",
+      "{base} {suffix}"
+    ],
+    "legendary": [
+      "{base} {adjective} {suffix}"
+    ]
+  },
+  "bases": {
+    "head": [
+      {
+        "text": "Casque",
+        "gender": "m"
+      },
+      {
+        "text": "Capuche",
+        "gender": "f"
+      },
+      {
+        "text": "Couronne",
+        "gender": "f"
+      },
+      {
+        "text": "Diadème",
+        "gender": "m"
+      },
+      {
+        "text": "Bonnet",
+        "gender": "m"
+      }
+    ],
+    "earring": [
+      {
+        "text": "Boucle d'oreille",
+        "gender": "f"
+      },
+      {
+        "text": "Anneau d'oreille",
+        "gender": "m"
+      },
+      {
+        "text": "Pendant d'oreille",
+        "gender": "m"
+      }
+    ],
+    "necklace": [
+      {
+        "text": "Amulette",
+        "gender": "f"
+      },
+      {
+        "text": "Pendentif",
+        "gender": "m"
+      },
+      {
+        "text": "Collier",
+        "gender": "m"
+      },
+      {
+        "text": "Torque",
+        "gender": "m"
+      }
+    ],
+    "ring": [
+      {
+        "text": "Anneau",
+        "gender": "m"
+      },
+      {
+        "text": "Bague",
+        "gender": "f"
+      },
+      {
+        "text": "Chevalière",
+        "gender": "f"
+      }
+    ],
+    "chest": [
+      {
+        "text": "Plastron",
+        "gender": "m"
+      },
+      {
+        "text": "Tunique",
+        "gender": "f"
+      },
+      {
+        "text": "Robe",
+        "gender": "f"
+      },
+      {
+        "text": "Cotte de mailles",
+        "gender": "f"
+      },
+      {
+        "text": "Pourpoint",
+        "gender": "m"
+      }
+    ],
+    "hand": [
+      {
+        "text": "Gants",
+        "gender": "m"
+      },
+      {
+        "text": "Gantelets",
+        "gender": "m"
+      },
+      {
+        "text": "Brassards",
+        "gender": "m"
+      },
+      {
+        "text": "Mitaines",
+        "gender": "f"
+      }
+    ],
+    "legs": [
+      {
+        "text": "Jambières",
+        "gender": "f"
+      },
+      {
+        "text": "Chausses",
+        "gender": "f"
+      },
+      {
+        "text": "Braies",
+        "gender": "f"
+      },
+      {
+        "text": "Cuissards",
+        "gender": "m"
+      }
+    ],
+    "foot": [
+      {
+        "text": "Bottes",
+        "gender": "f"
+      },
+      {
+        "text": "Sandales",
+        "gender": "f"
+      },
+      {
+        "text": "Solerets",
+        "gender": "m"
+      },
+      {
+        "text": "Chaussures",
+        "gender": "f"
+      }
+    ],
+    "weapon1": [
+      {
+        "text": "Épée",
+        "gender": "f"
+      },
+      {
+        "text": "Hache",
+        "gender": "f"
+      },
+      {
+        "text": "Masse",
+        "gender": "f"
+      },
+      {
+        "text": "Lance",
+        "gender": "f"
+      },
+      {
+        "text": "Bâton",
+        "gender": "m"
+      },
+      {
+        "text": "Dague",
+        "gender": "f"
+      },
+      {
+        "text": "Arc",
+        "gender": "m"
+      }
+    ],
+    "weapon2": [
+      {
+        "text": "Bouclier",
+        "gender": "m"
+      },
+      {
+        "text": "Rondache",
+        "gender": "f"
+      },
+      {
+        "text": "Grimoire",
+        "gender": "m"
+      },
+      {
+        "text": "Orbe",
+        "gender": "m"
+      },
+      {
+        "text": "Main-gauche",
+        "gender": "f"
+      }
+    ],
+    "item": [
+      {
+        "text": "Carte",
+        "gender": "f"
+      },
+      {
+        "text": "Clé",
+        "gender": "f"
+      },
+      {
+        "text": "Gemme",
+        "gender": "f"
+      },
+      {
+        "text": "Idole",
+        "gender": "f"
+      },
+      {
+        "text": "Lanterne",
+        "gender": "f"
+      },
+      {
+        "text": "Boussole",
+        "gender": "f"
+      },
+      {
+        "text": "Étui à parchemins",
+        "gender": "m"
+      }
+    ],
+    "consumable": [
+      {
+        "text": "Potion",
+        "gender": "f"
+      },
+      {
+        "text": "Élixir",
+        "gender": "m"
+      },
+      {
+        "text": "Breuvage",
+        "gender": "m"
+      },
+      {
+        "text": "Tonique",
+        "gender": "m"
+      },
+      {
+        "text": "Ration",
+        "gender": "f"
+      },
+      {
+        "text": "Onguent",
+        "gender": "m"
+      },
+      {
+        "text": "Parchemin",
+        "gender": "m"
+      }
+    ]
+  },
+  "adjectives": {
+    "common": [
+      {
+        "m": "usé",
+        "f": "usée"
+      },
+      {
+        "m": "simple",
+        "f": "simple"
+      },
+      {
+        "m": "rouillé",
+        "f": "rouillée"
+      },
+      {
+        "m": "rapiécé",
+        "f": "rapiécée"
+      },
+      {
+        "m": "robuste",
+        "f": "robuste"
+      },
+      {
+        "m": "ordinaire",
+        "f": "ordinaire"
+      }
+    ],
+    "uncommon": [
+      {
+        "m": "raffiné",
+        "f": "raffinée"
+      },
+      {
+        "m": "poli",
+        "f": "polie"
+      },
+      {
+        "m": "renforcé",
+        "f": "renforcée"
+      },
+      {
+        "m": "affûté",
+        "f": "affûtée"
+      },
+      {
+        "m": "trempé",
+        "f": "trempée"
+      },
+      {
+        "m": "équilibré",
+        "f": "équilibrée"
+      }
+    ],
+    "rare": [
+      {
+        "m": "enchanté",
+        "f": "enchantée"
+      },
+      {
+        "m": "runique",
+        "f": "runique"
+      },
+      {
+        "m": "étincelant",
+        "f": "étincelante"
+      },
+      {
+        "m": "de maître",
+        "f": "de maître"
+      },
+      {
+        "m": "arcanique",
+        "f": "arcanique"
+      },
+      {
+        "m": "argenté",
+        "f": "argentée"
+      }
+    ],
+    "mythic": [
+      {
+        "m": "céleste",
+        "f": "céleste"
+      },
+      {
+        "m": "redoutable",
+        "f": "redoutable"
+      },
+      {
+        "m": "forgé dans les étoiles",
+        "f": "forgée dans les étoiles"
+      },
+      {
+        "m": "ancien",
+        "f": "ancienne"
+      },
+      {
+        "m": "fantôme",
+        "f": "fantôme"
+      },
+      {
+        "m": "en écailles de wyrm",
+        "f": "en écailles de wyrm"
+      }
+    ],
+    "legendary": [
+      {
+        "m": "éternel",
+        "f": "éternelle"
+      },
+      {
+        "m": "forgé par les dieux",
+        "f": "forgée par les dieux"
+      },
+      {
+        "m": "souverain",
+        "f": "souveraine"
+      },
+      {
+        "m": "fabuleux",
+        "f": "fabuleuse"
+      },
+      {
+        "m": "immortel",
+        "f": "immortelle"
+      },
+      {
+        "m": "légendaire",
+        "f": "légendaire"
+      }
+    ]
+  },
+  "suffixes": {
+    "common": [],
+    "uncommon": [
+      "de vigueur",
+      "du renard"
+    ],
+    "rare": [
+      "de vigueur",
+      "du renard",
+      "de l'ours",
+      "des braises",
+      "des marées",
+      "de célérité"
+    ],
+    "mythic": [
+      "de l'étoile déchue",
+      "du wyrm",
+      "de la lune silencieuse",
+      "des dix tempêtes"
+    ],
+    "legendary": [
+      "des anciens rois",
+      "de la première aube",
+      "de la nuit sans fin",
+      "du dernier héros"
+    ]
+  },
+  "descriptions": {
+    "item": [
+      "Une trouvaille étrange que quelqu'un, quelque part, doit chercher.",
+      "Ça bourdonne doucement quand personne ne regarde.",
+      "Ça vaut plus cher pour le bon acheteur.",
+      "Son créateur a laissé une marque que vous ne reconnaissez pas."
+    ],
+    "consumable": [
+      "L'odeur est pire que le goût. En général.",
+      "À utiliser avant le combat, pas après.",
+      "Le favori des voyageurs, vendu dans toutes les tavernes.",
+      "L'étiquette est à moitié déchirée, mais la couleur semble bonne."
+    ],
+    "equipment": [
+      "On oublie vite son poids.",
+      "Pour une longue route et un rude combat.",
+      "Chaque éraflure raconte une histoire.",
+      "On jurerait que c'est fait sur mesure pour vous."
+    ]
+  }
+}

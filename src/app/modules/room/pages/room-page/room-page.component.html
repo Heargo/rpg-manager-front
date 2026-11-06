@@ -1,0 +1,118 @@
+<div class="main-container room">
+  @switch (room.$status()) {
+    @case ('idle') {
+      <h1>{{ 'room.start.title' | transloco }}</h1>
+      <div class="start">
+        <p-card>
+          <form class="stack" (ngSubmit)="host()">
+            <h2>{{ 'room.start.hostTitle' | transloco }}</h2>
+            <p class="hint">{{ 'room.start.hostHint' | transloco }}</p>
+            <label for="room-name">{{ 'room.start.roomName' | transloco }}</label>
+            <input pInputText id="room-name" name="roomName" [(ngModel)]="roomName" maxlength="48" />
+            <p-button type="submit" icon="pi pi-crown" [label]="'room.start.host' | transloco" [disabled]="!roomName().trim()" />
+            @if (error()) {
+              <p-message severity="error" size="small" variant="simple">{{ error() }}</p-message>
+            }
+          </form>
+        </p-card>
+        <p-card>
+          <form class="stack" (ngSubmit)="join()">
+            <h2>{{ 'room.start.joinTitle' | transloco }}</h2>
+            <p class="hint">{{ 'room.start.joinHint' | transloco }}</p>
+            <label for="invite-code">{{ 'room.start.inviteCode' | transloco }}</label>
+            <textarea pTextarea id="invite-code" name="inviteCode" rows="3" [(ngModel)]="inviteInput"></textarea>
+            <p-button type="submit" icon="pi pi-sign-in" [label]="'room.start.join' | transloco" [disabled]="!inviteInput().trim()" />
+          </form>
+        </p-card>
+      </div>
+      @if (room.$recentRooms().length) {
+        <p-card [header]="'room.recent.title' | transloco">
+          <p class="hint">{{ 'room.recent.hint' | transloco }}</p>
+          <ul class="recent">
+            @for (recent of room.$recentRooms(); track recent.id) {
+              <li>
+                <div class="recent-text">
+                  <strong>{{ recent.name }}</strong>
+                  <small>
+                    {{ 'room.recent.hostedBy' | transloco: { name: recent.hostName } }} ·
+                    {{ 'room.recent.lastSeen' | transloco: { date: (recent.lastSeenAt | date: 'short') } }} ·
+                    {{ recent.members.length }} <i class="pi pi-users"></i>
+                  </small>
+                </div>
+                <p-button
+                  icon="pi pi-trash"
+                  severity="secondary"
+                  [text]="true"
+                  [rounded]="true"
+                  [ariaLabel]="'room.recent.forget' | transloco"
+                  (onClick)="forget(recent.id)"
+                />
+              </li>
+            }
+          </ul>
+        </p-card>
+      }
+    }
+
+    @case ('hosting') {
+      <header class="lobby-header">
+        <div>
+          <h1>{{ room.$room()?.name }}</h1>
+          <p class="hint"><i class="pi pi-crown"></i> {{ 'room.lobby.hosting' | transloco }}</p>
+        </div>
+        <p-button icon="pi pi-times" [label]="'room.lobby.close' | transloco" severity="secondary" [text]="true" (onClick)="leave()" />
+      </header>
+      @if (room.$restored()) {
+        <p-message severity="info" icon="pi pi-replay">{{ 'room.lobby.restored' | transloco }}</p-message>
+      }
+      <div class="lobby">
+        <p-card [header]="'room.members.title' | transloco">
+          @if (room.$room(); as state) {
+            <app-member-list
+              [members]="state.members"
+              [myPlayerId]="profile.$profile().playerId"
+              [canKick]="true"
+              (kick)="kick($event)"
+              (reinvite)="invite($event)"
+            />
+          }
+        </p-card>
+        <section class="stack">
+          <p-button icon="pi pi-user-plus" [label]="'room.invite.add' | transloco" [loading]="inviting()" (onClick)="invite()" />
+          @if (error()) {
+            <p-message severity="error" size="small">{{ error() }}</p-message>
+          }
+          @for (invite of room.$pendingInvites(); track invite.id) {
+            <app-invite-card [invite]="invite" />
+          }
+        </section>
+      </div>
+    }
+
+    @default {
+      <header class="lobby-header">
+        <div>
+          <h1>{{ room.$room()?.name ?? ('room.title' | transloco) }}</h1>
+          <p class="hint">
+            @switch (room.$status()) {
+              @case ('joining') { {{ 'room.lobby.joining' | transloco }} }
+              @case ('connected') { <i class="pi pi-wifi"></i> {{ 'room.lobby.connected' | transloco }} }
+            }
+          </p>
+        </div>
+        <p-button icon="pi pi-sign-out" [label]="'room.lobby.leave' | transloco" severity="secondary" [text]="true" (onClick)="leave()" />
+      </header>
+      @if (room.$status() === 'host-offline') {
+        <p-message severity="warn" icon="pi pi-exclamation-triangle">{{ 'room.lobby.hostOffline' | transloco }}</p-message>
+      }
+      @if (room.$status() === 'removed') {
+        <p-message severity="error" icon="pi pi-user-minus">{{ 'room.lobby.removed' | transloco }}</p-message>
+      }
+      @if (room.$room(); as state) {
+        <p-card [header]="'room.members.title' | transloco" styleClass="players">
+          <app-member-list [members]="state.members" [myPlayerId]="profile.$profile().playerId" />
+        </p-card>
+      }
+    }
+  }
+</div>
