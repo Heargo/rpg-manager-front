@@ -2,7 +2,7 @@
 
 Status: needs-triage
 Type: task
-Blocked by: p2p-rooms/07
+Blocked by: none
 
 Spec: `../spec.md` (Random generators as separate helpers, Word lists).
 

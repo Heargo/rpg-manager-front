@@ -8,9 +8,9 @@ import {
 } from '@angular/core';
 import { provideTransloco, TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
-import { SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE } from './core/constants/languages';
 import { detectInitialLanguage } from './core/i18n/initial-language';
 import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
+import { translocoSettings } from './core/i18n/transloco-config';
 import { LanguageBusiness } from './core/business/language.business';
 import { provideRouter } from '@angular/router';
 
@@ -34,14 +34,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptors([tokenInterceptor]), withFetch()),
     provideTransloco({
-      config: {
-        availableLangs: SUPPORTED_LANGUAGES.map((language) => language.code),
-        defaultLang: detectInitialLanguage(),
-        fallbackLang: DEFAULT_LANGUAGE,
-        missingHandler: { useFallbackTranslation: true },
-        reRenderOnLangChange: true,
-        prodMode: !isDevMode(),
-      },
+      config: translocoSettings(detectInitialLanguage()),
       loader: TranslocoHttpLoader,
     }),
     // Load the starting language before the first render (no flash of keys), and start LanguageBusiness.

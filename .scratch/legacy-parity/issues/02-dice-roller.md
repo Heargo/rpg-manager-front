@@ -2,7 +2,7 @@
 
 Status: needs-triage
 Type: task
-Blocked by: p2p-rooms/07, 10
+Blocked by: 10
 
 Spec: `../spec.md` (Dice roller).
 

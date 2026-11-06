@@ -2,7 +2,7 @@
 
 Status: needs-triage
 Type: task
-Blocked by: 07
+Blocked by: none
 
 Spec: `../spec.md` (Signalling: manual handshake, Layers).
 

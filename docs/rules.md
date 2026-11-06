@@ -62,10 +62,24 @@ The app is in English and French, switchable at runtime (no reload, so live peer
 - `npm run start`: dev server on http://localhost:4200
 - `npm run build`: production build in `dist/panel`
 - `npm run watch`: `ng build --watch`
-- `npm run test`: not wired up yet (Karma/Jasmine deps are installed; the few `*.spec.ts` files are CLI stubs).
+- `npm test`: Vitest suite, single run
+- `npm run test:watch`: Vitest in watch mode
 
 ## Conventions
 
-- Specs sit next to the code as `*.spec.ts`. Components are standalone, so specs use `imports: [Component]`.
 - Prettier formats the code (config in `package.json`, Angular parser for HTML).
 - Never commit `.env` files or secrets.
+
+## Tests
+
+Vitest through Angular's `@angular/build:unit-test` builder (jsdom), globals (`describe`, `it`, `expect`, `vi`) enabled. Specs sit next to the code as `*.spec.ts`.
+
+- Full suite: `npm test`
+- One file: `npx ng test --watch=false --include src/app/path/to/file.spec.ts`
+- Typecheck specs: `npx tsc -p tsconfig.spec.json --noEmit`
+
+- Pure helpers (generators, codecs, reducers) are tested directly, without TestBed.
+- Business classes: `TestBed.configureTestingModule({ providers: [...] })` then `TestBed.inject`.
+- Components are standalone, so specs use `imports: [Component]` and `providers: TEST_PROVIDERS` from `src/testing/test-providers.ts` (router, mocked `HttpClient`, real EN/FR translations, Optimus UI `MessageService`/`DialogService`). Await `fixture.whenStable()` instead of calling `detectChanges()` (zoneless).
+- Translations in specs come from the real `public/i18n/*.json` files with the app's own Transloco settings (`core/i18n/transloco-config.ts`), so a missing key or a broken language switch fails a test.
+- Randomness: inject a `RandomSource`; use a seeded one in tests, never `Math.random()` in code under test.
