@@ -33,6 +33,7 @@
     "@openng/icons": "^1.0.0",
     "@openng/optimus-ui": "^2.0.2",
     "@openng/optimus-ui-themes": "^2.0.2",
+    "idb": "^8.0.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.9.1"
   },
@@ -40,6 +41,7 @@
     "@angular/build": "^22.2.6",
     "@angular/cli": "^22.2.6",
     "@angular/compiler-cli": "^22.2.5",
+    "fake-indexeddb": "^6.2.7",
     "jsdom": "^31.0.0",
     "typescript": "~6.0.3",
     "vitest": "^5.0.0"

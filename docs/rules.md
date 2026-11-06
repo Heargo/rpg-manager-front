@@ -89,6 +89,14 @@ The app is in English and French, switchable at runtime (no reload, so live peer
 - Data that depends on the language (generator word lists) lives in `public/i18n/generators/<lang>/`, loaded by its own service, not through Transloco.
 - Supported languages are listed in `core/constants/languages.ts`; adding one means a new JSON file per folder and an entry there.
 
+## Local storage
+
+- Small settings (language, profile) in `localStorage`, always wrapped in `try/catch` (private mode).
+- Everything else in IndexedDB through `idb`: one database, schema and version in `core/helpers/app-database.ts`. Adding a store or index means bumping the version and handling it in `upgrade`.
+- Only services touch IndexedDB (`WorldStorageService`, `ImageStorageService`); they store and return whole records, rules stay in business code.
+- Images: always through `ImageBusiness` (shrunk to max 512 px WebP, stored as bytes, id = SHA-256 of the bytes, so the same image is stored and sent once). Show them with `ImageBusiness.url(id)`.
+- Service specs use `fake-indexeddb` (`import 'fake-indexeddb/auto'`, and `globalThis.indexedDB = new IDBFactory()` in `beforeEach` for a clean database).
+
 ## PWA
 
 - The service worker is registered in `app.config.ts` (`provideServiceWorker`) and only runs in production builds; check it with `npm run build` and a static server, not `ng serve`.
