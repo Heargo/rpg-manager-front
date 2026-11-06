@@ -1,6 +1,6 @@
 # Invite, join and lobby pages
 
-Status: needs-triage
+Status: ready-for-agent
 Type: task
 Blocked by: 03
 

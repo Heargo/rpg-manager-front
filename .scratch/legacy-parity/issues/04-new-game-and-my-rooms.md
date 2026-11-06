@@ -1,6 +1,6 @@
 # New game wizard and "my rooms" list
 
-Status: needs-triage
+Status: ready-for-agent
 Type: task
 Blocked by: 03, p2p-rooms/04
 

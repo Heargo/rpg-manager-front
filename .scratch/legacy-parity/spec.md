@@ -50,7 +50,7 @@ Routes: `home`, `login`, `signup`, `games`, `new-game`, `game`, `create-player`,
 - **GM device** (host) stores worlds in IndexedDB: game settings, item catalogue, characters, inventories, illustration and quick images, notes. It's the source of truth while the room is live.
 - **Player device** stores its profile, the rooms it joined (code + last snapshot for an offline read-only view).
 - **Images** (game icon, portraits, item images, illustrations) are resized client-side (max ~512 px, WebP) and stored as blobs; the host sends them over the data channel in chunks, and clients cache them by content hash so they're sent once.
-- Players act through **intents** (spend stat point, equip, use, sell); the GM's device validates them with the rules in row 8 and broadcasts the new state. GM-only actions (grant points, give item, change illustration) are intents the host only accepts from itself.
+- Players act through **feature services** (`characterService.spendStatPoint()`, `equip()`, `use()`, `sell()`): requests to the GM's device, whose business handlers validate them with the rules in row 8 (`character.rules.ts`) and publish the new state. GM-only actions (grant points, give item, change illustration) are service calls whose host handlers reject them unless they come from the host itself.
 - **Export/import a world as JSON** replaces cloud backup (the legacy JSON item editor is the same idea at item level).
 
 ## Default items (decided: yes, for now)
@@ -174,6 +174,6 @@ See `issues/`. They assume the p2p tickets 01–03 and 07 land first; 01, 02 and
 
 1. Item generation: confirm the three tiers above (random generator, Chrome on-device AI, copy prompt).
 2. ~~Default items~~: decided, yes; bundled starter pack (no legacy list exists).
-3. Shared dice rolls on by default?
+3. ~~Shared dice rolls~~: decided, off by default, toggle next to the Roll button.
 4. ~~Item generation~~: decided, three tiers; generators as pure helpers, word lists as JSON per language.
 5. ~~Dice~~: decided, 3D physics modal with predetermined fair results.

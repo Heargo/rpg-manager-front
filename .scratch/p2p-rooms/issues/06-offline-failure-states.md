@@ -1,6 +1,6 @@
 # Offline and failure states
 
-Status: needs-triage
+Status: ready-for-agent
 Type: task
 Blocked by: 04
 

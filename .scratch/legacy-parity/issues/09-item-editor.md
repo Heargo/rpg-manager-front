@@ -1,6 +1,6 @@
 # Item editor (form, JSON, AI prompt)
 
-Status: needs-triage
+Status: ready-for-agent
 Type: task
 Blocked by: 08, 10
 

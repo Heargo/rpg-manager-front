@@ -52,36 +52,48 @@ The host can have several invites pending at once, one per player. Each pending 
 
 ## Design
 
-### Layers (follows `docs/rules.md`)
+### Layers (follows `docs/rules.md`: Layering, Peer-to-peer services)
+
+Component → business (game logic) → service (wrapper exposing API-like calls over peer-to-peer). Stateless plumbing lives in helpers.
 
 ```
+core/p2p/
+  peer-api.service.ts          PeerApi: the HttpClient of this app. Owns the RoomTransport, role, pending requests,
+                               subscriptions. request(route, payload) → Promise, watch(topic) → Observable,
+                               serve(route, handler) and publish(topic, data) on the host. In-process on the host.
+  room-transport.ts            interface: createInvite() → {id, offerCode}, acceptAnswer(id, answerCode), cancelInvite(id),
+                               answerInvite(offerCode) → answerCode, send(peer, msg), broadcast(msg),
+                               onMessage, onPeerJoin/Leave, close()
+  webrtc-transport.ts          the only file touching RTCPeerConnection
+  fake-transport.ts            in-memory hub for tests
+  helpers/
+    signal-codec.ts            encode/decode offer and answer codes
+    envelope.ts                build/parse { v, id, kind: request|response|error|publish, route, payload, seq }
+    correlation.ts             createRequestTracker(): match responses to requests, timeouts
+    routes.ts                  route/topic naming and matching
+    peer-api-error.ts          PeerApiError { code, message } + mapping from wire errors
 modules/room/
-  pages/            create-room, join-room, room (lobby + game shell)
+  pages/                       invite/join/lobby
   business/
-    room.business.ts        signals: $role (host|client|none), $roomCode, $peers, $state, $status
-    host.business.ts        host-only: validates intents, applies them, broadcasts, assigns seq numbers
+    room.business.ts           signals: $role, $peers, $status, $pendingInvites; invite/accept/leave
+    room-host.business.ts      host: registers room/* handlers (hello, kick), seq, persistence
   services/
-    room-transport.ts           interface: createInvite() → {id, offerCode}, acceptAnswer(id, answerCode), cancelInvite(id),
-                                answerInvite(offerCode) → answerCode (client side), send(peer, msg), broadcast(msg),
-                                onMessage, onPeerJoin/Leave, close()
-    webrtc-transport.service.ts the only file touching RTCPeerConnection
-    signal-codec.ts             encode/decode offer and answer codes (pure, unit-tested)
-    qr.service.ts               generate and scan QR codes
+    room.service.ts            hello(), leave(), watchRoom(); serveHello(), publishRoom()… (routes room/*)
+    qr.service.ts              generate and scan QR codes
   models/
-    messages.ts     discriminated union of wire messages, with a protocol version
-    room-state.ts   the shared room state
+    room-state.ts, room-api.ts request/response types
+modules/<feature>/             same pattern per game feature (character, item, table, dice…)
 ```
-
-Components talk to `room.business`, never to the transport.
 
 ### Protocol
 
-All messages are JSON with `{ v: 1, type, ... }`.
+All wire messages are envelopes `{ v: 1, id, kind, route, payload }`:
 
-- Client → host: `hello { playerId, name }`, `intent { id, action }` (a game action the client asks for), `ping`.
-- Host → client: `welcome { you, state, seq }` (full snapshot), `patch { seq, ops }` or `state { seq, state }` (start with full state; add patches only if needed), `reject { intentId, reason }`, `kicked`.
-- The host is the **single source of truth**: clients never change shared state locally; they send an intent and render what the host sends back. `seq` lets a client detect gaps and ask for a fresh snapshot.
-- The host is also a player: its own UI sends intents to `host.business` in-process.
+- `request` (client → host) → `response` or `error { code, message }` with the same `id`. This is what `service.foo()` returns as a `Promise`.
+- `publish { topic, seq, payload }` (host → clients): pushed state, what `service.watchFoo()` returns as an `Observable`. Start with full snapshots per topic; add patches only if needed. `seq` per topic lets a client detect gaps and re-request the snapshot.
+- Session routes on `room/*`: `room/hello { playerId, name, rev, hash }` → `{ you, snapshot }`, `room/leave`, `room/kicked` (publish).
+- The host is the **single source of truth**: clients never change shared state locally (except the host-offline features); they call a service, the host's handler validates and applies the rules, then publishes.
+- The host is also a player: its UI calls the same services, which run the handlers in-process.
 
 ### Identity
 
@@ -112,7 +124,7 @@ No hard limit. The host's lobby shows a recommended maximum and a non-blocking `
 
 ### Persistence
 
-The host saves the room state to IndexedDB after every applied intent. Reopening the app as host restores the room and its seats. Clients keep their profile and the rooms they joined (ID, name, last snapshot).
+The host saves the room state to IndexedDB after every handled request. Reopening the app as host restores the room and its seats. Clients keep their profile and the rooms they joined (ID, name, last snapshot).
 
 Connections don't survive a reload: there is no server to reconnect through. After a host reload, every player rejoins with a fresh handshake. To keep that cheap, each offline seat in the host's lobby has a "Re-invite" button that makes a new invite for that seat; the player's `hello` carries their `playerId`, so they get their seat (and character) back.
 
@@ -132,7 +144,7 @@ Connections don't survive a reload: there is no server to reconnect through. Aft
   | Equip / unequip | off | applied to the local copy, queued |
   | Use consumables | off | applied to the local copy, queued |
   | Sell items | off | applied to the local copy, queued |
-- Queued actions are kept as intents with their order. On reconnect the player's copy differs from the host's, which triggers the "Pick a save" dialog; the dialog also lists the queued actions, so the host can choose the player's version (accept them) or the host's (drop them).
+- Queued actions are kept as service requests (route + payload) in order. On reconnect the player's copy differs from the host's, which triggers the "Pick a save" dialog; the dialog also lists the queued actions, so the host can choose the player's version (accept them) or the host's (drop them).
 - The room's offline settings are part of the room state, so players receive them while connected.
 - Host migration (promote a client) stays out of scope: every player would have to re-handshake with the new host.
 
@@ -146,8 +158,8 @@ The service worker keeps serving the app shell offline. Only joining/hosting nee
 - Automatic reconnection (impossible without a signalling server; re-invite is the answer).
 - Client-to-client links: everything goes through the host.
 - Host migration.
-- Anti-cheat beyond "the host validates intents" (the host can cheat; it's a friends' table).
-- The actual game rules: this spec builds the room layer; game features plug in as intents.
+- Anti-cheat beyond "the host validates requests" (the host can cheat; it's a friends' table).
+- The actual game rules: this spec builds the room layer; game features plug in as feature services with host handlers.
 
 ## Tickets
 
@@ -155,8 +167,8 @@ One file per ticket in `issues/` (01–11 below). Game features on top of rooms 
 
 
 1. **Local profile replaces accounts**: remove auth/users services, interceptor, guards, login/register pages and `@supabase/supabase-js`; add the `localStorage` profile and its edit page.
-2. **Signal codec + WebRTC transport**: `signal-codec.ts` (compress/encode, version, validation), `RoomTransport` with invites, `webrtc-transport.service.ts`, fake transport for tests.
-3. **Room business + protocol**: host/client roles, `hello`/`welcome`/`intent`/`state`/`reject`, `seq` gap recovery; tested over the fake transport with one host and two clients.
+2. **Signal codec + WebRTC transport**: `core/p2p/helpers/signal-codec.ts`, `RoomTransport` with invites, `core/p2p/webrtc-transport.ts`, `fake-transport.ts`.
+3. **PeerApi + room service/business**: envelope, correlation and error helpers; `PeerApi` (request/watch/serve/publish, in-process on host); `room.service` + `room.business` + `room-host.business` (hello, leave, kick, `seq` resync); tested over the fake transport with one host and two clients.
 4. **Invite, join and lobby pages**: host invite panel (link, share, QR, paste answer, cancel), `/join#…` page (answer code, copy, share, QR), lobby lists, leave.
 5. **Host persistence and re-invite**: IndexedDB snapshot, restore on reopen, offline seats with "Re-invite", seat recovery by `playerId`.
 6. **Offline and failure states**: offline banner, "host disconnected", connection timeout ("try the same Wi-Fi"), bad or expired code errors.

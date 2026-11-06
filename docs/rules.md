@@ -1,6 +1,6 @@
 # rpg-manager-front — rules
 
-Angular 22 app (TypeScript 6.0), zoneless, standalone components, Optimus UI 2 (MIT fork of PrimeNG 21, see `docs/adr/0001-replace-primeng-with-optimus-ui.md`; Aura preset in `src/app/ui.preset.ts`), installable as a PWA (`@angular/service-worker`). Talks to the backend over HTTP (`environment.API_URL`, token added by `core/interceptors/token.interceptor.ts`).
+Angular 22 app (TypeScript 6.0), zoneless, standalone components, Optimus UI 2 (MIT fork of PrimeNG 21, see `docs/adr/0001-replace-primeng-with-optimus-ui.md`; Aura preset in `src/app/ui.preset.ts`), installable as a PWA (`@angular/service-worker`). No backend: players talk peer-to-peer over WebRTC in host-dispatched rooms (`.scratch/p2p-rooms/spec.md`). The HTTP auth code (`AuthService`, `UsersService`, `token.interceptor.ts`) is legacy, removed by p2p ticket 01.
 
 ## Structure
 
@@ -10,17 +10,55 @@ Angular 22 app (TypeScript 6.0), zoneless, standalone components, Optimus UI 2 (
 
 ## Layering
 
-Target architecture inside each feature: **component → business → service**.
+Every feature follows **component → business → service**, like sql-monitoring-front, with peer-to-peer in place of HTTP.
 
-| Layer | Folder / suffix | Does | May call |
+| Layer | Folder / suffix | Does | May use |
 | --- | --- | --- | --- |
-| Component / page | `components/`, `pages/` | Rendering and user interaction. No HTTP, no data transformation. | Its own feature's business (and `core/` business). |
-| Business | `business/*.business.ts` | State, transformations, validation, orchestration. Exposes state as signals. | Its own feature's service(s) and other **business** (other features' or core). |
-| Service | `services/*.service.ts` | API calls only (`HttpClient`). Returns the raw response. | Nothing above it, and no other service. |
+| Component / page | `components/`, `pages/` | Rendering and user interaction. No game logic, no data transformation, no peer-to-peer. | Business only: its own feature's, or `core/business`. |
+| Business | `business/*.business.ts` | **Game logic**: state (signals), rules, validation, orchestration. On the host, it also answers requests (see below). | Other **business** (any feature or core) and **its own feature's service(s)**. |
+| Service | `services/*.service.ts` | Wrapper around libraries (peer-to-peer, IndexedDB, QR, 3D…). Exposes functions shaped like API calls. No game logic. | `core/p2p` (`PeerApi`), libraries, stateless helpers. Never a business, never another service. |
+| Helper | `helpers/*.ts`, `core/p2p/helpers/`, `core/generators/` | Stateless functions: encoding, routing, rules, random draws. | Other helpers only. No Angular injection. |
 
-- A component never injects a service directly; a business never injects another feature's service.
-- Infrastructure in `core/services` (menu, token storage) follows the same rule: business code calls it, components don't.
-- New code follows the target; when a ticket touches a component that calls a service, route it through the business if the ticket covers it, otherwise note it.
+- A component never injects a service. A business never injects another feature's service: it goes through that feature's business.
+- Pure game rules (apply an intent to a state, compute a price) live in `*.rules.ts` helpers that the business calls, so they're tested without TestBed.
+- New code follows this; when a ticket touches code that breaks it, fix it if the ticket covers that code, otherwise note it in the ticket.
+
+## Peer-to-peer services
+
+Services look like a REST client so business code doesn't care that there's no server: every call returns a `Promise` (one-shot) or an `Observable` (pushed updates), and failures reject with a `PeerApiError { code, message }`, like `HttpErrorResponse`.
+
+```ts
+@Injectable({ providedIn: 'root' })
+export class CharacterService {
+  private readonly api = inject(PeerApi);
+
+  // Any player: a request sent to the host, resolved with the host's answer.
+  spendStatPoint(characterId: string, attribute: string): Promise<Character> {
+    return this.api.request('character/spend-stat-point', { characterId, attribute });
+  }
+
+  // Any player: state the host pushes.
+  watchCharacters(): Observable<Character[]> {
+    return this.api.watch('character/list');
+  }
+
+  // Host only: the business plugs its rules in; the service never imports the business.
+  serveSpendStatPoint(handler: PeerHandler<SpendStatPointRequest, Character>): void {
+    this.api.serve('character/spend-stat-point', handler);
+  }
+
+  publishCharacters(characters: Character[]): void {
+    this.api.publish('character/list', characters);
+  }
+}
+```
+
+- **`PeerApi`** (`core/p2p/peer-api.service.ts`) is to these services what `HttpClient` is to REST services: the one stateful piece that owns the connections (through `RoomTransport`), the role (host/client), pending requests and subscriptions. Feature services use it; business and components never do.
+- **Routes** are `<feature>/<action>`; only that feature's service uses its routes. Request and response payloads are typed in the feature's `models/`.
+- **On the host**, `request()` calls the registered handler in-process, so the host's own UI goes through exactly the same code as remote players. Handlers are business code (validate, apply `*.rules.ts`, persist, then `publish`).
+- **Stateless or repeated plumbing goes into helpers** in `core/p2p/helpers/`, unit-tested on their own: message envelope encode/decode (`{ v, id, route, payload }`), request/response correlation, timeouts, route matching, error mapping, payload validation. If two services repeat the same few lines, it becomes a helper.
+- Host offline: `PeerApi` rejects with `PeerApiError('host-offline')`, unless the business routes the call to its local offline handling (p2p ticket 10).
+- Testing: business specs mock their service (`vi.fn()` returning promises/observables); service specs run against `PeerApi` over the in-memory `FakeTransport`; helpers are tested directly.
 
 ## Signals
 
