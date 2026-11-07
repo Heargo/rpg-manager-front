@@ -1,0 +1,68 @@
+import { computed, inject, Injectable } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ImageBusiness } from '../../../core/business/image.business';
+import { LanguageBusiness } from '../../../core/business/language.business';
+import { ProfileBusiness } from '../../../core/business/profile.business';
+import { PeerApiError } from '../../../core/p2p/helpers/peer-api-error';
+import { RoomBusiness } from '../../room/business/room.business';
+import { WorldInfoBusiness } from '../../world/business/world-info.business';
+import { Character } from '../../world/models/world';
+import { CharacterService } from '../services/character.service';
+
+/** Characters of the room this device is in, and creating one's own. */
+@Injectable({ providedIn: 'root' })
+export class CharacterBusiness {
+  private readonly service = inject(CharacterService);
+  private readonly room = inject(RoomBusiness);
+  private readonly profile = inject(ProfileBusiness);
+  private readonly images = inject(ImageBusiness);
+  private readonly language = inject(LanguageBusiness);
+
+  readonly $world = inject(WorldInfoBusiness).$info;
+  /** null until the host sent the list. */
+  readonly $characters = toSignal<Character[] | null>(this.service.watchCharacters(), { initialValue: null });
+  readonly $myCharacter = computed(() => {
+    const playerId = this.profile.$profile().playerId;
+    return this.$characters()?.find((character) => character.playerId === playerId);
+  });
+  /** A connected player whose seat has no character yet. */
+  readonly $needsCharacter = computed(
+    () => this.room.$status() === 'connected' && this.$characters() !== null && !this.$myCharacter(),
+  );
+
+  private creationOffered = false;
+
+  /**
+   * True the first time a player needs a character in this room, so the app sends them to the creation page once;
+   * after "Later" they use the button instead. Resets when they're no longer in a room.
+   */
+  takeCreationOffer(): boolean {
+    if (this.$characters() === null) this.creationOffered = false;
+    if (!this.$needsCharacter() || this.creationOffered) return false;
+    this.creationOffered = true;
+    return true;
+  }
+
+  /** Shrinks the portrait, keeps a copy here and sends it with the name to the host. */
+  async create(name: string, portrait?: Blob): Promise<Character> {
+    let image: { type: string; data: string } | undefined;
+    if (portrait) {
+      const id = await this.images.storeUpload(portrait);
+      image = await this.images.toBase64(id);
+    }
+    return this.service.create({ name, portrait: image });
+  }
+
+  /** Name of the player behind a character, from the room's seats. */
+  playerName(playerId: string): string | undefined {
+    return this.room.$room()?.members.find((member) => member.playerId === playerId)?.name;
+  }
+
+  describeError(error: unknown): string {
+    if (error instanceof PeerApiError && error.message.startsWith('character.')) {
+      console.error('Character error', error);
+      return this.language.t(error.message);
+    }
+    return this.room.describeError(error);
+  }
+}

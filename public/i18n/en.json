@@ -107,6 +107,34 @@
       "image": "This picture couldn't be used."
     }
   },
+  "character": {
+    "list": {
+      "title": "Characters",
+      "empty": "No character yet.",
+      "needOne": "You don't have a character in this room yet."
+    },
+    "create": {
+      "title": "Create your character",
+      "intro": "You're joining {{ world }}. Pick a name and a portrait; the rest comes from the world's rules.",
+      "name": "Character name",
+      "portrait": "Portrait",
+      "choosePortrait": "Choose a portrait",
+      "startsWith": "Your character starts with",
+      "statPoints": "{{ count }} stat points to spend",
+      "money": "{{ count }} money",
+      "submit": "Create",
+      "later": "Later"
+    },
+    "errors": {
+      "invalid": "This character can't be created.",
+      "nameRequired": "Give your character a name.",
+      "nameTooLong": "That name is too long.",
+      "portraitTooLarge": "This portrait is too large.",
+      "alreadyExists": "You already have a character in this room.",
+      "notInRoom": "You're not in this room anymore. Ask for a new invite.",
+      "hostHasNoCharacter": "The game master doesn't play a character."
+    }
+  },
   "profile": {
     "title": "Your profile",
     "defaultName": "Adventurer",

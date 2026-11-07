@@ -8,12 +8,13 @@ import { ProfileBusiness } from '../../../../core/business/profile.business';
 import { RoomBusiness } from '../../business/room.business';
 import { InviteCardComponent } from '../../components/invite-card/invite-card.component';
 import { MemberListComponent } from '../../components/member-list/member-list.component';
+import { CharacterListComponent } from '../../../character/components/character-list/character-list.component';
 
 /** The open room's lobby. With no room open (or after leaving), the Play hub takes over. */
 @Component({
   selector: 'app-room-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, ButtonModule, CardModule, MessageModule, InviteCardComponent, MemberListComponent],
+  imports: [TranslocoPipe, ButtonModule, CardModule, MessageModule, InviteCardComponent, MemberListComponent, CharacterListComponent],
   templateUrl: './room-page.component.html',
   styleUrl: './room-page.component.scss',
 })

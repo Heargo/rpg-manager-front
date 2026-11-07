@@ -107,6 +107,34 @@
       "image": "Cette image n'a pas pu être utilisée."
     }
   },
+  "character": {
+    "list": {
+      "title": "Personnages",
+      "empty": "Aucun personnage pour l'instant.",
+      "needOne": "Vous n'avez pas encore de personnage dans cette salle."
+    },
+    "create": {
+      "title": "Créez votre personnage",
+      "intro": "Vous rejoignez {{ world }}. Choisissez un nom et un portrait ; le reste vient des règles du monde.",
+      "name": "Nom du personnage",
+      "portrait": "Portrait",
+      "choosePortrait": "Choisir un portrait",
+      "startsWith": "Votre personnage commence avec",
+      "statPoints": "{{ count }} points de stats à dépenser",
+      "money": "{{ count }} d'argent",
+      "submit": "Créer",
+      "later": "Plus tard"
+    },
+    "errors": {
+      "invalid": "Ce personnage ne peut pas être créé.",
+      "nameRequired": "Donnez un nom à votre personnage.",
+      "nameTooLong": "Ce nom est trop long.",
+      "portraitTooLarge": "Ce portrait est trop lourd.",
+      "alreadyExists": "Vous avez déjà un personnage dans cette salle.",
+      "notInRoom": "Vous n'êtes plus dans cette salle. Demandez une nouvelle invitation.",
+      "hostHasNoCharacter": "Le maître du jeu ne joue pas de personnage."
+    }
+  },
   "profile": {
     "title": "Votre profil",
     "defaultName": "Aventurier",

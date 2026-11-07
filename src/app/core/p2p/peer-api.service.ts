@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, InjectionToken, signal } from '@angular/core';
-import { BehaviorSubject, Observable, ReplaySubject, Subject, Subscription, switchMap } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, startWith, Subject, Subscription, switchMap } from 'rxjs';
 import { createRequestTracker } from './helpers/correlation';
 import { decodeEnvelope, encodeEnvelope, Envelope } from './helpers/envelope';
 import { PeerApiError, toWireError } from './helpers/peer-api-error';
@@ -135,6 +135,15 @@ export class PeerApi {
     this.topics.set(topic, { seq, payload });
     this.stream(topic).next(payload);
     this.transport?.broadcast(encodeEnvelope({ v: 1, kind: 'publish', topic, seq, payload }));
+  }
+
+  /**
+   * The topic's current state for signals: `null` whenever a session starts or ends (until the host sends it),
+   * then its values. Use with `toSignal` so a new room never shows the previous room's state.
+   */
+  watchCurrent<T>(topic: string): Observable<T | null> {
+    assertValidRoute(topic);
+    return this.session.pipe(switchMap(() => (this.stream(topic) as Observable<T>).pipe(startWith(null)))) as Observable<T | null>;
   }
 
   /** Latest and next values of a topic in the current session (replays the latest to new subscribers). */

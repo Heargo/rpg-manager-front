@@ -13,7 +13,7 @@ import { detectInitialLanguage } from './core/i18n/initial-language';
 import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
 import { translocoSettings } from './core/i18n/transloco-config';
 import { LanguageBusiness } from './core/business/language.business';
-import { RoomBusiness } from './modules/room/business/room.business';
+import { GameSessionBusiness } from './modules/play/business/game-session.business';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -42,8 +42,8 @@ export const appConfig: ApplicationConfig = {
       inject(LanguageBusiness);
       return firstValueFrom(transloco.load(transloco.getActiveLang())).then(() => {
         // Only once translations are in: starting the room creates the profile, whose default name is translated.
-        // Reopens the room this device was hosting before a reload.
-        injector.get(RoomBusiness);
+        // Reopens the room this device was hosting before a reload, and its world's game handlers.
+        injector.get(GameSessionBusiness);
       });
     }),
     MessageService,

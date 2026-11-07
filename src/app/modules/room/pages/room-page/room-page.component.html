@@ -12,6 +12,7 @@
         <p-message severity="info" icon="pi pi-replay">{{ 'room.lobby.restored' | transloco }}</p-message>
       }
       <div class="lobby">
+        <app-character-list />
         <p-card [header]="'room.members.title' | transloco">
           @if (room.$room(); as state) {
             <app-member-list
@@ -55,9 +56,12 @@
         <p-message severity="error" icon="pi pi-user-minus">{{ 'room.lobby.removed' | transloco }}</p-message>
       }
       @if (room.$room(); as state) {
-        <p-card [header]="'room.members.title' | transloco" styleClass="players">
-          <app-member-list [members]="state.members" [myPlayerId]="profile.$profile().playerId" />
-        </p-card>
+        <div class="lobby">
+          <app-character-list />
+          <p-card [header]="'room.members.title' | transloco" styleClass="players">
+            <app-member-list [members]="state.members" [myPlayerId]="profile.$profile().playerId" />
+          </p-card>
+        </div>
       }
     }
   }

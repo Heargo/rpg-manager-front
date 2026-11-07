@@ -5,11 +5,13 @@ import { routesProfile } from './modules/profile/profile.routes';
 import { routesRoom } from './modules/room/room.routes';
 import { routesPlay } from './modules/play/play.routes';
 import { routesWorld } from './modules/world/world.routes';
+import { routesCharacter } from './modules/character/character.routes';
 
 export const routes: Routes = [
   { path: '', component: HomePageComponent, canActivate: [NavigationGuard] },
   ...routesProfile,
   ...routesPlay,
+  ...routesCharacter,
   ...routesRoom,
   ...routesWorld,
   { path: '**', redirectTo: '' },

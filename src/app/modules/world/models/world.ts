@@ -105,3 +105,21 @@ export interface WorldDraft {
   moneyFormat?: MoneyFormat;
   offlineFeatures?: Partial<OfflineFeatures>;
 }
+
+/** What players receive about the hosted world (no catalogue, characters or GM notes). */
+export interface WorldInfo {
+  id: string;
+  name: string;
+  description: string;
+  imageId?: string;
+  attributes: WorldAttribute[];
+  barAttributes: { life?: string; mana?: string };
+  startingStatPoints: number;
+  startingMoney: number;
+  moneyFormat: MoneyFormat;
+  offlineFeatures: OfflineFeatures;
+}
+
+export const WORLD_TOPICS = {
+  info: 'world/info',
+} as const;

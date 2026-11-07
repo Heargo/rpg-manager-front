@@ -42,6 +42,11 @@ export class RoomHostBusiness {
     return state;
   }
 
+  /** The seat (playerId) behind a connection, once the player said hello. */
+  playerIdOf(peer: PeerId): string | undefined {
+    return this.playerByPeer.get(peer);
+  }
+
   /**
    * Frees a player's seat and disconnects them. The new room state goes out first, so the player sees they
    * were removed rather than a lost connection.
