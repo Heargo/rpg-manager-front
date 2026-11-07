@@ -151,6 +151,16 @@ describe('CharacterSheetComponent', () => {
     expect(el.querySelector('[data-locked="spend-stat-point"]')).toBeNull();
   });
 
+  it('renders the character card beside the details, not inside them', async () => {
+    const { el } = await render({ canPlay: false, gameMaster: false });
+    const card = el.querySelector('app-character-card');
+    const details = el.querySelector('[data-testid="character-details"]');
+    expect(card).not.toBeNull();
+    expect(details).not.toBeNull();
+    expect(details!.querySelector('p-tabs')).not.toBeNull();
+    expect(details!.contains(card)).toBe(false);
+  });
+
   describe('equipment slot silhouettes', () => {
     const labels: Record<string, string> = {
       head: 'Head',

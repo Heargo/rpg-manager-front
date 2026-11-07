@@ -4,74 +4,40 @@
   gap: 1rem;
 }
 
-.sheet-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.portrait {
-  width: 5rem;
-  height: 5rem;
-  border-radius: 50%;
-  flex: none;
-  background: var(--p-content-hover-background);
-}
-
-.initial {
+.layout {
   display: grid;
-  place-items: center;
-  height: 100%;
-  font-size: 2rem;
-  font-weight: 600;
+  grid-template-columns: 18rem minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
 }
 
-.who {
+.card {
+  position: sticky;
+  top: 1rem;
+}
+
+.details {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 1rem;
   min-width: 0;
+}
 
-  h1 {
-    margin: 0;
-    overflow-wrap: anywhere;
+.played-by {
+  color: var(--p-text-muted-color);
+}
+
+@media (max-width: 52rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  small {
-    color: var(--p-text-muted-color);
+  .card {
+    position: static;
+    width: 100%;
+    max-width: 20rem;
+    justify-self: center;
   }
-}
-
-.facts {
-  display: flex;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-  font-weight: 600;
-
-  span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-}
-
-.bar-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.875rem;
-  margin-bottom: 0.25rem;
-}
-
-.bar p-progressbar {
-  --p-progressbar-height: 0.75rem;
-}
-
-.life ::ng-deep .p-progressbar-value {
-  background: var(--p-red-500);
-}
-
-.mana ::ng-deep .p-progressbar-value {
-  background: var(--p-blue-500);
 }
 
 p-tab p-badge {

@@ -17,16 +17,14 @@ import { ContextMenu, ContextMenuModule } from '@openng/optimus-ui/contextmenu';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { Menu, MenuModule } from '@openng/optimus-ui/menu';
-import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
 import { TabsModule } from '@openng/optimus-ui/tabs';
-import { TagModule } from '@openng/optimus-ui/tag';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { LanguageBusiness } from '../../../../core/business/language.business';
-import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { EQUIPMENT_SLOTS, EquipmentSlot } from '../../../../core/models/item';
 import { ItemCardComponent } from '../../../item/components/item-card/item-card.component';
 import { RARITY_SEVERITY } from '../../../item/helpers/item-display';
+import { CharacterCardComponent } from '../character-card/character-card.component';
 import { SlotSilhouetteComponent } from '../slot-silhouette/slot-silhouette.component';
 import { Character, InventoryItem } from '../../../world/models/world';
 import {
@@ -62,11 +60,9 @@ const ITEM_ICONS: Record<string, string> = {
     DialogModule,
     InputNumberModule,
     MenuModule,
-    ProgressBarModule,
     TabsModule,
-    TagModule,
     TooltipModule,
-    CoinDisplayComponent,
+    CharacterCardComponent,
     StoredImageComponent,
     ItemCardComponent,
     SlotSilhouetteComponent,
@@ -96,9 +92,6 @@ export class CharacterSheetComponent {
   protected readonly icons = ITEM_ICONS;
   protected readonly grantAmount = signal(1);
   protected readonly grantXpAmount = signal(100);
-  protected readonly progress = computed(() =>
-    this.characters.progressOf(this.character(), this.world()),
-  );
   /** The item whose details dialog is open. */
   private readonly openItemId = signal<string | null>(null);
   /** The item the context menu / action menu was opened on. */
@@ -107,16 +100,6 @@ export class CharacterSheetComponent {
   protected readonly stats = computed(() =>
     this.characters.statsOf(this.character(), this.world()),
   );
-  protected readonly bars = computed(() => {
-    const { life, mana } = this.characters.barsOf(
-      this.character(),
-      this.world(),
-    );
-    return [
-      ...(life ? [{ kind: 'life', stat: life }] : []),
-      ...(mana ? [{ kind: 'mana', stat: mana }] : []),
-    ];
-  });
   protected readonly slots = computed(() =>
     EQUIPMENT_SLOTS.map((slot) => ({
       slot,
