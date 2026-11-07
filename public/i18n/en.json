@@ -539,6 +539,67 @@
       "sampleName": "Sample hero"
     }
   },
+  "home": {
+    "title": "RPG Manager",
+    "pitch": "Build your world, create characters and items, and play with your friends straight from the browser. No account, no server: your game lives on your device and players connect directly to the host.",
+    "ctaPlay": "Start playing",
+    "ctaTools": "Discover the tools",
+    "screenshotAlt": "The RPG Manager character sheet showing an inventory",
+    "footerCredits": "Credits",
+    "footerContact": "Contact",
+    "footerPrivacy": "Privacy policy"
+  },
+  "credits": {
+    "title": "Credits",
+    "intro": "RPG Manager is built on the work of many open source projects and free tools. Thank you to their authors.",
+    "librariesTitle": "Libraries",
+    "toolsTitle": "External tools",
+    "tools": "The tools page links to free generators by others: Watabou's Procgen Arcana, Azgaar's Fantasy Map Generator and Squoosh. They are not part of this app.",
+    "legacyTitle": "The legacy app",
+    "legacy": "This app is the successor of the first RPG Manager, a backend-based version. Its ideas, rules and content are the foundation of this one."
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "A question, a bug or an idea? Send a message.",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send",
+    "nameRequired": "Please enter your name.",
+    "emailInvalid": "Please enter a valid email address.",
+    "messageRequired": "Please write a message.",
+    "success": "Thank you, your message was sent.",
+    "error": "Your message could not be sent. Try again later.",
+    "unavailable": "The contact form is unavailable in this version of the app."
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "intro": "RPG Manager has no accounts and no database. This page says what leaves your device.",
+    "local": {
+      "title": "What stays on your device",
+      "text": "Your profile, worlds, characters, items and settings are stored in your browser (localStorage and IndexedDB). They are never sent to us. Clearing your browser data erases them."
+    },
+    "stun": {
+      "title": "Connecting players (STUN)",
+      "text": "To connect players directly, your browser asks Google's public STUN server (stun.l.google.com) for its network address. That server therefore sees your IP address."
+    },
+    "mailbox": {
+      "title": "Signalling mailbox",
+      "text": "To let a player join from an invite link, the connection codes are held in a small mailbox. They become unavailable after 30 minutes, then are purged."
+    },
+    "relay": {
+      "title": "Relay",
+      "text": "The relay is only used on retry, when a direct connection fails. The app then asks our Netlify Function (/.netlify/functions/ice-servers) for TURN credentials from Open Relay (Metered). The relay sees IP addresses and carries encrypted traffic, not readable content."
+    },
+    "hosting": {
+      "title": "Hosting",
+      "text": "The app is hosted on Netlify, which sees the requests made to it (such as your IP address and the pages you load)."
+    },
+    "contact": {
+      "title": "Contact form",
+      "text": "Messages sent with the contact form (name, email and message) are received by Web3Forms, which forwards them to us. Do not use it if you do not want this."
+    }
+  },
   "notFound": {
     "title": "Page not found"
   },

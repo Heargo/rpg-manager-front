@@ -73,6 +73,8 @@ The app is a static site plus one Netlify Function.
 
 Without them the app still works, just without the relay.
 
+The contact form needs a [Web3Forms](https://web3forms.com/) access key, read at build time from `CONTACT_KEY` (a gitignored `.env` locally, see `.env.example`; the host's build environment in production). Without it the contact page shows an "unavailable" note. The key ends up in the shipped bundle by design: Web3Forms access keys are public.
+
 ## Project map
 
 | Where | What |

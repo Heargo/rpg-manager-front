@@ -539,6 +539,67 @@
       "sampleName": "Héros d'exemple"
     }
   },
+  "home": {
+    "title": "RPG Manager",
+    "pitch": "Construisez votre monde, créez personnages et objets, et jouez avec vos amis directement depuis le navigateur. Pas de compte, pas de serveur : votre partie vit sur votre appareil et les joueurs se connectent directement à l'hôte.",
+    "ctaPlay": "Commencer à jouer",
+    "ctaTools": "Découvrir les outils",
+    "screenshotAlt": "La fiche de personnage de RPG Manager affichant un inventaire",
+    "footerCredits": "Crédits",
+    "footerContact": "Contact",
+    "footerPrivacy": "Politique de confidentialité"
+  },
+  "credits": {
+    "title": "Crédits",
+    "intro": "RPG Manager repose sur le travail de nombreux projets open source et outils gratuits. Merci à leurs auteurs.",
+    "librariesTitle": "Bibliothèques",
+    "toolsTitle": "Outils externes",
+    "tools": "La page des outils renvoie vers des générateurs gratuits créés par d'autres : Procgen Arcana de Watabou, Fantasy Map Generator d'Azgaar et Squoosh. Ils ne font pas partie de cette application.",
+    "legacyTitle": "L'ancienne application",
+    "legacy": "Cette application succède au premier RPG Manager, une version avec serveur. Ses idées, ses règles et son contenu sont le socle de celle-ci."
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "Une question, un bug ou une idée ? Envoyez un message.",
+    "name": "Nom",
+    "email": "E-mail",
+    "message": "Message",
+    "send": "Envoyer",
+    "nameRequired": "Veuillez saisir votre nom.",
+    "emailInvalid": "Veuillez saisir une adresse e-mail valide.",
+    "messageRequired": "Veuillez écrire un message.",
+    "success": "Merci, votre message a été envoyé.",
+    "error": "Votre message n'a pas pu être envoyé. Réessayez plus tard.",
+    "unavailable": "Le formulaire de contact n'est pas disponible dans cette version de l'application."
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "intro": "RPG Manager n'a ni compte ni base de données. Cette page indique ce qui quitte votre appareil.",
+    "local": {
+      "title": "Ce qui reste sur votre appareil",
+      "text": "Votre profil, vos mondes, personnages, objets et réglages sont stockés dans votre navigateur (localStorage et IndexedDB). Ils ne nous sont jamais envoyés. Effacer les données du navigateur les supprime."
+    },
+    "stun": {
+      "title": "Connexion des joueurs (STUN)",
+      "text": "Pour relier les joueurs directement, votre navigateur demande son adresse réseau au serveur STUN public de Google (stun.l.google.com). Ce serveur voit donc votre adresse IP."
+    },
+    "mailbox": {
+      "title": "Boîte aux lettres de signalisation",
+      "text": "Pour permettre de rejoindre via un lien d'invitation, les codes de connexion sont conservés dans une petite boîte aux lettres. Ils deviennent indisponibles après 30 minutes, puis sont purgés."
+    },
+    "relay": {
+      "title": "Relais",
+      "text": "Le relais n'est utilisé qu'en nouvel essai, quand la connexion directe échoue. L'application demande alors à notre fonction Netlify (/.netlify/functions/ice-servers) des identifiants TURN d'Open Relay (Metered). Le relais voit les adresses IP et transporte du trafic chiffré, pas de contenu lisible."
+    },
+    "hosting": {
+      "title": "Hébergement",
+      "text": "L'application est hébergée sur Netlify, qui voit les requêtes qui lui sont faites (comme votre adresse IP et les pages chargées)."
+    },
+    "contact": {
+      "title": "Formulaire de contact",
+      "text": "Les messages envoyés par le formulaire de contact (nom, e-mail et message) sont reçus par Web3Forms, qui nous les transmet. Ne l'utilisez pas si vous ne le souhaitez pas."
+    }
+  },
   "notFound": {
     "title": "Page introuvable"
   },
