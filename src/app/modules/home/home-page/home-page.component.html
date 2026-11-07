@@ -23,54 +23,45 @@
       <i class="pi pi-chevron-down" aria-hidden="true"></i>
     </button>
   </section>
-  <section class="content main-container" data-test="content" #content>
-    <div class="intro">
-      <div class="text">
-        <h2 class="heading">{{ "home.heading" | transloco }}</h2>
-        <p class="lead" data-test="pitch">{{ "home.pitch" | transloco }}</p>
-        <div class="actions">
-          <a routerLink="/play" data-test="cta-play" class="cta primary">{{
-            "home.ctaPlay" | transloco
-          }}</a>
-          <a routerLink="/tools/links" data-test="cta-tools" class="cta">{{
-            "home.ctaTools" | transloco
-          }}</a>
+  <div class="below">
+    <section class="content main-container" data-test="content" #content>
+      <div class="intro">
+        <div class="text">
+          <h2 class="heading">{{ "home.heading" | transloco }}</h2>
+          <p class="lead" data-test="pitch">{{ "home.pitch" | transloco }}</p>
+          <div class="actions">
+            <a routerLink="/play" data-test="cta-play" class="cta primary">{{
+              "home.ctaPlay" | transloco
+            }}</a>
+            <a routerLink="/tools/links" data-test="cta-tools" class="cta">{{
+              "home.ctaTools" | transloco
+            }}</a>
+          </div>
+        </div>
+        <div class="window">
+          <img
+            data-test="screenshot"
+            src="images/landing-screenshot.webp"
+            width="580"
+            height="480"
+            [alt]="'home.screenshotAlt' | transloco"
+          />
         </div>
       </div>
-      <div class="window">
-        <img
-          data-test="screenshot"
-          src="images/landing-screenshot.webp"
-          width="580"
-          height="480"
-          [alt]="'home.screenshotAlt' | transloco"
-        />
-      </div>
-    </div>
-    <ul
-      class="highlights"
-      data-test="highlights"
-      [attr.aria-label]="'home.highlightsLabel' | transloco"
-    >
-      @for (item of highlights; track item.key) {
-        <li class="card" data-test="highlight">
-          <i class="pi {{ item.icon }}" aria-hidden="true"></i>
-          <h3>{{ "home." + item.key + "Title" | transloco }}</h3>
-          <p>{{ "home." + item.key + "Text" | transloco }}</p>
-        </li>
-      }
-    </ul>
-    <footer>
-      <span class="brand">{{ "home.footerBrand" | transloco }}</span>
-      <a routerLink="/credits" data-test="footer-credits">{{
-        "home.footerCredits" | transloco
-      }}</a>
-      <a routerLink="/contact" data-test="footer-contact">{{
-        "home.footerContact" | transloco
-      }}</a>
-      <a routerLink="/privacy-policy" data-test="footer-privacy">{{
-        "home.footerPrivacy" | transloco
-      }}</a>
-    </footer>
-  </section>
+      <ul
+        class="highlights"
+        data-test="highlights"
+        [attr.aria-label]="'home.highlightsLabel' | transloco"
+      >
+        @for (item of highlights; track item.key) {
+          <li class="card" data-test="highlight">
+            <i class="pi {{ item.icon }}" aria-hidden="true"></i>
+            <h3>{{ "home." + item.key + "Title" | transloco }}</h3>
+            <p>{{ "home." + item.key + "Text" | transloco }}</p>
+          </li>
+        }
+      </ul>
+    </section>
+    <app-site-footer />
+  </div>
 </div>

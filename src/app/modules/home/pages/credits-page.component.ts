@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { TagModule } from '@openng/optimus-ui/tag';
+import { SiteFooterComponent } from '../components/site-footer/site-footer.component';
 
 /** Libraries actually listed in package.json, with their licences. */
 export const CREDIT_LIBRARIES = [
@@ -41,32 +43,51 @@ export const CREDIT_LIBRARIES = [
 @Component({
   selector: 'app-credits-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, TagModule, SiteFooterComponent],
   template: `
-    <div class="main-container page">
-      <h1>{{ 'credits.title' | transloco }}</h1>
-      <p>{{ 'credits.intro' | transloco }}</p>
+    <main class="page">
+      <header class="page-header">
+        <h1>{{ 'credits.title' | transloco }}</h1>
+        <p class="lead">{{ 'credits.intro' | transloco }}</p>
+      </header>
       <h2>{{ 'credits.librariesTitle' | transloco }}</h2>
-      <ul>
+      <ul class="libs">
         @for (lib of libraries; track lib.name) {
-          <li>
+          <li class="card lib">
             <a [href]="lib.url" target="_blank" rel="noopener noreferrer">{{
               lib.name
             }}</a>
-            ({{ lib.licence }})
+            <p-tag [value]="lib.licence" severity="secondary" />
           </li>
         }
       </ul>
       <h2>{{ 'credits.toolsTitle' | transloco }}</h2>
-      <p>{{ 'credits.tools' | transloco }}</p>
+      <div class="card">
+        <p>{{ 'credits.tools' | transloco }}</p>
+      </div>
       <h2>{{ 'credits.legacyTitle' | transloco }}</h2>
-      <p>{{ 'credits.legacy' | transloco }}</p>
-    </div>
+      <div class="card">
+        <p>{{ 'credits.legacy' | transloco }}</p>
+      </div>
+    </main>
+    <app-site-footer />
   `,
+  styleUrl: './static-page.scss',
   styles: `
-    .page {
-      max-width: 48rem;
-      margin-inline: auto;
+    .libs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+      gap: 0.75rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .lib {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-weight: 600;
     }
   `,
 })

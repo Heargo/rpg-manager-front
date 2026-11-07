@@ -55,6 +55,15 @@ describe('static pages', () => {
     expect(text).toContain('Web3Forms');
   });
 
+  for (const url of ['/', '/credits', '/contact', '/privacy-policy']) {
+    it(`renders the shared footer with its 3 links on ${url}`, async () => {
+      const el = await visit(url);
+      const footer = el.querySelector('app-site-footer');
+      expect(footer).not.toBeNull();
+      expect(footer!.querySelectorAll('a').length).toBe(3);
+    });
+  }
+
   for (const section of ['home', 'credits', 'contact', 'privacy']) {
     it(`has the same non-empty "${section}" keys in en.json and fr.json`, () => {
       const enTree = (en as unknown as Tree)[section] as Tree | undefined;

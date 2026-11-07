@@ -4,6 +4,7 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
+import { SiteFooterComponent } from '../components/site-footer/site-footer.component';
 import { ContactBusiness } from '../business/contact.business';
 
 @Component({
@@ -15,18 +16,28 @@ import { ContactBusiness } from '../business/contact.business';
     InputTextModule,
     MessageModule,
     TextareaModule,
+    SiteFooterComponent,
   ],
   providers: [ContactBusiness],
   template: `
-    <div class="main-container page">
-      <h1>{{ 'contact.title' | transloco }}</h1>
-      <p class="hint">{{ 'contact.intro' | transloco }}</p>
+    <main class="page">
+      <header class="page-header">
+        <h1>{{ 'contact.title' | transloco }}</h1>
+        <p class="lead">{{ 'contact.intro' | transloco }}</p>
+      </header>
       @if (!contact.available) {
-        <p-message data-test="contact-unavailable" severity="info">
-          {{ 'contact.unavailable' | transloco }}
-        </p-message>
+        <div class="card unavailable">
+          <p-message data-test="contact-unavailable" severity="info">
+            <i class="pi pi-info-circle" aria-hidden="true"></i>
+            {{ 'contact.unavailable' | transloco }}
+          </p-message>
+        </div>
       } @else {
-        <form (submit)="$event.preventDefault(); contact.submit()" novalidate>
+        <form
+          class="card"
+          (submit)="$event.preventDefault(); contact.submit()"
+          novalidate
+        >
           <label for="contact-name">{{ 'contact.name' | transloco }}</label>
           <input
             pInputText
@@ -84,6 +95,7 @@ import { ContactBusiness } from '../business/contact.business';
           </div>
           @if (contact.status() === 'success') {
             <p-message data-test="contact-success" severity="success">
+              <i class="pi pi-check-circle" aria-hidden="true"></i>
               {{ 'contact.success' | transloco }}
             </p-message>
           }
@@ -94,22 +106,15 @@ import { ContactBusiness } from '../business/contact.business';
           }
         </form>
       }
-    </div>
+    </main>
+    <app-site-footer />
   `,
+  styleUrl: './static-page.scss',
   styles: `
-    .page {
-      max-width: 40rem;
-      margin-inline: auto;
+    .unavailable {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-    }
-    h1,
-    .hint {
-      margin: 0;
-    }
-    .hint {
-      color: var(--p-text-muted-color);
     }
     form {
       display: flex;
