@@ -12,6 +12,8 @@ describe('roomErrorKey', () => {
     [new SignalCodeError('corrupt'), 'room.errors.code.corrupt'],
     [new SignalCodeError('wrong-type'), 'room.errors.code.wrongType'],
     [new TransportError('timeout'), 'room.errors.timeout'],
+    [new TransportError('invite-used'), 'room.errors.inviteUsed'],
+    [new TransportError('invite-expired'), 'room.errors.inviteExpired'],
     [new TransportError('unknown-invite'), 'room.errors.unknownInvite'],
     [new PeerApiError('rejected'), 'room.errors.seatTaken'],
     [new PeerApiError('host-offline'), 'room.errors.timeout'],

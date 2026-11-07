@@ -365,6 +365,18 @@ describe('RoomBusiness signalling mailbox', () => {
       expect(mailbox.gets('player')).toBeLessThanOrEqual(5);
     });
 
+    it('fails the join with the specific reason when the host closes the box while the player waits', async () => {
+      const invite = await gm.invite();
+      const { joined } = await ada.join(invite.offerCode, UNWATCHED_BOX);
+      const outcome = joined.catch((e: unknown) => e);
+
+      await mailbox.delete(UNWATCHED_BOX, 'expired');
+      await elapse(6000);
+
+      expect(await outcome).toMatchObject({ reason: 'invite-expired' });
+      expect(ada.$joinState()).toBe('failed');
+    });
+
     it('pauses while the page is hidden and resumes on return', async () => {
       const invite = await gm.invite();
       await ada.join(invite.offerCode, UNWATCHED_BOX);

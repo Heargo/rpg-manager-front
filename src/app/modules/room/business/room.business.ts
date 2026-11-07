@@ -123,6 +123,7 @@ export class RoomBusiness {
 
   constructor() {
     inject(DestroyRef).onDestroy(() => {
+      this.leavePrompt(false);
       clearInterval(this.hostTimer);
       clearInterval(this.playerTimer);
     });
@@ -194,6 +195,7 @@ export class RoomBusiness {
       }
     }
     this.invites.update((invites) => [...invites, pending]);
+    this.syncLeavePrompt();
     this.startHostPolling();
     return pending;
   }
@@ -210,7 +212,7 @@ export class RoomBusiness {
     }
     this.dropInvite(inviteId);
     // The box has done its job: nothing stays on the server.
-    if (boxId) this.deleteBox(boxId);
+    if (boxId) this.deleteBox(boxId, 'used');
   }
 
   /** Replaces an invite (usually a failed one) with a fresh one for the same seat. */
@@ -231,6 +233,7 @@ export class RoomBusiness {
       rest.splice(index < 0 ? rest.length : index, 0, fresh);
       return rest;
     });
+    this.syncLeavePrompt();
     return fresh;
   }
 
@@ -239,12 +242,32 @@ export class RoomBusiness {
     this.service.cancelInvite(inviteId);
     this.dropInvite(inviteId);
     // Nobody is going to use the box any more.
-    if (boxId) this.deleteBox(boxId);
+    if (boxId) this.deleteBox(boxId, 'expired');
   }
 
-  /** Best effort: the box expires on its own anyway. */
-  private deleteBox(boxId: string): void {
-    this.mailbox.delete(boxId).catch(() => undefined);
+  private readonly onLeavePage = (event: BeforeUnloadEvent) => event.preventDefault();
+  private leavePromptOn = false;
+
+  /**
+   * Pending invites live in memory only: ask before a reload or close throws them away. The listener is attached
+   * only while an invite is pending (synchronously, with the invite list), so it doesn't block the browser's
+   * back/forward cache the rest of the time.
+   */
+  private syncLeavePrompt(): void {
+    this.leavePrompt(this.invites().length > 0);
+  }
+
+  private leavePrompt(on: boolean): void {
+    if (on === this.leavePromptOn) return;
+    this.leavePromptOn = on;
+    const view = this.document.defaultView;
+    if (on) view?.addEventListener('beforeunload', this.onLeavePage);
+    else view?.removeEventListener('beforeunload', this.onLeavePage);
+  }
+
+  /** Best effort: the box expires on its own anyway. The reason tells a player opening the link later why it is gone. */
+  private deleteBox(boxId: string, reason: 'used' | 'expired'): void {
+    this.mailbox.delete(boxId, reason).catch(() => undefined);
   }
 
   private dropInvite(inviteId: string): void {
@@ -252,6 +275,7 @@ export class RoomBusiness {
     this.unsent.delete(inviteId);
     this.failedPolls.delete(inviteId);
     this.invites.update((invites) => invites.filter((invite) => invite.id !== inviteId));
+    this.syncLeavePrompt();
   }
 
   kick(playerId: string): void {
@@ -294,7 +318,13 @@ export class RoomBusiness {
       let offer = offerCode;
       if (boxId) {
         // A reloaded page holds the link's first offer: the box may hold a newer one.
-        const newest = await withTimeout(this.mailbox.get(boxId, 'player'), MAILBOX_TIMEOUT_MS).catch(() => null);
+        const newest = await withTimeout(this.mailbox.get(boxId, 'player'), MAILBOX_TIMEOUT_MS).catch(
+          (error: unknown) => {
+            // A used or expired box ends the join; anything else (unreachable mailbox) is ignored.
+            if (error instanceof TransportError) throw error;
+            return null;
+          },
+        );
         if (newest) {
           offer = newest.code;
           attempt.answeredSeq = newest.seq;
@@ -393,11 +423,12 @@ export class RoomBusiness {
   }
 
   leave(): void {
-    for (const invite of this.invites()) if (invite.boxId) this.deleteBox(invite.boxId);
+    for (const invite of this.invites()) if (invite.boxId) this.deleteBox(invite.boxId, 'expired');
     if (this.service.$role() === 'host') this.host.close();
     else this.service.leave();
     this.hostLock.releaseLock();
     this.invites.set([]);
+    this.syncLeavePrompt();
     this.offerSeq.clear();
     this.unsent.clear();
     this.failedPolls.clear();
@@ -507,8 +538,15 @@ export class RoomBusiness {
       if (!offer || offer.seq <= attempt.answeredSeq || this.attempt !== attempt) return;
       attempt.answeredSeq = offer.seq;
       await this.answerOffer(attempt, offer.code);
-    } catch {
-      // Try again at the next poll.
+    } catch (error) {
+      // A box the host closed (invite used or cancelled) ends the join with the specific reason.
+      if (error instanceof TransportError && (error.reason === 'invite-used' || error.reason === 'invite-expired')) {
+        if (this.attempt === attempt) {
+          attempt.boxId = undefined;
+          this.onAttemptFailed(attempt, error);
+        }
+      }
+      // Anything else: try again at the next poll.
     } finally {
       this.playerPolling = false;
     }

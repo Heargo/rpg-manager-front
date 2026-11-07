@@ -92,8 +92,15 @@ describe('mailbox handler', () => {
       await put(BOX, 'host', { seq: 0, code: 'offer-0' });
       now += 30 * MINUTE + 1;
 
-      expect((await get(BOX, 'player')).status).toBe(204);
+      expect((await get(BOX, 'host')).status).toBe(204);
       expect(data.size).toBe(0);
+    });
+
+    it('tells a player opening an expired box that the invite expired', async () => {
+      await put(BOX, 'host', { seq: 0, code: 'offer-0' });
+      now += 30 * MINUTE + 1;
+
+      expect((await get(BOX, 'player')).status).toBe(410);
     });
 
     it('counts the age from the last write', async () => {
@@ -114,6 +121,48 @@ describe('mailbox handler', () => {
 
       expect((await get(BOX, 'player')).body).toEqual({ seq: 0, code: 'new-offer' });
       expect((await get(BOX, 'host')).status).toBe(204);
+    });
+  });
+
+  describe('closed boxes', () => {
+    const close = (reason?: string) => handle({ method: 'DELETE', box: BOX, from: undefined, body: undefined, reason });
+
+    it('tells a player the invite was used once the host closed the box as used', async () => {
+      await put(BOX, 'player', { seq: 0, code: 'answer-0' });
+      expect((await close('used')).status).toBe(204);
+
+      expect((await get(BOX, 'player')).status).toBe(409);
+      expect((await get(BOX, 'host')).status).toBe(204);
+    });
+
+    it('tells a player the invite expired once the host closed the box as expired', async () => {
+      await close('expired');
+
+      expect((await get(BOX, 'player')).status).toBe(410);
+    });
+
+    it('refuses a late answer on a closed box, and reopens it when the host writes again', async () => {
+      await close('used');
+      expect((await put(BOX, 'player', { seq: 0, code: 'late' })).status).toBe(409);
+      expect(data.has(`${BOX}/player`)).toBe(false);
+
+      await put(BOX, 'host', { seq: 1, code: 'offer-1' });
+      expect((await get(BOX, 'player')).body).toEqual({ seq: 1, code: 'offer-1' });
+    });
+
+    it('keeps a plain delete a plain removal', async () => {
+      await close();
+
+      expect(data.size).toBe(0);
+      expect((await get(BOX, 'player')).status).toBe(204);
+    });
+
+    it('lets the sweep remove a closed box after the TTL', async () => {
+      await close('used');
+      now += 31 * MINUTE;
+
+      expect(await sweepMailbox(store, now)).toBe(1);
+      expect(data.size).toBe(0);
     });
   });
 

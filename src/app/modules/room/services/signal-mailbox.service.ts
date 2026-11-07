@@ -2,7 +2,11 @@ import { Injectable } from '@angular/core';
 import {
   MailboxMessage,
   MailboxSide,
+  MAILBOX_EXPIRED_STATUS,
+  MAILBOX_USED_STATUS,
+  MailboxGoneReason,
 } from '../../../core/p2p/helpers/mailbox-handler';
+import { TransportError } from '../../../core/p2p/room-transport';
 
 const ENDPOINT = '/.netlify/functions/signal';
 const TIMEOUT_MS = 5000;
@@ -27,8 +31,9 @@ export class SignalMailboxService {
       : ((await response.json()) as MailboxMessage);
   }
 
-  async delete(box: string): Promise<void> {
-    await this.call('DELETE', box);
+  /** Closes the box; the reason lets a player opening the link later know why it is gone. */
+  async delete(box: string, reason?: MailboxGoneReason): Promise<void> {
+    await this.call('DELETE', box, undefined, undefined, reason);
   }
 
   private async call(
@@ -36,8 +41,9 @@ export class SignalMailboxService {
     box: string,
     from?: MailboxSide,
     body?: MailboxMessage,
+    reason?: MailboxGoneReason,
   ): Promise<Response> {
-    const query = new URLSearchParams({ box, ...(from ? { from } : {}) });
+    const query = new URLSearchParams({ box, ...(from ? { from } : {}), ...(reason ? { reason } : {}) });
     const response = await fetch(`${ENDPOINT}?${query}`, {
       method,
       cache: 'no-store',
@@ -45,6 +51,8 @@ export class SignalMailboxService {
       body: body ? JSON.stringify(body) : undefined,
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
+    if (response.status === MAILBOX_USED_STATUS) throw new TransportError('invite-used');
+    if (response.status === MAILBOX_EXPIRED_STATUS) throw new TransportError('invite-expired');
     if (!response.ok)
       throw new Error(`Mailbox ${method} failed (${response.status})`);
     return response;

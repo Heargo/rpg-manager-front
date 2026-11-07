@@ -52,7 +52,7 @@ export interface RoomTransport {
   close(): void;
 }
 
-export type TransportErrorReason = 'unknown-invite' | 'not-connected' | 'timeout' | 'closed' | 'relay-unavailable';
+export type TransportErrorReason = 'unknown-invite' | 'invite-used' | 'invite-expired' | 'not-connected' | 'timeout' | 'closed' | 'relay-unavailable';
 
 export class TransportError extends Error {
   constructor(readonly reason: TransportErrorReason, message?: string) {

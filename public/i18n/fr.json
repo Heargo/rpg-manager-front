@@ -1,6 +1,7 @@
 {
   "common": {
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "offlineBanner": "Vous êtes hors ligne. Les données enregistrées restent disponibles ; rejoindre une salle demande un réseau."
   },
   "nav": {
     "play": "Jouer",
@@ -418,6 +419,7 @@
       "leave": "Quitter la salle",
       "close": "Fermer la salle",
       "removed": "L'hôte vous a retiré de cette salle.",
+      "pendingInvitesNote": "Les invitations en attente sont perdues si vous rechargez ou fermez cette page.",
       "restored": "Salle rouverte après un rechargement. Les connexions ne survivent pas à un rechargement : utilisez Réinviter à côté de chaque joueur."
     },
     "errors": {
@@ -428,6 +430,8 @@
         "wrongType": "Mauvais type de code : l'hôte a besoin de la réponse du joueur, le joueur de l'invitation."
       },
       "timeout": "Connexion impossible. Réessayez sur le même Wi-Fi.",
+      "inviteUsed": "Cette invitation a déjà été utilisée. Demandez-en une nouvelle à l'hôte.",
+      "inviteExpired": "Cette invitation a expiré. Demandez-en une nouvelle à l'hôte.",
       "unknownInvite": "Cette invitation n'existe plus. Demandez-en une nouvelle.",
       "seatTaken": "Vous êtes déjà dans cette salle sur un autre appareil.",
       "generic": "Une erreur est survenue.",

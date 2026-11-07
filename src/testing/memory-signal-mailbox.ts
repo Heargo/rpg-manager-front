@@ -1,3 +1,5 @@
+import { TransportError } from '../app/core/p2p/room-transport';
+
 export interface MailboxMessage {
   seq: number;
   code: string;
@@ -11,6 +13,7 @@ type Side = 'host' | 'player';
  * The flags make it misbehave on demand.
  */
 export class MemorySignalMailbox {
+  private readonly closed = new Map<string, 'invite-used' | 'invite-expired'>();
   private readonly boxes = new Map<string, Partial<Record<Side, MailboxMessage>>>();
   readonly calls: { method: 'put' | 'get' | 'delete'; box: string; from?: Side }[] = [];
 
@@ -41,12 +44,15 @@ export class MemorySignalMailbox {
   async get(box: string, from: Side): Promise<MailboxMessage | null> {
     this.calls.push({ method: 'get', box, from });
     if (this.down || this.failGets) throw new Error('mailbox down');
+    const closed = this.closed.get(box);
+    if (from === 'player' && closed) throw new TransportError(closed);
     return this.boxes.get(box)?.[from === 'host' ? 'player' : 'host'] ?? null;
   }
 
-  async delete(box: string): Promise<void> {
+  async delete(box: string, reason?: 'used' | 'expired'): Promise<void> {
     this.calls.push({ method: 'delete', box });
     if (this.down) throw new Error('mailbox down');
+    if (reason) this.closed.set(box, reason === 'used' ? 'invite-used' : 'invite-expired');
     this.boxes.delete(box);
   }
 

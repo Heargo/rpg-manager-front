@@ -15,6 +15,8 @@ import {
  */
 export function createFakeNetwork() {
   const invites = new Map<string, { host: FakeTransport; client?: FakeTransport }>();
+  /** Invites that are gone: accepted ones are used, cancelled ones expired. */
+  const gone = new Map<string, 'invite-used' | 'invite-expired'>();
   let counter = 0;
 
   class FakeTransport implements RoomTransport {
@@ -34,9 +36,10 @@ export function createFakeNetwork() {
     async acceptAnswer(inviteId: string, answerCode: string): Promise<PeerId> {
       const pending = invites.get(inviteId);
       if (!pending || answerCode !== `fake-answer:${inviteId}` || !pending.client) {
-        throw new TransportError('unknown-invite');
+        throw new TransportError(gone.get(inviteId) ?? 'unknown-invite');
       }
       invites.delete(inviteId);
+      gone.set(inviteId, 'invite-used');
       const client = pending.client;
       await tick();
       this.link(inviteId, client, HOST_PEER);
@@ -45,13 +48,13 @@ export function createFakeNetwork() {
     }
 
     cancelInvite(inviteId: string): void {
-      invites.delete(inviteId);
+      if (invites.delete(inviteId)) gone.set(inviteId, 'invite-expired');
     }
 
     async answerInvite(offerCode: string): Promise<AnsweredInvite> {
       const inviteId = offerCode.replace(/^.*#/, '').replace('fake-offer:', '');
       const pending = invites.get(inviteId);
-      if (!pending) throw new TransportError('unknown-invite');
+      if (!pending) throw new TransportError(gone.get(inviteId) ?? 'unknown-invite');
       pending.client = this;
       const connected = new Promise<PeerId>((resolve) => {
         const subscription = this.peerJoined$.subscribe((peer) => {

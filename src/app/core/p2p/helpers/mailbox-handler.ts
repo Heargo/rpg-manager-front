@@ -18,7 +18,18 @@ export interface MailboxMessage {
 /** What a box stores: one key per side (so the two sides never overwrite each other) and one key for its age. */
 interface MailboxMeta {
   updatedAt: number;
+  /** Set when the host closed the box: its answer was used, or the invite was cancelled. */
+  gone?: MailboxGoneReason;
 }
+
+/** Why a box is closed: the invite was used (answer consumed) or it expired (cancelled, or past its TTL). */
+export type MailboxGoneReason = 'used' | 'expired';
+
+/** What a player is told when the box behind an invite link is closed. */
+export const MAILBOX_USED_STATUS = 409;
+export const MAILBOX_EXPIRED_STATUS = 410;
+const goneStatus = (reason: MailboxGoneReason) =>
+  reason === 'used' ? MAILBOX_USED_STATUS : MAILBOX_EXPIRED_STATUS;
 
 const sideKey = (box: string, side: MailboxSide) => `${box}/${side}`;
 
@@ -34,6 +45,8 @@ export interface MailboxRequest {
   from: string | undefined;
   /** Parsed JSON body. */
   body: unknown;
+  /** On DELETE: why the box is closed. Without it the box is simply removed. */
+  reason?: string;
 }
 
 export interface MailboxResponse {
@@ -76,15 +89,15 @@ export async function sweepMailbox(
 }
 
 export function createMailboxHandler(store: MailboxStore, now: () => number) {
-  /** True when the box exists and is not older than the TTL (a stale box is deleted). */
-  async function isLive(box: string): Promise<boolean> {
+  /** The box's marker; a box older than the TTL is deleted and reported stale. */
+  async function liveMeta(box: string): Promise<{ live: boolean; stale: boolean; meta?: MailboxMeta }> {
     const meta = (await store.get(box)) as MailboxMeta | null | undefined;
-    if (!meta) return false;
+    if (!meta) return { live: false, stale: false };
     if (isStale(meta, now())) {
       await removeBox(store, box);
-      return false;
+      return { live: false, stale: true };
     }
-    return true;
+    return { live: true, stale: false, meta };
   }
 
   return async ({
@@ -92,6 +105,7 @@ export function createMailboxHandler(store: MailboxStore, now: () => number) {
     box,
     from,
     body,
+    reason,
   }: MailboxRequest): Promise<MailboxResponse> => {
     if (method !== 'PUT' && method !== 'GET' && method !== 'DELETE')
       return { status: 405 };
@@ -99,6 +113,9 @@ export function createMailboxHandler(store: MailboxStore, now: () => number) {
 
     if (method === 'DELETE') {
       await removeBox(store, box);
+      // A closed box leaves a marker (until the TTL) so a player opening the link later learns why.
+      if (reason === 'used' || reason === 'expired')
+        await store.set(box, { updatedAt: now(), gone: reason } satisfies MailboxMeta);
       return { status: 204 };
     }
 
@@ -106,7 +123,12 @@ export function createMailboxHandler(store: MailboxStore, now: () => number) {
     const side: MailboxSide = from;
 
     if (method === 'GET') {
-      if (!(await isLive(box))) return { status: 204 };
+      const { live, stale, meta } = await liveMeta(box);
+      if (side === 'player') {
+        if (meta?.gone) return { status: goneStatus(meta.gone) };
+        if (stale) return { status: MAILBOX_EXPIRED_STATUS };
+      }
+      if (!live || meta?.gone) return { status: 204 };
       const message = (await store.get(
         sideKey(box, side === 'host' ? 'player' : 'host'),
       )) as MailboxMessage | null;
@@ -115,7 +137,9 @@ export function createMailboxHandler(store: MailboxStore, now: () => number) {
 
     const message = parseMessage(body);
     if (!message) return { status: 400 };
-    const live = await isLive(box);
+    const { live, meta } = await liveMeta(box);
+    // A closed box takes no answer; the host writing again (a new offer) reopens it.
+    if (side === 'player' && meta?.gone) return { status: goneStatus(meta.gone) };
     const current = live
       ? ((await store.get(sideKey(box, side))) as MailboxMessage | null)
       : null;

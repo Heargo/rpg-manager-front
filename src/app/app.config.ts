@@ -13,7 +13,6 @@ import { detectInitialLanguage } from './core/i18n/initial-language';
 import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
 import { translocoSettings } from './core/i18n/transloco-config';
 import { LanguageBusiness } from './core/business/language.business';
-import { GameSessionBusiness } from './modules/play/business/game-session.business';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -43,7 +42,10 @@ export const appConfig: ApplicationConfig = {
       return firstValueFrom(transloco.load(transloco.getActiveLang())).then(() => {
         // Only once translations are in: starting the room creates the profile, whose default name is translated.
         // Reopens the room this device was hosting before a reload, and its world's game handlers.
-        injector.get(GameSessionBusiness);
+        // A lazy chunk too: it pulls in the whole room and game host side, which the initial bundle can't afford.
+        void import('./modules/play/business/game-session.business')
+          .then((session) => injector.get(session.GameSessionBusiness))
+          .catch((error: unknown) => console.error('Could not start the game session', error));
         // Player copy and "Pick a save": a lazy chunk, so the initial bundle stays small.
         void import('./modules/character/player-copy.start')
           .then((start) => start.startPlayerCopy(injector))

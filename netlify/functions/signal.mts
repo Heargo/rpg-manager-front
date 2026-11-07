@@ -4,7 +4,9 @@
  *
  *   PUT    /.netlify/functions/signal?box=<id>&from=host|player   body { seq, code }
  *   GET    /.netlify/functions/signal?box=<id>&from=host|player   → the other side's latest message, or 204
- *   DELETE /.netlify/functions/signal?box=<id>
+ *   DELETE /.netlify/functions/signal?box=<id>[&reason=used|expired]
+ *
+ * A player's GET answers 409 when the invite was used and 410 when it expired (cancelled, or past the TTL).
  *
  * Boxes live in Netlify Blobs (store `signal`) and count as empty after 30 minutes. The logic is in
  * `createMailboxHandler`; this file only connects it to Netlify.
@@ -54,6 +56,7 @@ export default async (request: Request): Promise<Response> => {
     box: url.searchParams.get("box") ?? "",
     from: url.searchParams.get("from") ?? undefined,
     body,
+    reason: url.searchParams.get("reason") ?? undefined,
   });
   return new Response(
     responseBody === undefined ? null : JSON.stringify(responseBody),

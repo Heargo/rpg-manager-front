@@ -41,6 +41,8 @@ export class WebRtcTransport implements RoomTransport {
 
   private readonly pending = new Map<string, Link>();
   private readonly peers = new Map<PeerId, Link>();
+  /** Invites that are gone, so a late answer can say why. */
+  private readonly gone = new Map<string, 'invite-used' | 'invite-expired'>();
   private readonly iceServers: () => Promise<RTCIceServer[]>;
   private readonly directServers: RTCIceServer[];
   private readonly gatherTimeoutMs: number;
@@ -82,7 +84,7 @@ export class WebRtcTransport implements RoomTransport {
 
   async acceptAnswer(inviteId: string, answerCode: string): Promise<PeerId> {
     const link = this.pending.get(inviteId);
-    if (!link) throw new TransportError('unknown-invite');
+    if (!link) throw new TransportError(this.gone.get(inviteId) ?? 'unknown-invite');
     const answer = decodeSignal(answerCode, 'answer');
     await link.connection.setRemoteDescription(answer);
     try {
@@ -92,13 +94,14 @@ export class WebRtcTransport implements RoomTransport {
       throw error;
     }
     this.pending.delete(inviteId);
+    this.gone.set(inviteId, 'invite-used');
     this.attach(inviteId, link);
     return inviteId;
   }
 
   cancelInvite(inviteId: string): void {
     this.pending.get(inviteId)?.connection.close();
-    this.pending.delete(inviteId);
+    if (this.pending.delete(inviteId)) this.gone.set(inviteId, 'invite-expired');
   }
 
   async answerInvite(offerCode: string): Promise<AnsweredInvite> {

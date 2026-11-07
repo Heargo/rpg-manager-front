@@ -1,6 +1,7 @@
 {
   "common": {
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "offlineBanner": "You're offline. Saved data still works; connecting to a room needs a network."
   },
   "nav": {
     "play": "Play",
@@ -418,6 +419,7 @@
       "leave": "Leave the room",
       "close": "Close the room",
       "removed": "The host removed you from this room.",
+      "pendingInvitesNote": "Pending invites are lost if you reload or close this page.",
       "restored": "Room reopened after a reload. Connections don't survive a reload: use Re-invite next to each player."
     },
     "errors": {
@@ -428,6 +430,8 @@
         "wrongType": "Wrong kind of code: the host needs the player's answer, the player needs the invite."
       },
       "timeout": "Couldn't connect. Try again on the same Wi-Fi.",
+      "inviteUsed": "This invite was already used. Ask the host for a new one.",
+      "inviteExpired": "This invite has expired. Ask the host for a new one.",
       "unknownInvite": "This invite no longer exists. Ask for a new one.",
       "seatTaken": "You're already in this room on another device.",
       "generic": "Something went wrong.",

@@ -38,6 +38,9 @@
           @if (error()) {
             <p-message severity="error" size="small">{{ error() }}</p-message>
           }
+          @if (room.$pendingInvites().length) {
+            <p class="hint pending-invites-note"><i class="pi pi-info-circle"></i> {{ 'room.lobby.pendingInvitesNote' | transloco }}</p>
+          }
           @for (invite of room.$pendingInvites(); track invite.id) {
             <app-invite-card [invite]="invite" />
           }
