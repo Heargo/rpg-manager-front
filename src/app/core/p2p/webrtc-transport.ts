@@ -14,7 +14,7 @@ import {
 export interface WebRtcTransportOptions {
   /**
    * STUN/TURN servers, or a function asked for them before each new connection (TURN credentials expire).
-   * Default: `fetchIceServers` (Cloudflare TURN through the Netlify Function, else public STUN). `[]` for same-network play only.
+   * Default: `fetchIceServers` (Open Relay TURN through the Netlify Function, else public STUN). `[]` for same-network play only.
    */
   iceServers?: RTCIceServer[] | (() => Promise<RTCIceServer[]>);
   /** Max wait for ICE gathering before sending what was found so far. */

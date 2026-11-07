@@ -2,9 +2,9 @@ import { fetchIceServers, ICE_SERVERS_URL, STUN_ONLY } from './ice-servers';
 
 describe('fetchIceServers', () => {
   const TURN: RTCIceServer[] = [
-    { urls: 'stun:stun.cloudflare.com:3478' },
+    { urls: 'stun:stun.relay.metered.ca:80' },
     {
-      urls: ['turn:turn.cloudflare.com:3478?transport=udp'],
+      urls: ['turn:global.relay.metered.ca:80'],
       username: 'u',
       credential: 'c',
     },

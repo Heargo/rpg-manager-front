@@ -23,7 +23,7 @@ Manual handshake. The host makes one invite per player: a link `/join#<offer-cod
 - Joining takes two copy/pastes (or two QR scans) instead of typing a room code.
 - No automatic reconnection: after a host reload or a dropped connection, the host re-invites the seat. Seats and characters survive through `playerId`.
 - Pending invites live in the host page's memory.
-- Players on strict NATs can't connect without TURN, which is out of scope.
+- Players on strict NATs can't connect without TURN: added later through Open Relay (`0003-open-relay-turn.md`).
 - The `RoomTransport` interface keeps the signalling swappable if this proves too clunky.
 - **Codes contain the player's public IP address(es)**: the SDP lists every ICE candidate, including the public IPv4/IPv6 found through STUN. That's inherent to WebRTC (connected peers learn it anyway), but an invite link posted publicly exposes the host's address. The UI should say to share invites only with the players you're inviting.
 - Measured in Chrome (2026-11-06, one machine with IPv4 + IPv6): the first version sent the whole SDP compressed, ~760 characters (offer) and ~640 (answer), which made dense QR codes phones failed to scan; it was replaced (no backward compatibility while in development). Compact codes (2026-11-07): offer 177 characters, answer 142, invite link ~205. TCP candidates are dropped (they need TURN to help). Checked Chrome ↔ Chrome; Firefox ↔ Chrome still to be tried on real devices.

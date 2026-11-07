@@ -1,6 +1,6 @@
 /**
- * STUN/TURN servers for a new peer connection (docs/adr/0003-cloudflare-turn-relay.md): the Netlify Function's
- * short-lived Cloudflare TURN credentials, or public STUN only when it can't be reached (`ng serve`, offline, not
+ * STUN/TURN servers for a new peer connection (docs/adr/0003-open-relay-turn.md): the Netlify Function's
+ * Open Relay TURN credentials, or public STUN only when it can't be reached (`ng serve`, offline, not
  * configured). TURN only matters when a direct connection fails, so the fallback never blocks an invite.
  */
 
