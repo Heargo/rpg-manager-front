@@ -6,7 +6,7 @@
 
 .layout {
   display: grid;
-  grid-template-columns: 18rem minmax(0, 1fr);
+  grid-template-columns: 24rem minmax(0, 1fr);
   gap: 1.5rem;
   align-items: start;
 }
@@ -34,9 +34,10 @@
 
   .card {
     position: static;
-    width: 100%;
-    max-width: 20rem;
-    justify-self: center;
+    /* bleed out of the page (1rem) and panel (1.25rem) padding */
+    margin-inline: -2.25rem;
+    min-width: 0;
+    --card-height: min(calc(100svh - 3.125rem - 2.4rem), 177vw);
   }
 }
 

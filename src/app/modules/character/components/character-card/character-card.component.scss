@@ -1,10 +1,44 @@
 :host {
   display: block;
+  min-width: 0;
+}
+
+.frame {
+  position: relative;
+  margin-bottom: 0.9rem;
+}
+
+.xp-pill {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--p-primary-color);
+  border-radius: 999px;
+  background: var(--p-content-background);
+  color: var(--p-text-color);
+  font-size: 0.7rem;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+
+  p-progressbar {
+    --p-progressbar-height: 0.2rem;
+    width: 2.5rem;
+  }
 }
 
 .card {
   position: relative;
   aspect-ratio: 5 / 7;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  height: var(--card-height, auto);
   overflow: hidden;
   border: 2px solid var(--p-primary-color);
   border-radius: 12px;

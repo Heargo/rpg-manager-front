@@ -6,7 +6,6 @@ import {
   input,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { BadgeModule } from '@openng/optimus-ui/badge';
 import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
@@ -23,7 +22,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     TranslocoPipe,
-    BadgeModule,
     ProgressBarModule,
     TagModule,
     CoinDisplayComponent,

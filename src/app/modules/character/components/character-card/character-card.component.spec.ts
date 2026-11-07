@@ -69,9 +69,9 @@ describe('CharacterCardComponent', () => {
     expect(el.querySelector('[data-coin="copper"]')!.textContent).toContain('40');
   });
 
-  it('shows the stat points', async () => {
+  it('does not show the stat points', async () => {
     const { el } = await render();
-    expect(el.querySelector('[data-testid="card-stat-points"]')!.textContent).toContain('3');
+    expect(el.querySelector('[data-testid="card-stat-points"]')).toBeNull();
   });
 
   it('shows the XP progress and text', async () => {
