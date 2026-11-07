@@ -84,6 +84,8 @@ Tickets in `ui-feedback/` (U). Bugs first, then cheap visual wins, then the mode
 | 31 | **U07** Attribute levels, max, current, formulas | Model change; the card and XP build on it. | none |
 | 32 | **U08** Experience and level | Needs the formula parser from U07. | U07 |
 | 33 | **U09** Character card and details | Shows level and the new attributes. | U07, U08 |
+| 33b | **U10** Landing content section | User feedback after U04 (done). | U04 |
+| 33c | **U11** Full-width footer, static pages | User feedback after U10 (done). | U10 |
 
 ## How each ticket is developed
 
