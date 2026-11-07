@@ -548,7 +548,16 @@
     "footerCredits": "Credits",
     "footerContact": "Contact",
     "footerPrivacy": "Privacy policy",
-    "scrollDown": "Scroll down to the content"
+    "scrollDown": "Scroll down to the content",
+    "heading": "Your table, in the browser",
+    "highlightsLabel": "Highlights",
+    "buildTitle": "Build your world",
+    "buildText": "Attributes, items and characters, shaped to your game.",
+    "p2pTitle": "Play together",
+    "p2pText": "Peer to peer, with no account and no server.",
+    "toolsTitle": "Tools without a game",
+    "toolsText": "Dice, item generator and character sheet, ready any time.",
+    "footerBrand": "RPG Manager"
   },
   "credits": {
     "title": "Credits",

@@ -92,4 +92,15 @@ describe('HomePageComponent (landing)', () => {
       expect(scroll).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('shows three translated highlights', async () => {
+    const el = await render();
+    const items = hook(el, 'highlights')!.querySelectorAll('li');
+    expect(items.length).toBe(3);
+    items.forEach((li) => {
+      const title = li.querySelector('h3')!.textContent!.trim();
+      expect(title.length).toBeGreaterThan(0);
+      expect(title).not.toMatch(/^home\./);
+    });
+  });
 });

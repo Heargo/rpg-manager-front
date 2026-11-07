@@ -548,7 +548,16 @@
     "footerCredits": "Crédits",
     "footerContact": "Contact",
     "footerPrivacy": "Politique de confidentialité",
-    "scrollDown": "Défiler vers le contenu"
+    "scrollDown": "Défiler vers le contenu",
+    "heading": "Votre table, dans le navigateur",
+    "highlightsLabel": "Points forts",
+    "buildTitle": "Construisez votre monde",
+    "buildText": "Attributs, objets et personnages, façonnés pour votre jeu.",
+    "p2pTitle": "Jouez ensemble",
+    "p2pText": "De pair à pair, sans compte et sans serveur.",
+    "toolsTitle": "Des outils sans partie",
+    "toolsText": "Dés, générateur d'objets et fiche de personnage, toujours prêts.",
+    "footerBrand": "RPG Manager"
   },
   "credits": {
     "title": "Crédits",
