@@ -15,6 +15,7 @@ import { DataViewModule } from '@openng/optimus-ui/dataview';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { SliderModule } from '@openng/optimus-ui/slider';
+import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import {
   ITEM_RARITIES,
@@ -22,7 +23,6 @@ import {
   ItemRarity,
   ItemType,
 } from '../../../../core/models/item';
-import { formatMoney } from '../../../world/helpers/money';
 import { Item, World } from '../../../world/models/world';
 import {
   filterCatalogue,
@@ -42,6 +42,7 @@ import { ItemCardComponent } from '../item-card/item-card.component';
     InputTextModule,
     MultiSelectModule,
     SliderModule,
+    CoinDisplayComponent,
     ItemCardComponent,
   ],
   template: `
@@ -77,14 +78,17 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         display="chip"
       />
       <div class="price">
-        <label>{{
-          'item.catalogue.price'
-            | transloco: { min: range()[0], max: range()[1] }
-        }}</label>
+        <span class="price-label">
+          {{ 'item.catalogue.price' | transloco }}
+          <app-coin-display [copper]="range()[0]" />
+          {{ 'item.catalogue.priceTo' | transloco }}
+          <app-coin-display [copper]="range()[1]" />
+        </span>
         <p-slider
           [range]="true"
           [min]="bounds().min"
           [max]="bounds().max"
+          [step]="100"
           [ngModel]="range()"
           (ngModelChange)="priceRange.set($event)"
         />
@@ -113,7 +117,7 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         <div class="grid">
           @for (item of items; track item.id) {
             <div class="entry">
-              <app-item-card [item]="item" [priceText]="priceText(item)" />
+              <app-item-card [item]="item" />
               <div class="actions">
                 @if (canGive()) {
                   <button
@@ -172,6 +176,12 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       flex-direction: column;
       gap: 0.75rem;
       min-width: 12rem;
+    }
+    .price-label {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
     }
     .grid {
       display: grid;
@@ -242,15 +252,6 @@ export class ItemCatalogueComponent {
       label: this.language.t('item.type.' + value),
     })),
   );
-
-  protected priceText(item: Item): string {
-    return formatMoney(
-      item.price,
-      this.world().moneyFormat,
-      this.language.$language(),
-      (amount) => this.language.t('item.price', { price: amount }),
-    );
-  }
 
   protected askDelete(item: Item): void {
     this.confirmation.confirm({

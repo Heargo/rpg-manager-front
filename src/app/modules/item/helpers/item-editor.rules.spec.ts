@@ -32,6 +32,10 @@ describe('validateItemDraft', () => {
     expect(fields({ ...sword, price: -1 })).toEqual(['price']);
   });
 
+  it('rejects a price that is not a whole number of copper', () => {
+    expect(fields({ ...sword, price: 12.5 })).toEqual(['price']);
+  });
+
   it('allows a slot only for equipment', () => {
     expect(fields({ ...sword, type: 'consumable' })).toEqual(['slot']);
     expect(fields({ ...sword, type: 'consumable', slot: 'none' })).toEqual([]);

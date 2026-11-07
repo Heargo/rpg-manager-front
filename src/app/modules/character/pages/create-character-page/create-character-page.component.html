@@ -39,7 +39,7 @@
           </ul>
           <p class="hint">
             {{ 'character.create.statPoints' | transloco: { count: world.startingStatPoints } }} ·
-            {{ 'character.create.money' | transloco: { count: world.startingMoney } }}
+            {{ 'character.create.money' | transloco }} <app-coin-display [copper]="world.startingMoney" />
           </p>
         </section>
       }

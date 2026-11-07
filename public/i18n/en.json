@@ -1,4 +1,9 @@
 {
+  "coin": {
+    "gold": "Gold",
+    "silver": "Silver",
+    "copper": "Copper"
+  },
   "common": {
     "cancel": "Cancel",
     "offlineBanner": "You're offline. Saved data still works; connecting to a room needs a network."
@@ -73,20 +78,10 @@
       "noBar": "None",
       "startingStatPoints": "Starting stat points",
       "startingMoney": "Starting money",
-      "currency": "Currency",
-      "currencySymbol": "Currency symbol",
       "starterItems": "Start with default items",
       "starterItemsHint": "About 20 items generated from your attributes: equipment for every slot, potions, objects.",
       "offlineTitle": "When the host is offline",
       "offlineHint": "Players can always read their sheet. Choose what else they can still do; changes are checked when the host is back."
-    },
-    "money": {
-      "coins": "Coins",
-      "dollars": "Dollars ($)",
-      "euros": "Euros (€)",
-      "pounds": "Pounds (£)",
-      "yen": "Yen (¥)",
-      "custom": "Custom…"
     },
     "offline": {
       "dice": "Roll dice",
@@ -111,7 +106,6 @@
       "attributeNamesUnique": "Two attributes have the same name.",
       "baseValueInteger": "Base values must be whole numbers.",
       "nonNegativeInteger": "Use a whole number, 0 or more.",
-      "symbolRequired": "Enter the currency symbol.",
       "image": "This picture couldn't be used."
     }
   },
@@ -129,7 +123,7 @@
       "choosePortrait": "Choose a portrait",
       "startsWith": "Your character starts with",
       "statPoints": "{{ count }} stat points to spend",
-      "money": "{{ count }} money",
+      "money": "Starting money",
       "submit": "Create",
       "later": "Later"
     },
@@ -160,7 +154,6 @@
       "money": "Money",
       "attribute": "Attribute",
       "value": "Value",
-      "coins": "{{ count }} coins",
       "open": "Open the sheet",
       "notFound": "This character isn't in the room.",
       "tabs": {
@@ -255,12 +248,12 @@
       "image": "Image"
     },
     "modifiers": "Modifiers",
-    "price": "{{ price }} coins",
     "catalogue": {
       "title": "Item catalogue",
       "back": "Back to the room",
       "search": "Search by name",
-      "price": "Price: {{ min }} to {{ max }}",
+      "price": "Price",
+      "priceTo": "to",
       "addDefaults": "Add default items",
       "give": "Give",
       "delete": "Delete",
@@ -557,7 +550,9 @@
     "p2pText": "Peer to peer, with no account and no server.",
     "toolsTitle": "Tools without a game",
     "toolsText": "Dice, item generator and character sheet, ready any time.",
-    "footerBrand": "RPG Manager"
+    "footerBrand": "RPG Manager",
+    "footerTagline": "No account, no server: your data stays in your browser.",
+    "footerNav": "Site links"
   },
   "credits": {
     "title": "Credits",

@@ -7,10 +7,6 @@ export interface WorldAttribute {
   baseValue: number;
 }
 
-export type MoneyFormat =
-  | { kind: 'coins' | 'dollars' | 'euros' | 'pounds' | 'yen' }
-  | { kind: 'custom'; symbol: string };
-
 /** What players can still do while the host is offline (p2p-rooms spec, Host offline). */
 export interface OfflineFeatures {
   dice: boolean;
@@ -72,7 +68,6 @@ export interface World {
   barAttributes: { life?: string; mana?: string };
   startingStatPoints: number;
   startingMoney: number;
-  moneyFormat: MoneyFormat;
   offlineFeatures: OfflineFeatures;
   items: Item[];
   characters: Character[];
@@ -104,7 +99,6 @@ export interface WorldDraft {
   barAttributes?: { life?: string; mana?: string };
   startingStatPoints?: number;
   startingMoney?: number;
-  moneyFormat?: MoneyFormat;
   offlineFeatures?: Partial<OfflineFeatures>;
 }
 
@@ -118,7 +112,6 @@ export interface WorldInfo {
   barAttributes: { life?: string; mana?: string };
   startingStatPoints: number;
   startingMoney: number;
-  moneyFormat: MoneyFormat;
   offlineFeatures: OfflineFeatures;
 }
 

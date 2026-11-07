@@ -1,3 +1,4 @@
+import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -14,7 +15,7 @@ import { CHARACTER_NAME_MAX_LENGTH } from '../../models/character-api';
 @Component({
   selector: 'app-create-character-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, TranslocoPipe, ButtonModule, CardModule, FileUploadModule, InputTextModule, MessageModule],
+  imports: [FormsModule, RouterLink, TranslocoPipe, ButtonModule, CardModule, FileUploadModule, InputTextModule, MessageModule, CoinDisplayComponent],
   templateUrl: './create-character-page.component.html',
   styleUrl: './create-character-page.component.scss',
 })

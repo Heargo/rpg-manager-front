@@ -14,13 +14,14 @@ import { StepperModule } from '@openng/optimus-ui/stepper';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
+import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { WorldLibraryBusiness } from '../../business/world-library.business';
 import { WorldCardComponent } from '../../components/world-card/world-card.component';
 import { DEFAULT_OFFLINE_FEATURES } from '../../helpers/world.factory';
 import { ATTRIBUTE_NAME_MAX_LENGTH, WORLD_NAME_MAX_LENGTH } from '../../helpers/world-draft.rules';
-import { MoneyFormat, OfflineFeatures, WorldDraft } from '../../models/world';
+import { OfflineFeatures, WorldDraft } from '../../models/world';
 
 interface AttributeRow {
   key: number;
@@ -28,9 +29,6 @@ interface AttributeRow {
   baseValue: number;
 }
 
-type MoneyKind = MoneyFormat['kind'];
-
-const MONEY_KINDS: MoneyKind[] = ['coins', 'dollars', 'euros', 'pounds', 'yen', 'custom'];
 const OFFLINE_FEATURES = Object.keys(DEFAULT_OFFLINE_FEATURES) as (keyof OfflineFeatures)[];
 
 /** New game wizard: identity → attributes → rules, with a live preview. */
@@ -53,6 +51,7 @@ import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
     TagModule,
     TextareaModule,
     ToggleSwitchModule,
+    CoinInputComponent,
     WorldCardComponent,
   ],
   templateUrl: './world-new-page.component.html',
@@ -77,18 +76,12 @@ export class WorldNewPageComponent {
   protected readonly lifeBar = signal<string | null>(this.attributes()[0]?.name ?? null);
   protected readonly manaBar = signal<string | null>(this.attributes()[1]?.name ?? null);
   protected readonly startingStatPoints = signal(5);
-  protected readonly startingMoney = signal(50);
-  protected readonly moneyKind = signal<MoneyKind>('coins');
-  protected readonly moneySymbol = signal('');
+  protected readonly startingMoney = signal(5000);
   protected readonly starterItems = signal(true);
   protected readonly offline = signal<OfflineFeatures>({ ...DEFAULT_OFFLINE_FEATURES });
   protected readonly creating = signal(false);
   private nextKey = 100;
 
-  protected readonly moneyOptions = computed(() => {
-    this.language.$language();
-    return MONEY_KINDS.map((kind) => ({ value: kind, label: this.language.t(`world.money.${kind}`) }));
-  });
   protected readonly attributeNames = computed(() =>
     this.attributes()
       .map((attribute) => attribute.name.trim())
@@ -105,7 +98,6 @@ export class WorldNewPageComponent {
     },
     startingStatPoints: this.startingStatPoints(),
     startingMoney: this.startingMoney(),
-    moneyFormat: this.moneyKind() === 'custom' ? { kind: 'custom', symbol: this.moneySymbol() } : { kind: this.moneyKind() as Exclude<MoneyKind, 'custom'> },
     offlineFeatures: this.offline(),
   }));
   protected readonly errors = computed(() => this.library.validateDraft(this.draft()));
@@ -114,7 +106,7 @@ export class WorldNewPageComponent {
     return {
       1: !errors.name,
       2: !errors.attributes,
-      3: !errors.startingStatPoints && !errors.startingMoney && !errors.moneySymbol,
+      3: !errors.startingStatPoints && !errors.startingMoney,
     } as Record<number, boolean>;
   });
   protected readonly canCreate = computed(() => Object.keys(this.errors()).length === 0);

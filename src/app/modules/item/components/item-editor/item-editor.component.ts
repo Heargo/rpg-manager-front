@@ -19,6 +19,7 @@ import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { ImageBusiness } from '../../../../core/business/image.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
+import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import {
   EQUIPMENT_SLOTS,
@@ -71,6 +72,7 @@ function toDraft(item: Item | undefined): ItemDraft {
     SelectModule,
     TabsModule,
     TextareaModule,
+    CoinInputComponent,
     StoredImageComponent,
   ],
   template: `
@@ -172,14 +174,11 @@ function toDraft(item: Item | undefined): ItemDraft {
                 <label for="item-price">{{
                   'item.fields.price' | transloco
                 }}</label>
-                <input
-                  pInputText
+                <app-coin-input
                   id="item-price"
                   data-field="price"
-                  type="number"
-                  min="0"
                   [value]="draft().price"
-                  (input)="patch({ price: +$any($event.target).value })"
+                  (valueChange)="patch({ price: $event })"
                 />
               </div>
             </div>

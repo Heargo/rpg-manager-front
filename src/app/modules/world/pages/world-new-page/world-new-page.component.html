@@ -140,22 +140,9 @@
                 </div>
                 <div class="field">
                   <label for="money">{{ 'world.fields.startingMoney' | transloco }}</label>
-                  <p-inputnumber inputId="money" [min]="0" [showButtons]="true" [ngModel]="startingMoney()" (ngModelChange)="startingMoney.set($event ?? 0)" />
+                  <app-coin-input id="money" [(value)]="startingMoney" />
                 </div>
-                <div class="field">
-                  <label for="money-kind">{{ 'world.fields.currency' | transloco }}</label>
-                  <p-select inputId="money-kind" [options]="moneyOptions()" optionLabel="label" optionValue="value" [ngModel]="moneyKind()" (ngModelChange)="moneyKind.set($event)" />
-                </div>
-                @if (moneyKind() === 'custom') {
-                  <div class="field">
-                    <label for="money-symbol">{{ 'world.fields.currencySymbol' | transloco }}</label>
-                    <input pInputText id="money-symbol" maxlength="12" [ngModel]="moneySymbol()" (ngModelChange)="moneySymbol.set($event)" />
-                  </div>
-                }
               </div>
-              @if (errors().moneySymbol; as error) {
-                <p-message severity="error" size="small" variant="simple">{{ error | transloco }}</p-message>
-              }
 
               <div class="check">
                 <p-checkbox inputId="starter-items" [binary]="true" [ngModel]="starterItems()" (ngModelChange)="starterItems.set($event)" />

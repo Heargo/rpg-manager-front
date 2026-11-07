@@ -36,10 +36,9 @@ describe('validateWorldDraft', () => {
     expect(validateWorldDraft(draft({ attributes: [{ name: 'Life', baseValue: 1.5 }] })).attributes).toBe('world.errors.baseValueInteger');
   });
 
-  it('refuses negative or fractional starting values, and an empty custom currency', () => {
+  it('refuses negative or fractional starting values', () => {
     expect(validateWorldDraft(draft({ startingStatPoints: -1 })).startingStatPoints).toBe('world.errors.nonNegativeInteger');
     expect(validateWorldDraft(draft({ startingMoney: 2.5 })).startingMoney).toBe('world.errors.nonNegativeInteger');
-    expect(validateWorldDraft(draft({ moneyFormat: { kind: 'custom', symbol: ' ' } })).moneySymbol).toBe('world.errors.symbolRequired');
   });
 });
 

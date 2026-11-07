@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { CardModule } from '@openng/optimus-ui/card';
 import { TagModule } from '@openng/optimus-ui/tag';
+import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
 import { ItemDraft } from '../../../../core/models/item';
 import { RARITY_SEVERITY } from '../../helpers/item-display';
 
@@ -9,7 +10,7 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
 @Component({
   selector: 'app-item-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, CardModule, TagModule],
+  imports: [TranslocoPipe, CardModule, TagModule, CoinDisplayComponent],
   template: `
     @let item = this.item();
     <p-card styleClass="item-card">
@@ -40,8 +41,7 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
       }
       <p class="description">{{ item.description }}</p>
       <p class="price">
-        <i class="pi pi-wallet"></i>
-        {{ priceText() ?? ('item.price' | transloco: { price: item.price }) }}
+        <app-coin-display [copper]="item.price" />
       </p>
     </p-card>
   `,
@@ -92,7 +92,5 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
 })
 export class ItemCardComponent {
   readonly item = input.required<ItemDraft>();
-  /** The price in the world's money format; coins when not given. */
-  readonly priceText = input<string>();
   protected readonly severity = RARITY_SEVERITY;
 }

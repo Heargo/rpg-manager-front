@@ -32,7 +32,7 @@ function entry(
       rarity: 'common',
       type: 'item',
       slot: 'none',
-      price: 10,
+      price: 1000,
       modifiers: [],
       ...item,
     },
@@ -53,9 +53,9 @@ const ring = entry('ring', { type: 'equipment', slot: 'ring' });
 const potion = entry('potion', {
   type: 'consumable',
   modifiers: [{ attribute: 'Life', value: 6 }],
-  price: 25,
+  price: 2500,
 });
-const rock = entry('rock', { price: 3 });
+const rock = entry('rock', { price: 300 });
 
 function character(overrides: Partial<Character> = {}): Character {
   return {
@@ -63,7 +63,7 @@ function character(overrides: Partial<Character> = {}): Character {
     playerId: 'p',
     name: 'Ada',
     statPoints: 2,
-    money: 50,
+    money: 5000,
     attributes: [
       { attributeId: 'life', points: 0, current: 4 },
       { attributeId: 'str', points: 0, current: 2 },
@@ -274,7 +274,7 @@ describe('character actions', () => {
         { kind: 'sell', inventoryId: 'helmA' },
       ),
     );
-    expect(c.money).toBe(60);
+    expect(c.money).toBe(6000);
     expect(c.inventory.map((e) => e.id)).toEqual(['rock']);
     expect(stat(c, 'life').max).toBe(10);
   });

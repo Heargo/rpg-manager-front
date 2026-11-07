@@ -1,4 +1,4 @@
-import { MoneyFormat, OfflineFeatures, World, WorldDraft, WorldInfo, WorldSummary } from '../models/world';
+import { OfflineFeatures, World, WorldDraft, WorldInfo, WorldSummary } from '../models/world';
 
 /** Defaults from the p2p-rooms spec table: reading always works, dice and notes on, actions changing shared state off. */
 export const DEFAULT_OFFLINE_FEATURES: OfflineFeatures = {
@@ -9,8 +9,6 @@ export const DEFAULT_OFFLINE_FEATURES: OfflineFeatures = {
   useConsumables: false,
   sell: false,
 };
-
-export const DEFAULT_MONEY_FORMAT: MoneyFormat = { kind: 'coins' };
 
 /** Builds a new world from the wizard's draft. Ids and time are injected so the result is predictable in tests. */
 export function createWorld(draft: WorldDraft, newId: () => string, now: number): World {
@@ -34,7 +32,6 @@ export function createWorld(draft: WorldDraft, newId: () => string, now: number)
     },
     startingStatPoints: draft.startingStatPoints ?? 0,
     startingMoney: draft.startingMoney ?? 0,
-    moneyFormat: draft.moneyFormat ?? DEFAULT_MONEY_FORMAT,
     offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures },
     items: [],
     characters: [],
@@ -102,7 +99,6 @@ export function toWorldInfo(world: World): WorldInfo {
     barAttributes: world.barAttributes,
     startingStatPoints: world.startingStatPoints,
     startingMoney: world.startingMoney,
-    moneyFormat: world.moneyFormat,
     offlineFeatures: world.offlineFeatures,
   };
 }

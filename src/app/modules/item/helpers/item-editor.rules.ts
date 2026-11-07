@@ -25,7 +25,7 @@ export function validateItemDraft(
 ): ItemIssue[] {
   const issues: ItemIssue[] = [];
   if (!draft.name.trim()) issues.push({ field: 'name', code: 'required' });
-  if (!Number.isFinite(draft.price) || draft.price < 0) {
+  if (!Number.isInteger(draft.price) || draft.price < 0) {
     issues.push({ field: 'price', code: 'invalid' });
   }
   const equipment = draft.type === 'equipment';
@@ -87,7 +87,7 @@ export function parseItemJson(
   if (raw['slot'] !== undefined && !SLOTS.includes(raw['slot'] as string)) {
     bad('slot');
   }
-  if (typeof raw['price'] !== 'number') bad('price');
+  if (!Number.isInteger(raw['price']) || (raw['price'] as number) < 0) bad('price');
   const modifiers = raw['modifiers'] ?? [];
   if (!Array.isArray(modifiers) || !modifiers.every(isModifier))
     bad('modifiers');
@@ -124,7 +124,7 @@ export function buildItemPrompt(attributeNames: readonly string[]): string {
     `- rarity: one of ${ITEM_RARITIES.join(', ')}.`,
     `- type: one of ${ITEM_TYPES.join(', ')}.`,
     `- slot: one of ${EQUIPMENT_SLOTS.join(', ')} when the type is equipment, otherwise "none".`,
-    '- price: a whole number of coins, 0 or more.',
+    '- price: a whole number of copper (100 copper = 1 silver, 100 silver = 1 gold), 0 or more.',
     `- modifiers: bonuses or maluses (positive or negative whole numbers) on these attributes only: ${attributeNames.join(', ')}.`,
   ].join('\n');
 }

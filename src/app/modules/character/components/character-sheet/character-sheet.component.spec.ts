@@ -11,7 +11,6 @@ const world = {
     { id: 'str', name: 'Strength', baseValue: 2 },
   ],
   barAttributes: { life: 'life' },
-  moneyFormat: { kind: 'coins' as const },
 };
 
 const character: Character = {
@@ -85,7 +84,7 @@ describe('CharacterSheetComponent', () => {
   it('shows stats with equipment bonus, the life bar and money', async () => {
     const { el } = await render({ canPlay: false, gameMaster: false });
     expect(el.textContent).toContain('Ada');
-    expect(el.textContent).toContain('40 coins');
+    expect(el.querySelector('[data-coin="copper"]')!.textContent).toContain('40');
     expect(el.textContent).toContain('6 / 12');
     expect(el.querySelector('[aria-label="Spend a point on Life"]')).toBeNull();
     expect(el.querySelector('#grant-points')).toBeNull();

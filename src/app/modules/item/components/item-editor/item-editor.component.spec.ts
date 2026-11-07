@@ -8,7 +8,7 @@ import { ItemEditorComponent } from './item-editor.component';
 
 /**
  * Hooks the template must expose (all tab panels rendered, hidden or not): form fields `[data-field]` =
- * `name`, `description`, `price` (inputs), `json` (textarea), `seed` (input); buttons `[data-action]` =
+ * `name`, `description`, `price` (the coin input: gold, silver and copper fields inside), `json` (textarea), `seed` (input); buttons `[data-action]` =
  * `generate`, `reroll`, `copy-prompt`, `save`; `[data-field="json-error"]` shown only while the JSON is invalid.
  */
 describe('ItemEditorComponent', () => {
@@ -44,8 +44,13 @@ describe('ItemEditorComponent', () => {
     if (item) fixture.componentRef.setInput('item', item);
     await fixture.whenStable();
     const el: HTMLElement = fixture.nativeElement;
+    // The price is a coin input: its copper field stands for it in these tests.
     const field = (name: string) =>
-      el.querySelector<HTMLInputElement>(`[data-field="${name}"]`)!;
+      el.querySelector<HTMLInputElement>(
+        name === 'price'
+          ? '[data-field="price"] input[name="copper"]'
+          : `[data-field="${name}"]`,
+      )!;
     const action = (name: string) =>
       el.querySelector<HTMLElement>(`[data-action="${name}"]`)!;
     const type = async (name: string, value: string) => {

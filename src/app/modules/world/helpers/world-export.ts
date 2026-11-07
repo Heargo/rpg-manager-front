@@ -64,10 +64,11 @@ function validateWorld(world: unknown, errors: string[]): void {
   for (const key of ['id', 'name', 'description', 'notes'] as const) {
     if (typeof world[key] !== 'string') errors.push(`world.${key} must be a string`);
   }
-  for (const key of ['startingStatPoints', 'startingMoney', 'createdAt', 'updatedAt'] as const) {
+  for (const key of ['startingStatPoints', 'createdAt', 'updatedAt'] as const) {
     if (typeof world[key] !== 'number') errors.push(`world.${key} must be a number`);
   }
-  for (const key of ['moneyFormat', 'offlineFeatures', 'barAttributes'] as const) {
+  if (!Number.isInteger(world['startingMoney'])) errors.push('world.startingMoney must be an integer');
+  for (const key of ['offlineFeatures', 'barAttributes'] as const) {
     if (!isRecord(world[key])) errors.push(`world.${key} must be an object`);
   }
   list(world['attributes'], 'world.attributes', errors, (attribute, path) => {
@@ -79,9 +80,10 @@ function validateWorld(world: unknown, errors: string[]): void {
     for (const key of ['id', 'playerId', 'name'] as const) {
       if (typeof character[key] !== 'string') errors.push(`${path}.${key} must be a string`);
     }
-    for (const key of ['statPoints', 'money', 'rev', 'updatedAt'] as const) {
+    for (const key of ['statPoints', 'rev', 'updatedAt'] as const) {
       if (typeof character[key] !== 'number') errors.push(`${path}.${key} must be a number`);
     }
+    if (!Number.isInteger(character['money'])) errors.push(`${path}.money must be an integer`);
     list(character['attributes'], `${path}.attributes`, errors, () => undefined);
     list(character['inventory'], `${path}.inventory`, errors, (entry, entryPath) => {
       if (!isRecord(entry['item'])) errors.push(`${entryPath}.item must be an object`);
@@ -98,6 +100,7 @@ function validateItem(item: Record<string, unknown>, path: string, errors: strin
   if (!(ITEM_RARITIES as readonly unknown[]).includes(item['rarity'])) errors.push(`${path}.rarity is unknown`);
   if (!(ITEM_TYPES as readonly unknown[]).includes(item['type'])) errors.push(`${path}.type is unknown`);
   if (!Array.isArray(item['modifiers'])) errors.push(`${path}.modifiers must be a list`);
+  if (!Number.isInteger(item['price'])) errors.push(`${path}.price must be an integer`);
 }
 
 function list(

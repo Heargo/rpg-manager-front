@@ -6,7 +6,7 @@ const world = {
     { id: 'str', name: 'Strength', baseValue: 2 },
   ],
   startingStatPoints: 5,
-  startingMoney: 50,
+  startingMoney: 5000,
 };
 
 describe('character rules', () => {
@@ -17,7 +17,7 @@ describe('character rules', () => {
       name: 'Ada la Brave',
       portraitId: 'img',
       statPoints: 5,
-      money: 50,
+      money: 5000,
       attributes: [
         { attributeId: 'life', points: 0, current: 10 },
         { attributeId: 'str', points: 0, current: 2 },

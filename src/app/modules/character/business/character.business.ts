@@ -6,11 +6,11 @@ import { ProfileBusiness } from '../../../core/business/profile.business';
 import { PeerApiError } from '../../../core/p2p/helpers/peer-api-error';
 import { RoomBusiness } from '../../room/business/room.business';
 import { WorldInfoBusiness } from '../../world/business/world-info.business';
-import { Character, MoneyFormat, WorldInfo } from '../../world/models/world';
+import { Character, WorldInfo } from '../../world/models/world';
 
 /** What a character sheet needs from its world (the room's, or the sandbox's). */
-export type SheetWorld = Pick<WorldInfo, 'attributes' | 'barAttributes' | 'moneyFormat'>;
-import { formatMoney } from '../../world/helpers/money';
+export type SheetWorld = Pick<WorldInfo, 'attributes' | 'barAttributes'>;
+import { coinDisplayParts } from '../../../core/helpers/money.rules';
 import { CharacterAction } from '../helpers/character-actions.rules';
 import { attributeStats, AttributeStat, barStats, BarStat } from '../helpers/character-stats';
 import { CharacterService } from '../services/character.service';
@@ -82,9 +82,11 @@ export class CharacterBusiness {
     return world ? barStats(this.statsOf(character, world), world.barAttributes) : {};
   }
 
-  /** An amount in the world's money format and the active language. */
-  money(amount: number, format: MoneyFormat = this.$world()?.moneyFormat ?? { kind: 'coins' }): string {
-    return formatMoney(amount, format, this.language.$language(), (count) => this.language.t('character.sheet.coins', { count }));
+  /** An amount of copper as text ("1 gold 12 silver 3 copper"), for confirmations and toasts. */
+  money(amount: number): string {
+    return coinDisplayParts(amount)
+      .map(({ coin, amount: count }) => `${count} ${this.language.t('coin.' + coin).toLowerCase()}`)
+      .join(' ');
   }
 
   /** Name of the player behind a character, from the room's seats. */

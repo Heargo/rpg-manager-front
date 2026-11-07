@@ -1,4 +1,9 @@
 {
+  "coin": {
+    "gold": "Or",
+    "silver": "Argent",
+    "copper": "Cuivre"
+  },
   "common": {
     "cancel": "Annuler",
     "offlineBanner": "Vous êtes hors ligne. Les données enregistrées restent disponibles ; rejoindre une salle demande un réseau."
@@ -73,20 +78,10 @@
       "noBar": "Aucune",
       "startingStatPoints": "Points de stats de départ",
       "startingMoney": "Argent de départ",
-      "currency": "Monnaie",
-      "currencySymbol": "Symbole de la monnaie",
       "starterItems": "Commencer avec des objets par défaut",
       "starterItemsHint": "Une vingtaine d'objets générés à partir de vos attributs : un équipement par emplacement, des potions, des objets.",
       "offlineTitle": "Quand l'hôte est hors ligne",
       "offlineHint": "Les joueurs peuvent toujours lire leur fiche. Choisissez ce qu'ils peuvent encore faire ; les changements sont vérifiés au retour de l'hôte."
-    },
-    "money": {
-      "coins": "Pièces",
-      "dollars": "Dollars ($)",
-      "euros": "Euros (€)",
-      "pounds": "Livres (£)",
-      "yen": "Yens (¥)",
-      "custom": "Personnalisée…"
     },
     "offline": {
       "dice": "Lancer les dés",
@@ -111,7 +106,6 @@
       "attributeNamesUnique": "Deux attributs ont le même nom.",
       "baseValueInteger": "Les valeurs de base doivent être des nombres entiers.",
       "nonNegativeInteger": "Utilisez un nombre entier, 0 ou plus.",
-      "symbolRequired": "Saisissez le symbole de la monnaie.",
       "image": "Cette image n'a pas pu être utilisée."
     }
   },
@@ -129,7 +123,7 @@
       "choosePortrait": "Choisir un portrait",
       "startsWith": "Votre personnage commence avec",
       "statPoints": "{{ count }} points de stats à dépenser",
-      "money": "{{ count }} d'argent",
+      "money": "Argent de départ",
       "submit": "Créer",
       "later": "Plus tard"
     },
@@ -160,7 +154,6 @@
       "money": "Argent",
       "attribute": "Attribut",
       "value": "Valeur",
-      "coins": "{{ count }} pièces",
       "open": "Ouvrir la fiche",
       "notFound": "Ce personnage n'est pas dans le salon.",
       "tabs": {
@@ -255,12 +248,12 @@
       "image": "Image"
     },
     "modifiers": "Modificateurs",
-    "price": "{{ price }} pièces",
     "catalogue": {
       "title": "Catalogue d'objets",
       "back": "Retour à la salle",
       "search": "Rechercher par nom",
-      "price": "Prix : de {{ min }} à {{ max }}",
+      "price": "Prix",
+      "priceTo": "à",
       "addDefaults": "Ajouter les objets par défaut",
       "give": "Donner",
       "delete": "Supprimer",
@@ -557,7 +550,9 @@
     "p2pText": "De pair à pair, sans compte et sans serveur.",
     "toolsTitle": "Des outils sans partie",
     "toolsText": "Dés, générateur d'objets et fiche de personnage, toujours prêts.",
-    "footerBrand": "RPG Manager"
+    "footerBrand": "RPG Manager",
+    "footerTagline": "Pas de compte, pas de serveur : vos données restent dans votre navigateur.",
+    "footerNav": "Liens du site"
   },
   "credits": {
     "title": "Crédits",

@@ -87,10 +87,10 @@ function drawModifiers(
     .map((attribute) => ({ attribute, value: randomInt(source, ...rule.modifierValue) * multiplier }));
 }
 
-/** Base price for the rarity, +10% per modifier point, ±20% jitter, rounded to 5. */
+/** Base price for the rarity, +10% per modifier point, ±20% jitter, in copper, rounded to 5 silver. */
 function priceFor(source: RandomSource, rarity: ItemRarity, modifiers: ItemModifier[]): number {
   const points = modifiers.reduce((sum, modifier) => sum + Math.abs(modifier.value), 0);
   const jitterPercent = randomInt(source, 80, 120);
-  const raw = (RARITY_RULES[rarity].basePrice * (10 + points) * jitterPercent) / 1000;
-  return Math.max(5, Math.round(raw / 5) * 5);
+  const silver = (RARITY_RULES[rarity].basePrice * (10 + points) * jitterPercent) / 1000;
+  return Math.max(500, Math.round(silver / 5) * 500);
 }

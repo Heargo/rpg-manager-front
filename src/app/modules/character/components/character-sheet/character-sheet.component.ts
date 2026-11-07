@@ -22,6 +22,7 @@ import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { LanguageBusiness } from '../../../../core/business/language.business';
+import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { EQUIPMENT_SLOTS, EquipmentSlot } from '../../../../core/models/item';
 import { ItemCardComponent } from '../../../item/components/item-card/item-card.component';
@@ -65,6 +66,7 @@ const ITEM_ICONS: Record<string, string> = {
     TabsModule,
     TagModule,
     TooltipModule,
+    CoinDisplayComponent,
     StoredImageComponent,
     ItemCardComponent,
     SlotSilhouetteComponent,
@@ -137,7 +139,7 @@ export class CharacterSheetComponent {
   }
 
   protected money(amount: number): string {
-    return this.characters.money(amount, this.world().moneyFormat);
+    return this.characters.money(amount);
   }
 
   protected slotLabel(slot: EquipmentSlot): string {

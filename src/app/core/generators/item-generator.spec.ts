@@ -71,8 +71,8 @@ describe('generateItem', () => {
           expect(item.name.length).toBeGreaterThan(0);
           expect(item.description.length).toBeGreaterThan(0);
           expect(item.slot).toBe(slot ?? 'none');
-          expect(item.price % 5).toBe(0);
-          expect(item.price).toBeGreaterThanOrEqual(5);
+          expect(item.price % 500).toBe(0);
+          expect(item.price).toBeGreaterThanOrEqual(500);
         }
       }
     }

@@ -33,7 +33,7 @@ export function createSandboxWorld(translate: (key: string) => string): World {
       attributes,
       barAttributes: { life: attributes[0].name, mana: attributes[1].name },
       startingStatPoints: 5,
-      startingMoney: 50,
+      startingMoney: 5000,
     },
     () => ids[next++],
     0,

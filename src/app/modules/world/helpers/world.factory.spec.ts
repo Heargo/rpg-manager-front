@@ -7,6 +7,11 @@ function ids() {
 }
 
 describe('createWorld', () => {
+  it('has no money format: money is always integer copper', () => {
+    const world = createWorld({ name: 'Eldoria', attributes: [{ name: 'Life', baseValue: 10 }, { name: 'Mana', baseValue: 5 }], barAttributes: { life: 'Life', mana: 'Mana' } }, ids(), 1000);
+    expect(world).not.toHaveProperty('moneyFormat');
+  });
+
   it('builds a world with ids, trimmed names and defaults', () => {
     const world = createWorld(
       {
@@ -33,7 +38,6 @@ describe('createWorld', () => {
       barAttributes: { life: 'id1', mana: 'id2' },
       startingStatPoints: 0,
       startingMoney: 0,
-      moneyFormat: { kind: 'coins' },
       offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, sell: true },
       items: [],
       characters: [],

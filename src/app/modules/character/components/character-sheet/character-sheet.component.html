@@ -11,7 +11,7 @@
       }}</small>
     }
     <div class="facts">
-      <span><i class="pi pi-wallet"></i> {{ money(c.money) }}</span>
+      <span><i class="pi pi-wallet"></i> <app-coin-display [copper]="c.money" /></span>
       <span>
         {{ "character.sheet.statPoints" | transloco }}
         <p-badge
@@ -278,7 +278,7 @@
   [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
 >
   @if (openItem(); as entry) {
-    <app-item-card [item]="entry.item" [priceText]="money(entry.item.price)" />
+    <app-item-card [item]="entry.item" />
     @if (canPlay()) {
       <div class="dialog-actions">
         @if (entry.item.type === "equipment" && entry.item.slot !== "none") {

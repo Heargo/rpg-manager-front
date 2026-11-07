@@ -15,6 +15,25 @@ describe('world export', () => {
     expect(parseWorldExport('{"format":"other"}')).toEqual({ ok: false, errors: ['the file is not a world export'] });
   });
 
+  it('refuses fractional money in starting money, character money and item prices', () => {
+    const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
+    file.world.startingMoney = 12.5;
+    file.world.items = [{ id: 'i', name: 'Sword', rarity: 'common', type: 'object', price: 1.5, modifiers: [] }];
+    file.world.characters = [{ id: 'c', playerId: 'p', name: 'Ada', statPoints: 0, money: 0.5, rev: 0, updatedAt: 0, attributes: [], inventory: [] }];
+
+    const parsed = parseWorldExport(JSON.stringify(file));
+
+    expect(parsed.ok).toBe(false);
+    if (parsed.ok) return;
+    expect(parsed.errors).toEqual(
+      expect.arrayContaining([
+        'world.startingMoney must be an integer',
+        'world.items[0].price must be an integer',
+        'world.characters[0].money must be an integer',
+      ]),
+    );
+  });
+
   it('lists what is wrong in a damaged file', () => {
     const file = JSON.parse(JSON.stringify(buildWorldExport(world, { x: { type: 'text/html', data: '' } }, 9)));
     file.version = 3;
