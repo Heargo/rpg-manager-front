@@ -1,6 +1,6 @@
 # Clean up the wizard's attributes step
 
-Status: ready-for-agent
+Status: claimed
 Type: task
 Blocked by: 14
 
@@ -16,3 +16,7 @@ User feedback (2026-11-08): "clean up the ui in attribute step because it's clun
 ## Seam
 
 The wizard component test: existing hooks kept, or renamed together with the spec. The layout is checked in the browser at 1280 and 375 px.
+
+## Baseline
+
+`npm test`: 92 test files, 709 tests, all passed (2026-11-08, `develop` at f5774b6).
