@@ -54,7 +54,7 @@ import { RoomBusiness } from '../../business/room.business';
     h1 { margin: 0; font-size: 1.5rem; }
     textarea { width: 100%; font-family: monospace; font-size: 0.8rem; }
     .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .qr { width: min(16rem, 100%); align-self: center; image-rendering: pixelated; }
+    .qr { width: min(26rem, 100%); align-self: center; image-rendering: pixelated; background: #fff; }
     .hint { margin: 0; color: var(--p-text-muted-color); }
     .row { display: flex; align-items: center; gap: 0.75rem; }
     :host ::ng-deep .spinner { width: 1.5rem; height: 1.5rem; }

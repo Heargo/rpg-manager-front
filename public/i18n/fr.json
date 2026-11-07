@@ -22,7 +22,7 @@
       "hostTitle": "Créer une salle",
       "hostHint": "Vous serez le maître du jeu. Les joueurs rejoignent avec un lien d'invitation.",
       "roomName": "Nom de la salle",
-      "defaultName": "La table de {{ name }}",
+      "defaultName": "Table — {{ name }}",
       "host": "Créer",
       "joinTitle": "Rejoindre une salle",
       "joinHint": "Collez le lien ou le code d'invitation envoyé par l'hôte.",

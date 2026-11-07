@@ -4,8 +4,9 @@ import { Injectable } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class QrService {
   async toDataUrl(text: string): Promise<string> {
-    const { toDataURL } = await import('qrcode');
-    // Low error correction keeps ~800-character codes at a size phones scan easily.
-    return toDataURL(text, { errorCorrectionLevel: 'L', margin: 1, width: 320 });
+    const { toDataURL } = await import('./qr-encoder');
+    // ~800-character codes give a dense QR (~97 modules): lowest error correction, the full 4-module quiet zone
+    // scanners need, and a large bitmap so each module stays several screen pixels wide.
+    return toDataURL(text, { errorCorrectionLevel: 'L', margin: 4, width: 1024 });
   }
 }

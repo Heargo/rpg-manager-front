@@ -5,6 +5,7 @@ import {
   isDevMode,
   inject,
   provideAppInitializer,
+  Injector,
 } from '@angular/core';
 import { provideTransloco, TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
@@ -37,12 +38,13 @@ export const appConfig: ApplicationConfig = {
     // Load the starting language before the first render (no flash of keys), and start LanguageBusiness.
     provideAppInitializer(() => {
       const transloco = inject(TranslocoService);
+      const injector = inject(Injector);
       inject(LanguageBusiness);
-      return firstValueFrom(transloco.load(transloco.getActiveLang()));
-    }),
-    // Reopen the room this device was hosting before a reload (doesn't block startup).
-    provideAppInitializer(() => {
-      inject(RoomBusiness);
+      return firstValueFrom(transloco.load(transloco.getActiveLang())).then(() => {
+        // Only once translations are in: starting the room creates the profile, whose default name is translated.
+        // Reopens the room this device was hosting before a reload.
+        injector.get(RoomBusiness);
+      });
     }),
     MessageService,
     DialogService,

@@ -23,6 +23,13 @@
         "http://localhost:4300?"
       ],
       "port": 4300
+    },
+    {
+      "name": "front-lan",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["ng", "serve", "--host", "0.0.0.0", "--port", "4201", "--ssl"],
+      "url": "https://localhost:4201",
+      "port": 4201
     }
   ]
 }
