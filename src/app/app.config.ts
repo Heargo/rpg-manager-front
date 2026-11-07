@@ -18,7 +18,7 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideOptimus } from '@openng/optimus-ui/config';
-import { MessageService } from '@openng/optimus-ui/api';
+import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { DialogService } from '@openng/optimus-ui/dynamicdialog';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { UiRpgPreset } from './ui.preset';
@@ -47,6 +47,7 @@ export const appConfig: ApplicationConfig = {
       });
     }),
     MessageService,
+    ConfirmationService,
     DialogService,
     provideOptimus({
       theme: {

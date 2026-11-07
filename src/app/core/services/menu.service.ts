@@ -14,7 +14,7 @@ export class MenuService {
     {
       label: 'nav.play',
       icon: 'pi pi-users',
-      routerLink: '/room',
+      routerLink: '/play',
       // items: [
       //   {
       //     label: 'Bookmarks',

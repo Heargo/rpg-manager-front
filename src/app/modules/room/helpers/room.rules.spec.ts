@@ -4,9 +4,10 @@ const host = { playerId: 'h', name: 'Gm' };
 
 describe('room rules', () => {
   it('starts with the host as the only member', () => {
-    expect(createRoomState('r1', ' Table ', host)).toEqual({
+    expect(createRoomState('r1', ' Table ', host, 'w1')).toEqual({
       id: 'r1',
       name: 'Table',
+      worldId: 'w1',
       members: [{ playerId: 'h', name: 'Gm', isHost: true, online: true }],
     });
   });

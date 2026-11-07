@@ -26,7 +26,7 @@ import { RoomBusiness } from '../../business/room.business';
           <h1>{{ 'room.join.title' | transloco }}</h1>
           @if (error()) {
             <p-message severity="error">{{ error() }}</p-message>
-            <a routerLink="/room">{{ 'room.start.title' | transloco }}</a>
+            <a routerLink="/play">{{ 'play.title' | transloco }}</a>
           } @else if (!answerCode()) {
             <div class="row"><p-progress-spinner styleClass="spinner" strokeWidth="6" /> {{ 'room.join.preparing' | transloco }}</div>
           } @else {

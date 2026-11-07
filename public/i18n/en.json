@@ -1,8 +1,111 @@
 {
+  "common": {
+    "cancel": "Cancel"
+  },
   "nav": {
     "play": "Play",
     "profile": "Profile",
     "language": "Language"
+  },
+  "play": {
+    "title": "Play",
+    "activeRoom": "Room open: {{ name }}.",
+    "backToRoom": "Back to the room",
+    "worlds": {
+      "title": "Your worlds",
+      "new": "New world",
+      "import": "Import",
+      "imported": "World imported",
+      "importFailed": "This file isn't a valid world export.",
+      "empty": "No world yet. Create one to host a game.",
+      "characters": "{{ count }} characters",
+      "host": "Host",
+      "openRoom": "Open room",
+      "export": "Export as a file",
+      "delete": "Delete",
+      "deleteTitle": "Delete this world?",
+      "deleteMessage": "\"{{ name }}\" and its characters and items will be deleted from this device. Export it first to keep a copy."
+    },
+    "rooms": {
+      "empty": "Rooms you join as a player appear here.",
+      "forgetMessage": "Forget \"{{ name }}\"? You can join again with a new invite."
+    }
+  },
+  "world": {
+    "created": "\"{{ name }}\" is ready",
+    "new": {
+      "title": "New world",
+      "steps": {
+        "identity": "Identity",
+        "attributes": "Attributes",
+        "rules": "Rules"
+      },
+      "next": "Next",
+      "back": "Back",
+      "create": "Create the world",
+      "preview": "Preview",
+      "attributeCount": "{{ count }} attributes",
+      "attributesHint": "Every character of this world has these attributes. Players raise them with stat points; items can boost them.",
+      "addAttribute": "Add an attribute",
+      "removeAttribute": "Remove this attribute",
+      "barsHint": "Bars are shown on the player view (health, mana…). Leave empty if your game has none."
+    },
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "Name of your world",
+      "description": "Description",
+      "descriptionPlaceholder": "What is this world about?",
+      "image": "Picture",
+      "chooseImage": "Choose a picture",
+      "changeImage": "Change the picture",
+      "attributeName": "Attribute",
+      "baseValue": "Base value",
+      "lifeBar": "Health bar",
+      "manaBar": "Second bar (mana…)",
+      "noBar": "None",
+      "startingStatPoints": "Starting stat points",
+      "startingMoney": "Starting money",
+      "currency": "Currency",
+      "currencySymbol": "Currency symbol",
+      "starterItems": "Start with default items",
+      "starterItemsHint": "About 20 items generated from your attributes: equipment for every slot, potions, objects.",
+      "offlineTitle": "When the host is offline",
+      "offlineHint": "Players can always read their sheet. Choose what else they can still do; changes are checked when the host is back."
+    },
+    "money": {
+      "coins": "Coins",
+      "dollars": "Dollars ($)",
+      "euros": "Euros (€)",
+      "pounds": "Pounds (£)",
+      "yen": "Yen (¥)",
+      "custom": "Custom…"
+    },
+    "offline": {
+      "dice": "Roll dice",
+      "notes": "Write personal notes",
+      "spendStatPoints": "Spend stat points",
+      "equip": "Equip and unequip items",
+      "useConsumables": "Use consumables",
+      "sell": "Sell items"
+    },
+    "defaults": {
+      "life": "Life",
+      "mana": "Mana",
+      "strength": "Strength",
+      "agility": "Agility",
+      "intelligence": "Intelligence"
+    },
+    "errors": {
+      "nameRequired": "Give your world a name.",
+      "nameTooLong": "That name is too long.",
+      "attributeNameRequired": "Every attribute needs a name.",
+      "attributeNameTooLong": "An attribute name is too long.",
+      "attributeNamesUnique": "Two attributes have the same name.",
+      "baseValueInteger": "Base values must be whole numbers.",
+      "nonNegativeInteger": "Use a whole number, 0 or more.",
+      "symbolRequired": "Enter the currency symbol.",
+      "image": "This picture couldn't be used."
+    }
   },
   "profile": {
     "title": "Your profile",

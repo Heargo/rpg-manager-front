@@ -1,59 +1,5 @@
 <div class="main-container room">
   @switch (room.$status()) {
-    @case ('idle') {
-      <h1>{{ 'room.start.title' | transloco }}</h1>
-      <div class="start">
-        <p-card>
-          <form class="stack" (ngSubmit)="host()">
-            <h2>{{ 'room.start.hostTitle' | transloco }}</h2>
-            <p class="hint">{{ 'room.start.hostHint' | transloco }}</p>
-            <label for="room-name">{{ 'room.start.roomName' | transloco }}</label>
-            <input pInputText id="room-name" name="roomName" [(ngModel)]="roomName" maxlength="48" />
-            <p-button type="submit" icon="pi pi-crown" [label]="'room.start.host' | transloco" [disabled]="!roomName().trim()" />
-            @if (error()) {
-              <p-message severity="error" size="small" variant="simple">{{ error() }}</p-message>
-            }
-          </form>
-        </p-card>
-        <p-card>
-          <form class="stack" (ngSubmit)="join()">
-            <h2>{{ 'room.start.joinTitle' | transloco }}</h2>
-            <p class="hint">{{ 'room.start.joinHint' | transloco }}</p>
-            <label for="invite-code">{{ 'room.start.inviteCode' | transloco }}</label>
-            <textarea pTextarea id="invite-code" name="inviteCode" rows="3" [(ngModel)]="inviteInput"></textarea>
-            <p-button type="submit" icon="pi pi-sign-in" [label]="'room.start.join' | transloco" [disabled]="!inviteInput().trim()" />
-          </form>
-        </p-card>
-      </div>
-      @if (room.$recentRooms().length) {
-        <p-card [header]="'room.recent.title' | transloco">
-          <p class="hint">{{ 'room.recent.hint' | transloco }}</p>
-          <ul class="recent">
-            @for (recent of room.$recentRooms(); track recent.id) {
-              <li>
-                <div class="recent-text">
-                  <strong>{{ recent.name }}</strong>
-                  <small>
-                    {{ 'room.recent.hostedBy' | transloco: { name: recent.hostName } }} ·
-                    {{ 'room.recent.lastSeen' | transloco: { date: (recent.lastSeenAt | date: 'short') } }} ·
-                    {{ recent.members.length }} <i class="pi pi-users"></i>
-                  </small>
-                </div>
-                <p-button
-                  icon="pi pi-trash"
-                  severity="secondary"
-                  [text]="true"
-                  [rounded]="true"
-                  [ariaLabel]="'room.recent.forget' | transloco"
-                  (onClick)="forget(recent.id)"
-                />
-              </li>
-            }
-          </ul>
-        </p-card>
-      }
-    }
-
     @case ('hosting') {
       <header class="lobby-header">
         <div>

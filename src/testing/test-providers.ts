@@ -4,7 +4,7 @@ import { importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { TranslocoTestingModule, TranslocoTestingOptions } from '@jsverse/transloco';
 import { DialogService } from '@openng/optimus-ui/dynamicdialog';
-import { MessageService } from '@openng/optimus-ui/api';
+import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { translocoSettings } from '../app/core/i18n/transloco-config';
 import en from '../../public/i18n/en.json';
 import fr from '../../public/i18n/fr.json';
@@ -28,5 +28,6 @@ export const TEST_PROVIDERS = [
   provideHttpClientTesting(),
   provideTestTranslations(),
   MessageService,
+  ConfirmationService,
   DialogService,
 ];

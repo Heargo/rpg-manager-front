@@ -15,7 +15,6 @@
   }
 }
 
-.start,
 .lobby {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
@@ -46,28 +45,3 @@
   flex-wrap: wrap;
 }
 
-.recent {
-  list-style: none;
-  margin: 0.5rem 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
-  li {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  small {
-    color: var(--p-text-muted-color);
-  }
-}
-
-.recent-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}

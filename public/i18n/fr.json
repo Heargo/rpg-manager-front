@@ -1,8 +1,111 @@
 {
+  "common": {
+    "cancel": "Annuler"
+  },
   "nav": {
     "play": "Jouer",
     "profile": "Profil",
     "language": "Langue"
+  },
+  "play": {
+    "title": "Jouer",
+    "activeRoom": "Salle ouverte : {{ name }}.",
+    "backToRoom": "Retour à la salle",
+    "worlds": {
+      "title": "Vos mondes",
+      "new": "Nouveau monde",
+      "import": "Importer",
+      "imported": "Monde importé",
+      "importFailed": "Ce fichier n'est pas un export de monde valide.",
+      "empty": "Aucun monde pour l'instant. Créez-en un pour lancer une partie.",
+      "characters": "{{ count }} personnages",
+      "host": "Héberger",
+      "openRoom": "Ouvrir la salle",
+      "export": "Exporter dans un fichier",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer ce monde ?",
+      "deleteMessage": "« {{ name }} », ses personnages et ses objets seront supprimés de cet appareil. Exportez-le d'abord pour en garder une copie."
+    },
+    "rooms": {
+      "empty": "Les salles que vous rejoignez comme joueur apparaissent ici.",
+      "forgetMessage": "Oublier « {{ name }} » ? Vous pourrez revenir avec une nouvelle invitation."
+    }
+  },
+  "world": {
+    "created": "« {{ name }} » est prêt",
+    "new": {
+      "title": "Nouveau monde",
+      "steps": {
+        "identity": "Identité",
+        "attributes": "Attributs",
+        "rules": "Règles"
+      },
+      "next": "Suivant",
+      "back": "Retour",
+      "create": "Créer le monde",
+      "preview": "Aperçu",
+      "attributeCount": "{{ count }} attributs",
+      "attributesHint": "Chaque personnage de ce monde a ces attributs. Les joueurs les augmentent avec des points de stats ; les objets peuvent les améliorer.",
+      "addAttribute": "Ajouter un attribut",
+      "removeAttribute": "Retirer cet attribut",
+      "barsHint": "Les barres s'affichent sur la vue joueur (vie, mana…). Laissez vide si votre jeu n'en a pas."
+    },
+    "fields": {
+      "name": "Nom",
+      "namePlaceholder": "Nom de votre monde",
+      "description": "Description",
+      "descriptionPlaceholder": "De quoi parle ce monde ?",
+      "image": "Image",
+      "chooseImage": "Choisir une image",
+      "changeImage": "Changer l'image",
+      "attributeName": "Attribut",
+      "baseValue": "Valeur de base",
+      "lifeBar": "Barre de vie",
+      "manaBar": "Seconde barre (mana…)",
+      "noBar": "Aucune",
+      "startingStatPoints": "Points de stats de départ",
+      "startingMoney": "Argent de départ",
+      "currency": "Monnaie",
+      "currencySymbol": "Symbole de la monnaie",
+      "starterItems": "Commencer avec des objets par défaut",
+      "starterItemsHint": "Une vingtaine d'objets générés à partir de vos attributs : un équipement par emplacement, des potions, des objets.",
+      "offlineTitle": "Quand l'hôte est hors ligne",
+      "offlineHint": "Les joueurs peuvent toujours lire leur fiche. Choisissez ce qu'ils peuvent encore faire ; les changements sont vérifiés au retour de l'hôte."
+    },
+    "money": {
+      "coins": "Pièces",
+      "dollars": "Dollars ($)",
+      "euros": "Euros (€)",
+      "pounds": "Livres (£)",
+      "yen": "Yens (¥)",
+      "custom": "Personnalisée…"
+    },
+    "offline": {
+      "dice": "Lancer les dés",
+      "notes": "Écrire des notes personnelles",
+      "spendStatPoints": "Dépenser des points de stats",
+      "equip": "Équiper et retirer des objets",
+      "useConsumables": "Utiliser des consommables",
+      "sell": "Vendre des objets"
+    },
+    "defaults": {
+      "life": "Vie",
+      "mana": "Mana",
+      "strength": "Force",
+      "agility": "Agilité",
+      "intelligence": "Intelligence"
+    },
+    "errors": {
+      "nameRequired": "Donnez un nom à votre monde.",
+      "nameTooLong": "Ce nom est trop long.",
+      "attributeNameRequired": "Chaque attribut doit avoir un nom.",
+      "attributeNameTooLong": "Un nom d'attribut est trop long.",
+      "attributeNamesUnique": "Deux attributs ont le même nom.",
+      "baseValueInteger": "Les valeurs de base doivent être des nombres entiers.",
+      "nonNegativeInteger": "Utilisez un nombre entier, 0 ou plus.",
+      "symbolRequired": "Saisissez le symbole de la monnaie.",
+      "image": "Cette image n'a pas pu être utilisée."
+    }
   },
   "profile": {
     "title": "Votre profil",

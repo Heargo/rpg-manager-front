@@ -1,0 +1,201 @@
+<div class="main-container wizard">
+  <header class="wizard-header">
+    <a routerLink="/play" class="back"><i class="pi pi-arrow-left"></i> {{ 'play.title' | transloco }}</a>
+    <h1>{{ 'world.new.title' | transloco }}</h1>
+  </header>
+
+  <div class="layout">
+    <p-stepper [(value)]="step" [linear]="true" class="steps">
+      <p-step-list>
+        <p-step [value]="1">{{ 'world.new.steps.identity' | transloco }}</p-step>
+        <p-step [value]="2" [disabled]="!stepValid()[1]">{{ 'world.new.steps.attributes' | transloco }}</p-step>
+        <p-step [value]="3" [disabled]="!stepValid()[1] || !stepValid()[2]">{{ 'world.new.steps.rules' | transloco }}</p-step>
+      </p-step-list>
+      <p-step-panels>
+        <!-- 1. Identity -->
+        <p-step-panel [value]="1">
+          <ng-template #content>
+            <div class="panel">
+              <label for="world-name">{{ 'world.fields.name' | transloco }}</label>
+              <input
+                pInputText
+                id="world-name"
+                [maxlength]="nameMax"
+                [placeholder]="'world.fields.namePlaceholder' | transloco"
+                [ngModel]="name()"
+                (ngModelChange)="name.set($event)"
+              />
+              <label for="world-description">{{ 'world.fields.description' | transloco }}</label>
+              <textarea
+                pTextarea
+                id="world-description"
+                rows="4"
+                [placeholder]="'world.fields.descriptionPlaceholder' | transloco"
+                [ngModel]="description()"
+                (ngModelChange)="description.set($event)"
+              ></textarea>
+              <span class="label">{{ 'world.fields.image' | transloco }}</span>
+              <p-fileupload
+                mode="basic"
+                accept="image/*"
+                [auto]="true"
+                [customUpload]="true"
+                [chooseLabel]="(imageId() ? 'world.fields.changeImage' : 'world.fields.chooseImage') | transloco"
+                chooseIcon="pi pi-image"
+                [disabled]="uploading()"
+                (uploadHandler)="upload($event)"
+              />
+              <div class="actions">
+                <p-button [label]="'world.new.next' | transloco" icon="pi pi-arrow-right" iconPos="right" [disabled]="!stepValid()[1]" (onClick)="step.set(2)" />
+              </div>
+            </div>
+          </ng-template>
+        </p-step-panel>
+
+        <!-- 2. Attributes -->
+        <p-step-panel [value]="2">
+          <ng-template #content>
+            <div class="panel">
+              <p class="hint">{{ 'world.new.attributesHint' | transloco }}</p>
+              <div class="attributes" role="table">
+                <div class="row head" role="row">
+                  <span role="columnheader">{{ 'world.fields.attributeName' | transloco }}</span>
+                  <span role="columnheader">{{ 'world.fields.baseValue' | transloco }}</span>
+                  <span></span>
+                </div>
+                @for (attribute of attributes(); track attribute.key; let i = $index) {
+                  <div class="row" role="row">
+                    <input
+                      pInputText
+                      [maxlength]="attributeMax"
+                      [ariaLabel]="('world.fields.attributeName' | transloco) + ' ' + (i + 1)"
+                      [ngModel]="attribute.name"
+                      (ngModelChange)="updateAttribute(attribute.key, { name: $event })"
+                    />
+                    <p-inputnumber
+                      [ngModel]="attribute.baseValue"
+                      (ngModelChange)="updateAttribute(attribute.key, { baseValue: $event ?? 0 })"
+                      [step]="1"
+                      inputStyleClass="number"
+                      [ariaLabel]="('world.fields.baseValue' | transloco) + ' ' + (i + 1)"
+                    />
+                    <p-button
+                      icon="pi pi-trash"
+                      severity="secondary"
+                      [text]="true"
+                      [rounded]="true"
+                      [ariaLabel]="'world.new.removeAttribute' | transloco"
+                      (onClick)="removeAttribute(attribute.key)"
+                    />
+                  </div>
+                }
+              </div>
+              <p-button icon="pi pi-plus" [label]="'world.new.addAttribute' | transloco" severity="secondary" [text]="true" (onClick)="addAttribute()" />
+              @if (errors().attributes; as error) {
+                <p-message severity="error" size="small" variant="simple">{{ error | transloco }}</p-message>
+              }
+
+              <div class="bars">
+                <div class="field">
+                  <label for="life-bar">{{ 'world.fields.lifeBar' | transloco }}</label>
+                  <p-select
+                    inputId="life-bar"
+                    [options]="attributeNames()"
+                    [showClear]="true"
+                    [placeholder]="'world.fields.noBar' | transloco"
+                    [ngModel]="lifeBar()"
+                    (ngModelChange)="lifeBar.set($event)"
+                  />
+                </div>
+                <div class="field">
+                  <label for="mana-bar">{{ 'world.fields.manaBar' | transloco }}</label>
+                  <p-select
+                    inputId="mana-bar"
+                    [options]="attributeNames()"
+                    [showClear]="true"
+                    [placeholder]="'world.fields.noBar' | transloco"
+                    [ngModel]="manaBar()"
+                    (ngModelChange)="manaBar.set($event)"
+                  />
+                </div>
+              </div>
+              <p class="hint">{{ 'world.new.barsHint' | transloco }}</p>
+
+              <div class="actions">
+                <p-button [label]="'world.new.back' | transloco" severity="secondary" [text]="true" (onClick)="step.set(1)" />
+                <p-button [label]="'world.new.next' | transloco" icon="pi pi-arrow-right" iconPos="right" [disabled]="!stepValid()[2]" (onClick)="step.set(3)" />
+              </div>
+            </div>
+          </ng-template>
+        </p-step-panel>
+
+        <!-- 3. Rules -->
+        <p-step-panel [value]="3">
+          <ng-template #content>
+            <div class="panel">
+              <div class="bars">
+                <div class="field">
+                  <label for="stat-points">{{ 'world.fields.startingStatPoints' | transloco }}</label>
+                  <p-inputnumber inputId="stat-points" [min]="0" [showButtons]="true" [ngModel]="startingStatPoints()" (ngModelChange)="startingStatPoints.set($event ?? 0)" />
+                </div>
+                <div class="field">
+                  <label for="money">{{ 'world.fields.startingMoney' | transloco }}</label>
+                  <p-inputnumber inputId="money" [min]="0" [showButtons]="true" [ngModel]="startingMoney()" (ngModelChange)="startingMoney.set($event ?? 0)" />
+                </div>
+                <div class="field">
+                  <label for="money-kind">{{ 'world.fields.currency' | transloco }}</label>
+                  <p-select inputId="money-kind" [options]="moneyOptions()" optionLabel="label" optionValue="value" [ngModel]="moneyKind()" (ngModelChange)="moneyKind.set($event)" />
+                </div>
+                @if (moneyKind() === 'custom') {
+                  <div class="field">
+                    <label for="money-symbol">{{ 'world.fields.currencySymbol' | transloco }}</label>
+                    <input pInputText id="money-symbol" maxlength="12" [ngModel]="moneySymbol()" (ngModelChange)="moneySymbol.set($event)" />
+                  </div>
+                }
+              </div>
+              @if (errors().moneySymbol; as error) {
+                <p-message severity="error" size="small" variant="simple">{{ error | transloco }}</p-message>
+              }
+
+              <div class="check">
+                <p-checkbox inputId="starter-items" [binary]="true" [ngModel]="starterItems()" (ngModelChange)="starterItems.set($event)" />
+                <label for="starter-items">
+                  {{ 'world.fields.starterItems' | transloco }}
+                  <small>{{ 'world.fields.starterItemsHint' | transloco }}</small>
+                </label>
+              </div>
+
+              <fieldset class="offline">
+                <legend>{{ 'world.fields.offlineTitle' | transloco }}</legend>
+                <p class="hint">{{ 'world.fields.offlineHint' | transloco }}</p>
+                @for (feature of offlineFeatures; track feature) {
+                  <div class="toggle">
+                    <p-toggleswitch [inputId]="'offline-' + feature" [ngModel]="offline()[feature]" (ngModelChange)="setOffline(feature, $event)" />
+                    <label [for]="'offline-' + feature">{{ 'world.offline.' + feature | transloco }}</label>
+                  </div>
+                }
+              </fieldset>
+
+              <div class="actions">
+                <p-button [label]="'world.new.back' | transloco" severity="secondary" [text]="true" (onClick)="step.set(2)" />
+                <p-button [label]="'world.new.create' | transloco" icon="pi pi-check" [loading]="creating()" [disabled]="!canCreate()" (onClick)="create()" />
+              </div>
+            </div>
+          </ng-template>
+        </p-step-panel>
+      </p-step-panels>
+    </p-stepper>
+
+    <aside class="preview">
+      <span class="label">{{ 'world.new.preview' | transloco }}</span>
+      <app-world-card [name]="name().trim() || ('world.fields.namePlaceholder' | transloco)" [description]="description()" [imageId]="imageId()">
+        <span meta>{{ 'world.new.attributeCount' | transloco: { count: attributeNames().length } }}</span>
+        <div actions class="chips">
+          @for (attribute of attributeNames(); track attribute) {
+            <p-tag [value]="attribute" severity="secondary" />
+          }
+        </div>
+      </app-world-card>
+    </aside>
+  </div>
+</div>
