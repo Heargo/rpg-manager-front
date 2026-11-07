@@ -9,7 +9,8 @@
     "dice": "Dice",
     "tools": "Tools",
     "itemGenerator": "Item generator",
-    "externalTools": "External tools"
+    "externalTools": "External tools",
+    "characterSheet": "Character sheet"
   },
   "play": {
     "title": "Play",
@@ -136,7 +137,16 @@
       "portraitTooLarge": "This portrait is too large.",
       "alreadyExists": "You already have a character in this room.",
       "notInRoom": "You're not in this room anymore. Ask for a new invite.",
-      "hostHasNoCharacter": "The game master doesn't play a character."
+      "hostHasNoCharacter": "The game master doesn't play a character.",
+      "noStatPoints": "No stat points left to spend.",
+      "unknownAttribute": "This attribute doesn't exist in this world.",
+      "invalidAmount": "Grant between 1 and 100 points.",
+      "unknownItem": "This item isn't in the inventory anymore.",
+      "notEquipment": "Only equipment can be equipped.",
+      "notConsumable": "Only consumables can be used.",
+      "gameMasterOnly": "Only the game master can do that.",
+      "unknownCharacter": "This character isn't in the room.",
+      "notYours": "This isn't your character."
     },
     "sheet": {
       "playedBy": "Played by {{ name }}",
@@ -144,7 +154,35 @@
       "money": "Money",
       "attribute": "Attribute",
       "value": "Value",
-      "coins": "{{ count }} coins"
+      "coins": "{{ count }} coins",
+      "open": "Open the sheet",
+      "notFound": "This character isn't in the room.",
+      "tabs": {
+        "stats": "Stats",
+        "equipment": "Equipment",
+        "inventory": "Inventory"
+      },
+      "base": "Base",
+      "points": "Points",
+      "bonus": "Bonus",
+      "spend": "Spend a point",
+      "spendOn": "Spend a point on {{ name }}",
+      "currentOf": "Current {{ name }}",
+      "grant": "Grant",
+      "grantLabel": "Grant stat points"
+    },
+    "items": {
+      "details": "Details",
+      "equip": "Equip",
+      "unequip": "Unequip",
+      "use": "Use",
+      "sell": "Sell",
+      "sellFor": "Sell for {{ price }}",
+      "sellTitle": "Sell this item?",
+      "sellMessage": "Sell {{ name }} for {{ price }}? It leaves the inventory.",
+      "equipped": "Equipped",
+      "empty": "The inventory is empty.",
+      "actions": "Actions for {{ name }}"
     }
   },
   "item": {
@@ -354,6 +392,12 @@
         "name": "Squoosh",
         "description": "Shrink and convert pictures before adding them to your world."
       }
+    },
+    "sheet": {
+      "title": "Character sheet",
+      "intro": "A sample character on the default attributes, with the default items in the bag. Everything follows the game rules and stays on this page.",
+      "reset": "Start over",
+      "sampleName": "Sample hero"
     }
   },
   "notFound": {

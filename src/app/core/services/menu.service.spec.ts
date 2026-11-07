@@ -10,6 +10,7 @@ describe('MenuService', () => {
     expect(tools?.items?.map((item) => item.routerLink)).toEqual([
       '/dice',
       '/tools/item-generator',
+      '/tools/character-sheet',
       '/tools/links',
     ]);
     expect(items.some((item) => item.label === 'nav.dice')).toBe(false);

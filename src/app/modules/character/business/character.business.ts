@@ -6,8 +6,12 @@ import { ProfileBusiness } from '../../../core/business/profile.business';
 import { PeerApiError } from '../../../core/p2p/helpers/peer-api-error';
 import { RoomBusiness } from '../../room/business/room.business';
 import { WorldInfoBusiness } from '../../world/business/world-info.business';
-import { Character } from '../../world/models/world';
+import { Character, MoneyFormat, WorldInfo } from '../../world/models/world';
+
+/** What a character sheet needs from its world (the room's, or the sandbox's). */
+export type SheetWorld = Pick<WorldInfo, 'attributes' | 'barAttributes' | 'moneyFormat'>;
 import { formatMoney } from '../../world/helpers/money';
+import { CharacterAction } from '../helpers/character-actions.rules';
 import { attributeStats, AttributeStat, barStats, BarStat } from '../helpers/character-stats';
 import { CharacterService } from '../services/character.service';
 
@@ -45,6 +49,19 @@ export class CharacterBusiness {
     return true;
   }
 
+  /** True on the game master's device: may act on any character, grant points and set current values. */
+  readonly $isGameMaster = this.room.$isHost;
+
+  /** Whether this device may spend points and use the items of a character: its player, or the game master. */
+  canPlay(character: Character): boolean {
+    return this.$isGameMaster() || character.playerId === this.profile.$profile().playerId;
+  }
+
+  /** Sends an action on a character to the host; resolves with the character as the host saved it. */
+  act(characterId: string, action: CharacterAction): Promise<Character> {
+    return this.service.act(characterId, action);
+  }
+
   /** Shrinks the portrait, keeps a copy here and sends it with the name to the host. */
   async create(name: string, portrait?: Blob): Promise<Character> {
     let image: { type: string; data: string } | undefined;
@@ -56,19 +73,17 @@ export class CharacterBusiness {
   }
 
   /** Every attribute of a character with its max (base + points + equipment) and current value. */
-  statsOf(character: Character): AttributeStat[] {
-    return attributeStats(this.$world()?.attributes ?? [], character);
+  statsOf(character: Character, world: SheetWorld | null = this.$world()): AttributeStat[] {
+    return attributeStats(world?.attributes ?? [], character);
   }
 
   /** The world's life and mana bars for a character. */
-  barsOf(character: Character): { life?: BarStat; mana?: BarStat } {
-    const world = this.$world();
-    return world ? barStats(this.statsOf(character), world.barAttributes) : {};
+  barsOf(character: Character, world: SheetWorld | null = this.$world()): { life?: BarStat; mana?: BarStat } {
+    return world ? barStats(this.statsOf(character, world), world.barAttributes) : {};
   }
 
   /** An amount in the world's money format and the active language. */
-  money(amount: number): string {
-    const format = this.$world()?.moneyFormat ?? { kind: 'coins' };
+  money(amount: number, format: MoneyFormat = this.$world()?.moneyFormat ?? { kind: 'coins' }): string {
     return formatMoney(amount, format, this.language.$language(), (count) => this.language.t('character.sheet.coins', { count }));
   }
 

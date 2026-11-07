@@ -9,7 +9,8 @@
     "dice": "Dés",
     "tools": "Outils",
     "itemGenerator": "Générateur d'objets",
-    "externalTools": "Outils externes"
+    "externalTools": "Outils externes",
+    "characterSheet": "Fiche de personnage"
   },
   "play": {
     "title": "Jouer",
@@ -136,7 +137,16 @@
       "portraitTooLarge": "Ce portrait est trop lourd.",
       "alreadyExists": "Vous avez déjà un personnage dans cette salle.",
       "notInRoom": "Vous n'êtes plus dans cette salle. Demandez une nouvelle invitation.",
-      "hostHasNoCharacter": "Le maître du jeu ne joue pas de personnage."
+      "hostHasNoCharacter": "Le maître du jeu ne joue pas de personnage.",
+      "noStatPoints": "Plus de points de stats à dépenser.",
+      "unknownAttribute": "Cet attribut n'existe pas dans ce monde.",
+      "invalidAmount": "Donnez entre 1 et 100 points.",
+      "unknownItem": "Cet objet n'est plus dans l'inventaire.",
+      "notEquipment": "Seul l'équipement peut être équipé.",
+      "notConsumable": "Seuls les consommables peuvent être utilisés.",
+      "gameMasterOnly": "Seul le maître du jeu peut faire ça.",
+      "unknownCharacter": "Ce personnage n'est pas dans le salon.",
+      "notYours": "Ce n'est pas votre personnage."
     },
     "sheet": {
       "playedBy": "Joué par {{ name }}",
@@ -144,7 +154,35 @@
       "money": "Argent",
       "attribute": "Attribut",
       "value": "Valeur",
-      "coins": "{{ count }} pièces"
+      "coins": "{{ count }} pièces",
+      "open": "Ouvrir la fiche",
+      "notFound": "Ce personnage n'est pas dans le salon.",
+      "tabs": {
+        "stats": "Stats",
+        "equipment": "Équipement",
+        "inventory": "Inventaire"
+      },
+      "base": "Base",
+      "points": "Points",
+      "bonus": "Bonus",
+      "spend": "Dépenser un point",
+      "spendOn": "Dépenser un point en {{ name }}",
+      "currentOf": "{{ name }} actuel",
+      "grant": "Donner",
+      "grantLabel": "Donner des points de stats"
+    },
+    "items": {
+      "details": "Détails",
+      "equip": "Équiper",
+      "unequip": "Retirer",
+      "use": "Utiliser",
+      "sell": "Vendre",
+      "sellFor": "Vendre pour {{ price }}",
+      "sellTitle": "Vendre cet objet ?",
+      "sellMessage": "Vendre {{ name }} pour {{ price }} ? Il quitte l'inventaire.",
+      "equipped": "Équipé",
+      "empty": "L'inventaire est vide.",
+      "actions": "Actions pour {{ name }}"
     }
   },
   "item": {
@@ -354,6 +392,12 @@
         "name": "Squoosh",
         "description": "Réduire et convertir des images avant de les ajouter à votre monde."
       }
+    },
+    "sheet": {
+      "title": "Fiche de personnage",
+      "intro": "Un personnage d'exemple sur les attributs par défaut, avec les objets par défaut dans son sac. Tout suit les règles du jeu et reste sur cette page.",
+      "reset": "Recommencer",
+      "sampleName": "Héros d'exemple"
     }
   },
   "notFound": {

@@ -1,0 +1,296 @@
+@let c = character();
+<header class="sheet-header">
+  <app-stored-image class="portrait" [imageId]="c.portraitId" [alt]="c.name">
+    <span class="initial">{{ c.name.charAt(0).toUpperCase() }}</span>
+  </app-stored-image>
+  <div class="who">
+    <h1>{{ c.name }}</h1>
+    @if (characters.playerName(c.playerId); as player) {
+      <small>{{
+        "character.sheet.playedBy" | transloco: { name: player }
+      }}</small>
+    }
+    <div class="facts">
+      <span><i class="pi pi-wallet"></i> {{ money(c.money) }}</span>
+      <span>
+        {{ "character.sheet.statPoints" | transloco }}
+        <p-badge
+          [value]="c.statPoints"
+          [severity]="c.statPoints > 0 ? 'info' : 'secondary'"
+        />
+      </span>
+    </div>
+  </div>
+</header>
+
+@for (bar of bars(); track bar.kind) {
+  <div class="bar" [class]="bar.kind">
+    <div class="bar-label">
+      <span>{{ bar.stat.name }}</span>
+      <span>{{ bar.stat.current }} / {{ bar.stat.max }}</span>
+    </div>
+    <p-progressbar
+      [value]="bar.stat.percent"
+      [showValue]="false"
+      [attr.aria-label]="bar.stat.name"
+    />
+  </div>
+}
+
+<p-tabs value="stats">
+  <p-tablist>
+    <p-tab value="stats">
+      {{ "character.sheet.tabs.stats" | transloco }}
+      @if (c.statPoints > 0) {
+        <p-badge [value]="c.statPoints" severity="info" />
+      }
+    </p-tab>
+    <p-tab value="equipment">{{
+      "character.sheet.tabs.equipment" | transloco
+    }}</p-tab>
+    <p-tab value="inventory">
+      {{ "character.sheet.tabs.inventory" | transloco }}
+      <p-badge [value]="c.inventory.length" severity="secondary" />
+    </p-tab>
+  </p-tablist>
+  <p-tabpanels>
+    <!-- Stats -->
+    <p-tabpanel value="stats">
+      @if (gameMaster()) {
+        <form class="grant" (ngSubmit)="grant()">
+          <label for="grant-points">{{
+            "character.sheet.grantLabel" | transloco
+          }}</label>
+          <p-inputnumber
+            inputId="grant-points"
+            [min]="1"
+            [max]="maxGranted"
+            [showButtons]="true"
+            buttonLayout="horizontal"
+            inputStyleClass="grant-input"
+            name="grant"
+            [ngModel]="grantAmount()"
+            (ngModelChange)="grantAmount.set($event ?? 1)"
+          />
+          <p-button
+            type="submit"
+            icon="pi pi-plus"
+            [label]="'character.sheet.grant' | transloco"
+            [disabled]="busy()"
+          />
+        </form>
+      }
+      <table class="stats">
+        <thead>
+          <tr>
+            <th scope="col">{{ "character.sheet.attribute" | transloco }}</th>
+            <th scope="col" class="num">
+              {{ "character.sheet.base" | transloco }}
+            </th>
+            <th scope="col" class="num">
+              {{ "character.sheet.points" | transloco }}
+            </th>
+            <th scope="col" class="num">
+              {{ "character.sheet.bonus" | transloco }}
+            </th>
+            <th scope="col" class="num">
+              {{ "character.sheet.value" | transloco }}
+            </th>
+            @if (canPlay() && c.statPoints > 0) {
+              <th scope="col">
+                <span class="sr-only">{{
+                  "character.sheet.spend" | transloco
+                }}</span>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (stat of stats(); track stat.attributeId) {
+            <tr>
+              <th scope="row">{{ stat.name }}</th>
+              <td class="num">{{ stat.base }}</td>
+              <td class="num">{{ stat.points }}</td>
+              <td
+                class="num"
+                [class.plus]="stat.bonus > 0"
+                [class.minus]="stat.bonus < 0"
+              >
+                {{ stat.bonus > 0 ? "+" : "" }}{{ stat.bonus }}
+              </td>
+              <td class="num value">
+                @if (gameMaster()) {
+                  <p-inputnumber
+                    [inputId]="'current-' + stat.attributeId"
+                    [min]="0"
+                    [max]="stat.max"
+                    [ngModel]="stat.current"
+                    (onBlur)="
+                      setCurrent(stat.attributeId, current.value, stat.current)
+                    "
+                    (keydown.enter)="
+                      setCurrent(stat.attributeId, current.value, stat.current)
+                    "
+                    #current
+                    inputStyleClass="current-input"
+                    [ariaLabel]="
+                      'character.sheet.currentOf'
+                        | transloco: { name: stat.name }
+                    "
+                  />
+                  <span class="max">/ {{ stat.max }}</span>
+                } @else {
+                  {{ stat.current }} / {{ stat.max }}
+                }
+              </td>
+              @if (canPlay() && c.statPoints > 0) {
+                <td>
+                  <p-button
+                    icon="pi pi-plus"
+                    size="small"
+                    [rounded]="true"
+                    [text]="true"
+                    [disabled]="busy()"
+                    [ariaLabel]="
+                      'character.sheet.spendOn' | transloco: { name: stat.name }
+                    "
+                    (onClick)="spend(stat.attributeId)"
+                  />
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </p-tabpanel>
+
+    <!-- Equipment -->
+    <p-tabpanel value="equipment">
+      <ul class="slots">
+        @for (slot of slots(); track slot.slot) {
+          <li>
+            <span class="slot-name">{{
+              slotLabel(slot.slot) | transloco
+            }}</span>
+            @if (slot.entry; as entry) {
+              <ng-container
+                *ngTemplateOutlet="tile; context: { $implicit: entry }"
+              />
+            } @else {
+              <div class="tile empty"><i class="pi pi-minus"></i></div>
+            }
+          </li>
+        }
+      </ul>
+    </p-tabpanel>
+
+    <!-- Inventory -->
+    <p-tabpanel value="inventory">
+      @if (inventory().length) {
+        <ul class="bag">
+          @for (entry of inventory(); track entry.id) {
+            <li>
+              <ng-container
+                *ngTemplateOutlet="tile; context: { $implicit: entry }"
+              />
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="hint">{{ "character.items.empty" | transloco }}</p>
+      }
+    </p-tabpanel>
+  </p-tabpanels>
+</p-tabs>
+
+<ng-template #tile let-entry>
+  <div
+    class="tile"
+    [class]="'rarity-' + entry.item.rarity"
+    [class.equipped]="entry.equipped"
+  >
+    <button
+      type="button"
+      class="tile-main"
+      (click)="showDetails(entry)"
+      (contextmenu)="openContextMenu($event, entry, contextMenu)"
+    >
+      <app-stored-image
+        class="tile-image"
+        [imageId]="entry.item.imageId"
+        [alt]="entry.item.name"
+      >
+        <i [class]="icons[entry.item.type]"></i>
+      </app-stored-image>
+      <span class="tile-name">{{ entry.item.name }}</span>
+      @if (entry.equipped) {
+        <span class="tile-equipped">{{
+          "character.items.equipped" | transloco
+        }}</span>
+      }
+    </button>
+    <p-button
+      icon="pi pi-ellipsis-v"
+      size="small"
+      [rounded]="true"
+      [text]="true"
+      severity="secondary"
+      styleClass="tile-menu"
+      [ariaLabel]="
+        'character.items.actions' | transloco: { name: entry.item.name }
+      "
+      (onClick)="openActionMenu($event, entry, actionMenu)"
+    />
+  </div>
+</ng-template>
+
+<p-contextmenu #contextMenu [model]="menuModel()" appendTo="body" />
+<p-menu #actionMenu [model]="menuModel()" [popup]="true" appendTo="body" />
+
+<p-dialog
+  [visible]="!!openItem()"
+  (visibleChange)="!$event && closeDetails()"
+  [modal]="true"
+  [dismissableMask]="true"
+  [header]="'character.items.details' | transloco"
+  [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
+>
+  @if (openItem(); as entry) {
+    <app-item-card [item]="entry.item" [priceText]="money(entry.item.price)" />
+    @if (canPlay()) {
+      <div class="dialog-actions">
+        @if (entry.item.type === "equipment" && entry.item.slot !== "none") {
+          <p-button
+            [icon]="entry.equipped ? 'pi pi-minus-circle' : 'pi pi-plus-circle'"
+            [label]="
+              (entry.equipped
+                ? 'character.items.unequip'
+                : 'character.items.equip'
+              ) | transloco
+            "
+            [disabled]="busy()"
+            (onClick)="equip(entry)"
+          />
+        }
+        @if (entry.item.type === "consumable") {
+          <p-button
+            icon="pi pi-heart"
+            [label]="'character.items.use' | transloco"
+            [disabled]="busy()"
+            (onClick)="use(entry)"
+          />
+        }
+        <p-button
+          icon="pi pi-wallet"
+          [label]="
+            'character.items.sellFor'
+              | transloco: { price: money(entry.item.price) }
+          "
+          severity="secondary"
+          [disabled]="busy()"
+          (onClick)="sell(entry)"
+        />
+      </div>
+    }
+  }
+</p-dialog>
