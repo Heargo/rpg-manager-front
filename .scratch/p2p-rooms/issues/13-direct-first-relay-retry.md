@@ -2,9 +2,9 @@
 
 Status: ready-for-agent
 Type: task
-Blocked by: 12
+Blocked by: 14
 
-Decided 2026-11-07: try to connect without the TURN relay first, and only use Metered's Open Relay when the direct connection fails. With manual codes (no signalling mailbox), switching to the relay needs a new invite, so it's a retry step, not a silent switch.
+Decided 2026-11-07: try to connect without the TURN relay first, and only use Metered's Open Relay when the direct connection fails. **Updated after ticket 14:** with the mailbox, the retry loop already sends a new offer through the box, so the switch to the relay is silent: attempt 1 is STUN only, retries use TURN. With manual codes (fallback), it stays a "Try through the relay" invite as described below.
 
 ## Today
 

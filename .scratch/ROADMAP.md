@@ -41,31 +41,32 @@ Tickets across two specs: `p2p-rooms/` (P) and `legacy-parity/` (L). The order f
 
 | # | Ticket | Why now | Blocked by |
 | - | --- | --- | --- |
-| 14 | **P12** Joining from a phone: survive leaving the page | Manual codes stay (decided 2026-11-07): players switch to their chat app to send the answer code, and a frozen background tab loses the connection. Without this, phone players can't join reliably. | none |
-| 15 | **P13** Direct first, relay invite on failure | Invites without TURN by default (shorter codes, no relay allocation); a relay invite when the direct one fails. | P12 |
+| 14 | **P12** Joining from a phone: survive leaving the page | Phone-friendly manual flow (done; now the fallback for P14). | none |
+| 15 | **P14** Join with the host's link only (signalling mailbox) | Decided 2026-11-07: a Netlify Function + Blobs mailbox carries the answer, so nobody pastes and there's no 30 s limit; retries until connected. Manual code stays as fallback. | none |
+| 16 | **P13** Direct first, relay on retry | Attempt 1 without TURN; the mailbox retry switches to the relay silently (relay invite in manual mode). | P14 |
 
 ## Phase 4: items
 
 | # | Ticket | Why now | Blocked by |
 | - | --- | --- | --- |
-| 16 | **L08** Item catalogue (GM) | Search/filter, give to player, default items import. | L03 |
-| 17 | **L09** Item editor (form, JSON, generate) | Uses L10 generators; Chrome on-device AI tier last within the ticket. **Milestone C: legacy parity for gameplay.** | L08, L10 |
+| 17 | **L08** Item catalogue (GM) | Search/filter, give to player, default items import. | L03 |
+| 18 | **L09** Item editor (form, JSON, generate) | Uses L10 generators; Chrome on-device AI tier last within the ticket. **Milestone C: legacy parity for gameplay.** | L08, L10 |
 
 ## Phase 5: resilience
 
 | # | Ticket | Why now | Blocked by |
 | - | --- | --- | --- |
-| 18 | **P09** Player copy and "Pick a save" | Needs real player data (L05–L07) to be meaningful. | P03, P05 |
-| 19 | **P10** Host offline mode | Builds on P09's conflict flow and the offline toggles from L04. | P09 |
-| 20 | **P06** Offline and failure states | Banners, timeouts, bad/expired codes, once all flows exist. | P04 |
+| 19 | **P09** Player copy and "Pick a save" | Needs real player data (L05–L07) to be meaningful. | P03, P05 |
+| 20 | **P10** Host offline mode | Builds on P09's conflict flow and the offline toggles from L04. | P09 |
+| 21 | **P06** Offline and failure states | Banners, timeouts, bad/expired codes, once all flows exist. | P04 |
 
 ## Phase 6: polish
 
 | # | Ticket | Why now | Blocked by |
 | - | --- | --- | --- |
-| 21 | **P08** QR scanning | Convenience: pasting already works. | P04 |
-| 22 | **P11** Room size warning | Only matters once real rooms are played. | P04 |
-| 23 | **L01** Landing, tools, credits, contact, privacy | Replaces the Angular starter home page; independent, can be pulled earlier any time. | none |
+| 22 | **P08** QR scanning | Convenience: pasting already works. | P04 |
+| 23 | **P11** Room size warning | Only matters once real rooms are played. | P04 |
+| 24 | **L01** Landing, tools, credits, contact, privacy | Replaces the Angular starter home page; independent, can be pulled earlier any time. | none |
 
 ## How each ticket is developed
 

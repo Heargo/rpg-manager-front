@@ -1,6 +1,6 @@
 # Joining from a phone: survive leaving the page
 
-Status: claimed
+Status: resolved
 Type: task
 Blocked by: none
 
@@ -98,3 +98,7 @@ Wake lock goes through a small service (browser API), asked for by `RoomBusiness
 
 - 2026-11-07, built (commit "feat(room): phone-friendly join"): join state on `RoomBusiness` (`$joinState`, `$failedWhileAway`), invite states with `retryInvite` (new invite created before the failed one is dropped), `WakeLockService`, "Send to the host" (Web Share, copy fallback; only `AbortError` counts as cancelled), come-back step, "still waiting" after returning, failed-while-away message, "Connecting…" / failed + "New invite" on the host card. Review: ship; three Consider points fixed. Browser check (desktop pane, two tabs): invite → join page → Send (copy fallback, come-back step) → host paste → refused duplicate seat shown to the player; layout fits at 375 px. Suite 246 passing.
 - **Still open:** device measurements on Android Chrome and iOS Safari (user), then adjust wording/timings and resolve. Not covered: an ICE failure after a successful paste is only surfaced if the transport's `acceptAnswer` rejects (it does on `failed`), and it can't be reproduced without real devices.
+
+## Answer
+
+Built as described in the comments above (commit ca340f0). The device measurements are dropped: ticket 14 (signalling mailbox) takes the code and its time limit out of the normal path, and this ticket's flow stays as the fallback when the mailbox can't be reached. Its join and invite states, wake lock and "Send to the host" are reused by ticket 14.
