@@ -36,6 +36,7 @@
     "@openng/optimus-ui": "^2.0.2",
     "@openng/optimus-ui-themes": "^2.0.2",
     "idb": "^8.0.4",
+    "jsqr": "1.4.0",
     "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",
     "three": "^0.187.0",

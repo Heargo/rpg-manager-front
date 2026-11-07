@@ -4,6 +4,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
+  Injector,
+  afterNextRender,
   inject,
   input,
   signal,
@@ -19,6 +22,7 @@ import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { PendingInvite, RoomBusiness } from '../../business/room.business';
+import { QrScanComponent } from '../qr-scan/qr-scan.component';
 
 /** One pending invite on the host: send the link (copy, share, QR), then paste the player's answer. */
 @Component({
@@ -33,6 +37,7 @@ import { PendingInvite, RoomBusiness } from '../../business/room.business';
     InputTextModule,
     MessageModule,
     TextareaModule,
+    QrScanComponent,
   ],
   template: `
     <p-card styleClass="invite">
@@ -114,6 +119,18 @@ import { PendingInvite, RoomBusiness } from '../../business/room.business';
           <ng-container *ngTemplateOutlet="answerField" />
         }
         <ng-template #answerField>
+          <div class="actions">
+            <button
+              pButton
+              type="button"
+              data-test="scan"
+              icon="pi pi-camera"
+              [label]="'room.scan.button' | transloco"
+              size="small"
+              severity="secondary"
+              (click)="scanning.set(true)"
+            ></button>
+          </div>
           <textarea
             pTextarea
             rows="3"
@@ -176,6 +193,13 @@ import { PendingInvite, RoomBusiness } from '../../business/room.business';
         </div>
       </div>
     </p-card>
+    @if (scanning()) {
+      <app-qr-scan
+        place="host-pending-invite"
+        (scanned)="scanned($event)"
+        (closed)="closeScanner()"
+      />
+    }
   `,
   styles: `
     .steps {
@@ -237,6 +261,9 @@ export class InviteCardComponent {
   protected readonly qr = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
   protected readonly connecting = signal(false);
+  protected readonly scanning = signal(false);
+  private readonly element = inject(ElementRef<HTMLElement>);
+  private readonly injector = inject(Injector);
   protected readonly canShare =
     typeof navigator !== 'undefined' && 'share' in navigator;
 
@@ -267,6 +294,22 @@ export class InviteCardComponent {
 
   protected async toggleQr(): Promise<void> {
     this.qr.set(this.qr() ? null : await this.room.qrCode(this.link()));
+  }
+
+  /** The scanner is removed with `@if`, so give focus back to the button that opened it. */
+  protected closeScanner(): void {
+    this.scanning.set(false);
+    afterNextRender(
+      () =>
+        this.element.nativeElement.querySelector('[data-test="scan"]')?.focus(),
+      { injector: this.injector },
+    );
+  }
+
+  protected scanned(text: string): void {
+    this.closeScanner();
+    this.answer.set(text);
+    void this.accept();
   }
 
   protected async accept(): Promise<void> {

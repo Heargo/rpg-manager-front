@@ -348,6 +348,20 @@
   },
   "room": {
     "title": "Salle",
+    "scan": {
+      "button": "Scanner",
+      "title": "Scanner un QR code",
+      "hintAnswer": "Pointez la caméra vers le QR code affiché sur l'écran du joueur.",
+      "hintInvite": "Pointez la caméra vers le QR code de l'invitation.",
+      "close": "Fermer",
+      "wrongKind": "Ce n'est pas le bon type de code ici.",
+      "unknown": "Ce QR code n'est pas un code de connexion.",
+      "denied": "L'accès à la caméra a été refusé. Collez le code à la place.",
+      "noCamera": "Aucune caméra disponible. Collez le code à la place.",
+      "paste": "Collez le code",
+      "use": "Utiliser ce code",
+      "video": "Aperçu de la caméra"
+    },
     "start": {
       "title": "Jouer ensemble",
       "hostTitle": "Créer une salle",

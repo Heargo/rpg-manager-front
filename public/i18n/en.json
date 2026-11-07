@@ -348,6 +348,20 @@
   },
   "room": {
     "title": "Room",
+    "scan": {
+      "button": "Scan",
+      "title": "Scan a QR code",
+      "hintAnswer": "Point the camera at the QR code on the player's screen.",
+      "hintInvite": "Point the camera at the invite QR code.",
+      "close": "Close",
+      "wrongKind": "This is not the right kind of code here.",
+      "unknown": "This QR code is not a connection code.",
+      "denied": "Camera access was denied. Paste the code instead.",
+      "noCamera": "No camera available. Paste the code instead.",
+      "paste": "Paste the code",
+      "use": "Use this code",
+      "video": "Camera preview"
+    },
     "start": {
       "title": "Play together",
       "hostTitle": "Host a room",
