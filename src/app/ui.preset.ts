@@ -17,6 +17,20 @@ import Aura from '@openng/optimus-ui-themes/aura';
 
 export const UiRpgPreset = definePreset(Aura, {
   semantic: {
+    // Primary (buttons, actions, accents): the palette's dark red, #7f1919 at 500 (legacy $red).
+    primary: {
+      50: '#fbe6e6',
+      100: '#f8cdcd',
+      200: '#f29494',
+      300: '#ef5252',
+      400: '#bc2a2a',
+      500: '#7f1919',
+      600: '#691313',
+      700: '#560e0e',
+      800: '#400808',
+      900: '#2d0404',
+      950: '#1f0202',
+    },
     colorScheme: {
       light: {
         surface: {

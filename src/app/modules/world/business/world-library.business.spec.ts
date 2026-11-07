@@ -4,6 +4,14 @@ import { TestBed } from '@angular/core/testing';
 import { ImageBusiness } from '../../../core/business/image.business';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
 import { WorldImportError, WorldLibraryBusiness } from './world-library.business';
+import en from '../../../../../public/i18n/generators/en/items.json';
+import { WordListService } from '../../../core/services/word-list.service';
+import { provideTestTranslations } from '../../../../testing/test-providers';
+
+const TEST_WORLD_PROVIDERS = [
+  provideTestTranslations(),
+  { provide: WordListService, useValue: { loadItemWords: async () => en } },
+];
 
 describe('WorldLibraryBusiness (IndexedDB)', () => {
   let library: WorldLibraryBusiness;
@@ -12,7 +20,7 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
   beforeEach(() => {
     globalThis.indexedDB = new IDBFactory();
     vi.restoreAllMocks();
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({ providers: TEST_WORLD_PROVIDERS });
     library = TestBed.inject(WorldLibraryBusiness);
     images = TestBed.inject(ImageBusiness);
   });
@@ -27,7 +35,7 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
 
     // A fresh business sees what was stored.
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({ providers: TEST_WORLD_PROVIDERS });
     const reloaded = TestBed.inject(WorldLibraryBusiness);
     await reloaded.load();
     expect(reloaded.$worlds().map((world) => world.name)).toEqual(['First', 'Second']);
@@ -77,5 +85,29 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
 
   it('refuses an invalid file with the list of problems', async () => {
     await expect(library.importWorld('{"format":"rpg-manager-world","version":1}')).rejects.toBeInstanceOf(WorldImportError);
+  });
+
+  it('creates a world with starter items drawn from its attributes', async () => {
+    const world = await library.create(
+      {
+        name: 'Eldoria',
+        attributes: [
+          { name: 'Life', baseValue: 10 },
+          { name: 'Strength', baseValue: 2 },
+        ],
+        barAttributes: { life: 'Life' },
+      },
+      { starterItems: true },
+    );
+
+    expect(world.items.length).toBeGreaterThan(15);
+    expect(new Set(world.items.map((item) => item.id)).size).toBe(world.items.length);
+    const attributes = world.items.flatMap((item) => item.modifiers.map((m) => m.attribute));
+    expect(attributes.every((attribute) => ['Life', 'Strength'].includes(attribute))).toBe(true);
+    expect((await library.get(world.id))?.items).toHaveLength(world.items.length);
+  });
+
+  it('creates an empty catalogue without the option', async () => {
+    expect((await library.create({ name: 'Bare', attributes: [] })).items).toEqual([]);
   });
 });

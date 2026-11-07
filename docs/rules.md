@@ -1,6 +1,6 @@
 # rpg-manager-front — rules
 
-Angular 22 app (TypeScript 6.0), zoneless, standalone components, Optimus UI 2 (MIT fork of PrimeNG 21, see `docs/adr/0001-replace-primeng-with-optimus-ui.md`; Aura preset in `src/app/ui.preset.ts`), installable as a PWA (`@angular/service-worker`). No backend: players talk peer-to-peer over WebRTC in host-dispatched rooms (`.scratch/p2p-rooms/spec.md`). There are no accounts: the player is a local profile (`core/business/profile.business.ts`) with a stable `playerId`. `HttpClient` only loads the app's own static files.
+Angular 22 app (TypeScript 6.0), zoneless, standalone components, Optimus UI 2 (MIT fork of PrimeNG 21, see `docs/adr/0001-replace-primeng-with-optimus-ui.md`; Aura preset in `src/app/ui.preset.ts`), installable as a PWA (`@angular/service-worker`). No backend: players talk peer-to-peer over WebRTC in host-dispatched rooms (`.scratch/p2p-rooms/spec.md`). The only server code is one Netlify Function (`netlify/functions/ice-servers.mts`) that hands out TURN credentials (`docs/adr/0003-open-relay-turn.md`). There are no accounts: the player is a local profile (`core/business/profile.business.ts`) with a stable `playerId`. `HttpClient` only loads the app's own static files; `fetchIceServers()` calls the ICE servers function.
 
 ## Structure
 
@@ -86,6 +86,8 @@ The app is in English and French, switchable at runtime (no reload, so live peer
 - TypeScript (menu labels, toasts, error messages): `LanguageBusiness.t('key', params)`; it is reactive inside `computed()`. Never hard-code a user-facing string.
 - The active language: `LanguageBusiness.$language`; change it with `setLanguage()`. Starting language: saved choice, then the browser language, then `en` (`core/i18n/initial-language.ts`).
 - Optimus UI's built-in texts come from the `optimus` block of each language file.
+- Dates: the `localDate` pipe (`core/pipes/local-date.pipe.ts`, `Intl` in the active language), not Angular's `DatePipe` (fixed locale).
+- Confirmations: `ConfirmationService.confirm()` with translated header, message and button labels; the dialog lives in `app.html`.
 - Data that depends on the language (generator word lists) lives in `public/i18n/generators/<lang>/`, loaded by its own service, not through Transloco.
 - Supported languages are listed in `core/constants/languages.ts`; adding one means a new JSON file per folder and an entry there.
 

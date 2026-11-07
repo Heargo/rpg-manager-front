@@ -1,8 +1,241 @@
 {
+  "common": {
+    "cancel": "Annuler"
+  },
   "nav": {
     "play": "Jouer",
     "profile": "Profil",
-    "language": "Langue"
+    "language": "Langue",
+    "dice": "Dés",
+    "tools": "Outils",
+    "itemGenerator": "Générateur d'objets",
+    "externalTools": "Outils externes",
+    "characterSheet": "Fiche de personnage"
+  },
+  "play": {
+    "title": "Jouer",
+    "activeRoom": "Salle ouverte : {{ name }}.",
+    "backToRoom": "Retour à la salle",
+    "worlds": {
+      "title": "Vos mondes",
+      "new": "Nouveau monde",
+      "import": "Importer",
+      "imported": "Monde importé",
+      "importFailed": "Ce fichier n'est pas un export de monde valide.",
+      "empty": "Aucun monde pour l'instant. Créez-en un pour lancer une partie.",
+      "characters": "{{ count }} personnages",
+      "host": "Héberger",
+      "openRoom": "Ouvrir la salle",
+      "export": "Exporter dans un fichier",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer ce monde ?",
+      "deleteMessage": "« {{ name }} », ses personnages et ses objets seront supprimés de cet appareil. Exportez-le d'abord pour en garder une copie."
+    },
+    "rooms": {
+      "empty": "Les salles que vous rejoignez comme joueur apparaissent ici.",
+      "forgetMessage": "Oublier « {{ name }} » ? Vous pourrez revenir avec une nouvelle invitation."
+    }
+  },
+  "world": {
+    "created": "« {{ name }} » est prêt",
+    "new": {
+      "title": "Nouveau monde",
+      "steps": {
+        "identity": "Identité",
+        "attributes": "Attributs",
+        "rules": "Règles"
+      },
+      "next": "Suivant",
+      "back": "Retour",
+      "create": "Créer le monde",
+      "preview": "Aperçu",
+      "attributeCount": "{{ count }} attributs",
+      "attributesHint": "Chaque personnage de ce monde a ces attributs. Les joueurs les augmentent avec des points de stats ; les objets peuvent les améliorer.",
+      "addAttribute": "Ajouter un attribut",
+      "removeAttribute": "Retirer cet attribut",
+      "barsHint": "Les barres s'affichent sur la vue joueur (vie, mana…). Laissez vide si votre jeu n'en a pas."
+    },
+    "fields": {
+      "name": "Nom",
+      "namePlaceholder": "Nom de votre monde",
+      "description": "Description",
+      "descriptionPlaceholder": "De quoi parle ce monde ?",
+      "image": "Image",
+      "chooseImage": "Choisir une image",
+      "changeImage": "Changer l'image",
+      "attributeName": "Attribut",
+      "baseValue": "Valeur de base",
+      "lifeBar": "Barre de vie",
+      "manaBar": "Seconde barre (mana…)",
+      "noBar": "Aucune",
+      "startingStatPoints": "Points de stats de départ",
+      "startingMoney": "Argent de départ",
+      "currency": "Monnaie",
+      "currencySymbol": "Symbole de la monnaie",
+      "starterItems": "Commencer avec des objets par défaut",
+      "starterItemsHint": "Une vingtaine d'objets générés à partir de vos attributs : un équipement par emplacement, des potions, des objets.",
+      "offlineTitle": "Quand l'hôte est hors ligne",
+      "offlineHint": "Les joueurs peuvent toujours lire leur fiche. Choisissez ce qu'ils peuvent encore faire ; les changements sont vérifiés au retour de l'hôte."
+    },
+    "money": {
+      "coins": "Pièces",
+      "dollars": "Dollars ($)",
+      "euros": "Euros (€)",
+      "pounds": "Livres (£)",
+      "yen": "Yens (¥)",
+      "custom": "Personnalisée…"
+    },
+    "offline": {
+      "dice": "Lancer les dés",
+      "notes": "Écrire des notes personnelles",
+      "spendStatPoints": "Dépenser des points de stats",
+      "equip": "Équiper et retirer des objets",
+      "useConsumables": "Utiliser des consommables",
+      "sell": "Vendre des objets"
+    },
+    "defaults": {
+      "life": "Vie",
+      "mana": "Mana",
+      "strength": "Force",
+      "agility": "Agilité",
+      "intelligence": "Intelligence"
+    },
+    "errors": {
+      "nameRequired": "Donnez un nom à votre monde.",
+      "nameTooLong": "Ce nom est trop long.",
+      "attributeNameRequired": "Chaque attribut doit avoir un nom.",
+      "attributeNameTooLong": "Un nom d'attribut est trop long.",
+      "attributeNamesUnique": "Deux attributs ont le même nom.",
+      "baseValueInteger": "Les valeurs de base doivent être des nombres entiers.",
+      "nonNegativeInteger": "Utilisez un nombre entier, 0 ou plus.",
+      "symbolRequired": "Saisissez le symbole de la monnaie.",
+      "image": "Cette image n'a pas pu être utilisée."
+    }
+  },
+  "character": {
+    "list": {
+      "title": "Personnages",
+      "empty": "Aucun personnage pour l'instant.",
+      "needOne": "Vous n'avez pas encore de personnage dans cette salle."
+    },
+    "create": {
+      "title": "Créez votre personnage",
+      "intro": "Vous rejoignez {{ world }}. Choisissez un nom et un portrait ; le reste vient des règles du monde.",
+      "name": "Nom du personnage",
+      "portrait": "Portrait",
+      "choosePortrait": "Choisir un portrait",
+      "startsWith": "Votre personnage commence avec",
+      "statPoints": "{{ count }} points de stats à dépenser",
+      "money": "{{ count }} d'argent",
+      "submit": "Créer",
+      "later": "Plus tard"
+    },
+    "errors": {
+      "invalid": "Ce personnage ne peut pas être créé.",
+      "nameRequired": "Donnez un nom à votre personnage.",
+      "nameTooLong": "Ce nom est trop long.",
+      "portraitTooLarge": "Ce portrait est trop lourd.",
+      "alreadyExists": "Vous avez déjà un personnage dans cette salle.",
+      "notInRoom": "Vous n'êtes plus dans cette salle. Demandez une nouvelle invitation.",
+      "hostHasNoCharacter": "Le maître du jeu ne joue pas de personnage.",
+      "noStatPoints": "Plus de points de stats à dépenser.",
+      "unknownAttribute": "Cet attribut n'existe pas dans ce monde.",
+      "invalidAmount": "Donnez entre 1 et 100 points.",
+      "unknownItem": "Cet objet n'est plus dans l'inventaire.",
+      "notEquipment": "Seul l'équipement peut être équipé.",
+      "notConsumable": "Seuls les consommables peuvent être utilisés.",
+      "gameMasterOnly": "Seul le maître du jeu peut faire ça.",
+      "unknownCharacter": "Ce personnage n'est pas dans le salon.",
+      "notYours": "Ce n'est pas votre personnage."
+    },
+    "sheet": {
+      "playedBy": "Joué par {{ name }}",
+      "statPoints": "Points de stats",
+      "money": "Argent",
+      "attribute": "Attribut",
+      "value": "Valeur",
+      "coins": "{{ count }} pièces",
+      "open": "Ouvrir la fiche",
+      "notFound": "Ce personnage n'est pas dans le salon.",
+      "tabs": {
+        "stats": "Stats",
+        "equipment": "Équipement",
+        "inventory": "Inventaire"
+      },
+      "base": "Base",
+      "points": "Points",
+      "bonus": "Bonus",
+      "spend": "Dépenser un point",
+      "spendOn": "Dépenser un point en {{ name }}",
+      "currentOf": "{{ name }} actuel",
+      "grant": "Donner",
+      "grantLabel": "Donner des points de stats"
+    },
+    "items": {
+      "details": "Détails",
+      "equip": "Équiper",
+      "unequip": "Retirer",
+      "use": "Utiliser",
+      "sell": "Vendre",
+      "sellFor": "Vendre pour {{ price }}",
+      "sellTitle": "Vendre cet objet ?",
+      "sellMessage": "Vendre {{ name }} pour {{ price }} ? Il quitte l'inventaire.",
+      "equipped": "Équipé",
+      "empty": "L'inventaire est vide.",
+      "actions": "Actions pour {{ name }}"
+    }
+  },
+  "item": {
+    "rarity": {
+      "common": "Commun",
+      "uncommon": "Peu commun",
+      "rare": "Rare",
+      "mythic": "Mythique",
+      "legendary": "Légendaire"
+    },
+    "type": {
+      "item": "Objet",
+      "consumable": "Consommable",
+      "equipment": "Équipement"
+    },
+    "slot": {
+      "head": "Tête",
+      "earring": "Boucle d'oreille",
+      "necklace": "Collier",
+      "ring": "Anneau",
+      "chest": "Torse",
+      "hand": "Mains",
+      "legs": "Jambes",
+      "foot": "Pieds",
+      "weapon1": "Arme 1",
+      "weapon2": "Arme 2"
+    },
+    "fields": {
+      "rarity": "Rareté",
+      "type": "Type",
+      "slot": "Emplacement"
+    },
+    "modifiers": "Modificateurs",
+    "price": "{{ price }} pièces"
+  },
+  "dice": {
+    "title": "Dés",
+    "count": "Nombre de dés",
+    "sides": "Faces",
+    "roll": "Lancer",
+    "rolling": "Lancer en cours…",
+    "again": "Relancer",
+    "close": "Fermer",
+    "history": "Lancers récents",
+    "skip": "Cliquez pour passer l'animation",
+    "share": "Partager avec la table",
+    "tableRolls": "Lancers de la table",
+    "rolledBy": "{{ name }} a lancé",
+    "errors": {
+      "invalid": "Ces dés ne peuvent pas être lancés.",
+      "notInRoom": "Vous n'êtes plus dans ce salon.",
+      "shareFailed": "Impossible de joindre l'hôte pour partager ce lancer. Désactivez le partage pour lancer ici."
+    }
   },
   "profile": {
     "title": "Votre profil",
@@ -94,6 +327,77 @@
       "hostedBy": "Hôte : {{ name }}",
       "lastSeen": "vue {{ date }}",
       "forget": "Oublier cette salle"
+    }
+  },
+  "table": {
+    "title": "Table de jeu",
+    "open": "Aller à la table",
+    "lobby": "Salon",
+    "gameMaster": "Vous êtes le maître du jeu",
+    "players": "Joueurs",
+    "noPlayers": "Aucun personnage à la table pour l'instant.",
+    "waiting": "En attente de l'hôte…",
+    "illustration": "Illustration",
+    "noIllustration": "Le maître du jeu n'a pas encore montré d'image.",
+    "noIllustrationGm": "Ajoutez une image pour la montrer à tous les joueurs.",
+    "addImage": "Ajouter une image",
+    "hideIllustration": "Masquer l'image",
+    "quickImages": "Images rapides",
+    "quickImage": "Image rapide",
+    "quickImagesHint": "Les images ajoutées restent ici : cliquez sur l'une d'elles pour la montrer à tous.",
+    "showToAll": "Montrer à tous",
+    "removeImage": "Retirer des images rapides",
+    "notes": {
+      "title": "Notes",
+      "placeholder": "Vous seul voyez ces notes. Elles sont enregistrées avec le monde.",
+      "saved": "Enregistré",
+      "editing": "Modification…",
+      "saving": "Enregistrement…",
+      "error": "Non enregistré"
+    },
+    "errors": {
+      "invalid": "Cette demande n'est pas valide.",
+      "notesTooLong": "Ces notes sont trop longues.",
+      "tooManyImages": "Trop d'images rapides : retirez-en d'abord.",
+      "imageMissing": "Cette image n'est pas sur l'appareil de l'hôte.",
+      "gameMasterOnly": "Seul le maître du jeu peut faire ça."
+    }
+  },
+  "tools": {
+    "sandbox": {
+      "name": "Bac à sable"
+    },
+    "itemGenerator": {
+      "title": "Générateur d'objets",
+      "intro": "Tire un objet au hasard. Ses modificateurs utilisent les attributs par défaut : {{ attributes }}.",
+      "random": "Au hasard",
+      "seed": "Graine",
+      "reroll": "Relancer",
+      "seedHint": "La même graine avec les mêmes options donne le même objet. Collez une graine pour retrouver un objet.",
+      "failed": "La liste de mots n'a pas pu être chargée. Vérifiez votre connexion et rechargez."
+    },
+    "external": {
+      "title": "Outils externes",
+      "intro": "Des outils gratuits, faits par d'autres, pour préparer une partie.",
+      "notOurs": "Ces sites ne font pas partie de l'application ; ils s'ouvrent dans un nouvel onglet.",
+      "procgenArcana": {
+        "name": "Procgen Arcana",
+        "description": "Les générateurs de Watabou : villes, villages, donjons et plus."
+      },
+      "fantasyMap": {
+        "name": "Fantasy Map Generator",
+        "description": "Les cartes du monde d'Azgaar, avec pays, cultures et routes."
+      },
+      "squoosh": {
+        "name": "Squoosh",
+        "description": "Réduire et convertir des images avant de les ajouter à votre monde."
+      }
+    },
+    "sheet": {
+      "title": "Fiche de personnage",
+      "intro": "Un personnage d'exemple sur les attributs par défaut, avec les objets par défaut dans son sac. Tout suit les règles du jeu et reste sur cette page.",
+      "reset": "Recommencer",
+      "sampleName": "Héros d'exemple"
     }
   },
   "notFound": {

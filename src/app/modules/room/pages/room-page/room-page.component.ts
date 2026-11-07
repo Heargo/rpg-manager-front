@@ -1,35 +1,20 @@
-import { ChangeDetectionStrategy, Component, inject, linkedSignal, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
-import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
-import { TextareaModule } from '@openng/optimus-ui/textarea';
-import { LanguageBusiness } from '../../../../core/business/language.business';
 import { ProfileBusiness } from '../../../../core/business/profile.business';
-import { extractSignalCode } from '../../../../core/p2p/helpers/signal-codec';
 import { RoomBusiness } from '../../business/room.business';
 import { InviteCardComponent } from '../../components/invite-card/invite-card.component';
 import { MemberListComponent } from '../../components/member-list/member-list.component';
+import { CharacterListComponent } from '../../../character/components/character-list/character-list.component';
 
+/** The open room's lobby. With no room open (or after leaving), the Play hub takes over. */
 @Component({
   selector: 'app-room-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    DatePipe,
-    FormsModule,
-    TranslocoPipe,
-    ButtonModule,
-    CardModule,
-    InputTextModule,
-    MessageModule,
-    TextareaModule,
-    InviteCardComponent,
-    MemberListComponent,
-  ],
+  imports: [RouterLink, TranslocoPipe, ButtonModule, CardModule, MessageModule, InviteCardComponent, MemberListComponent, CharacterListComponent],
   templateUrl: './room-page.component.html',
   styleUrl: './room-page.component.scss',
 })
@@ -37,33 +22,17 @@ export class RoomPageComponent {
   protected readonly room = inject(RoomBusiness);
   protected readonly profile = inject(ProfileBusiness);
   private readonly router = inject(Router);
-  private readonly language = inject(LanguageBusiness);
 
-  protected readonly roomName = linkedSignal(() => this.room.defaultRoomName());
-  protected readonly inviteInput = signal('');
   protected readonly inviting = signal(false);
   protected readonly error = signal<string | null>(null);
+  private readonly ready = signal(false);
 
-  protected async host(): Promise<void> {
-    if (!this.roomName().trim()) return;
-    this.error.set(null);
-    if (!(await this.room.hostRoom(this.roomName()))) {
-      this.error.set(this.translate('room.errors.otherTab'));
-    }
-  }
-
-  private translate(key: string): string {
-    return this.language.t(key);
-  }
-
-  /** Joining happens on /join (it shows the answer code), so a pasted link or code goes there. */
-  protected async join(): Promise<void> {
-    const code = extractSignalCode(this.inviteInput());
-    if (!code) {
-      this.error.set(this.room.describeError(new Error()));
-      return;
-    }
-    await this.router.navigate(['/join'], { fragment: code });
+  constructor() {
+    // Wait for a saved room to be reopened before deciding there is none.
+    void this.room.whenReady().then(() => this.ready.set(true));
+    effect(() => {
+      if (this.ready() && this.room.$status() === 'idle') void this.router.navigate(['/play']);
+    });
   }
 
   protected async invite(forPlayerId?: string): Promise<void> {
@@ -80,10 +49,6 @@ export class RoomPageComponent {
 
   protected kick(playerId: string): void {
     this.room.kick(playerId);
-  }
-
-  protected forget(id: string): void {
-    void this.room.forgetRecentRoom(id);
   }
 
   protected leave(): void {

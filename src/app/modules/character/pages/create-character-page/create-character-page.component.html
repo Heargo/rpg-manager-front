@@ -1,0 +1,56 @@
+<div class="main-container flex-col center middle">
+  <p-card styleClass="create">
+    <form class="stack" (ngSubmit)="create()">
+      <h1>{{ 'character.create.title' | transloco }}</h1>
+      @if (characters.$world(); as world) {
+        <p class="hint">{{ 'character.create.intro' | transloco: { world: world.name } }}</p>
+      }
+
+      <div class="identity">
+        <div class="portrait">
+          @if (portraitUrl(); as url) {
+            <img [src]="url" [alt]="'character.create.portrait' | transloco" />
+          } @else {
+            <i class="pi pi-user"></i>
+          }
+        </div>
+        <div class="fields">
+          <label for="character-name">{{ 'character.create.name' | transloco }}</label>
+          <input pInputText id="character-name" name="name" [maxlength]="maxLength" [ngModel]="name()" (ngModelChange)="name.set($event)" />
+          <p-fileupload
+            mode="basic"
+            accept="image/*"
+            [auto]="true"
+            [customUpload]="true"
+            chooseIcon="pi pi-image"
+            [chooseLabel]="'character.create.choosePortrait' | transloco"
+            (uploadHandler)="choosePortrait($event)"
+          />
+        </div>
+      </div>
+
+      @if (characters.$world(); as world) {
+        <section class="start">
+          <h2>{{ 'character.create.startsWith' | transloco }}</h2>
+          <ul class="stats">
+            @for (attribute of world.attributes; track attribute.id) {
+              <li><span>{{ attribute.name }}</span><strong>{{ attribute.baseValue }}</strong></li>
+            }
+          </ul>
+          <p class="hint">
+            {{ 'character.create.statPoints' | transloco: { count: world.startingStatPoints } }} ·
+            {{ 'character.create.money' | transloco: { count: world.startingMoney } }}
+          </p>
+        </section>
+      }
+
+      @if (error()) {
+        <p-message severity="error" size="small">{{ error() }}</p-message>
+      }
+      <div class="actions">
+        <a routerLink="/room" class="later">{{ 'character.create.later' | transloco }}</a>
+        <p-button type="submit" icon="pi pi-check" [label]="'character.create.submit' | transloco" [loading]="creating()" [disabled]="!canCreate()" />
+      </div>
+    </form>
+  </p-card>
+</div>

@@ -23,8 +23,8 @@ export class RoomHostBusiness {
 
   readonly $state = this.state.asReadonly();
 
-  open(roomName: string, host: { playerId: string; name: string }): RoomState {
-    return this.start(createRoomState(crypto.randomUUID(), roomName, host));
+  open(roomName: string, host: { playerId: string; name: string }, worldId?: string): RoomState {
+    return this.start(createRoomState(crypto.randomUUID(), roomName, host, worldId));
   }
 
   /** Reopens a saved room (after a reload): same id and seats, players offline until they rejoin. */
@@ -40,6 +40,11 @@ export class RoomHostBusiness {
     this.cleanup = [stopHello, () => left.unsubscribe()];
     this.update(state);
     return state;
+  }
+
+  /** The seat (playerId) behind a connection, once the player said hello. */
+  playerIdOf(peer: PeerId): string | undefined {
+    return this.playerByPeer.get(peer);
   }
 
   /**

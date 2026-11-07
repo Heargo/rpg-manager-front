@@ -134,4 +134,25 @@ describe('PeerApi', () => {
     expect(await left).toBe(HOST_PEER);
     expect(host.$peers()).toEqual([]);
   });
+
+  it('watchCurrent starts empty in each session, so a new room never shows the old state', async () => {
+    const seen: unknown[] = [];
+    const subscription = playerA.watchCurrent('room/state').subscribe((value) => seen.push(value));
+    await net.connect(injectors[0], injectors[1]);
+    host.publish('room/state', 'first room');
+    await flush();
+
+    playerA.leave();
+    host.leave();
+    host.startHosting();
+    await net.connect(injectors[0], injectors[1]);
+    host.publish('room/state', 'second room');
+    await flush();
+
+    // null at each session start (join) and end (leave), then each room's own state.
+    expect(seen.filter((value) => value !== null)).toEqual(['first room', 'second room']);
+    expect(seen.indexOf('second room')).toBeGreaterThan(seen.lastIndexOf(null) - 1);
+    expect(seen[seen.indexOf('first room') + 1]).toBeNull();
+    subscription.unsubscribe();
+  });
 });

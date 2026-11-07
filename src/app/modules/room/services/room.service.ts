@@ -45,8 +45,9 @@ export class RoomService {
     return this.api.request(ROOM_ROUTES.hello, request);
   }
 
-  watchRoom(): Observable<RoomState> {
-    return this.api.watch(ROOM_TOPICS.state);
+  /** null until the host sends it, and again after leaving. */
+  watchRoom(): Observable<RoomState | null> {
+    return this.api.watchCurrent(ROOM_TOPICS.state);
   }
 
   serveHello(handler: PeerHandler<unknown, HelloResponse>): () => void {

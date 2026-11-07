@@ -1,8 +1,241 @@
 {
+  "common": {
+    "cancel": "Cancel"
+  },
   "nav": {
     "play": "Play",
     "profile": "Profile",
-    "language": "Language"
+    "language": "Language",
+    "dice": "Dice",
+    "tools": "Tools",
+    "itemGenerator": "Item generator",
+    "externalTools": "External tools",
+    "characterSheet": "Character sheet"
+  },
+  "play": {
+    "title": "Play",
+    "activeRoom": "Room open: {{ name }}.",
+    "backToRoom": "Back to the room",
+    "worlds": {
+      "title": "Your worlds",
+      "new": "New world",
+      "import": "Import",
+      "imported": "World imported",
+      "importFailed": "This file isn't a valid world export.",
+      "empty": "No world yet. Create one to host a game.",
+      "characters": "{{ count }} characters",
+      "host": "Host",
+      "openRoom": "Open room",
+      "export": "Export as a file",
+      "delete": "Delete",
+      "deleteTitle": "Delete this world?",
+      "deleteMessage": "\"{{ name }}\" and its characters and items will be deleted from this device. Export it first to keep a copy."
+    },
+    "rooms": {
+      "empty": "Rooms you join as a player appear here.",
+      "forgetMessage": "Forget \"{{ name }}\"? You can join again with a new invite."
+    }
+  },
+  "world": {
+    "created": "\"{{ name }}\" is ready",
+    "new": {
+      "title": "New world",
+      "steps": {
+        "identity": "Identity",
+        "attributes": "Attributes",
+        "rules": "Rules"
+      },
+      "next": "Next",
+      "back": "Back",
+      "create": "Create the world",
+      "preview": "Preview",
+      "attributeCount": "{{ count }} attributes",
+      "attributesHint": "Every character of this world has these attributes. Players raise them with stat points; items can boost them.",
+      "addAttribute": "Add an attribute",
+      "removeAttribute": "Remove this attribute",
+      "barsHint": "Bars are shown on the player view (health, mana…). Leave empty if your game has none."
+    },
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "Name of your world",
+      "description": "Description",
+      "descriptionPlaceholder": "What is this world about?",
+      "image": "Picture",
+      "chooseImage": "Choose a picture",
+      "changeImage": "Change the picture",
+      "attributeName": "Attribute",
+      "baseValue": "Base value",
+      "lifeBar": "Health bar",
+      "manaBar": "Second bar (mana…)",
+      "noBar": "None",
+      "startingStatPoints": "Starting stat points",
+      "startingMoney": "Starting money",
+      "currency": "Currency",
+      "currencySymbol": "Currency symbol",
+      "starterItems": "Start with default items",
+      "starterItemsHint": "About 20 items generated from your attributes: equipment for every slot, potions, objects.",
+      "offlineTitle": "When the host is offline",
+      "offlineHint": "Players can always read their sheet. Choose what else they can still do; changes are checked when the host is back."
+    },
+    "money": {
+      "coins": "Coins",
+      "dollars": "Dollars ($)",
+      "euros": "Euros (€)",
+      "pounds": "Pounds (£)",
+      "yen": "Yen (¥)",
+      "custom": "Custom…"
+    },
+    "offline": {
+      "dice": "Roll dice",
+      "notes": "Write personal notes",
+      "spendStatPoints": "Spend stat points",
+      "equip": "Equip and unequip items",
+      "useConsumables": "Use consumables",
+      "sell": "Sell items"
+    },
+    "defaults": {
+      "life": "Life",
+      "mana": "Mana",
+      "strength": "Strength",
+      "agility": "Agility",
+      "intelligence": "Intelligence"
+    },
+    "errors": {
+      "nameRequired": "Give your world a name.",
+      "nameTooLong": "That name is too long.",
+      "attributeNameRequired": "Every attribute needs a name.",
+      "attributeNameTooLong": "An attribute name is too long.",
+      "attributeNamesUnique": "Two attributes have the same name.",
+      "baseValueInteger": "Base values must be whole numbers.",
+      "nonNegativeInteger": "Use a whole number, 0 or more.",
+      "symbolRequired": "Enter the currency symbol.",
+      "image": "This picture couldn't be used."
+    }
+  },
+  "character": {
+    "list": {
+      "title": "Characters",
+      "empty": "No character yet.",
+      "needOne": "You don't have a character in this room yet."
+    },
+    "create": {
+      "title": "Create your character",
+      "intro": "You're joining {{ world }}. Pick a name and a portrait; the rest comes from the world's rules.",
+      "name": "Character name",
+      "portrait": "Portrait",
+      "choosePortrait": "Choose a portrait",
+      "startsWith": "Your character starts with",
+      "statPoints": "{{ count }} stat points to spend",
+      "money": "{{ count }} money",
+      "submit": "Create",
+      "later": "Later"
+    },
+    "errors": {
+      "invalid": "This character can't be created.",
+      "nameRequired": "Give your character a name.",
+      "nameTooLong": "That name is too long.",
+      "portraitTooLarge": "This portrait is too large.",
+      "alreadyExists": "You already have a character in this room.",
+      "notInRoom": "You're not in this room anymore. Ask for a new invite.",
+      "hostHasNoCharacter": "The game master doesn't play a character.",
+      "noStatPoints": "No stat points left to spend.",
+      "unknownAttribute": "This attribute doesn't exist in this world.",
+      "invalidAmount": "Grant between 1 and 100 points.",
+      "unknownItem": "This item isn't in the inventory anymore.",
+      "notEquipment": "Only equipment can be equipped.",
+      "notConsumable": "Only consumables can be used.",
+      "gameMasterOnly": "Only the game master can do that.",
+      "unknownCharacter": "This character isn't in the room.",
+      "notYours": "This isn't your character."
+    },
+    "sheet": {
+      "playedBy": "Played by {{ name }}",
+      "statPoints": "Stat points",
+      "money": "Money",
+      "attribute": "Attribute",
+      "value": "Value",
+      "coins": "{{ count }} coins",
+      "open": "Open the sheet",
+      "notFound": "This character isn't in the room.",
+      "tabs": {
+        "stats": "Stats",
+        "equipment": "Equipment",
+        "inventory": "Inventory"
+      },
+      "base": "Base",
+      "points": "Points",
+      "bonus": "Bonus",
+      "spend": "Spend a point",
+      "spendOn": "Spend a point on {{ name }}",
+      "currentOf": "Current {{ name }}",
+      "grant": "Grant",
+      "grantLabel": "Grant stat points"
+    },
+    "items": {
+      "details": "Details",
+      "equip": "Equip",
+      "unequip": "Unequip",
+      "use": "Use",
+      "sell": "Sell",
+      "sellFor": "Sell for {{ price }}",
+      "sellTitle": "Sell this item?",
+      "sellMessage": "Sell {{ name }} for {{ price }}? It leaves the inventory.",
+      "equipped": "Equipped",
+      "empty": "The inventory is empty.",
+      "actions": "Actions for {{ name }}"
+    }
+  },
+  "item": {
+    "rarity": {
+      "common": "Common",
+      "uncommon": "Uncommon",
+      "rare": "Rare",
+      "mythic": "Mythic",
+      "legendary": "Legendary"
+    },
+    "type": {
+      "item": "Object",
+      "consumable": "Consumable",
+      "equipment": "Equipment"
+    },
+    "slot": {
+      "head": "Head",
+      "earring": "Earring",
+      "necklace": "Necklace",
+      "ring": "Ring",
+      "chest": "Chest",
+      "hand": "Hands",
+      "legs": "Legs",
+      "foot": "Feet",
+      "weapon1": "Weapon 1",
+      "weapon2": "Weapon 2"
+    },
+    "fields": {
+      "rarity": "Rarity",
+      "type": "Type",
+      "slot": "Slot"
+    },
+    "modifiers": "Modifiers",
+    "price": "{{ price }} coins"
+  },
+  "dice": {
+    "title": "Dice",
+    "count": "Number of dice",
+    "sides": "Sides",
+    "roll": "Roll",
+    "rolling": "Rolling…",
+    "again": "Roll again",
+    "close": "Close",
+    "history": "Recent rolls",
+    "skip": "Click to skip the animation",
+    "share": "Share with the table",
+    "tableRolls": "Table rolls",
+    "rolledBy": "{{ name }} rolled",
+    "errors": {
+      "invalid": "These dice can't be rolled.",
+      "notInRoom": "You're not in this room anymore.",
+      "shareFailed": "Couldn't reach the host to share this roll. Turn off sharing to roll here."
+    }
   },
   "profile": {
     "title": "Your profile",
@@ -94,6 +327,77 @@
       "hostedBy": "Host: {{ name }}",
       "lastSeen": "last seen {{ date }}",
       "forget": "Forget this room"
+    }
+  },
+  "table": {
+    "title": "Game table",
+    "open": "Go to the table",
+    "lobby": "Lobby",
+    "gameMaster": "You're the game master",
+    "players": "Players",
+    "noPlayers": "No character at the table yet.",
+    "waiting": "Waiting for the host…",
+    "illustration": "Illustration",
+    "noIllustration": "The game master hasn't shown a picture yet.",
+    "noIllustrationGm": "Add a picture to show it to every player.",
+    "addImage": "Add a picture",
+    "hideIllustration": "Hide the picture",
+    "quickImages": "Quick images",
+    "quickImage": "Quick image",
+    "quickImagesHint": "Pictures you add stay here: click one to show it to everyone.",
+    "showToAll": "Show to everyone",
+    "removeImage": "Remove from quick images",
+    "notes": {
+      "title": "Notes",
+      "placeholder": "Only you can see these notes. They're saved with the world.",
+      "saved": "Saved",
+      "editing": "Editing…",
+      "saving": "Saving…",
+      "error": "Not saved"
+    },
+    "errors": {
+      "invalid": "This request isn't valid.",
+      "notesTooLong": "These notes are too long.",
+      "tooManyImages": "Too many quick images: remove some first.",
+      "imageMissing": "This picture isn't on the host's device.",
+      "gameMasterOnly": "Only the game master can do that."
+    }
+  },
+  "tools": {
+    "sandbox": {
+      "name": "Sandbox"
+    },
+    "itemGenerator": {
+      "title": "Item generator",
+      "intro": "Draws a random item. Its modifiers use the default attributes: {{ attributes }}.",
+      "random": "Random",
+      "seed": "Seed",
+      "reroll": "Reroll",
+      "seedHint": "The same seed with the same options gives the same item. Paste a seed to get an item back.",
+      "failed": "The word list couldn't be loaded. Check your connection and reload."
+    },
+    "external": {
+      "title": "External tools",
+      "intro": "Free tools by other people that help prepare a game.",
+      "notOurs": "These sites aren't part of this app; they open in a new tab.",
+      "procgenArcana": {
+        "name": "Procgen Arcana",
+        "description": "Watabou's generators: cities, villages, dungeons and more."
+      },
+      "fantasyMap": {
+        "name": "Fantasy Map Generator",
+        "description": "Azgaar's world maps with countries, cultures and routes."
+      },
+      "squoosh": {
+        "name": "Squoosh",
+        "description": "Shrink and convert pictures before adding them to your world."
+      }
+    },
+    "sheet": {
+      "title": "Character sheet",
+      "intro": "A sample character on the default attributes, with the default items in the bag. Everything follows the game rules and stays on this page.",
+      "reset": "Start over",
+      "sampleName": "Sample hero"
     }
   },
   "notFound": {

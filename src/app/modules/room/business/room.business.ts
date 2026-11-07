@@ -77,12 +77,12 @@ export class RoomBusiness {
 
   // ---- Host ----
 
-  /** Opens a new room. Resolves false when another tab of this app is already hosting. */
-  async hostRoom(name: string): Promise<boolean> {
+  /** Opens a new room (for a world, usually). Resolves false when another tab of this app is already hosting. */
+  async hostRoom(name: string, worldId?: string): Promise<boolean> {
     this.leave();
     if (!(await this.hostLock.acquire())) return false;
     const { playerId, name: playerName } = this.profile.$profile();
-    const state = this.host.open(name, { playerId, name: playerName });
+    const state = this.host.open(name, { playerId, name: playerName }, worldId);
     this.me.set(state.members[0]);
     return true;
   }

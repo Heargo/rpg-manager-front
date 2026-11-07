@@ -18,11 +18,16 @@ describe('signal codec', () => {
     expect(code.length).toBeLessThan(200);
   });
 
-  it('refuses to encode an SDP that is not a data channel with candidates', () => {
+  it('refuses to encode an SDP that is not a single data channel', () => {
     const audio = CHROME_OFFER.replace('a=mid:0', 'a=mid:0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111');
     expect(() => encodeSignal({ type: 'offer', sdp: audio })).toThrow('Unsupported SDP');
+  });
+
+  it('encodes an SDP without candidates (gathering found none in time)', () => {
     const noCandidates = CHROME_OFFER.split('\r\n').filter((line) => !line.startsWith('a=candidate')).join('\r\n');
-    expect(() => encodeSignal({ type: 'offer', sdp: noCandidates })).toThrow('Unsupported SDP');
+    const decoded = parseDataChannelSdp(decodeSignal(encodeSignal({ type: 'offer', sdp: noCandidates }), 'offer').sdp);
+    expect(decoded?.ufrag).toBe('x9cm');
+    expect(decoded?.candidates).toEqual([]);
   });
 
   it('accepts a full invite link and whitespace from chat apps', () => {

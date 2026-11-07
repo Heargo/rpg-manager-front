@@ -1,4 +1,4 @@
-import { MoneyFormat, OfflineFeatures, World, WorldDraft, WorldSummary } from '../models/world';
+import { MoneyFormat, OfflineFeatures, World, WorldDraft, WorldInfo, WorldSummary } from '../models/world';
 
 /** Defaults from the p2p-rooms spec table: reading always works, dice and notes on, actions changing shared state off. */
 export const DEFAULT_OFFLINE_FEATURES: OfflineFeatures = {
@@ -88,5 +88,21 @@ export function remapWorldImages(world: World, map: ReadonlyMap<string, string>)
         item: { ...entry.item, imageId: swap(entry.item.imageId) },
       })),
     })),
+  };
+}
+
+/** The public part of a world, sent to players. */
+export function toWorldInfo(world: World): WorldInfo {
+  return {
+    id: world.id,
+    name: world.name,
+    description: world.description,
+    imageId: world.imageId,
+    attributes: world.attributes,
+    barAttributes: world.barAttributes,
+    startingStatPoints: world.startingStatPoints,
+    startingMoney: world.startingMoney,
+    moneyFormat: world.moneyFormat,
+    offlineFeatures: world.offlineFeatures,
   };
 }

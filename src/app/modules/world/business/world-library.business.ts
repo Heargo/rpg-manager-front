@@ -1,5 +1,9 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { ImageBusiness } from '../../../core/business/image.business';
+import { WordListBusiness } from '../../../core/business/word-list.business';
+import { seededRandomSource } from '../../../core/generators/random-source';
+import { generateStarterItems } from '../helpers/starter-items';
+import { validateWorldDraft, WorldDraftErrors } from '../helpers/world-draft.rules';
 import { buildWorldExport, ExportedImage, parseWorldExport, WorldExport } from '../helpers/world-export';
 import { createWorld, remapWorldImages, summarizeWorld, worldImageIds } from '../helpers/world.factory';
 import { World, WorldDraft, WorldSummary } from '../models/world';
@@ -16,6 +20,7 @@ export class WorldImportError extends Error {
 export class WorldLibraryBusiness {
   private readonly storage = inject(WorldStorageService);
   private readonly imageBusiness = inject(ImageBusiness);
+  private readonly wordLists = inject(WordListBusiness);
 
   private readonly worlds = signal<WorldSummary[]>([]);
   /** Most recently changed first. */
@@ -29,10 +34,30 @@ export class WorldLibraryBusiness {
     return this.storage.get(id);
   }
 
-  async create(draft: WorldDraft): Promise<World> {
-    const world = createWorld(draft, () => crypto.randomUUID(), Date.now());
+  /** Creates a world, optionally with the default items drawn from its own attributes (in the active language). */
+  async create(draft: WorldDraft, options: { starterItems?: boolean } = {}): Promise<World> {
+    let world = createWorld(draft, () => crypto.randomUUID(), Date.now());
+    if (options.starterItems) {
+      const words = await this.wordLists.itemWords();
+      const barIds = [world.barAttributes.life, world.barAttributes.mana];
+      const items = generateStarterItems(seededRandomSource(world.id), words, {
+        attributes: world.attributes.map((attribute) => attribute.name),
+        barAttributes: world.attributes.filter((attribute) => barIds.includes(attribute.id)).map((attribute) => attribute.name),
+      });
+      world = { ...world, items: items.map((item) => ({ ...item, id: crypto.randomUUID() })) };
+    }
     await this.persist(world);
     return world;
+  }
+
+  /** Problems with a wizard draft, as translation keys per field (empty when it can be created). */
+  validateDraft(draft: WorldDraft): WorldDraftErrors {
+    return validateWorldDraft(draft);
+  }
+
+  /** Stores an uploaded picture (world icon…) and returns its image id. */
+  uploadImage(file: Blob): Promise<string> {
+    return this.imageBusiness.storeUpload(file);
   }
 
   /** Saves changes and bumps `updatedAt`. */

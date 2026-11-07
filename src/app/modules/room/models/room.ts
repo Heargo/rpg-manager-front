@@ -9,6 +9,8 @@ export interface RoomMember {
 export interface RoomState {
   id: string;
   name: string;
+  /** The world this room plays in (stored on the host's device). */
+  worldId?: string;
   members: RoomMember[];
 }
 

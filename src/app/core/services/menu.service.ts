@@ -14,14 +14,18 @@ export class MenuService {
     {
       label: 'nav.play',
       icon: 'pi pi-users',
-      routerLink: '/room',
-      // items: [
-      //   {
-      //     label: 'Bookmarks',
-      //     icon: 'pi pi-bookmark',
-      //     routerLink: '/bookmarks',
-      //   },
-      // ],
+      routerLink: '/play',
+    },
+    {
+      label: 'nav.tools',
+      icon: 'pi pi-wrench',
+      // Every tool works without a world or a room.
+      items: [
+        { label: 'nav.dice', icon: 'pi pi-box', routerLink: '/dice' },
+        { label: 'nav.itemGenerator', icon: 'pi pi-sparkles', routerLink: '/tools/item-generator' },
+        { label: 'nav.characterSheet', icon: 'pi pi-id-card', routerLink: '/tools/character-sheet' },
+        { label: 'nav.externalTools', icon: 'pi pi-external-link', routerLink: '/tools/links' },
+      ],
     },
   ];
 

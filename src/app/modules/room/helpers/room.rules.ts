@@ -1,8 +1,18 @@
 import { normalizeProfileName, isValidProfileName } from '../../../core/helpers/profile.rules';
 import { HelloRequest, RoomMember, RoomState } from '../models/room';
 
-export function createRoomState(id: string, name: string, host: { playerId: string; name: string }): RoomState {
-  return { id, name: name.trim(), members: [{ playerId: host.playerId, name: host.name, isHost: true, online: true }] };
+export function createRoomState(
+  id: string,
+  name: string,
+  host: { playerId: string; name: string },
+  worldId?: string,
+): RoomState {
+  return {
+    id,
+    name: name.trim(),
+    worldId,
+    members: [{ playerId: host.playerId, name: host.name, isHost: true, online: true }],
+  };
 }
 
 /** Checks a hello payload from the wire. */

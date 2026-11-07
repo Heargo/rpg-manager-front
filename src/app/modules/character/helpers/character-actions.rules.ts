@@ -1,0 +1,217 @@
+import {
+  Character,
+  CharacterAttribute,
+  WorldAttribute,
+} from '../../world/models/world';
+import { attributeStats } from './character-stats';
+
+/** Everything that changes a character during play. The host applies these; the sandbox applies them locally. */
+export type CharacterAction =
+  | { kind: 'spend-stat-point'; attributeId: string }
+  | { kind: 'grant-stat-points'; amount: number }
+  | { kind: 'set-current'; attributeId: string; value: number }
+  | { kind: 'equip'; inventoryId: string }
+  | { kind: 'unequip'; inventoryId: string }
+  | { kind: 'use'; inventoryId: string }
+  | { kind: 'sell'; inventoryId: string };
+
+export type CharacterActionKind = CharacterAction['kind'];
+
+export const CHARACTER_ACTION_KINDS: readonly CharacterActionKind[] = [
+  'spend-stat-point',
+  'grant-stat-points',
+  'set-current',
+  'equip',
+  'unequip',
+  'use',
+  'sell',
+];
+
+/** Only the game master grants points and sets current values (a hit, a rest…). */
+export const GAME_MASTER_ACTIONS: readonly CharacterActionKind[] = [
+  'grant-stat-points',
+  'set-current',
+];
+
+export const MAX_GRANTED_POINTS = 100;
+
+export type ActionResult =
+  { ok: true; character: Character } | { ok: false; error: string };
+
+const fail = (error: string): ActionResult => ({ ok: false, error });
+
+/** The action in a request payload, or null when it isn't a well-formed action of that kind. */
+export function parseCharacterAction(
+  kind: CharacterActionKind,
+  payload: unknown,
+): CharacterAction | null {
+  if (typeof payload !== 'object' || payload === null) return null;
+  const p = payload as Record<string, unknown>;
+  const text = (value: unknown): value is string =>
+    typeof value === 'string' && value.length > 0 && value.length <= 100;
+  switch (kind) {
+    case 'spend-stat-point':
+      return text(p['attributeId'])
+        ? { kind, attributeId: p['attributeId'] }
+        : null;
+    case 'grant-stat-points':
+      return Number.isInteger(p['amount'])
+        ? { kind, amount: p['amount'] as number }
+        : null;
+    case 'set-current':
+      return text(p['attributeId']) && Number.isInteger(p['value'])
+        ? { kind, attributeId: p['attributeId'], value: p['value'] as number }
+        : null;
+    default:
+      return text(p['inventoryId'])
+        ? { kind, inventoryId: p['inventoryId'] }
+        : null;
+  }
+}
+
+/**
+ * Applies an action to a character with the world's rules. Pure: returns the changed character (same `rev`;
+ * the caller bumps it) or the translation key of why it's refused.
+ */
+export function applyCharacterAction(
+  attributes: WorldAttribute[],
+  character: Character,
+  action: CharacterAction,
+): ActionResult {
+  switch (action.kind) {
+    case 'spend-stat-point': {
+      if (character.statPoints < 1)
+        return fail('character.errors.noStatPoints');
+      const stat = attributeStats(attributes, character).find(
+        (entry) => entry.attributeId === action.attributeId,
+      );
+      if (!stat) return fail('character.errors.unknownAttribute');
+      // A new point raises the max and the current value together.
+      const next = setAttribute(character, action.attributeId, {
+        points: stat.points + 1,
+        current: stat.current + 1,
+      });
+      return {
+        ok: true,
+        character: { ...next, statPoints: character.statPoints - 1 },
+      };
+    }
+    case 'grant-stat-points': {
+      if (action.amount < 1 || action.amount > MAX_GRANTED_POINTS)
+        return fail('character.errors.invalidAmount');
+      return {
+        ok: true,
+        character: {
+          ...character,
+          statPoints: character.statPoints + action.amount,
+        },
+      };
+    }
+    case 'set-current': {
+      const stat = attributeStats(attributes, character).find(
+        (entry) => entry.attributeId === action.attributeId,
+      );
+      if (!stat) return fail('character.errors.unknownAttribute');
+      const current = Math.max(0, Math.min(action.value, stat.max));
+      return {
+        ok: true,
+        character: setAttribute(character, action.attributeId, {
+          points: stat.points,
+          current,
+        }),
+      };
+    }
+    case 'equip': {
+      const entry = character.inventory.find(
+        (candidate) => candidate.id === action.inventoryId,
+      );
+      if (!entry) return fail('character.errors.unknownItem');
+      if (entry.item.type !== 'equipment' || entry.item.slot === 'none')
+        return fail('character.errors.notEquipment');
+      if (entry.equipped) return { ok: true, character };
+      // One item per slot: whatever was there goes back to the bag.
+      const inventory = character.inventory.map((candidate) => {
+        if (candidate.id === entry.id) return { ...candidate, equipped: true };
+        if (candidate.equipped && candidate.item.slot === entry.item.slot)
+          return { ...candidate, equipped: false };
+        return candidate;
+      });
+      return { ok: true, character: { ...character, inventory } };
+    }
+    case 'unequip': {
+      const entry = character.inventory.find(
+        (candidate) => candidate.id === action.inventoryId,
+      );
+      if (!entry) return fail('character.errors.unknownItem');
+      const inventory = character.inventory.map((candidate) =>
+        candidate.id === entry.id
+          ? { ...candidate, equipped: false }
+          : candidate,
+      );
+      return { ok: true, character: { ...character, inventory } };
+    }
+    case 'use': {
+      const entry = character.inventory.find(
+        (candidate) => candidate.id === action.inventoryId,
+      );
+      if (!entry) return fail('character.errors.unknownItem');
+      if (entry.item.type !== 'consumable')
+        return fail('character.errors.notConsumable');
+      // Consumables add their modifiers to current values, capped at max (and never below 0).
+      let next: Character = {
+        ...character,
+        inventory: character.inventory.filter(
+          (candidate) => candidate.id !== entry.id,
+        ),
+      };
+      for (const modifier of entry.item.modifiers) {
+        const stat = attributeStats(attributes, next).find(
+          (candidate) => candidate.name === modifier.attribute,
+        );
+        if (!stat) continue;
+        const current = Math.max(
+          0,
+          Math.min(stat.current + modifier.value, stat.max),
+        );
+        next = setAttribute(next, stat.attributeId, {
+          points: stat.points,
+          current,
+        });
+      }
+      return { ok: true, character: next };
+    }
+    case 'sell': {
+      const entry = character.inventory.find(
+        (candidate) => candidate.id === action.inventoryId,
+      );
+      if (!entry) return fail('character.errors.unknownItem');
+      return {
+        ok: true,
+        character: {
+          ...character,
+          money: character.money + entry.item.price,
+          inventory: character.inventory.filter(
+            (candidate) => candidate.id !== entry.id,
+          ),
+        },
+      };
+    }
+  }
+}
+
+/** Sets one attribute's entry, adding it when the attribute was added to the world after the character. */
+function setAttribute(
+  character: Character,
+  attributeId: string,
+  values: Omit<CharacterAttribute, 'attributeId'>,
+): Character {
+  const exists = character.attributes.some(
+    (entry) => entry.attributeId === attributeId,
+  );
+  const attributes = exists
+    ? character.attributes.map((entry) =>
+        entry.attributeId === attributeId ? { ...entry, ...values } : entry,
+      )
+    : [...character.attributes, { attributeId, ...values }];
+  return { ...character, attributes };
+}

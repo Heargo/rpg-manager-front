@@ -55,11 +55,10 @@ Routes: `home`, `login`, `signup`, `games`, `new-game`, `game`, `create-player`,
 
 ## Default items (decided: yes, for now)
 
-The legacy app had no starter catalogue, only a default image. We ship one:
+The legacy app had no starter catalogue, only a default image. Default items are **generated** for each world (changed in L04, 2026-11-07):
 
-- A bundled `starter-items.json` (~30 items across every rarity, type and equipment slot) plus the default item image, in `public/`.
-- When creating a world, a "Start with the default items" checkbox (on by default) copies them into the world's catalogue; the catalogue also has "Import default items" later.
-- Item modifiers name attributes. On import, modifiers on attributes the world doesn't have are dropped, and the dialog says how many; attribute names are matched case-insensitively.
+- Item modifiers name attributes, and every world has its own (in its own language), so a fixed list would lose most of its modifiers. Instead `world/helpers/starter-items.ts` draws them with the item generator from the world's own attributes, seeded by the world id, in the host's language: one common piece per equipment slot, a few better ones, potions for the bar attributes, and misc items.
+- When creating a world, a "Start with default items" checkbox (on by default) adds them; the catalogue (L08) can offer "Add default items" later with the same helper.
 
 ## Item generation (decided: three tiers)
 
@@ -124,7 +123,7 @@ Clicking **Roll** opens a modal (`p-dialog`, full screen, transparent so the pag
 
 - The value of every die is drawn **first**, with `rollDice(cryptoRandomSource(), count, sides)` from `core/generators/dice.ts`: `crypto.getRandomValues` + rejection sampling, so each face of an `n`-sided die has probability exactly `1/n`.
 - Physics never decides the result: simulated polyhedra are not perfectly fair (mesh, collision shape, throw angle), and many sizes have no fair solid at all.
-- **Predetermined landing**: for each throw, run the simulation headless (fixed timestep, fast-forward, Rapier is deterministic for the same inputs) with a random throw (position, velocity, spin from a non-crypto PRNG: it only affects the animation). Read which face ends up on top, then **relabel** that die's faces so the top face shows the drawn value (swap that label with the face that had it). Replay the same simulation visibly. If a die ends cocked (top face normal within ~10° of vertical not reached) or off the table, re-run that throw with a new seed.
+- **Predetermined landing**: for each throw, run the simulation headless (fixed timestep, fast-forward) with a random throw (position, velocity, spin from a seeded PRNG: it only affects the animation) and **record every frame**. Read which face ends up on top, then **relabel** that die's faces so the top face shows the drawn value (swap that label with the face that had it). **Replay the recording** (built in L02: replaying recorded frames instead of re-simulating makes the animation always match, on any device). If a die ends cocked (top face more than ~10° from vertical), re-run the throw with a new seed (up to 6 tries, then keep the flattest).
 - Labels stay a permutation of `1..n`, so a die never shows a number twice.
 
 ### Shapes
@@ -154,7 +153,7 @@ d4: read the value at the top vertex (standard d4 convention), labels arranged a
 
 ### In a room
 
-Shared rolls send `{ count, sides, values, seed }`. Other players replay the throw from the seed and relabel to the same `values`, so they see the same result even if their physics drift slightly.
+Shared rolls ask the host to draw (so the roller can't pick the values); the host publishes `{ count, sides, values, seed }` and every device replays the throw from the seed and relabels to the same `values`, so they see the same result even if their physics drift slightly (decided in L06).
 
 ## Improvements over legacy
 

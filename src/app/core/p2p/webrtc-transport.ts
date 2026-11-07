@@ -1,4 +1,5 @@
 import { Subject } from 'rxjs';
+import { fetchIceServers } from './helpers/ice-servers';
 import { decodeSignal, encodeSignal } from './helpers/signal-codec';
 import {
   AnsweredInvite,
@@ -10,11 +11,12 @@ import {
   TransportMessage,
 } from './room-transport';
 
-export const DEFAULT_ICE_SERVERS: RTCIceServer[] = [{ urls: 'stun:stun.l.google.com:19302' }];
-
 export interface WebRtcTransportOptions {
-  /** STUN servers to find public addresses; `[]` for same-network play only. */
-  iceServers?: RTCIceServer[];
+  /**
+   * STUN/TURN servers, or a function asked for them before each new connection (TURN credentials expire).
+   * Default: `fetchIceServers` (Open Relay TURN through the Netlify Function, else public STUN). `[]` for same-network play only.
+   */
+  iceServers?: RTCIceServer[] | (() => Promise<RTCIceServer[]>);
   /** Max wait for ICE gathering before sending what was found so far. */
   gatherTimeoutMs?: number;
   /** Max wait for the channel to open after the host pastes the answer. */
@@ -37,7 +39,7 @@ export class WebRtcTransport implements RoomTransport {
 
   private readonly pending = new Map<string, Link>();
   private readonly peers = new Map<PeerId, Link>();
-  private readonly iceServers: RTCIceServer[];
+  private readonly iceServers: () => Promise<RTCIceServer[]>;
   private readonly gatherTimeoutMs: number;
   private readonly connectTimeoutMs: number;
   /**
@@ -47,20 +49,23 @@ export class WebRtcTransport implements RoomTransport {
   private readonly onPageHide = () => this.close();
 
   constructor(options: WebRtcTransportOptions = {}) {
-    this.iceServers = options.iceServers ?? DEFAULT_ICE_SERVERS;
+    const iceServers = options.iceServers ?? (() => fetchIceServers());
+    this.iceServers = typeof iceServers === 'function' ? iceServers : () => Promise.resolve(iceServers);
     this.gatherTimeoutMs = options.gatherTimeoutMs ?? 4000;
     this.connectTimeoutMs = options.connectTimeoutMs ?? 20000;
     globalThis.addEventListener?.('pagehide', this.onPageHide);
   }
 
   async createInvite(): Promise<Invite> {
-    const connection = this.newConnection();
+    const connection = await this.newConnection();
     const channel = connection.createDataChannel('room', { ordered: true });
+    const candidates = collectCandidates(connection);
     await connection.setLocalDescription(await connection.createOffer());
     await this.gathered(connection);
+    const offerCode = encodeSignal({ type: 'offer', sdp: withCandidates(connection.localDescription!.sdp, candidates) });
     const id = crypto.randomUUID();
     this.pending.set(id, { connection, channel });
-    return { id, offerCode: encodeSignal({ type: 'offer', sdp: connection.localDescription!.sdp }) };
+    return { id, offerCode };
   }
 
   async acceptAnswer(inviteId: string, answerCode: string): Promise<PeerId> {
@@ -86,14 +91,15 @@ export class WebRtcTransport implements RoomTransport {
 
   async answerInvite(offerCode: string): Promise<AnsweredInvite> {
     const offer = decodeSignal(offerCode, 'offer');
-    const connection = this.newConnection();
+    const connection = await this.newConnection();
     const channel = new Promise<RTCDataChannel>((resolve) => {
       connection.ondatachannel = (event) => resolve(event.channel);
     });
+    const candidates = collectCandidates(connection);
     await connection.setRemoteDescription(offer);
     await connection.setLocalDescription(await connection.createAnswer());
     await this.gathered(connection);
-    const answerCode = encodeSignal({ type: 'answer', sdp: connection.localDescription!.sdp });
+    const answerCode = encodeSignal({ type: 'answer', sdp: withCandidates(connection.localDescription!.sdp, candidates) });
 
     // No timeout here: the host may take minutes to paste the answer. A failed connection still rejects.
     const connected = channel
@@ -131,8 +137,8 @@ export class WebRtcTransport implements RoomTransport {
     for (const peer of [...this.peers.keys()]) this.disconnect(peer);
   }
 
-  private newConnection(): RTCPeerConnection {
-    return new RTCPeerConnection({ iceServers: this.iceServers });
+  private async newConnection(): Promise<RTCPeerConnection> {
+    return new RTCPeerConnection({ iceServers: await this.iceServers() });
   }
 
   private attach(peer: PeerId, link: Link): void {
@@ -166,6 +172,21 @@ export class WebRtcTransport implements RoomTransport {
       connection.addEventListener('icegatheringstatechange', onChange);
     });
   }
+}
+
+/** Records candidates as they are found: some browsers (Firefox) may leave them out of `localDescription`. */
+function collectCandidates(connection: RTCPeerConnection): string[] {
+  const found: string[] = [];
+  connection.addEventListener('icecandidate', (event) => {
+    if (event.candidate?.candidate) found.push(event.candidate.candidate);
+  });
+  return found;
+}
+
+/** Adds the collected candidates when the SDP has none of its own. */
+function withCandidates(sdp: string, candidates: string[]): string {
+  if (/^a=candidate:/m.test(sdp) || candidates.length === 0) return sdp;
+  return `${sdp.replace(/(\r?\n)+$/, '')}\r\n${candidates.map((candidate) => `a=${candidate}`).join('\r\n')}\r\n`;
 }
 
 /** Resolves when the channel opens; rejects if the connection fails, or after the timeout when one is given. */
