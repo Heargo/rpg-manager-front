@@ -8,6 +8,7 @@ import { routesWorld } from './modules/world/world.routes';
 import { routesCharacter } from './modules/character/character.routes';
 import { routesDice } from './modules/dice/dice.routes';
 import { routesTable } from './modules/table/table.routes';
+import { routesTools } from './modules/tools/tools.routes';
 
 export const routes: Routes = [
   { path: '', component: HomePageComponent, canActivate: [NavigationGuard] },
@@ -18,5 +19,6 @@ export const routes: Routes = [
   ...routesRoom,
   ...routesWorld,
   ...routesDice,
+  ...routesTools,
   { path: '**', redirectTo: '' },
 ];

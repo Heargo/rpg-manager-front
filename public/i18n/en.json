@@ -6,7 +6,10 @@
     "play": "Play",
     "profile": "Profile",
     "language": "Language",
-    "dice": "Dice"
+    "dice": "Dice",
+    "tools": "Tools",
+    "itemGenerator": "Item generator",
+    "externalTools": "External tools"
   },
   "play": {
     "title": "Play",
@@ -143,6 +146,39 @@
       "value": "Value",
       "coins": "{{ count }} coins"
     }
+  },
+  "item": {
+    "rarity": {
+      "common": "Common",
+      "uncommon": "Uncommon",
+      "rare": "Rare",
+      "mythic": "Mythic",
+      "legendary": "Legendary"
+    },
+    "type": {
+      "item": "Object",
+      "consumable": "Consumable",
+      "equipment": "Equipment"
+    },
+    "slot": {
+      "head": "Head",
+      "earring": "Earring",
+      "necklace": "Necklace",
+      "ring": "Ring",
+      "chest": "Chest",
+      "hand": "Hands",
+      "legs": "Legs",
+      "foot": "Feet",
+      "weapon1": "Weapon 1",
+      "weapon2": "Weapon 2"
+    },
+    "fields": {
+      "rarity": "Rarity",
+      "type": "Type",
+      "slot": "Slot"
+    },
+    "modifiers": "Modifiers",
+    "price": "{{ price }} coins"
   },
   "dice": {
     "title": "Dice",
@@ -287,6 +323,37 @@
       "tooManyImages": "Too many quick images: remove some first.",
       "imageMissing": "This picture isn't on the host's device.",
       "gameMasterOnly": "Only the game master can do that."
+    }
+  },
+  "tools": {
+    "sandbox": {
+      "name": "Sandbox"
+    },
+    "itemGenerator": {
+      "title": "Item generator",
+      "intro": "Draws a random item. Its modifiers use the default attributes: {{ attributes }}.",
+      "random": "Random",
+      "seed": "Seed",
+      "reroll": "Reroll",
+      "seedHint": "The same seed with the same options gives the same item. Paste a seed to get an item back.",
+      "failed": "The word list couldn't be loaded. Check your connection and reload."
+    },
+    "external": {
+      "title": "External tools",
+      "intro": "Free tools by other people that help prepare a game.",
+      "notOurs": "These sites aren't part of this app; they open in a new tab.",
+      "procgenArcana": {
+        "name": "Procgen Arcana",
+        "description": "Watabou's generators: cities, villages, dungeons and more."
+      },
+      "fantasyMap": {
+        "name": "Fantasy Map Generator",
+        "description": "Azgaar's world maps with countries, cultures and routes."
+      },
+      "squoosh": {
+        "name": "Squoosh",
+        "description": "Shrink and convert pictures before adding them to your world."
+      }
     }
   },
   "notFound": {

@@ -1,6 +1,6 @@
 # Tools menu: every tool usable without a game
 
-Status: ready-for-agent
+Status: resolved
 Type: task
 Blocked by: none
 
@@ -30,3 +30,14 @@ Anyone should be able to try the app's features from the nav bar without creatin
 - Tests: sandbox world helper (valid world, both languages), item generator page (reroll changes the item, seed reproduces it), menu has the Tools group.
 
 ## Comments
+
+## Answer
+
+- Nav bar: "Tools" submenu (`nav.tools`) in `MenuService.staticItems` with Dice (`/dice`, moved), Item generator (`/tools/item-generator`) and External tools (`/tools/links`); works in the desktop menubar and the mobile menu. No route needs a world or a room.
+- Sandbox world: `world/helpers/default-world.ts` (`DEFAULT_ATTRIBUTES`, now also used by the new world wizard, and `createSandboxWorld(translate)`: default attributes in the active language, life/mana bars, 5 stat points, 50 coins, fixed ids) and `SandboxWorldBusiness.$world` (in memory, follows the language, never saved nor hosted).
+- Item generator: `tools/business/item-generator.business.ts` (rarity/type/slot or random, slot only for equipment or random type, visible seed, Reroll, paste a seed; `seededRandomSource(seed)` + the word list of the active language → same seed + options + language gives the same item) and the page. New item module with `app-item-card` (name, rarity `p-tag`, type, slot, modifiers, description, price) and `RARITY_SEVERITY`, for L07–L09.
+- External tools page (Watabou's Procgen Arcana, Azgaar's Fantasy Map Generator, Squoosh), cards that open in a new tab. Noted in L01 so it links to it instead of making another one.
+- L07, L08, L09 tickets now mention the sandbox world and their Tools entry.
+- Rarity colours use `p-tag` severities (secondary → success → info → warn → danger), not new preset tokens; L08 can switch to preset colours if wanted.
+- Checked in the browser: Tools menu (desktop + mobile), generator in FR and EN, reroll then pasting the first seed brings the same item back, external tools page, mobile layout, no console errors. Production build on a fresh origin: the generator opens with no world or room, the service worker controls the page and has the tools chunks and both word lists cached (offline itself not simulated, the pane can't cut the network).
+- Tests: 10 new (sandbox world in EN and FR + stable, generator business: sandbox attributes, seed reproduces / reroll changes, options, blank seed; item card renders every rarity/type/slot in EN and FR without a missing key; menu Tools group). Suite: 218 passing.

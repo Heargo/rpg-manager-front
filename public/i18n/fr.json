@@ -6,7 +6,10 @@
     "play": "Jouer",
     "profile": "Profil",
     "language": "Langue",
-    "dice": "Dés"
+    "dice": "Dés",
+    "tools": "Outils",
+    "itemGenerator": "Générateur d'objets",
+    "externalTools": "Outils externes"
   },
   "play": {
     "title": "Jouer",
@@ -143,6 +146,39 @@
       "value": "Valeur",
       "coins": "{{ count }} pièces"
     }
+  },
+  "item": {
+    "rarity": {
+      "common": "Commun",
+      "uncommon": "Peu commun",
+      "rare": "Rare",
+      "mythic": "Mythique",
+      "legendary": "Légendaire"
+    },
+    "type": {
+      "item": "Objet",
+      "consumable": "Consommable",
+      "equipment": "Équipement"
+    },
+    "slot": {
+      "head": "Tête",
+      "earring": "Boucle d'oreille",
+      "necklace": "Collier",
+      "ring": "Anneau",
+      "chest": "Torse",
+      "hand": "Mains",
+      "legs": "Jambes",
+      "foot": "Pieds",
+      "weapon1": "Arme 1",
+      "weapon2": "Arme 2"
+    },
+    "fields": {
+      "rarity": "Rareté",
+      "type": "Type",
+      "slot": "Emplacement"
+    },
+    "modifiers": "Modificateurs",
+    "price": "{{ price }} pièces"
   },
   "dice": {
     "title": "Dés",
@@ -287,6 +323,37 @@
       "tooManyImages": "Trop d'images rapides : retirez-en d'abord.",
       "imageMissing": "Cette image n'est pas sur l'appareil de l'hôte.",
       "gameMasterOnly": "Seul le maître du jeu peut faire ça."
+    }
+  },
+  "tools": {
+    "sandbox": {
+      "name": "Bac à sable"
+    },
+    "itemGenerator": {
+      "title": "Générateur d'objets",
+      "intro": "Tire un objet au hasard. Ses modificateurs utilisent les attributs par défaut : {{ attributes }}.",
+      "random": "Au hasard",
+      "seed": "Graine",
+      "reroll": "Relancer",
+      "seedHint": "La même graine avec les mêmes options donne le même objet. Collez une graine pour retrouver un objet.",
+      "failed": "La liste de mots n'a pas pu être chargée. Vérifiez votre connexion et rechargez."
+    },
+    "external": {
+      "title": "Outils externes",
+      "intro": "Des outils gratuits, faits par d'autres, pour préparer une partie.",
+      "notOurs": "Ces sites ne font pas partie de l'application ; ils s'ouvrent dans un nouvel onglet.",
+      "procgenArcana": {
+        "name": "Procgen Arcana",
+        "description": "Les générateurs de Watabou : villes, villages, donjons et plus."
+      },
+      "fantasyMap": {
+        "name": "Fantasy Map Generator",
+        "description": "Les cartes du monde d'Azgaar, avec pays, cultures et routes."
+      },
+      "squoosh": {
+        "name": "Squoosh",
+        "description": "Réduire et convertir des images avant de les ajouter à votre monde."
+      }
     }
   },
   "notFound": {

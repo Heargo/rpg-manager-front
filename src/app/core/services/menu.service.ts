@@ -17,9 +17,14 @@ export class MenuService {
       routerLink: '/play',
     },
     {
-      label: 'nav.dice',
-      icon: 'pi pi-box',
-      routerLink: '/dice',
+      label: 'nav.tools',
+      icon: 'pi pi-wrench',
+      // Every tool works without a world or a room.
+      items: [
+        { label: 'nav.dice', icon: 'pi pi-box', routerLink: '/dice' },
+        { label: 'nav.itemGenerator', icon: 'pi pi-sparkles', routerLink: '/tools/item-generator' },
+        { label: 'nav.externalTools', icon: 'pi pi-external-link', routerLink: '/tools/links' },
+      ],
     },
   ];
 

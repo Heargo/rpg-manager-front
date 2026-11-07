@@ -34,6 +34,7 @@ const MONEY_KINDS: MoneyKind[] = ['coins', 'dollars', 'euros', 'pounds', 'yen', 
 const OFFLINE_FEATURES = Object.keys(DEFAULT_OFFLINE_FEATURES) as (keyof OfflineFeatures)[];
 
 /** New game wizard: identity → attributes → rules, with a live preview. */
+import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
 @Component({
   selector: 'app-world-new-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -164,12 +165,6 @@ export class WorldNewPageComponent {
   }
 
   private defaultAttributes(): AttributeRow[] {
-    return [
-      { key: 1, name: this.language.t('world.defaults.life'), baseValue: 10 },
-      { key: 2, name: this.language.t('world.defaults.mana'), baseValue: 5 },
-      { key: 3, name: this.language.t('world.defaults.strength'), baseValue: 1 },
-      { key: 4, name: this.language.t('world.defaults.agility'), baseValue: 1 },
-      { key: 5, name: this.language.t('world.defaults.intelligence'), baseValue: 1 },
-    ];
+    return DEFAULT_ATTRIBUTES.map(({ nameKey, baseValue }, index) => ({ key: index + 1, name: this.language.t(nameKey), baseValue }));
   }
 }
