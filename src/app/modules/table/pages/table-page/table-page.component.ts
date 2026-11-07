@@ -24,6 +24,7 @@ import { MessageModule } from '@openng/optimus-ui/message';
 import { SplitterModule } from '@openng/optimus-ui/splitter';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
+import { HostOfflineIconComponent } from '../../../../core/components/host-offline-icon/host-offline-icon.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterBusiness } from '../../../character/business/character.business';
@@ -55,6 +56,7 @@ const NARROW_QUERY = '(max-width: 960px)';
     TextareaModule,
     TooltipModule,
     StoredImageComponent,
+    HostOfflineIconComponent,
     CharacterSummaryComponent,
     DiceRollerComponent,
     DiceOverlayComponent,

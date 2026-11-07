@@ -24,7 +24,7 @@ export interface AppDatabaseSchema extends DBSchema {
   /** Rooms this device joined as a player, by room id. Typed by the room feature. */
   joinedRooms: { key: string; value: { id: string } & Record<string, unknown> };
   /** The player's own copy of their character, by room id. Typed by the character feature. */
-  playerCopies: { key: string; value: { roomId: string; character: Record<string, unknown> } };
+  playerCopies: { key: string; value: { roomId: string; character: Record<string, unknown>; queue?: unknown[] } };
 }
 
 export type AppDatabase = IDBPDatabase<AppDatabaseSchema>;

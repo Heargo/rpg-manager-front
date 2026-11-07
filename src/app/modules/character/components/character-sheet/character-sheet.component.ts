@@ -20,6 +20,7 @@ import { Menu, MenuModule } from '@openng/optimus-ui/menu';
 import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TagModule } from '@openng/optimus-ui/tag';
+import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { EQUIPMENT_SLOTS, EquipmentSlot } from '../../../../core/models/item';
@@ -32,6 +33,7 @@ import {
 } from '../../business/character.business';
 import {
   CharacterAction,
+  CharacterActionKind,
   MAX_GRANTED_POINTS,
 } from '../../helpers/character-actions.rules';
 
@@ -61,6 +63,7 @@ const ITEM_ICONS: Record<string, string> = {
     ProgressBarModule,
     TabsModule,
     TagModule,
+    TooltipModule,
     StoredImageComponent,
     ItemCardComponent,
   ],
@@ -80,6 +83,8 @@ export class CharacterSheetComponent {
   readonly gameMaster = input(false);
   /** An action is on its way: buttons wait. */
   readonly busy = input(false);
+  /** Actions that are off for now (the host is offline and didn't allow them): disabled, with a tooltip. */
+  readonly lockedActions = input<CharacterActionKind[]>([]);
   readonly act = output<CharacterAction>();
 
   protected readonly maxGranted = MAX_GRANTED_POINTS;
@@ -124,6 +129,10 @@ export class CharacterSheetComponent {
     );
     return entry ? this.itemMenu(entry) : [];
   });
+
+  protected isLocked(kind: CharacterActionKind): boolean {
+    return this.lockedActions().includes(kind);
+  }
 
   protected money(amount: number): string {
     return this.characters.money(amount, this.world().moneyFormat);
@@ -223,8 +232,13 @@ export class CharacterSheetComponent {
       },
     ];
     if (!this.canPlay()) return items;
+    const locked = (kind: CharacterActionKind): Partial<MenuItem> =>
+      this.isLocked(kind)
+        ? { disabled: true, title: t('character.sheet.lockedOffline') }
+        : {};
     if (entry.item.type === 'equipment' && entry.item.slot !== 'none') {
       items.push({
+        ...locked(entry.equipped ? 'unequip' : 'equip'),
         label: t(
           entry.equipped ? 'character.items.unequip' : 'character.items.equip',
         ),
@@ -234,6 +248,7 @@ export class CharacterSheetComponent {
     }
     if (entry.item.type === 'consumable') {
       items.push({
+        ...locked('use'),
         label: t('character.items.use'),
         icon: 'pi pi-heart',
         command: () => this.use(entry),
@@ -242,6 +257,7 @@ export class CharacterSheetComponent {
     items.push(
       { separator: true },
       {
+        ...locked('sell'),
         label: t('character.items.sell'),
         icon: 'pi pi-wallet',
         command: () => this.sell(entry),

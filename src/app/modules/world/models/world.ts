@@ -58,6 +58,8 @@ export interface Character {
   /** Bumped by the host on every change (p2p-rooms spec, Player data). */
   rev: number;
   updatedAt: number;
+  /** The player's personal notes, saved by the host with the record. */
+  notes?: string;
 }
 
 export interface World {

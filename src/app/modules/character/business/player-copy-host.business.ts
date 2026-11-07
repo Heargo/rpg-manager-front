@@ -6,6 +6,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { isValidQueue, replayQueue } from '../helpers/offline-actions.rules';
 import { PeerApiError } from '../../../core/p2p/helpers/peer-api-error';
 import { PeerId } from '../../../core/p2p/room-transport';
 import { RoomHostBusiness } from '../../room/business/room-host.business';
@@ -22,6 +23,7 @@ import {
   PlayerCopyHelloAnswer,
   PlayerCopySubmit,
   QueuedAction,
+  QueuedRefusal,
 } from '../models/player-copy';
 import { PlayerCopyService } from '../services/player-copy.service';
 import { CharacterHostBusiness } from './character-host.business';
@@ -57,6 +59,9 @@ export class PlayerCopyHostBusiness {
         this.service.serveSubmit((payload, { from }) =>
           this.onSubmit(payload, from),
         ),
+        this.service.serveNotes((_payload, { from }) => ({
+          notes: this.hostCharacter(this.playerOf(from))?.notes,
+        })),
       ];
       onCleanup(() => {
         stops.forEach((stop) => stop());
@@ -88,11 +93,12 @@ export class PlayerCopyHostBusiness {
     if (gone.length > 0) this.publish();
   }
 
-  keepHost(playerId: string): Promise<void> {
-    return this.resolve(playerId, 'host');
+  async keepHost(playerId: string): Promise<void> {
+    await this.resolve(playerId, 'host');
   }
 
-  usePlayer(playerId: string): Promise<void> {
+  /** Replays the player's queued actions on the host's record; resolves with the entries the host refused. */
+  usePlayer(playerId: string): Promise<QueuedRefusal[]> {
     return this.resolve(playerId, 'player');
   }
 
@@ -132,7 +138,7 @@ export class PlayerCopyHostBusiness {
     if (!match) this.gate.hold(playerId);
     this.gate.markChecked(from);
     this.publish();
-    return { match };
+    return { match, notes: host?.notes };
   }
 
   private onSubmit(payload: unknown, from: PeerId): void {
@@ -147,7 +153,7 @@ export class PlayerCopyHostBusiness {
       typeof copy !== 'object' ||
       copy.id !== host.id ||
       copy.playerId !== playerId ||
-      !Array.isArray(submit?.queued)
+      !isValidQueue(submit?.queued, host.id)
     ) {
       throw new PeerApiError('invalid', 'character.errors.invalid');
     }
@@ -171,19 +177,37 @@ export class PlayerCopyHostBusiness {
   private async resolve(
     playerId: string,
     pick: 'host' | 'player',
-  ): Promise<void> {
+  ): Promise<QueuedRefusal[]> {
     const conflict = this.pending().find(
       (candidate) => candidate.playerId === playerId,
     );
     if (!conflict)
       throw new PeerApiError('rejected', 'character.errors.invalid');
+    let refused: QueuedRefusal[] = [];
     await this.session.update((world) => {
       const host = world.characters.find(
         (character) => character.playerId === playerId,
       );
       if (!host)
         throw new PeerApiError('invalid', 'character.errors.unknownCharacter');
-      const picked = resolvePick(host, conflict.player, pick, Date.now());
+      // The player's version is the host's record plus the queued actions: nothing comes from the submitted copy.
+      let picked: Character;
+      if (pick === 'player') {
+        const replay = replayQueue(
+          world.attributes,
+          host,
+          conflict.queued,
+          world.offlineFeatures,
+        );
+        refused = replay.refused;
+        picked = {
+          ...replay.character,
+          rev: host.rev + 1,
+          updatedAt: Date.now(),
+        };
+      } else {
+        picked = resolvePick(host, conflict.player, 'host', Date.now());
+      }
       return {
         ...world,
         characters: world.characters.map((character) =>
@@ -194,6 +218,7 @@ export class PlayerCopyHostBusiness {
     this.characterHost.publish();
     this.clear(playerId);
     this.publish();
+    return refused;
   }
 
   private clear(playerId: string): void {

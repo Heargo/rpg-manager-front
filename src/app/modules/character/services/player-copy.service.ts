@@ -24,6 +24,11 @@ export class PlayerCopyService {
     return this.api.request(PLAYER_COPY_ROUTES.submit, submit, 30_000);
   }
 
+  /** The player's own notes, as the host has them. */
+  notes(): Promise<{ notes?: string }> {
+    return this.api.request(PLAYER_COPY_ROUTES.notes, {});
+  }
+
   /** null until the host sends the characters, and again after leaving. */
   watchCharacters(): Observable<Character[] | null> {
     return this.api.watchCurrent(CHARACTER_TOPICS.list);
@@ -40,6 +45,10 @@ export class PlayerCopyService {
 
   serveSubmit(handler: PeerHandler<unknown, void>): () => void {
     return this.api.serve(PLAYER_COPY_ROUTES.submit, handler);
+  }
+
+  serveNotes(handler: PeerHandler<unknown, { notes?: string }>): () => void {
+    return this.api.serve(PLAYER_COPY_ROUTES.notes, handler);
   }
 
   publishReadOnly(playerIds: string[]): void {

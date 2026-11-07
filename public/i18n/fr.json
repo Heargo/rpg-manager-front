@@ -149,7 +149,9 @@
       "gameMasterOnly": "Seul le maître du jeu peut faire ça.",
       "unknownCharacter": "Ce personnage n'est pas dans le salon.",
       "notYours": "Ce n'est pas votre personnage.",
-      "held": "Votre copie est en cours de vérification, ou attend le choix du MJ. Réessayez dans un instant."
+      "held": "Votre copie est en cours de vérification, ou attend le choix du MJ. Réessayez dans un instant.",
+      "offlineNotAllowed": "L'hôte n'a pas autorisé cette action hors ligne.",
+      "notesTooLong": "Ces notes sont trop longues."
     },
     "sheet": {
       "playedBy": "Joué par {{ name }}",
@@ -172,7 +174,8 @@
       "spendOn": "Dépenser un point en {{ name }}",
       "currentOf": "{{ name }} actuel",
       "grant": "Donner",
-      "grantLabel": "Donner des points de stats"
+      "grantLabel": "Donner des points de stats",
+      "lockedOffline": "Indisponible tant que l'hôte est hors ligne"
     },
     "items": {
       "details": "Détails",
@@ -205,9 +208,16 @@
         "inventory": "Inventaire",
         "rev": "Révision",
         "updatedAt": "Mis à jour"
-      }
+      },
+      "refused": "{{count}} action(s) en attente n'ont pas pu être appliquées."
     },
-    "readOnly": "Votre copie de ce personnage diffère de celle de l'hôte. Les actions sont désactivées tant que le MJ n'a pas choisi une sauvegarde."
+    "readOnly": "Votre copie de ce personnage diffère de celle de l'hôte. Les actions sont désactivées tant que le MJ n'a pas choisi une sauvegarde.",
+    "notes": {
+      "title": "Notes personnelles",
+      "placeholder": "Seuls vous et le maître du jeu voyez ces notes.",
+      "save": "Enregistrer les notes",
+      "readOnly": "Les notes ne sont pas modifiables tant que l'hôte est hors ligne."
+    }
   },
   "item": {
     "rarity": {
@@ -429,6 +439,10 @@
       "hostedBy": "Hôte : {{ name }}",
       "lastSeen": "vue {{ date }}",
       "forget": "Oublier cette salle"
+    },
+    "hostOfflineTooltip": "Hôte hors ligne : certaines fonctions restent disponibles ; demandez un nouveau lien d'invitation à l'hôte pour vous reconnecter",
+    "offline": {
+      "title": "Fonctions hors ligne"
     }
   },
   "table": {

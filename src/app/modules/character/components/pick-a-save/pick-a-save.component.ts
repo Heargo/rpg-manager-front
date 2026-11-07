@@ -43,9 +43,23 @@ export class PickASaveComponent {
     pick: 'host' | 'player',
   ): Promise<void> {
     try {
-      await (pick === 'host'
-        ? this.copies.keepHost(playerId)
-        : this.copies.usePlayer(playerId));
+      if (pick === 'host') {
+        await this.copies.keepHost(playerId);
+        return;
+      }
+      const refused = await this.copies.usePlayer(playerId);
+      if (refused.length > 0) {
+        this.messages.add({
+          severity: MessageLevel.Warning,
+          summary: this.language.t('character.pickASave.refused', {
+            count: refused.length,
+          }),
+          detail: refused
+            .map((entry) => `${entry.route}: ${this.language.t(entry.error)}`)
+            .join('\n'),
+          life: 10000,
+        });
+      }
     } catch (error) {
       console.error('Could not apply the pick', error);
       this.messages.add({

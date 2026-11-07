@@ -20,6 +20,11 @@ export class CharacterService {
     return this.api.request(characterActionRoute(kind), { characterId, ...fields });
   }
 
+  /** Saves the player's personal notes with their record on the host. */
+  saveNotes(characterId: string, notes: string): Promise<Character> {
+    return this.api.request(CHARACTER_ROUTES.saveNotes, { characterId, notes });
+  }
+
   /** null until the host sends it, and again after leaving. */
   watchCharacters(): Observable<Character[] | null> {
     return this.api.watchCurrent(CHARACTER_TOPICS.list);
@@ -27,6 +32,10 @@ export class CharacterService {
 
   serveCreate(handler: PeerHandler<unknown, Character>): () => void {
     return this.api.serve(CHARACTER_ROUTES.create, handler);
+  }
+
+  serveSaveNotes(handler: PeerHandler<unknown, Character>): () => void {
+    return this.api.serve(CHARACTER_ROUTES.saveNotes, handler);
   }
 
   serveAction(kind: CharacterActionKind, handler: PeerHandler<unknown, Character>): () => void {

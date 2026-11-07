@@ -45,7 +45,7 @@ const character: Character = {
   updatedAt: 0,
 };
 
-async function render(inputs: { canPlay: boolean; gameMaster: boolean }) {
+async function render(inputs: { canPlay: boolean; gameMaster: boolean; locked?: string[] }) {
   // jsdom has no matchMedia nor ResizeObserver; the tabs use them.
   vi.stubGlobal(
     'ResizeObserver',
@@ -72,6 +72,7 @@ async function render(inputs: { canPlay: boolean; gameMaster: boolean }) {
   fixture.componentRef.setInput('world', world);
   fixture.componentRef.setInput('canPlay', inputs.canPlay);
   fixture.componentRef.setInput('gameMaster', inputs.gameMaster);
+  if (inputs.locked) fixture.componentRef.setInput('lockedActions', inputs.locked);
   const actions: CharacterAction[] = [];
   fixture.componentInstance.act.subscribe((action) => actions.push(action));
   await fixture.whenStable();
@@ -103,5 +104,23 @@ describe('CharacterSheetComponent', () => {
   it('gives the game master the grant form', async () => {
     const { el } = await render({ canPlay: true, gameMaster: true });
     expect(el.querySelector('#grant-points')).not.toBeNull();
+  });
+
+  it('disables the spend buttons with a tooltip when the action is locked (host offline)', async () => {
+    const { el, actions } = await render({ canPlay: true, gameMaster: false, locked: ['spend-stat-point'] });
+    const button = el.querySelector('[aria-label="Spend a point on Strength"]') as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+    button.click();
+    expect(actions).toEqual([]);
+    // Contract: a wrapper around the disabled button carries the tooltip text as its aria-label.
+    expect(el.querySelector('[data-locked="spend-stat-point"]')!.getAttribute('aria-label')).toBe(
+      'Not available while the host is offline',
+    );
+  });
+
+  it('keeps unlocked actions enabled', async () => {
+    const { el } = await render({ canPlay: true, gameMaster: false, locked: ['sell'] });
+    expect((el.querySelector('[aria-label="Spend a point on Strength"]') as HTMLButtonElement).disabled).toBe(false);
+    expect(el.querySelector('[data-locked="spend-stat-point"]')).toBeNull();
   });
 });

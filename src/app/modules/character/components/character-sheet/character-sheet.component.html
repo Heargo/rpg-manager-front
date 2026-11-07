@@ -146,17 +146,32 @@
               </td>
               @if (canPlay() && c.statPoints > 0) {
                 <td>
-                  <p-button
-                    icon="pi pi-plus"
-                    size="small"
-                    [rounded]="true"
-                    [text]="true"
-                    [disabled]="busy()"
-                    [ariaLabel]="
-                      'character.sheet.spendOn' | transloco: { name: stat.name }
+                  <span
+                    class="lock-wrap"
+                    [attr.data-locked]="
+                      isLocked('spend-stat-point') ? 'spend-stat-point' : null
                     "
-                    (onClick)="spend(stat.attributeId)"
-                  />
+                    [attr.aria-label]="
+                      isLocked('spend-stat-point')
+                        ? ('character.sheet.lockedOffline' | transloco)
+                        : null
+                    "
+                    [pTooltip]="'character.sheet.lockedOffline' | transloco"
+                    [tooltipDisabled]="!isLocked('spend-stat-point')"
+                  >
+                    <p-button
+                      icon="pi pi-plus"
+                      size="small"
+                      [rounded]="true"
+                      [text]="true"
+                      [disabled]="busy() || isLocked('spend-stat-point')"
+                      [ariaLabel]="
+                        'character.sheet.spendOn'
+                          | transloco: { name: stat.name }
+                      "
+                      (onClick)="spend(stat.attributeId)"
+                    />
+                  </span>
                 </td>
               }
             </tr>
@@ -270,7 +285,9 @@
                 : 'character.items.equip'
               ) | transloco
             "
-            [disabled]="busy()"
+            [disabled]="busy() || isLocked(entry.equipped ? 'unequip' : 'equip')"
+            [pTooltip]="'character.sheet.lockedOffline' | transloco"
+            [tooltipDisabled]="!isLocked(entry.equipped ? 'unequip' : 'equip')"
             (onClick)="equip(entry)"
           />
         }
@@ -278,7 +295,9 @@
           <p-button
             icon="pi pi-heart"
             [label]="'character.items.use' | transloco"
-            [disabled]="busy()"
+            [disabled]="busy() || isLocked('use')"
+            [pTooltip]="'character.sheet.lockedOffline' | transloco"
+            [tooltipDisabled]="!isLocked('use')"
             (onClick)="use(entry)"
           />
         }
@@ -289,7 +308,9 @@
               | transloco: { price: money(entry.item.price) }
           "
           severity="secondary"
-          [disabled]="busy()"
+          [disabled]="busy() || isLocked('sell')"
+          [pTooltip]="'character.sheet.lockedOffline' | transloco"
+          [tooltipDisabled]="!isLocked('sell')"
           (onClick)="sell(entry)"
         />
       </div>

@@ -28,6 +28,11 @@
             />
           }
         </p-card>
+        @if (offlineFeatures.$features(); as features) {
+          <p-card [header]="'room.offline.title' | transloco">
+            <app-offline-features-panel [features]="features" (featuresChange)="setOfflineFeatures($event)" />
+          </p-card>
+        }
         <section class="stack">
           <p-button icon="pi pi-user-plus" [label]="'room.invite.add' | transloco" [loading]="inviting()" (onClick)="invite()" />
           @if (error()) {

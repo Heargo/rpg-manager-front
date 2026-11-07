@@ -149,7 +149,9 @@
       "gameMasterOnly": "Only the game master can do that.",
       "unknownCharacter": "This character isn't in the room.",
       "notYours": "This isn't your character.",
-      "held": "Your copy is being checked, or waits for the game master's pick. Try again in a moment."
+      "held": "Your copy is being checked, or waits for the game master's pick. Try again in a moment.",
+      "offlineNotAllowed": "The host did not allow this while offline.",
+      "notesTooLong": "These notes are too long."
     },
     "sheet": {
       "playedBy": "Played by {{ name }}",
@@ -172,7 +174,8 @@
       "spendOn": "Spend a point on {{ name }}",
       "currentOf": "Current {{ name }}",
       "grant": "Grant",
-      "grantLabel": "Grant stat points"
+      "grantLabel": "Grant stat points",
+      "lockedOffline": "Not available while the host is offline"
     },
     "items": {
       "details": "Details",
@@ -205,9 +208,16 @@
         "inventory": "Inventory",
         "rev": "Revision",
         "updatedAt": "Updated"
-      }
+      },
+      "refused": "{{count}} queued action(s) could not be applied."
     },
-    "readOnly": "Your copy of this character differs from the host's. Actions are off until the game master picks a save."
+    "readOnly": "Your copy of this character differs from the host's. Actions are off until the game master picks a save.",
+    "notes": {
+      "title": "Personal notes",
+      "placeholder": "Only you and the game master see these notes.",
+      "save": "Save notes",
+      "readOnly": "Notes can't be edited while the host is offline."
+    }
   },
   "item": {
     "rarity": {
@@ -429,6 +439,10 @@
       "hostedBy": "Host: {{ name }}",
       "lastSeen": "last seen {{ date }}",
       "forget": "Forget this room"
+    },
+    "hostOfflineTooltip": "Host offline: some features still work; ask the host for a new invite to reconnect",
+    "offline": {
+      "title": "Offline features"
     }
   },
   "table": {

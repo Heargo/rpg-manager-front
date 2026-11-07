@@ -18,6 +18,7 @@ export interface PlayerCopyConflict {
 export const PLAYER_COPY_ROUTES = {
   hello: 'player-copy/hello',
   submit: 'player-copy/submit',
+  notes: 'player-copy/notes',
 } as const;
 
 export const PLAYER_COPY_TOPICS = {
@@ -33,6 +34,14 @@ export interface PlayerCopyHello {
 
 export interface PlayerCopyHelloAnswer {
   match: boolean;
+  /** The player's own notes on the host (they are not in the broadcast list). */
+  notes?: string;
+}
+
+/** A queued action the host refused when it replayed the queue. */
+export interface QueuedRefusal {
+  route: string;
+  error: string;
 }
 
 export interface PlayerCopySubmit {

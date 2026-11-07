@@ -138,13 +138,13 @@ describe('player copy and "Pick a save" (host + player over the fake network)', 
     expect(ada.copy.$readOnly()).toBe(false);
   });
 
-  it("mismatch → use player version: the player's data becomes the next rev, broadcast, kept as the copy", async () => {
+  it("mismatch → use player version: the host's record replays the queue (none here), next rev, broadcast, kept as the copy; nothing is taken from the copy", async () => {
     await rejoinAfterHostChange();
 
     await gm.hostCopy.usePlayer('ada');
     await settle();
 
-    expect(hostCharacter()).toMatchObject({ statPoints: 3, rev: 3 });
+    expect(hostCharacter()).toMatchObject({ statPoints: 5, rev: 3 });
     const hostWorld = await gm.injector.get(WorldLibraryBusiness).get(rooms(gm).$room()!.worldId!);
     expect(hostWorld?.characters.find((c) => c.playerId === 'ada')).toEqual(hostCharacter());
     expect(characters(ada).$myCharacter()).toEqual(hostCharacter());
