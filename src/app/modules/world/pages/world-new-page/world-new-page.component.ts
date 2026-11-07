@@ -23,6 +23,7 @@ import { StepperModule } from '@openng/optimus-ui/stepper';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
+import { FormulaChartComponent } from '../../../../core/components/formula-chart/formula-chart.component';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
 import { LanguageBusiness } from '../../../../core/business/language.business';
@@ -92,6 +93,7 @@ import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
     TextareaModule,
     ToggleSwitchModule,
     TooltipModule,
+    FormulaChartComponent,
     CoinInputComponent,
     WorldCardComponent,
   ],
@@ -171,11 +173,36 @@ export class WorldNewPageComponent {
       const levels = previewMax(row.formula, row.baseValue, names);
       return {
         levels: levels.join(' '),
+        chart: previewMax(row.formula, row.baseValue, names, 10),
         first: levels[0],
         last: levels[levels.length - 1],
       };
     });
   });
+  /** Which preview shows its chart: an attribute row index, 'curve' or none. */
+  protected readonly chartOpen = signal<number | 'curve' | null>(null);
+  protected setChart(target: number | 'curve' | null): void {
+    this.chartOpen.set(target);
+  }
+  /** Mouse hover opens the chart; touch and pen go through the tap. */
+  protected hoverChart(event: Event, target: number | 'curve' | null): void {
+    if ((event as PointerEvent).pointerType === 'mouse') this.setChart(target);
+  }
+  /** Keyboard focus opens the chart (a pointer press is handled by hover or tap). */
+  protected focusChart(event: Event, target: number | 'curve'): void {
+    let keyboard = false;
+    try {
+      keyboard = (event.target as Element).matches(':focus-visible');
+    } catch {
+      keyboard = false;
+    }
+    if (keyboard) this.setChart(target);
+  }
+  /** A tap (or Enter) toggles the chart; a mouse click leaves the hover state alone. */
+  protected tapChart(event: Event, target: number | 'curve'): void {
+    if ((event as PointerEvent).pointerType === 'mouse') return;
+    this.chartOpen.update((open) => (open === target ? null : target));
+  }
   protected readonly curveError = computed(() =>
     checkLevelCurve(this.levelCurve()),
   );
@@ -186,6 +213,14 @@ export class WorldNewPageComponent {
       : [2, 3, 4, 5, 6]
           .map((level) => levelCost(this.levelCurve(), level))
           .join(' '),
+  );
+  /** XP cost of levels 2 to 11 for the chart (empty while a custom curve is invalid). */
+  protected readonly curveChart = computed(() =>
+    this.curveError()
+      ? []
+      : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((level) =>
+          levelCost(this.levelCurve(), level),
+        ),
   );
   protected readonly errors = computed(() =>
     this.library.validateDraft(this.draft()),

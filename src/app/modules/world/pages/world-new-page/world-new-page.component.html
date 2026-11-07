@@ -173,11 +173,15 @@
                         class="max"
                         [attr.data-testid]="'formula-preview-' + i"
                         [attr.data-levels]="previews()[i].levels"
-                        [pTooltip]="
-                          ('world.formula.preview' | transloco) +
-                          ': ' +
-                          previews()[i].levels
-                        "
+                        data-chart-trigger
+                        [attr.tabindex]="previews()[i].levels ? 0 : null"
+                        [attr.aria-expanded]="chartOpen() === i"
+                        (pointerenter)="hoverChart($event, i)"
+                        (pointerleave)="hoverChart($event, null)"
+                        (focus)="focusChart($event, i)"
+                        (blur)="setChart(null)"
+                        (click)="tapChart($event, i)"
+                        (keydown.escape)="setChart(null)"
                       >
                         @if (previews()[i].levels) {
                           {{
@@ -190,6 +194,14 @@
                           }}
                         } @else {
                           –
+                        }
+                        @if (chartOpen() === i && previews()[i].chart.length) {
+                          <span class="chart-card" role="tooltip">
+                            <app-formula-chart
+                              [values]="previews()[i].chart"
+                              [label]="'formula.chart.maxLabel' | transloco"
+                            />
+                          </span>
                         }
                       </span>
                       <span class="bar-toggles">
@@ -388,9 +400,29 @@
                   }
                   <small class="hint wide">
                     {{ "world.level.preview" | transloco }}:
-                    <span data-testid="level-curve-preview">{{
-                      curvePreview()
-                    }}</span>
+                    <span
+                      class="curve-preview"
+                      data-testid="level-curve-preview"
+                      data-chart-trigger
+                      [attr.tabindex]="curvePreview() ? 0 : null"
+                      [attr.aria-expanded]="chartOpen() === 'curve'"
+                      (pointerenter)="hoverChart($event, 'curve')"
+                      (pointerleave)="hoverChart($event, null)"
+                      (focus)="focusChart($event, 'curve')"
+                      (blur)="setChart(null)"
+                      (click)="tapChart($event, 'curve')"
+                      (keydown.escape)="setChart(null)"
+                      >{{ curvePreview() }}
+                      @if (chartOpen() === "curve" && curveChart().length) {
+                        <span class="chart-card" role="tooltip">
+                          <app-formula-chart
+                            [values]="curveChart()"
+                            [startLevel]="2"
+                            [label]="'formula.chart.xpLabel' | transloco"
+                          />
+                        </span>
+                      }
+                    </span>
                   </small>
                 </div>
                 <div class="field">

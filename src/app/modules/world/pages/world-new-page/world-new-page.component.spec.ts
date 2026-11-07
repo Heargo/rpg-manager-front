@@ -298,3 +298,16 @@ describe('WorldNewPageComponent switching to Custom', () => {
     expect(nextDisabled()).toBe(false);
   });
 });
+
+describe('WorldNewPageComponent formula chart', () => {
+  it('opens a chart of levels 0 to 10 from the max preview, which keeps its levels 0 to 5 data', async () => {
+    const { el, byId, pick, levels } = await openAttributesStep();
+    expect(byId('formula-preview-0')!.hasAttribute('data-chart-trigger')).toBe(true);
+    expect(el.querySelector('app-formula-chart')).toBeNull();
+    await pick('formula-preview-0');
+    expect(el.querySelectorAll('app-formula-chart svg [data-point]').length).toBe(11);
+    expect(levels(0)!.split(' ').length).toBe(6);
+    await pick('formula-preview-0');
+    expect(el.querySelector('app-formula-chart')).toBeNull();
+  });
+});

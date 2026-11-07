@@ -688,6 +688,11 @@
       "negative": "Max négatif au niveau {{ level }}",
       "divisionByZeroAtLevel": "Division par zéro (caractère {{ position }}, niveau {{ level }})",
       "notFiniteAtLevel": "Le résultat n'est pas un nombre fini (niveau {{ level }})"
+    },
+    "chart": {
+      "level": "niv. {{ level }}",
+      "maxLabel": "Maximum par niveau",
+      "xpLabel": "Coût en XP par niveau"
     }
   }
 }

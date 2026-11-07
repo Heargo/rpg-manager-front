@@ -408,7 +408,7 @@ export function validateFormula(
 
 export const CHECK_MAX_LEVEL = 50;
 export const CHECK_MAX_PLAYER_LEVEL = 100;
-const PREVIEW_LEVELS = [0, 1, 2, 3, 4, 5];
+const PREVIEW_LEVELS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 /**
  * Validates an attribute formula by evaluating it over levels 0 to 50 and player levels 1 to 100
@@ -479,15 +479,16 @@ function computeCheck(
   return null;
 }
 
-/** Rounded max at levels 0 to 5 for the wizard (player level 1, other attributes at 0); empty on error. */
+/** Rounded max at levels 0 to `upTo` (5 by default, 10 at most) for the wizard (player level 1, other attributes at 0); empty on error. */
 export function previewMax(
   formula: AttributeFormula,
   base: number,
   attributeNames: string[],
+  upTo = 5,
 ): number[] {
   const levels = Object.fromEntries(attributeNames.map((name) => [name, 0]));
   const values: number[] = [];
-  for (const level of PREVIEW_LEVELS) {
+  for (const level of PREVIEW_LEVELS.slice(0, upTo + 1)) {
     const result = evaluateFormula(formula, {
       level,
       base,

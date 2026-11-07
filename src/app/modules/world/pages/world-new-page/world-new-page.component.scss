@@ -283,3 +283,19 @@
     color: var(--p-red-500);
   }
 }
+
+:host ::ng-deep [data-chart-trigger] {
+  position: relative;
+  cursor: help;
+  .chart-card {
+    position: absolute;
+    z-index: 10;
+    bottom: 100%;
+    right: 0;
+    padding: 0.5rem;
+    background: var(--p-content-background);
+    border: 1px solid var(--p-content-border-color);
+    border-radius: 6px;
+    white-space: normal;
+  }
+}

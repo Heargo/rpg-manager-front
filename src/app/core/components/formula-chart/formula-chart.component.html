@@ -1,0 +1,64 @@
+<svg
+  class="chart"
+  role="img"
+  [attr.viewBox]="'0 0 ' + width + ' ' + height"
+  [attr.aria-label]="description()"
+>
+  <title>{{ description() }}</title>
+  <path class="area" [attr.d]="area()" />
+  <line
+    class="axis"
+    [attr.x1]="10"
+    [attr.x2]="width - 14"
+    [attr.y1]="baseline"
+    [attr.y2]="baseline"
+  />
+  <polyline class="line" [attr.points]="line()" />
+  @for (point of points(); track $index) {
+    <circle
+      class="dot"
+      data-point
+      [attr.cx]="point.x"
+      [attr.cy]="point.y"
+      r="2.5"
+    />
+  }
+  @if (points().length) {
+    <text
+      class="value"
+      data-label="first"
+      text-anchor="start"
+      [attr.x]="points()[0].x"
+      [attr.y]="points()[0].y - 6"
+    >
+      {{ points()[0].value }}
+    </text>
+    <text
+      class="value"
+      data-label="last"
+      text-anchor="end"
+      [attr.x]="points()[points().length - 1].x + 8"
+      [attr.y]="points()[points().length - 1].y - 6"
+    >
+      {{ points()[points().length - 1].value }}
+    </text>
+  }
+  <text
+    class="tick"
+    data-axis="start"
+    text-anchor="start"
+    x="10"
+    [attr.y]="height - 8"
+  >
+    {{ startText() }}
+  </text>
+  <text
+    class="tick"
+    data-axis="end"
+    text-anchor="end"
+    [attr.x]="width - 14"
+    [attr.y]="height - 8"
+  >
+    {{ endText() }}
+  </text>
+</svg>
