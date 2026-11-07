@@ -32,6 +32,16 @@ describe('static pages', () => {
     expect(el.textContent).toContain('Watabou');
   });
 
+  it('credits Yuumei with a link to her site, in both languages', async () => {
+    for (const lang of ['en', 'fr']) {
+      TestBed.resetTestingModule();
+      const el = await visit('/credits', lang);
+      expect(el.textContent).toContain('Yuumei');
+      const link = el.querySelector('a[href="https://www.yuumeiart.com/"]');
+      expect(link).not.toBeNull();
+    }
+  });
+
   it('renders the contact page with a title', async () => {
     const el = await visit('/contact');
     expect(el.querySelector('h1')!.textContent!.trim().length).toBeGreaterThan(0);

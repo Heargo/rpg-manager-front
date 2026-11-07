@@ -30,7 +30,8 @@ describe('SandboxCharacterBusiness', () => {
 
   it('starts with a sample character carrying the default items', () => {
     const character = sandbox.$character()!;
-    expect(character.name).toBe('Sample hero');
+    expect(character.name).toBe('Yusica');
+    expect(character.samplePortrait).toBe('images/sample-hero.webp');
     expect(character.statPoints).toBe(5);
     expect(character.inventory.length).toBeGreaterThan(15);
     expect(character.inventory.some((entry) => entry.equipped)).toBe(false);

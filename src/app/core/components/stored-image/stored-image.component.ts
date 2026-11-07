@@ -8,6 +8,8 @@ import { ImageBusiness } from '../../business/image.business';
   template: `
     @if (src.hasValue() ? src.value() : undefined; as url) {
       <img [src]="url" [alt]="alt()" />
+    } @else if (fallbackSrc(); as bundled) {
+      <img [src]="bundled" [alt]="alt()" />
     } @else {
       <ng-content />
     }
@@ -22,9 +24,11 @@ export class StoredImageComponent {
 
   readonly imageId = input<string | undefined>();
   readonly alt = input('');
+  /** A bundled image path shown when there is no stored image. */
+  readonly fallbackSrc = input<string | undefined>();
 
   protected readonly src = resource({
     params: () => this.imageId(),
-    loader: ({ params: id }) => this.images.url(id),
+    loader: ({ params: id }) => (id ? this.images.url(id) : Promise.resolve(undefined)),
   });
 }

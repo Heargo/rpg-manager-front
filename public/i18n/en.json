@@ -577,8 +577,7 @@
     "sheet": {
       "title": "Character sheet",
       "intro": "A sample character on the default attributes, with the default items in the bag. Everything follows the game rules and stays on this page.",
-      "reset": "Start over",
-      "sampleName": "Sample hero"
+      "reset": "Start over"
     }
   },
   "home": {
@@ -608,7 +607,10 @@
     "intro": "RPG Manager is built on the work of many open source projects and free tools. Thank you to their authors.",
     "librariesTitle": "Libraries",
     "toolsTitle": "External tools",
-    "tools": "The tools page links to free generators by others: Watabou's Procgen Arcana, Azgaar's Fantasy Map Generator and Squoosh. They are not part of this app."
+    "tools": "The tools page links to free generators by others: Watabou's Procgen Arcana, Azgaar's Fantasy Map Generator and Squoosh. They are not part of this app.",
+    "illustrationsTitle": "Illustrations",
+    "sampleHeroPrefix": "Sample hero portrait: art by",
+    "sampleHeroSuffix": ". Used with credit and a link to her site, as her FAQ allows."
   },
   "contact": {
     "title": "Contact",

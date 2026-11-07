@@ -12,6 +12,10 @@ import { generateStarterItems } from '../../world/helpers/starter-items';
 import { Character } from '../../world/models/world';
 
 export const SANDBOX_PLAYER_ID = 'sandbox-player';
+/** A proper name, the same in every language. */
+export const SANDBOX_HERO_NAME = 'Yusica';
+/** Bundled portrait (art by Yuumei, credited on the credits page). */
+export const SANDBOX_HERO_PORTRAIT = 'images/sample-hero.webp';
 
 /**
  * The character sheet tool: a sample character on the sandbox world, with the world's default items in the bag.
@@ -44,7 +48,7 @@ export class SandboxCharacterBusiness {
         world,
         {
           playerId: SANDBOX_PLAYER_ID,
-          name: this.language.t('tools.sheet.sampleName'),
+          name: SANDBOX_HERO_NAME,
         },
         'sandbox-character',
         0,
@@ -53,6 +57,7 @@ export class SandboxCharacterBusiness {
         lang,
         character: {
           ...character,
+          samplePortrait: SANDBOX_HERO_PORTRAIT,
           inventory: items.map((item, index) => ({
             id: `inv-${index}`,
             item: { ...item, id: `item-${index}` },

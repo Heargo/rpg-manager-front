@@ -53,6 +53,8 @@ export interface Character {
   playerId: string;
   name: string;
   portraitId?: string;
+  /** Bundled image path (under the app's base href) used when there is no stored portrait; sandbox character only. */
+  samplePortrait?: string;
   statPoints: number;
   /** Total experience points. */
   xp: number;

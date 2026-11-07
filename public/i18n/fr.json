@@ -577,8 +577,7 @@
     "sheet": {
       "title": "Fiche de personnage",
       "intro": "Un personnage d'exemple sur les attributs par défaut, avec les objets par défaut dans son sac. Tout suit les règles du jeu et reste sur cette page.",
-      "reset": "Recommencer",
-      "sampleName": "Héros d'exemple"
+      "reset": "Recommencer"
     }
   },
   "home": {
@@ -608,7 +607,10 @@
     "intro": "RPG Manager repose sur le travail de nombreux projets open source et outils gratuits. Merci à leurs auteurs.",
     "librariesTitle": "Bibliothèques",
     "toolsTitle": "Outils externes",
-    "tools": "La page des outils renvoie vers des générateurs gratuits créés par d'autres : Procgen Arcana de Watabou, Fantasy Map Generator d'Azgaar et Squoosh. Ils ne font pas partie de cette application."
+    "tools": "La page des outils renvoie vers des générateurs gratuits créés par d'autres : Procgen Arcana de Watabou, Fantasy Map Generator d'Azgaar et Squoosh. Ils ne font pas partie de cette application.",
+    "illustrationsTitle": "Illustrations",
+    "sampleHeroPrefix": "Portrait du héros d'exemple : illustration de",
+    "sampleHeroSuffix": ". Utilisée avec crédit et lien vers son site, comme l'autorise sa FAQ."
   },
   "contact": {
     "title": "Contact",

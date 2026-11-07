@@ -61,6 +61,15 @@ export const CREDIT_LIBRARIES = [
           </li>
         }
       </ul>
+      <h2>{{ 'credits.illustrationsTitle' | transloco }}</h2>
+      <div class="card">
+        <p>
+          {{ 'credits.sampleHeroPrefix' | transloco }}
+          <a [href]="yuumeiUrl" target="_blank" rel="noopener noreferrer"
+            >Yuumei</a
+          >{{ 'credits.sampleHeroSuffix' | transloco }}
+        </p>
+      </div>
       <h2>{{ 'credits.toolsTitle' | transloco }}</h2>
       <div class="card">
         <p>{{ 'credits.tools' | transloco }}</p>
@@ -89,4 +98,5 @@ export const CREDIT_LIBRARIES = [
 })
 export class CreditsPageComponent {
   protected readonly libraries = CREDIT_LIBRARIES;
+  protected readonly yuumeiUrl = 'https://www.yuumeiart.com/';
 }

@@ -30,7 +30,7 @@ const character: Character = {
   updatedAt: 0,
 };
 
-async function render() {
+async function render(overrides: Partial<Character> = {}) {
   vi.stubGlobal(
     'ResizeObserver',
     class {
@@ -44,7 +44,7 @@ async function render() {
     providers: TEST_PROVIDERS,
   });
   const fixture = TestBed.createComponent(CharacterCardComponent);
-  fixture.componentRef.setInput('character', character);
+  fixture.componentRef.setInput('character', { ...character, ...overrides });
   fixture.componentRef.setInput('world', world);
   await fixture.whenStable();
   return { fixture, el: fixture.nativeElement as HTMLElement };
@@ -62,6 +62,12 @@ describe('CharacterCardComponent', () => {
   it('shows the initial when there is no portrait', async () => {
     const { el } = await render();
     expect(el.querySelector('[data-testid="card-portrait"]')!.textContent).toContain('A');
+  });
+
+  it('shows the bundled sample portrait when the character has one', async () => {
+    const { el } = await render({ samplePortrait: 'images/sample-hero.webp' });
+    const img = el.querySelector('[data-testid="card-portrait"] img') as HTMLImageElement;
+    expect(img.getAttribute('src')).toBe('images/sample-hero.webp');
   });
 
   it('shows the money', async () => {

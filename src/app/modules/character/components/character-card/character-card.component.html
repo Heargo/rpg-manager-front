@@ -5,6 +5,7 @@
       class="portrait"
       data-testid="card-portrait"
       [imageId]="c.portraitId"
+      [fallbackSrc]="c.samplePortrait"
       [alt]="c.name"
     >
       <span class="initial">{{ c.name.charAt(0).toUpperCase() }}</span>
