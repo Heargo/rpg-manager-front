@@ -52,7 +52,14 @@ import { PendingInvite, RoomBusiness } from '../../business/room.business';
           [placeholder]="'room.invite.answerPlaceholder' | transloco"
           [(ngModel)]="answer"
         ></textarea>
-        @if (error()) {
+        @if (invite().state === 'connecting') {
+          <p-message severity="info" size="small" variant="simple">{{ 'room.invite.connecting' | transloco }}</p-message>
+        } @else if (invite().state === 'failed') {
+          <p-message severity="error" size="small" variant="simple">{{ 'room.invite.failed' | transloco }}</p-message>
+          <div class="actions">
+            <p-button icon="pi pi-refresh" [label]="'room.invite.retry' | transloco" size="small" (onClick)="retry()" />
+          </div>
+        } @else if (error()) {
           <p-message severity="error" size="small" variant="simple">{{ error() }}</p-message>
         }
         <div class="actions end">
@@ -126,6 +133,15 @@ export class InviteCardComponent {
       this.error.set(this.room.describeError(error));
     } finally {
       this.connecting.set(false);
+    }
+  }
+
+  protected async retry(): Promise<void> {
+    this.error.set(null);
+    try {
+      await this.room.retryInvite(this.invite().id);
+    } catch (error) {
+      this.error.set(this.room.describeError(error));
     }
   }
 

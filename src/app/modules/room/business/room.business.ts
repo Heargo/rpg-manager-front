@@ -2,6 +2,7 @@ import { computed, DOCUMENT, effect, inject, Injectable, signal } from '@angular
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { ProfileBusiness } from '../../../core/business/profile.business';
+import { WakeLockService } from '../../../core/services/wake-lock.service';
 import { roomErrorKey } from '../helpers/room-errors';
 import { isHostedBy, resumeRoom } from '../helpers/room.rules';
 import { RoomStorageService } from '../services/room-storage.service';
@@ -11,6 +12,8 @@ import { JoinedRoomRecord, RoomMember, RoomState } from '../models/room';
 import { RoomService } from '../services/room.service';
 import { RoomHostBusiness } from './room-host.business';
 
+export type JoinState = 'idle' | 'preparing' | 'waiting' | 'connected' | 'failed';
+
 export type RoomStatus = 'idle' | 'hosting' | 'joining' | 'connected' | 'host-offline' | 'removed';
 
 export interface PendingInvite {
@@ -19,6 +22,7 @@ export interface PendingInvite {
   createdAt: number;
   /** Set when re-inviting a player to their seat (the seat comes back through their playerId anyway). */
   forPlayer?: { playerId: string; name: string };
+  state: 'waiting' | 'connecting' | 'failed';
 }
 
 /** The room as the pages see it, for both the host and the players. */
@@ -32,8 +36,11 @@ export class RoomBusiness {
   private readonly document = inject(DOCUMENT);
   private readonly storage = inject(RoomStorageService);
   private readonly hostLock = inject(HostLockService);
+  private readonly wakeLock = inject(WakeLockService);
 
   private readonly joinState = signal<'idle' | 'joining' | 'joined'>('idle');
+  private readonly handshake = signal<JoinState>('idle');
+  private readonly awayFailure = signal(false);
   private readonly invites = signal<PendingInvite[]>([]);
   private readonly me = signal<RoomMember | null>(null);
   private readonly restored = signal(false);
@@ -43,6 +50,10 @@ export class RoomBusiness {
   readonly $room = toSignal<RoomState | null>(this.service.watchRoom(), { initialValue: null });
   readonly $pendingInvites = this.invites.asReadonly();
   readonly $me = this.me.asReadonly();
+  /** Where the player's handshake stands: preparing the answer, waiting for the host, connected or failed. */
+  readonly $joinState = this.handshake.asReadonly();
+  /** True when the join failed while the page was hidden (the player was in another app). */
+  readonly $failedWhileAway = this.awayFailure.asReadonly();
   readonly $isHost = computed(() => this.service.$role() === 'host');
   /** True after the room was reopened from storage: players have to be re-invited. */
   readonly $restored = this.restored.asReadonly();
@@ -95,6 +106,7 @@ export class RoomBusiness {
       ...invite,
       createdAt: Date.now(),
       forPlayer: member ? { playerId: member.playerId, name: member.name } : undefined,
+      state: 'waiting',
     };
     this.invites.update((invites) => [...invites, pending]);
     return pending;
@@ -102,8 +114,29 @@ export class RoomBusiness {
 
   /** Finishes a handshake with the player's answer code; the invite is dropped once they're connected. */
   async accept(inviteId: string, answerCode: string): Promise<void> {
-    await this.service.acceptAnswer(inviteId, answerCode);
+    this.setInviteState(inviteId, 'connecting');
+    try {
+      await this.service.acceptAnswer(inviteId, answerCode);
+    } catch (error) {
+      this.setInviteState(inviteId, 'failed');
+      throw error;
+    }
     this.invites.update((invites) => invites.filter((invite) => invite.id !== inviteId));
+  }
+
+  /** Replaces an invite (usually a failed one) with a fresh one for the same seat. */
+  async retryInvite(inviteId: string): Promise<PendingInvite> {
+    const previous = this.invites().find((invite) => invite.id === inviteId);
+    // Create the new one first: if that fails, the old invite stays.
+    const fresh = await this.invite(previous?.forPlayer?.playerId);
+    this.service.cancelInvite(inviteId);
+    this.invites.update((invites) => {
+      const rest = invites.filter((invite) => invite.id !== inviteId && invite.id !== fresh.id);
+      const index = invites.findIndex((invite) => invite.id === inviteId);
+      rest.splice(index < 0 ? rest.length : index, 0, fresh);
+      return rest;
+    });
+    return fresh;
   }
 
   cancelInvite(inviteId: string): void {
@@ -124,19 +157,30 @@ export class RoomBusiness {
   async join(offerCode: string): Promise<{ answerCode: string; joined: Promise<RoomMember> }> {
     this.leave();
     this.joinState.set('joining');
+    this.handshake.set('preparing');
     try {
       const { answerCode, connected } = await this.service.joinRoom(offerCode);
+      this.handshake.set('waiting');
+      void this.wakeLock.request();
       const joined = connected.then(async () => {
         const { playerId, name } = this.profile.$profile();
         const { you } = await this.service.hello({ playerId, name });
         this.me.set(you);
         this.joinState.set('joined');
+        this.handshake.set('connected');
+        this.wakeLock.release();
         return you;
       });
-      joined.catch(() => this.leave());
+      joined.catch(() => {
+        const away = this.document.visibilityState === 'hidden';
+        this.leave();
+        this.awayFailure.set(away);
+        this.handshake.set('failed');
+      });
       return { answerCode, joined };
     } catch (error) {
       this.leave();
+      this.handshake.set('failed');
       throw error;
     }
   }
@@ -170,7 +214,14 @@ export class RoomBusiness {
     this.invites.set([]);
     this.me.set(null);
     this.joinState.set('idle');
+    if (this.handshake() === 'waiting') this.wakeLock.release();
+    this.handshake.set('idle');
+    this.awayFailure.set(false);
     this.restored.set(false);
+  }
+
+  private setInviteState(inviteId: string, state: PendingInvite['state']): void {
+    this.invites.update((invites) => invites.map((invite) => (invite.id === inviteId ? { ...invite, state } : invite)));
   }
 
   async forgetRecentRoom(id: string): Promise<void> {

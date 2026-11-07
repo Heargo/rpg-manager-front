@@ -287,7 +287,10 @@
       "accept": "Connect",
       "cancel": "Cancel invite",
       "privacy": "The link contains your network address: only send it to players you're inviting.",
-      "forPlayer": "Re-invite {{ name }}"
+      "forPlayer": "Re-invite {{ name }}",
+      "connecting": "Connecting…",
+      "failed": "Couldn't connect: send a new invite",
+      "retry": "New invite"
     },
     "join": {
       "title": "You've been invited",
@@ -296,7 +299,12 @@
       "hint": "The host pastes it to let you in. Keep this page open.",
       "qrAlt": "QR code of your answer",
       "waiting": "Waiting for the host…",
-      "noCode": "This link has no invite code."
+      "noCode": "This link has no invite code.",
+      "send": "Send to the host",
+      "comeBack": "Come back to this page: you'll be connected as soon as the host pastes your code.",
+      "stillWaiting": "Still waiting for the host to paste your code.",
+      "failedAway": "The connection timed out while you were away. Ask the host for a new link.",
+      "failed": "The connection failed. Ask the host for a new link."
     },
     "lobby": {
       "hosting": "You're hosting",

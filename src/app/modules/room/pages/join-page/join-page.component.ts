@@ -1,7 +1,7 @@
 import { Clipboard } from '@angular/cdk/clipboard';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DOCUMENT, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { distinctUntilChanged } from 'rxjs';
+import { distinctUntilChanged, fromEvent } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
@@ -24,7 +24,10 @@ import { RoomBusiness } from '../../business/room.business';
       <p-card styleClass="join">
         <div class="stack">
           <h1>{{ 'room.join.title' | transloco }}</h1>
-          @if (error()) {
+          @if (room.$joinState() === 'failed' && room.$failedWhileAway()) {
+            <p-message severity="error">{{ 'room.join.failedAway' | transloco }}</p-message>
+            <a routerLink="/play">{{ 'play.title' | transloco }}</a>
+          } @else if (error()) {
             <p-message severity="error">{{ error() }}</p-message>
             <a routerLink="/play">{{ 'play.title' | transloco }}</a>
           } @else if (!answerCode()) {
@@ -33,16 +36,21 @@ import { RoomBusiness } from '../../business/room.business';
             <label for="answer-code">{{ 'room.join.step' | transloco }}</label>
             <textarea pTextarea id="answer-code" readonly rows="4" [value]="answerCode()" (focus)="select($event)"></textarea>
             <div class="actions">
-              <p-button icon="pi pi-copy" [label]="'room.invite.copy' | transloco" size="large" (onClick)="copy()" />
-              @if (canShare) {
-                <p-button icon="pi pi-share-alt" [label]="'room.invite.share' | transloco" severity="secondary" (onClick)="share()" />
-              }
+              <p-button icon="pi pi-send" [label]="'room.join.send' | transloco" size="large" (onClick)="send()" />
+              <p-button icon="pi pi-copy" [label]="'room.invite.copy' | transloco" severity="secondary" (onClick)="copy()" />
             </div>
             @if (qr(); as qrUrl) {
               <img class="qr" [src]="qrUrl" [alt]="'room.join.qrAlt' | transloco" />
             }
-            <p class="hint">{{ 'room.join.hint' | transloco }}</p>
-            <div class="row"><p-progress-spinner styleClass="spinner" strokeWidth="6" /> {{ 'room.join.waiting' | transloco }}</div>
+            @if (sent()) {
+              <p-message severity="info">{{ 'room.join.comeBack' | transloco }}</p-message>
+            } @else {
+              <p class="hint">{{ 'room.join.hint' | transloco }}</p>
+            }
+            <div class="row">
+              <p-progress-spinner styleClass="spinner" strokeWidth="6" />
+              {{ (returned() ? 'room.join.stillWaiting' : 'room.join.waiting') | transloco }}
+            </div>
           }
         </div>
       </p-card>
@@ -61,19 +69,29 @@ import { RoomBusiness } from '../../business/room.business';
   `,
 })
 export class JoinPageComponent {
-  private readonly room = inject(RoomBusiness);
+  protected readonly room = inject(RoomBusiness);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly language = inject(LanguageBusiness);
   private readonly clipboard = inject(Clipboard);
   private readonly messages = inject(MessageService);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly answerCode = signal('');
   protected readonly qr = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
   protected readonly canShare = typeof navigator !== 'undefined' && 'share' in navigator;
+  protected readonly sent = signal(false);
+  /** True once the player came back to the page after sending the code. */
+  protected readonly returned = signal(false);
 
   constructor() {
+    // After sending the code the player switches apps: on return the page shows where things stand.
+    fromEvent(this.document, 'visibilitychange')
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        if (this.document.visibilityState === 'visible' && this.sent()) this.returned.set(true);
+      });
     // Follow the fragment, not a snapshot: opening another invite link while on /join only changes the `#` part.
     this.route.fragment
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
@@ -82,6 +100,8 @@ export class JoinPageComponent {
 
   private async start(code: string | null): Promise<void> {
     this.answerCode.set('');
+    this.sent.set(false);
+    this.returned.set(false);
     this.qr.set(null);
     this.error.set(null);
     if (!code) {
@@ -101,6 +121,21 @@ export class JoinPageComponent {
     }
   }
 
+  /** One tap: the share sheet where there is one, the clipboard otherwise, then the come-back step. */
+  protected async send(): Promise<void> {
+    if (this.canShare) {
+      try {
+        await navigator.share({ text: this.answerCode() });
+      } catch (error) {
+        if ((error as { name?: string })?.name === 'AbortError') return; // Cancelled by the user.
+        this.copy();
+      }
+    } else {
+      this.copy();
+    }
+    this.sent.set(true);
+  }
+
   protected select(event: FocusEvent): void {
     (event.target as HTMLTextAreaElement).select();
   }
@@ -111,11 +146,4 @@ export class JoinPageComponent {
     }
   }
 
-  protected async share(): Promise<void> {
-    try {
-      await navigator.share({ text: this.answerCode() });
-    } catch {
-      // Cancelled by the user.
-    }
-  }
 }

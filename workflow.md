@@ -14,6 +14,7 @@ This runs on a Claude Pro plan, so every token counts:
 - Retry a step by continuing the same subagent with `SendMessage`, which keeps its context.
 - In the browser, read pages as text (`get_page_text`, `find`, `read_page`) and take a screenshot only for layout, at `scale: 0.5`.
 - One ticket per run.
+- The `tdd-*` agent types load when a session starts. If one isn't available (agent files added mid-session), dispatch a `general-purpose` agent with `model: sonnet` and start the brief with "Follow `.claude/agents/tdd-<step>.md`."
 
 ## 1. Load the ticket
 

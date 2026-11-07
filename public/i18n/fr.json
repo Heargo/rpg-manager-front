@@ -287,7 +287,10 @@
       "accept": "Connecter",
       "cancel": "Annuler l'invitation",
       "privacy": "Le lien contient votre adresse réseau : ne l'envoyez qu'aux joueurs que vous invitez.",
-      "forPlayer": "Réinviter {{ name }}"
+      "forPlayer": "Réinviter {{ name }}",
+      "connecting": "Connexion…",
+      "failed": "Connexion impossible : envoyez une nouvelle invitation",
+      "retry": "Nouvelle invitation"
     },
     "join": {
       "title": "Vous êtes invité",
@@ -296,7 +299,12 @@
       "hint": "L'hôte le colle pour vous faire entrer. Gardez cette page ouverte.",
       "qrAlt": "QR code de votre réponse",
       "waiting": "En attente de l'hôte…",
-      "noCode": "Ce lien ne contient pas de code d'invitation."
+      "noCode": "Ce lien ne contient pas de code d'invitation.",
+      "send": "Envoyer à l'hôte",
+      "comeBack": "Revenez sur cette page : vous serez connecté dès que l'hôte aura collé votre code.",
+      "stillWaiting": "L'hôte n'a pas encore collé votre code.",
+      "failedAway": "La connexion a expiré pendant votre absence. Demandez un nouveau lien à l'hôte.",
+      "failed": "La connexion a échoué. Demandez un nouveau lien à l'hôte."
     },
     "lobby": {
       "hosting": "Vous êtes l'hôte",
