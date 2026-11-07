@@ -10,6 +10,7 @@ import { seededRandomSource, RandomSource } from '../../../core/generators/rando
 import { randomInt } from '../../../core/generators/random';
 import { DieLabels, initialLabels, putOnTop, topSlot } from '../helpers/dice-labels';
 import { DiePlan, ThrowPlan } from '../helpers/dice-plan';
+import { replayIndex } from '../helpers/replay-index';
 import { buildShape, DieShape, shapeForSides, Vec3 } from '../helpers/dice-shapes';
 
 const STEP = 1 / 60;
@@ -128,7 +129,7 @@ export class DiceScene {
     return new Promise((resolve) => {
       const start = performance.now();
       const tick = (now: number) => {
-        const index = this.skipRequested ? frames.length - 1 : Math.min(frames.length - 1, Math.floor(((now - start) / 1000) / STEP));
+        const index = replayIndex(now - start, frames.length, this.skipRequested, STEP);
         this.applyFrame(frames[index]);
         this.render();
         if (index >= frames.length - 1) {
@@ -142,7 +143,8 @@ export class DiceScene {
     });
   }
 
-  private applyFrame(frame: Float32Array[]): void {
+  private applyFrame(frame: Float32Array[] | undefined): void {
+    if (!frame) return;
     frame.forEach((pose, i) => {
       const mesh = this.meshes[i];
       mesh.position.set(pose[0], pose[1], pose[2]);
