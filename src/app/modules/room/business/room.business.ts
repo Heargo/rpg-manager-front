@@ -1,4 +1,4 @@
-import { computed, DestroyRef, DOCUMENT, effect, inject, Injectable, signal } from '@angular/core';
+import { computed, DestroyRef, DOCUMENT, effect, inject, Injectable, Injector, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { ProfileBusiness } from '../../../core/business/profile.business';
@@ -14,6 +14,10 @@ import { TransportError } from '../../../core/p2p/room-transport';
 import { RoomService } from '../services/room.service';
 import { SignalMailboxService } from '../services/signal-mailbox.service';
 import { RoomHostBusiness } from './room-host.business';
+import type { RoomSizeBusiness } from './room-size.business';
+
+/** What the lazily loaded `RoomSizeBusiness` offers this class. */
+type RunningRoomSize = Pick<RoomSizeBusiness, 'start' | 'stop'>;
 
 export type JoinState = 'idle' | 'preparing' | 'waiting' | 'connected' | 'failed';
 
@@ -75,6 +79,9 @@ export class RoomBusiness {
   private readonly hostLock = inject(HostLockService);
   private readonly wakeLock = inject(WakeLockService);
   private readonly mailbox = inject(SignalMailboxService);
+  private readonly injector = inject(Injector);
+  /** Loaded on demand: only a host needs it, so it stays out of the initial bundle. */
+  private size?: RunningRoomSize;
 
   private readonly joinState = signal<'idle' | 'joining' | 'joined'>('idle');
   private readonly handshake = signal<JoinState>('idle');
@@ -127,6 +134,7 @@ export class RoomBusiness {
       clearInterval(this.hostTimer);
       clearInterval(this.playerTimer);
     });
+    this.service.servePing();
     this.ready = this.restore();
     // A player keeps the last state of each room they joined.
     effect(() => {
@@ -151,7 +159,22 @@ export class RoomBusiness {
     const { playerId, name: playerName } = this.profile.$profile();
     const state = this.host.open(name, { playerId, name: playerName }, worldId);
     this.me.set(state.members[0]);
+    await this.watchRoomSize();
     return true;
+  }
+
+  private async watchRoomSize(): Promise<void> {
+    try {
+      const { RoomSizeBusiness } = await import('./room-size.business');
+      // Hosting may have ended while the chunk loaded.
+      if (this.service.$role() !== 'host') return;
+      const size: RunningRoomSize = this.injector.get(RoomSizeBusiness);
+      size.start();
+      this.size = size;
+    } catch (error) {
+      // The size warning is optional (offline and uncached chunk): hosting goes on without it.
+      console.warn('Could not load the room size warning', error);
+    }
   }
 
   /** Invites a new player, or re-invites one to their seat. */
@@ -424,6 +447,7 @@ export class RoomBusiness {
 
   leave(): void {
     for (const invite of this.invites()) if (invite.boxId) this.deleteBox(invite.boxId, 'expired');
+    this.size?.stop();
     if (this.service.$role() === 'host') this.host.close();
     else this.service.leave();
     this.hostLock.releaseLock();
@@ -575,6 +599,7 @@ export class RoomBusiness {
       const state = this.host.resume(resumeRoom(hosted.state, { playerId, name }));
       this.me.set(state.members.find((member) => member.isHost) ?? null);
       this.restored.set(state.members.some((member) => !member.isHost));
+      await this.watchRoomSize();
     } catch (error) {
       console.warn('Could not restore rooms', error);
     }

@@ -15,6 +15,13 @@
       @if (room.$restored()) {
         <p-message severity="info" icon="pi pi-replay">{{ 'room.lobby.restored' | transloco }}</p-message>
       }
+      <p class="hint room-size-max"><i class="pi pi-users"></i> {{ 'room.size.max' | transloco: { max: size.$recommendedMax() } }}</p>
+      @if (size.$overMax()) {
+        <p-message class="room-size-warning" severity="warn" icon="pi pi-exclamation-triangle">{{ 'room.size.over' | transloco: { max: size.$recommendedMax() } }}</p-message>
+      }
+      @if (size.$struggling()) {
+        <p-message class="room-size-struggling" severity="warn" icon="pi pi-wifi">{{ 'room.size.struggling' | transloco }}</p-message>
+      }
       <div class="lobby">
         <app-character-list />
         <p-card [header]="'room.members.title' | transloco">

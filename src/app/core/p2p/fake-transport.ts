@@ -75,6 +75,10 @@ export function createFakeNetwork() {
       for (const peer of this.links.keys()) this.send(peer, data);
     }
 
+    bufferedAmount(): number {
+      return 0;
+    }
+
     disconnect(peer: PeerId): void {
       const link = this.links.get(peer);
       if (!link) return;

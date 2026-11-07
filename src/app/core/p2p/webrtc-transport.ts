@@ -131,6 +131,10 @@ export class WebRtcTransport implements RoomTransport {
     return { answerCode, connected };
   }
 
+  bufferedAmount(peer: PeerId): number {
+    return this.peers.get(peer)?.channel.bufferedAmount ?? 0;
+  }
+
   send(peer: PeerId, data: string): void {
     const link = this.peers.get(peer);
     if (!link || link.channel.readyState !== 'open')

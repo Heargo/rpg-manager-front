@@ -41,6 +41,8 @@ export interface RoomTransport {
   send(peer: PeerId, data: string): void;
   /** Host: send to every connected player. */
   broadcast(data: string): void;
+  /** Bytes queued and not yet sent to a peer (0 when unknown). */
+  bufferedAmount(peer: PeerId): number;
   /** Close one connection (kick, leave). */
   disconnect(peer: PeerId): void;
 

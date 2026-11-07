@@ -6,6 +6,7 @@ import { CardModule } from '@openng/optimus-ui/card';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { ProfileBusiness } from '../../../../core/business/profile.business';
 import { RoomBusiness } from '../../business/room.business';
+import { RoomSizeBusiness } from '../../business/room-size.business';
 import { InviteCardComponent } from '../../components/invite-card/invite-card.component';
 import { MemberListComponent } from '../../components/member-list/member-list.component';
 import { OfflineFeaturesBusiness } from '../../../world/business/offline-features.business';
@@ -23,6 +24,7 @@ import { CharacterListComponent } from '../../../character/components/character-
 })
 export class RoomPageComponent {
   protected readonly room = inject(RoomBusiness);
+  protected readonly size = inject(RoomSizeBusiness);
   protected readonly profile = inject(ProfileBusiness);
   protected readonly offlineFeatures = inject(OfflineFeaturesBusiness);
   private readonly router = inject(Router);

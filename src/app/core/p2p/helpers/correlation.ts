@@ -2,7 +2,7 @@ import { PeerApiError } from './peer-api-error';
 
 export interface RequestTracker {
   /** Registers a request; the promise settles with its response, error or timeout. */
-  start<T>(timeoutMs: number): { id: string; promise: Promise<T> };
+  start<T>(timeoutMs: number, timeoutMessage?: string): { id: string; promise: Promise<T> };
   resolve(id: string, payload: unknown): boolean;
   reject(id: string, error: Error): boolean;
   /** Fails every pending request (e.g. the host went offline). */
@@ -24,12 +24,12 @@ export function createRequestTracker(newId: () => string = () => crypto.randomUU
   };
 
   return {
-    start<T>(timeoutMs: number) {
+    start<T>(timeoutMs: number, timeoutMessage = 'No answer in time') {
       const id = newId();
       const promise = new Promise<T>((resolve, reject) => {
         const timer = setTimeout(() => {
           settle(id);
-          reject(new PeerApiError('timeout', 'The host did not answer in time'));
+          reject(new PeerApiError('timeout', timeoutMessage));
         }, timeoutMs);
         pending.set(id, { resolve: resolve as (value: unknown) => void, reject, timer });
       });

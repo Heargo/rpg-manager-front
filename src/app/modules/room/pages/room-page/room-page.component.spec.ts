@@ -8,6 +8,7 @@ import { InviteCardComponent } from '../../components/invite-card/invite-card.co
 import { MemberListComponent } from '../../components/member-list/member-list.component';
 import { OfflineFeaturesPanelComponent } from '../../components/offline-features-panel/offline-features-panel.component';
 import { PendingInvite, RoomBusiness } from '../../business/room.business';
+import { RoomSizeBusiness } from '../../business/room-size.business';
 import { RoomPageComponent } from './room-page.component';
 
 
@@ -59,5 +60,60 @@ describe('RoomPageComponent pending invites note', () => {
     $pendingInvites.set([]);
     await fixture.whenStable();
     expect(el.querySelector('.pending-invites-note')).toBeNull();
+  });
+});
+
+describe('RoomPageComponent room size', () => {
+  async function renderSize(size: { max: number; over: boolean; struggling: boolean }) {
+    const $over = signal(size.over);
+    const $struggling = signal(size.struggling);
+    const room = {
+      $status: signal('hosting'),
+      $room: signal({ name: 'Friday table', members: [] }),
+      $restored: signal(false),
+      $pendingInvites: signal<PendingInvite[]>([]),
+      whenReady: async () => undefined,
+    };
+    TestBed.configureTestingModule({
+      imports: [RoomPageComponent],
+      providers: [
+        ...TEST_PROVIDERS,
+        { provide: RoomBusiness, useValue: room },
+        { provide: RoomSizeBusiness, useValue: { $recommendedMax: signal(size.max), $overMax: $over, $struggling } },
+        { provide: ProfileBusiness, useValue: { $profile: signal({ playerId: 'gm', name: 'Gm' }) } },
+        { provide: OfflineFeaturesBusiness, useValue: { $features: signal(null) } },
+      ],
+    }).overrideComponent(RoomPageComponent, {
+      remove: { imports: [CharacterListComponent, InviteCardComponent, MemberListComponent, OfflineFeaturesPanelComponent] },
+      add: { schemas: [NO_ERRORS_SCHEMA] },
+    });
+    const fixture = TestBed.createComponent(RoomPageComponent);
+    await fixture.whenStable();
+    return { el: fixture.nativeElement as HTMLElement, fixture, $over, $struggling };
+  }
+
+  it('shows the recommended maximum in the lobby', async () => {
+    const { el } = await renderSize({ max: 6, over: false, struggling: false });
+
+    expect(el.querySelector('.room-size-max')!.textContent).toContain('6');
+  });
+
+  it('warns, without blocking, only while the room is over the maximum', async () => {
+    const { el, fixture, $over } = await renderSize({ max: 6, over: false, struggling: false });
+    expect(el.querySelector('.room-size-warning')).toBeNull();
+
+    $over.set(true);
+    await fixture.whenStable();
+    expect(el.querySelector('.room-size-warning')).not.toBeNull();
+    expect(el.querySelector('.room-size-warning')!.tagName.toLowerCase()).toBe('p-message');
+  });
+
+  it("says the host's connection is struggling, whatever the count", async () => {
+    const { el, fixture, $struggling } = await renderSize({ max: 6, over: false, struggling: false });
+    expect(el.querySelector('.room-size-struggling')).toBeNull();
+
+    $struggling.set(true);
+    await fixture.whenStable();
+    expect(el.querySelector('.room-size-struggling')!.textContent).toMatch(/connection is struggling/i);
   });
 });
