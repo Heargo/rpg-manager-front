@@ -6,6 +6,10 @@ Angular front-end for the RPG manager (Optimus UI, installable PWA). Structure, 
 
 Work on `develop` or a `feat/*` branch merged into `develop`. Promote with a PR `develop` → `main`. Never push to `main` directly. `legacy-dev` is the old backend-based `dev` work, kept for reference only: never merge it or build on it. Never commit `.env` files or secrets.
 
+## Developing a ticket
+
+Follow [workflow.md](workflow.md): red, green, then review, each in its own subagent (`.claude/agents/tdd-*.md`), with the ticket file as the hand-off, then a short browser check for UI tickets. The order of tickets is `.scratch/ROADMAP.md`.
+
 ## Agent skills
 
 ### Issue tracker

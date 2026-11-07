@@ -62,11 +62,7 @@ Status: validated (2026-11-06)
 
 ## How each ticket is developed
 
-- Set `Status: claimed`, read the spec section and `docs/rules.md`.
-- Tests first for helpers, rules and business (`npm test`), then the UI; check UI tickets in the browser in both languages.
-- New strings go into `public/i18n/en.json` and `fr.json` in the same change.
-- One commit per ticket on `develop`, which sets `Status: resolved` and moves the ticket to `.scratch/archived/` (see `docs/agents/issue-tracker.md`). Nothing is pushed unless you ask.
-- Stop and ask when a ticket hits a decision the spec doesn't cover.
+Follow [workflow.md](../workflow.md): baseline, agreed seams, red / green / review in subagents, browser check for UI tickets (both languages, mobile), then one commit per ticket on `develop` that resolves and archives it. Stop and ask when a ticket hits a decision the spec doesn't cover. Nothing is pushed unless you ask.
 
 ## Before starting
 
