@@ -2,7 +2,7 @@
 
 Status: validated (2026-11-06)
 
-20 open tickets across two specs: `p2p-rooms/` (P) and `legacy-parity/` (L). The order follows the `Blocked by:` lines, and within that:
+21 open tickets across two specs: `p2p-rooms/` (P) and `legacy-parity/` (L). The order follows the `Blocked by:` lines, and within that:
 
 1. Remove the backend first, so the app runs on its own from now on.
 2. Do the **riskiest** thing early: the manual WebRTC handshake (P02) proves or kills the whole serverless idea, so it comes before any game feature.
@@ -34,30 +34,31 @@ Status: validated (2026-11-06)
 | 9 | **L05** Character creation on first join | First real feature service + host handler (`characterService.createCharacter()`). | L03, P03 |
 | 10 | **L02** 3D dice roller | Needed on the table; self-contained (lazy three + rapier). Needs the shared-dice default decided (open question). | L10 |
 | 11 | **L06** Game table (GM and player views) | Illustration, quick images, notes, players list, dice. | L05, L02 |
-| 12 | **L07** Character sheet and item actions | Stats, equipment, inventory, use/sell/equip rules. **Milestone B: a playable session.** | L06 |
+| 12 | **L11** Tools menu: every tool usable without a game | Lets anyone try the features without a world or a room (Tools submenu, item generator page, sandbox world). Before L07–L09 so they are built on a world input and get a Tools entry. | none |
+| 13 | **L07** Character sheet and item actions | Stats, equipment, inventory, use/sell/equip rules. **Milestone B: a playable session.** | L06 |
 
 ## Phase 4: items
 
 | # | Ticket | Why now | Blocked by |
 | - | --- | --- | --- |
-| 13 | **L08** Item catalogue (GM) | Search/filter, give to player, default items import. | L03 |
-| 14 | **L09** Item editor (form, JSON, generate) | Uses L10 generators; Chrome on-device AI tier last within the ticket. **Milestone C: legacy parity for gameplay.** | L08, L10 |
+| 14 | **L08** Item catalogue (GM) | Search/filter, give to player, default items import. | L03 |
+| 15 | **L09** Item editor (form, JSON, generate) | Uses L10 generators; Chrome on-device AI tier last within the ticket. **Milestone C: legacy parity for gameplay.** | L08, L10 |
 
 ## Phase 5: resilience
 
 | # | Ticket | Why now | Blocked by |
 | - | --- | --- | --- |
-| 15 | **P09** Player copy and "Pick a save" | Needs real player data (L05–L07) to be meaningful. | P03, P05 |
-| 16 | **P10** Host offline mode | Builds on P09's conflict flow and the offline toggles from L04. | P09 |
-| 17 | **P06** Offline and failure states | Banners, timeouts, bad/expired codes, once all flows exist. | P04 |
+| 16 | **P09** Player copy and "Pick a save" | Needs real player data (L05–L07) to be meaningful. | P03, P05 |
+| 17 | **P10** Host offline mode | Builds on P09's conflict flow and the offline toggles from L04. | P09 |
+| 18 | **P06** Offline and failure states | Banners, timeouts, bad/expired codes, once all flows exist. | P04 |
 
 ## Phase 6: polish
 
 | # | Ticket | Why now | Blocked by |
 | - | --- | --- | --- |
-| 18 | **P08** QR scanning | Convenience: pasting already works. | P04 |
-| 19 | **P11** Room size warning | Only matters once real rooms are played. | P04 |
-| 20 | **L01** Landing, tools, credits, contact, privacy | Replaces the Angular starter home page; independent, can be pulled earlier any time. | none |
+| 19 | **P08** QR scanning | Convenience: pasting already works. | P04 |
+| 20 | **P11** Room size warning | Only matters once real rooms are played. | P04 |
+| 21 | **L01** Landing, tools, credits, contact, privacy | Replaces the Angular starter home page; independent, can be pulled earlier any time. | none |
 
 ## How each ticket is developed
 
