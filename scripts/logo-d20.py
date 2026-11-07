@@ -3,13 +3,15 @@ import math, sys
 c, r = (512, 512), 500
 hexa = [(c[0] + r*math.cos(math.radians(a)), c[1] + r*math.sin(math.radians(a))) for a in (-90, -30, 30, 90, 150, 210)]
 T, UR, LR, B, LL, UL = hexa
-P, Q, R = (512, 262), (772, 712), (252, 712)
+# Front face: a triangle with its apex cut flat (Pl-Pr), so the top band mirrors the bottom one.
+Q, R = (772, 712), (252, 712)
+Pl, Pr = (452, 332), (572, 332)
 facets = [
-    [T, UR, P, UL],      # top
-    [UL, P, R, LL],      # left
-    [UR, LR, Q, P],      # right
-    [LL, R, Q, LR, B],   # bottom
-    [P, Q, R],           # front
+    [UL, T, UR, Pr, Pl],  # top band
+    [UL, Pl, R, LL],      # left
+    [UR, LR, Q, Pr],      # right
+    [LL, R, Q, LR, B],    # bottom band
+    [Pl, Pr, Q, R],       # front
 ]
 GAP = float(sys.argv[1]) if len(sys.argv) > 1 else 22
 
