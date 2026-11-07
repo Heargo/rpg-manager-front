@@ -62,7 +62,12 @@
       "addAttribute": "Add an attribute",
       "removeAttribute": "Remove this attribute",
       "barsHint": "Bars are shown on the player view (health, mana…). Leave empty if your game has none.",
-      "formulaHint": "Each attribute has a formula that gives its max from its level (0 to 5 shown). Step is how much each level adds."
+      "formulaHint": "Each attribute has a formula that gives its max from its level (0 to 5 shown). Step is how much each level adds.",
+      "columns": {
+        "base": "Base",
+        "progression": "Progression",
+        "max": "Max"
+      }
     },
     "fields": {
       "name": "Name",
@@ -124,7 +129,9 @@
         "custom": "Custom"
       },
       "preview": "Max at levels 0 to 5",
-      "help": "Variables: level, base, playerLevel (0 for now). Read another attribute's level by its name: strength, or [Max life] in square brackets when the name has spaces. Case does not matter. Operators: + - * / ^ and parentheses. Functions: min, max, floor, round, sqrt. The max is rounded to a whole number."
+      "help": "Variables: level, base, playerLevel (0 for now). Read another attribute's level by its name: strength, or [Max life] in square brackets when the name has spaces. Case does not matter. Operators: + - * / ^ and parentheses. Functions: min, max, floor, round, sqrt. The max is rounded to a whole number.",
+      "max": "max {{ from }} → {{ to }}",
+      "helpShort": "Variables: level, base, playerLevel; another attribute by name, [in brackets] if it has spaces. + - * / ^ ( ) min max floor round sqrt."
     },
     "level": {
       "title": "Experience and levels",

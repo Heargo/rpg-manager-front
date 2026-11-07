@@ -62,7 +62,12 @@
       "addAttribute": "Ajouter un attribut",
       "removeAttribute": "Retirer cet attribut",
       "barsHint": "Les barres s'affichent sur la vue joueur (vie, mana…). Laissez vide si votre jeu n'en a pas.",
-      "formulaHint": "Chaque attribut a une formule qui donne son maximum selon son niveau (de 0 à 5 affichés). Le pas est ce qu'ajoute chaque niveau."
+      "formulaHint": "Chaque attribut a une formule qui donne son maximum selon son niveau (de 0 à 5 affichés). Le pas est ce qu'ajoute chaque niveau.",
+      "columns": {
+        "base": "Base",
+        "progression": "Progression",
+        "max": "Max"
+      }
     },
     "fields": {
       "name": "Nom",
@@ -124,7 +129,9 @@
         "custom": "Personnalisée"
       },
       "preview": "Maximum aux niveaux 0 à 5",
-      "help": "Variables : level, base, playerLevel (0 pour l'instant). Lisez le niveau d'un autre attribut par son nom : force, ou [Vie max] entre crochets quand le nom contient des espaces. La casse n'a pas d'importance. Opérateurs : + - * / ^ et parenthèses. Fonctions : min, max, floor, round, sqrt. Le maximum est arrondi à l'entier."
+      "help": "Variables : level, base, playerLevel (0 pour l'instant). Lisez le niveau d'un autre attribut par son nom : force, ou [Vie max] entre crochets quand le nom contient des espaces. La casse n'a pas d'importance. Opérateurs : + - * / ^ et parenthèses. Fonctions : min, max, floor, round, sqrt. Le maximum est arrondi à l'entier.",
+      "max": "max {{ from }} → {{ to }}",
+      "helpShort": "Variables : level, base, playerLevel ; un autre attribut par son nom, [entre crochets] s'il a des espaces. + - * / ^ ( ) min max floor round sqrt."
     },
     "level": {
       "title": "Expérience et niveaux",

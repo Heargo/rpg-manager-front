@@ -23,6 +23,7 @@ import { StepperModule } from '@openng/optimus-ui/stepper';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
+import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import {
@@ -90,6 +91,7 @@ import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
     TagModule,
     TextareaModule,
     ToggleSwitchModule,
+    TooltipModule,
     CoinInputComponent,
     WorldCardComponent,
   ],
@@ -105,7 +107,7 @@ export class WorldNewPageComponent {
   protected readonly nameMax = WORLD_NAME_MAX_LENGTH;
   protected readonly attributeMax = ATTRIBUTE_NAME_MAX_LENGTH;
   protected readonly offlineFeatures = OFFLINE_FEATURES;
-  protected readonly presets = PRESETS;
+  protected readonly presets = [...PRESETS];
 
   protected readonly step = signal(1);
   protected readonly name = signal('');
@@ -115,11 +117,12 @@ export class WorldNewPageComponent {
   protected readonly attributes = signal<AttributeRow[]>(
     this.defaultAttributes(),
   );
-  protected readonly lifeBar = signal<string | null>(
-    this.attributes()[0]?.name ?? null,
+  /** Row keys (not names, so renaming a row keeps its bar). */
+  protected readonly lifeBar = signal<number | null>(
+    this.attributes()[0]?.key ?? null,
   );
-  protected readonly manaBar = signal<string | null>(
-    this.attributes()[1]?.name ?? null,
+  protected readonly manaBar = signal<number | null>(
+    this.attributes()[1]?.key ?? null,
   );
   protected readonly startingStatPoints = signal(5);
   protected readonly startingMoney = signal(5000);
@@ -148,12 +151,8 @@ export class WorldNewPageComponent {
       formula,
     })),
     barAttributes: {
-      life: this.attributeNames().includes(this.lifeBar() ?? '')
-        ? (this.lifeBar() ?? undefined)
-        : undefined,
-      mana: this.attributeNames().includes(this.manaBar() ?? '')
-        ? (this.manaBar() ?? undefined)
-        : undefined,
+      life: this.barName(this.lifeBar()),
+      mana: this.barName(this.manaBar()),
     },
     startingStatPoints: this.startingStatPoints(),
     levelCurve: this.levelCurve(),
@@ -164,13 +163,18 @@ export class WorldNewPageComponent {
   protected readonly formulaErrors = computed(() =>
     attributeFormulaErrors(this.draft()),
   );
-  /** Per row, the rounded max at levels 0 to 5 (empty while the formula is invalid). */
+  /** Per row, the rounded max at levels 0 to 5 (empty while the formula is invalid); memoised. */
   protected readonly previews = computed(() => {
     const rows = this.attributes();
     const names = rows.map((row) => row.name.trim());
-    return rows.map((row) =>
-      previewMax(row.formula, row.baseValue, names).join(' '),
-    );
+    return rows.map((row) => {
+      const levels = previewMax(row.formula, row.baseValue, names);
+      return {
+        levels: levels.join(' '),
+        first: levels[0],
+        last: levels[levels.length - 1],
+      };
+    });
   });
   protected readonly curveError = computed(() =>
     checkLevelCurve(this.levelCurve()),
@@ -179,7 +183,9 @@ export class WorldNewPageComponent {
   protected readonly curvePreview = computed(() =>
     this.curveError()
       ? ''
-      : [2, 3, 4, 5, 6].map((level) => levelCost(this.levelCurve(), level)).join(' '),
+      : [2, 3, 4, 5, 6]
+          .map((level) => levelCost(this.levelCurve(), level))
+          .join(' '),
   );
   protected readonly errors = computed(() =>
     this.library.validateDraft(this.draft()),
@@ -189,7 +195,11 @@ export class WorldNewPageComponent {
     return {
       1: !errors.name,
       2: !errors.attributes,
-      3: !errors.startingStatPoints && !errors.startingMoney && !errors.levelCurve && !errors.statPointsPerLevel,
+      3:
+        !errors.startingStatPoints &&
+        !errors.startingMoney &&
+        !errors.levelCurve &&
+        !errors.statPointsPerLevel,
     } as Record<number, boolean>;
   });
   protected readonly canCreate = computed(
@@ -227,6 +237,8 @@ export class WorldNewPageComponent {
   }
 
   protected removeAttribute(key: number): void {
+    if (this.lifeBar() === key) this.lifeBar.set(null);
+    if (this.manaBar() === key) this.manaBar.set(null);
     this.attributes.update((rows) => rows.filter((row) => row.key !== key));
   }
 
@@ -240,7 +252,11 @@ export class WorldNewPageComponent {
     const current = this.levelCurve();
     this.levelCurve.set(
       preset === 'custom'
-        ? { preset, expression: current.preset === 'custom' ? current.expression : 'level * 100' }
+        ? {
+            preset,
+            expression:
+              current.preset === 'custom' ? current.expression : 'level * 100',
+          }
         : { preset: preset as 'flat' | 'growing' | 'steep' | 'classic' },
     );
   }
@@ -259,7 +275,16 @@ export class WorldNewPageComponent {
     if (!row || !PRESETS.includes(preset as FormulaPreset | 'custom')) return;
     const formula: AttributeFormula =
       preset === 'custom'
-        ? { preset: 'custom', expression: formulaExpression(row.formula) }
+        ? {
+            preset: 'custom',
+            expression:
+              row.formula.preset === 'custom'
+                ? row.formula.expression
+                : formulaExpression(row.formula).replace(
+                    /\bstep\b/g,
+                    String(row.formula.step),
+                  ),
+          }
         : {
             preset: preset as FormulaPreset,
             step: defaultStep(preset as FormulaPreset),
@@ -267,8 +292,19 @@ export class WorldNewPageComponent {
     this.updateAttribute(key, { formula });
   }
 
-  protected setStep(key: number, text: string): void {
-    const step = Number(text);
+  protected setBar(bar: 'life' | 'mana', key: number): void {
+    const target = bar === 'life' ? this.lifeBar : this.manaBar;
+    const other = bar === 'life' ? this.manaBar : this.lifeBar;
+    if (target() === key) {
+      target.set(null);
+      return;
+    }
+    target.set(key);
+    if (other() === key) other.set(null);
+  }
+
+  protected setStep(key: number, value: number | null): void {
+    const step = value ?? 0;
     const row = this.attributes().find((entry) => entry.key === key);
     if (!row || row.formula.preset === 'custom') return;
     this.updateAttribute(key, {
@@ -330,6 +366,13 @@ export class WorldNewPageComponent {
     } finally {
       this.creating.set(false);
     }
+  }
+
+  private barName(key: number | null): string | undefined {
+    const name = this.attributes()
+      .find((row) => row.key === key)
+      ?.name.trim();
+    return name || undefined;
   }
 
   private defaultAttributes(): AttributeRow[] {

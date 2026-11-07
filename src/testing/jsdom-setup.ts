@@ -17,3 +17,7 @@ if (typeof globalThis.matchMedia === 'undefined') {
       removeListener: () => {},
     }) as unknown as MediaQueryList;
 }
+// jsdom has no scrollIntoView; Optimus UI selects call it on the selected option when they open.
+if (typeof Element.prototype.scrollIntoView === 'undefined') {
+  Element.prototype.scrollIntoView = () => {};
+}
