@@ -56,11 +56,13 @@ export class WebRtcTransport implements RoomTransport {
   async createInvite(): Promise<Invite> {
     const connection = this.newConnection();
     const channel = connection.createDataChannel('room', { ordered: true });
+    const candidates = collectCandidates(connection);
     await connection.setLocalDescription(await connection.createOffer());
     await this.gathered(connection);
+    const offerCode = encodeSignal({ type: 'offer', sdp: withCandidates(connection.localDescription!.sdp, candidates) });
     const id = crypto.randomUUID();
     this.pending.set(id, { connection, channel });
-    return { id, offerCode: encodeSignal({ type: 'offer', sdp: connection.localDescription!.sdp }) };
+    return { id, offerCode };
   }
 
   async acceptAnswer(inviteId: string, answerCode: string): Promise<PeerId> {
@@ -90,10 +92,11 @@ export class WebRtcTransport implements RoomTransport {
     const channel = new Promise<RTCDataChannel>((resolve) => {
       connection.ondatachannel = (event) => resolve(event.channel);
     });
+    const candidates = collectCandidates(connection);
     await connection.setRemoteDescription(offer);
     await connection.setLocalDescription(await connection.createAnswer());
     await this.gathered(connection);
-    const answerCode = encodeSignal({ type: 'answer', sdp: connection.localDescription!.sdp });
+    const answerCode = encodeSignal({ type: 'answer', sdp: withCandidates(connection.localDescription!.sdp, candidates) });
 
     // No timeout here: the host may take minutes to paste the answer. A failed connection still rejects.
     const connected = channel
@@ -166,6 +169,21 @@ export class WebRtcTransport implements RoomTransport {
       connection.addEventListener('icegatheringstatechange', onChange);
     });
   }
+}
+
+/** Records candidates as they are found: some browsers (Firefox) may leave them out of `localDescription`. */
+function collectCandidates(connection: RTCPeerConnection): string[] {
+  const found: string[] = [];
+  connection.addEventListener('icecandidate', (event) => {
+    if (event.candidate?.candidate) found.push(event.candidate.candidate);
+  });
+  return found;
+}
+
+/** Adds the collected candidates when the SDP has none of its own. */
+function withCandidates(sdp: string, candidates: string[]): string {
+  if (/^a=candidate:/m.test(sdp) || candidates.length === 0) return sdp;
+  return `${sdp.replace(/(\r?\n)+$/, '')}\r\n${candidates.map((candidate) => `a=${candidate}`).join('\r\n')}\r\n`;
 }
 
 /** Resolves when the channel opens; rejects if the connection fails, or after the timeout when one is given. */

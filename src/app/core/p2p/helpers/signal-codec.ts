@@ -22,12 +22,13 @@ export interface SignalDescription {
   sdp: string;
 }
 
-/** Throws if the SDP isn't a single data channel with candidates (the only kind this app creates). */
+/**
+ * Throws if the SDP isn't a single data channel (the only kind this app creates). A code without candidates is
+ * allowed: the other side's candidates can still connect (this side is then found as a peer-reflexive address).
+ */
 export function encodeSignal(description: SignalDescription): string {
   const compact = parseDataChannelSdp(description.sdp);
-  if (!compact || compact.candidates.length === 0) {
-    throw new Error('Unsupported SDP: expected a data channel with candidates');
-  }
+  if (!compact) throw new Error('Unsupported SDP: expected a single data channel');
   return `${SIGNAL_CODE_VERSION}.${toBase64Url(packCompactSdp(compact, description.type === 'offer'))}`;
 }
 
