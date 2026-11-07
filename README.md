@@ -26,7 +26,7 @@ Everything under **Tools** in the menu works without a world or a room. The app 
 1. **Play → New world**: the game master creates a world. It's saved in their browser only (IndexedDB). It can be exported to a JSON file and imported elsewhere.
 2. **Host**: opens a room for that world.
 3. **Invite a player**: the app makes a link (and a QR code). The game master sends it through any chat.
-4. The player opens the link and gets an **answer code**, which they send back. The game master pastes it, and the player is in.
+4. The player opens the link and waits on the page: the answer reaches the game master by itself and the player is in. If the automatic connection is unavailable, the player gets an **answer code** to send back and the game master pastes it.
 5. The player creates a character, then everyone goes **to the table**.
 
 The game master's device is the source of truth: players send requests ("spend a point", "sell this item"), the host checks them against the rules, saves, and sends the new state to everyone.

@@ -51,10 +51,15 @@ export function decodeSignal(input: string, expected: SignalType): SignalDescrip
   return { type, sdp: buildDataChannelSdp(decoded.compact, sessionId) };
 }
 
-/** Accepts a bare code or a link with the code after `#`, and drops whitespace chat apps add when wrapping. */
+/**
+ * Accepts a bare code or a link with the code after `#`, and drops whitespace chat apps add when wrapping
+ * and the "~<box id>" suffix of a link made for the signalling mailbox.
+ */
 export function extractSignalCode(input: string): string {
   const hash = input.indexOf('#');
-  return (hash >= 0 ? input.slice(hash + 1) : input).replace(/\s+/g, '');
+  const code = (hash >= 0 ? input.slice(hash + 1) : input).replace(/\s+/g, '');
+  const tilde = code.indexOf('~');
+  return tilde >= 0 ? code.slice(0, tilde) : code;
 }
 
 function toBase64Url(bytes: Uint8Array): string {

@@ -108,6 +108,7 @@ export function createFakeNetwork() {
   };
 }
 
+// A microtask, not a timer: tests that fake the clock must not stall the network.
 function tick(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 0));
+  return Promise.resolve();
 }

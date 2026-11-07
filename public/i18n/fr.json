@@ -290,7 +290,10 @@
       "forPlayer": "Réinviter {{ name }}",
       "connecting": "Connexion…",
       "failed": "Connexion impossible : envoyez une nouvelle invitation",
-      "retry": "Nouvelle invitation"
+      "retry": "Nouvelle invitation",
+      "auto": "Le joueur se connecte tout seul dès qu'il ouvre le lien.",
+      "paste": "Coller le code du joueur",
+      "mailboxDown": "Connexion automatique indisponible : demandez son code au joueur"
     },
     "join": {
       "title": "Vous êtes invité",
@@ -304,7 +307,9 @@
       "comeBack": "Revenez sur cette page : vous serez connecté dès que l'hôte aura collé votre code.",
       "stillWaiting": "L'hôte n'a pas encore collé votre code.",
       "failedAway": "La connexion a expiré pendant votre absence. Demandez un nouveau lien à l'hôte.",
-      "failed": "La connexion a échoué. Demandez un nouveau lien à l'hôte."
+      "failed": "La connexion a échoué. Demandez un nouveau lien à l'hôte.",
+      "connectingAuto": "Connexion automatique…",
+      "autoHint": "Gardez cette page ouverte. Si le premier essai échoue, elle réessaie toute seule tant que l'hôte garde l'invitation."
     },
     "lobby": {
       "hosting": "Vous êtes l'hôte",

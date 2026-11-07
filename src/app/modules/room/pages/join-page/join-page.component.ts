@@ -11,10 +11,14 @@ import { MessageModule } from '@openng/optimus-ui/message';
 import { ProgressSpinnerModule } from '@openng/optimus-ui/progressspinner';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { LanguageBusiness } from '../../../../core/business/language.business';
+import { parseInviteFragment } from '../../../../core/p2p/helpers/invite-link';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { RoomBusiness } from '../../business/room.business';
 
-/** Opened from an invite link: makes the answer code, shows it to send back, then enters the room. */
+/**
+ * Opened from an invite link: answers the offer. With a mailbox the answer reaches the host by itself; otherwise
+ * it shows the answer code to send back. Then enters the room.
+ */
 @Component({
   selector: 'app-join-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +36,9 @@ import { RoomBusiness } from '../../business/room.business';
             <a routerLink="/play">{{ 'play.title' | transloco }}</a>
           } @else if (!answerCode()) {
             <div class="row"><p-progress-spinner styleClass="spinner" strokeWidth="6" /> {{ 'room.join.preparing' | transloco }}</div>
+          } @else if (mailbox()) {
+            <div class="row"><p-progress-spinner styleClass="spinner" strokeWidth="6" /> {{ 'room.join.connectingAuto' | transloco }}</div>
+            <p class="hint">{{ 'room.join.autoHint' | transloco }}</p>
           } @else {
             <label for="answer-code">{{ 'room.join.step' | transloco }}</label>
             <textarea pTextarea id="answer-code" readonly rows="4" [value]="answerCode()" (focus)="select($event)"></textarea>
@@ -82,6 +89,8 @@ export class JoinPageComponent {
   protected readonly error = signal<string | null>(null);
   protected readonly canShare = typeof navigator !== 'undefined' && 'share' in navigator;
   protected readonly sent = signal(false);
+  /** True when the answer reaches the host through the mailbox: no code to show or send. */
+  protected readonly mailbox = signal(false);
   /** True once the player came back to the page after sending the code. */
   protected readonly returned = signal(false);
 
@@ -100,6 +109,7 @@ export class JoinPageComponent {
 
   private async start(code: string | null): Promise<void> {
     this.answerCode.set('');
+    this.mailbox.set(false);
     this.sent.set(false);
     this.returned.set(false);
     this.qr.set(null);
@@ -109,9 +119,11 @@ export class JoinPageComponent {
       return;
     }
     try {
-      const { answerCode, joined } = await this.room.join(code);
+      const { offerCode, boxId } = parseInviteFragment(code);
+      const { answerCode, joined, mode } = await this.room.join(offerCode, boxId);
+      this.mailbox.set(mode === 'mailbox');
       this.answerCode.set(answerCode);
-      this.qr.set(await this.room.qrCode(answerCode));
+      if (mode !== 'mailbox') this.qr.set(await this.room.qrCode(answerCode));
       joined.then(
         () => this.router.navigate(['/room']),
         (error: unknown) => this.error.set(this.room.describeError(error)),

@@ -290,7 +290,10 @@
       "forPlayer": "Re-invite {{ name }}",
       "connecting": "Connecting…",
       "failed": "Couldn't connect: send a new invite",
-      "retry": "New invite"
+      "retry": "New invite",
+      "auto": "The player connects by themselves once they open the link.",
+      "paste": "Paste the player's code",
+      "mailboxDown": "Automatic connection unavailable: ask the player for their code"
     },
     "join": {
       "title": "You've been invited",
@@ -304,7 +307,9 @@
       "comeBack": "Come back to this page: you'll be connected as soon as the host pastes your code.",
       "stillWaiting": "Still waiting for the host to paste your code.",
       "failedAway": "The connection timed out while you were away. Ask the host for a new link.",
-      "failed": "The connection failed. Ask the host for a new link."
+      "failed": "The connection failed. Ask the host for a new link.",
+      "connectingAuto": "Connecting automatically…",
+      "autoHint": "Keep this page open. If the first try fails, it tries again by itself while the host keeps the invite."
     },
     "lobby": {
       "hosting": "You're hosting",

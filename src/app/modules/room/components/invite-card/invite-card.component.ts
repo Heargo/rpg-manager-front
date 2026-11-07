@@ -1,4 +1,5 @@
 import { Clipboard } from '@angular/cdk/clipboard';
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -16,7 +17,7 @@ import { PendingInvite, RoomBusiness } from '../../business/room.business';
 @Component({
   selector: 'app-invite-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslocoPipe, ButtonModule, CardModule, InputTextModule, MessageModule, TextareaModule],
+  imports: [NgTemplateOutlet, FormsModule, TranslocoPipe, ButtonModule, CardModule, InputTextModule, MessageModule, TextareaModule],
   template: `
     <p-card styleClass="invite">
       <div class="steps">
@@ -44,14 +45,30 @@ import { PendingInvite, RoomBusiness } from '../../business/room.business';
         }
         <small class="privacy">{{ 'room.invite.privacy' | transloco }}</small>
 
-        <label [for]="'answer-' + invite().id">{{ 'room.invite.step2' | transloco }}</label>
-        <textarea
-          pTextarea
-          rows="3"
-          [id]="'answer-' + invite().id"
-          [placeholder]="'room.invite.answerPlaceholder' | transloco"
-          [(ngModel)]="answer"
-        ></textarea>
+        @if (invite().boxId) {
+          @if (!invite().mailboxDown) {
+            <small class="privacy">{{ 'room.invite.auto' | transloco }}</small>
+          }
+          @if (invite().mailboxDown) {
+            <p-message severity="warn" size="small" variant="simple">{{ 'room.invite.mailboxDown' | transloco }}</p-message>
+          }
+          <details class="manual" [open]="!!invite().mailboxDown || invite().state === 'failed'">
+            <summary>{{ 'room.invite.paste' | transloco }}</summary>
+            <ng-container *ngTemplateOutlet="answerField" />
+          </details>
+        } @else {
+          <label [for]="'answer-' + invite().id">{{ 'room.invite.step2' | transloco }}</label>
+          <ng-container *ngTemplateOutlet="answerField" />
+        }
+        <ng-template #answerField>
+          <textarea
+            pTextarea
+            rows="3"
+            [id]="'answer-' + invite().id"
+            [placeholder]="'room.invite.answerPlaceholder' | transloco"
+            [(ngModel)]="answer"
+          ></textarea>
+        </ng-template>
         @if (invite().state === 'connecting') {
           <p-message severity="info" size="small" variant="simple">{{ 'room.invite.connecting' | transloco }}</p-message>
         } @else if (invite().state === 'failed') {
@@ -84,6 +101,7 @@ import { PendingInvite, RoomBusiness } from '../../business/room.business';
     .qr { width: min(26rem, 100%); align-self: center; image-rendering: pixelated; background: #fff; }
     .privacy { color: var(--p-text-muted-color); }
     label { font-weight: 600; margin-top: 0.5rem; }
+    .manual summary { cursor: pointer; font-weight: 600; margin-bottom: 0.5rem; }
     .for { display: flex; align-items: center; gap: 0.5rem; }
   `,
 })
@@ -95,7 +113,7 @@ export class InviteCardComponent {
 
   readonly invite = input.required<PendingInvite>();
 
-  protected readonly link = computed(() => this.room.inviteLink(this.invite().offerCode));
+  protected readonly link = computed(() => this.room.inviteLink(this.invite().offerCode, this.invite().boxId));
   protected readonly answer = signal('');
   protected readonly qr = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
