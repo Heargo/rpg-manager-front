@@ -69,6 +69,22 @@ Tickets across two specs: `p2p-rooms/` (P) and `legacy-parity/` (L). The order f
 | 23 | **P11** Room size warning | Only matters once real rooms are played. | P04 |
 | 24 | **L01** Landing, tools, credits, contact, privacy | Replaces the Angular starter home page; independent, can be pulled earlier any time. | none |
 
+## Phase 7: UI feedback round 1 (2026-11-07)
+
+Tickets in `ui-feedback/` (U). Bugs first, then cheap visual wins, then the model changes the card depends on.
+
+| # | Ticket | Why now | Blocked by |
+| - | --- | --- | --- |
+| 25 | **U01** 3D dice roller crash | Broken feature. | none |
+| 26 | **U02** Wizard attributes overlap | Layout bug. | none |
+| 27 | **U03** Space above the table | Layout bug. | none |
+| 28 | **U04** Landing hero and favicon | Brand, small. | none |
+| 29 | **U05** Fantasy coins | Legacy money, touches prices and selling before the model change. | none |
+| 30 | **U06** Equipment slot silhouettes | Self-contained visuals. | none |
+| 31 | **U07** Attribute levels, max, current, formulas | Model change; the card and XP build on it. | none |
+| 32 | **U08** Experience and level | Needs the formula parser from U07. | U07 |
+| 33 | **U09** Character card and details | Shows level and the new attributes. | U07, U08 |
+
 ## How each ticket is developed
 
 Follow [workflow.md](../workflow.md): baseline, agreed seams, red / green / review in subagents, browser check for UI tickets (both languages, mobile), then one commit per ticket on `develop` that resolves and archives it. Stop and ask when a ticket hits a decision the spec doesn't cover. Nothing is pushed unless you ask.
