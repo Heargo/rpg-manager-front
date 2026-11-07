@@ -28,7 +28,7 @@ import { LanguageBusiness } from '../../../../core/business/language.business';
 import {
   AttributeFormula,
   defaultStep,
-  evaluateFormula,
+  previewMax,
   formulaExpression,
   FormulaPreset,
 } from '../../../../core/helpers/formula';
@@ -41,7 +41,7 @@ import {
   LEVEL_CURVE_PRESETS,
   LevelCurve,
   levelCost,
-  validateLevelCurve,
+  checkLevelCurve,
 } from '../../../character/helpers/level.rules';
 import { DEFAULT_OFFLINE_FEATURES } from '../../helpers/world.factory';
 import {
@@ -65,7 +65,6 @@ const PRESETS: readonly (FormulaPreset | 'custom')[] = [
   'percent',
   'custom',
 ];
-const PREVIEW_LEVELS = [0, 1, 2, 3, 4, 5];
 
 const OFFLINE_FEATURES = Object.keys(
   DEFAULT_OFFLINE_FEATURES,
@@ -168,23 +167,14 @@ export class WorldNewPageComponent {
   /** Per row, the rounded max at levels 0 to 5 (empty while the formula is invalid). */
   protected readonly previews = computed(() => {
     const rows = this.attributes();
-    const levels = Object.fromEntries(rows.map((row) => [row.name.trim(), 0]));
-    return rows.map((row) => {
-      const values: number[] = [];
-      for (const level of PREVIEW_LEVELS) {
-        const result = evaluateFormula(row.formula, {
-          level,
-          base: row.baseValue,
-          playerLevel: 0,
-          levels,
-        });
-        if (!result.ok) return '';
-        values.push(Math.round(result.value));
-      }
-      return values.join(' ');
-    });
+    const names = rows.map((row) => row.name.trim());
+    return rows.map((row) =>
+      previewMax(row.formula, row.baseValue, names).join(' '),
+    );
   });
-  protected readonly curveError = computed(() => validateLevelCurve(this.levelCurve()));
+  protected readonly curveError = computed(() =>
+    checkLevelCurve(this.levelCurve()),
+  );
   /** XP cost of levels 2 to 6 (empty while a custom curve is invalid). */
   protected readonly curvePreview = computed(() =>
     this.curveError()
@@ -291,6 +281,14 @@ export class WorldNewPageComponent {
 
   protected setExpression(key: number, expression: string): void {
     this.updateAttribute(key, { formula: { preset: 'custom', expression } });
+  }
+
+  protected formulaErrorKey(error: { key: string; level?: number }): string {
+    return error.level !== undefined &&
+      (error.key === 'formula.errors.divisionByZero' ||
+        error.key === 'formula.errors.notFinite')
+      ? `${error.key}AtLevel`
+      : error.key;
   }
 
   protected expressionOf(formula: AttributeFormula): string {

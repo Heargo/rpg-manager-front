@@ -137,7 +137,7 @@
                     </small>
                     @if (formulaErrors()[i]; as formulaError) {
                       <small class="formula-error wide" role="alert" [attr.data-testid]="'formula-error-' + i">
-                        {{ formulaError.key | transloco: { position: formulaError.position + 1 } }}
+                        {{ formulaErrorKey(formulaError) | transloco: { position: formulaError.position + 1, level: formulaError.level } }}
                       </small>
                     }
                     <small class="hint wide">
@@ -223,7 +223,7 @@
                     <small class="hint wide">{{ 'world.level.customHelp' | transloco }}</small>
                   }
                   @if (curveError(); as error) {
-                    <small class="formula-error wide" role="alert" data-testid="level-curve-error">{{ error | transloco }}</small>
+                    <small class="formula-error wide" role="alert" data-testid="level-curve-error">{{ error.key | transloco: { position: (error.position ?? 0) + 1, level: error.level } }}</small>
                   }
                   <small class="hint wide">
                     {{ 'world.level.preview' | transloco }}:

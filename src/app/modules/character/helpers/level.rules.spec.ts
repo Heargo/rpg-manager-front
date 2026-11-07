@@ -4,6 +4,7 @@ import {
   grantXp,
   levelCost,
   levelProgress,
+  checkLevelCurve,
   validateLevelCurve,
 } from './level.rules';
 
@@ -99,5 +100,28 @@ describe('level limits', () => {
   it('checks a custom curve up to MAX_LEVEL', () => {
     // Positive up to level 60, then it drops below 1.
     expect(validateLevelCurve({ preset: 'custom', expression: '1000 - level * 16' })).toEqual(expect.any(String));
+  });
+});
+
+describe('checkLevelCurve', () => {
+  const check = (expression: string) => checkLevelCurve({ preset: 'custom', expression });
+
+  it('accepts presets and a valid custom expression', () => {
+    expect(checkLevelCurve({ preset: 'steep' })).toBeNull();
+    expect(check('50 * level ^ 2')).toBeNull();
+  });
+
+  it('reports a syntax error with its position', () => {
+    expect(check('level +')).toEqual({ key: 'formula.errors.syntax', position: 7 });
+  });
+
+  it('reports an unknown name with its position', () => {
+    expect(check('level + luck')).toEqual({ key: 'formula.errors.unknownName', position: 8 });
+    expect(check('base * 2')).toEqual({ key: 'formula.errors.unknownName', position: 0 });
+  });
+
+  it('reports the first level that costs less than 1 XP', () => {
+    expect(check('level - 5')).toEqual({ key: 'world.errors.levelCostTooLow', level: 2 });
+    expect(check('1000 - level * 16')).toEqual({ key: 'world.errors.levelCostTooLow', level: 63 });
   });
 });

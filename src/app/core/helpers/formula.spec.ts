@@ -4,7 +4,9 @@ import {
   evaluateFormula,
   formulaExpression,
   FormulaScope,
+  checkAttributeFormula,
   presetExpression,
+  previewMax,
   validateFormula,
 } from './formula';
 
@@ -199,5 +201,97 @@ describe('formula limits', () => {
   it('treats step as an unknown name in Custom', () => {
     expect(error('base + step')?.key).toBe('formula.errors.unknownName');
     expect(validateFormula(custom('step'), [])?.key).toBe('formula.errors.unknownName');
+  });
+});
+
+describe('accent-insensitive names', () => {
+  it('evaluates an unaccented name against an accented attribute', () => {
+    expect(value('agilite * 2', { levels: { Agilité: 3 } })).toBe(6);
+    expect(value('[AGILITE]', { levels: { Agilité: 3 } })).toBe(3);
+    expect(value('agilité', { levels: { Agilite: 4 } })).toBe(4);
+  });
+
+  it('validates an unaccented name', () => {
+    expect(validateFormula(custom('Agilite + level'), ['Agilité'])).toBeNull();
+  });
+});
+
+describe('checkAttributeFormula', () => {
+  it('uses the attribute base value', () => {
+    expect(checkAttributeFormula(custom('5 - base'), [], 10)).toMatchObject({
+      key: 'formula.errors.negative',
+      level: 0,
+    });
+    expect(checkAttributeFormula(custom('5 - base'), [], 2)).toBeNull();
+  });
+
+  it('accepts presets and a formula reading another attribute', () => {
+    expect(checkAttributeFormula({ preset: 'linear', step: 1 }, ['Force'], 1)).toBeNull();
+    expect(checkAttributeFormula(custom('base + Agilite * 2'), ['Agilité'], 1)).toBeNull();
+  });
+
+  it('reports a division by zero with its position and the level', () => {
+    expect(checkAttributeFormula(custom('base + level/0'), [], 1)).toEqual({
+      key: 'formula.errors.divisionByZero',
+      position: 12,
+      level: 0,
+    });
+    expect(checkAttributeFormula(custom('base + 1 / (level - 3) ^ 2'), [], 1)).toEqual({
+      key: 'formula.errors.divisionByZero',
+      position: 9,
+      level: 3,
+    });
+  });
+
+  it('reports a division by zero that only happens at some player level', () => {
+    expect(checkAttributeFormula(custom('base + 1 / (playerLevel - 50) ^ 2'), [], 1)).toMatchObject({
+      key: 'formula.errors.divisionByZero',
+    });
+  });
+
+  it('reports a negative max with the level it happens at', () => {
+    expect(checkAttributeFormula(custom('level - 5'), [], 1)).toMatchObject({
+      key: 'formula.errors.negative',
+      level: 0,
+    });
+    expect(checkAttributeFormula(custom('level - 5 + 3 * level'), [], 1)).toMatchObject({
+      key: 'formula.errors.negative',
+      level: 0,
+    });
+  });
+
+  it('reports syntax and unknown names with their position', () => {
+    expect(checkAttributeFormula(custom('luck + 1'), [], 1)).toMatchObject({
+      key: 'formula.errors.unknownName',
+      position: 0,
+    });
+    expect(checkAttributeFormula(custom('base +'), [], 1)).toMatchObject({
+      key: 'formula.errors.syntax',
+      position: 6,
+    });
+  });
+
+  it('reports a result that is not finite', () => {
+    expect(checkAttributeFormula(custom('10 ^ 1000'), [], 1)).toMatchObject({
+      key: 'formula.errors.notFinite',
+    });
+  });
+});
+
+describe('previewMax', () => {
+  it('gives the rounded max at levels 0 to 5', () => {
+    expect(previewMax({ preset: 'linear', step: 2 }, 10, [])).toEqual([10, 12, 14, 16, 18, 20]);
+  });
+
+  it('evaluates playerLevel as 1', () => {
+    expect(previewMax(custom('base + playerLevel'), 10, [])).toEqual([11, 11, 11, 11, 11, 11]);
+  });
+
+  it('reads other attributes at level 0', () => {
+    expect(previewMax(custom('base + Agilite + level'), 10, ['Agilité'])).toEqual([10, 11, 12, 13, 14, 15]);
+  });
+
+  it('is empty when the formula fails', () => {
+    expect(previewMax(custom('base + level/0'), 10, [])).toEqual([]);
   });
 });

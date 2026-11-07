@@ -112,7 +112,8 @@
       "nonNegativeInteger": "Use a whole number, 0 or more.",
       "image": "This picture couldn't be used.",
       "formulaInvalid": "Fix the formulas of the attributes marked in red.",
-      "levelCurveInvalid": "Invalid level curve: use only level, and every level must cost at least 1 XP."
+      "levelCurveInvalid": "Invalid level curve: use only level, and every level must cost at least 1 XP.",
+      "levelCostTooLow": "Level {{ level }} costs less than 1 XP: every level must cost at least 1 XP."
     },
     "formula": {
       "presets": {
@@ -676,7 +677,10 @@
       "divisionByZero": "Division by zero (character {{ position }})",
       "notFinite": "The result is not a finite number",
       "tooLong": "Formula too long (200 characters at most)",
-      "tooDeep": "Formula too deeply nested (32 levels at most)"
+      "tooDeep": "Formula too deeply nested (32 levels at most)",
+      "negative": "Negative max at level {{ level }}",
+      "divisionByZeroAtLevel": "Division by zero (character {{ position }}, level {{ level }})",
+      "notFiniteAtLevel": "The result is not a finite number (level {{ level }})"
     }
   }
 }

@@ -120,4 +120,14 @@ describe('world import of character xp and level', () => {
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.errors).toContain('world.characters[0].level must be an integer of 1 or more');
   });
+
+  it('refuses formulas that fail when evaluated', () => {
+    for (const expression of ['base + level/0', 'level - 5']) {
+      const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
+      file.world.attributes[0].formula = { preset: 'custom', expression };
+      const parsed = parseWorldExport(JSON.stringify(file));
+      expect(parsed.ok).toBe(false);
+      if (!parsed.ok) expect(parsed.errors).toContain('world.attributes[0].formula is invalid');
+    }
+  });
 });

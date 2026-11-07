@@ -26,6 +26,7 @@ export interface FormulaError {
     | 'formula.errors.unknownName'
     | 'formula.errors.divisionByZero'
     | 'formula.errors.notFinite'
+    | 'formula.errors.negative'
     | 'formula.errors.tooLong'
     | 'formula.errors.tooDeep';
   /** 0-based character position in the expression. */
@@ -280,7 +281,10 @@ function parse(expression: string): Node {
   return new Parser(tokenize(expression)).parse();
 }
 
-const lower = (text: string) => text.toLocaleLowerCase();
+/** Names compare case- and accent-insensitively. */
+export const normalizeName = (text: string): string =>
+  text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase();
+const lower = normalizeName;
 
 const variablesOf = (formula: AttributeFormula): string[] =>
   formula.preset === 'custom' ? VARIABLES : [...VARIABLES, 'step'];
@@ -387,16 +391,111 @@ export function evaluateFormula(
 export function validateFormula(
   formula: AttributeFormula,
   attributeNames: string[],
+  variables: string[] = variablesOf(formula),
 ): FormulaError | null {
   try {
     checkNames(
       parse(formulaExpression(formula)),
       new Set(attributeNames.map(lower)),
-      variablesOf(formula),
+      variables,
     );
     return null;
   } catch (error) {
     if (error instanceof FormulaFailure) return error.error;
     throw error;
   }
+}
+
+export const CHECK_MAX_LEVEL = 50;
+export const CHECK_MAX_PLAYER_LEVEL = 100;
+const PREVIEW_LEVELS = [0, 1, 2, 3, 4, 5];
+
+/**
+ * Validates an attribute formula by evaluating it over levels 0 to 50 and player levels 1 to 100
+ * (the other attributes at the same level): the first error, with the level it happens at.
+ */
+export function checkAttributeFormula(
+  formula: AttributeFormula,
+  attributeNames: string[],
+  base: number,
+): (FormulaError & { level?: number }) | null {
+  const key = JSON.stringify([formula, attributeNames, base]);
+  const cached = CHECK_CACHE.get(key);
+  if (cached !== undefined) return cached;
+  const result = computeCheck(formula, attributeNames, base);
+  if (CHECK_CACHE.size >= CHECK_CACHE_LIMIT) CHECK_CACHE.clear();
+  CHECK_CACHE.set(key, result);
+  return result;
+}
+
+const CHECK_CACHE_LIMIT = 500;
+const CHECK_CACHE = new Map<
+  string,
+  (FormulaError & { level?: number }) | null
+>();
+
+function computeCheck(
+  formula: AttributeFormula,
+  attributeNames: string[],
+  base: number,
+): (FormulaError & { level?: number }) | null {
+  let node: Node;
+  try {
+    node = parse(formulaExpression(formula));
+    checkNames(node, new Set(attributeNames.map(lower)), variablesOf(formula));
+  } catch (error) {
+    if (error instanceof FormulaFailure) return error.error;
+    throw error;
+  }
+  const step = formula.preset === 'custom' ? 0 : formula.step;
+  const keys = attributeNames.map(lower);
+  const levels = new Map<string, number>();
+  const vars = new Map<string, number>([
+    ['base', base],
+    ['step', step],
+  ]);
+  for (let level = 0; level <= CHECK_MAX_LEVEL; level++) {
+    for (const key of keys) levels.set(key, level);
+    vars.set('level', level);
+    for (
+      let playerLevel = 1;
+      playerLevel <= CHECK_MAX_PLAYER_LEVEL;
+      playerLevel++
+    ) {
+      vars.set('playerlevel', playerLevel);
+      let value: number;
+      try {
+        value = run(node, vars, levels);
+      } catch (error) {
+        if (error instanceof FormulaFailure) return { ...error.error, level };
+        throw error;
+      }
+      if (!Number.isFinite(value))
+        return { key: 'formula.errors.notFinite', position: 0, level };
+      if (Math.round(value) < 0)
+        return { key: 'formula.errors.negative', position: 0, level };
+    }
+  }
+  return null;
+}
+
+/** Rounded max at levels 0 to 5 for the wizard (player level 1, other attributes at 0); empty on error. */
+export function previewMax(
+  formula: AttributeFormula,
+  base: number,
+  attributeNames: string[],
+): number[] {
+  const levels = Object.fromEntries(attributeNames.map((name) => [name, 0]));
+  const values: number[] = [];
+  for (const level of PREVIEW_LEVELS) {
+    const result = evaluateFormula(formula, {
+      level,
+      base,
+      playerLevel: 1,
+      levels,
+    });
+    if (!result.ok) return [];
+    values.push(Math.round(result.value));
+  }
+  return values;
 }

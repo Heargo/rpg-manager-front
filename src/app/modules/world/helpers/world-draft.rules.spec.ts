@@ -50,6 +50,15 @@ describe('validateWorldDraft', () => {
     expect(validateWorldDraft(draft({ attributes: [{ name: 'Life', baseValue: 1.5, formula: { preset: 'linear', step: 1 } }] })).attributes).toBe('world.errors.baseValueInteger');
   });
 
+  it('treats names differing only by accents as duplicates', () => {
+    const linear = { preset: 'linear', step: 1 } as const;
+    const attributes: WorldDraft['attributes'] = [
+      { name: 'Agilité', baseValue: 1, formula: linear },
+      { name: 'Agilite', baseValue: 1, formula: linear },
+    ];
+    expect(validateWorldDraft(draft({ attributes })).attributes).toBe('world.errors.attributeNamesUnique');
+  });
+
   it('accepts a custom formula that reads a sibling attribute by name', () => {
     const attributes: WorldDraft['attributes'] = [
       { name: 'Max life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
@@ -103,5 +112,29 @@ describe('generateStarterItems', () => {
     const items = generateStarterItems(seededRandomSource('w'), words, { attributes: [], barAttributes: [] });
     expect(items.length).toBeGreaterThan(10);
     expect(items.every((item) => item.modifiers.length === 0)).toBe(true);
+  });
+});
+
+describe('formulas that fail when evaluated', () => {
+  const withFormula = (expression: string) =>
+    draft({ attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'custom', expression } }] });
+
+  it('blocks Next on a division by zero', () => {
+    expect(attributeFormulaErrors(withFormula('base + level/0'))[0]).toMatchObject({ key: 'formula.errors.divisionByZero', position: 12, level: 0 });
+    expect(validateWorldDraft(withFormula('base + level/0')).attributes).toBe('world.errors.formulaInvalid');
+    expect(isDraftValid(withFormula('base + level/0'))).toBe(false);
+  });
+
+  it('blocks Next on a negative max', () => {
+    expect(attributeFormulaErrors(withFormula('level - 5'))[0]).toMatchObject({ key: 'formula.errors.negative', level: 0 });
+    expect(validateWorldDraft(withFormula('level - 5')).attributes).toBe('world.errors.formulaInvalid');
+  });
+
+  it('accepts an unaccented reference to an accented sibling', () => {
+    const attributes: WorldDraft['attributes'] = [
+      { name: 'Agilité', baseValue: 3, formula: { preset: 'linear', step: 1 } },
+      { name: 'Dodge', baseValue: 1, formula: { preset: 'custom', expression: 'base + Agilite' } },
+    ];
+    expect(attributeFormulaErrors(draft({ attributes }))).toEqual([null, null]);
   });
 });

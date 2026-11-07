@@ -1,4 +1,4 @@
-import { FormulaError, validateFormula } from '../../../core/helpers/formula';
+import { FormulaError, checkAttributeFormula, normalizeName } from '../../../core/helpers/formula';
 import { validateLevelCurve } from '../../character/helpers/level.rules';
 import { WorldDraft } from '../models/world';
 
@@ -15,7 +15,7 @@ export function validateWorldDraft(draft: WorldDraft): WorldDraftErrors {
   if (!name) errors.name = 'world.errors.nameRequired';
   else if (name.length > WORLD_NAME_MAX_LENGTH) errors.name = 'world.errors.nameTooLong';
 
-  const names = draft.attributes.map((attribute) => attribute.name.trim().toLocaleLowerCase());
+  const names = draft.attributes.map((attribute) => normalizeName(attribute.name.trim()));
   if (names.some((attributeName) => !attributeName)) errors.attributes = 'world.errors.attributeNameRequired';
   else if (names.some((attributeName) => attributeName.length > ATTRIBUTE_NAME_MAX_LENGTH)) errors.attributes = 'world.errors.attributeNameTooLong';
   else if (new Set(names).size !== names.length) errors.attributes = 'world.errors.attributeNamesUnique';
@@ -33,9 +33,9 @@ export function validateWorldDraft(draft: WorldDraft): WorldDraftErrors {
 }
 
 /** Per attribute, the problem of its formula (null when valid); formulas may read any attribute of the draft. */
-export function attributeFormulaErrors(draft: WorldDraft): (FormulaError | null)[] {
+export function attributeFormulaErrors(draft: WorldDraft): ((FormulaError & { level?: number }) | null)[] {
   const names = draft.attributes.map((attribute) => attribute.name.trim());
-  return draft.attributes.map((attribute) => validateFormula(attribute.formula, names));
+  return draft.attributes.map((attribute) => checkAttributeFormula(attribute.formula, names, attribute.baseValue));
 }
 
 export function isDraftValid(draft: WorldDraft): boolean {

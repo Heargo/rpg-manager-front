@@ -86,6 +86,10 @@ Tickets in `ui-feedback/` (U). Bugs first, then cheap visual wins, then the mode
 | 33 | **U09** Character card and details | Shows level and the new attributes. | U07, U08 |
 | 33b | **U10** Landing content section | User feedback after U04 (done). | U04 |
 | 33c | **U11** Full-width footer, static pages | User feedback after U10 (done). | U10 |
+| 33d | **U12** Landing polish (done) | User feedback. | U11 |
+| 33e | **U13** Original logo (done) | The old mark was Font Awesome Pro. | none |
+| 33f | **U14** Formula validation gaps | Found by probing custom formulas. | U07, U08 |
+| 33g | **U15** Attributes step cleanup | User feedback: clunky. | U14 |
 
 ## How each ticket is developed
 

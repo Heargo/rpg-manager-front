@@ -1,5 +1,6 @@
 import {
   evaluateFormula,
+  FormulaError,
   validateFormula,
 } from '../../../core/helpers/formula';
 
@@ -23,7 +24,6 @@ export const MAX_LEVEL = 100;
 const INVALID = 'world.errors.levelCurveInvalid';
 /** Cost of levels 2 to 6 of the classic table, then +50 % per level. */
 const CLASSIC_TABLE = [300, 600, 1800, 3800, 7500];
-const CUSTOM_WORDS = new Set(['level', 'min', 'max', 'floor', 'round', 'sqrt']);
 
 export interface LevelProgress {
   level: number;
@@ -68,26 +68,37 @@ export function levelCost(curve: LevelCurve, level: number): number {
   }
 }
 
-/** Translation key of what's wrong with a curve, or null when it's usable. */
-export function validateLevelCurve(curve: LevelCurve): string | null {
+export interface LevelCurveError {
+  key: string;
+  position?: number;
+  level?: number;
+}
+
+/** What's wrong with a curve (translation key, position or level), or null when it's usable. */
+export function checkLevelCurve(curve: LevelCurve): LevelCurveError | null {
   if (curve.preset !== 'custom') return null;
   const expression = curve.expression;
-  if (typeof expression !== 'string' || !expression.trim()) return INVALID;
-  if (expression.includes('[')) return INVALID;
-  const words = expression.match(/[\p{L}_][\p{L}\p{N}_]*/gu) ?? [];
-  if (words.some((word) => !CUSTOM_WORDS.has(word.toLowerCase())))
-    return INVALID;
-  const problem = validateFormula({ preset: 'custom', expression }, []);
-  if (problem) return INVALID;
+  if (typeof expression !== 'string' || !expression.trim())
+    return { key: 'formula.errors.syntax', position: 0 };
+  const formula = { preset: 'custom', expression } as const;
+  const problem: FormulaError | null = validateFormula(formula, [], ['level']);
+  if (problem) return problem;
   for (let level = 2; level <= MAX_LEVEL; level++) {
-    const result = evaluateFormula(
-      { preset: 'custom', expression },
-      { level, base: 0, playerLevel: 0 },
-    );
-    if (!result.ok) return INVALID;
-    if (Math.round(result.value) < 1) return INVALID;
+    const result = evaluateFormula(formula, {
+      level,
+      base: 0,
+      playerLevel: 0,
+    });
+    if (!result.ok) return result.error;
+    if (Math.round(result.value) < 1)
+      return { key: 'world.errors.levelCostTooLow', level };
   }
   return null;
+}
+
+/** Translation key of what's wrong with a curve, or null when it's usable. */
+export function validateLevelCurve(curve: LevelCurve): string | null {
+  return checkLevelCurve(curve) ? INVALID : null;
 }
 
 /** The level for a total XP, and how far into it. */
