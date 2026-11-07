@@ -76,9 +76,14 @@ describe('ItemCatalogueComponent', () => {
     expect(q('[data-action="delete"]')).toHaveLength(2);
   });
 
-  it('hides edit until the editor exists', async () => {
-    const { q } = await setup(true);
-    expect(q('[data-action="edit"]')).toHaveLength(0);
+  it('emits the item to edit', async () => {
+    const { fixture, q, component } = await setup(true);
+    expect(q('[data-action="edit"]')).toHaveLength(2);
+    const edited: Item[] = [];
+    component.edit.subscribe((i: Item) => edited.push(i));
+    q('[data-action="edit"]')[0].click();
+    await fixture.whenStable();
+    expect(edited).toEqual([sword]);
   });
 
   it('asks for confirmation before emitting delete', async () => {

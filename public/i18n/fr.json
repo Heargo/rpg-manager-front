@@ -11,7 +11,8 @@
     "itemGenerator": "Générateur d'objets",
     "itemCatalogue": "Catalogue d'objets",
     "externalTools": "Outils externes",
-    "characterSheet": "Fiche de personnage"
+    "characterSheet": "Fiche de personnage",
+    "itemEditor": "Éditeur d'objets"
   },
   "play": {
     "title": "Jouer",
@@ -214,7 +215,11 @@
     "fields": {
       "rarity": "Rareté",
       "type": "Type",
-      "slot": "Emplacement"
+      "slot": "Emplacement",
+      "name": "Nom",
+      "description": "Description",
+      "price": "Prix",
+      "image": "Image"
     },
     "modifiers": "Modificateurs",
     "price": "{{ price }} pièces",
@@ -234,13 +239,48 @@
       "noPlayers": "Aucun joueur n'a encore de personnage.",
       "given": "{{ item }} donné à {{ name }}",
       "notHosting": "Hébergez un monde pour gérer son catalogue d'objets.",
-      "toolIntro": "Un catalogue d'exemple sur les attributs par défaut. Rien n'est enregistré."
+      "toolIntro": "Un catalogue d'exemple sur les attributs par défaut. Rien n'est enregistré.",
+      "create": "Nouvel objet",
+      "edit": "Modifier"
     },
     "errors": {
       "invalid": "Cet objet ne peut pas être donné.",
       "gameMasterOnly": "Seul le maître du jeu donne des objets.",
       "unknownItem": "Cet objet n'est pas dans le catalogue.",
       "unknownCharacter": "Ce personnage n'existe pas."
+    },
+    "editor": {
+      "title": "Éditeur d'objets",
+      "titleNew": "Nouvel objet",
+      "titleEdit": "Modifier {{ name }}",
+      "back": "Retour au catalogue",
+      "tabForm": "Formulaire",
+      "tabJson": "JSON",
+      "tabGenerate": "Générer",
+      "jsonHint": "Modifiez l'objet en JSON. Le formulaire suit dès que le JSON est valide.",
+      "generateHint": "Tire un objet au hasard sur les attributs de ce monde et remplit le formulaire. La même graine donne le même objet.",
+      "generate": "Générer",
+      "copyPrompt": "Copier le prompt IA",
+      "copyPromptHint": "Collez-le dans n'importe quelle IA, puis collez le JSON obtenu dans l'onglet JSON.",
+      "promptCopied": "Prompt copié",
+      "copyFailed": "Le prompt n'a pas pu être copié",
+      "imageFailed": "Cette image n'a pas pu être utilisée",
+      "save": "Enregistrer",
+      "saved": "{{ name }} enregistré",
+      "notHosting": "Hébergez un monde pour modifier ses objets.",
+      "notFound": "Cet objet n'est pas dans le catalogue.",
+      "toolIntro": "Créez ou modifiez un objet sur les attributs par défaut. Le résultat reste sur cette page.",
+      "result": "Résultat",
+      "issue": {
+        "name": "Le nom est obligatoire.",
+        "description": "La description doit être du texte.",
+        "rarity": "Choisissez une rareté valide.",
+        "type": "Choisissez un type valide.",
+        "slot": "Un emplacement est requis pour l'équipement, et seulement pour lui.",
+        "price": "Le prix doit être de 0 ou plus.",
+        "modifiers": "Les modificateurs sont des entiers sur les attributs de ce monde.",
+        "json": "Ce JSON n'est pas un objet valide."
+      }
     }
   },
   "dice": {

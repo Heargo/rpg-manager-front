@@ -3,8 +3,12 @@ import { WordListBusiness } from '../../../core/business/word-list.business';
 import { seededRandomSource } from '../../../core/generators/random-source';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
 import { generateStarterItems } from '../../world/helpers/starter-items';
-import { Character, World } from '../../world/models/world';
-import { mergeDefaultItems } from '../helpers/item-catalogue.rules';
+import { Character, Item, World } from '../../world/models/world';
+import {
+  ItemInput,
+  mergeDefaultItems,
+  upsertItem,
+} from '../helpers/item-catalogue.rules';
 import { ItemService } from '../services/item.service';
 
 /** Game master: the catalogue of the hosted world, saved with the world. */
@@ -25,6 +29,17 @@ export class ItemCatalogueBusiness {
       ...world,
       items: world.items.filter((item) => item.id !== itemId),
     }));
+  }
+
+  /** Adds the item (new id) or updates it (same id), and saves the world. */
+  async save(input: ItemInput): Promise<Item> {
+    let saved: Item | undefined;
+    await this.session.update((world) => {
+      const result = upsertItem(world.items, input, () => crypto.randomUUID());
+      saved = result.item;
+      return { ...world, items: result.items };
+    });
+    return saved!;
   }
 
   /** Adds the default items drawn from the world's attributes; the ones it already has are skipped. */

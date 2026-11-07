@@ -30,7 +30,7 @@ import {
 } from '../../helpers/item-catalogue.rules';
 import { ItemCardComponent } from '../item-card/item-card.component';
 
-/** A world's item catalogue: search and filters, a card per item, with give (when someone can receive) and delete. */
+/** A world's item catalogue: search and filters, a card per item, with give (when someone can receive), edit and delete. */
 @Component({
   selector: 'app-item-catalogue',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -92,6 +92,14 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       <button
         pButton
         type="button"
+        data-action="create"
+        icon="pi pi-plus-circle"
+        [label]="'item.catalogue.create' | transloco"
+        (click)="create.emit()"
+      ></button>
+      <button
+        pButton
+        type="button"
         data-action="add-defaults"
         icon="pi pi-plus"
         severity="secondary"
@@ -117,6 +125,16 @@ import { ItemCardComponent } from '../item-card/item-card.component';
                     (click)="give.emit(item)"
                   ></button>
                 }
+                <button
+                  pButton
+                  type="button"
+                  data-action="edit"
+                  icon="pi pi-pencil"
+                  severity="secondary"
+                  [text]="true"
+                  [label]="'item.catalogue.edit' | transloco"
+                  (click)="edit.emit(item)"
+                ></button>
                 <button
                   pButton
                   type="button"
@@ -183,6 +201,8 @@ export class ItemCatalogueComponent {
   readonly canGive = input(true);
 
   readonly give = output<Item>();
+  readonly edit = output<Item>();
+  readonly create = output<void>();
   readonly remove = output<Item>();
   readonly addDefaults = output<void>();
 

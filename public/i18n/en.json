@@ -11,7 +11,8 @@
     "itemGenerator": "Item generator",
     "itemCatalogue": "Item catalogue",
     "externalTools": "External tools",
-    "characterSheet": "Character sheet"
+    "characterSheet": "Character sheet",
+    "itemEditor": "Item editor"
   },
   "play": {
     "title": "Play",
@@ -214,7 +215,11 @@
     "fields": {
       "rarity": "Rarity",
       "type": "Type",
-      "slot": "Slot"
+      "slot": "Slot",
+      "name": "Name",
+      "description": "Description",
+      "price": "Price",
+      "image": "Image"
     },
     "modifiers": "Modifiers",
     "price": "{{ price }} coins",
@@ -234,13 +239,48 @@
       "noPlayers": "No player has a character yet.",
       "given": "{{ item }} given to {{ name }}",
       "notHosting": "Host a world to manage its item catalogue.",
-      "toolIntro": "A sample catalogue on the default attributes. Nothing is saved."
+      "toolIntro": "A sample catalogue on the default attributes. Nothing is saved.",
+      "create": "New item",
+      "edit": "Edit"
     },
     "errors": {
       "invalid": "This item can't be given.",
       "gameMasterOnly": "Only the game master gives items.",
       "unknownItem": "This item isn't in the catalogue.",
       "unknownCharacter": "This character doesn't exist."
+    },
+    "editor": {
+      "title": "Item editor",
+      "titleNew": "New item",
+      "titleEdit": "Edit {{ name }}",
+      "back": "Back to the catalogue",
+      "tabForm": "Form",
+      "tabJson": "JSON",
+      "tabGenerate": "Generate",
+      "jsonHint": "Edit the item as JSON. The form follows as soon as the JSON is valid.",
+      "generateHint": "Draws a random item on this world's attributes and fills the form. The same seed gives the same item.",
+      "generate": "Generate",
+      "copyPrompt": "Copy the AI prompt",
+      "copyPromptHint": "Paste it in any AI chat, then paste the JSON it gives back in the JSON tab.",
+      "promptCopied": "Prompt copied",
+      "copyFailed": "The prompt could not be copied",
+      "imageFailed": "This image could not be used",
+      "save": "Save",
+      "saved": "{{ name }} saved",
+      "notHosting": "Host a world to edit its items.",
+      "notFound": "This item isn't in the catalogue.",
+      "toolIntro": "Create or edit an item on the default attributes. The result stays on this page.",
+      "result": "Result",
+      "issue": {
+        "name": "The name is required.",
+        "description": "The description must be text.",
+        "rarity": "Pick a valid rarity.",
+        "type": "Pick a valid type.",
+        "slot": "A slot is needed for equipment and only for equipment.",
+        "price": "The price must be 0 or more.",
+        "modifiers": "Modifiers must be whole numbers on the attributes of this world.",
+        "json": "This is not valid JSON for an item."
+      }
     }
   },
   "dice": {

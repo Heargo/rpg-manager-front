@@ -5,7 +5,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -49,6 +49,8 @@ import { ItemCatalogueComponent } from '../../components/item-catalogue/item-cat
         <app-item-catalogue
           [world]="world"
           (give)="itemToGive.set($event)"
+          (edit)="router.navigate(['/room/items/editor', $event.id])"
+          (create)="router.navigate(['/room/items/editor'])"
           (remove)="remove($event)"
           (addDefaults)="addDefaults()"
         />
@@ -117,6 +119,7 @@ import { ItemCatalogueComponent } from '../../components/item-catalogue/item-cat
 })
 export class ItemCataloguePageComponent {
   protected readonly catalogue = inject(ItemCatalogueBusiness);
+  protected readonly router = inject(Router);
   private readonly room = inject(RoomBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly messages = inject(MessageService);

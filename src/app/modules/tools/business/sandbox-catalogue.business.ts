@@ -8,7 +8,11 @@ import {
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { WordListBusiness } from '../../../core/business/word-list.business';
 import { seededRandomSource } from '../../../core/generators/random-source';
-import { mergeDefaultItems } from '../../item/helpers/item-catalogue.rules';
+import {
+  ItemInput,
+  mergeDefaultItems,
+  upsertItem,
+} from '../../item/helpers/item-catalogue.rules';
 import { SandboxWorldBusiness } from '../../world/business/sandbox-world.business';
 import { generateStarterItems } from '../../world/helpers/starter-items';
 import { Item } from '../../world/models/world';
@@ -64,6 +68,13 @@ export class SandboxCatalogueBusiness {
 
   remove(itemId: string): void {
     this.items.update((items) => items.filter((item) => item.id !== itemId));
+  }
+
+  /** Adds the item (new id) or updates it (same id), in memory. */
+  save(input: ItemInput): Item {
+    const result = upsertItem(this.items(), input, () => crypto.randomUUID());
+    this.items.set(result.items);
+    return result.item;
   }
 
   addDefaults(): void {

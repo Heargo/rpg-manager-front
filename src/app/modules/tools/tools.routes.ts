@@ -20,6 +20,14 @@ export const routesTools: Routes = [
       ),
   },
   {
+    path: 'tools/item-editor',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/item-editor-tool-page/item-editor-tool-page.component').then(
+        (m) => m.ItemEditorToolPageComponent,
+      ),
+  },
+  {
     path: 'tools/character-sheet',
     canActivate: [NavigationGuard],
     loadComponent: () =>

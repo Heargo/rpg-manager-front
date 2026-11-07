@@ -55,3 +55,30 @@ export function mergeDefaultItems(
   }
   return [...catalogue, ...added];
 }
+
+/** An item to save: with an id it replaces that item, without one it is added. */
+export type ItemInput = ItemDraft & Partial<Pick<Item, 'id' | 'imageId'>>;
+
+/** The catalogue with the item added (new id) or updated in place (id and image kept). */
+export function upsertItem(
+  items: readonly Item[],
+  input: ItemInput,
+  newId: () => string,
+): { items: Item[]; item: Item } {
+  const index = input.id ? items.findIndex((item) => item.id === input.id) : -1;
+  if (index < 0) {
+    const item: Item = { ...input, id: newId() };
+    return { items: [...items, item], item };
+  }
+  const existing = items[index];
+  const item: Item = {
+    ...existing,
+    ...input,
+    id: existing.id,
+    imageId: input.imageId ?? existing.imageId,
+  };
+  return {
+    items: items.map((current, i) => (i === index ? item : current)),
+    item,
+  };
+}

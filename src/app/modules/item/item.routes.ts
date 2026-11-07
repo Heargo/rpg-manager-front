@@ -10,4 +10,20 @@ export const routesItem: Routes = [
         (m) => m.ItemCataloguePageComponent,
       ),
   },
+  {
+    path: 'room/items/editor',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/item-editor-page/item-editor-page.component').then(
+        (m) => m.ItemEditorPageComponent,
+      ),
+  },
+  {
+    path: 'room/items/editor/:id',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/item-editor-page/item-editor-page.component').then(
+        (m) => m.ItemEditorPageComponent,
+      ),
+  },
 ];

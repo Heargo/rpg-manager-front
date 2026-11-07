@@ -6,7 +6,7 @@ import { ImageBusiness } from '../../business/image.business';
   selector: 'app-stored-image',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (src.value(); as url) {
+    @if (src.hasValue() ? src.value() : undefined; as url) {
       <img [src]="url" [alt]="alt()" />
     } @else {
       <ng-content />

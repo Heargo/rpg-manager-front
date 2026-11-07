@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
@@ -31,6 +32,12 @@ import { SandboxCatalogueBusiness } from '../../business/sandbox-catalogue.busin
         <app-item-catalogue
           [world]="sandbox.$world()"
           [canGive]="false"
+          (edit)="
+            router.navigate(['/tools/item-editor'], {
+              queryParams: { item: $event.id },
+            })
+          "
+          (create)="router.navigate(['/tools/item-editor'])"
           (remove)="sandbox.remove($event.id)"
           (addDefaults)="sandbox.addDefaults()"
         />
@@ -54,4 +61,5 @@ import { SandboxCatalogueBusiness } from '../../business/sandbox-catalogue.busin
 })
 export class ItemCatalogueToolPageComponent {
   protected readonly sandbox = inject(SandboxCatalogueBusiness);
+  protected readonly router = inject(Router);
 }

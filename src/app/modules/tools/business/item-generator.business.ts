@@ -62,6 +62,25 @@ export class ItemGeneratorBusiness {
   );
   readonly $failed = computed(() => this.generated.status() === 'error');
 
+  /** A new seed, for callers that keep their own. */
+  newSeed(): string {
+    return createSeed();
+  }
+
+  /** Draws an item from a seed on the given attributes, in the active language (independent of the tool's state). */
+  async generateFor(
+    seed: string,
+    attributes: readonly string[],
+  ): Promise<ItemDraft> {
+    return generateItem(
+      seededRandomSource(seed),
+      await this.words.itemWords(),
+      {
+        attributes,
+      },
+    );
+  }
+
   reroll(): void {
     this.$seed.set(createSeed());
   }
