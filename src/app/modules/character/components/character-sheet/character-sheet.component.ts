@@ -26,6 +26,7 @@ import { StoredImageComponent } from '../../../../core/components/stored-image/s
 import { EQUIPMENT_SLOTS, EquipmentSlot } from '../../../../core/models/item';
 import { ItemCardComponent } from '../../../item/components/item-card/item-card.component';
 import { RARITY_SEVERITY } from '../../../item/helpers/item-display';
+import { SlotSilhouetteComponent } from '../slot-silhouette/slot-silhouette.component';
 import { Character, InventoryItem } from '../../../world/models/world';
 import {
   CharacterBusiness,
@@ -66,6 +67,7 @@ const ITEM_ICONS: Record<string, string> = {
     TooltipModule,
     StoredImageComponent,
     ItemCardComponent,
+    SlotSilhouetteComponent,
   ],
   templateUrl: './character-sheet.component.html',
   styleUrl: './character-sheet.component.scss',

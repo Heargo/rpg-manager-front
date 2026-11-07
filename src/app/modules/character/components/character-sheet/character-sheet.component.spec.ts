@@ -123,4 +123,52 @@ describe('CharacterSheetComponent', () => {
     expect((el.querySelector('[aria-label="Spend a point on Strength"]') as HTMLButtonElement).disabled).toBe(false);
     expect(el.querySelector('[data-locked="spend-stat-point"]')).toBeNull();
   });
+
+  describe('equipment slot silhouettes', () => {
+    const labels: Record<string, string> = {
+      head: 'Head',
+      earring: 'Earring',
+      necklace: 'Necklace',
+      ring: 'Ring',
+      chest: 'Chest',
+      hand: 'Hands',
+      legs: 'Legs',
+      foot: 'Feet',
+      weapon1: 'Weapon 1',
+      weapon2: 'Weapon 2',
+    };
+    const emptySlots = Object.keys(labels).filter((slot) => slot !== 'head');
+
+    async function openEquipment() {
+      const rendered = await render({ canPlay: false, gameMaster: false });
+      const tab = Array.from(rendered.el.querySelectorAll('p-tab')).find((t) =>
+        t.textContent?.includes('Equipment'),
+      ) as HTMLElement;
+      tab.click();
+      rendered.fixture.detectChanges();
+      await rendered.fixture.whenStable();
+      return rendered;
+    }
+
+    it.each(emptySlots)('shows the %s silhouette, labelled, in the empty slot', async (slot) => {
+      const { el } = await openEquipment();
+      const silhouette = el.querySelector(`[data-slot-silhouette="${slot}"]`);
+      expect(silhouette).not.toBeNull();
+      expect(silhouette!.getAttribute('role')).toBe('img');
+      expect(silhouette!.getAttribute('aria-label')).toBe(labels[slot]);
+      expect(silhouette!.querySelector('svg')).not.toBeNull();
+    });
+
+    it('no longer shows the "-" icon in empty slots', async () => {
+      const { el } = await openEquipment();
+      expect(el.querySelector('.tile.empty .pi-minus')).toBeNull();
+    });
+
+    it('shows the item, not a silhouette, in a filled slot', async () => {
+      const { el } = await openEquipment();
+      expect(el.querySelector('[data-slot-silhouette="head"]')).toBeNull();
+      expect(el.querySelector('.slots')!.textContent).toContain('Iron helm');
+      expect(el.querySelectorAll('[data-slot-silhouette]').length).toBe(9);
+    });
+  });
 });

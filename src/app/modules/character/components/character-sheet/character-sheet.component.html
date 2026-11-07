@@ -194,7 +194,12 @@
                 *ngTemplateOutlet="tile; context: { $implicit: entry }"
               />
             } @else {
-              <div class="tile empty"><i class="pi pi-minus"></i></div>
+              <div class="tile empty">
+                <app-slot-silhouette
+                  [slot]="slot.slot"
+                  [label]="slotLabel(slot.slot) | transloco"
+                />
+              </div>
             }
           </li>
         }
