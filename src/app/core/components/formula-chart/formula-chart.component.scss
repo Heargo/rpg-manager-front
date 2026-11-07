@@ -33,6 +33,17 @@
   stroke-width: 1;
 }
 
+.cap {
+  stroke: var(--p-text-muted-color);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.cap-label {
+  fill: var(--p-text-muted-color);
+  font-size: 10px;
+}
+
 .value {
   fill: var(--p-text-color);
   font-size: 11px;

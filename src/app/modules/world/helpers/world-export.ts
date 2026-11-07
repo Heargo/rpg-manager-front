@@ -83,6 +83,7 @@ function validateWorld(world: unknown, errors: string[]): void {
   list(world['attributes'], 'world.attributes', errors, (attribute, path) => {
     if (typeof attribute['id'] !== 'string' || typeof attribute['name'] !== 'string') errors.push(`${path} needs an id and a name`);
     if (typeof attribute['baseValue'] !== 'number') errors.push(`${path}.baseValue must be a number`);
+    if (attribute['cap'] !== undefined && (!Number.isInteger(attribute['cap']) || (attribute['cap'] as number) < 1 || (typeof attribute['baseValue'] === 'number' && (attribute['cap'] as number) < attribute['baseValue']))) errors.push(`${path}.cap is invalid`);
     if (!isValidFormula(attribute['formula'], attributeNames, attribute['baseValue'])) errors.push(`${path}.formula is invalid`);
   });
   list(world['items'], 'world.items', errors, (item, path) => validateItem(item, path, errors));

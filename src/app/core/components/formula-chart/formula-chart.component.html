@@ -13,6 +13,25 @@
     [attr.y1]="baseline"
     [attr.y2]="baseline"
   />
+  @if (capY(); as y) {
+    <line
+      class="cap"
+      data-cap-line
+      [attr.x1]="10"
+      [attr.x2]="width - 14"
+      [attr.y1]="y"
+      [attr.y2]="y"
+    />
+    <text
+      class="cap-label"
+      data-cap-label
+      text-anchor="start"
+      x="10"
+      [attr.y]="y + 11"
+    >
+      {{ capText() }}
+    </text>
+  }
   <polyline class="line" [attr.points]="line()" />
   @for (point of points(); track $index) {
     <circle

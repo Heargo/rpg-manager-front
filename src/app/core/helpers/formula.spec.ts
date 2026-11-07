@@ -295,3 +295,18 @@ describe('previewMax', () => {
     expect(previewMax(custom('base + level/0'), 10, [])).toEqual([]);
   });
 });
+
+// `cap` is not in the types yet (red): the call goes through a loose alias so the suite still compiles.
+const previewMaxCapped = previewMax as unknown as (...args: unknown[]) => number[];
+
+describe('previewMax with a cap', () => {
+  it('flattens the line at the cap, applied to the rounded formula', () => {
+    expect(previewMaxCapped({ preset: 'linear', step: 5 }, 10, [], 5, 22)).toEqual([10, 15, 20, 22, 22, 22]);
+    expect(previewMaxCapped({ preset: 'linear', step: 5 }, 10, [], 10, 30)).toEqual([10, 15, 20, 25, 30, 30, 30, 30, 30, 30, 30]);
+  });
+
+  it('changes nothing when the cap is not reached or absent', () => {
+    expect(previewMaxCapped({ preset: 'linear', step: 2 }, 10, [], 5, 1000)).toEqual([10, 12, 14, 16, 18, 20]);
+    expect(previewMaxCapped({ preset: 'linear', step: 2 }, 10, [], 5, undefined)).toEqual([10, 12, 14, 16, 18, 20]);
+  });
+});

@@ -66,6 +66,7 @@
       "columns": {
         "base": "Base",
         "progression": "Progression",
+        "cap": "Cap",
         "max": "Max"
       }
     },
@@ -89,6 +90,7 @@
       "offlineTitle": "When the host is offline",
       "offlineHint": "Players can always read their sheet. Choose what else they can still do; changes are checked when the host is back.",
       "formula": "Growth",
+      "cap": "Cap of the max (before gear)",
       "step": "Step",
       "expression": "Expression"
     },
@@ -116,6 +118,8 @@
       "baseValueInteger": "Base values must be whole numbers.",
       "nonNegativeInteger": "Use a whole number, 0 or more.",
       "image": "This picture couldn't be used.",
+      "capInvalid": "The cap must be a whole number, 1 or more.",
+      "capTooLow": "The cap can't be below the base value ({{ base }}).",
       "formulaInvalid": "Fix the formulas of the attributes marked in red.",
       "levelCurveInvalid": "Invalid level curve: use only level, and every level must cost at least 1 XP.",
       "levelCostTooLow": "Level {{ level }} costs less than 1 XP: every level must cost at least 1 XP."
@@ -174,6 +178,7 @@
       "alreadyExists": "You already have a character in this room.",
       "notInRoom": "You're not in this room anymore. Ask for a new invite.",
       "hostHasNoCharacter": "The game master doesn't play a character.",
+      "attributeCapped": "This attribute is already at its cap.",
       "noStatPoints": "No stat points left to spend.",
       "unknownAttribute": "This attribute doesn't exist in this world.",
       "invalidAmount": "Grant between 1 and 100 points.",
@@ -691,6 +696,7 @@
     },
     "chart": {
       "level": "lvl {{ level }}",
+      "cap": "Cap {{ cap }}",
       "maxLabel": "Max per level",
       "xpLabel": "XP cost per level"
     }

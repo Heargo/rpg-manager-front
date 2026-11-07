@@ -131,3 +131,35 @@ describe('world import of character xp and level', () => {
     }
   });
 });
+
+describe('world export of attribute caps', () => {
+  const capped = createWorld(
+    { name: 'W', attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 }, ...({ cap: 1000 } as object) }] },
+    () => crypto.randomUUID(),
+    5,
+  );
+  const reparse = (change: (file: any) => void) => {
+    const file = JSON.parse(JSON.stringify(buildWorldExport(capped, {}, 9)));
+    change(file);
+    return parseWorldExport(JSON.stringify(file));
+  };
+
+  it('round-trips the cap', () => {
+    const file = buildWorldExport(capped, {}, 9);
+    expect((file.world.attributes[0] as { cap?: number }).cap).toBe(1000);
+    const parsed = parseWorldExport(JSON.stringify(file));
+    expect(parsed).toEqual({ ok: true, value: file });
+  });
+
+  it('refuses a cap that is not an integer of at least 1, or is below the base value', () => {
+    for (const cap of [0, -1, 2.5, '100', 9]) {
+      const parsed = reparse((file) => (file.world.attributes[0].cap = cap));
+      expect(parsed.ok).toBe(false);
+      if (!parsed.ok) expect(parsed.errors).toContain('world.attributes[0].cap is invalid');
+    }
+  });
+
+  it('accepts an attribute without a cap', () => {
+    expect(reparse((file) => delete file.world.attributes[0].cap).ok).toBe(true);
+  });
+});

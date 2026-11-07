@@ -89,6 +89,7 @@
                   <span>{{ "world.new.columns.base" | transloco }}</span>
                   <span>{{ "world.new.columns.progression" | transloco }}</span>
                   <span>{{ "world.fields.step" | transloco }}</span>
+                  <span>{{ "world.new.columns.cap" | transloco }}</span>
                   <span>{{ "world.new.columns.max" | transloco }}</span>
                   <span class="bar-toggles"></span>
                   <span class="remove"></span>
@@ -169,6 +170,25 @@
                       } @else {
                         <span class="step"></span>
                       }
+                      <input
+                        pInputText
+                        class="cap"
+                        type="number"
+                        inputmode="numeric"
+                        min="1"
+                        step="1"
+                        placeholder="∞"
+                        [attr.data-testid]="'formula-cap-' + i"
+                        [attr.aria-invalid]="capErrors()[i] ? 'true' : null"
+                        [pTooltip]="'world.fields.cap' | transloco"
+                        [ariaLabel]="
+                          ('world.fields.cap' | transloco) + ' ' + (i + 1)
+                        "
+                        [value]="attribute.cap ?? ''"
+                        (input)="
+                          setCap(attribute.key, $any($event.target).value)
+                        "
+                      />
                       <span
                         class="max"
                         [attr.data-testid]="'formula-preview-' + i"
@@ -199,6 +219,7 @@
                           <span class="chart-card" role="tooltip">
                             <app-formula-chart
                               [values]="previews()[i].chart"
+                              [cap]="previews()[i].cap"
                               [label]="'formula.chart.maxLabel' | transloco"
                             />
                           </span>
@@ -237,6 +258,16 @@
                         [ariaLabel]="'world.new.removeAttribute' | transloco"
                         (onClick)="removeAttribute(attribute.key)"
                       />
+                      @if (capErrors()[i]; as capError) {
+                        <small
+                          class="formula-error"
+                          role="alert"
+                          [attr.data-testid]="'formula-cap-error-' + i"
+                          >{{
+                            capError | transloco: { base: attribute.baseValue }
+                          }}</small
+                        >
+                      }
                     </div>
                     @if (attribute.formula.preset === "custom") {
                       <div

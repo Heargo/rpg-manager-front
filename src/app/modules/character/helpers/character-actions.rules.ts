@@ -3,7 +3,7 @@ import {
   CharacterAttribute,
   WorldAttribute,
 } from '../../world/models/world';
-import { attributeStats } from './character-stats';
+import { attributeStats, formulaMax, levelsByName } from './character-stats';
 import { grantXp, LevelCurve } from './level.rules';
 
 /** Everything that changes a character during play. The host applies these; the sandbox applies them locally. */
@@ -102,6 +102,12 @@ export function applyCharacterAction(
         (entry) => entry.attributeId === action.attributeId,
       );
       if (!stat) return fail('character.errors.unknownAttribute');
+      const spent = attributes.find((entry) => entry.id === action.attributeId)!;
+      if (
+        spent.cap !== undefined &&
+        formulaMax(spent, stat.level, levelsByName(attributes, character), character.level) >= spent.cap
+      )
+        return fail('character.errors.attributeCapped');
       // A new level raises the max and the current value by the same delta.
       const raised = setAttribute(character, action.attributeId, {
         level: stat.level + 1,

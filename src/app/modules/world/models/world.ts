@@ -9,6 +9,8 @@ export interface WorldAttribute {
   baseValue: number;
   /** How the max grows with the level. */
   formula: AttributeFormula;
+  /** Optional hard cap (integer >= 1) on the formula result; equipment bonuses still add on top. */
+  cap?: number;
 }
 
 /** What players can still do while the host is offline (p2p-rooms spec, Host offline). */
@@ -104,7 +106,7 @@ export interface WorldDraft {
   name: string;
   description?: string;
   imageId?: string;
-  attributes: { name: string; baseValue: number; formula: AttributeFormula }[];
+  attributes: { name: string; baseValue: number; formula: AttributeFormula; cap?: number }[];
   /** Attribute names to show as bars. */
   barAttributes?: { life?: string; mana?: string };
   startingStatPoints?: number;

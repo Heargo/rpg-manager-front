@@ -355,3 +355,60 @@ describe('grant-xp limits', () => {
     ).toEqual({ ok: false, error: 'character.errors.invalidAmount' });
   });
 });
+
+// `cap` is not in the types yet (red): spread through a helper so the suite still compiles.
+const cap = (value: number): object => ({ cap: value });
+
+describe('character actions with an attribute cap', () => {
+  const capped: WorldAttribute[] = [
+    { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 }, ...cap(12) },
+    { id: 'str', name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
+  ];
+  const at = (level: number, current: number, extra: Partial<Character> = {}) =>
+    character({
+      statPoints: 2,
+      inventory: [],
+      attributes: [
+        { attributeId: 'life', level, current },
+        { attributeId: 'str', level: 0, current: 2 },
+      ],
+      ...extra,
+    });
+
+  it('refuses a point on an attribute whose formula already reaches the cap, and keeps the point', () => {
+    const result = applyCharacterAction(capped, at(2, 12), { kind: 'spend-stat-point', attributeId: 'life' });
+    expect(result).toEqual({ ok: false, error: 'character.errors.attributeCapped' });
+  });
+
+  it('still refuses when gear lifts the max above the cap', () => {
+    const gear = entry('gear', { type: 'equipment', slot: 'head', modifiers: [{ attribute: 'Life', value: 5 }] }, true);
+    const result = applyCharacterAction(capped, at(3, 17, { inventory: [gear] }), { kind: 'spend-stat-point', attributeId: 'life' });
+    expect(result).toEqual({ ok: false, error: 'character.errors.attributeCapped' });
+  });
+
+  it('accepts the point that reaches the cap, then refuses the next', () => {
+    const first = ok(applyCharacterAction(capped, at(1, 11), { kind: 'spend-stat-point', attributeId: 'life' }));
+    expect(first.statPoints).toBe(1);
+    expect(attributeStats(capped, first).find((s) => s.attributeId === 'life')).toMatchObject({ level: 2, max: 12, current: 12 });
+    const second = applyCharacterAction(capped, first, { kind: 'spend-stat-point', attributeId: 'life' });
+    expect(second).toEqual({ ok: false, error: 'character.errors.attributeCapped' });
+  });
+
+  it('does not refuse an uncapped attribute', () => {
+    const result = applyCharacterAction(capped, at(2, 12), { kind: 'spend-stat-point', attributeId: 'str' });
+    expect(result.ok).toBe(true);
+  });
+
+  it('a level-up never pushes a playerLevel formula past the cap', () => {
+    const scaling: WorldAttribute[] = [
+      { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'custom', expression: 'base + playerLevel * 10' }, ...cap(30) },
+    ];
+    const start = character({
+      inventory: [],
+      attributes: [{ attributeId: 'life', level: 0, current: 20 }],
+    });
+    const next = ok(applyCharacterAction(scaling, start, { kind: 'grant-xp', amount: 1_000_000 }));
+    expect(next.level).toBeGreaterThan(2);
+    expect(attributeStats(scaling, next)[0]).toMatchObject({ max: 30, current: 30 });
+  });
+});

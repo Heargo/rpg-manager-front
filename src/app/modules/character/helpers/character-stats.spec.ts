@@ -3,7 +3,7 @@ import {
   InventoryItem,
   WorldAttribute,
 } from '../../world/models/world';
-import { attributeStats, barStats } from './character-stats';
+import { attributeStats, barStats, formulaMax } from './character-stats';
 
 const attributes: WorldAttribute[] = [
   { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
@@ -196,5 +196,40 @@ describe('attributeStats with playerLevel', () => {
       attributeStats(wise, character({ level, attributes: [{ attributeId: 'wit', level: 0, current: 0 }] }))[0].max;
     expect(at(1)).toBe(20);
     expect(at(4)).toBe(50);
+  });
+});
+
+// `cap` is not in the types yet (red): spread through a helper so the suite still compiles.
+const cap = (value?: number): object => ({ cap: value });
+
+describe('attribute cap', () => {
+  const capped: WorldAttribute[] = [
+    { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 5 }, ...cap(22) },
+  ];
+  const withLevel = (level: number, current: number, inventory: Character['inventory'] = []) =>
+    character({ attributes: [{ attributeId: 'life', level, current }], inventory });
+
+  it('formulaMax stops at the cap', () => {
+    expect(formulaMax(capped[0], 1, {})).toBe(15);
+    expect(formulaMax(capped[0], 3, {})).toBe(22);
+    expect(formulaMax(capped[0], 50, {})).toBe(22);
+  });
+
+  it('attributeStats caps the formula only: equipped gear adds on top', () => {
+    const gear = item('ring', true, [{ attribute: 'Life', value: 3 }]);
+    const [plain] = attributeStats(capped, withLevel(10, 5));
+    expect(plain.max).toBe(22);
+    const [geared] = attributeStats(capped, withLevel(10, 5, [gear]));
+    expect(geared).toMatchObject({ max: 25, bonus: 3 });
+  });
+
+  it('keeps current at most the max', () => {
+    const [stat] = attributeStats(capped, withLevel(10, 40));
+    expect(stat.current).toBe(22);
+  });
+
+  it('does nothing without a cap', () => {
+    const [stat] = attributeStats([{ ...capped[0], ...cap(undefined) }], withLevel(10, 5));
+    expect(stat.max).toBe(60);
   });
 });

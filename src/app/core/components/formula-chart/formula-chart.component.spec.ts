@@ -8,7 +8,7 @@ import { FormulaChartComponent } from './formula-chart.component';
  * and `[data-label="last"]` holding the first and last values, a `[data-axis="start|end"]` per axis end, and an
  * `aria-label` that starts with the label and lists the values.
  */
-async function render(values: number[], startLevel?: number) {
+async function render(values: number[], startLevel?: number, cap?: number) {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     imports: [FormulaChartComponent],
@@ -17,6 +17,7 @@ async function render(values: number[], startLevel?: number) {
   const fixture = TestBed.createComponent(FormulaChartComponent);
   fixture.componentRef.setInput('values', values);
   fixture.componentRef.setInput('label', 'Max per level');
+  if (cap !== undefined) fixture.componentRef.setInput('cap', cap);
   if (startLevel !== undefined)
     fixture.componentRef.setInput('startLevel', startLevel);
   await fixture.whenStable();
@@ -55,6 +56,18 @@ describe('FormulaChartComponent', () => {
     expect(el.querySelector('[data-axis="end"]')!.textContent!.trim()).toBe(
       'lvl 5',
     );
+  });
+
+  it('draws a labelled dashed line at the cap, only when a cap is set', async () => {
+    expect(
+      (await render([10, 15, 20])).querySelector('[data-cap-line]'),
+    ).toBeNull();
+    const el = await render([10, 15, 22, 22], undefined, 22);
+    const line = el.querySelector('[data-cap-line]')!;
+    expect(line.getAttribute('stroke-dasharray') ?? '').toBeDefined();
+    expect(line.getAttribute('y1')).toBe(line.getAttribute('y2'));
+    expect(el.querySelector('[data-cap-label]')!.textContent).toContain('22');
+    expect(el.innerHTML).not.toContain('NaN');
   });
 
   it('handles a flat or negative series without NaN', async () => {

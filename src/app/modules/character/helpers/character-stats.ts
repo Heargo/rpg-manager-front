@@ -87,7 +87,8 @@ export function formulaMax(
     playerLevel,
     levels,
   });
-  return result.ok ? Math.round(result.value) : attribute.baseValue;
+  const value = result.ok ? Math.round(result.value) : attribute.baseValue;
+  return attribute.cap === undefined ? value : Math.min(attribute.cap, value);
 }
 
 /** The world's bar attributes (life, mana) for one character; a bar is missing when the world has none. */

@@ -48,6 +48,7 @@ import {
 import { DEFAULT_OFFLINE_FEATURES } from '../../helpers/world.factory';
 import {
   ATTRIBUTE_NAME_MAX_LENGTH,
+  attributeCapError,
   attributeFormulaErrors,
   WORLD_NAME_MAX_LENGTH,
 } from '../../helpers/world-draft.rules';
@@ -58,6 +59,7 @@ interface AttributeRow {
   name: string;
   baseValue: number;
   formula: AttributeFormula;
+  cap?: number;
 }
 
 const PRESETS: readonly (FormulaPreset | 'custom')[] = [
@@ -147,10 +149,11 @@ export class WorldNewPageComponent {
     name: this.name(),
     description: this.description(),
     imageId: this.imageId(),
-    attributes: this.attributes().map(({ name, baseValue, formula }) => ({
+    attributes: this.attributes().map(({ name, baseValue, formula, cap }) => ({
       name,
       baseValue,
       formula,
+      cap,
     })),
     barAttributes: {
       life: this.barName(this.lifeBar()),
@@ -162,6 +165,10 @@ export class WorldNewPageComponent {
     startingMoney: this.startingMoney(),
     offlineFeatures: this.offline(),
   }));
+  /** Per row, the problem of its cap (null when none or valid). */
+  protected readonly capErrors = computed(() =>
+    this.draft().attributes.map(attributeCapError),
+  );
   protected readonly formulaErrors = computed(() =>
     attributeFormulaErrors(this.draft()),
   );
@@ -170,10 +177,11 @@ export class WorldNewPageComponent {
     const rows = this.attributes();
     const names = rows.map((row) => row.name.trim());
     return rows.map((row) => {
-      const levels = previewMax(row.formula, row.baseValue, names);
+      const levels = previewMax(row.formula, row.baseValue, names, 5, row.cap);
       return {
         levels: levels.join(' '),
-        chart: previewMax(row.formula, row.baseValue, names, 10),
+        chart: previewMax(row.formula, row.baseValue, names, 10, row.cap),
+        cap: row.cap,
         first: levels[0],
         last: levels[levels.length - 1],
       };
@@ -269,6 +277,12 @@ export class WorldNewPageComponent {
         formula: { preset: 'linear', step: 1 },
       },
     ]);
+  }
+
+  protected setCap(key: number, text: string): void {
+    this.updateAttribute(key, {
+      cap: text.trim() === '' ? undefined : Number(text),
+    });
   }
 
   protected removeAttribute(key: number): void {

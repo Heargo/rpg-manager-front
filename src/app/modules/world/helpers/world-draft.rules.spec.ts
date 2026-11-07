@@ -138,3 +138,25 @@ describe('formulas that fail when evaluated', () => {
     expect(attributeFormulaErrors(draft({ attributes }))).toEqual([null, null]);
   });
 });
+
+describe('validateWorldDraft attribute cap', () => {
+  const linear = { preset: 'linear', step: 1 } as const;
+  const withCap = (cap: number | undefined) =>
+    draft({ attributes: [{ name: 'Life', baseValue: 10, formula: linear, ...({ cap } as object) }] });
+
+  it('accepts no cap, and an integer cap of at least the base value', () => {
+    expect(validateWorldDraft(withCap(undefined))).toEqual({});
+    expect(validateWorldDraft(withCap(1000))).toEqual({});
+    expect(validateWorldDraft(withCap(10))).toEqual({});
+  });
+
+  it('rejects a cap that is not an integer of at least 1', () => {
+    expect(validateWorldDraft(withCap(0)).attributes).toBe('world.errors.capInvalid');
+    expect(validateWorldDraft(withCap(-5)).attributes).toBe('world.errors.capInvalid');
+    expect(validateWorldDraft(withCap(20.5)).attributes).toBe('world.errors.capInvalid');
+  });
+
+  it('rejects a cap below the base value with world.errors.capTooLow', () => {
+    expect(validateWorldDraft(withCap(9)).attributes).toBe('world.errors.capTooLow');
+  });
+});

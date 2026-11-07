@@ -485,6 +485,7 @@ export function previewMax(
   base: number,
   attributeNames: string[],
   upTo = 5,
+  cap?: number,
 ): number[] {
   const levels = Object.fromEntries(attributeNames.map((name) => [name, 0]));
   const values: number[] = [];
@@ -496,7 +497,8 @@ export function previewMax(
       levels,
     });
     if (!result.ok) return [];
-    values.push(Math.round(result.value));
+    const rounded = Math.round(result.value);
+    values.push(cap === undefined ? rounded : Math.min(cap, rounded));
   }
   return values;
 }

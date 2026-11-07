@@ -66,6 +66,7 @@
       "columns": {
         "base": "Base",
         "progression": "Progression",
+        "cap": "Plafond",
         "max": "Max"
       }
     },
@@ -89,6 +90,7 @@
       "offlineTitle": "Quand l'hôte est hors ligne",
       "offlineHint": "Les joueurs peuvent toujours lire leur fiche. Choisissez ce qu'ils peuvent encore faire ; les changements sont vérifiés au retour de l'hôte.",
       "formula": "Progression",
+      "cap": "Plafond du maximum (avant équipement)",
       "step": "Pas",
       "expression": "Expression"
     },
@@ -116,6 +118,8 @@
       "baseValueInteger": "Les valeurs de base doivent être des nombres entiers.",
       "nonNegativeInteger": "Utilisez un nombre entier, 0 ou plus.",
       "image": "Cette image n'a pas pu être utilisée.",
+      "capInvalid": "Le plafond doit être un nombre entier, 1 ou plus.",
+      "capTooLow": "Le plafond ne peut pas être sous la valeur de base ({{ base }}).",
       "formulaInvalid": "Corrigez les formules des attributs en rouge.",
       "levelCurveInvalid": "Courbe invalide : utilisez uniquement level, et chaque niveau doit coûter au moins 1 XP.",
       "levelCostTooLow": "Le niveau {{ level }} coûte moins de 1 XP : chaque niveau doit coûter au moins 1 XP."
@@ -174,6 +178,7 @@
       "alreadyExists": "Vous avez déjà un personnage dans cette salle.",
       "notInRoom": "Vous n'êtes plus dans cette salle. Demandez une nouvelle invitation.",
       "hostHasNoCharacter": "Le maître du jeu ne joue pas de personnage.",
+      "attributeCapped": "Cet attribut a déjà atteint son plafond.",
       "noStatPoints": "Plus de points de stats à dépenser.",
       "unknownAttribute": "Cet attribut n'existe pas dans ce monde.",
       "invalidAmount": "Donnez entre 1 et 100 points.",
@@ -691,6 +696,7 @@
     },
     "chart": {
       "level": "niv. {{ level }}",
+      "cap": "Plafond {{ cap }}",
       "maxLabel": "Maximum par niveau",
       "xpLabel": "Coût en XP par niveau"
     }

@@ -20,6 +20,7 @@ export function validateWorldDraft(draft: WorldDraft): WorldDraftErrors {
   else if (names.some((attributeName) => attributeName.length > ATTRIBUTE_NAME_MAX_LENGTH)) errors.attributes = 'world.errors.attributeNameTooLong';
   else if (new Set(names).size !== names.length) errors.attributes = 'world.errors.attributeNamesUnique';
   else if (draft.attributes.some((attribute) => !Number.isInteger(attribute.baseValue))) errors.attributes = 'world.errors.baseValueInteger';
+  else if (draft.attributes.some((attribute) => attributeCapError(attribute))) errors.attributes = draft.attributes.map(attributeCapError).find(Boolean)!;
   else if (attributeFormulaErrors(draft).some(Boolean)) errors.attributes = 'world.errors.formulaInvalid';
 
   if (!isNonNegativeInteger(draft.startingStatPoints ?? 0)) errors.startingStatPoints = 'world.errors.nonNegativeInteger';
@@ -30,6 +31,13 @@ export function validateWorldDraft(draft: WorldDraft): WorldDraftErrors {
   }
   if (!isNonNegativeInteger(draft.statPointsPerLevel ?? 0)) errors.statPointsPerLevel = 'world.errors.nonNegativeInteger';
   return errors;
+}
+
+/** The problem of an attribute's optional cap (an integer of at least 1, and at least the base value), or null. */
+export function attributeCapError(attribute: { baseValue: number; cap?: number }): 'world.errors.capInvalid' | 'world.errors.capTooLow' | null {
+  if (attribute.cap === undefined) return null;
+  if (!Number.isInteger(attribute.cap) || attribute.cap < 1) return 'world.errors.capInvalid';
+  return attribute.cap < attribute.baseValue ? 'world.errors.capTooLow' : null;
 }
 
 /** Per attribute, the problem of its formula (null when valid); formulas may read any attribute of the draft. */

@@ -121,3 +121,21 @@ describe('world images', () => {
     });
   });
 });
+
+describe('createWorld attribute cap', () => {
+  it('keeps the cap on the world attribute, and leaves it absent otherwise', () => {
+    const world = createWorld(
+      {
+        name: 'Eldoria',
+        attributes: [
+          { name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 }, ...({ cap: 1000 } as object) },
+          { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } },
+        ],
+      },
+      ids(),
+      1000,
+    );
+    expect((world.attributes[0] as { cap?: number }).cap).toBe(1000);
+    expect((world.attributes[1] as { cap?: number }).cap).toBeUndefined();
+  });
+});

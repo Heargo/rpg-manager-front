@@ -25,6 +25,8 @@ export class FormulaChartComponent {
   readonly startLevel = input(0);
   /** Start of the accessible description, e.g. "Max per level". */
   readonly label = input('');
+  /** Optional hard cap: drawn as a thin dashed line, labelled. */
+  readonly cap = input<number | undefined>(undefined);
 
   protected readonly width = WIDTH;
   protected readonly height = HEIGHT;
@@ -32,9 +34,7 @@ export class FormulaChartComponent {
   protected readonly points = computed(() => {
     const values = this.values();
     if (!values.length) return [];
-    const min = Math.min(0, ...values);
-    const max = Math.max(...values);
-    const span = max - min || 1;
+    const { min, span } = this.scale();
     const innerW = WIDTH - PAD.left - PAD.right;
     const innerH = HEIGHT - PAD.top - PAD.bottom;
     return values.map((value, i) => ({
@@ -45,6 +45,25 @@ export class FormulaChartComponent {
       y: PAD.top + innerH - ((value - min) / span) * innerH,
     }));
   });
+
+  private readonly scale = computed(() => {
+    const cap = this.cap();
+    const values = cap === undefined ? this.values() : [...this.values(), cap];
+    const min = Math.min(0, ...values);
+    const max = Math.max(...values);
+    return { min, span: max - min || 1 };
+  });
+
+  /** Height of the cap line, when a cap is set and there is something to draw. */
+  protected readonly capY = computed(() => {
+    const cap = this.cap();
+    if (cap === undefined || !this.values().length) return null;
+    const { min, span } = this.scale();
+    return PAD.top + (HEIGHT - PAD.top - PAD.bottom) * (1 - (cap - min) / span);
+  });
+  protected readonly capText = computed(() =>
+    this.language.t('formula.chart.cap', { cap: this.cap() }),
+  );
 
   protected readonly line = computed(() =>
     this.points()
