@@ -64,10 +64,17 @@
     color: var(--p-text-muted-color);
   }
 
-  :host ::ng-deep .number {
-    width: 100%;
-    text-align: center;
+  p-inputnumber {
+    display: flex;
+    min-width: 0;
   }
+}
+
+// Outside `.attributes`: nested, `:host` would compile to `.attributes :host …` and never match.
+:host ::ng-deep .attributes .number {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
 }
 
 .bars {
