@@ -24,7 +24,7 @@ Netlify environment variables (Site configuration → Environment variables, nev
 ## Consequences
 
 - The app has one tiny backend endpoint. It never sees game data, only hands out credentials.
-- Direct connections are still tried first: relay candidates have the lowest ICE priority, so the relay only carries traffic when nothing else works. The data channel stays end-to-end encrypted (DTLS); the relay sees who connects and how much, not what.
+- The relay is no longer offered on every invite. The first invite is STUN only (no function call, no relay allocation, shorter codes). Only when it fails does the host make a relay invite (a flag in the code; both sides then ask the function for TURN servers and use `iceTransportPolicy: 'relay'`): silently on the retry in mailbox mode, through a "Try through the relay" button in manual mode. If the function is unreachable, the relay is reported unavailable instead of making an invite that can't work. The data channel stays end-to-end encrypted (DTLS); the relay sees who connects and how much, not what.
 - 20 GB is thousands of relayed game sessions (chat, dice, state: a few MB each). Past the quota, relayed players fail to connect until next month, as they did before TURN.
 - Anyone can call the function and get credentials; Metered's docs don't say whether they expire. Abuse can only use up the free quota. Rate limiting is left out until that happens.
 - Open Relay is a free service with no uptime guarantee.

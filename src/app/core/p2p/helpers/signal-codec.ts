@@ -20,6 +20,8 @@ export class SignalCodeError extends Error {
 export interface SignalDescription {
   type: SignalType;
   sdp: string;
+  /** Offer only: a relay invite, both sides use TURN servers with relay-only policy. */
+  relay?: boolean;
 }
 
 /**
@@ -29,7 +31,7 @@ export interface SignalDescription {
 export function encodeSignal(description: SignalDescription): string {
   const compact = parseDataChannelSdp(description.sdp);
   if (!compact) throw new Error('Unsupported SDP: expected a single data channel');
-  return `${SIGNAL_CODE_VERSION}.${toBase64Url(packCompactSdp(compact, description.type === 'offer'))}`;
+  return `${SIGNAL_CODE_VERSION}.${toBase64Url(packCompactSdp(compact, description.type === 'offer', description.relay === true && description.type === 'offer'))}`;
 }
 
 /** Decodes a code (or a whole invite link) and checks it is the expected kind. */
@@ -48,7 +50,7 @@ export function decodeSignal(input: string, expected: SignalType): SignalDescrip
   const type: SignalType = decoded.isOffer ? 'offer' : 'answer';
   if (type !== expected) throw new SignalCodeError('wrong-type');
   const sessionId = String(Math.floor(Math.random() * 2 ** 52) + 1);
-  return { type, sdp: buildDataChannelSdp(decoded.compact, sessionId) };
+  return { type, sdp: buildDataChannelSdp(decoded.compact, sessionId), relay: type === 'offer' && decoded.relay };
 }
 
 /**

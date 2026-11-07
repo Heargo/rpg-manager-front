@@ -35,6 +35,9 @@ const HASHES: Record<string, number> = { 'sha-1': 20, 'sha-256': 32, 'sha-384': 
 const HASH_NAMES = Object.keys(HASHES);
 const TYPE_PREFERENCE: Record<CandidateType, number> = { host: 126, prflx: 110, srflx: 100, relay: 0 };
 
+/** Flags bit 3: the offer is a relay invite (both sides use TURN only). */
+const RELAY_FLAG = 8;
+
 // Address kinds in the binary form.
 const IPV4 = 0;
 const IPV6 = 1;
@@ -104,15 +107,15 @@ export function buildDataChannelSdp(compact: CompactSdp, sessionId: string): str
   ].join('\r\n');
 }
 
-/** Binary form: [flags][ufrag][pwd][hash][fingerprint][mid][count][candidates…]. */
-export function packCompactSdp(compact: CompactSdp, isOffer: boolean): Uint8Array {
+/** Binary form: [flags: offer, setup, relay][ufrag][pwd][hash][fingerprint][mid][count][candidates…]. */
+export function packCompactSdp(compact: CompactSdp, isOffer: boolean, relay = false): Uint8Array {
   const out: number[] = [];
   const text = (value: string) => {
     const bytes = new TextEncoder().encode(value);
     if (bytes.length > 255) throw new RangeError('SDP field too long');
     out.push(bytes.length, ...bytes);
   };
-  out.push((isOffer ? 1 : 0) | (SETUP_ROLES.indexOf(compact.setup) << 1));
+  out.push((isOffer ? 1 : 0) | (SETUP_ROLES.indexOf(compact.setup) << 1) | (relay ? RELAY_FLAG : 0));
   text(compact.ufrag);
   text(compact.pwd);
   out.push(HASH_NAMES.indexOf(compact.hashAlgorithm));
@@ -131,7 +134,7 @@ export function packCompactSdp(compact: CompactSdp, isOffer: boolean): Uint8Arra
 }
 
 /** Reverse of packCompactSdp; throws RangeError on truncated or invalid data. */
-export function unpackCompactSdp(bytes: Uint8Array): { isOffer: boolean; compact: CompactSdp } {
+export function unpackCompactSdp(bytes: Uint8Array): { isOffer: boolean; relay: boolean; compact: CompactSdp } {
   let offset = 0;
   const byte = () => {
     if (offset >= bytes.length) throw new RangeError('Truncated code');
@@ -171,7 +174,7 @@ export function unpackCompactSdp(bytes: Uint8Array): { isOffer: boolean; compact
     candidates.push({ type, address, port });
   }
   if (offset !== bytes.length || !ufrag || !pwd || !mid) throw new RangeError('Bad code');
-  return { isOffer: (flags & 1) === 1, compact: { ufrag, pwd, hashAlgorithm, fingerprint, setup, mid, candidates } };
+  return { isOffer: (flags & 1) === 1, relay: (flags & RELAY_FLAG) !== 0, compact: { ufrag, pwd, hashAlgorithm, fingerprint, setup, mid, candidates } };
 }
 
 function packAddress(address: string): { kind: number; bytes: number[] } {

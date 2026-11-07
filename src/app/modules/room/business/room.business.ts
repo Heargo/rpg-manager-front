@@ -37,6 +37,8 @@ export interface PendingInvite {
   state: 'waiting' | 'connecting' | 'failed';
   /** Mailbox box of this invite (kept when the invite is replaced after a failed connection). */
   boxId?: string;
+  /** A relay invite: both sides use the TURN relay only. */
+  relay?: boolean;
   /** True once the mailbox could not be polled 3 times in a row: the host should ask for the player's code. */
   mailboxDown?: boolean;
 }
@@ -159,8 +161,9 @@ export class RoomBusiness {
   private async createInvite(
     forPlayerId: string | undefined,
     box: { boxId: string; seq: number },
+    options?: { relay?: boolean },
   ): Promise<PendingInvite> {
-    const invite = await this.service.createInvite();
+    const invite = await this.service.createInvite(options?.relay ? { relay: true } : undefined);
     const member = forPlayerId ? this.$room()?.members.find((m) => m.playerId === forPlayerId) : undefined;
     const pending: PendingInvite = {
       ...invite,
@@ -172,6 +175,7 @@ export class RoomBusiness {
           : undefined,
       state: 'waiting',
       boxId: box.boxId,
+      ...(options?.relay ? { relay: true } : {}),
     };
     this.offerSeq.set(pending.id, box.seq);
     // The link carries the first offer; a replacement offer has to reach the player through the box.
@@ -210,13 +214,13 @@ export class RoomBusiness {
   }
 
   /** Replaces an invite (usually a failed one) with a fresh one for the same seat. */
-  async retryInvite(inviteId: string): Promise<PendingInvite> {
+  async retryInvite(inviteId: string, options?: { relay?: boolean }): Promise<PendingInvite> {
     const previous = this.invites().find((invite) => invite.id === inviteId);
     // Create the new one first: if that fails, the old invite stays.
     const box = previous?.boxId
       ? { boxId: previous.boxId, seq: (this.offerSeq.get(inviteId) ?? 0) + 1 }
       : { boxId: createBoxId(), seq: 0 };
-    const fresh = await this.createInvite(previous?.forPlayer?.playerId, box);
+    const fresh = await this.createInvite(previous?.forPlayer?.playerId, box, options);
     this.service.cancelInvite(inviteId);
     this.offerSeq.delete(inviteId);
     this.unsent.delete(inviteId);
@@ -467,7 +471,14 @@ export class RoomBusiness {
       } catch {
         // The connection failed: a new offer for the same seat goes into the same box.
         // If even that fails, the invite goes back to waiting: the next poll tries again.
-        await this.retryInvite(invite.id).catch(() => this.setInviteState(invite.id, 'waiting'));
+        // The retry goes through the relay; if that isn't available, it stays a direct one.
+        await this.retryInvite(invite.id, { relay: true })
+          .catch((error: unknown) =>
+            error instanceof TransportError && error.reason === 'relay-unavailable'
+              ? this.retryInvite(invite.id)
+              : Promise.reject(error),
+          )
+          .catch(() => this.setInviteState(invite.id, 'waiting'));
       }
     } finally {
       this.polling.delete(invite.id);

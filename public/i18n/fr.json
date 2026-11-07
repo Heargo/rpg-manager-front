@@ -289,8 +289,10 @@
       "privacy": "Le lien contient votre adresse réseau : ne l'envoyez qu'aux joueurs que vous invitez.",
       "forPlayer": "Réinviter {{ name }}",
       "connecting": "Connexion…",
-      "failed": "Connexion impossible : envoyez une nouvelle invitation",
+      "failed": "Connexion directe impossible. Essayez via le relais, ou envoyez une nouvelle invitation",
       "retry": "Nouvelle invitation",
+      "relay": "Essayer via le relais",
+      "relayUnavailable": "Le relais n'est pas disponible pour le moment. Envoyez plutôt une nouvelle invitation.",
       "auto": "Le joueur se connecte tout seul dès qu'il ouvre le lien.",
       "paste": "Coller le code du joueur",
       "mailboxDown": "Connexion automatique indisponible : demandez son code au joueur"
@@ -306,8 +308,8 @@
       "send": "Envoyer à l'hôte",
       "comeBack": "Revenez sur cette page : vous serez connecté dès que l'hôte aura collé votre code.",
       "stillWaiting": "L'hôte n'a pas encore collé votre code.",
-      "failedAway": "La connexion a expiré pendant votre absence. Demandez un nouveau lien à l'hôte.",
-      "failed": "La connexion a échoué. Demandez un nouveau lien à l'hôte.",
+      "failedAway": "La connexion a expiré pendant votre absence. Demandez un nouveau lien à l'hôte, ou une invitation par relais.",
+      "failed": "La connexion a échoué. Demandez un nouveau lien à l'hôte, ou une invitation par relais.",
       "connectingAuto": "Connexion automatique…",
       "autoHint": "Gardez cette page ouverte. Si le premier essai échoue, elle réessaie toute seule tant que l'hôte garde l'invitation."
     },

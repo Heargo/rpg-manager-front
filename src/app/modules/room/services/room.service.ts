@@ -17,8 +17,8 @@ export class RoomService {
     this.api.startHosting();
   }
 
-  createInvite(): Promise<Invite> {
-    return this.api.createInvite();
+  createInvite(options?: { relay?: boolean }): Promise<Invite> {
+    return this.api.createInvite(options);
   }
 
   acceptAnswer(inviteId: string, answerCode: string): Promise<PeerId> {

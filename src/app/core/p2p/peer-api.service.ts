@@ -66,8 +66,8 @@ export class PeerApi {
     this.open('host');
   }
 
-  createInvite(): Promise<Invite> {
-    return this.hostTransport().createInvite();
+  createInvite(options?: { relay?: boolean }): Promise<Invite> {
+    return this.hostTransport().createInvite(options);
   }
 
   acceptAnswer(inviteId: string, answerCode: string): Promise<PeerId> {
