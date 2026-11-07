@@ -148,7 +148,8 @@
       "notConsumable": "Only consumables can be used.",
       "gameMasterOnly": "Only the game master can do that.",
       "unknownCharacter": "This character isn't in the room.",
-      "notYours": "This isn't your character."
+      "notYours": "This isn't your character.",
+      "held": "Your copy is being checked, or waits for the game master's pick. Try again in a moment."
     },
     "sheet": {
       "playedBy": "Played by {{ name }}",
@@ -185,7 +186,28 @@
       "equipped": "Equipped",
       "empty": "The inventory is empty.",
       "actions": "Actions for {{ name }}"
-    }
+    },
+    "pickASave": {
+      "title": "Pick a save for {{name}}",
+      "intro": "This player's copy differs from yours. Choose the version to keep; it becomes the new version for everyone.",
+      "field": "Field",
+      "host": "Host version",
+      "player": "Player version",
+      "queued": "Actions queued while offline",
+      "keepHost": "Keep host version",
+      "usePlayer": "Use player version",
+      "fields": {
+        "name": "Name",
+        "portraitId": "Portrait",
+        "statPoints": "Stat points",
+        "money": "Money",
+        "attributes": "Attributes",
+        "inventory": "Inventory",
+        "rev": "Revision",
+        "updatedAt": "Updated"
+      }
+    },
+    "readOnly": "Your copy of this character differs from the host's. Actions are off until the game master picks a save."
   },
   "item": {
     "rarity": {

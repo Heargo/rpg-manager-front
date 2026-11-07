@@ -1,8 +1,8 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
 
 export const APP_DATABASE_NAME = 'rpg-manager';
-/** v1: worlds, images. v2: hostedRoom, joinedRooms. */
-const APP_DATABASE_VERSION = 2;
+/** v1: worlds, images. v2: hostedRoom, joinedRooms. v3: playerCopies. */
+const APP_DATABASE_VERSION = 3;
 
 export interface StoredImage {
   /** SHA-256 of the bytes, hex. */
@@ -23,6 +23,8 @@ export interface AppDatabaseSchema extends DBSchema {
   hostedRoom: { key: string; value: Record<string, unknown> };
   /** Rooms this device joined as a player, by room id. Typed by the room feature. */
   joinedRooms: { key: string; value: { id: string } & Record<string, unknown> };
+  /** The player's own copy of their character, by room id. Typed by the character feature. */
+  playerCopies: { key: string; value: { roomId: string; character: Record<string, unknown> } };
 }
 
 export type AppDatabase = IDBPDatabase<AppDatabaseSchema>;
@@ -35,6 +37,7 @@ export function openAppDatabase(name = APP_DATABASE_NAME): Promise<AppDatabase> 
       if (!db.objectStoreNames.contains('images')) db.createObjectStore('images', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('hostedRoom')) db.createObjectStore('hostedRoom');
       if (!db.objectStoreNames.contains('joinedRooms')) db.createObjectStore('joinedRooms', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains('playerCopies')) db.createObjectStore('playerCopies', { keyPath: 'roomId' });
     },
   });
 }

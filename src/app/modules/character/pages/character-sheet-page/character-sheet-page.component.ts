@@ -12,10 +12,12 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
+import { MessageModule } from '@openng/optimus-ui/message';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { RoomBusiness } from '../../../room/business/room.business';
 import { CharacterBusiness } from '../../business/character.business';
+import { PlayerCopyBusiness } from '../../business/player-copy.business';
 import { CharacterSheetComponent } from '../../components/character-sheet/character-sheet.component';
 import { CharacterAction } from '../../helpers/character-actions.rules';
 
@@ -28,6 +30,7 @@ import { CharacterAction } from '../../helpers/character-actions.rules';
     TranslocoPipe,
     ButtonModule,
     CardModule,
+    MessageModule,
     SkeletonModule,
     CharacterSheetComponent,
   ],
@@ -41,13 +44,21 @@ import { CharacterAction } from '../../helpers/character-actions.rules';
       />
       <p-card>
         @if (character(); as c) {
+          @if (copy.$readOnly()) {
+            <p-message
+              severity="warn"
+              icon="pi pi-lock"
+              styleClass="read-only"
+              >{{ 'character.readOnly' | transloco }}</p-message
+            >
+          }
           @if (characters.$world(); as world) {
             <app-character-sheet
               [character]="c"
               [world]="world"
-              [canPlay]="characters.canPlay(c)"
+              [canPlay]="characters.canPlay(c) && !copy.$readOnly()"
               [gameMaster]="characters.$isGameMaster()"
-              [busy]="busy()"
+              [busy]="busy() || copy.$readOnly()"
               (act)="act(c.id, $event)"
             />
           }
@@ -79,6 +90,7 @@ import { CharacterAction } from '../../helpers/character-actions.rules';
 })
 export class CharacterSheetPageComponent {
   protected readonly characters = inject(CharacterBusiness);
+  protected readonly copy = inject(PlayerCopyBusiness);
   private readonly room = inject(RoomBusiness);
   private readonly messages = inject(MessageService);
   private readonly router = inject(Router);

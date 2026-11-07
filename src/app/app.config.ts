@@ -44,6 +44,10 @@ export const appConfig: ApplicationConfig = {
         // Only once translations are in: starting the room creates the profile, whose default name is translated.
         // Reopens the room this device was hosting before a reload, and its world's game handlers.
         injector.get(GameSessionBusiness);
+        // Player copy and "Pick a save": a lazy chunk, so the initial bundle stays small.
+        void import('./modules/character/player-copy.start')
+          .then((start) => start.startPlayerCopy(injector))
+          .catch((error: unknown) => console.error('Could not start the player copy', error));
       });
     }),
     MessageService,

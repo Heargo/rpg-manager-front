@@ -148,7 +148,8 @@
       "notConsumable": "Seuls les consommables peuvent être utilisés.",
       "gameMasterOnly": "Seul le maître du jeu peut faire ça.",
       "unknownCharacter": "Ce personnage n'est pas dans le salon.",
-      "notYours": "Ce n'est pas votre personnage."
+      "notYours": "Ce n'est pas votre personnage.",
+      "held": "Votre copie est en cours de vérification, ou attend le choix du MJ. Réessayez dans un instant."
     },
     "sheet": {
       "playedBy": "Joué par {{ name }}",
@@ -185,7 +186,28 @@
       "equipped": "Équipé",
       "empty": "L'inventaire est vide.",
       "actions": "Actions pour {{ name }}"
-    }
+    },
+    "pickASave": {
+      "title": "Choisir une sauvegarde pour {{name}}",
+      "intro": "La copie de ce joueur diffère de la vôtre. Choisissez la version à conserver ; elle devient la nouvelle version pour tout le monde.",
+      "field": "Champ",
+      "host": "Version de l'hôte",
+      "player": "Version du joueur",
+      "queued": "Actions en attente hors ligne",
+      "keepHost": "Garder la version de l'hôte",
+      "usePlayer": "Utiliser la version du joueur",
+      "fields": {
+        "name": "Nom",
+        "portraitId": "Portrait",
+        "statPoints": "Points de caractéristiques",
+        "money": "Argent",
+        "attributes": "Attributs",
+        "inventory": "Inventaire",
+        "rev": "Révision",
+        "updatedAt": "Mis à jour"
+      }
+    },
+    "readOnly": "Votre copie de ce personnage diffère de celle de l'hôte. Les actions sont désactivées tant que le MJ n'a pas choisi une sauvegarde."
   },
   "item": {
     "rarity": {

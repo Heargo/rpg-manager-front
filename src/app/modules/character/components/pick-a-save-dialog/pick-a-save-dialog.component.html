@@ -1,0 +1,63 @@
+<p class="intro">{{ "character.pickASave.intro" | transloco }}</p>
+
+<table class="versions">
+  <thead>
+    <tr>
+      <th scope="col">{{ "character.pickASave.field" | transloco }}</th>
+      <th scope="col">{{ "character.pickASave.host" | transloco }}</th>
+      <th scope="col">{{ "character.pickASave.player" | transloco }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of rows(); track row.field) {
+      <tr [attr.data-field]="row.field" [class.differs]="row.differs">
+        <th scope="row">
+          {{ "character.pickASave.fields." + row.field | transloco }}
+        </th>
+        <td class="host-value">
+          @if (row.field === "updatedAt") {
+            {{ $any(row.host) | localDate: "dateTime" }}
+          } @else {
+            {{ show(row.host) }}
+          }
+        </td>
+        <td class="player-value">
+          @if (row.field === "updatedAt") {
+            {{ $any(row.player) | localDate: "dateTime" }}
+          } @else {
+            {{ show(row.player) }}
+          }
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+@if (conflict().queued.length > 0) {
+  <section class="queued">
+    <h3>{{ "character.pickASave.queued" | transloco }}</h3>
+    <ul>
+      @for (action of conflict().queued; track $index) {
+        <li>
+          <code>{{ action.route }}</code> {{ show($any(action.payload)) }}
+        </li>
+      }
+    </ul>
+  </section>
+}
+
+<div class="actions">
+  <p-button
+    data-action="keep-host"
+    severity="secondary"
+    icon="pi pi-check"
+    [label]="'character.pickASave.keepHost' | transloco"
+    (click)="keepHost.emit()"
+  />
+  <p-button
+    data-action="use-player"
+    icon="pi pi-user"
+    [label]="'character.pickASave.usePlayer' | transloco"
+    (click)="usePlayer.emit()"
+  />
+</div>

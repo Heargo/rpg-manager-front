@@ -16,6 +16,7 @@ import {
 import { createCharacter, findCharacterOf, validateCreateCharacter } from '../helpers/character.rules';
 import { CreateCharacterRequest } from '../models/character-api';
 import { CharacterService } from '../services/character.service';
+import { PlayerCopyGateBusiness } from './player-copy-gate.business';
 
 /** Host: creates characters for players and publishes the character list. */
 @Injectable({ providedIn: 'root' })
@@ -24,6 +25,7 @@ export class CharacterHostBusiness {
   private readonly session = inject(WorldSessionBusiness);
   private readonly roomHost = inject(RoomHostBusiness);
   private readonly images = inject(ImageBusiness);
+  private readonly gate = inject(PlayerCopyGateBusiness);
 
   /** Starts answering character requests for the open world. Returns a function that stops. */
   start(): () => void {
@@ -44,6 +46,7 @@ export class CharacterHostBusiness {
     if (!isGameMaster && GAME_MASTER_ACTIONS.includes(kind)) throw new PeerApiError('forbidden', 'character.errors.gameMasterOnly');
     const playerId = isGameMaster ? undefined : this.roomHost.playerIdOf(from);
     if (!isGameMaster && !playerId) throw new PeerApiError('forbidden', 'character.errors.notInRoom');
+    if (playerId && this.gate.isHeld(from, playerId)) throw new PeerApiError('forbidden', 'character.errors.held');
 
     let changed: Character | undefined;
     await this.session.update((world) => {
@@ -64,6 +67,7 @@ export class CharacterHostBusiness {
     if (from === SELF_PEER) throw new PeerApiError('forbidden', 'character.errors.hostHasNoCharacter');
     const playerId = this.roomHost.playerIdOf(from);
     if (!playerId) throw new PeerApiError('forbidden', 'character.errors.notInRoom');
+    if (this.gate.isHeld(from, playerId)) throw new PeerApiError('forbidden', 'character.errors.held');
     const problem = validateCreateCharacter(payload);
     if (problem) throw new PeerApiError('invalid', problem);
     const request = payload as CreateCharacterRequest;
