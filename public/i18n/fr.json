@@ -5,7 +5,8 @@
   "nav": {
     "play": "Jouer",
     "profile": "Profil",
-    "language": "Langue"
+    "language": "Langue",
+    "dice": "Dés"
   },
   "play": {
     "title": "Jouer",
@@ -134,6 +135,17 @@
       "notInRoom": "Vous n'êtes plus dans cette salle. Demandez une nouvelle invitation.",
       "hostHasNoCharacter": "Le maître du jeu ne joue pas de personnage."
     }
+  },
+  "dice": {
+    "title": "Dés",
+    "count": "Nombre de dés",
+    "sides": "Faces",
+    "roll": "Lancer",
+    "rolling": "Lancer en cours…",
+    "again": "Relancer",
+    "close": "Fermer",
+    "history": "Lancers récents",
+    "skip": "Cliquez pour passer l'animation"
   },
   "profile": {
     "title": "Votre profil",

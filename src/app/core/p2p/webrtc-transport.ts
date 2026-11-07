@@ -1,4 +1,5 @@
 import { Subject } from 'rxjs';
+import { fetchIceServers } from './helpers/ice-servers';
 import { decodeSignal, encodeSignal } from './helpers/signal-codec';
 import {
   AnsweredInvite,
@@ -10,11 +11,12 @@ import {
   TransportMessage,
 } from './room-transport';
 
-export const DEFAULT_ICE_SERVERS: RTCIceServer[] = [{ urls: 'stun:stun.l.google.com:19302' }];
-
 export interface WebRtcTransportOptions {
-  /** STUN servers to find public addresses; `[]` for same-network play only. */
-  iceServers?: RTCIceServer[];
+  /**
+   * STUN/TURN servers, or a function asked for them before each new connection (TURN credentials expire).
+   * Default: `fetchIceServers` (Cloudflare TURN through the Netlify Function, else public STUN). `[]` for same-network play only.
+   */
+  iceServers?: RTCIceServer[] | (() => Promise<RTCIceServer[]>);
   /** Max wait for ICE gathering before sending what was found so far. */
   gatherTimeoutMs?: number;
   /** Max wait for the channel to open after the host pastes the answer. */
@@ -37,7 +39,7 @@ export class WebRtcTransport implements RoomTransport {
 
   private readonly pending = new Map<string, Link>();
   private readonly peers = new Map<PeerId, Link>();
-  private readonly iceServers: RTCIceServer[];
+  private readonly iceServers: () => Promise<RTCIceServer[]>;
   private readonly gatherTimeoutMs: number;
   private readonly connectTimeoutMs: number;
   /**
@@ -47,14 +49,15 @@ export class WebRtcTransport implements RoomTransport {
   private readonly onPageHide = () => this.close();
 
   constructor(options: WebRtcTransportOptions = {}) {
-    this.iceServers = options.iceServers ?? DEFAULT_ICE_SERVERS;
+    const iceServers = options.iceServers ?? (() => fetchIceServers());
+    this.iceServers = typeof iceServers === 'function' ? iceServers : () => Promise.resolve(iceServers);
     this.gatherTimeoutMs = options.gatherTimeoutMs ?? 4000;
     this.connectTimeoutMs = options.connectTimeoutMs ?? 20000;
     globalThis.addEventListener?.('pagehide', this.onPageHide);
   }
 
   async createInvite(): Promise<Invite> {
-    const connection = this.newConnection();
+    const connection = await this.newConnection();
     const channel = connection.createDataChannel('room', { ordered: true });
     const candidates = collectCandidates(connection);
     await connection.setLocalDescription(await connection.createOffer());
@@ -88,7 +91,7 @@ export class WebRtcTransport implements RoomTransport {
 
   async answerInvite(offerCode: string): Promise<AnsweredInvite> {
     const offer = decodeSignal(offerCode, 'offer');
-    const connection = this.newConnection();
+    const connection = await this.newConnection();
     const channel = new Promise<RTCDataChannel>((resolve) => {
       connection.ondatachannel = (event) => resolve(event.channel);
     });
@@ -134,8 +137,8 @@ export class WebRtcTransport implements RoomTransport {
     for (const peer of [...this.peers.keys()]) this.disconnect(peer);
   }
 
-  private newConnection(): RTCPeerConnection {
-    return new RTCPeerConnection({ iceServers: this.iceServers });
+  private async newConnection(): Promise<RTCPeerConnection> {
+    return new RTCPeerConnection({ iceServers: await this.iceServers() });
   }
 
   private attach(peer: PeerId, link: Link): void {

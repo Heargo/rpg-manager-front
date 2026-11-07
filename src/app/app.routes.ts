@@ -6,6 +6,7 @@ import { routesRoom } from './modules/room/room.routes';
 import { routesPlay } from './modules/play/play.routes';
 import { routesWorld } from './modules/world/world.routes';
 import { routesCharacter } from './modules/character/character.routes';
+import { routesDice } from './modules/dice/dice.routes';
 
 export const routes: Routes = [
   { path: '', component: HomePageComponent, canActivate: [NavigationGuard] },
@@ -14,5 +15,6 @@ export const routes: Routes = [
   ...routesCharacter,
   ...routesRoom,
   ...routesWorld,
+  ...routesDice,
   { path: '**', redirectTo: '' },
 ];

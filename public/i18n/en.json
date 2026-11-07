@@ -5,7 +5,8 @@
   "nav": {
     "play": "Play",
     "profile": "Profile",
-    "language": "Language"
+    "language": "Language",
+    "dice": "Dice"
   },
   "play": {
     "title": "Play",
@@ -134,6 +135,17 @@
       "notInRoom": "You're not in this room anymore. Ask for a new invite.",
       "hostHasNoCharacter": "The game master doesn't play a character."
     }
+  },
+  "dice": {
+    "title": "Dice",
+    "count": "Number of dice",
+    "sides": "Sides",
+    "roll": "Roll",
+    "rolling": "Rolling…",
+    "again": "Roll again",
+    "close": "Close",
+    "history": "Recent rolls",
+    "skip": "Click to skip the animation"
   },
   "profile": {
     "title": "Your profile",

@@ -15,13 +15,11 @@ export class MenuService {
       label: 'nav.play',
       icon: 'pi pi-users',
       routerLink: '/play',
-      // items: [
-      //   {
-      //     label: 'Bookmarks',
-      //     icon: 'pi pi-bookmark',
-      //     routerLink: '/bookmarks',
-      //   },
-      // ],
+    },
+    {
+      label: 'nav.dice',
+      icon: 'pi pi-box',
+      routerLink: '/dice',
     },
   ];
 
