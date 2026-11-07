@@ -10,6 +10,11 @@ export const CHARACTER_ROUTES = {
   create: 'character/create',
 } as const;
 
+/** One route per character action: `character/<kind>`, payload `{ characterId, ...action fields }`. */
+export function characterActionRoute(kind: string): string {
+  return `character/${kind}`;
+}
+
 export const CHARACTER_TOPICS = {
   list: 'character/list',
 } as const;

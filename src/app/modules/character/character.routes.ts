@@ -8,4 +8,10 @@ export const routesCharacter: Routes = [
     loadComponent: () =>
       import('./pages/create-character-page/create-character-page.component').then((m) => m.CreateCharacterPageComponent),
   },
+  {
+    path: 'room/sheet/:characterId',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/character-sheet-page/character-sheet-page.component').then((m) => m.CharacterSheetPageComponent),
+  },
 ];

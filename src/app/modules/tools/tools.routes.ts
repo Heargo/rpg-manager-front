@@ -12,6 +12,14 @@ export const routesTools: Routes = [
       ),
   },
   {
+    path: 'tools/character-sheet',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/sheet-tool-page/sheet-tool-page.component').then(
+        (m) => m.SheetToolPageComponent,
+      ),
+  },
+  {
     path: 'tools/links',
     canActivate: [NavigationGuard],
     loadComponent: () =>

@@ -1,0 +1,273 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.portrait {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  flex: none;
+  background: var(--p-content-hover-background);
+}
+
+.initial {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+
+  h1 {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  small {
+    color: var(--p-text-muted-color);
+  }
+}
+
+.facts {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  font-weight: 600;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+}
+
+.bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.bar p-progressbar {
+  --p-progressbar-height: 0.75rem;
+}
+
+.life ::ng-deep .p-progressbar-value {
+  background: var(--p-red-500);
+}
+
+.mana ::ng-deep .p-progressbar-value {
+  background: var(--p-blue-500);
+}
+
+p-tab p-badge {
+  margin-left: 0.4rem;
+}
+
+.grant {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+
+  ::ng-deep .grant-input {
+    width: 3.5rem;
+    text-align: center;
+  }
+}
+
+.stats {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.4rem 0.25rem;
+    border-bottom: 1px solid var(--p-content-border-color);
+  }
+
+  thead th {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--p-text-muted-color);
+  }
+
+  tbody th {
+    font-weight: 500;
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .plus {
+    color: var(--p-green-700);
+  }
+
+  .minus {
+    color: var(--p-red-700);
+  }
+
+  .value {
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  .max {
+    margin-left: 0.25rem;
+  }
+
+  ::ng-deep .current-input {
+    width: 3.5rem;
+    text-align: right;
+    padding-block: 0.25rem;
+  }
+}
+
+.slots,
+.bag {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: 0.75rem;
+}
+
+.slots li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.slot-name {
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color);
+}
+
+.tile {
+  position: relative;
+  border: 2px solid var(--p-content-border-color);
+  border-radius: 10px;
+  background: var(--p-content-background);
+  min-height: 8rem;
+
+  &.empty {
+    display: grid;
+    place-items: center;
+    border-style: dashed;
+    color: var(--p-text-muted-color);
+  }
+
+  &.rarity-uncommon {
+    border-color: var(--p-green-500);
+  }
+
+  &.rarity-rare {
+    border-color: var(--p-sky-500);
+  }
+
+  &.rarity-mythic {
+    border-color: var(--p-amber-500);
+  }
+
+  &.rarity-legendary {
+    border-color: var(--p-red-500);
+  }
+
+  ::ng-deep .tile-menu {
+    position: absolute;
+    top: 0.15rem;
+    right: 0.15rem;
+  }
+}
+
+.tile-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  height: 100%;
+  padding: 0.75rem 0.5rem 0.5rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+
+.tile-image {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 8px;
+
+  i {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    font-size: 1.75rem;
+    color: var(--p-text-muted-color);
+  }
+}
+
+.tile-name {
+  font-size: 0.875rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.tile-equipped {
+  font-size: 0.75rem;
+  color: var(--p-primary-color);
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0;
+  color: var(--p-text-muted-color);
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.stats-scroll {
+  overflow-x: auto;
+}
+
+@media (max-width: 480px) {
+  .stats .optional {
+    display: none;
+  }
+}

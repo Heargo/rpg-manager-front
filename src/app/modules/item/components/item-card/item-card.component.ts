@@ -41,7 +41,7 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
       <p class="description">{{ item.description }}</p>
       <p class="price">
         <i class="pi pi-wallet"></i>
-        {{ 'item.price' | transloco: { price: item.price } }}
+        {{ priceText() ?? ('item.price' | transloco: { price: item.price }) }}
       </p>
     </p-card>
   `,
@@ -92,5 +92,7 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
 })
 export class ItemCardComponent {
   readonly item = input.required<ItemDraft>();
+  /** The price in the world's money format; coins when not given. */
+  readonly priceText = input<string>();
   protected readonly severity = RARITY_SEVERITY;
 }

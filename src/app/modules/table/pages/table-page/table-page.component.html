@@ -85,6 +85,13 @@
         <p-card>
           @if (characters.$myCharacter(); as mine) {
             <app-character-summary [character]="mine" />
+            <p-button
+              class="open-sheet"
+              icon="pi pi-id-card"
+              [label]="'character.sheet.open' | transloco"
+              severity="secondary"
+              [routerLink]="['/room/sheet', mine.id]"
+            />
           } @else if (characters.$needsCharacter()) {
             <div class="cta">
               <p>{{ "character.list.needOne" | transloco }}</p>
@@ -175,6 +182,13 @@
       @if (selected(); as character) {
         <div class="selected">
           <app-character-summary [character]="character" />
+          <p-button
+            class="open-sheet"
+            icon="pi pi-id-card"
+            [label]="'character.sheet.open' | transloco"
+            severity="secondary"
+            [routerLink]="['/room/sheet', character.id]"
+          />
         </div>
       }
     } @else {
