@@ -11,7 +11,6 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
-import { CardModule } from '@openng/optimus-ui/card';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
 import { MessageLevel } from '../../../../core/models/toast-level';
@@ -32,7 +31,6 @@ import { CHARACTER_ACTION_KINDS, CharacterAction } from '../../helpers/character
     RouterLink,
     TranslocoPipe,
     ButtonModule,
-    CardModule,
     MessageModule,
     SkeletonModule,
     CharacterSheetComponent,
@@ -46,7 +44,7 @@ import { CHARACTER_ACTION_KINDS, CharacterAction } from '../../helpers/character
         [text]="true"
         routerLink="/room/table"
       />
-      <p-card>
+      <div class="sheet-body">
         @if (character(); as c) {
           @if (copy.$readOnly()) {
             <p-message
@@ -80,7 +78,7 @@ import { CHARACTER_ACTION_KINDS, CharacterAction } from '../../helpers/character
         } @else {
           <p class="hint">{{ 'character.sheet.notFound' | transloco }}</p>
         }
-      </p-card>
+      </div>
     </div>
   `,
   styles: `
@@ -96,7 +94,12 @@ import { CHARACTER_ACTION_KINDS, CharacterAction } from '../../helpers/character
       align-self: flex-start;
     }
     .notes {
+      display: block;
       margin-top: 1rem;
+      padding: 1.25rem;
+      border: 1px solid var(--p-content-border-color);
+      border-radius: var(--p-content-border-radius, 12px);
+      background: var(--p-content-background);
     }
     .hint {
       margin: 0;

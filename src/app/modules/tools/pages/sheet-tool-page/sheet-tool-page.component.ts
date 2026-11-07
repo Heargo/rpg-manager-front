@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
-import { CardModule } from '@openng/optimus-ui/card';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
 import { CharacterBusiness } from '../../../character/business/character.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
@@ -18,7 +17,6 @@ import { SandboxCharacterBusiness } from '../../business/sandbox-character.busin
   imports: [
     TranslocoPipe,
     ButtonModule,
-    CardModule,
     SkeletonModule,
     CharacterSheetComponent,
   ],
@@ -37,7 +35,7 @@ import { SandboxCharacterBusiness } from '../../business/sandbox-character.busin
           (onClick)="sandbox.reset()"
         />
       </header>
-      <p-card>
+      <div class="sheet-body">
         @if (sandbox.$character(); as character) {
           <app-character-sheet
             [character]="character"
@@ -49,7 +47,7 @@ import { SandboxCharacterBusiness } from '../../business/sandbox-character.busin
         } @else {
           <p-skeleton height="20rem" />
         }
-      </p-card>
+      </div>
     </div>
   `,
   styles: `

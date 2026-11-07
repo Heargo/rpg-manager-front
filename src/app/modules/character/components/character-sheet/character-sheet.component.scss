@@ -21,6 +21,10 @@
   flex-direction: column;
   gap: 1rem;
   min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: var(--p-content-border-radius, 12px);
+  background: var(--p-content-background);
 }
 
 .played-by {
@@ -34,10 +38,10 @@
 
   .card {
     position: static;
-    /* bleed out of the page (1rem) and panel (1.25rem) padding */
-    margin-inline: -2.25rem;
-    min-width: 0;
-    --card-height: min(calc(100svh - 3.125rem - 2.4rem), 177vw);
+    justify-self: center;
+    /* largest 5:7 card fitting the width and the height under the nav
+       (50px nav + 0.5rem body margins + room for the XP pill) */
+    width: min(100%, calc((100svh - 50px - 1rem - 1rem) * 5 / 7));
   }
 }
 
