@@ -71,4 +71,15 @@ describe('ProfileBusiness', () => {
     expect(business.$profile().name).toBe('Ada');
     expect(storage.write).not.toHaveBeenCalled();
   });
+
+  it('never uses an untranslated key as the default name', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideTestTranslations({ preloadLangs: false, langs: {} }),
+        { provide: ProfileStorageService, useValue: storage },
+      ],
+    });
+    const business = TestBed.inject(ProfileBusiness);
+    expect(business.$profile().name).toBe('Adventurer abcd');
+  });
 });

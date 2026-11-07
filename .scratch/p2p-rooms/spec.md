@@ -35,8 +35,8 @@ The host can have several invites pending at once, one per player. Each pending 
 
 ### Encoding the codes
 
-- v1: the full SDP, compressed with the native `CompressionStream('deflate-raw')`, then base64url, prefixed with a version (`1.`). No library needed. Measure the real lengths; target under ~800 characters, which still fits a QR code that phones scan easily.
-- If codes are too long, a later step strips the SDP to what WebRTC needs (ICE ufrag/password, DTLS fingerprint, setup role, candidates) in a compact binary form, typically 100 to 200 characters. Keep the version prefix so old links fail cleanly.
+- Only what WebRTC needs (ICE ufrag/password, DTLS fingerprint, setup role, media id, UDP candidates) in a compact binary form, base64url, prefix `2.`; ~140–180 characters (`core/p2p/helpers/compact-sdp.ts`). The receiver rebuilds a data-channel SDP.
+- A first version sent the whole SDP compressed (~650–800 characters): too dense for reliable QR scanning, so it was dropped. No backward compatibility is kept while the app is in development.
 - Decoding validates the version and the SDP type (`offer` on `/join`, `answer` on the host), and shows a clear error for a bad paste.
 
 ### Reaching each other

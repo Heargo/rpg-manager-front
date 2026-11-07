@@ -154,6 +154,8 @@ export class RoomBusiness {
 
   /** A translated message for anything the handshake or the room failed with. */
   describeError(error: unknown): string {
+    // The message shown is generic for unexpected errors: keep the real one in the console.
+    console.error('Room error', error);
     return this.language.t(roomErrorKey(error));
   }
 

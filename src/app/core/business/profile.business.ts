@@ -32,10 +32,10 @@ export class ProfileBusiness {
     const stored = parseStoredProfile(this.storage.read());
     if (stored) return stored;
     const playerId = this.storage.newPlayerId();
-    const created: Profile = {
-      playerId,
-      name: defaultProfileName(this.languageBusiness.t('profile.defaultName'), playerId),
-    };
+    const translated = this.languageBusiness.t('profile.defaultName');
+    // If translations aren't loaded yet, t() returns the key: never save that as a name.
+    const prefix = translated === 'profile.defaultName' ? 'Adventurer' : translated;
+    const created: Profile = { playerId, name: defaultProfileName(prefix, playerId) };
     this.storage.write(JSON.stringify(created));
     return created;
   }

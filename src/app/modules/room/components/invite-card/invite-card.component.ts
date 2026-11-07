@@ -74,7 +74,7 @@ import { PendingInvite, RoomBusiness } from '../../business/room.business';
     .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .actions.end { justify-content: flex-end; }
     input, textarea { width: 100%; font-family: monospace; font-size: 0.8rem; }
-    .qr { width: min(16rem, 100%); align-self: center; image-rendering: pixelated; }
+    .qr { width: min(26rem, 100%); align-self: center; image-rendering: pixelated; background: #fff; }
     .privacy { color: var(--p-text-muted-color); }
     label { font-weight: 600; margin-top: 0.5rem; }
     .for { display: flex; align-items: center; gap: 0.5rem; }
