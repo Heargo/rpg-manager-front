@@ -55,7 +55,7 @@
       },
       "next": "Next",
       "back": "Back",
-      "create": "Create the world",
+      "create": "Create",
       "preview": "Preview",
       "attributeCount": "{{ count }} attributes",
       "attributesHint": "Every character of this world has these attributes. Players raise them with stat points; items can boost them.",
@@ -111,7 +111,8 @@
       "baseValueInteger": "Base values must be whole numbers.",
       "nonNegativeInteger": "Use a whole number, 0 or more.",
       "image": "This picture couldn't be used.",
-      "formulaInvalid": "Fix the formulas of the attributes marked in red."
+      "formulaInvalid": "Fix the formulas of the attributes marked in red.",
+      "levelCurveInvalid": "Invalid level curve: use only level, and every level must cost at least 1 XP."
     },
     "formula": {
       "presets": {
@@ -123,6 +124,20 @@
       },
       "preview": "Max at levels 0 to 5",
       "help": "Variables: level, base, playerLevel (0 for now). Read another attribute's level by its name: strength, or [Max life] in square brackets when the name has spaces. Case does not matter. Operators: + - * / ^ and parentheses. Functions: min, max, floor, round, sqrt. The max is rounded to a whole number."
+    },
+    "level": {
+      "title": "Experience and levels",
+      "curve": "Level curve",
+      "preview": "XP for levels 2 to 6",
+      "statPointsPerLevel": "Stat points per level",
+      "customHelp": "Write an expression using only level, for example level * 50.",
+      "presets": {
+        "flat": "Flat (100 XP per level)",
+        "growing": "Growing (100 x level)",
+        "steep": "Steep (+50 % per level)",
+        "classic": "Classic tabletop",
+        "custom": "Custom"
+      }
     }
   },
   "character": {
@@ -185,7 +200,12 @@
       "currentOf": "Current {{ name }}",
       "grant": "Grant",
       "grantLabel": "Grant stat points",
-      "lockedOffline": "Not available while the host is offline"
+      "lockedOffline": "Not available while the host is offline",
+      "xp": "Experience",
+      "grantXpLabel": "Grant XP",
+      "grantXp": "Grant XP",
+      "levelUp": "Level {{ level }}! +{{ points }} stat points",
+      "levelBadge": "Level {{ level }}"
     },
     "items": {
       "details": "Details",

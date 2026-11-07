@@ -35,6 +35,14 @@ import {
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { WorldLibraryBusiness } from '../../business/world-library.business';
 import { WorldCardComponent } from '../../components/world-card/world-card.component';
+import {
+  DEFAULT_LEVEL_CURVE,
+  DEFAULT_STAT_POINTS_PER_LEVEL,
+  LEVEL_CURVE_PRESETS,
+  LevelCurve,
+  levelCost,
+  validateLevelCurve,
+} from '../../../character/helpers/level.rules';
 import { DEFAULT_OFFLINE_FEATURES } from '../../helpers/world.factory';
 import {
   ATTRIBUTE_NAME_MAX_LENGTH,
@@ -116,6 +124,9 @@ export class WorldNewPageComponent {
   );
   protected readonly startingStatPoints = signal(5);
   protected readonly startingMoney = signal(5000);
+  protected readonly levelCurve = signal<LevelCurve>(DEFAULT_LEVEL_CURVE);
+  protected readonly statPointsPerLevel = signal(DEFAULT_STAT_POINTS_PER_LEVEL);
+  protected readonly curvePresets = LEVEL_CURVE_PRESETS;
   protected readonly starterItems = signal(true);
   protected readonly offline = signal<OfflineFeatures>({
     ...DEFAULT_OFFLINE_FEATURES,
@@ -146,6 +157,8 @@ export class WorldNewPageComponent {
         : undefined,
     },
     startingStatPoints: this.startingStatPoints(),
+    levelCurve: this.levelCurve(),
+    statPointsPerLevel: this.statPointsPerLevel(),
     startingMoney: this.startingMoney(),
     offlineFeatures: this.offline(),
   }));
@@ -171,6 +184,13 @@ export class WorldNewPageComponent {
       return values.join(' ');
     });
   });
+  protected readonly curveError = computed(() => validateLevelCurve(this.levelCurve()));
+  /** XP cost of levels 2 to 6 (empty while a custom curve is invalid). */
+  protected readonly curvePreview = computed(() =>
+    this.curveError()
+      ? ''
+      : [2, 3, 4, 5, 6].map((level) => levelCost(this.levelCurve(), level)).join(' '),
+  );
   protected readonly errors = computed(() =>
     this.library.validateDraft(this.draft()),
   );
@@ -179,7 +199,7 @@ export class WorldNewPageComponent {
     return {
       1: !errors.name,
       2: !errors.attributes,
-      3: !errors.startingStatPoints && !errors.startingMoney,
+      3: !errors.startingStatPoints && !errors.startingMoney && !errors.levelCurve && !errors.statPointsPerLevel,
     } as Record<number, boolean>;
   });
   protected readonly canCreate = computed(
@@ -224,6 +244,24 @@ export class WorldNewPageComponent {
     this.attributes.update((rows) =>
       rows.map((row) => (row.key === key ? { ...row, ...change } : row)),
     );
+  }
+
+  protected setCurvePreset(preset: string): void {
+    const current = this.levelCurve();
+    this.levelCurve.set(
+      preset === 'custom'
+        ? { preset, expression: current.preset === 'custom' ? current.expression : 'level * 100' }
+        : { preset: preset as 'flat' | 'growing' | 'steep' | 'classic' },
+    );
+  }
+
+  protected setCurveExpression(expression: string): void {
+    this.levelCurve.set({ preset: 'custom', expression });
+  }
+
+  protected curveExpression(): string {
+    const curve = this.levelCurve();
+    return curve.preset === 'custom' ? curve.expression : '';
   }
 
   protected setPreset(key: number, preset: string): void {

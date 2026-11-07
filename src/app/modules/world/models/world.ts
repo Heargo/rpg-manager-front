@@ -1,5 +1,6 @@
 import { AttributeFormula } from '../../../core/helpers/formula';
 import { ItemDraft } from '../../../core/models/item';
+import { LevelCurve } from '../../character/helpers/level.rules';
 
 /** An attribute every character of the world has (Strength, Life…). */
 export interface WorldAttribute {
@@ -51,6 +52,10 @@ export interface Character {
   name: string;
   portraitId?: string;
   statPoints: number;
+  /** Total experience points. */
+  xp: number;
+  /** Derived from the XP by the world's level curve; kept so formulas and lists read it directly. */
+  level: number;
   money: number;
   attributes: CharacterAttribute[];
   inventory: InventoryItem[];
@@ -70,6 +75,8 @@ export interface World {
   /** Attributes shown as bars on the player view, by attribute id. */
   barAttributes: { life?: string; mana?: string };
   startingStatPoints: number;
+  levelCurve: LevelCurve;
+  statPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
   items: Item[];
@@ -101,6 +108,8 @@ export interface WorldDraft {
   /** Attribute names to show as bars. */
   barAttributes?: { life?: string; mana?: string };
   startingStatPoints?: number;
+  levelCurve?: LevelCurve;
+  statPointsPerLevel?: number;
   startingMoney?: number;
   offlineFeatures?: Partial<OfflineFeatures>;
 }
@@ -114,6 +123,8 @@ export interface WorldInfo {
   attributes: WorldAttribute[];
   barAttributes: { life?: string; mana?: string };
   startingStatPoints: number;
+  levelCurve: LevelCurve;
+  statPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
 }

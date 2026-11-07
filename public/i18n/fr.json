@@ -55,7 +55,7 @@
       },
       "next": "Suivant",
       "back": "Retour",
-      "create": "Créer le monde",
+      "create": "Créer",
       "preview": "Aperçu",
       "attributeCount": "{{ count }} attributs",
       "attributesHint": "Chaque personnage de ce monde a ces attributs. Les joueurs les augmentent avec des points de stats ; les objets peuvent les améliorer.",
@@ -111,7 +111,8 @@
       "baseValueInteger": "Les valeurs de base doivent être des nombres entiers.",
       "nonNegativeInteger": "Utilisez un nombre entier, 0 ou plus.",
       "image": "Cette image n'a pas pu être utilisée.",
-      "formulaInvalid": "Corrigez les formules des attributs en rouge."
+      "formulaInvalid": "Corrigez les formules des attributs en rouge.",
+      "levelCurveInvalid": "Courbe invalide : utilisez uniquement level, et chaque niveau doit coûter au moins 1 XP."
     },
     "formula": {
       "presets": {
@@ -123,6 +124,20 @@
       },
       "preview": "Maximum aux niveaux 0 à 5",
       "help": "Variables : level, base, playerLevel (0 pour l'instant). Lisez le niveau d'un autre attribut par son nom : force, ou [Vie max] entre crochets quand le nom contient des espaces. La casse n'a pas d'importance. Opérateurs : + - * / ^ et parenthèses. Fonctions : min, max, floor, round, sqrt. Le maximum est arrondi à l'entier."
+    },
+    "level": {
+      "title": "Expérience et niveaux",
+      "curve": "Courbe de niveaux",
+      "preview": "XP des niveaux 2 à 6",
+      "statPointsPerLevel": "Points de stats par niveau",
+      "customHelp": "Écrivez une expression utilisant uniquement level, par exemple level * 50.",
+      "presets": {
+        "flat": "Constante (100 XP par niveau)",
+        "growing": "Croissante (100 x niveau)",
+        "steep": "Raide (+50 % par niveau)",
+        "classic": "Jeu de rôle classique",
+        "custom": "Personnalisée"
+      }
     }
   },
   "character": {
@@ -185,7 +200,12 @@
       "currentOf": "{{ name }} actuel",
       "grant": "Donner",
       "grantLabel": "Donner des points de stats",
-      "lockedOffline": "Indisponible tant que l'hôte est hors ligne"
+      "lockedOffline": "Indisponible tant que l'hôte est hors ligne",
+      "xp": "Expérience",
+      "grantXpLabel": "Donner de l'XP",
+      "grantXp": "Donner",
+      "levelUp": "Niveau {{ level }} ! +{{ points }} points de stats",
+      "levelBadge": "Niveau {{ level }}"
     },
     "items": {
       "details": "Détails",

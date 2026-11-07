@@ -47,7 +47,7 @@ export function attributeStats(
     );
     const level = own?.level ?? 0;
     const bonus = bonusByName.get(attribute.name) ?? 0;
-    const max = formulaMax(attribute, level, levels) + bonus;
+    const max = formulaMax(attribute, level, levels, character.level) + bonus;
     const current = Math.max(0, Math.min(own?.current ?? max, max));
     return {
       attributeId: attribute.id,
@@ -79,11 +79,12 @@ export function formulaMax(
   attribute: WorldAttribute,
   level: number,
   levels: Record<string, number>,
+  playerLevel = 1,
 ): number {
   const result = evaluateFormula(attribute.formula, {
     level,
     base: attribute.baseValue,
-    playerLevel: 0,
+    playerLevel,
     levels,
   });
   return result.ok ? Math.round(result.value) : attribute.baseValue;

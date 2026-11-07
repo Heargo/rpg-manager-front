@@ -204,6 +204,38 @@
                 </div>
               </div>
 
+              <fieldset class="level-curve">
+                <legend>{{ 'world.level.title' | transloco }}</legend>
+                <div class="formula">
+                  <label class="formula-field">
+                    <span>{{ 'world.level.curve' | transloco }}</span>
+                    <select class="native" name="level-curve" [value]="levelCurve().preset" (change)="setCurvePreset($any($event.target).value)">
+                      @for (preset of curvePresets; track preset) {
+                        <option [value]="preset" [selected]="preset === levelCurve().preset">{{ 'world.level.presets.' + preset | transloco }}</option>
+                      }
+                    </select>
+                  </label>
+                  @if (levelCurve().preset === 'custom') {
+                    <label class="formula-field wide">
+                      <span>{{ 'world.fields.expression' | transloco }}</span>
+                      <input class="native" type="text" autocomplete="off" spellcheck="false" name="level-curve-expression" [value]="curveExpression()" (input)="setCurveExpression($any($event.target).value)" />
+                    </label>
+                    <small class="hint wide">{{ 'world.level.customHelp' | transloco }}</small>
+                  }
+                  @if (curveError(); as error) {
+                    <small class="formula-error wide" role="alert" data-testid="level-curve-error">{{ error | transloco }}</small>
+                  }
+                  <small class="hint wide">
+                    {{ 'world.level.preview' | transloco }}:
+                    <span data-testid="level-curve-preview">{{ curvePreview() }}</span>
+                  </small>
+                </div>
+                <div class="field">
+                  <label for="stat-points-per-level">{{ 'world.level.statPointsPerLevel' | transloco }}</label>
+                  <p-inputnumber inputId="stat-points-per-level" [min]="0" [showButtons]="true" [ngModel]="statPointsPerLevel()" (ngModelChange)="statPointsPerLevel.set($event ?? 0)" />
+                </div>
+              </fieldset>
+
               <div class="check">
                 <p-checkbox inputId="starter-items" [binary]="true" [ngModel]="starterItems()" (ngModelChange)="starterItems.set($event)" />
                 <label for="starter-items">

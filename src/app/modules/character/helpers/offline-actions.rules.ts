@@ -16,12 +16,19 @@ import {
   CharacterAction,
   CharacterActionKind,
   GAME_MASTER_ACTIONS,
+  LevelRules,
   parseCharacterAction,
 } from './character-actions.rules';
 
 export type OfflineResult =
   | { ok: true; character: Character; queue: QueuedAction[] }
   | { ok: false; error: string };
+
+/** Granting XP is a game master action, refused offline before it gets here: the rules only satisfy the signature. */
+const NO_XP_RULES: LevelRules = {
+  levelCurve: { preset: 'flat' },
+  statPointsPerLevel: 0,
+};
 
 const NOT_ALLOWED = 'character.errors.offlineNotAllowed';
 
@@ -53,7 +60,12 @@ export function applyOffline(
 ): OfflineResult {
   if (!isOfflineAllowed(features, action.kind))
     return { ok: false, error: NOT_ALLOWED };
-  const result = applyCharacterAction(attributes, character, action);
+  const result = applyCharacterAction(
+    attributes,
+    character,
+    action,
+    NO_XP_RULES,
+  );
   if (!result.ok) return result;
   const { kind, ...fields } = action;
   return {
@@ -181,7 +193,12 @@ export function replayQueue(
     else if (!isOfflineAllowed(features, action.kind))
       refused.push({ route: entry.route, error: NOT_ALLOWED });
     else {
-      const result = applyCharacterAction(attributes, character, action);
+      const result = applyCharacterAction(
+    attributes,
+    character,
+    action,
+    NO_XP_RULES,
+  );
       if (result.ok) character = result.character;
       else refused.push({ route: entry.route, error: result.error });
     }

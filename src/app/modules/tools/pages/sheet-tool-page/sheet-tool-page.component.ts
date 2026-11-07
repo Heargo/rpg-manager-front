@@ -4,6 +4,7 @@ import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
+import { CharacterBusiness } from '../../../character/business/character.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterSheetComponent } from '../../../character/components/character-sheet/character-sheet.component';
@@ -79,10 +80,16 @@ export class SheetToolPageComponent {
   protected readonly sandbox = inject(SandboxCharacterBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly messages = inject(MessageService);
+  private readonly characters = inject(CharacterBusiness);
 
   protected act(action: CharacterAction): void {
     try {
+      const before = this.sandbox.$character();
       this.sandbox.act(action);
+      const after = this.sandbox.$character();
+      const message = before && after && this.characters.levelUpMessage(before, after);
+      if (message)
+        this.messages.add({ severity: MessageLevel.Success, summary: message, life: 4000 });
     } catch (error) {
       const key =
         error instanceof Error ? error.message : 'room.errors.generic';

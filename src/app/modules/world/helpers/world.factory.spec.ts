@@ -37,6 +37,8 @@ describe('createWorld', () => {
       ],
       barAttributes: { life: 'id1', mana: 'id2' },
       startingStatPoints: 0,
+      levelCurve: { preset: 'growing' },
+      statPointsPerLevel: 3,
       startingMoney: 0,
       offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, sell: true },
       items: [],
@@ -45,6 +47,15 @@ describe('createWorld', () => {
       createdAt: 1000,
       updatedAt: 1000,
     });
+  });
+
+  it('keeps the level curve and stat points per level of the draft', () => {
+    const world = createWorld(
+      { name: 'W', attributes: [], levelCurve: { preset: 'custom', expression: 'level * 50' }, statPointsPerLevel: 5 },
+      ids(),
+      0,
+    );
+    expect(world).toMatchObject({ levelCurve: { preset: 'custom', expression: 'level * 50' }, statPointsPerLevel: 5 });
   });
 
   it('keeps each attribute formula, preset or custom', () => {
@@ -82,7 +93,7 @@ function worldWithImages(): World {
     items: [item],
     characters: [
       {
-        id: 'c1', playerId: 'p1', name: 'Ada', portraitId: 'img-portrait', statPoints: 0, money: 0, attributes: [], rev: 1, updatedAt: 0,
+        id: 'c1', playerId: 'p1', name: 'Ada', portraitId: 'img-portrait', statPoints: 0, xp: 0, level: 1, money: 0, attributes: [], rev: 1, updatedAt: 0,
         inventory: [{ id: 'e1', item: { ...item, imageId: 'img-copy' }, equipped: false, position: 0 }],
       },
     ],

@@ -9,6 +9,7 @@ import { RoomBusiness } from '../../room/business/room.business';
 import { WorldLibraryBusiness } from '../../world/business/world-library.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
 import { InventoryItem } from '../../world/models/world';
+import { attributeStats } from '../helpers/character-stats';
 import { CharacterBusiness } from './character.business';
 
 const potion: InventoryItem = {
@@ -58,7 +59,12 @@ describe('character actions (host + players)', () => {
     [gm, ada, bob].forEach((d) => d.injector.get(GameSessionBusiness));
     const world = await gm.injector.get(WorldLibraryBusiness).create({
       name: 'Eldoria',
-      attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }],
+      attributes: [
+        { name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+        { name: 'Mana', baseValue: 10, formula: { preset: 'custom', expression: 'base + playerLevel * 10' } },
+      ],
+      levelCurve: { preset: 'growing' },
+      statPointsPerLevel: 3,
       startingStatPoints: 1,
       startingMoney: 5,
     });
@@ -153,5 +159,64 @@ describe('character actions (host + players)', () => {
         .$world()!
         .characters.find((c) => c.playerId === 'ada')!.money,
     ).toBe(25);
+  });
+
+  describe('grant-xp', () => {
+    it('starts characters at level 1 with 0 XP', () => {
+      expect(mine(ada)).toMatchObject({ xp: 0, level: 1 });
+    });
+
+    it('lets the game master grant XP, and the character levels up and gets stat points', async () => {
+      const gmChars = gm.injector.get(CharacterBusiness);
+
+      await gmChars.act(mine(ada).id, { kind: 'grant-xp', amount: 150 });
+      await settle();
+      expect(mine(ada)).toMatchObject({ xp: 150, level: 1, statPoints: 1 });
+
+      await gmChars.act(mine(ada).id, { kind: 'grant-xp', amount: 100 });
+      await settle();
+      expect(mine(ada)).toMatchObject({ xp: 250, level: 2, statPoints: 4 });
+      expect(mine(bob)).toMatchObject({ xp: 0, level: 1, statPoints: 1 });
+    });
+
+    it('gains several levels from one grant', async () => {
+      await gm.injector.get(CharacterBusiness).act(mine(ada).id, { kind: 'grant-xp', amount: 1000 });
+      await settle();
+      expect(mine(ada)).toMatchObject({ xp: 1000, level: 4, statPoints: 10 });
+    });
+
+    it('raises maxima that use playerLevel, and current by the same delta', async () => {
+      const gmChars = gm.injector.get(CharacterBusiness);
+      const manaId = mine(ada).attributes[1].attributeId;
+      expect(mine(ada).attributes[1].current).toBe(20);
+      await gmChars.act(mine(ada).id, { kind: 'set-current', attributeId: manaId, value: 5 });
+      await gmChars.act(mine(ada).id, { kind: 'grant-xp', amount: 200 });
+      await settle();
+      expect(mine(ada).level).toBe(2);
+      // max 10 + 2 * 10 = 30 (was 20): current 5 -> 15.
+      expect(mine(ada).attributes[1].current).toBe(15);
+      const stat = attributeStats(
+        gm.injector.get(WorldSessionBusiness).$world()!.attributes,
+        mine(ada),
+      ).find((entry) => entry.attributeId === manaId)!;
+      expect(stat).toMatchObject({ max: 30, current: 15 });
+    });
+
+    it('refuses a player, even for their own character', async () => {
+      await expect(
+        ada.injector.get(CharacterBusiness).act(mine(ada).id, { kind: 'grant-xp', amount: 500 }),
+      ).rejects.toMatchObject({ message: 'character.errors.gameMasterOnly' });
+      await expect(
+        ada.injector.get(CharacterBusiness).act(mine(bob).id, { kind: 'grant-xp', amount: 500 }),
+      ).rejects.toMatchObject({ code: 'forbidden' });
+      await settle();
+      expect(mine(ada)).toMatchObject({ xp: 0, level: 1 });
+    });
+
+    it('refuses an amount below 1', async () => {
+      await expect(
+        gm.injector.get(CharacterBusiness).act(mine(ada).id, { kind: 'grant-xp', amount: 0 }),
+      ).rejects.toMatchObject({ message: 'character.errors.invalidAmount' });
+    });
   });
 });

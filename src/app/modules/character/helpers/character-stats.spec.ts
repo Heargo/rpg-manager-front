@@ -39,6 +39,8 @@ function character(overrides: Partial<Character> = {}): Character {
     playerId: 'p',
     name: 'Ada',
     statPoints: 0,
+    xp: 0,
+    level: 1,
     money: 0,
     attributes: [
       { attributeId: 'life', level: 2, current: 7 },
@@ -182,5 +184,17 @@ describe('attributeStats with formulas', () => {
     const stats = attributeStats(formulaAttributes, withLevels({}));
     expect(maxOf(stats, 'life')).toBe(10);
     expect(stats.find((entry) => entry.attributeId === 'life')!.current).toBe(10);
+  });
+});
+
+describe('attributeStats with playerLevel', () => {
+  it('uses the character level, not 0', () => {
+    const wise: WorldAttribute[] = [
+      { id: 'wit', name: 'Wit', baseValue: 10, formula: { preset: 'custom', expression: 'base + playerLevel * 10' } },
+    ];
+    const at = (level: number) =>
+      attributeStats(wise, character({ level, attributes: [{ attributeId: 'wit', level: 0, current: 0 }] }))[0].max;
+    expect(at(1)).toBe(20);
+    expect(at(4)).toBe(50);
   });
 });

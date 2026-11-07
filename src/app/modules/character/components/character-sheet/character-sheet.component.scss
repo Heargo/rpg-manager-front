@@ -85,6 +85,11 @@ p-tab p-badge {
   flex-wrap: wrap;
   margin-bottom: 1rem;
 
+  .grant-input {
+    width: 5rem;
+    text-align: center;
+  }
+
   ::ng-deep .grant-input {
     width: 3.5rem;
     text-align: center;

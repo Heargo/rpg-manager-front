@@ -5,6 +5,12 @@
   </app-stored-image>
   <div class="who">
     <h1>{{ c.name }}</h1>
+    <div class="level" data-testid="character-level">
+      <p-tag
+        severity="info"
+        [value]="'character.sheet.levelBadge' | transloco: { level: c.level }"
+      />
+    </div>
     @if (characters.playerName(c.playerId); as player) {
       <small>{{
         "character.sheet.playedBy" | transloco: { name: player }
@@ -22,6 +28,21 @@
     </div>
   </div>
 </header>
+
+@if (progress(); as p) {
+  <div class="bar xp">
+    <div class="bar-label">
+      <span>{{ "character.sheet.xp" | transloco }}</span>
+      <span data-testid="xp-text">{{ p.xpIntoLevel }} / {{ p.xpForNext }}</span>
+    </div>
+    <p-progressbar
+      data-testid="xp-progress"
+      [value]="p.percent"
+      [showValue]="false"
+      [attr.aria-label]="'character.sheet.xp' | transloco"
+    />
+  </div>
+}
 
 @for (bar of bars(); track bar.kind) {
   <div class="bar" [class]="bar.kind">
@@ -57,6 +78,26 @@
     <!-- Stats -->
     <p-tabpanel value="stats">
       @if (gameMaster()) {
+        <form class="grant" (ngSubmit)="grantXp()">
+          <label for="grant-xp">{{ "character.sheet.grantXpLabel" | transloco }}</label>
+          <input
+            id="grant-xp"
+            class="p-inputtext grant-input"
+            type="number"
+            min="1"
+            step="1"
+            name="grant-xp"
+            [ngModel]="grantXpAmount()"
+            (ngModelChange)="grantXpAmount.set($event ?? 0)"
+          />
+          <p-button
+            type="submit"
+            data-testid="grant-xp-button"
+            icon="pi pi-star"
+            [label]="'character.sheet.grantXp' | transloco"
+            [disabled]="busy()"
+          />
+        </form>
         <form class="grant" (ngSubmit)="grant()">
           <label for="grant-points">{{
             "character.sheet.grantLabel" | transloco

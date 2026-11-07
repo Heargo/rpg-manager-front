@@ -1,3 +1,4 @@
+import { DEFAULT_LEVEL_CURVE, DEFAULT_STAT_POINTS_PER_LEVEL } from '../../character/helpers/level.rules';
 import { OfflineFeatures, World, WorldDraft, WorldInfo, WorldSummary } from '../models/world';
 
 /** Defaults from the p2p-rooms spec table: reading always works, dice and notes on, actions changing shared state off. */
@@ -32,6 +33,8 @@ export function createWorld(draft: WorldDraft, newId: () => string, now: number)
       mana: idByName(draft.barAttributes?.mana),
     },
     startingStatPoints: draft.startingStatPoints ?? 0,
+    levelCurve: draft.levelCurve ?? DEFAULT_LEVEL_CURVE,
+    statPointsPerLevel: draft.statPointsPerLevel ?? DEFAULT_STAT_POINTS_PER_LEVEL,
     startingMoney: draft.startingMoney ?? 0,
     offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures },
     items: [],
@@ -99,6 +102,8 @@ export function toWorldInfo(world: World): WorldInfo {
     attributes: world.attributes,
     barAttributes: world.barAttributes,
     startingStatPoints: world.startingStatPoints,
+    levelCurve: world.levelCurve,
+    statPointsPerLevel: world.statPointsPerLevel,
     startingMoney: world.startingMoney,
     offlineFeatures: world.offlineFeatures,
   };

@@ -86,6 +86,7 @@ export class SandboxCharacterBusiness {
       this.$world().attributes,
       character,
       action,
+      this.$world(),
     );
     if (!result.ok) throw new Error(result.error);
     this.edited.set({

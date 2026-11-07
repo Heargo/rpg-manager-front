@@ -9,8 +9,9 @@ import { WorldInfoBusiness } from '../../world/business/world-info.business';
 import { Character, WorldInfo } from '../../world/models/world';
 
 /** What a character sheet needs from its world (the room's, or the sandbox's). */
-export type SheetWorld = Pick<WorldInfo, 'attributes' | 'barAttributes'>;
+export type SheetWorld = Pick<WorldInfo, 'attributes' | 'barAttributes' | 'levelCurve'>;
 import { coinDisplayParts } from '../../../core/helpers/money.rules';
+import { levelProgress, LevelProgress } from '../helpers/level.rules';
 import { CharacterAction } from '../helpers/character-actions.rules';
 import { attributeStats, AttributeStat, barStats, BarStat } from '../helpers/character-stats';
 import { CharacterService } from '../services/character.service';
@@ -75,6 +76,20 @@ export class CharacterBusiness {
   /** Every attribute of a character with its max (base + points + equipment) and current value. */
   statsOf(character: Character, world: SheetWorld | null = this.$world()): AttributeStat[] {
     return attributeStats(world?.attributes ?? [], character);
+  }
+
+  /** The character's level and progress towards the next one, from the world's level curve. */
+  progressOf(character: Character, world: Pick<WorldInfo, 'levelCurve'> | null = this.$world()): LevelProgress | null {
+    return world ? levelProgress(world.levelCurve, character.xp) : null;
+  }
+
+  /** "Level 3! +3 stat points" when a change raised the level, else null. */
+  levelUpMessage(before: Character, after: Character): string | null {
+    if (after.level <= before.level) return null;
+    return this.language.t('character.sheet.levelUp', {
+      level: after.level,
+      points: after.statPoints - before.statPoints,
+    });
   }
 
   /** The world's life and mana bars for a character. */

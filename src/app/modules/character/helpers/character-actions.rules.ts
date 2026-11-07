@@ -4,11 +4,13 @@ import {
   WorldAttribute,
 } from '../../world/models/world';
 import { attributeStats } from './character-stats';
+import { grantXp, LevelCurve } from './level.rules';
 
 /** Everything that changes a character during play. The host applies these; the sandbox applies them locally. */
 export type CharacterAction =
   | { kind: 'spend-stat-point'; attributeId: string }
   | { kind: 'grant-stat-points'; amount: number }
+  | { kind: 'grant-xp'; amount: number }
   | { kind: 'set-current'; attributeId: string; value: number }
   | { kind: 'equip'; inventoryId: string }
   | { kind: 'unequip'; inventoryId: string }
@@ -20,6 +22,7 @@ export type CharacterActionKind = CharacterAction['kind'];
 export const CHARACTER_ACTION_KINDS: readonly CharacterActionKind[] = [
   'spend-stat-point',
   'grant-stat-points',
+  'grant-xp',
   'set-current',
   'equip',
   'unequip',
@@ -30,10 +33,18 @@ export const CHARACTER_ACTION_KINDS: readonly CharacterActionKind[] = [
 /** Only the game master grants points and sets current values (a hit, a rest…). */
 export const GAME_MASTER_ACTIONS: readonly CharacterActionKind[] = [
   'grant-stat-points',
+  'grant-xp',
   'set-current',
 ];
 
 export const MAX_GRANTED_POINTS = 100;
+export const MAX_GRANTED_XP = 1_000_000;
+
+/** The world settings that turn XP into levels and stat points. */
+export interface LevelRules {
+  levelCurve: LevelCurve;
+  statPointsPerLevel: number;
+}
 
 export type ActionResult =
   { ok: true; character: Character } | { ok: false; error: string };
@@ -58,6 +69,10 @@ export function parseCharacterAction(
       return Number.isInteger(p['amount'])
         ? { kind, amount: p['amount'] as number }
         : null;
+    case 'grant-xp':
+      return Number.isInteger(p['amount'])
+        ? { kind, amount: p['amount'] as number }
+        : null;
     case 'set-current':
       return text(p['attributeId']) && Number.isInteger(p['value'])
         ? { kind, attributeId: p['attributeId'], value: p['value'] as number }
@@ -77,6 +92,7 @@ export function applyCharacterAction(
   attributes: WorldAttribute[],
   character: Character,
   action: CharacterAction,
+  levelRules: LevelRules,
 ): ActionResult {
   switch (action.kind) {
     case 'spend-stat-point': {
@@ -112,6 +128,33 @@ export function applyCharacterAction(
           ...character,
           statPoints: character.statPoints + action.amount,
         },
+      };
+    }
+    case 'grant-xp': {
+      if (action.amount < 1 || action.amount > MAX_GRANTED_XP)
+        return fail('character.errors.invalidAmount');
+      const grant = grantXp(
+        levelRules.levelCurve,
+        levelRules.statPointsPerLevel,
+        character.xp,
+        action.amount,
+      );
+      const leveled: Character = { ...character, xp: grant.xp, level: grant.level };
+      // A new level can raise maxima that read playerLevel: current rises by the same delta.
+      const before = attributeStats(attributes, character);
+      const after = attributeStats(attributes, leveled);
+      let next = leveled;
+      for (const stat of after) {
+        const old = before.find((entry) => entry.attributeId === stat.attributeId);
+        if (!old || stat.max === old.max) continue;
+        next = setAttribute(next, stat.attributeId, {
+          level: stat.level,
+          current: Math.max(0, Math.min(stat.max, old.current + (stat.max - old.max))),
+        });
+      }
+      return {
+        ok: true,
+        character: { ...next, statPoints: character.statPoints + grant.statPointsGranted },
       };
     }
     case 'set-current': {

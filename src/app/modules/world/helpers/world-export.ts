@@ -1,5 +1,6 @@
 import { validateFormula } from '../../../core/helpers/formula';
 import { ITEM_RARITIES, ITEM_TYPES } from '../../../core/models/item';
+import { LEVEL_CURVE_PRESETS, validateLevelCurve } from '../../character/helpers/level.rules';
 import { World } from '../models/world';
 
 export const WORLD_EXPORT_FORMAT = 'rpg-manager-world';
@@ -68,6 +69,10 @@ function validateWorld(world: unknown, errors: string[]): void {
   for (const key of ['startingStatPoints', 'createdAt', 'updatedAt'] as const) {
     if (typeof world[key] !== 'number') errors.push(`world.${key} must be a number`);
   }
+  if (!isValidLevelCurve(world['levelCurve'])) errors.push('world.levelCurve is invalid');
+  if (!Number.isInteger(world['statPointsPerLevel']) || (world['statPointsPerLevel'] as number) < 0) {
+    errors.push('world.statPointsPerLevel must be a non-negative integer');
+  }
   if (!Number.isInteger(world['startingMoney'])) errors.push('world.startingMoney must be an integer');
   for (const key of ['offlineFeatures', 'barAttributes'] as const) {
     if (!isRecord(world[key])) errors.push(`world.${key} must be an object`);
@@ -88,6 +93,8 @@ function validateWorld(world: unknown, errors: string[]): void {
     for (const key of ['statPoints', 'rev', 'updatedAt'] as const) {
       if (typeof character[key] !== 'number') errors.push(`${path}.${key} must be a number`);
     }
+    if (!Number.isInteger(character['xp']) || (character['xp'] as number) < 0) errors.push(`${path}.xp must be an integer of 0 or more`);
+    if (!Number.isInteger(character['level']) || (character['level'] as number) < 1) errors.push(`${path}.level must be an integer of 1 or more`);
     if (!Number.isInteger(character['money'])) errors.push(`${path}.money must be an integer`);
     list(character['attributes'], `${path}.attributes`, errors, () => undefined);
     list(character['inventory'], `${path}.inventory`, errors, (entry, entryPath) => {
@@ -139,4 +146,12 @@ function isValidFormula(formula: unknown, attributeNames: string[]): boolean {
     typeof formula['step'] === 'number' &&
     Number.isFinite(formula['step'])
   );
+}
+
+function isValidLevelCurve(curve: unknown): boolean {
+  if (!isRecord(curve)) return false;
+  if (curve['preset'] === 'custom') {
+    return typeof curve['expression'] === 'string' && validateLevelCurve({ preset: 'custom', expression: curve['expression'] }) === null;
+  }
+  return (LEVEL_CURVE_PRESETS as readonly unknown[]).includes(curve['preset']);
 }

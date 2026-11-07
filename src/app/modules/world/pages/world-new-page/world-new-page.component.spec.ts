@@ -121,3 +121,62 @@ describe('WorldNewPageComponent formula picker', () => {
     expect(nextDisabled()).toBe(false);
   });
 });
+
+/**
+ * Contract (step 3, Rules), reached from the attributes step through `[data-testid="attributes-next"]`:
+ * - native `select[name="level-curve"]` with the values flat, growing (default), steep, classic, custom;
+ * - native `input[name="level-curve-expression"]` for custom only;
+ * - `[data-testid="level-curve-preview"]`: XP cost of levels 2 to 6, separated by single spaces;
+ * - `[data-testid="level-curve-error"]` present only while a custom curve is invalid, and the Create button is disabled;
+ * - `#stat-points-per-level` input, default 3.
+ */
+describe('WorldNewPageComponent level curve', () => {
+  async function openRulesStep() {
+    const base = await openAttributesStep();
+    const host = base.el.querySelector('[data-testid="attributes-next"]')!;
+    (host.matches('button') ? (host as HTMLButtonElement) : host.querySelector('button')!).click();
+    await new Promise((resolve) => setTimeout(resolve));
+    const text = (selector: string) => base.el.querySelector(selector)?.textContent?.trim().replace(/\s+/g, ' ');
+    const choose = async (value: string) => {
+      const select = base.field('select[name="level-curve"]')!;
+      select.value = value;
+      select.dispatchEvent(new Event('change'));
+      await new Promise((resolve) => setTimeout(resolve));
+    };
+    const createDisabled = () => {
+      const button = Array.from(base.el.querySelectorAll('button')).find((b) => b.textContent?.trim() === 'Create');
+      return button!.disabled;
+    };
+    return { ...base, text, choose, createDisabled };
+  }
+
+  it('defaults to Growing, with a preview of levels 2 to 6 and 3 stat points per level', async () => {
+    const { field, text } = await openRulesStep();
+    expect(field('select[name="level-curve"]')!.value).toBe('growing');
+    expect(text('[data-testid="level-curve-preview"]')).toBe('200 300 400 500 600');
+    expect((document.querySelector('#stat-points-per-level') as HTMLInputElement).value).toBe('3');
+  });
+
+  it.each([
+    ['flat', '100 100 100 100 100'],
+    ['steep', '100 150 225 338 506'],
+    ['classic', '300 600 1800 3800 7500'],
+  ])('previews the %s curve', async (preset, expected) => {
+    const { choose, text } = await openRulesStep();
+    await choose(preset);
+    expect(text('[data-testid="level-curve-preview"]')).toBe(expected);
+  });
+
+  it('previews a custom curve and blocks Create while it is invalid', async () => {
+    const { choose, type, text, el, createDisabled } = await openRulesStep();
+    await choose('custom');
+    await type('input[name="level-curve-expression"]', 'level * 50');
+    expect(text('[data-testid="level-curve-preview"]')).toBe('100 150 200 250 300');
+    expect(el.querySelector('[data-testid="level-curve-error"]')).toBeNull();
+    expect(createDisabled()).toBe(false);
+
+    await type('input[name="level-curve-expression"]', 'level +');
+    expect(el.querySelector('[data-testid="level-curve-error"]')?.textContent?.trim()).toBeTruthy();
+    expect(createDisabled()).toBe(true);
+  });
+});

@@ -161,7 +161,13 @@ export class CharacterSheetPageComponent {
   ): Promise<void> {
     this.busy.set(true);
     try {
-      await this.offline.act(characterId, action);
+      const before = this.characters
+        .$characters()
+        ?.find((character) => character.id === characterId);
+      const after = await this.offline.act(characterId, action);
+      const message = before && this.characters.levelUpMessage(before, after);
+      if (message)
+        this.messages.add({ severity: MessageLevel.Success, summary: message, life: 4000 });
     } catch (error) {
       this.messages.add({
         severity: MessageLevel.Error,

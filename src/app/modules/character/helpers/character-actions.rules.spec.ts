@@ -5,11 +5,19 @@ import {
   WorldAttribute,
 } from '../../world/models/world';
 import {
+  CHARACTER_ACTION_KINDS,
+  GAME_MASTER_ACTIONS,
   ActionResult,
-  applyCharacterAction,
+  applyCharacterAction as applyWithRules,
+  MAX_GRANTED_XP,
   parseCharacterAction,
 } from './character-actions.rules';
 import { attributeStats } from './character-stats';
+
+const levelRules = { levelCurve: { preset: 'growing' as const }, statPointsPerLevel: 3 };
+const applyCharacterAction = (
+  ...args: [WorldAttribute[], Character, Parameters<typeof applyWithRules>[2]]
+) => applyWithRules(...args, levelRules);
 
 const attributes: WorldAttribute[] = [
   { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
@@ -63,6 +71,8 @@ function character(overrides: Partial<Character> = {}): Character {
     playerId: 'p',
     name: 'Ada',
     statPoints: 2,
+    xp: 0,
+    level: 1,
     money: 5000,
     attributes: [
       { attributeId: 'life', level: 0, current: 4 },
@@ -327,5 +337,21 @@ describe('character actions', () => {
       parseCharacterAction('set-current', { attributeId: 'life', value: 4 }),
     ).toEqual({ kind: 'set-current', attributeId: 'life', value: 4 });
     expect(parseCharacterAction('spend-stat-point', null)).toBeNull();
+    expect(parseCharacterAction('grant-xp', { amount: 250 })).toEqual({ kind: 'grant-xp', amount: 250 });
+    expect(parseCharacterAction('grant-xp', { amount: 2.5 })).toBeNull();
+    expect(parseCharacterAction('grant-xp', {})).toBeNull();
+    expect(CHARACTER_ACTION_KINDS).toContain('grant-xp');
+    expect(GAME_MASTER_ACTIONS).toContain('grant-xp');
+  });
+});
+
+describe('grant-xp limits', () => {
+  it('refuses an amount above MAX_GRANTED_XP', () => {
+    expect(
+      applyCharacterAction(attributes, character(), { kind: 'grant-xp', amount: 1e12 }),
+    ).toEqual({ ok: false, error: 'character.errors.invalidAmount' });
+    expect(
+      applyCharacterAction(attributes, character(), { kind: 'grant-xp', amount: MAX_GRANTED_XP + 1 }),
+    ).toEqual({ ok: false, error: 'character.errors.invalidAmount' });
   });
 });

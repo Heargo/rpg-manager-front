@@ -11,6 +11,7 @@ const world = {
     { id: 'str', name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
   ],
   barAttributes: { life: 'life' },
+  levelCurve: { preset: 'growing' },
 };
 
 const character: Character = {
@@ -18,6 +19,8 @@ const character: Character = {
   playerId: 'p',
   name: 'Ada',
   statPoints: 2,
+  xp: 250,
+  level: 2,
   money: 40,
   attributes: [
     { attributeId: 'life', level: 0, current: 6 },
@@ -88,6 +91,31 @@ describe('CharacterSheetComponent', () => {
     expect(el.textContent).toContain('6 / 12');
     expect(el.querySelector('[aria-label="Spend a point on Life"]')).toBeNull();
     expect(el.querySelector('#grant-points')).toBeNull();
+  });
+
+  it('shows the level and an XP progress bar', async () => {
+    const { el } = await render({ canPlay: false, gameMaster: false });
+    expect(el.querySelector('[data-testid="character-level"]')!.textContent).toContain('2');
+    const bar = el.querySelector('[data-testid="xp-progress"]')!;
+    expect(bar.tagName.toLowerCase()).toBe('p-progressbar');
+    expect(bar.getAttribute('aria-valuenow') ?? bar.querySelector('[aria-valuenow]')?.getAttribute('aria-valuenow')).toBe('17');
+    expect(el.querySelector('[data-testid="xp-text"]')!.textContent).toContain('50 / 300');
+  });
+
+  it('gives the game master a grant XP control that emits grant-xp', async () => {
+    const { el, actions, fixture } = await render({ canPlay: true, gameMaster: true });
+    const input = el.querySelector('#grant-xp') as HTMLInputElement;
+    input.value = '120';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    const host = el.querySelector('[data-testid="grant-xp-button"]')!;
+    (host.matches('button') ? (host as HTMLButtonElement) : host.querySelector('button')!).click();
+    expect(actions).toEqual([{ kind: 'grant-xp', amount: 120 }]);
+  });
+
+  it('hides the grant XP control from players', async () => {
+    const { el } = await render({ canPlay: true, gameMaster: false });
+    expect(el.querySelector('#grant-xp')).toBeNull();
   });
 
   it('lets the player spend a point', async () => {

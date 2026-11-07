@@ -80,7 +80,12 @@ export class CharacterHostBusiness {
         throw new PeerApiError('invalid', 'character.errors.unknownCharacter');
       if (!isGameMaster && character.playerId !== playerId)
         throw new PeerApiError('forbidden', 'character.errors.notYours');
-      const result = applyCharacterAction(world.attributes, character, action);
+      const result = applyCharacterAction(
+        world.attributes,
+        character,
+        action,
+        world,
+      );
       if (!result.ok) throw new PeerApiError('rejected', result.error);
       changed = {
         ...result.character,

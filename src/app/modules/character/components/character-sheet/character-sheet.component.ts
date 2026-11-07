@@ -95,6 +95,10 @@ export class CharacterSheetComponent {
   protected readonly severity = RARITY_SEVERITY;
   protected readonly icons = ITEM_ICONS;
   protected readonly grantAmount = signal(1);
+  protected readonly grantXpAmount = signal(100);
+  protected readonly progress = computed(() =>
+    this.characters.progressOf(this.character(), this.world()),
+  );
   /** The item whose details dialog is open. */
   private readonly openItemId = signal<string | null>(null);
   /** The item the context menu / action menu was opened on. */
@@ -153,6 +157,11 @@ export class CharacterSheetComponent {
   protected grant(): void {
     const amount = this.grantAmount();
     if (amount >= 1) this.act.emit({ kind: 'grant-stat-points', amount });
+  }
+
+  protected grantXp(): void {
+    const amount = this.grantXpAmount();
+    if (Number.isInteger(amount) && amount >= 1) this.act.emit({ kind: 'grant-xp', amount });
   }
 
   protected setCurrent(

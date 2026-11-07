@@ -55,6 +55,26 @@ describe('world export', () => {
     expect(parseWorldExport(JSON.stringify(file)).ok).toBe(true);
   });
 
+  it('round-trips the level curve and refuses an invalid one', () => {
+    const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
+    expect(file.world.levelCurve).toEqual({ preset: 'growing' });
+    expect(file.world.statPointsPerLevel).toBe(3);
+
+    file.world.levelCurve = { preset: 'custom', expression: 'level +' };
+    const broken = parseWorldExport(JSON.stringify(file));
+    expect(broken.ok).toBe(false);
+    if (!broken.ok) expect(broken.errors).toContain('world.levelCurve is invalid');
+
+    file.world.levelCurve = { preset: 'custom', expression: 'level * 50' };
+    file.world.statPointsPerLevel = -2;
+    const negative = parseWorldExport(JSON.stringify(file));
+    expect(negative.ok).toBe(false);
+    if (!negative.ok) expect(negative.errors).toContain('world.statPointsPerLevel must be a non-negative integer');
+
+    file.world.statPointsPerLevel = 4;
+    expect(parseWorldExport(JSON.stringify(file)).ok).toBe(true);
+  });
+
   it('lists what is wrong in a damaged file', () => {
     const file = JSON.parse(JSON.stringify(buildWorldExport(world, { x: { type: 'text/html', data: '' } }, 9)));
     file.version = 3;
@@ -73,5 +93,31 @@ describe('world export', () => {
         'images.x is not an image',
       ]),
     );
+  });
+});
+
+describe('world import of character xp and level', () => {
+  const withCharacter = (changes: Record<string, unknown>) => {
+    const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
+    file.world.characters = [
+      { id: 'c', playerId: 'p', name: 'Ada', statPoints: 0, xp: 0, level: 1, money: 0, rev: 0, updatedAt: 0, attributes: [], inventory: [], ...changes },
+    ];
+    return parseWorldExport(JSON.stringify(file));
+  };
+
+  it('accepts a valid xp and level', () => {
+    expect(withCharacter({ xp: 250, level: 2 }).ok).toBe(true);
+  });
+
+  it.each([-1, 1.5, '3'])('refuses xp %s', (xp) => {
+    const result = withCharacter({ xp });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errors).toContain('world.characters[0].xp must be an integer of 0 or more');
+  });
+
+  it.each([0, -1, 1.5, '2'])('refuses level %s', (level) => {
+    const result = withCharacter({ level });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errors).toContain('world.characters[0].level must be an integer of 1 or more');
   });
 });

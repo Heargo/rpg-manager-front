@@ -18,6 +18,8 @@ describe('character rules', () => {
       name: 'Ada la Brave',
       portraitId: 'img',
       statPoints: 5,
+      xp: 0,
+      level: 1,
       money: 5000,
       attributes: [
         { attributeId: 'life', level: 0, current: 10 },

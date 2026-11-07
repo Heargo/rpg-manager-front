@@ -69,6 +69,8 @@ const ada: Character = {
   playerId: 'ada',
   name: 'Ada',
   statPoints: 2,
+  xp: 0,
+  level: 1,
   money: 40,
   attributes: [
     { attributeId: 'life', level: 0, current: 4 },

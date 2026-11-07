@@ -17,6 +17,20 @@ const draft = (changes: Partial<WorldDraft> = {}): WorldDraft => ({
   ...changes,
 });
 
+describe('validateWorldDraft level rules', () => {
+  it('accepts a premade curve and a valid custom one', () => {
+    expect(validateWorldDraft(draft({ levelCurve: { preset: 'steep' }, statPointsPerLevel: 2 }))).toEqual({});
+    expect(validateWorldDraft(draft({ levelCurve: { preset: 'custom', expression: 'level * 50' } }))).toEqual({});
+  });
+
+  it('rejects an invalid custom curve and a bad stat points per level', () => {
+    expect(validateWorldDraft(draft({ levelCurve: { preset: 'custom', expression: 'level +' } })).levelCurve).toEqual(expect.any(String));
+    expect(validateWorldDraft(draft({ levelCurve: { preset: 'custom', expression: 'base' } })).levelCurve).toEqual(expect.any(String));
+    expect(validateWorldDraft(draft({ statPointsPerLevel: -1 })).statPointsPerLevel).toBe('world.errors.nonNegativeInteger');
+    expect(validateWorldDraft(draft({ statPointsPerLevel: 1.5 })).statPointsPerLevel).toBe('world.errors.nonNegativeInteger');
+  });
+});
+
 describe('validateWorldDraft', () => {
   it('accepts a complete draft, and a world with no attributes', () => {
     expect(validateWorldDraft(draft())).toEqual({});
