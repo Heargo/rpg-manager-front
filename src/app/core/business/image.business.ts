@@ -37,6 +37,11 @@ export class ImageBusiness {
     return url;
   }
 
+  /** True when the image is in this device's store. */
+  has(id: string): Promise<boolean> {
+    return this.storage.has(id);
+  }
+
   async toBase64(id: string): Promise<Base64Image | undefined> {
     const blob = await this.storage.get(id);
     if (!blob) return undefined;

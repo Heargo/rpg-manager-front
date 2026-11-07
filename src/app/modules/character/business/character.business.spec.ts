@@ -1,69 +1,19 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
-import { EnvironmentInjector, signal } from '@angular/core';
+import { EnvironmentInjector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ImageBusiness } from '../../../core/business/image.business';
-import { ProfileBusiness } from '../../../core/business/profile.business';
-import { WordListBusiness } from '../../../core/business/word-list.business';
-import { ImageProcessingService } from '../../../core/services/image-processing.service';
-import { ImageStorageService } from '../../../core/services/image-storage.service';
-import { ImageTransferService } from '../../../core/services/image-transfer.service';
-import { MemoryImageStorage } from '../../../../testing/memory-image-storage';
-import { createPeerNetwork, flush } from '../../../../testing/peer-network';
+import { createPeerNetwork } from '../../../../testing/peer-network';
 import { provideTestTranslations } from '../../../../testing/test-providers';
 import { GameSessionBusiness } from '../../play/business/game-session.business';
-import { RoomHostBusiness } from '../../room/business/room-host.business';
 import { RoomBusiness } from '../../room/business/room.business';
-import { HostLockService } from '../../room/services/host-lock.service';
-import { RoomStorageService } from '../../room/services/room-storage.service';
-import { RoomService } from '../../room/services/room.service';
 import { WorldInfoBusiness } from '../../world/business/world-info.business';
 import { WorldLibraryBusiness } from '../../world/business/world-library.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
-import { WorldService } from '../../world/services/world.service';
-import { WorldStorageService } from '../../world/services/world-storage.service';
-import { CharacterService } from '../services/character.service';
-import { CharacterHostBusiness } from './character-host.business';
 import { CharacterBusiness } from './character.business';
+import { gameDevice, settle } from '../../../../testing/game-device';
 
-/** Everything a device runs, so each test device gets its own instances. */
-const DEVICE = [
-  RoomService,
-  RoomStorageService,
-  HostLockService,
-  RoomHostBusiness,
-  RoomBusiness,
-  WorldService,
-  WorldStorageService,
-  WorldLibraryBusiness,
-  WorldSessionBusiness,
-  WorldInfoBusiness,
-  CharacterService,
-  CharacterHostBusiness,
-  CharacterBusiness,
-  GameSessionBusiness,
-  ImageTransferService,
-  ImageBusiness,
-  { provide: ImageProcessingService, useValue: { resize: async (file: Blob) => file } },
-  { provide: WordListBusiness, useValue: {} },
-];
-
-function device(net: ReturnType<typeof createPeerNetwork>, playerId: string, name: string) {
-  const images = new MemoryImageStorage();
-  const injector = net.device([
-    ...DEVICE,
-    { provide: ProfileBusiness, useValue: { $profile: signal({ playerId, name }) } },
-    { provide: ImageStorageService, useValue: images },
-  ]);
-  return { injector, images };
-}
-
-async function settle(): Promise<void> {
-  for (let i = 0; i < 5; i++) {
-    TestBed.tick();
-    await flush();
-  }
-}
+const device = gameDevice;
 
 describe('character creation (host + players)', () => {
   let net: ReturnType<typeof createPeerNetwork>;

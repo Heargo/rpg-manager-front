@@ -134,6 +134,14 @@
       "alreadyExists": "You already have a character in this room.",
       "notInRoom": "You're not in this room anymore. Ask for a new invite.",
       "hostHasNoCharacter": "The game master doesn't play a character."
+    },
+    "sheet": {
+      "playedBy": "Played by {{ name }}",
+      "statPoints": "Stat points",
+      "money": "Money",
+      "attribute": "Attribute",
+      "value": "Value",
+      "coins": "{{ count }} coins"
     }
   },
   "dice": {
@@ -145,7 +153,15 @@
     "again": "Roll again",
     "close": "Close",
     "history": "Recent rolls",
-    "skip": "Click to skip the animation"
+    "skip": "Click to skip the animation",
+    "share": "Share with the table",
+    "tableRolls": "Table rolls",
+    "rolledBy": "{{ name }} rolled",
+    "errors": {
+      "invalid": "These dice can't be rolled.",
+      "notInRoom": "You're not in this room anymore.",
+      "shareFailed": "Couldn't reach the host to share this roll. Turn off sharing to roll here."
+    }
   },
   "profile": {
     "title": "Your profile",
@@ -237,6 +253,40 @@
       "hostedBy": "Host: {{ name }}",
       "lastSeen": "last seen {{ date }}",
       "forget": "Forget this room"
+    }
+  },
+  "table": {
+    "title": "Game table",
+    "open": "Go to the table",
+    "lobby": "Lobby",
+    "gameMaster": "You're the game master",
+    "players": "Players",
+    "noPlayers": "No character at the table yet.",
+    "waiting": "Waiting for the host…",
+    "illustration": "Illustration",
+    "noIllustration": "The game master hasn't shown a picture yet.",
+    "noIllustrationGm": "Add a picture to show it to every player.",
+    "addImage": "Add a picture",
+    "hideIllustration": "Hide the picture",
+    "quickImages": "Quick images",
+    "quickImage": "Quick image",
+    "quickImagesHint": "Pictures you add stay here: click one to show it to everyone.",
+    "showToAll": "Show to everyone",
+    "removeImage": "Remove from quick images",
+    "notes": {
+      "title": "Notes",
+      "placeholder": "Only you can see these notes. They're saved with the world.",
+      "saved": "Saved",
+      "editing": "Editing…",
+      "saving": "Saving…",
+      "error": "Not saved"
+    },
+    "errors": {
+      "invalid": "This request isn't valid.",
+      "notesTooLong": "These notes are too long.",
+      "tooManyImages": "Too many quick images: remove some first.",
+      "imageMissing": "This picture isn't on the host's device.",
+      "gameMasterOnly": "Only the game master can do that."
     }
   },
   "notFound": {

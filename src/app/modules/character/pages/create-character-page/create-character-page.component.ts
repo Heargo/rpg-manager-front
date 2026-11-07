@@ -33,6 +33,7 @@ export class CreateCharacterPageComponent {
   constructor() {
     // Nothing to do here once the player has a character (or isn't in a room).
     effect(() => {
+      if (this.creating()) return;
       if (this.characters.$myCharacter() || this.characters.$characters() === null) void this.router.navigate(['/room']);
     });
   }
@@ -51,7 +52,7 @@ export class CreateCharacterPageComponent {
     this.error.set(null);
     try {
       await this.characters.create(this.name(), this.portrait() ?? undefined);
-      await this.router.navigate(['/room']);
+      await this.router.navigate(['/room/table']);
     } catch (error) {
       this.error.set(this.characters.describeError(error));
     } finally {

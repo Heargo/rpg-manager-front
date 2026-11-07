@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
@@ -14,7 +14,7 @@ import { CharacterListComponent } from '../../../character/components/character-
 @Component({
   selector: 'app-room-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, ButtonModule, CardModule, MessageModule, InviteCardComponent, MemberListComponent, CharacterListComponent],
+  imports: [RouterLink, TranslocoPipe, ButtonModule, CardModule, MessageModule, InviteCardComponent, MemberListComponent, CharacterListComponent],
   templateUrl: './room-page.component.html',
   styleUrl: './room-page.component.scss',
 })

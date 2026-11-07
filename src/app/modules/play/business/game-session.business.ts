@@ -1,6 +1,8 @@
 import { effect, inject, Injectable } from '@angular/core';
 import { ImageBusiness } from '../../../core/business/image.business';
 import { CharacterHostBusiness } from '../../character/business/character-host.business';
+import { DiceHostBusiness } from '../../dice/business/dice-host.business';
+import { TableHostBusiness } from '../../table/business/table-host.business';
 import { RoomBusiness } from '../../room/business/room.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
 
@@ -14,6 +16,8 @@ export class GameSessionBusiness {
   private readonly session = inject(WorldSessionBusiness);
   private readonly characters = inject(CharacterHostBusiness);
   private readonly images = inject(ImageBusiness);
+  private readonly table = inject(TableHostBusiness);
+  private readonly dice = inject(DiceHostBusiness);
 
   private openWorldId: string | undefined;
   private stops: (() => void)[] = [];
@@ -39,7 +43,7 @@ export class GameSessionBusiness {
       return;
     }
     if (generation !== this.generation) return;
-    this.stops = [this.characters.start(), this.images.serveToPlayers()];
+    this.stops = [this.characters.start(), this.table.start(), this.dice.start(), this.images.serveToPlayers()];
   }
 
   private stop(): void {

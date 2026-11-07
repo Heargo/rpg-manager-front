@@ -7,6 +7,8 @@ import { PeerApiError } from '../../../core/p2p/helpers/peer-api-error';
 import { RoomBusiness } from '../../room/business/room.business';
 import { WorldInfoBusiness } from '../../world/business/world-info.business';
 import { Character } from '../../world/models/world';
+import { formatMoney } from '../../world/helpers/money';
+import { attributeStats, AttributeStat, barStats, BarStat } from '../helpers/character-stats';
 import { CharacterService } from '../services/character.service';
 
 /** Characters of the room this device is in, and creating one's own. */
@@ -51,6 +53,23 @@ export class CharacterBusiness {
       image = await this.images.toBase64(id);
     }
     return this.service.create({ name, portrait: image });
+  }
+
+  /** Every attribute of a character with its max (base + points + equipment) and current value. */
+  statsOf(character: Character): AttributeStat[] {
+    return attributeStats(this.$world()?.attributes ?? [], character);
+  }
+
+  /** The world's life and mana bars for a character. */
+  barsOf(character: Character): { life?: BarStat; mana?: BarStat } {
+    const world = this.$world();
+    return world ? barStats(this.statsOf(character), world.barAttributes) : {};
+  }
+
+  /** An amount in the world's money format and the active language. */
+  money(amount: number): string {
+    const format = this.$world()?.moneyFormat ?? { kind: 'coins' };
+    return formatMoney(amount, format, this.language.$language(), (count) => this.language.t('character.sheet.coins', { count }));
   }
 
   /** Name of the player behind a character, from the room's seats. */

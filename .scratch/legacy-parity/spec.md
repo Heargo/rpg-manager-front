@@ -153,7 +153,7 @@ d4: read the value at the top vertex (standard d4 convention), labels arranged a
 
 ### In a room
 
-Shared rolls send `{ count, sides, values, seed }`. Other players replay the throw from the seed and relabel to the same `values`, so they see the same result even if their physics drift slightly.
+Shared rolls ask the host to draw (so the roller can't pick the values); the host publishes `{ count, sides, values, seed }` and every device replays the throw from the seed and relabels to the same `values`, so they see the same result even if their physics drift slightly (decided in L06).
 
 ## Improvements over legacy
 

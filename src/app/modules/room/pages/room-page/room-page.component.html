@@ -6,7 +6,10 @@
           <h1>{{ room.$room()?.name }}</h1>
           <p class="hint"><i class="pi pi-crown"></i> {{ 'room.lobby.hosting' | transloco }}</p>
         </div>
-        <p-button icon="pi pi-times" [label]="'room.lobby.close' | transloco" severity="secondary" [text]="true" (onClick)="leave()" />
+        <div class="header-actions">
+          <p-button icon="pi pi-th-large" [label]="'table.open' | transloco" routerLink="/room/table" />
+          <p-button icon="pi pi-times" [label]="'room.lobby.close' | transloco" severity="secondary" [text]="true" (onClick)="leave()" />
+        </div>
       </header>
       @if (room.$restored()) {
         <p-message severity="info" icon="pi pi-replay">{{ 'room.lobby.restored' | transloco }}</p-message>
@@ -47,7 +50,12 @@
             }
           </p>
         </div>
-        <p-button icon="pi pi-sign-out" [label]="'room.lobby.leave' | transloco" severity="secondary" [text]="true" (onClick)="leave()" />
+        <div class="header-actions">
+          @if (room.$room()) {
+            <p-button icon="pi pi-th-large" [label]="'table.open' | transloco" routerLink="/room/table" />
+          }
+          <p-button icon="pi pi-sign-out" [label]="'room.lobby.leave' | transloco" severity="secondary" [text]="true" (onClick)="leave()" />
+        </div>
       </header>
       @if (room.$status() === 'host-offline') {
         <p-message severity="warn" icon="pi pi-exclamation-triangle">{{ 'room.lobby.hostOffline' | transloco }}</p-message>

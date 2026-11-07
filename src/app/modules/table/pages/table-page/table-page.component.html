@@ -1,0 +1,285 @@
+<div class="main-container table-page">
+  <header class="table-header">
+    <div>
+      <h1>{{ room.$room()?.name ?? ("table.title" | transloco) }}</h1>
+      <p class="hint">
+        @if (table.$isGameMaster()) {
+          <i class="pi pi-crown"></i> {{ "table.gameMaster" | transloco }}
+        } @else if (room.$status() === "connected") {
+          <i class="pi pi-wifi"></i> {{ "room.lobby.connected" | transloco }}
+        }
+      </p>
+    </div>
+    <div class="header-actions">
+      @if (table.$isGameMaster() && narrow()) {
+        <p-button
+          icon="pi pi-users"
+          [label]="'table.players' | transloco"
+          severity="secondary"
+          (onClick)="playersOpen.set(true)"
+        />
+      }
+      <p-button
+        icon="pi pi-sitemap"
+        [label]="'table.lobby' | transloco"
+        severity="secondary"
+        [text]="true"
+        routerLink="/room"
+      />
+    </div>
+  </header>
+
+  @if (room.$status() === "host-offline") {
+    <p-message severity="warn" icon="pi pi-exclamation-triangle">{{
+      "room.lobby.hostOffline" | transloco
+    }}</p-message>
+  }
+  @if (room.$status() === "removed") {
+    <p-message severity="error" icon="pi pi-user-minus">{{
+      "room.lobby.removed" | transloco
+    }}</p-message>
+  }
+
+  @if (table.$isGameMaster()) {
+    @if (narrow()) {
+      <div class="gm-stack">
+        <ng-container [ngTemplateOutlet]="scenePanel" />
+        <ng-container [ngTemplateOutlet]="toolsPanel" />
+      </div>
+      <p-drawer
+        [visible]="playersOpen()"
+        (visibleChange)="playersOpen.set($event)"
+        [header]="'table.players' | transloco"
+        position="left"
+      >
+        <ng-container [ngTemplateOutlet]="playersPanel" />
+      </p-drawer>
+    } @else {
+      <p-splitter
+        class="gm-splitter"
+        [panelSizes]="[22, 53, 25]"
+        [minSizes]="[15, 30, 18]"
+        stateKey="rpg-table-gm"
+        stateStorage="local"
+      >
+        <ng-template #panel
+          ><div class="panel">
+            <ng-container [ngTemplateOutlet]="playersPanel" /></div
+        ></ng-template>
+        <ng-template #panel
+          ><div class="panel">
+            <ng-container [ngTemplateOutlet]="scenePanel" /></div
+        ></ng-template>
+        <ng-template #panel
+          ><div class="panel">
+            <ng-container [ngTemplateOutlet]="toolsPanel" /></div
+        ></ng-template>
+      </p-splitter>
+    }
+  } @else {
+    <div class="player-layout">
+      <section class="illustration-area">
+        <ng-container [ngTemplateOutlet]="illustration" />
+      </section>
+      <aside class="player-side">
+        <p-card>
+          @if (characters.$myCharacter(); as mine) {
+            <app-character-summary [character]="mine" />
+          } @else if (characters.$needsCharacter()) {
+            <div class="cta">
+              <p>{{ "character.list.needOne" | transloco }}</p>
+              <p-button
+                icon="pi pi-user-plus"
+                [label]="'character.create.title' | transloco"
+                routerLink="/room/character"
+              />
+            </div>
+          } @else {
+            <p class="hint">{{ "table.waiting" | transloco }}</p>
+          }
+        </p-card>
+        <p-card [header]="'dice.title' | transloco">
+          <app-dice-roller />
+        </p-card>
+      </aside>
+    </div>
+  }
+</div>
+<app-dice-overlay />
+
+<!-- What everyone sees in the middle of the table. -->
+<ng-template #illustration>
+  @if (table.$scene()?.illustrationId; as imageId) {
+    <app-stored-image
+      class="illustration"
+      [imageId]="imageId"
+      [alt]="'table.illustration' | transloco"
+    >
+      <div class="empty"><i class="pi pi-spin pi-spinner"></i></div>
+    </app-stored-image>
+  } @else {
+    <div class="illustration empty">
+      <i class="pi pi-image"></i>
+      <span>{{
+        (table.$isGameMaster()
+          ? "table.noIllustrationGm"
+          : "table.noIllustration"
+        ) | transloco
+      }}</span>
+    </div>
+  }
+</ng-template>
+
+<!-- Game master: the characters, and the picked one's details. -->
+<ng-template #playersPanel>
+  @if (!narrow()) {
+    <h2>{{ "table.players" | transloco }}</h2>
+  }
+  @if (characters.$characters(); as list) {
+    @if (list.length) {
+      <ul
+        class="players"
+        role="listbox"
+        [attr.aria-label]="'table.players' | transloco"
+      >
+        @for (character of list; track character.id) {
+          <li
+            role="option"
+            [attr.aria-selected]="selected()?.id === character.id"
+          >
+            <button
+              type="button"
+              class="player"
+              [class.active]="selected()?.id === character.id"
+              (click)="select(character.id)"
+            >
+              <app-stored-image
+                class="avatar"
+                [imageId]="character.portraitId"
+                [alt]="character.name"
+              >
+                <span class="initial">{{
+                  character.name.charAt(0).toUpperCase()
+                }}</span>
+              </app-stored-image>
+              <span class="player-text">
+                <strong>{{ character.name }}</strong>
+                <small>{{
+                  characters.playerName(character.playerId) ?? ""
+                }}</small>
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+      @if (selected(); as character) {
+        <div class="selected">
+          <app-character-summary [character]="character" />
+        </div>
+      }
+    } @else {
+      <p class="hint">{{ "table.noPlayers" | transloco }}</p>
+      <p-button
+        icon="pi pi-user-plus"
+        [label]="'room.invite.add' | transloco"
+        [text]="true"
+        routerLink="/room"
+      />
+    }
+  }
+</ng-template>
+
+<!-- Game master: the illustration and the quick images. -->
+<ng-template #scenePanel>
+  <div class="scene">
+    <ng-container [ngTemplateOutlet]="illustration" />
+    <div class="scene-actions">
+      <p-fileupload
+        #uploader
+        mode="basic"
+        accept="image/*"
+        [auto]="true"
+        [customUpload]="true"
+        chooseIcon="pi pi-upload"
+        [chooseLabel]="'table.addImage' | transloco"
+        [disabled]="uploading()"
+        (uploadHandler)="upload($event, uploader)"
+      />
+      @if (table.$scene()?.illustrationId) {
+        <p-button
+          icon="pi pi-eye-slash"
+          [label]="'table.hideIllustration' | transloco"
+          severity="secondary"
+          [text]="true"
+          (onClick)="show(null)"
+        />
+      }
+    </div>
+    @if (table.$quickImageIds().length) {
+      <ul
+        class="quick-images"
+        [attr.aria-label]="'table.quickImages' | transloco"
+      >
+        @for (imageId of table.$quickImageIds(); track imageId) {
+          <li [class.active]="table.$scene()?.illustrationId === imageId">
+            <button
+              type="button"
+              class="thumb"
+              (click)="show(imageId)"
+              [pTooltip]="'table.showToAll' | transloco"
+              tooltipPosition="top"
+            >
+              <app-stored-image
+                [imageId]="imageId"
+                [alt]="'table.quickImage' | transloco"
+              />
+            </button>
+            <p-button
+              icon="pi pi-times"
+              severity="secondary"
+              [rounded]="true"
+              size="small"
+              styleClass="remove"
+              [ariaLabel]="'table.removeImage' | transloco"
+              (onClick)="remove(imageId)"
+            />
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="hint">{{ "table.quickImagesHint" | transloco }}</p>
+    }
+  </div>
+</ng-template>
+
+<!-- Game master: notes and dice. -->
+<ng-template #toolsPanel>
+  <div class="tools">
+    <section class="notes">
+      <div class="notes-header">
+        <h2>
+          <label for="gm-notes">{{ "table.notes.title" | transloco }}</label>
+        </h2>
+        <small
+          class="hint"
+          [class.error]="table.$notesState() === 'error'"
+          aria-live="polite"
+        >
+          {{ "table.notes." + table.$notesState() | transloco }}
+        </small>
+      </div>
+      <textarea
+        pTextarea
+        id="gm-notes"
+        [maxlength]="notesMaxLength"
+        [ngModel]="notes()"
+        (ngModelChange)="editNotes($event)"
+        [placeholder]="'table.notes.placeholder' | transloco"
+      ></textarea>
+    </section>
+    <section>
+      <h2>{{ "dice.title" | transloco }}</h2>
+      <app-dice-roller />
+    </section>
+  </div>
+</ng-template>

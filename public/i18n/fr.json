@@ -134,6 +134,14 @@
       "alreadyExists": "Vous avez déjà un personnage dans cette salle.",
       "notInRoom": "Vous n'êtes plus dans cette salle. Demandez une nouvelle invitation.",
       "hostHasNoCharacter": "Le maître du jeu ne joue pas de personnage."
+    },
+    "sheet": {
+      "playedBy": "Joué par {{ name }}",
+      "statPoints": "Points de stats",
+      "money": "Argent",
+      "attribute": "Attribut",
+      "value": "Valeur",
+      "coins": "{{ count }} pièces"
     }
   },
   "dice": {
@@ -145,7 +153,15 @@
     "again": "Relancer",
     "close": "Fermer",
     "history": "Lancers récents",
-    "skip": "Cliquez pour passer l'animation"
+    "skip": "Cliquez pour passer l'animation",
+    "share": "Partager avec la table",
+    "tableRolls": "Lancers de la table",
+    "rolledBy": "{{ name }} a lancé",
+    "errors": {
+      "invalid": "Ces dés ne peuvent pas être lancés.",
+      "notInRoom": "Vous n'êtes plus dans ce salon.",
+      "shareFailed": "Impossible de joindre l'hôte pour partager ce lancer. Désactivez le partage pour lancer ici."
+    }
   },
   "profile": {
     "title": "Votre profil",
@@ -237,6 +253,40 @@
       "hostedBy": "Hôte : {{ name }}",
       "lastSeen": "vue {{ date }}",
       "forget": "Oublier cette salle"
+    }
+  },
+  "table": {
+    "title": "Table de jeu",
+    "open": "Aller à la table",
+    "lobby": "Salon",
+    "gameMaster": "Vous êtes le maître du jeu",
+    "players": "Joueurs",
+    "noPlayers": "Aucun personnage à la table pour l'instant.",
+    "waiting": "En attente de l'hôte…",
+    "illustration": "Illustration",
+    "noIllustration": "Le maître du jeu n'a pas encore montré d'image.",
+    "noIllustrationGm": "Ajoutez une image pour la montrer à tous les joueurs.",
+    "addImage": "Ajouter une image",
+    "hideIllustration": "Masquer l'image",
+    "quickImages": "Images rapides",
+    "quickImage": "Image rapide",
+    "quickImagesHint": "Les images ajoutées restent ici : cliquez sur l'une d'elles pour la montrer à tous.",
+    "showToAll": "Montrer à tous",
+    "removeImage": "Retirer des images rapides",
+    "notes": {
+      "title": "Notes",
+      "placeholder": "Vous seul voyez ces notes. Elles sont enregistrées avec le monde.",
+      "saved": "Enregistré",
+      "editing": "Modification…",
+      "saving": "Enregistrement…",
+      "error": "Non enregistré"
+    },
+    "errors": {
+      "invalid": "Cette demande n'est pas valide.",
+      "notesTooLong": "Ces notes sont trop longues.",
+      "tooManyImages": "Trop d'images rapides : retirez-en d'abord.",
+      "imageMissing": "Cette image n'est pas sur l'appareil de l'hôte.",
+      "gameMasterOnly": "Seul le maître du jeu peut faire ça."
     }
   },
   "notFound": {

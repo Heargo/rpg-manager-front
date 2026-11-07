@@ -1,4 +1,8 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { NEVER } from 'rxjs';
+import { ProfileBusiness } from '../../../core/business/profile.business';
+import { DiceService } from '../services/dice.service';
 import { MAX_THROWN_DICE, planDice, totalRatio } from '../helpers/dice-plan';
 import { DiceRollBusiness } from './dice-roll.business';
 
@@ -6,7 +10,12 @@ describe('DiceRollBusiness', () => {
   let dice: DiceRollBusiness;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ProfileBusiness, useValue: { $profile: signal({ playerId: 'me', name: 'Me' }) } },
+        { provide: DiceService, useValue: { canShare: () => false, watchRolls: () => NEVER } },
+      ],
+    });
     dice = TestBed.inject(DiceRollBusiness);
   });
 

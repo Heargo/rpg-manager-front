@@ -29,6 +29,9 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
         }
         <div class="bar" #bar [class.settled]="dice.$settled()">
           <div class="values" aria-live="polite">
+            @if (roll.shared && !roll.shared.mine) {
+              <span class="by">{{ 'dice.rolledBy' | transloco: { name: roll.shared.name } }}</span>
+            }
             @if (dice.$settled()) {
               <span class="notation">{{ roll.count }}d{{ roll.sides }}</span>
               @if (roll.values.length > 1) {
@@ -40,7 +43,9 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
             }
           </div>
           <div class="actions">
-            <p-button icon="pi pi-refresh" [label]="'dice.again' | transloco" (onClick)="again()" />
+            @if (!roll.shared || roll.shared.mine) {
+              <p-button icon="pi pi-refresh" [label]="'dice.again' | transloco" (onClick)="again()" />
+            }
             <p-button icon="pi pi-times" [label]="'dice.close' | transloco" severity="secondary" (onClick)="close()" />
           </div>
         </div>
@@ -59,6 +64,7 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
       background: var(--p-surface-0); box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
     }
     .values { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: baseline; min-width: 0; }
+    .by { font-weight: 600; }
     .notation, .hint { color: var(--p-text-muted-color); }
     .list { overflow-wrap: anywhere; }
     .total { font-size: 1.75rem; }
@@ -109,7 +115,7 @@ export class DiceOverlayComponent {
   }
 
   protected again(): void {
-    this.dice.roll();
+    this.dice.rollAgain().catch((error) => console.error('Roll again failed', error));
   }
 
   protected close(): void {
