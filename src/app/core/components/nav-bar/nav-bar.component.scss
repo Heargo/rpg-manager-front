@@ -1,0 +1,7 @@
+// Stays at the top while the page scrolls; in the flow, so pages need no top margin for it.
+:host {
+  display: block;
+  position: sticky;
+  top: 0.5rem;
+  z-index: 10;
+}
