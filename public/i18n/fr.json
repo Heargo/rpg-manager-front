@@ -547,7 +547,8 @@
     "screenshotAlt": "La fiche de personnage de RPG Manager affichant un inventaire",
     "footerCredits": "Crédits",
     "footerContact": "Contact",
-    "footerPrivacy": "Politique de confidentialité"
+    "footerPrivacy": "Politique de confidentialité",
+    "scrollDown": "Défiler vers le contenu"
   },
   "credits": {
     "title": "Crédits",

@@ -547,7 +547,8 @@
     "screenshotAlt": "The RPG Manager character sheet showing an inventory",
     "footerCredits": "Credits",
     "footerContact": "Contact",
-    "footerPrivacy": "Privacy policy"
+    "footerPrivacy": "Privacy policy",
+    "scrollDown": "Scroll down to the content"
   },
   "credits": {
     "title": "Credits",

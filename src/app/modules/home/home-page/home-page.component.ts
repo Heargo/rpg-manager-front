@@ -9,4 +9,11 @@ import { TranslocoPipe } from '@jsverse/transloco';
   imports: [RouterLink, TranslocoPipe],
   styleUrls: ['./home-page.component.scss'],
 })
-export class HomePageComponent {}
+export class HomePageComponent {
+  protected scrollToContent(content: HTMLElement): void {
+    const reduced = window.matchMedia?.(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+    content.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
+  }
+}
