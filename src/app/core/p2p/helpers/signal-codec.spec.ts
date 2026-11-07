@@ -1,54 +1,52 @@
 import { CHROME_OFFER, FIREFOX_ANSWER } from '../../../../testing/sdp-samples';
 import { parseDataChannelSdp } from './compact-sdp';
-import { decodeSignal, encodeFullSdp, encodeSignal, extractSignalCode, SignalCodeError } from './signal-codec';
+import { decodeSignal, encodeSignal, extractSignalCode, SignalCodeError } from './signal-codec';
 
 describe('signal codec', () => {
-  it('encodes v2 codes that decode to the same connection data', async () => {
-    const offer = await encodeSignal({ type: 'offer', sdp: CHROME_OFFER });
-    const answer = await encodeSignal({ type: 'answer', sdp: FIREFOX_ANSWER });
+  it('encodes v2 codes that decode to the same connection data', () => {
+    const offer = encodeSignal({ type: 'offer', sdp: CHROME_OFFER });
+    const answer = encodeSignal({ type: 'answer', sdp: FIREFOX_ANSWER });
 
     expect(offer.startsWith('2.')).toBe(true);
-    expect(parseDataChannelSdp((await decodeSignal(offer, 'offer')).sdp)?.ufrag).toBe('x9cm');
-    expect(parseDataChannelSdp((await decodeSignal(answer, 'answer')).sdp)?.mid).toBe('sdparta_0');
+    expect(parseDataChannelSdp(decodeSignal(offer, 'offer').sdp)?.ufrag).toBe('x9cm');
+    expect(parseDataChannelSdp(decodeSignal(answer, 'answer').sdp)?.mid).toBe('sdparta_0');
   });
 
-  it('makes short, URL-safe codes', async () => {
-    const code = await encodeSignal({ type: 'offer', sdp: CHROME_OFFER });
+  it('makes short, URL-safe codes', () => {
+    const code = encodeSignal({ type: 'offer', sdp: CHROME_OFFER });
     expect(code).toMatch(/^2\.[A-Za-z0-9_-]+$/);
     expect(code.length).toBeLessThan(200);
   });
 
-  it('falls back to v1 for an SDP the compact form cannot hold, and still decodes v1', async () => {
-    const odd = CHROME_OFFER.replace('a=mid:0', 'a=mid:0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111');
-    const code = await encodeSignal({ type: 'offer', sdp: odd });
-    expect(code.startsWith('1.')).toBe(true);
-    expect((await decodeSignal(code, 'offer')).sdp).toBe(odd);
-
-    const v1 = await encodeFullSdp({ type: 'answer', sdp: FIREFOX_ANSWER });
-    expect((await decodeSignal(v1, 'answer')).sdp).toBe(FIREFOX_ANSWER);
+  it('refuses to encode an SDP that is not a data channel with candidates', () => {
+    const audio = CHROME_OFFER.replace('a=mid:0', 'a=mid:0\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111');
+    expect(() => encodeSignal({ type: 'offer', sdp: audio })).toThrow('Unsupported SDP');
+    const noCandidates = CHROME_OFFER.split('\r\n').filter((line) => !line.startsWith('a=candidate')).join('\r\n');
+    expect(() => encodeSignal({ type: 'offer', sdp: noCandidates })).toThrow('Unsupported SDP');
   });
 
-  it('accepts a full invite link and whitespace from chat apps', async () => {
-    const code = await encodeSignal({ type: 'offer', sdp: CHROME_OFFER });
+  it('accepts a full invite link and whitespace from chat apps', () => {
+    const code = encodeSignal({ type: 'offer', sdp: CHROME_OFFER });
     const wrapped = `https://rpg.example/join#${code.slice(0, 20)}\n  ${code.slice(20)}`;
-    expect(parseDataChannelSdp((await decodeSignal(wrapped, 'offer')).sdp)?.ufrag).toBe('x9cm');
+    expect(parseDataChannelSdp(decodeSignal(wrapped, 'offer').sdp)?.ufrag).toBe('x9cm');
   });
 
-  it('explains what is wrong with a bad code', async () => {
-    const answer = await encodeSignal({ type: 'answer', sdp: FIREFOX_ANSWER });
-    const v1 = await encodeFullSdp({ type: 'answer', sdp: FIREFOX_ANSWER });
-    const reason = (input: string, expected: 'offer' | 'answer') =>
-      decodeSignal(input, expected).then(
-        () => 'ok',
-        (error: SignalCodeError) => error.reason,
-      );
+  it('explains what is wrong with a bad code', () => {
+    const answer = encodeSignal({ type: 'answer', sdp: FIREFOX_ANSWER });
+    const reason = (input: string, expected: 'offer' | 'answer') => {
+      try {
+        decodeSignal(input, expected);
+        return 'ok';
+      } catch (error) {
+        return (error as SignalCodeError).reason;
+      }
+    };
 
-    expect(await reason('   ', 'offer')).toBe('empty');
-    expect(await reason(answer.replace(/^2\./, '9.'), 'answer')).toBe('version');
-    expect(await reason('2.not*base64', 'offer')).toBe('corrupt');
-    expect(await reason(answer.slice(0, answer.length - 8), 'answer')).toBe('corrupt');
-    expect(await reason(v1.slice(0, v1.length - 12), 'answer')).toBe('corrupt');
-    expect(await reason(answer, 'offer')).toBe('wrong-type');
+    expect(reason('   ', 'offer')).toBe('empty');
+    expect(reason(answer.replace(/^2\./, '9.'), 'answer')).toBe('version');
+    expect(reason('2.not*base64', 'offer')).toBe('corrupt');
+    expect(reason(answer.slice(0, answer.length - 8), 'answer')).toBe('corrupt');
+    expect(reason(answer, 'offer')).toBe('wrong-type');
   });
 
   it('extracts the code part', () => {

@@ -60,13 +60,13 @@ export class WebRtcTransport implements RoomTransport {
     await this.gathered(connection);
     const id = crypto.randomUUID();
     this.pending.set(id, { connection, channel });
-    return { id, offerCode: await encodeSignal({ type: 'offer', sdp: connection.localDescription!.sdp }) };
+    return { id, offerCode: encodeSignal({ type: 'offer', sdp: connection.localDescription!.sdp }) };
   }
 
   async acceptAnswer(inviteId: string, answerCode: string): Promise<PeerId> {
     const link = this.pending.get(inviteId);
     if (!link) throw new TransportError('unknown-invite');
-    const answer = await decodeSignal(answerCode, 'answer');
+    const answer = decodeSignal(answerCode, 'answer');
     await link.connection.setRemoteDescription(answer);
     try {
       await opened(link.channel, link.connection, this.connectTimeoutMs);
@@ -85,7 +85,7 @@ export class WebRtcTransport implements RoomTransport {
   }
 
   async answerInvite(offerCode: string): Promise<AnsweredInvite> {
-    const offer = await decodeSignal(offerCode, 'offer');
+    const offer = decodeSignal(offerCode, 'offer');
     const connection = this.newConnection();
     const channel = new Promise<RTCDataChannel>((resolve) => {
       connection.ondatachannel = (event) => resolve(event.channel);
@@ -93,7 +93,7 @@ export class WebRtcTransport implements RoomTransport {
     await connection.setRemoteDescription(offer);
     await connection.setLocalDescription(await connection.createAnswer());
     await this.gathered(connection);
-    const answerCode = await encodeSignal({ type: 'answer', sdp: connection.localDescription!.sdp });
+    const answerCode = encodeSignal({ type: 'answer', sdp: connection.localDescription!.sdp });
 
     // No timeout here: the host may take minutes to paste the answer. A failed connection still rejects.
     const connected = channel

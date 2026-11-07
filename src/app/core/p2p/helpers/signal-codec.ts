@@ -1,13 +1,11 @@
 import { buildDataChannelSdp, packCompactSdp, parseDataChannelSdp, unpackCompactSdp } from './compact-sdp';
 
 /**
- * Offer and answer codes for the manual WebRTC handshake (p2p-rooms spec, "Encoding the codes").
- * - v2 (default): "2." + base64url(compact binary SDP), ~200 characters. See compact-sdp.ts.
- * - v1 (fallback for SDPs v2 can't represent, still decoded): "1." + base64url(deflate-raw("o|"/"a|" + SDP)).
+ * Offer and answer codes for the manual WebRTC handshake (p2p-rooms spec, "Encoding the codes"):
+ * "2." + base64url(compact binary SDP), ~150–200 characters. See compact-sdp.ts.
  */
 
 export const SIGNAL_CODE_VERSION = '2';
-const FULL_SDP_VERSION = '1';
 
 export type SignalType = 'offer' | 'answer';
 
@@ -24,52 +22,25 @@ export interface SignalDescription {
   sdp: string;
 }
 
-const TYPE_MARK: Record<SignalType, string> = { offer: 'o', answer: 'a' };
-
-export async function encodeSignal(description: SignalDescription): Promise<string> {
+/** Throws if the SDP isn't a single data channel with candidates (the only kind this app creates). */
+export function encodeSignal(description: SignalDescription): string {
   const compact = parseDataChannelSdp(description.sdp);
-  if (compact && compact.candidates.length > 0) {
-    return `${SIGNAL_CODE_VERSION}.${toBase64Url(packCompactSdp(compact, description.type === 'offer'))}`;
+  if (!compact || compact.candidates.length === 0) {
+    throw new Error('Unsupported SDP: expected a data channel with candidates');
   }
-  return encodeFullSdp(description);
-}
-
-/** v1: the whole SDP, compressed. Used when the compact form can't represent the SDP. */
-export async function encodeFullSdp(description: SignalDescription): Promise<string> {
-  const payload = new TextEncoder().encode(`${TYPE_MARK[description.type]}|${description.sdp}`);
-  const compressed = await transform(payload, new CompressionStream('deflate-raw'));
-  return `${FULL_SDP_VERSION}.${toBase64Url(compressed)}`;
+  return `${SIGNAL_CODE_VERSION}.${toBase64Url(packCompactSdp(compact, description.type === 'offer'))}`;
 }
 
 /** Decodes a code (or a whole invite link) and checks it is the expected kind. */
-export async function decodeSignal(input: string, expected: SignalType): Promise<SignalDescription> {
+export function decodeSignal(input: string, expected: SignalType): SignalDescription {
   const code = extractSignalCode(input);
   if (!code) throw new SignalCodeError('empty');
   const dot = code.indexOf('.');
-  const version = dot < 0 ? '' : code.slice(0, dot);
-  if (version === SIGNAL_CODE_VERSION) return decodeCompact(code.slice(dot + 1), expected);
-  if (version !== FULL_SDP_VERSION) throw new SignalCodeError('version');
+  if (dot < 0 || code.slice(0, dot) !== SIGNAL_CODE_VERSION) throw new SignalCodeError('version');
 
-  let text: string;
-  try {
-    const bytes = await transform(fromBase64Url(code.slice(dot + 1)), new DecompressionStream('deflate-raw'));
-    text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
-  } catch {
-    throw new SignalCodeError('corrupt');
-  }
-
-  const mark = text.slice(0, 2);
-  const type = mark === 'o|' ? 'offer' : mark === 'a|' ? 'answer' : undefined;
-  const sdp = text.slice(2);
-  if (!type || !sdp.startsWith('v=0')) throw new SignalCodeError('corrupt');
-  if (type !== expected) throw new SignalCodeError('wrong-type');
-  return { type, sdp };
-}
-
-function decodeCompact(payload: string, expected: SignalType): SignalDescription {
   let decoded: ReturnType<typeof unpackCompactSdp>;
   try {
-    decoded = unpackCompactSdp(fromBase64Url(payload));
+    decoded = unpackCompactSdp(fromBase64Url(code.slice(dot + 1)));
   } catch {
     throw new SignalCodeError('corrupt');
   }
@@ -83,25 +54,6 @@ function decodeCompact(payload: string, expected: SignalType): SignalDescription
 export function extractSignalCode(input: string): string {
   const hash = input.indexOf('#');
   return (hash >= 0 ? input.slice(hash + 1) : input).replace(/\s+/g, '');
-}
-
-async function transform(bytes: Uint8Array, stream: CompressionStream | DecompressionStream): Promise<Uint8Array> {
-  const writer = stream.writable.getWriter();
-  // Don't await: the readable side must be drained at the same time or large inputs stall.
-  const written = writer.write(bytes as BufferSource).then(() => writer.close());
-  // If the data is corrupt the reader throws first; the writer then rejects too and must not go unhandled.
-  written.catch(() => undefined);
-  const chunks: Uint8Array[] = [];
-  const reader = stream.readable.getReader();
-  for (let result = await reader.read(); !result.done; result = await reader.read()) chunks.push(result.value);
-  await written;
-  const output = new Uint8Array(chunks.reduce((size, chunk) => size + chunk.length, 0));
-  let offset = 0;
-  for (const chunk of chunks) {
-    output.set(chunk, offset);
-    offset += chunk.length;
-  }
-  return output;
 }
 
 function toBase64Url(bytes: Uint8Array): string {
