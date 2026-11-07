@@ -1,9 +1,13 @@
+import { buildDataChannelSdp, packCompactSdp, parseDataChannelSdp, unpackCompactSdp } from './compact-sdp';
+
 /**
  * Offer and answer codes for the manual WebRTC handshake (p2p-rooms spec, "Encoding the codes").
- * Code = "1." + base64url(deflate-raw("o|" or "a|" + SDP)).
+ * - v2 (default): "2." + base64url(compact binary SDP), ~200 characters. See compact-sdp.ts.
+ * - v1 (fallback for SDPs v2 can't represent, still decoded): "1." + base64url(deflate-raw("o|"/"a|" + SDP)).
  */
 
-export const SIGNAL_CODE_VERSION = '1';
+export const SIGNAL_CODE_VERSION = '2';
+const FULL_SDP_VERSION = '1';
 
 export type SignalType = 'offer' | 'answer';
 
@@ -23,9 +27,18 @@ export interface SignalDescription {
 const TYPE_MARK: Record<SignalType, string> = { offer: 'o', answer: 'a' };
 
 export async function encodeSignal(description: SignalDescription): Promise<string> {
+  const compact = parseDataChannelSdp(description.sdp);
+  if (compact && compact.candidates.length > 0) {
+    return `${SIGNAL_CODE_VERSION}.${toBase64Url(packCompactSdp(compact, description.type === 'offer'))}`;
+  }
+  return encodeFullSdp(description);
+}
+
+/** v1: the whole SDP, compressed. Used when the compact form can't represent the SDP. */
+export async function encodeFullSdp(description: SignalDescription): Promise<string> {
   const payload = new TextEncoder().encode(`${TYPE_MARK[description.type]}|${description.sdp}`);
   const compressed = await transform(payload, new CompressionStream('deflate-raw'));
-  return `${SIGNAL_CODE_VERSION}.${toBase64Url(compressed)}`;
+  return `${FULL_SDP_VERSION}.${toBase64Url(compressed)}`;
 }
 
 /** Decodes a code (or a whole invite link) and checks it is the expected kind. */
@@ -33,7 +46,9 @@ export async function decodeSignal(input: string, expected: SignalType): Promise
   const code = extractSignalCode(input);
   if (!code) throw new SignalCodeError('empty');
   const dot = code.indexOf('.');
-  if (dot < 0 || code.slice(0, dot) !== SIGNAL_CODE_VERSION) throw new SignalCodeError('version');
+  const version = dot < 0 ? '' : code.slice(0, dot);
+  if (version === SIGNAL_CODE_VERSION) return decodeCompact(code.slice(dot + 1), expected);
+  if (version !== FULL_SDP_VERSION) throw new SignalCodeError('version');
 
   let text: string;
   try {
@@ -49,6 +64,19 @@ export async function decodeSignal(input: string, expected: SignalType): Promise
   if (!type || !sdp.startsWith('v=0')) throw new SignalCodeError('corrupt');
   if (type !== expected) throw new SignalCodeError('wrong-type');
   return { type, sdp };
+}
+
+function decodeCompact(payload: string, expected: SignalType): SignalDescription {
+  let decoded: ReturnType<typeof unpackCompactSdp>;
+  try {
+    decoded = unpackCompactSdp(fromBase64Url(payload));
+  } catch {
+    throw new SignalCodeError('corrupt');
+  }
+  const type: SignalType = decoded.isOffer ? 'offer' : 'answer';
+  if (type !== expected) throw new SignalCodeError('wrong-type');
+  const sessionId = String(Math.floor(Math.random() * 2 ** 52) + 1);
+  return { type, sdp: buildDataChannelSdp(decoded.compact, sessionId) };
 }
 
 /** Accepts a bare code or a link with the code after `#`, and drops whitespace chat apps add when wrapping. */
@@ -83,7 +111,7 @@ function toBase64Url(bytes: Uint8Array): string {
 }
 
 function fromBase64Url(text: string): Uint8Array {
-  if (!/^[A-Za-z0-9_-]*$/.test(text)) throw new SignalCodeError('corrupt');
+  if (!/^[A-Za-z0-9_-]*$/.test(text) || text.length % 4 === 1) throw new SignalCodeError('corrupt');
   const base64 = text.replace(/-/g, '+').replace(/_/g, '/');
   const binary = atob(base64 + '='.repeat((4 - (base64.length % 4)) % 4));
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
