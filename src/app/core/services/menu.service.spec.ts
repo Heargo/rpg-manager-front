@@ -11,6 +11,7 @@ describe('MenuService', () => {
       '/dice',
       '/tools/item-generator',
       '/tools/character-sheet',
+      '/tools/item-catalogue',
       '/tools/links',
     ]);
     expect(items.some((item) => item.label === 'nav.dice')).toBe(false);

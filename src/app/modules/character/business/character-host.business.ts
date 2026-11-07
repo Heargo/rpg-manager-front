@@ -79,7 +79,8 @@ export class CharacterHostBusiness {
     return created!;
   }
 
-  private publish(): void {
+  /** Sends the characters to every player. */
+  publish(): void {
     const world = this.session.$world();
     if (world) this.service.publishCharacters(world.characters);
   }

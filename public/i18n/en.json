@@ -9,6 +9,7 @@
     "dice": "Dice",
     "tools": "Tools",
     "itemGenerator": "Item generator",
+    "itemCatalogue": "Item catalogue",
     "externalTools": "External tools",
     "characterSheet": "Character sheet"
   },
@@ -216,7 +217,31 @@
       "slot": "Slot"
     },
     "modifiers": "Modifiers",
-    "price": "{{ price }} coins"
+    "price": "{{ price }} coins",
+    "catalogue": {
+      "title": "Item catalogue",
+      "back": "Back to the room",
+      "search": "Search by name",
+      "price": "Price: {{ min }} to {{ max }}",
+      "addDefaults": "Add default items",
+      "give": "Give",
+      "delete": "Delete",
+      "empty": "No item matches.",
+      "deleteTitle": "Delete this item?",
+      "deleteMessage": "{{ name }} leaves the catalogue. Copies already in inventories stay.",
+      "giveTitle": "Give {{ name }}",
+      "giveTo": "Give to",
+      "noPlayers": "No player has a character yet.",
+      "given": "{{ item }} given to {{ name }}",
+      "notHosting": "Host a world to manage its item catalogue.",
+      "toolIntro": "A sample catalogue on the default attributes. Nothing is saved."
+    },
+    "errors": {
+      "invalid": "This item can't be given.",
+      "gameMasterOnly": "Only the game master gives items.",
+      "unknownItem": "This item isn't in the catalogue.",
+      "unknownCharacter": "This character doesn't exist."
+    }
   },
   "dice": {
     "title": "Dice",

@@ -24,6 +24,7 @@ export class MenuService {
         { label: 'nav.dice', icon: 'pi pi-box', routerLink: '/dice' },
         { label: 'nav.itemGenerator', icon: 'pi pi-sparkles', routerLink: '/tools/item-generator' },
         { label: 'nav.characterSheet', icon: 'pi pi-id-card', routerLink: '/tools/character-sheet' },
+        { label: 'nav.itemCatalogue', icon: 'pi pi-shopping-bag', routerLink: '/tools/item-catalogue' },
         { label: 'nav.externalTools', icon: 'pi pi-external-link', routerLink: '/tools/links' },
       ],
     },

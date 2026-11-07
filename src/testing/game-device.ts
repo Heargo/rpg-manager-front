@@ -18,6 +18,8 @@ import { RoomBusiness } from '../app/modules/room/business/room.business';
 import { HostLockService } from '../app/modules/room/services/host-lock.service';
 import { RoomStorageService } from '../app/modules/room/services/room-storage.service';
 import { RoomService } from '../app/modules/room/services/room.service';
+import { ItemHostBusiness } from '../app/modules/item/business/item-host.business';
+import { ItemService } from '../app/modules/item/services/item.service';
 import { TableHostBusiness } from '../app/modules/table/business/table-host.business';
 import { TableBusiness } from '../app/modules/table/business/table.business';
 import { TableService } from '../app/modules/table/services/table.service';
@@ -53,6 +55,8 @@ const GAME_DEVICE = [
   DiceService,
   DiceHostBusiness,
   DiceRollBusiness,
+  ItemService,
+  ItemHostBusiness,
   GameSessionBusiness,
   ImageTransferService,
   ImageBusiness,

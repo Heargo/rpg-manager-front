@@ -8,6 +8,7 @@ import { routesWorld } from './modules/world/world.routes';
 import { routesCharacter } from './modules/character/character.routes';
 import { routesDice } from './modules/dice/dice.routes';
 import { routesTable } from './modules/table/table.routes';
+import { routesItem } from './modules/item/item.routes';
 import { routesTools } from './modules/tools/tools.routes';
 
 export const routes: Routes = [
@@ -19,6 +20,7 @@ export const routes: Routes = [
   ...routesRoom,
   ...routesWorld,
   ...routesDice,
+  ...routesItem,
   ...routesTools,
   { path: '**', redirectTo: '' },
 ];

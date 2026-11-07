@@ -9,6 +9,7 @@
     "dice": "Dés",
     "tools": "Outils",
     "itemGenerator": "Générateur d'objets",
+    "itemCatalogue": "Catalogue d'objets",
     "externalTools": "Outils externes",
     "characterSheet": "Fiche de personnage"
   },
@@ -216,7 +217,31 @@
       "slot": "Emplacement"
     },
     "modifiers": "Modificateurs",
-    "price": "{{ price }} pièces"
+    "price": "{{ price }} pièces",
+    "catalogue": {
+      "title": "Catalogue d'objets",
+      "back": "Retour à la salle",
+      "search": "Rechercher par nom",
+      "price": "Prix : de {{ min }} à {{ max }}",
+      "addDefaults": "Ajouter les objets par défaut",
+      "give": "Donner",
+      "delete": "Supprimer",
+      "empty": "Aucun objet ne correspond.",
+      "deleteTitle": "Supprimer cet objet ?",
+      "deleteMessage": "{{ name }} quitte le catalogue. Les copies déjà dans les inventaires restent.",
+      "giveTitle": "Donner {{ name }}",
+      "giveTo": "Donner à",
+      "noPlayers": "Aucun joueur n'a encore de personnage.",
+      "given": "{{ item }} donné à {{ name }}",
+      "notHosting": "Hébergez un monde pour gérer son catalogue d'objets.",
+      "toolIntro": "Un catalogue d'exemple sur les attributs par défaut. Rien n'est enregistré."
+    },
+    "errors": {
+      "invalid": "Cet objet ne peut pas être donné.",
+      "gameMasterOnly": "Seul le maître du jeu donne des objets.",
+      "unknownItem": "Cet objet n'est pas dans le catalogue.",
+      "unknownCharacter": "Ce personnage n'existe pas."
+    }
   },
   "dice": {
     "title": "Dés",
