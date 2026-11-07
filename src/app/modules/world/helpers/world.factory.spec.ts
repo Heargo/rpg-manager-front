@@ -8,7 +8,7 @@ function ids() {
 
 describe('createWorld', () => {
   it('has no money format: money is always integer copper', () => {
-    const world = createWorld({ name: 'Eldoria', attributes: [{ name: 'Life', baseValue: 10 }, { name: 'Mana', baseValue: 5 }], barAttributes: { life: 'Life', mana: 'Mana' } }, ids(), 1000);
+    const world = createWorld({ name: 'Eldoria', attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }, { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } }], barAttributes: { life: 'Life', mana: 'Mana' } }, ids(), 1000);
     expect(world).not.toHaveProperty('moneyFormat');
   });
 
@@ -17,8 +17,8 @@ describe('createWorld', () => {
       {
         name: '  Eldoria ',
         attributes: [
-          { name: ' Life ', baseValue: 10 },
-          { name: 'Mana', baseValue: 5 },
+          { name: ' Life ', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+          { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } },
         ],
         barAttributes: { life: 'Life', mana: 'Mana' },
         offlineFeatures: { sell: true },
@@ -32,8 +32,8 @@ describe('createWorld', () => {
       name: 'Eldoria',
       description: '',
       attributes: [
-        { id: 'id1', name: 'Life', baseValue: 10 },
-        { id: 'id2', name: 'Mana', baseValue: 5 },
+        { id: 'id1', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+        { id: 'id2', name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } },
       ],
       barAttributes: { life: 'id1', mana: 'id2' },
       startingStatPoints: 0,
@@ -45,6 +45,24 @@ describe('createWorld', () => {
       createdAt: 1000,
       updatedAt: 1000,
     });
+  });
+
+  it('keeps each attribute formula, preset or custom', () => {
+    const world = createWorld(
+      {
+        name: 'W',
+        attributes: [
+          { name: 'Life', baseValue: 10, formula: { preset: 'steep-linear', step: 5 } },
+          { name: 'Luck', baseValue: 1, formula: { preset: 'custom', expression: 'base + level ^ 2' } },
+        ],
+      },
+      ids(),
+      0,
+    );
+    expect(world.attributes.map((attribute) => attribute.formula)).toEqual([
+      { preset: 'steep-linear', step: 5 },
+      { preset: 'custom', expression: 'base + level ^ 2' },
+    ]);
   });
 
   it('leaves a bar empty when its attribute name does not exist', () => {

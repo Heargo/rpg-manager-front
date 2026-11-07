@@ -41,7 +41,7 @@ describe('saving an item from the editor', () => {
     async function setup() {
       const world = await TestBed.inject(WorldLibraryBusiness).create({
         name: 'Eldoria',
-        attributes: [{ name: 'Life', baseValue: 10 }],
+        attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }],
       });
       await TestBed.inject(WorldSessionBusiness).open(world.id);
       return { id: world.id, catalogue: TestBed.inject(ItemCatalogueBusiness) };

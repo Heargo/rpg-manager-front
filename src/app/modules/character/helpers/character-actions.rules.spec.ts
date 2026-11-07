@@ -12,8 +12,8 @@ import {
 import { attributeStats } from './character-stats';
 
 const attributes: WorldAttribute[] = [
-  { id: 'life', name: 'Life', baseValue: 10 },
-  { id: 'str', name: 'Strength', baseValue: 2 },
+  { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+  { id: 'str', name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
 ];
 
 function entry(
@@ -65,8 +65,8 @@ function character(overrides: Partial<Character> = {}): Character {
     statPoints: 2,
     money: 5000,
     attributes: [
-      { attributeId: 'life', points: 0, current: 4 },
-      { attributeId: 'str', points: 0, current: 2 },
+      { attributeId: 'life', level: 0, current: 4 },
+      { attributeId: 'str', level: 0, current: 2 },
     ],
     inventory: [helmA, helmB, ring, potion, rock],
     rev: 1,
@@ -92,7 +92,42 @@ describe('character actions', () => {
       }),
     );
     expect(next.statPoints).toBe(1);
-    expect(stat(next, 'str')).toMatchObject({ points: 1, max: 3, current: 3 });
+    expect(stat(next, 'str')).toMatchObject({ level: 1, max: 3, current: 3 });
+  });
+
+  it('raises max and current by the same delta, whatever the formula', () => {
+    // Diminishing, base 10, step 4: level 0 -> 10, level 1 -> 18, level 2 -> 21 (21.31 rounded).
+    const wit: WorldAttribute[] = [
+      ...attributes,
+      { id: 'wit', name: 'Wit', baseValue: 10, formula: { preset: 'diminishing', step: 4 } },
+    ];
+    const start = character({
+      statPoints: 2,
+      attributes: [{ attributeId: 'wit', level: 0, current: 4 }],
+    });
+    const first = ok(applyCharacterAction(wit, start, { kind: 'spend-stat-point', attributeId: 'wit' }));
+    expect(attributeStats(wit, first).find((s) => s.attributeId === 'wit')).toMatchObject({
+      level: 1,
+      max: 18,
+      current: 12,
+    });
+    const second = ok(applyCharacterAction(wit, first, { kind: 'spend-stat-point', attributeId: 'wit' }));
+    expect(attributeStats(wit, second).find((s) => s.attributeId === 'wit')).toMatchObject({
+      level: 2,
+      max: 21,
+      current: 15,
+    });
+  });
+
+  it('keeps set-current and use capped at the formula max', () => {
+    const steep: WorldAttribute[] = [
+      { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'steep-linear', step: 5 } },
+    ];
+    const start = character({ attributes: [{ attributeId: 'life', level: 2, current: 18 }], inventory: [potion] });
+    const set = ok(applyCharacterAction(steep, start, { kind: 'set-current', attributeId: 'life', value: 99 }));
+    expect(set.attributes[0]).toMatchObject({ level: 2, current: 20 });
+    const used = ok(applyCharacterAction(steep, start, { kind: 'use', inventoryId: 'potion' }));
+    expect(used.attributes[0]).toMatchObject({ level: 2, current: 20 });
   });
 
   it('refuses to spend without points or on an unknown attribute', () => {

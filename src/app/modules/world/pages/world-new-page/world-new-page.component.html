@@ -57,6 +57,7 @@
           <ng-template #content>
             <div class="panel">
               <p class="hint">{{ 'world.new.attributesHint' | transloco }}</p>
+              <p class="hint">{{ 'world.new.formulaHint' | transloco }}</p>
               <div class="attributes" role="table">
                 <div class="row head" role="row">
                   <span role="columnheader">{{ 'world.fields.attributeName' | transloco }}</span>
@@ -87,6 +88,65 @@
                       [ariaLabel]="'world.new.removeAttribute' | transloco"
                       (onClick)="removeAttribute(attribute.key)"
                     />
+                  </div>
+                  <div class="formula" role="row">
+                    <label class="formula-field">
+                      <span>{{ 'world.fields.formula' | transloco }}</span>
+                      <select
+                        class="native"
+                        [name]="'formula-preset-' + i"
+                        [value]="attribute.formula.preset"
+                        (change)="setPreset(attribute.key, $any($event.target).value)"
+                      >
+                        @for (preset of presets; track preset) {
+                          <option [value]="preset" [selected]="preset === attribute.formula.preset">
+                            {{ 'world.formula.presets.' + preset | transloco }}
+                          </option>
+                        }
+                      </select>
+                    </label>
+                    @if (stepOf(attribute.formula) !== null) {
+                      <label class="formula-field">
+                        <span>{{ 'world.fields.step' | transloco }}</span>
+                        <input
+                          class="native"
+                          type="number"
+                          step="any"
+                          [name]="'formula-step-' + i"
+                          [value]="stepOf(attribute.formula)"
+                          (input)="setStep(attribute.key, $any($event.target).value)"
+                        />
+                      </label>
+                    } @else {
+                      <label class="formula-field wide">
+                        <span>{{ 'world.fields.expression' | transloco }}</span>
+                        <input
+                          class="native"
+                          type="text"
+                          autocomplete="off"
+                          spellcheck="false"
+                          [name]="'formula-expression-' + i"
+                          [value]="expressionText(attribute.formula)"
+                          (input)="setExpression(attribute.key, $any($event.target).value)"
+                        />
+                      </label>
+                    }
+                    <small class="hint wide">
+                      {{ 'world.formula.presets.' + attribute.formula.preset | transloco }}:
+                      <code>{{ expressionOf(attribute.formula) }}</code>
+                    </small>
+                    @if (formulaErrors()[i]; as formulaError) {
+                      <small class="formula-error wide" role="alert" [attr.data-testid]="'formula-error-' + i">
+                        {{ formulaError.key | transloco: { position: formulaError.position + 1 } }}
+                      </small>
+                    }
+                    <small class="hint wide">
+                      {{ 'world.formula.preview' | transloco }}:
+                      <span [attr.data-testid]="'formula-preview-' + i">{{ previews()[i] }}</span>
+                    </small>
+                    @if (attribute.formula.preset === 'custom') {
+                      <small class="hint wide">{{ 'world.formula.help' | transloco }}</small>
+                    }
                   </div>
                 }
               </div>
@@ -123,7 +183,7 @@
 
               <div class="actions">
                 <p-button [label]="'world.new.back' | transloco" severity="secondary" [text]="true" (onClick)="step.set(1)" />
-                <p-button [label]="'world.new.next' | transloco" icon="pi pi-arrow-right" iconPos="right" [disabled]="!stepValid()[2]" (onClick)="step.set(3)" />
+                <p-button data-testid="attributes-next" [label]="'world.new.next' | transloco" icon="pi pi-arrow-right" iconPos="right" [disabled]="!stepValid()[2]" (onClick)="step.set(3)" />
               </div>
             </div>
           </ng-template>

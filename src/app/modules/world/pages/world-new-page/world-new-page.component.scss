@@ -155,7 +155,40 @@
 
 // On phones only the current step keeps its title, so the step list fits.
 @media (max-width: 30rem) {
-  :host ::ng-deep p-step:not([data-p-active='true']) .p-step-title {
+  :host ::ng-deep p-step:not([data-p-active="true"]) .p-step-title {
     display: none;
+  }
+}
+
+.formula {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--p-content-border-color);
+
+  .wide {
+    grid-column: 1 / -1;
+  }
+
+  .formula-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .native {
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--p-form-field-border-color);
+    border-radius: var(--p-form-field-border-radius);
+    background: var(--p-form-field-background);
+    color: var(--p-form-field-color);
+    font: inherit;
+  }
+
+  .formula-error {
+    color: var(--p-red-500);
   }
 }

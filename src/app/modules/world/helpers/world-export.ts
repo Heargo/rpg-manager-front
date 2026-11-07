@@ -1,3 +1,4 @@
+import { validateFormula } from '../../../core/helpers/formula';
 import { ITEM_RARITIES, ITEM_TYPES } from '../../../core/models/item';
 import { World } from '../models/world';
 
@@ -71,9 +72,13 @@ function validateWorld(world: unknown, errors: string[]): void {
   for (const key of ['offlineFeatures', 'barAttributes'] as const) {
     if (!isRecord(world[key])) errors.push(`world.${key} must be an object`);
   }
+  const attributeNames = Array.isArray(world['attributes'])
+    ? world['attributes'].map((attribute) => (isRecord(attribute) && typeof attribute['name'] === 'string' ? attribute['name'] : ''))
+    : [];
   list(world['attributes'], 'world.attributes', errors, (attribute, path) => {
     if (typeof attribute['id'] !== 'string' || typeof attribute['name'] !== 'string') errors.push(`${path} needs an id and a name`);
     if (typeof attribute['baseValue'] !== 'number') errors.push(`${path}.baseValue must be a number`);
+    if (!isValidFormula(attribute['formula'], attributeNames)) errors.push(`${path}.formula is invalid`);
   });
   list(world['items'], 'world.items', errors, (item, path) => validateItem(item, path, errors));
   list(world['characters'], 'world.characters', errors, (character, path) => {
@@ -121,4 +126,17 @@ function list(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isValidFormula(formula: unknown, attributeNames: string[]): boolean {
+  if (!isRecord(formula)) return false;
+  if (formula['preset'] === 'custom') {
+    return typeof formula['expression'] === 'string' && validateFormula({ preset: 'custom', expression: formula['expression'] }, attributeNames) === null;
+  }
+  const preset = formula['preset'];
+  return (
+    (preset === 'linear' || preset === 'steep-linear' || preset === 'diminishing' || preset === 'percent') &&
+    typeof formula['step'] === 'number' &&
+    Number.isFinite(formula['step'])
+  );
 }

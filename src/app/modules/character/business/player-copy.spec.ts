@@ -65,7 +65,7 @@ describe('player copy and "Pick a save" (host + player over the fake network)', 
 
     const world = await gm.injector.get(WorldLibraryBusiness).create({
       name: 'Eldoria',
-      attributes: [{ name: 'Life', baseValue: 10 }],
+      attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }],
       startingStatPoints: 3,
       startingMoney: 20,
     });

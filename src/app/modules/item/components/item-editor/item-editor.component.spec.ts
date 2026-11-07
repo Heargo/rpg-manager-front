@@ -15,8 +15,8 @@ describe('ItemEditorComponent', () => {
   const world: World = {
     ...createSandboxWorld((key) => key),
     attributes: [
-      { id: 'wit', name: 'Wit', baseValue: 5 },
-      { id: 'grit', name: 'Grit', baseValue: 5 },
+      { id: 'wit', name: 'Wit', baseValue: 5, formula: { preset: 'linear', step: 1 } },
+      { id: 'grit', name: 'Grit', baseValue: 5, formula: { preset: 'linear', step: 1 } },
     ],
   };
   const charm: Item = {

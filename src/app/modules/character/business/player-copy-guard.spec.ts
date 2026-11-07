@@ -77,7 +77,7 @@ describe('player copy: the host holds players that are unchecked or waiting', ()
     [gm, ada].forEach((d) => d.injector.get(GameSessionBusiness));
     const world = await gm.injector.get(WorldLibraryBusiness).create({
       name: 'Eldoria',
-      attributes: [{ name: 'Life', baseValue: 10 }],
+      attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }],
       startingStatPoints: 3,
       startingMoney: 20,
     });

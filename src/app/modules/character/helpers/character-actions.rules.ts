@@ -86,10 +86,17 @@ export function applyCharacterAction(
         (entry) => entry.attributeId === action.attributeId,
       );
       if (!stat) return fail('character.errors.unknownAttribute');
-      // A new point raises the max and the current value together.
-      const next = setAttribute(character, action.attributeId, {
-        points: stat.points + 1,
-        current: stat.current + 1,
+      // A new level raises the max and the current value by the same delta.
+      const raised = setAttribute(character, action.attributeId, {
+        level: stat.level + 1,
+        current: stat.current,
+      });
+      const after = attributeStats(attributes, raised).find(
+        (entry) => entry.attributeId === action.attributeId,
+      )!;
+      const next = setAttribute(raised, action.attributeId, {
+        level: after.level,
+        current: Math.max(0, stat.current + (after.max - stat.max)),
       });
       return {
         ok: true,
@@ -116,7 +123,7 @@ export function applyCharacterAction(
       return {
         ok: true,
         character: setAttribute(character, action.attributeId, {
-          points: stat.points,
+          level: stat.level,
           current,
         }),
       };
@@ -174,7 +181,7 @@ export function applyCharacterAction(
           Math.min(stat.current + modifier.value, stat.max),
         );
         next = setAttribute(next, stat.attributeId, {
-          points: stat.points,
+          level: stat.level,
           current,
         });
       }

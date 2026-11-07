@@ -1,3 +1,4 @@
+import { AttributeFormula } from '../../../core/helpers/formula';
 import { ItemDraft } from '../../../core/models/item';
 
 /** An attribute every character of the world has (Strength, Life…). */
@@ -5,6 +6,8 @@ export interface WorldAttribute {
   id: string;
   name: string;
   baseValue: number;
+  /** How the max grows with the level. */
+  formula: AttributeFormula;
 }
 
 /** What players can still do while the host is offline (p2p-rooms spec, Host offline). */
@@ -26,9 +29,9 @@ export interface Item extends ItemDraft {
 
 export interface CharacterAttribute {
   attributeId: string;
-  /** Stat points spent on it, on top of the world's base value. */
-  points: number;
-  /** Current value (life after a hit…); max = base value + points + equipped modifiers. */
+  /** Level of the attribute (stat points spent on it). */
+  level: number;
+  /** Current value (life after a hit…); max = round(formula at level) + equipped modifiers. */
   current: number;
 }
 
@@ -94,7 +97,7 @@ export interface WorldDraft {
   name: string;
   description?: string;
   imageId?: string;
-  attributes: { name: string; baseValue: number }[];
+  attributes: { name: string; baseValue: number; formula: AttributeFormula }[];
   /** Attribute names to show as bars. */
   barAttributes?: { life?: string; mana?: string };
   startingStatPoints?: number;

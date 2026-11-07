@@ -58,7 +58,7 @@ describe('character actions (host + players)', () => {
     [gm, ada, bob].forEach((d) => d.injector.get(GameSessionBusiness));
     const world = await gm.injector.get(WorldLibraryBusiness).create({
       name: 'Eldoria',
-      attributes: [{ name: 'Life', baseValue: 10 }],
+      attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }],
       startingStatPoints: 1,
       startingMoney: 5,
     });
@@ -79,7 +79,7 @@ describe('character actions (host + players)', () => {
     await settle();
 
     expect(saved).toMatchObject({ statPoints: 0, rev: 2 });
-    expect(mine(ada).attributes[0]).toMatchObject({ points: 1, current: 11 });
+    expect(mine(ada).attributes[0]).toMatchObject({ level: 1, current: 11 });
     const seenByBob = bob.injector
       .get(CharacterBusiness)
       .$characters()!

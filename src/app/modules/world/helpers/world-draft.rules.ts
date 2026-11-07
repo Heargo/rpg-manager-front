@@ -1,3 +1,4 @@
+import { FormulaError, validateFormula } from '../../../core/helpers/formula';
 import { WorldDraft } from '../models/world';
 
 export const WORLD_NAME_MAX_LENGTH = 48;
@@ -18,10 +19,17 @@ export function validateWorldDraft(draft: WorldDraft): WorldDraftErrors {
   else if (names.some((attributeName) => attributeName.length > ATTRIBUTE_NAME_MAX_LENGTH)) errors.attributes = 'world.errors.attributeNameTooLong';
   else if (new Set(names).size !== names.length) errors.attributes = 'world.errors.attributeNamesUnique';
   else if (draft.attributes.some((attribute) => !Number.isInteger(attribute.baseValue))) errors.attributes = 'world.errors.baseValueInteger';
+  else if (attributeFormulaErrors(draft).some(Boolean)) errors.attributes = 'world.errors.formulaInvalid';
 
   if (!isNonNegativeInteger(draft.startingStatPoints ?? 0)) errors.startingStatPoints = 'world.errors.nonNegativeInteger';
   if (!isNonNegativeInteger(draft.startingMoney ?? 0)) errors.startingMoney = 'world.errors.nonNegativeInteger';
   return errors;
+}
+
+/** Per attribute, the problem of its formula (null when valid); formulas may read any attribute of the draft. */
+export function attributeFormulaErrors(draft: WorldDraft): (FormulaError | null)[] {
+  const names = draft.attributes.map((attribute) => attribute.name.trim());
+  return draft.attributes.map((attribute) => validateFormula(attribute.formula, names));
 }
 
 export function isDraftValid(draft: WorldDraft): boolean {

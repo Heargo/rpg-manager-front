@@ -61,7 +61,8 @@
       "attributesHint": "Every character of this world has these attributes. Players raise them with stat points; items can boost them.",
       "addAttribute": "Add an attribute",
       "removeAttribute": "Remove this attribute",
-      "barsHint": "Bars are shown on the player view (health, mana…). Leave empty if your game has none."
+      "barsHint": "Bars are shown on the player view (health, mana…). Leave empty if your game has none.",
+      "formulaHint": "Each attribute has a formula that gives its max from its level (0 to 5 shown). Step is how much each level adds."
     },
     "fields": {
       "name": "Name",
@@ -81,7 +82,10 @@
       "starterItems": "Start with default items",
       "starterItemsHint": "About 20 items generated from your attributes: equipment for every slot, potions, objects.",
       "offlineTitle": "When the host is offline",
-      "offlineHint": "Players can always read their sheet. Choose what else they can still do; changes are checked when the host is back."
+      "offlineHint": "Players can always read their sheet. Choose what else they can still do; changes are checked when the host is back.",
+      "formula": "Growth",
+      "step": "Step",
+      "expression": "Expression"
     },
     "offline": {
       "dice": "Roll dice",
@@ -106,7 +110,19 @@
       "attributeNamesUnique": "Two attributes have the same name.",
       "baseValueInteger": "Base values must be whole numbers.",
       "nonNegativeInteger": "Use a whole number, 0 or more.",
-      "image": "This picture couldn't be used."
+      "image": "This picture couldn't be used.",
+      "formulaInvalid": "Fix the formulas of the attributes marked in red."
+    },
+    "formula": {
+      "presets": {
+        "linear": "Linear",
+        "steep-linear": "Steep linear",
+        "diminishing": "Diminishing",
+        "percent": "Percent",
+        "custom": "Custom"
+      },
+      "preview": "Max at levels 0 to 5",
+      "help": "Variables: level, base, playerLevel (0 for now). Read another attribute's level by its name: strength, or [Max life] in square brackets when the name has spaces. Case does not matter. Operators: + - * / ^ and parentheses. Functions: min, max, floor, round, sqrt. The max is rounded to a whole number."
     }
   },
   "character": {
@@ -162,7 +178,7 @@
         "inventory": "Inventory"
       },
       "base": "Base",
-      "points": "Points",
+      "level": "Level",
       "bonus": "Bonus",
       "spend": "Spend a point",
       "spendOn": "Spend a point on {{ name }}",
@@ -632,5 +648,15 @@
       "ZB",
       "YB"
     ]
+  },
+  "formula": {
+    "errors": {
+      "syntax": "Invalid formula (character {{ position }})",
+      "unknownName": "Unknown name (character {{ position }})",
+      "divisionByZero": "Division by zero (character {{ position }})",
+      "notFinite": "The result is not a finite number",
+      "tooLong": "Formula too long (200 characters at most)",
+      "tooDeep": "Formula too deeply nested (32 levels at most)"
+    }
   }
 }

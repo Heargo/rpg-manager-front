@@ -1,7 +1,7 @@
 import { createWorld } from './world.factory';
 import { buildWorldExport, parseWorldExport } from './world-export';
 
-const world = createWorld({ name: 'W', attributes: [{ name: 'Life', baseValue: 10 }] }, () => crypto.randomUUID(), 5);
+const world = createWorld({ name: 'W', attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }] }, () => crypto.randomUUID(), 5);
 
 describe('world export', () => {
   it('round-trips through JSON', () => {
@@ -32,6 +32,27 @@ describe('world export', () => {
         'world.characters[0].money must be an integer',
       ]),
     );
+  });
+
+  it('refuses attributes without a valid formula', () => {
+    const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
+    delete file.world.attributes[0].formula;
+    const missing = parseWorldExport(JSON.stringify(file));
+    expect(missing.ok).toBe(false);
+    if (!missing.ok) expect(missing.errors).toContain('world.attributes[0].formula is invalid');
+
+    file.world.attributes[0].formula = { preset: 'custom', expression: 'base +' };
+    const broken = parseWorldExport(JSON.stringify(file));
+    expect(broken.ok).toBe(false);
+    if (!broken.ok) expect(broken.errors).toContain('world.attributes[0].formula is invalid');
+
+    file.world.attributes[0].formula = { preset: 'custom', expression: '('.repeat(10000) + '1' + ')'.repeat(10000) };
+    const deep = parseWorldExport(JSON.stringify(file));
+    expect(deep.ok).toBe(false);
+    if (!deep.ok) expect(deep.errors).toContain('world.attributes[0].formula is invalid');
+
+    file.world.attributes[0].formula = { preset: 'diminishing', step: 2 };
+    expect(parseWorldExport(JSON.stringify(file)).ok).toBe(true);
   });
 
   it('lists what is wrong in a damaged file', () => {

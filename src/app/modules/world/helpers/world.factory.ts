@@ -16,6 +16,7 @@ export function createWorld(draft: WorldDraft, newId: () => string, now: number)
     id: newId(),
     name: attribute.name.trim(),
     baseValue: attribute.baseValue,
+    formula: attribute.formula,
   }));
   const idByName = (name?: string) =>
     name === undefined ? undefined : attributes.find((attribute) => attribute.name === name.trim())?.id;

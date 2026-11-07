@@ -85,7 +85,7 @@ describe('host offline mode (host + player over the fake network)', () => {
 
     const world = await gm.injector.get(WorldLibraryBusiness).create({
       name: 'Eldoria',
-      attributes: [{ name: 'Life', baseValue: 10 }],
+      attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }],
       startingStatPoints: 3,
       startingMoney: 20,
     });
@@ -159,7 +159,7 @@ describe('host offline mode (host + player over the fake network)', () => {
       expect(ada.offline.canAct('spend-stat-point')).toBe(true);
       await ada.offline.act(hostCharacter().id, spend());
 
-      expect(ada.offline.$myCharacter()).toMatchObject({ statPoints: 2, attributes: [{ attributeId, points: 1, current: 11 }] });
+      expect(ada.offline.$myCharacter()).toMatchObject({ statPoints: 2, attributes: [{ attributeId, level: 1, current: 11 }] });
       expect(ada.offline.$queue()).toEqual([queuedSpend()]);
       expect(await ada.copy.savedCopy(roomId)).toMatchObject({ statPoints: 2 });
       expect(hostCharacter().statPoints).toBe(3);
@@ -226,7 +226,7 @@ describe('host offline mode (host + player over the fake network)', () => {
       await gm.hostCopy.usePlayer('ada');
       await settle();
 
-      expect(hostCharacter()).toMatchObject({ statPoints: 2, attributes: [{ attributeId, points: 1, current: 11 }] });
+      expect(hostCharacter()).toMatchObject({ statPoints: 2, attributes: [{ attributeId, level: 1, current: 11 }] });
       expect(ada.offline.$queue()).toEqual([]);
       expect(characters(ada).$myCharacter()).toEqual(hostCharacter());
     });
@@ -311,7 +311,7 @@ describe('host offline mode (host + player over the fake network)', () => {
       await settle();
 
       expect(refused).toEqual([]);
-      expect(hostRecord()).toMatchObject({ money: 20, statPoints: 2, attributes: [{ attributeId, points: 1, current: 11 }] });
+      expect(hostRecord()).toMatchObject({ money: 20, statPoints: 2, attributes: [{ attributeId, level: 1, current: 11 }] });
     });
 
     it('reports the entries the host refuses (feature switched off meanwhile) and leaves the record alone', async () => {

@@ -7,7 +7,7 @@ const ada: Character = {
   name: 'Ada',
   statPoints: 5,
   money: 20,
-  attributes: [{ attributeId: 'life', points: 0, current: 10 }],
+  attributes: [{ attributeId: 'life', level: 0, current: 10 }],
   inventory: [],
   rev: 2,
   updatedAt: 1000,
@@ -20,7 +20,7 @@ describe('player copy rules', () => {
         updatedAt: 1000,
         rev: 2,
         inventory: [],
-        attributes: [{ current: 10, points: 0, attributeId: 'life' }],
+        attributes: [{ current: 10, level: 0, attributeId: 'life' }],
         money: 20,
         statPoints: 5,
         name: 'Ada',
@@ -38,7 +38,7 @@ describe('player copy rules', () => {
       const base = await hashPlayerRecord(ada);
       expect(await hashPlayerRecord({ ...ada, money: 21 })).not.toBe(base);
       expect(
-        await hashPlayerRecord({ ...ada, attributes: [{ attributeId: 'life', points: 1, current: 10 }] }),
+        await hashPlayerRecord({ ...ada, attributes: [{ attributeId: 'life', level: 1, current: 10 }] }),
       ).not.toBe(base);
     });
   });
@@ -49,7 +49,7 @@ describe('player copy rules', () => {
         ...ada,
         money: 99,
         statPoints: 0,
-        attributes: [{ attributeId: 'life', points: 1, current: 11 }],
+        attributes: [{ attributeId: 'life', level: 1, current: 11 }],
       };
       expect(differingFields(ada, other)).toEqual(['attributes', 'money', 'statPoints']);
     });

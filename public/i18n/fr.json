@@ -61,7 +61,8 @@
       "attributesHint": "Chaque personnage de ce monde a ces attributs. Les joueurs les augmentent avec des points de stats ; les objets peuvent les améliorer.",
       "addAttribute": "Ajouter un attribut",
       "removeAttribute": "Retirer cet attribut",
-      "barsHint": "Les barres s'affichent sur la vue joueur (vie, mana…). Laissez vide si votre jeu n'en a pas."
+      "barsHint": "Les barres s'affichent sur la vue joueur (vie, mana…). Laissez vide si votre jeu n'en a pas.",
+      "formulaHint": "Chaque attribut a une formule qui donne son maximum selon son niveau (de 0 à 5 affichés). Le pas est ce qu'ajoute chaque niveau."
     },
     "fields": {
       "name": "Nom",
@@ -81,7 +82,10 @@
       "starterItems": "Commencer avec des objets par défaut",
       "starterItemsHint": "Une vingtaine d'objets générés à partir de vos attributs : un équipement par emplacement, des potions, des objets.",
       "offlineTitle": "Quand l'hôte est hors ligne",
-      "offlineHint": "Les joueurs peuvent toujours lire leur fiche. Choisissez ce qu'ils peuvent encore faire ; les changements sont vérifiés au retour de l'hôte."
+      "offlineHint": "Les joueurs peuvent toujours lire leur fiche. Choisissez ce qu'ils peuvent encore faire ; les changements sont vérifiés au retour de l'hôte.",
+      "formula": "Progression",
+      "step": "Pas",
+      "expression": "Expression"
     },
     "offline": {
       "dice": "Lancer les dés",
@@ -106,7 +110,19 @@
       "attributeNamesUnique": "Deux attributs ont le même nom.",
       "baseValueInteger": "Les valeurs de base doivent être des nombres entiers.",
       "nonNegativeInteger": "Utilisez un nombre entier, 0 ou plus.",
-      "image": "Cette image n'a pas pu être utilisée."
+      "image": "Cette image n'a pas pu être utilisée.",
+      "formulaInvalid": "Corrigez les formules des attributs en rouge."
+    },
+    "formula": {
+      "presets": {
+        "linear": "Linéaire",
+        "steep-linear": "Linéaire raide",
+        "diminishing": "Dégressive",
+        "percent": "Pourcentage",
+        "custom": "Personnalisée"
+      },
+      "preview": "Maximum aux niveaux 0 à 5",
+      "help": "Variables : level, base, playerLevel (0 pour l'instant). Lisez le niveau d'un autre attribut par son nom : force, ou [Vie max] entre crochets quand le nom contient des espaces. La casse n'a pas d'importance. Opérateurs : + - * / ^ et parenthèses. Fonctions : min, max, floor, round, sqrt. Le maximum est arrondi à l'entier."
     }
   },
   "character": {
@@ -162,7 +178,7 @@
         "inventory": "Inventaire"
       },
       "base": "Base",
-      "points": "Points",
+      "level": "Niveau",
       "bonus": "Bonus",
       "spend": "Dépenser un point",
       "spendOn": "Dépenser un point en {{ name }}",
@@ -632,5 +648,15 @@
       "Zo",
       "Yo"
     ]
+  },
+  "formula": {
+    "errors": {
+      "syntax": "Formule invalide (caractère {{ position }})",
+      "unknownName": "Nom inconnu (caractère {{ position }})",
+      "divisionByZero": "Division par zéro (caractère {{ position }})",
+      "notFinite": "Le résultat n'est pas un nombre fini",
+      "tooLong": "Formule trop longue (200 caractères au maximum)",
+      "tooDeep": "Formule trop imbriquée (32 niveaux au maximum)"
+    }
   }
 }

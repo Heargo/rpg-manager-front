@@ -4,13 +4,13 @@ import { WordList } from '../../../core/generators/word-list';
 import { EQUIPMENT_SLOTS } from '../../../core/models/item';
 import { WorldDraft } from '../models/world';
 import { generateStarterItems } from './starter-items';
-import { isDraftValid, validateWorldDraft } from './world-draft.rules';
+import { attributeFormulaErrors, isDraftValid, validateWorldDraft } from './world-draft.rules';
 
 const draft = (changes: Partial<WorldDraft> = {}): WorldDraft => ({
   name: 'Eldoria',
   attributes: [
-    { name: 'Life', baseValue: 10 },
-    { name: 'Mana', baseValue: 5 },
+    { name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+    { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } },
   ],
   startingStatPoints: 5,
   startingMoney: 100,
@@ -29,11 +29,34 @@ describe('validateWorldDraft', () => {
   });
 
   it('checks attributes: named, unique (ignoring case), integer base values', () => {
-    expect(validateWorldDraft(draft({ attributes: [{ name: ' ', baseValue: 1 }] })).attributes).toBe('world.errors.attributeNameRequired');
-    expect(validateWorldDraft(draft({ attributes: [{ name: 'Life', baseValue: 1 }, { name: ' life', baseValue: 2 }] })).attributes).toBe(
+    expect(validateWorldDraft(draft({ attributes: [{ name: ' ', baseValue: 1, formula: { preset: 'linear', step: 1 } }] })).attributes).toBe('world.errors.attributeNameRequired');
+    expect(validateWorldDraft(draft({ attributes: [{ name: 'Life', baseValue: 1, formula: { preset: 'linear', step: 1 } }, { name: ' life', baseValue: 2, formula: { preset: 'linear', step: 1 } }] })).attributes).toBe(
       'world.errors.attributeNamesUnique',
     );
-    expect(validateWorldDraft(draft({ attributes: [{ name: 'Life', baseValue: 1.5 }] })).attributes).toBe('world.errors.baseValueInteger');
+    expect(validateWorldDraft(draft({ attributes: [{ name: 'Life', baseValue: 1.5, formula: { preset: 'linear', step: 1 } }] })).attributes).toBe('world.errors.baseValueInteger');
+  });
+
+  it('accepts a custom formula that reads a sibling attribute by name', () => {
+    const attributes: WorldDraft['attributes'] = [
+      { name: 'Max life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+      { name: 'Regen', baseValue: 1, formula: { preset: 'custom', expression: 'base + [max LIFE] / 2' } },
+    ];
+    expect(validateWorldDraft(draft({ attributes }))).toEqual({});
+    expect(attributeFormulaErrors(draft({ attributes }))).toEqual([null, null]);
+  });
+
+  it('reports a bad custom formula per attribute and blocks the attributes step', () => {
+    const attributes: WorldDraft['attributes'] = [
+      { name: 'Life', baseValue: 10, formula: { preset: 'custom', expression: 'base +' } },
+      { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } },
+      { name: 'Luck', baseValue: 5, formula: { preset: 'custom', expression: 'base + nothing' } },
+    ];
+    expect(attributeFormulaErrors(draft({ attributes }))).toEqual([
+      { key: 'formula.errors.syntax', position: 6 },
+      null,
+      { key: 'formula.errors.unknownName', position: 7 },
+    ]);
+    expect(validateWorldDraft(draft({ attributes })).attributes).toBe('world.errors.formulaInvalid');
   });
 
   it('refuses negative or fractional starting values', () => {

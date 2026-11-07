@@ -58,7 +58,7 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
 
   it('exports a world with its images and imports it as a new copy', async () => {
     const iconId = await images.fromBase64({ type: 'image/webp', data: 'AQIDBA==' });
-    const world = await library.create({ name: 'Eldoria', attributes: [{ name: 'Life', baseValue: 10 }], imageId: iconId });
+    const world = await library.create({ name: 'Eldoria', attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }], imageId: iconId });
 
     const file = await (await library.exportWorld(world.id)).text();
     const json = JSON.parse(file);
@@ -92,8 +92,8 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
       {
         name: 'Eldoria',
         attributes: [
-          { name: 'Life', baseValue: 10 },
-          { name: 'Strength', baseValue: 2 },
+          { name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+          { name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
         ],
         barAttributes: { life: 'Life' },
       },

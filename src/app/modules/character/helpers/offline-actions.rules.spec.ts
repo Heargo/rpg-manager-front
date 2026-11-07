@@ -12,8 +12,8 @@ import {
 } from './offline-actions.rules';
 
 const attributes: WorldAttribute[] = [
-  { id: 'life', name: 'Life', baseValue: 10 },
-  { id: 'str', name: 'Strength', baseValue: 2 },
+  { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+  { id: 'str', name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
 ];
 
 const none: OfflineFeatures = {
@@ -71,8 +71,8 @@ const ada: Character = {
   statPoints: 2,
   money: 40,
   attributes: [
-    { attributeId: 'life', points: 0, current: 4 },
-    { attributeId: 'str', points: 0, current: 2 },
+    { attributeId: 'life', level: 0, current: 4 },
+    { attributeId: 'str', level: 0, current: 2 },
   ],
   inventory: [helm, potion],
   rev: 3,
@@ -128,7 +128,7 @@ describe('applyOffline', () => {
         statPoints: 1,
         attributes: [
           ada.attributes[0],
-          { attributeId: 'str', points: 1, current: 3 },
+          { attributeId: 'str', level: 1, current: 3 },
         ],
       },
       queue: [

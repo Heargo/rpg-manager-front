@@ -7,8 +7,8 @@ import { CharacterSheetComponent } from './character-sheet.component';
 
 const world = {
   attributes: [
-    { id: 'life', name: 'Life', baseValue: 10 },
-    { id: 'str', name: 'Strength', baseValue: 2 },
+    { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+    { id: 'str', name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
   ],
   barAttributes: { life: 'life' },
 };
@@ -20,8 +20,8 @@ const character: Character = {
   statPoints: 2,
   money: 40,
   attributes: [
-    { attributeId: 'life', points: 0, current: 6 },
-    { attributeId: 'str', points: 0, current: 2 },
+    { attributeId: 'life', level: 0, current: 6 },
+    { attributeId: 'str', level: 0, current: 2 },
   ],
   inventory: [
     {

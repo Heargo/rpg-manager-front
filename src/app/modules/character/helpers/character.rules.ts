@@ -1,3 +1,4 @@
+import { formulaMax } from './character-stats';
 import { Character, World } from '../../world/models/world';
 import { CHARACTER_NAME_MAX_LENGTH, CreateCharacterRequest, PORTRAIT_MAX_BASE64_LENGTH } from '../models/character-api';
 
@@ -34,6 +35,7 @@ export function createCharacter(
   id: string,
   now: number,
 ): Character {
+  const levels = Object.fromEntries(world.attributes.map((attribute) => [attribute.name, 0]));
   return {
     id,
     playerId: input.playerId,
@@ -41,7 +43,11 @@ export function createCharacter(
     portraitId: input.portraitId,
     statPoints: world.startingStatPoints,
     money: world.startingMoney,
-    attributes: world.attributes.map((attribute) => ({ attributeId: attribute.id, points: 0, current: attribute.baseValue })),
+    attributes: world.attributes.map((attribute) => ({
+      attributeId: attribute.id,
+      level: 0,
+      current: formulaMax(attribute, 0, levels),
+    })),
     inventory: [],
     rev: 1,
     updatedAt: now,

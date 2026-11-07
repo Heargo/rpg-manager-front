@@ -1,3 +1,4 @@
+import { evaluateFormula } from '../../../core/helpers/formula';
 import { Character, WorldAttribute } from '../../world/models/world';
 
 export interface AttributeStat {
@@ -5,8 +6,8 @@ export interface AttributeStat {
   name: string;
   /** The world's base value. */
   base: number;
-  /** Stat points spent on it. */
-  points: number;
+  /** Level of the attribute (stat points spent on it). */
+  level: number;
   /** Total of the equipped items' modifiers for it. */
   bonus: number;
   max: number;
@@ -22,7 +23,7 @@ export interface BarStat {
 }
 
 /**
- * Every attribute of the world for one character: base + points + equipped modifiers = max, and the current value
+ * Every attribute of the world for one character: round(formula at level) + equipped modifiers = max, and the current value
  * (capped at max, never below 0). Item modifiers name attributes, so they match by name.
  */
 export function attributeStats(
@@ -39,24 +40,53 @@ export function attributeStats(
       );
     }
   }
+  const levels = levelsByName(attributes, character);
   return attributes.map((attribute) => {
     const own = character.attributes.find(
       (entry) => entry.attributeId === attribute.id,
     );
-    const points = own?.points ?? 0;
+    const level = own?.level ?? 0;
     const bonus = bonusByName.get(attribute.name) ?? 0;
-    const max = attribute.baseValue + points + bonus;
+    const max = formulaMax(attribute, level, levels) + bonus;
     const current = Math.max(0, Math.min(own?.current ?? max, max));
     return {
       attributeId: attribute.id,
       name: attribute.name,
       base: attribute.baseValue,
-      points,
+      level,
       bonus,
       max,
       current,
     };
   });
+}
+
+/** Every attribute's level by name, for the formulas that read other attributes. */
+export function levelsByName(
+  attributes: WorldAttribute[],
+  character: Pick<Character, 'attributes'>,
+): Record<string, number> {
+  const levels: Record<string, number> = {};
+  for (const attribute of attributes) {
+    levels[attribute.name] =
+      character.attributes.find((entry) => entry.attributeId === attribute.id)?.level ?? 0;
+  }
+  return levels;
+}
+
+/** The formula's max for one attribute at a level, rounded (the base value when the formula fails). */
+export function formulaMax(
+  attribute: WorldAttribute,
+  level: number,
+  levels: Record<string, number>,
+): number {
+  const result = evaluateFormula(attribute.formula, {
+    level,
+    base: attribute.baseValue,
+    playerLevel: 0,
+    levels,
+  });
+  return result.ok ? Math.round(result.value) : attribute.baseValue;
 }
 
 /** The world's bar attributes (life, mana) for one character; a bar is missing when the world has none. */

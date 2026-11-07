@@ -40,7 +40,7 @@ describe('giving a catalogue item (GM + players)', () => {
     [gm, ada].forEach((d) => d.injector.get(GameSessionBusiness));
     const world = await gm.injector.get(WorldLibraryBusiness).create({
       name: 'Eldoria',
-      attributes: [{ name: 'Life', baseValue: 10 }],
+      attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }],
     });
     await gm.injector.get(RoomBusiness).hostRoom('Eldoria', world.id);
     await settle();

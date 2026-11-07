@@ -44,6 +44,17 @@ describe('createSandboxWorld', () => {
     },
   );
 
+  it('defaults to Steep linear for Life and Linear for the others', () => {
+    const world = createSandboxWorld((key) => transloco.translate(key, {}, 'en'));
+    expect(world.attributes.map((attribute) => attribute.formula)).toEqual([
+      { preset: 'steep-linear', step: 5 },
+      { preset: 'linear', step: 1 },
+      { preset: 'linear', step: 1 },
+      { preset: 'linear', step: 1 },
+      { preset: 'linear', step: 1 },
+    ]);
+  });
+
   it('is the same world every time', () => {
     const t = (key: string) => transloco.translate(key, {}, 'en');
     expect(createSandboxWorld(t)).toEqual(createSandboxWorld(t));

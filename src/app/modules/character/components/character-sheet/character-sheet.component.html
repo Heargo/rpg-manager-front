@@ -89,7 +89,7 @@
               {{ "character.sheet.base" | transloco }}
             </th>
             <th scope="col" class="num optional">
-              {{ "character.sheet.points" | transloco }}
+              {{ "character.sheet.level" | transloco }}
             </th>
             <th scope="col" class="num">
               {{ "character.sheet.bonus" | transloco }}
@@ -111,7 +111,7 @@
             <tr>
               <th scope="row">{{ stat.name }}</th>
               <td class="num optional">{{ stat.base }}</td>
-              <td class="num optional">{{ stat.points }}</td>
+              <td class="num optional">{{ stat.level }}</td>
               <td
                 class="num"
                 [class.plus]="stat.bonus > 0"
