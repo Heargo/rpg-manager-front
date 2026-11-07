@@ -65,10 +65,6 @@ export const CREDIT_LIBRARIES = [
       <div class="card">
         <p>{{ 'credits.tools' | transloco }}</p>
       </div>
-      <h2>{{ 'credits.legacyTitle' | transloco }}</h2>
-      <div class="card">
-        <p>{{ 'credits.legacy' | transloco }}</p>
-      </div>
     </main>
     <app-site-footer />
   `,

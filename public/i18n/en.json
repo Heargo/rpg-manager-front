@@ -559,9 +559,7 @@
     "intro": "RPG Manager is built on the work of many open source projects and free tools. Thank you to their authors.",
     "librariesTitle": "Libraries",
     "toolsTitle": "External tools",
-    "tools": "The tools page links to free generators by others: Watabou's Procgen Arcana, Azgaar's Fantasy Map Generator and Squoosh. They are not part of this app.",
-    "legacyTitle": "The legacy app",
-    "legacy": "This app is the successor of the first RPG Manager, a backend-based version. Its ideas, rules and content are the foundation of this one."
+    "tools": "The tools page links to free generators by others: Watabou's Procgen Arcana, Azgaar's Fantasy Map Generator and Squoosh. They are not part of this app."
   },
   "contact": {
     "title": "Contact",

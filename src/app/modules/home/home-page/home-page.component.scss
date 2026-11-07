@@ -77,6 +77,8 @@
   /* fill the viewport below the hero so the footer sits at the bottom */
   min-height: calc(100vh - 60px - 1rem);
   min-height: calc(100svh - 60px - 1rem);
+  /* cancel the global body margin so the footer touches the bottom edge */
+  margin-bottom: -0.5rem;
 }
 
 .content {
@@ -84,6 +86,10 @@
   width: 100%;
   max-width: 64rem;
   margin-inline: auto;
+  /* centred in the space under the hero, like the hero itself */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .intro {

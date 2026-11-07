@@ -1,9 +1,11 @@
 :host {
   display: flex;
   flex-direction: column;
-  /* fill the viewport below the sticky nav so the footer sits at the bottom */
-  min-height: calc(100vh - 60px - 1rem);
-  min-height: calc(100svh - 60px - 1rem);
+  /* fill the viewport below the sticky nav (50px tall, under the 0.5rem body margin) so the footer sits at the bottom */
+  min-height: calc(100vh - 50px - 0.5rem);
+  min-height: calc(100svh - 50px - 0.5rem);
+  /* cancel the global body margin so the footer touches the bottom edge */
+  margin-bottom: -0.5rem;
 }
 
 .page {

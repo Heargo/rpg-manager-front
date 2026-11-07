@@ -41,8 +41,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
   styles: `
     :host {
       display: block;
-      /* bleed through the global body margin (0.5rem) to the viewport edges */
-      margin: 0 -0.5rem -0.5rem;
+      /* bleed through the global body margin (0.5rem) to the side edges; the page cancels the bottom one */
+      margin: 0 -0.5rem;
     }
     footer {
       border-top: 1px solid var(--p-content-border-color);
