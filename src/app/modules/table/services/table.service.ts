@@ -1,7 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { PeerApi, PeerHandler } from '../../../core/p2p/peer-api.service';
+import { PublicNpc } from '../../npc/models/npc';
 import {
+  NpcRequest,
   QuickImageRequest,
   SaveNotesRequest,
   ShowIllustrationRequest,
@@ -40,6 +42,26 @@ export class TableService {
     return this.api.request<void, SaveNotesRequest>(TABLE_ROUTES.saveNotes, {
       notes,
     });
+  }
+
+  setNpc(npcId: string, shown: boolean): Promise<void> {
+    return this.api.request<void, NpcRequest>(TABLE_ROUTES.setNpc, {
+      npcId,
+      shown,
+    });
+  }
+
+  /** null until the host sends it, and again after leaving. */
+  watchNpcs(): Observable<PublicNpc[] | null> {
+    return this.api.watchCurrent(TABLE_TOPICS.npcs);
+  }
+
+  serveSetNpc(handler: PeerHandler<unknown, void>): () => void {
+    return this.api.serve(TABLE_ROUTES.setNpc, handler);
+  }
+
+  publishNpcs(npcs: PublicNpc[]): void {
+    this.api.publish(TABLE_TOPICS.npcs, npcs);
   }
 
   /** null until the host sends it, and again after leaving. */

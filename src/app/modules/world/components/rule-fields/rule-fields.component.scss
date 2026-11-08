@@ -98,3 +98,20 @@ label {
     white-space: normal;
   }
 }
+
+.npc-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, minmax(3.5rem, auto));
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+
+  .role {
+    text-align: center;
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+  }
+
+  .cell {
+    justify-self: center;
+  }
+}

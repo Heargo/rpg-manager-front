@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { CheckboxModule } from '@openng/optimus-ui/checkbox';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
@@ -24,6 +25,11 @@ import {
 } from '../../../character/helpers/level.rules';
 import { WorldDraftErrors } from '../../helpers/world-draft.rules';
 import { DEFAULT_OFFLINE_FEATURES } from '../../helpers/world.factory';
+import {
+  DEFAULT_NPC_VISIBILITY,
+  NPC_VISIBILITY_FIELDS,
+} from '../../../npc/helpers/npc-visibility.rules';
+import { NPC_ROLES, NpcRole, NpcVisibility } from '../../../npc/models/npc';
 import { OfflineFeatures, WorldDraft } from '../../models/world';
 
 const OFFLINE_FEATURES = Object.keys(
@@ -39,6 +45,7 @@ const OFFLINE_FEATURES = Object.keys(
     TranslocoPipe,
     InputNumberModule,
     ToggleSwitchModule,
+    CheckboxModule,
     CoinInputComponent,
     FormulaChartComponent,
   ],
@@ -50,6 +57,8 @@ export class RuleFieldsComponent {
   readonly errors = input<WorldDraftErrors>({});
 
   protected readonly offlineFeatures = OFFLINE_FEATURES;
+  protected readonly npcRoles = NPC_ROLES;
+  protected readonly npcFields = NPC_VISIBILITY_FIELDS;
   protected readonly curvePresets = LEVEL_CURVE_PRESETS;
   protected readonly maxLevelBounds = { min: MIN_MAX_LEVEL, max: MAX_LEVEL };
 
@@ -72,6 +81,10 @@ export class RuleFieldsComponent {
     ...DEFAULT_OFFLINE_FEATURES,
     ...this.draft().offlineFeatures,
   }));
+
+  protected readonly npcVisibility = computed(
+    () => this.draft().npcVisibility ?? DEFAULT_NPC_VISIBILITY,
+  );
 
   protected readonly curveError = computed(() =>
     checkLevelCurve(this.levelCurve()),
@@ -126,6 +139,20 @@ export class RuleFieldsComponent {
 
   protected setOffline(feature: keyof OfflineFeatures, enabled: boolean): void {
     this.patch({ offlineFeatures: { ...this.offline(), [feature]: enabled } });
+  }
+
+  protected setNpcField(
+    role: NpcRole,
+    field: keyof NpcVisibility,
+    enabled: boolean,
+  ): void {
+    const current = this.npcVisibility();
+    this.patch({
+      npcVisibility: {
+        ...current,
+        [role]: { ...current[role], [field]: enabled },
+      },
+    });
   }
 
   /** Mouse hover opens the chart; touch and pen go through the tap. */

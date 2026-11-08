@@ -168,7 +168,19 @@
       "remove": "Delete",
       "removeTitle": "Delete this attribute?",
       "removeMessage": "\"{{ name }}\" will be removed from every sheet and from the item modifiers that use it.",
-      "notHosting": "Host a room to edit its world rules."
+      "notHosting": "Host a room to edit its world rules.",
+      "npcs": {
+        "title": "NPCs on the table",
+        "hint": "What the players see of an NPC the game master shows, by role. The name and portrait are always shown; with several roles, the ticks add up.",
+        "fields": {
+          "description": "Description",
+          "level": "Level",
+          "lifeBar": "Life bar",
+          "lifeNumbers": "Life numbers",
+          "attributes": "Every attribute",
+          "equipment": "Equipped items"
+        }
+      }
     }
   },
   "character": {
@@ -574,8 +586,10 @@
       "notesTooLong": "These notes are too long.",
       "tooManyImages": "Too many quick images: remove some first.",
       "imageMissing": "This picture isn't on the host's device.",
-      "gameMasterOnly": "Only the game master can do that."
-    }
+      "gameMasterOnly": "Only the game master can do that.",
+      "tooManyNpcs": "Four NPCs are already on the table: hide one first."
+    },
+    "npcs": "NPCs"
   },
   "tools": {
     "sandbox": {
@@ -767,7 +781,9 @@
       "toolIntro": "Browse the sample NPCs of the sandbox world. Nothing is saved.",
       "edit": "Edit",
       "create": "Add NPC",
-      "copySuffix": "(copy)"
+      "copySuffix": "(copy)",
+      "show": "Show on the table",
+      "hide": "Hide from the table"
     },
     "role": {
       "story": "Story",

@@ -1,4 +1,5 @@
 import { DEFAULT_LEVEL_CURVE, DEFAULT_MAX_LEVEL, DEFAULT_STAT_POINTS_PER_LEVEL } from '../../character/helpers/level.rules';
+import { DEFAULT_NPC_VISIBILITY } from '../../npc/helpers/npc-visibility.rules';
 import { OfflineFeatures, World, WorldDraft, WorldInfo, WorldSummary } from '../models/world';
 
 /** Defaults from the p2p-rooms spec table: reading always works, dice and notes on, actions changing shared state off. */
@@ -39,6 +40,7 @@ export function createWorld(draft: WorldDraft, newId: () => string, now: number)
     statPointsPerLevel: draft.statPointsPerLevel ?? DEFAULT_STAT_POINTS_PER_LEVEL,
     startingMoney: draft.startingMoney ?? 0,
     offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures },
+    npcVisibility: draft.npcVisibility ?? DEFAULT_NPC_VISIBILITY,
     items: [],
     characters: [],
     npcs: [],

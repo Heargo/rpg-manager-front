@@ -72,4 +72,32 @@ describe('RuleFieldsComponent', () => {
     expect(el.textContent).toContain('Max level');
     expect(el.querySelector('.error')).not.toBeNull();
   });
+
+  it('shows the NPCs section with one tick per role and field, from the defaults', async () => {
+    const { el } = await open();
+    const npcs = el.querySelector('[data-testid="rules-section-npcs"]')!;
+    expect(npcs.querySelectorAll('input')).toHaveLength(18);
+    const ticked = (role: string, field: string) => (npcs.querySelector(`#npc-${role}-${field}`) as HTMLInputElement).checked;
+    expect(ticked('story', 'description')).toBe(true);
+    expect(ticked('story', 'lifeBar')).toBe(false);
+    expect(ticked('merchant', 'level')).toBe(true);
+    expect(ticked('enemy', 'description')).toBe(false);
+    expect(ticked('enemy', 'level')).toBe(true);
+    expect(ticked('enemy', 'lifeBar')).toBe(true);
+    expect(ticked('enemy', 'lifeNumbers')).toBe(false);
+    expect(ticked('enemy', 'attributes')).toBe(false);
+    expect(ticked('enemy', 'equipment')).toBe(false);
+  });
+
+  it('emits the draft with the changed tick, keeping the other defaults', async () => {
+    const { el, emitted, settle } = await open();
+    (el.querySelector('#npc-enemy-lifeNumbers') as HTMLInputElement).click();
+    await settle();
+
+    expect(emitted.at(-1)!.npcVisibility).toEqual({
+      story: { description: true, level: true, lifeBar: false, lifeNumbers: false, attributes: false, equipment: false },
+      merchant: { description: true, level: true, lifeBar: false, lifeNumbers: false, attributes: false, equipment: false },
+      enemy: { description: false, level: true, lifeBar: true, lifeNumbers: true, attributes: false, equipment: false },
+    });
+  });
 });

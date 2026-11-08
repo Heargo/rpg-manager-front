@@ -252,4 +252,29 @@ describe('world import of sheet skills and class', () => {
       }
     });
   });
+
+  it('round-trips the NPC visibility rules', () => {
+    const npcVisibility = {
+      story: { description: false, level: true, lifeBar: true, lifeNumbers: true, attributes: true, equipment: true },
+      merchant: { description: true, level: false, lifeBar: false, lifeNumbers: false, attributes: false, equipment: false },
+      enemy: { description: true, level: true, lifeBar: false, lifeNumbers: false, attributes: false, equipment: true },
+    };
+    const file = buildWorldExport({ ...world, npcVisibility }, {}, 9);
+    const parsed = parseWorldExport(JSON.stringify(file));
+    expect(parsed).toEqual({ ok: true, value: file });
+    if (parsed.ok) expect(parsed.value.world.npcVisibility).toEqual(npcVisibility);
+  });
+
+  it('refuses an export without valid NPC visibility rules', () => {
+    const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
+    delete file.world.npcVisibility;
+    const missing = parseWorldExport(JSON.stringify(file));
+    expect(missing.ok).toBe(false);
+    if (!missing.ok) expect(missing.errors).toContain('world.npcVisibility is invalid');
+
+    file.world.npcVisibility = { story: {}, merchant: {}, enemy: {} };
+    const broken = parseWorldExport(JSON.stringify(file));
+    expect(broken.ok).toBe(false);
+    if (!broken.ok) expect(broken.errors).toContain('world.npcVisibility is invalid');
+  });
 });

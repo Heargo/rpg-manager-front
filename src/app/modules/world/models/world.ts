@@ -1,7 +1,7 @@
 import { AttributeFormula } from '../../../core/helpers/formula';
 import { ItemDraft } from '../../../core/models/item';
 import { LevelCurve } from '../../character/helpers/level.rules';
-import { Npc } from '../../npc/models/npc';
+import { Npc, NpcVisibilityRules } from '../../npc/models/npc';
 
 /** An attribute every character of the world has (Strength, Life…). */
 export interface WorldAttribute {
@@ -23,6 +23,8 @@ export interface WorldRules {
   maxLevel: number;
   statPointsPerLevel: number;
   offlineFeatures: OfflineFeatures;
+  /** Kept as is when omitted. */
+  npcVisibility?: NpcVisibilityRules;
 }
 
 /** What players can still do while the host is offline (p2p-rooms spec, Host offline). */
@@ -109,6 +111,8 @@ export interface World {
   statPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
+  /** Per NPC role, what the players see of an NPC shown on the table. */
+  npcVisibility: NpcVisibilityRules;
   items: Item[];
   characters: Character[];
   /** The GM's NPC catalogue; host-only, never sent in WorldInfo. */
@@ -145,6 +149,7 @@ export interface WorldDraft {
   statPointsPerLevel?: number;
   startingMoney?: number;
   offlineFeatures?: Partial<OfflineFeatures>;
+  npcVisibility?: NpcVisibilityRules;
 }
 
 /** What players receive about the hosted world (no catalogue, characters or GM notes). */

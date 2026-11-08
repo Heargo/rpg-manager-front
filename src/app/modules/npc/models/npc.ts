@@ -19,3 +19,28 @@ export interface NpcFilter {
   minLevel: number;
   maxLevel: number;
 }
+
+/** What the players see of the NPCs of one role (world rules). */
+export interface NpcVisibility {
+  description: boolean;
+  level: boolean;
+  lifeBar: boolean;
+  lifeNumbers: boolean;
+  attributes: boolean;
+  equipment: boolean;
+}
+
+export type NpcVisibilityRules = Record<NpcRole, NpcVisibility>;
+
+/** An NPC shown on the table: what the world's visibility rules let the players see, and nothing else. */
+export interface PublicNpc {
+  id: string;
+  name: string;
+  portraitId?: string;
+  description?: string;
+  level?: number;
+  lifeBar?: { percent: number };
+  life?: { current: number; max: number };
+  attributes?: { name: string; current: number; max: number }[];
+  equipment?: { name: string }[];
+}

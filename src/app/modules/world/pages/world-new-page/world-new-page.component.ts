@@ -1,3 +1,5 @@
+import { DEFAULT_NPC_VISIBILITY } from '../../../npc/helpers/npc-visibility.rules';
+import { NpcVisibilityRules } from '../../../npc/models/npc';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -125,6 +127,9 @@ export class WorldNewPageComponent {
   protected readonly maxLevel = signal(DEFAULT_MAX_LEVEL);
   protected readonly statPointsPerLevel = signal(DEFAULT_STAT_POINTS_PER_LEVEL);
   protected readonly starterItems = signal(true);
+  protected readonly npcVisibility = signal<NpcVisibilityRules>(
+    DEFAULT_NPC_VISIBILITY,
+  );
   protected readonly offline = signal<OfflineFeatures>({
     ...DEFAULT_OFFLINE_FEATURES,
   });
@@ -156,6 +161,7 @@ export class WorldNewPageComponent {
     statPointsPerLevel: this.statPointsPerLevel(),
     startingMoney: this.startingMoney(),
     offlineFeatures: this.offline(),
+    npcVisibility: this.npcVisibility(),
   }));
   /** Per row, the problem of its cap (null when none or valid). */
   protected readonly capErrors = computed(() =>
@@ -346,8 +352,11 @@ export class WorldNewPageComponent {
     this.startingMoney.set(draft.startingMoney ?? 0);
     this.levelCurve.set(draft.levelCurve ?? DEFAULT_LEVEL_CURVE);
     this.maxLevel.set(draft.maxLevel ?? DEFAULT_MAX_LEVEL);
-    this.statPointsPerLevel.set(draft.statPointsPerLevel ?? DEFAULT_STAT_POINTS_PER_LEVEL);
+    this.statPointsPerLevel.set(
+      draft.statPointsPerLevel ?? DEFAULT_STAT_POINTS_PER_LEVEL,
+    );
     this.offline.set({ ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures });
+    this.npcVisibility.set(draft.npcVisibility ?? DEFAULT_NPC_VISIBILITY);
   }
 
   protected async create(): Promise<void> {

@@ -1,6 +1,7 @@
 import { checkAttributeFormula } from '../../../core/helpers/formula';
 import { ITEM_RARITIES, ITEM_TYPES } from '../../../core/models/item';
 import { isValidMaxLevel, LEVEL_CURVE_PRESETS, validateLevelCurve } from '../../character/helpers/level.rules';
+import { isValidNpcVisibility } from '../../npc/helpers/npc-visibility.rules';
 import { NPC_ROLES } from '../../npc/models/npc';
 import { World } from '../models/world';
 
@@ -78,6 +79,9 @@ function validateWorld(world: unknown, errors: string[]): void {
   if (!Number.isInteger(world['startingMoney'])) errors.push('world.startingMoney must be an integer');
   for (const key of ['offlineFeatures', 'barAttributes'] as const) {
     if (!isRecord(world[key])) errors.push(`world.${key} must be an object`);
+  }
+  if (!isValidNpcVisibility(world['npcVisibility'])) {
+    errors.push('world.npcVisibility is invalid');
   }
   const attributeNames = Array.isArray(world['attributes'])
     ? world['attributes'].map((attribute) => (isRecord(attribute) && typeof attribute['name'] === 'string' ? attribute['name'] : ''))

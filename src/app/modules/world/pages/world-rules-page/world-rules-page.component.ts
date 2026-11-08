@@ -90,6 +90,7 @@ export class WorldRulesPageComponent {
       maxLevel: world?.maxLevel,
       statPointsPerLevel: world?.statPointsPerLevel,
       offlineFeatures: world?.offlineFeatures,
+      npcVisibility: world?.npcVisibility,
     }),
   });
   protected readonly attributes = linkedSignal<World | null, AttributeRow[]>({
@@ -124,6 +125,7 @@ export class WorldRulesPageComponent {
       maxLevel: fields.maxLevel ?? world!.maxLevel,
       statPointsPerLevel: fields.statPointsPerLevel ?? 0,
       offlineFeatures: { ...world!.offlineFeatures, ...fields.offlineFeatures },
+      npcVisibility: fields.npcVisibility ?? world!.npcVisibility,
     };
   });
   protected readonly errors = computed(() =>

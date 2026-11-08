@@ -168,7 +168,19 @@
       "remove": "Supprimer",
       "removeTitle": "Supprimer cet attribut ?",
       "removeMessage": "« {{ name }} » sera retiré de toutes les fiches et des modificateurs d'objets qui l'utilisent.",
-      "notHosting": "Hébergez une salle pour modifier les règles de son monde."
+      "notHosting": "Hébergez une salle pour modifier les règles de son monde.",
+      "npcs": {
+        "title": "PNJ sur la table",
+        "hint": "Ce que les joueurs voient d'un PNJ montré par le MJ, selon son rôle. Le nom et le portrait sont toujours visibles ; avec plusieurs rôles, les cases s'additionnent.",
+        "fields": {
+          "description": "Description",
+          "level": "Niveau",
+          "lifeBar": "Barre de vie",
+          "lifeNumbers": "Points de vie",
+          "attributes": "Tous les attributs",
+          "equipment": "Objets équipés"
+        }
+      }
     }
   },
   "character": {
@@ -574,8 +586,10 @@
       "notesTooLong": "Ces notes sont trop longues.",
       "tooManyImages": "Trop d'images rapides : retirez-en d'abord.",
       "imageMissing": "Cette image n'est pas sur l'appareil de l'hôte.",
-      "gameMasterOnly": "Seul le maître du jeu peut faire ça."
-    }
+      "gameMasterOnly": "Seul le maître du jeu peut faire ça.",
+      "tooManyNpcs": "Quatre PNJ sont déjà sur la table : masquez-en un d'abord."
+    },
+    "npcs": "PNJ"
   },
   "tools": {
     "sandbox": {
@@ -767,7 +781,9 @@
       "toolIntro": "Parcourez les PNJ d'exemple du monde bac à sable. Rien n'est enregistré.",
       "edit": "Modifier",
       "create": "Ajouter un PNJ",
-      "copySuffix": "(copie)"
+      "copySuffix": "(copie)",
+      "show": "Montrer sur la table",
+      "hide": "Retirer de la table"
     },
     "role": {
       "story": "Histoire",

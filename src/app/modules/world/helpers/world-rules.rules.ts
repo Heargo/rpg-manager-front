@@ -99,6 +99,7 @@ export function applyWorldRules<T extends World>(
     maxLevel: rules.maxLevel,
     statPointsPerLevel: rules.statPointsPerLevel,
     offlineFeatures: rules.offlineFeatures,
+    npcVisibility: rules.npcVisibility ?? world.npcVisibility,
     items: world.items.map(fixItem),
     characters: world.characters.map(fixSheet),
   };

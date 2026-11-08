@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
@@ -6,6 +6,7 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { RoomBusiness } from '../../../room/business/room.business';
+import { TableBusiness } from '../../../table/business/table.business';
 import { NpcCatalogueBusiness } from '../../business/npc-catalogue.business';
 import { NpcCatalogueComponent } from '../../components/npc-catalogue/npc-catalogue.component';
 import { Npc } from '../../models/npc';
@@ -40,6 +41,10 @@ import { Npc } from '../../models/npc';
       @if (catalogue.$world(); as world) {
         <app-npc-catalogue
           [world]="world"
+          [shownIds]="shownIds()"
+          [showControls]="!tool"
+          (show)="run(table.showNpc($event.id))"
+          (hide)="run(table.hideNpc($event.id))"
           (create)="openEditor()"
           (edit)="openEditor($event.id)"
           (duplicate)="run(catalogue.duplicate($event.id))"
@@ -76,6 +81,10 @@ import { Npc } from '../../models/npc';
 export class NpcCataloguePageComponent {
   protected readonly catalogue = inject(NpcCatalogueBusiness);
   protected readonly tool = !!inject(ActivatedRoute).snapshot.data['tool'];
+  protected readonly table = inject(TableBusiness);
+  protected readonly shownIds = computed(() =>
+    this.table.$npcs().map((npc) => npc.id),
+  );
   private readonly router = inject(Router);
   private readonly room = inject(RoomBusiness);
   private readonly messages = inject(MessageService);
@@ -91,7 +100,7 @@ export class NpcCataloguePageComponent {
     } catch (error) {
       this.messages.add({
         severity: MessageLevel.Error,
-        summary: this.room.describeError(error),
+        summary: this.table.describeError(error),
         life: 4000,
       });
     }

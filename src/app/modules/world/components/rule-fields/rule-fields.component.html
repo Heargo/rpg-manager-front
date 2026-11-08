@@ -158,3 +158,35 @@
     }
   </fieldset>
 </section>
+
+<section class="section" data-testid="rules-section-npcs">
+  <fieldset class="level-curve">
+    <legend>{{ "world.rules.npcs.title" | transloco }}</legend>
+    <p class="hint">{{ "world.rules.npcs.hint" | transloco }}</p>
+    <div class="npc-grid" role="group">
+      <span></span>
+      @for (role of npcRoles; track role) {
+        <strong class="role">{{ "npc.role." + role | transloco }}</strong>
+      }
+      @for (field of npcFields; track field) {
+        <span class="field-name">{{
+          "world.rules.npcs.fields." + field | transloco
+        }}</span>
+        @for (role of npcRoles; track role) {
+          <p-checkbox
+            class="cell"
+            [binary]="true"
+            [inputId]="'npc-' + role + '-' + field"
+            [ariaLabel]="
+              ('npc.role.' + role | transloco) +
+              ': ' +
+              ('world.rules.npcs.fields.' + field | transloco)
+            "
+            [ngModel]="npcVisibility()[role][field]"
+            (ngModelChange)="setNpcField(role, field, $event)"
+          />
+        }
+      }
+    </div>
+  </fieldset>
+</section>

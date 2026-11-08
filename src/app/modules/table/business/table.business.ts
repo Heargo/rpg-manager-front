@@ -5,6 +5,7 @@ import { LanguageBusiness } from '../../../core/business/language.business';
 import { PeerApiError } from '../../../core/p2p/helpers/peer-api-error';
 import { RoomBusiness } from '../../room/business/room.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
+import { PublicNpc } from '../../npc/models/npc';
 import { TableScene } from '../models/table';
 import { TableService } from '../services/table.service';
 
@@ -20,11 +21,16 @@ export class TableBusiness {
   private readonly session = inject(WorldSessionBusiness);
   private readonly images = inject(ImageBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly npcs = toSignal(this.service.watchNpcs(), {
+    initialValue: null,
+  });
 
   /** null until the host sent it. */
   readonly $scene = toSignal<TableScene | null>(this.service.watchScene(), {
     initialValue: null,
   });
+  /** The NPCs shown on the table, as the players see them. */
+  readonly $npcs = computed<PublicNpc[]>(() => this.npcs() ?? []);
   readonly $isGameMaster = this.room.$isHost;
   /** Game master only: the strip of pictures ready to show. */
   readonly $quickImageIds = computed(
@@ -47,6 +53,15 @@ export class TableBusiness {
 
   showIllustration(imageId: string | null): Promise<void> {
     return this.service.showIllustration(imageId);
+  }
+
+  /** Game master: shows an NPC to everyone (4 at most). */
+  showNpc(npcId: string): Promise<void> {
+    return this.service.setNpc(npcId, true);
+  }
+
+  hideNpc(npcId: string): Promise<void> {
+    return this.service.setNpc(npcId, false);
   }
 
   removeQuickImage(imageId: string): Promise<void> {
