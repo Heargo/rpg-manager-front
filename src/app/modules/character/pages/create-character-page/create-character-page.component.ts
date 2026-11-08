@@ -8,14 +8,15 @@ import { CardModule } from '@openng/optimus-ui/card';
 import { FileUploadHandlerEvent, FileUploadModule } from '@openng/optimus-ui/fileupload';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
+import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { CharacterBusiness } from '../../business/character.business';
-import { CHARACTER_NAME_MAX_LENGTH } from '../../models/character-api';
+import { CHARACTER_NAME_MAX_LENGTH, ClassChoice } from '../../models/character-api';
 
 /** A player's first step in a room: name and portrait; everything else comes from the world's defaults. */
 @Component({
   selector: 'app-create-character-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, TranslocoPipe, ButtonModule, CardModule, FileUploadModule, InputTextModule, MessageModule, CoinDisplayComponent],
+  imports: [FormsModule, RouterLink, TranslocoPipe, ButtonModule, CardModule, FileUploadModule, InputTextModule, MessageModule, CoinDisplayComponent, StoredImageComponent],
   templateUrl: './create-character-page.component.html',
   styleUrl: './create-character-page.component.scss',
 })
@@ -29,9 +30,22 @@ export class CreateCharacterPageComponent {
   protected readonly portraitUrl = signal<string | null>(null);
   protected readonly creating = signal(false);
   protected readonly error = signal<string | null>(null);
-  protected readonly canCreate = computed(() => !!this.name().trim() && !this.creating());
+  /** The world's classes to choose from; empty (and the step skipped) when the world has none. */
+  protected readonly classChoices = signal<ClassChoice[]>([]);
+  protected readonly classId = signal<string | undefined>(undefined);
+  protected readonly canCreate = computed(
+    () =>
+      !!this.name().trim() &&
+      !this.creating() &&
+      (!this.classChoices().length || this.classId() !== undefined),
+  );
 
   constructor() {
+    void this.characters
+      .loadClassChoices()
+      .then((choices) => this.classChoices.set(choices))
+      .catch((error) => this.error.set(this.characters.describeError(error)));
+
     // Nothing to do here once the player has a character (or isn't in a room).
     effect(() => {
       if (this.creating()) return;
@@ -52,7 +66,7 @@ export class CreateCharacterPageComponent {
     this.creating.set(true);
     this.error.set(null);
     try {
-      await this.characters.create(this.name(), this.portrait() ?? undefined);
+      await this.characters.create(this.name(), this.portrait() ?? undefined, this.classId());
       await this.router.navigate(['/room/table']);
     } catch (error) {
       this.error.set(this.characters.describeError(error));

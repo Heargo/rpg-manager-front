@@ -13,6 +13,9 @@
 
     <header class="overlay top">
       <h2 data-testid="card-name" [id]="'card-name-' + c.id">{{ c.name }}</h2>
+      @if (c.className) {
+        <span data-testid="card-class">{{ c.className }}</span>
+      }
       <span
         data-testid="character-level"
         [attr.data-rarity]="levelRarityName()"

@@ -13,6 +13,7 @@ import {
 import { grantXp, LevelCurve } from './level.rules';
 import { CharacterClass } from '../../class/models/class';
 import { treeNodeStates } from '../../class/helpers/class.rules';
+import { classBonusesOf } from './class-view.rules';
 import { Skill } from '../../skill/models/skill';
 
 /** Everything that changes a character during play. The host applies these; the sandbox applies them locally. */
@@ -147,15 +148,19 @@ export function applyCharacterAction<T extends Sheet = Character>(
   levelRules: LevelRules,
   catalogue: SkillCatalogue,
 ): ActionResult<T> {
+  const statsOf = (sheet: T) =>
+    attributeStats(
+      attributes,
+      sheet,
+      levelRules.barAttributes,
+      catalogue.skills,
+      classBonusesOf(sheet, catalogue.classes),
+    );
   switch (action.kind) {
     case 'spend-stat-point': {
       if (character.statPoints < 1)
         return fail('character.errors.noStatPoints');
-      const stat = attributeStats(
-        attributes,
-        character,
-        levelRules.barAttributes,
-      ).find((entry) => entry.attributeId === action.attributeId);
+      const stat = statsOf(character).find((entry) => entry.attributeId === action.attributeId);
       if (!stat) return fail('character.errors.unknownAttribute');
       const spent = attributes.find(
         (entry) => entry.id === action.attributeId,
@@ -175,11 +180,7 @@ export function applyCharacterAction<T extends Sheet = Character>(
         level: stat.level + 1,
         current: stat.current,
       });
-      const after = attributeStats(
-        attributes,
-        raised,
-        levelRules.barAttributes,
-      ).find((entry) => entry.attributeId === action.attributeId)!;
+      const after = statsOf(raised).find((entry) => entry.attributeId === action.attributeId)!;
       const next = setAttribute(raised, action.attributeId, {
         level: after.level,
         current: Math.max(0, stat.current + (after.max - stat.max)),
@@ -190,11 +191,7 @@ export function applyCharacterAction<T extends Sheet = Character>(
       };
     }
     case 'refund-stat-point': {
-      const stat = attributeStats(
-        attributes,
-        character,
-        levelRules.barAttributes,
-      ).find((entry) => entry.attributeId === action.attributeId);
+      const stat = statsOf(character).find((entry) => entry.attributeId === action.attributeId);
       if (!stat) return fail('character.errors.unknownAttribute');
       if (stat.level < 1) return fail('character.errors.levelZero');
       // Undoes a spend: max and current drop by the formula delta.
@@ -202,11 +199,7 @@ export function applyCharacterAction<T extends Sheet = Character>(
         level: stat.level - 1,
         current: stat.current,
       });
-      const after = attributeStats(
-        attributes,
-        lowered,
-        levelRules.barAttributes,
-      ).find((entry) => entry.attributeId === action.attributeId)!;
+      const after = statsOf(lowered).find((entry) => entry.attributeId === action.attributeId)!;
       const next = setAttribute(lowered, action.attributeId, {
         level: after.level,
         current: Math.max(
@@ -242,16 +235,8 @@ export function applyCharacterAction<T extends Sheet = Character>(
       );
       const leveled: T = { ...character, xp: grant.xp, level: grant.level };
       // A new level can raise maxima that read playerLevel: current rises by the same delta.
-      const before = attributeStats(
-        attributes,
-        character,
-        levelRules.barAttributes,
-      );
-      const after = attributeStats(
-        attributes,
-        leveled,
-        levelRules.barAttributes,
-      );
+      const before = statsOf(character);
+      const after = statsOf(leveled);
       let next = leveled;
       for (const stat of after) {
         const old = before.find(
@@ -381,11 +366,7 @@ export function applyCharacterAction<T extends Sheet = Character>(
       };
     }
     case 'set-current': {
-      const stat = attributeStats(
-        attributes,
-        character,
-        levelRules.barAttributes,
-      ).find((entry) => entry.attributeId === action.attributeId);
+      const stat = statsOf(character).find((entry) => entry.attributeId === action.attributeId);
       if (!stat) return fail('character.errors.unknownAttribute');
       if (!stat.isBar) return fail('character.errors.notABar');
       const current = Math.max(0, Math.min(action.value, stat.max));
@@ -441,11 +422,7 @@ export function applyCharacterAction<T extends Sheet = Character>(
         ),
       };
       for (const modifier of entry.item.modifiers) {
-        const stat = attributeStats(
-          attributes,
-          next,
-          levelRules.barAttributes,
-        ).find((candidate) => candidate.name === modifier.attribute);
+        const stat = statsOf(next).find((candidate) => candidate.name === modifier.attribute);
         // Only bars keep a current value; a modifier on another attribute has no lasting effect.
         if (!stat?.isBar) continue;
         const current = Math.max(

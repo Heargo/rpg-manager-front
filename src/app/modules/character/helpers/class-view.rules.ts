@@ -1,3 +1,5 @@
+import { ItemModifier } from '../../../core/models/item';
+import { CharacterClass } from '../../class/models/class';
 import { Sheet } from '../../world/models/world';
 import { SkillCatalogue } from './character-actions.rules';
 import { ClassView } from '../models/character-api';
@@ -17,4 +19,12 @@ export function classViewOf(
     characterClass,
     skills: catalogue.skills.filter((skill) => ids.has(skill.id)),
   };
+}
+
+/** The always-on bonuses of a sheet's class (none without a class, or when the class is gone). */
+export function classBonusesOf(
+  sheet: Pick<Sheet, 'classId'>,
+  classes: CharacterClass[],
+): ItemModifier[] {
+  return classes.find((entry) => entry.id === sheet.classId)?.bonuses ?? [];
 }

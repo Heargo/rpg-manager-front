@@ -1,5 +1,5 @@
 import { AttributeFormula } from '../../../core/helpers/formula';
-import { ItemDraft } from '../../../core/models/item';
+import { ItemDraft, ItemModifier } from '../../../core/models/item';
 import { LevelCurve } from '../../character/helpers/level.rules';
 import { Npc, NpcVisibilityRules } from '../../npc/models/npc';
 import { CharacterClass } from '../../class/models/class';
@@ -105,6 +105,10 @@ export type Character = Sheet & {
   rev: number;
   /** The player's personal notes, saved by the host with the record. */
   notes?: string;
+  /** Set on the published list only: the name of the class, never its tree. */
+  className?: string;
+  /** Set on the published list only: the class's always-on bonuses, so every device computes the same maxima. */
+  classBonuses?: ItemModifier[];
 };
 
 export interface World {

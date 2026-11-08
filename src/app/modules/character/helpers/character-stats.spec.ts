@@ -81,6 +81,7 @@ describe('attributeStats', () => {
       level: 2,
       bonus: 4,
       skillBonus: 0,
+      classBonus: 0,
       max: 16,
       current: 7,
       isBar: true,
@@ -308,5 +309,30 @@ describe('attributeStats with passive skills', () => {
       [active, passive('timed', 'Life', '50', 3), passive('other', 'Life', '50')],
     );
     expect(stats[0]).toMatchObject({ skillBonus: 0, max: 12 });
+  });
+});
+
+describe('attributeStats class bonuses', () => {
+  // Loosely typed: the fifth argument and `classBonus` do not exist yet (red).
+  const stats = (sheet: Character, classBonuses: { attribute: string; value: number }[]) =>
+    (attributeStats as unknown as (...args: unknown[]) => (ReturnType<typeof attributeStats>[number] & { classBonus: number })[])(
+      attributes, sheet, barIds, [], classBonuses,
+    );
+
+  it('adds the class bonuses to the maxima on their own line', () => {
+    const [life, mana, str] = stats(character(), [{ attribute: 'Life', value: 3 }, { attribute: 'Strength', value: 1 }]);
+
+    expect(life).toMatchObject({ classBonus: 3, bonus: 0, max: 15 });
+    expect(mana).toMatchObject({ classBonus: 0, max: 0 });
+    expect(str).toMatchObject({ classBonus: 1, max: 4 });
+  });
+
+  it('stacks with the equipped items, and a negative bonus lowers the max', () => {
+    const sheet = character({ inventory: [item('ring', true, [{ attribute: 'Life', value: 2 }])] });
+
+    const [life, , str] = stats(sheet, [{ attribute: 'Life', value: 3 }, { attribute: 'Strength', value: -1 }]);
+
+    expect(life).toMatchObject({ bonus: 2, classBonus: 3, max: 17 });
+    expect(str).toMatchObject({ classBonus: -1, max: 2 });
   });
 });

@@ -239,7 +239,7 @@ export class CharacterSheetComponent {
       attribute.formula.preset === 'custom'
         ? `${t('world.formula.presets.custom')}: ${attribute.formula.expression}`
         : `${t('world.formula.presets.' + attribute.formula.preset)} (${attribute.formula.step})`;
-    const result = stat.max - stat.bonus - stat.skillBonus;
+    const result = stat.max - stat.bonus - stat.classBonus - stat.skillBonus;
     const lines = [
       t('character.sheet.tip.base', { value: stat.base }),
       t('character.sheet.tip.level', { value: stat.level }),
@@ -253,6 +253,13 @@ export class CharacterSheetComponent {
         value: `${stat.bonus > 0 ? '+' : ''}${stat.bonus}`,
       }),
     );
+    if (stat.classBonus !== 0) {
+      lines.push(
+        t('character.sheet.tip.class', {
+          value: `${stat.classBonus > 0 ? '+' : ''}${stat.classBonus}`,
+        }),
+      );
+    }
     if (stat.skillBonus !== 0) {
       lines.push(
         t('character.sheet.tip.skills', {

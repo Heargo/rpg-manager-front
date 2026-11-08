@@ -13,13 +13,14 @@ const sack: InventoryItem = {
 };
 
 const world = {
+  classes: [],
   attributes: [
     { id: 'life', name: 'Life', baseValue: 10, formula: linear },
     { id: 'str', name: 'Strength', baseValue: 2, formula: linear },
   ],
   barAttributes: { life: 'life' },
   npcVisibility: DEFAULT_NPC_VISIBILITY,
-} as Pick<World, 'attributes' | 'barAttributes' | 'npcVisibility'>;
+} as Pick<World, 'attributes' | 'barAttributes' | 'npcVisibility' | 'classes'>;
 
 const npc = (roles: Npc['roles']): Npc => ({
   id: 'n1', name: 'Grok', portraitId: 'p'.repeat(64), statPoints: 0, xp: 40, level: 3, money: 77, updatedAt: 1,

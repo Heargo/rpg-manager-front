@@ -8,6 +8,7 @@ import {
 } from '../helpers/character-actions.rules';
 import {
   CHARACTER_ROUTES,
+  ClassChoice,
   ClassView,
   CHARACTER_TOPICS,
   characterActionRoute,
@@ -40,6 +41,17 @@ export class CharacterService {
   /** The player's own class, its tree and the skills it references (never the catalogues). */
   loadMyClass(): Promise<ClassView> {
     return this.api.request(CHARACTER_ROUTES.myClass, {});
+  }
+
+  /** The world's classes as a player chooses them: no trees. */
+  loadClassChoices(): Promise<ClassChoice[]> {
+    return this.api.request(CHARACTER_ROUTES.classChoices, {});
+  }
+
+  serveClassChoices(
+    handler: PeerHandler<unknown, ClassChoice[]>,
+  ): () => void {
+    return this.api.serve(CHARACTER_ROUTES.classChoices, handler);
   }
 
   serveMyClass(handler: PeerHandler<unknown, ClassView>): () => void {

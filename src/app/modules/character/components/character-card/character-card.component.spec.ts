@@ -129,3 +129,17 @@ describe('CharacterCardComponent', () => {
     expect(el.querySelector('button')).toBeNull();
   });
 });
+
+describe('CharacterCardComponent class', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('shows the class name of the character', async () => {
+    const { el } = await render({ classId: 'mage', className: 'Mage' } as Partial<Character>);
+    expect(el.querySelector('[data-testid="card-class"]')?.textContent?.trim()).toBe('Mage');
+  });
+
+  it('shows no class line for a character without a class', async () => {
+    const { el } = await render();
+    expect(el.querySelector('[data-testid="card-class"]')).toBeNull();
+  });
+});

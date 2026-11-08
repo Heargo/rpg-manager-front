@@ -31,6 +31,25 @@ export function validateCreateCharacter(request: unknown): string | null {
   return null;
 }
 
+/**
+ * Translation key of what's wrong with the class a player chose: one is required when the world has classes,
+ * must be one of them, and is refused when the world has none. Null when it's fine.
+ */
+export function validateClassChoice(
+  world: Pick<World, 'classes'>,
+  classId: unknown,
+): string | null {
+  if (!world.classes.length)
+    return classId === undefined ? null : 'character.errors.noClasses';
+  if (classId === undefined) return 'character.errors.classRequired';
+  if (
+    typeof classId !== 'string' ||
+    !world.classes.some((entry) => entry.id === classId)
+  )
+    return 'character.errors.unknownClass';
+  return null;
+}
+
 export function normalizeCharacterName(name: string): string {
   return name.trim().replace(/\s+/g, ' ').slice(0, CHARACTER_NAME_MAX_LENGTH);
 }
@@ -50,7 +69,12 @@ export function createCharacter(
   world: Pick<World, 'attributes' | 'startingStatPoints' | 'startingMoney'> & {
     startingSkillPoints: number;
   },
-  input: { playerId: string; name: string; portraitId?: string },
+  input: {
+    playerId: string;
+    name: string;
+    portraitId?: string;
+    classId?: string;
+  },
   id: string,
   now: number,
 ): Character {
@@ -62,6 +86,7 @@ export function createCharacter(
     playerId: input.playerId,
     name: normalizeCharacterName(input.name),
     portraitId: input.portraitId,
+    ...(input.classId !== undefined && { classId: input.classId }),
     statPoints: world.startingStatPoints,
     xp: 0,
     level: 1,

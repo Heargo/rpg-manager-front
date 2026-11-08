@@ -30,6 +30,9 @@ import { CharacterBusiness } from '../../business/character.business';
                 <div class="text">
                   <strong>{{ character.name }}</strong>
                   <small>{{ characters.playerName(character.playerId) ?? '' }}</small>
+                  @if (character.className) {
+                    <small data-testid="list-class">{{ character.className }}</small>
+                  }
                 </div>
               </li>
             }

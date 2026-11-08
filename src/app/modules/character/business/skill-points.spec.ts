@@ -43,7 +43,8 @@ describe('skill points (host + players)', () => {
     await gm.injector.get(RoomBusiness).accept(invite.id, answerCode);
     await joined;
     await settle();
-    await player.injector.get(CharacterBusiness).create(name);
+    const business = player.injector.get(CharacterBusiness);
+    await (business.create as unknown as (n: string, p: undefined, c: string) => Promise<Character>).call(business, name, undefined, 'mage');
     await settle();
   }
 

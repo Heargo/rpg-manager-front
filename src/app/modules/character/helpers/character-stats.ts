@@ -1,4 +1,5 @@
 import { evaluateFormula } from '../../../core/helpers/formula';
+import { ItemModifier } from '../../../core/models/item';
 import { Sheet, WorldAttribute } from '../../world/models/world';
 import { Skill } from '../../skill/models/skill';
 import { evaluateSkillAmount } from '../../skill/helpers/skill.rules';
@@ -14,6 +15,8 @@ export interface AttributeStat {
   bonus: number;
   /** Total of the permanent `modify` effects of the sheet's passive skills for it. */
   skillBonus: number;
+  /** Total of the sheet's class bonuses for it. */
+  classBonus: number;
   max: number;
   /** The stored current value for a bar attribute; always the max for any other. */
   current: number;
@@ -35,6 +38,7 @@ export interface BarStat {
 /**
  * Every attribute of the world for one character: round(formula at level) + equipped modifiers = max, and the current value
  * (capped at max, never below 0) for the bar attributes; any other attribute's current is its max. Item modifiers name attributes, so they match by name.
+ * The sheet's class bonuses add to the max like equipped items, as their own line.
  * The sheet's passive skills add their permanent `modify` effects (at the sheet's rank) to the max, as their own line.
  */
 export function attributeStats(
@@ -42,6 +46,7 @@ export function attributeStats(
   character: Sheet,
   barAttributes: BarAttributes,
   skills: Skill[] = [],
+  classBonuses: ItemModifier[] = [],
 ): AttributeStat[] {
   const bonusByName = new Map<string, number>();
   for (const entry of character.inventory) {
@@ -53,8 +58,18 @@ export function attributeStats(
       );
     }
   }
+  const classBonusByName = new Map<string, number>();
+  for (const modifier of classBonuses) {
+    classBonusByName.set(
+      modifier.attribute,
+      (classBonusByName.get(modifier.attribute) ?? 0) + modifier.value,
+    );
+  }
   const levels = levelsByName(attributes, character);
-  const skillBonusByName = passiveBonuses(attributes, character, levels, bonusByName, skills);
+  const equipmentAndClass = new Map(bonusByName);
+  for (const [name, value] of classBonusByName)
+    equipmentAndClass.set(name, (equipmentAndClass.get(name) ?? 0) + value);
+  const skillBonusByName = passiveBonuses(attributes, character, levels, equipmentAndClass, skills);
   return attributes.map((attribute) => {
     const own = character.attributes.find(
       (entry) => entry.attributeId === attribute.id,
@@ -62,7 +77,8 @@ export function attributeStats(
     const level = own?.level ?? 0;
     const bonus = bonusByName.get(attribute.name) ?? 0;
     const skillBonus = skillBonusByName.get(attribute.name) ?? 0;
-    const max = formulaMax(attribute, level, levels, character.level) + bonus + skillBonus;
+    const classBonus = classBonusByName.get(attribute.name) ?? 0;
+    const max = formulaMax(attribute, level, levels, character.level) + bonus + classBonus + skillBonus;
     const isBar = [barAttributes.life, barAttributes.mana].includes(attribute.id);
     const current = isBar ? Math.max(0, Math.min(own?.current ?? max, max)) : max;
     return {
@@ -72,6 +88,7 @@ export function attributeStats(
       level,
       bonus,
       skillBonus,
+      classBonus,
       max,
       current,
       isBar,
@@ -85,7 +102,7 @@ function passiveBonuses(
   character: Sheet,
   levels: Record<string, number>,
   equipmentBonus: Map<string, number>,
-  skills: Skill[],
+  skills: Skill[] = [],
 ): Map<string, number> {
   const bonuses = new Map<string, number>();
   const owned = skills.flatMap((skill) => {

@@ -1,5 +1,6 @@
 import { Base64Image } from '../../../core/business/image.business';
 import { CharacterClass } from '../../class/models/class';
+import { ItemModifier } from '../../../core/models/item';
 import { Skill } from '../../skill/models/skill';
 
 /** What `class/mine` answers: the player's own class (null without one), its tree's skills and their sheet's skills. */
@@ -12,12 +13,24 @@ export interface CreateCharacterRequest {
   name: string;
   /** Already shrunk by the player's device; the host stores it and keeps its hash as `portraitId`. */
   portrait?: Base64Image;
+  /** Required when the world has classes, absent when it has none; the host checks it. */
+  classId?: string;
+}
+
+/** What a player sees of a class when choosing: never the tree nor the starting items. */
+export interface ClassChoice {
+  id: string;
+  name: string;
+  description: string;
+  imageId?: string;
+  bonuses?: ItemModifier[];
 }
 
 export const CHARACTER_ROUTES = {
   create: 'character/create',
   saveNotes: 'character/save-notes',
   myClass: 'class/mine',
+  classChoices: 'class/choices',
 } as const;
 
 /** One route per character action: `character/<kind>`, payload `{ characterId, ...action fields }`. */

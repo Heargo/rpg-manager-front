@@ -5,6 +5,7 @@ import { SELF_PEER } from '../../../core/p2p/peer-api.service';
 import { PeerId } from '../../../core/p2p/room-transport';
 import { RoomHostBusiness } from '../../room/business/room-host.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
+import { giveItem } from '../../item/helpers/item-give.rules';
 import { Character } from '../../world/models/world';
 import {
   applyCharacterAction,
@@ -13,14 +14,15 @@ import {
   GAME_MASTER_ACTIONS,
   parseCharacterAction,
 } from '../helpers/character-actions.rules';
-import { classViewOf } from '../helpers/class-view.rules';
+import { classBonusesOf, classViewOf } from '../helpers/class-view.rules';
 import { parseNotesPayload } from '../helpers/offline-actions.rules';
 import {
   createCharacter,
   findCharacterOf,
+  validateClassChoice,
   validateCreateCharacter,
 } from '../helpers/character.rules';
-import { ClassView, CreateCharacterRequest } from '../models/character-api';
+import { ClassChoice, ClassView, CreateCharacterRequest } from '../models/character-api';
 import { CharacterService } from '../services/character.service';
 import { PlayerCopyGateBusiness } from './player-copy-gate.business';
 
@@ -42,6 +44,9 @@ export class CharacterHostBusiness {
       ),
       this.service.serveSaveNotes((payload, { from }) =>
         this.onSaveNotes(payload, from),
+      ),
+      this.service.serveClassChoices((_payload, { from }) =>
+        this.onClassChoices(from),
       ),
       this.service.serveMyClass((_payload, { from }) => this.onMyClass(from)),
       ...CHARACTER_ACTION_KINDS.map((kind) =>
@@ -104,6 +109,23 @@ export class CharacterHostBusiness {
     });
     this.publish();
     return changed!;
+  }
+
+  /** The classes a player picks from at creation: name, description, image and bonuses, never the trees. */
+  private onClassChoices(from: PeerId): ClassChoice[] {
+    const world = this.session.$world();
+    if (from !== SELF_PEER && !this.roomHost.playerIdOf(from))
+      throw new PeerApiError('forbidden', 'character.errors.notInRoom');
+    if (!world) throw new PeerApiError('forbidden', 'character.errors.notInRoom');
+    return world.classes.map(
+      ({ id, name, description, imageId, bonuses }) => ({
+        id,
+        name,
+        description,
+        ...(imageId !== undefined && { imageId }),
+        ...(bonuses !== undefined && { bonuses }),
+      }),
+    );
   }
 
   /** The requesting player's class, the skills its tree references and the skills on their sheet: nothing else. */
@@ -180,12 +202,19 @@ export class CharacterHostBusiness {
     await this.session.update((world) => {
       if (findCharacterOf(world, playerId))
         throw new PeerApiError('rejected', 'character.errors.alreadyExists');
+      const problem = validateClassChoice(world, request.classId);
+      if (problem) throw new PeerApiError('invalid', problem);
       created = createCharacter(
         world,
-        { playerId, name: request.name, portraitId },
+        { playerId, name: request.name, portraitId, classId: request.classId },
         crypto.randomUUID(),
         Date.now(),
       );
+      const chosen = world.classes.find((entry) => entry.id === request.classId);
+      for (const itemId of chosen?.startingItems ?? []) {
+        const item = world.items.find((entry) => entry.id === itemId);
+        if (item) created = giveItem(created, item, crypto.randomUUID());
+      }
       return { ...world, characters: [...world.characters, created] };
     });
     this.publish();
@@ -198,7 +227,18 @@ export class CharacterHostBusiness {
     // Personal notes stay on the host and with their owner: they are not in the list everyone receives.
     if (world)
       this.service.publishCharacters(
-        world.characters.map(({ notes: _notes, ...character }) => character),
+        world.characters.map(({ notes: _notes, ...character }) => {
+          const characterClass = world.classes.find(
+            (entry) => entry.id === character.classId,
+          );
+          return characterClass
+            ? {
+                ...character,
+                className: characterClass.name,
+                classBonuses: classBonusesOf(character, world.classes),
+              }
+            : character;
+        }),
       );
   }
 }

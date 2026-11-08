@@ -202,6 +202,7 @@
       "name": "Nom du personnage",
       "portrait": "Portrait",
       "choosePortrait": "Choisir un portrait",
+      "class": "Classe",
       "startsWith": "Votre personnage commence avec",
       "statPoints": "{{ count }} points de stats à dépenser",
       "money": "Argent de départ",
@@ -211,6 +212,9 @@
     "errors": {
       "invalid": "Ce personnage ne peut pas être créé.",
       "nameRequired": "Donnez un nom à votre personnage.",
+      "classRequired": "Choisissez une classe pour votre personnage.",
+      "unknownClass": "Cette classe n'existe pas dans ce monde.",
+      "noClasses": "Ce monde n'a pas de classes.",
       "nameTooLong": "Ce nom est trop long.",
       "portraitTooLarge": "Ce portrait est trop lourd.",
       "alreadyExists": "Vous avez déjà un personnage dans cette salle.",
@@ -287,6 +291,7 @@
         "bonus": "Bonus : {{ value }}",
         "max": "Maximum : {{ value }}",
         "current": "Actuel : {{ value }}",
+        "class": "Classe : {{ value }}",
         "skills": "Compétences : {{ value }}"
       }
     },

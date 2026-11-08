@@ -1,3 +1,4 @@
+import { CharacterClass } from '../../class/models/class';
 import { Skill } from '../../skill/models/skill';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -16,7 +17,7 @@ export type SheetWorld = Pick<
   'attributes' | 'barAttributes' | 'levelCurve' | 'maxLevel'
 >;
 import { coinDisplayParts } from '../../../core/helpers/money.rules';
-import { classViewOf } from '../helpers/class-view.rules';
+import { classBonusesOf, classViewOf } from '../helpers/class-view.rules';
 import { levelProgress, LevelProgress } from '../helpers/level.rules';
 import { CharacterAction } from '../helpers/character-actions.rules';
 import {
@@ -25,7 +26,7 @@ import {
   barStats,
   BarStat,
 } from '../helpers/character-stats';
-import { ClassView } from '../models/character-api';
+import { ClassChoice, ClassView } from '../models/character-api';
 import { CharacterService } from '../services/character.service';
 
 /** Characters of the room this device is in, and creating one's own. */
@@ -104,14 +105,23 @@ export class CharacterBusiness {
     return this.service.act(characterId, action);
   }
 
+  /** The world's classes to choose from at creation (no trees); empty when the world has none. */
+  loadClassChoices(): Promise<ClassChoice[]> {
+    return this.service.loadClassChoices();
+  }
+
   /** Shrinks the portrait, keeps a copy here and sends it with the name to the host. */
-  async create(name: string, portrait?: Blob): Promise<Character> {
+  async create(
+    name: string,
+    portrait?: Blob,
+    classId?: string,
+  ): Promise<Character> {
     let image: { type: string; data: string } | undefined;
     if (portrait) {
       const id = await this.images.storeUpload(portrait);
       image = await this.images.toBase64(id);
     }
-    return this.service.create({ name, portrait: image });
+    return this.service.create({ name, portrait: image, classId });
   }
 
   /** Every attribute of a character with its max (base + points + equipment) and current value. */
@@ -124,7 +134,21 @@ export class CharacterBusiness {
       character,
       world?.barAttributes ?? {},
       (world as { skills?: Skill[] } | null)?.skills ?? [],
+      this.classBonusesOf(character, world),
     );
+  }
+
+  /**
+   * The character's class bonuses: from the classes of the world at hand (sandbox) or of the hosted world (game master);
+   * a player's device reads the ones the host published with the character.
+   */
+  private classBonusesOf(character: Character, world: SheetWorld | null) {
+    const classes =
+      (world as { classes?: CharacterClass[] } | null)?.classes ??
+      this.session.$world()?.classes;
+    return classes
+      ? classBonusesOf(character, classes)
+      : (character.classBonuses ?? []);
   }
 
   /** The character's level and progress towards the next one, from the world's level curve. */
