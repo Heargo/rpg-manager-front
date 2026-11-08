@@ -1,6 +1,6 @@
 # Classes and skill tree editor
 
-Status: needs-triage
+Status: ready-for-agent
 Type: task
 Blocked by: 05
 

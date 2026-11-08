@@ -1,6 +1,6 @@
 # Spec: NPCs, skills, classes and combat
 
-Status: needs-triage
+Status: validated (2026-11-08)
 Date: 2026-11-08
 Depends on: `archived/legacy-parity/` (item catalogue, character sheet), `archived/ui-feedback/` (attribute formulas, XP and level)
 

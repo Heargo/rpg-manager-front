@@ -1,6 +1,6 @@
 # Skill points and learning skills
 
-Status: needs-triage
+Status: ready-for-agent
 Type: task
 Blocked by: 06, 15
 

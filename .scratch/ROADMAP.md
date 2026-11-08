@@ -91,9 +91,9 @@ Tickets in `ui-feedback/` (U). Bugs first, then cheap visual wins, then the mode
 | 33f | **U14** Formula validation gaps | Found by probing custom formulas. | U07, U08 |
 | 33g | **U15** Attributes step cleanup | User feedback: clunky. | U14 |
 
-## Phase 8: NPCs, skills, classes and combat (draft, 2026-11-08)
+## Phase 8: NPCs, skills, classes and combat (2026-11-08)
 
-Tickets in `npcs-skills-combat/` (N). Status: needs-triage; the user's answers of 2026-11-08 are in the spec (Decisions). Model and the World rules page first (later tickets add their settings to it), then the catalogues, then what players use; combat last because it builds on everything, and the grid after the list mode works.
+Tickets in `npcs-skills-combat/` (N). Status: validated (2026-11-08), every ticket ready-for-agent; the user's answers are in the spec (Decisions). Model and the World rules page first (later tickets add their settings to it), then the catalogues, then what players use; combat last because it builds on everything, and the grid after the list mode works.
 
 | # | Ticket | Why now | Blocked by |
 | - | --- | --- | --- |

@@ -1,6 +1,6 @@
 # NPC model, storage and export
 
-Status: needs-triage
+Status: ready-for-agent
 Type: task
 Blocked by: 01
 

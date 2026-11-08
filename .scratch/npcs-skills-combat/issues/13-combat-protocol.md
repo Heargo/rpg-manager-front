@@ -1,6 +1,6 @@
 # Combat protocol and host persistence
 
-Status: needs-triage
+Status: ready-for-agent
 Type: task
 Blocked by: 12, 02, 10
 

@@ -1,6 +1,6 @@
 # Combat UI (GM panel, player view, sandbox tool)
 
-Status: needs-triage
+Status: ready-for-agent
 Type: task
 Blocked by: 13, 07
 

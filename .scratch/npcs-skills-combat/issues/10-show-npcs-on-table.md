@@ -1,6 +1,6 @@
 # Show NPCs on the table
 
-Status: needs-triage
+Status: ready-for-agent
 Type: task
 Blocked by: 03, 15
 

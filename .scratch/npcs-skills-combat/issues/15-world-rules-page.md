@@ -1,6 +1,6 @@
 # World rules page
 
-Status: needs-triage
+Status: ready-for-agent
 Type: task
 Blocked by: 01
 
