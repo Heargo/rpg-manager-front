@@ -89,6 +89,7 @@
       "manaBar": "Second bar (mana…)",
       "noBar": "None",
       "startingStatPoints": "Starting stat points",
+      "startingSkillPoints": "Starting skill points",
       "startingMoney": "Starting money",
       "starterItems": "Fill the catalogue with default items",
       "starterItemsHint": "About 20 items generated from your attributes (equipment for every slot, potions, objects) are added to the world's catalogue. Characters start with an empty bag: the game master gives them items from the catalogue.",
@@ -105,7 +106,8 @@
       "spendStatPoints": "Spend stat points",
       "equip": "Equip and unequip items",
       "useConsumables": "Use consumables",
-      "sell": "Sell items"
+      "sell": "Sell items",
+      "learnSkills": "Learn skills"
     },
     "defaults": {
       "life": "Life",
@@ -149,6 +151,7 @@
       "preview": "XP for levels 2 to 6",
       "maxLevel": "Max level",
       "statPointsPerLevel": "Stat points per level",
+      "skillPointsPerLevel": "Skill points per level",
       "customHelp": "Write an expression using only level, for example level * 50.",
       "presets": {
         "flat": "Flat (100 XP per level)",
@@ -225,7 +228,16 @@
       "held": "Your copy is being checked, or waits for the game master's pick. Try again in a moment.",
       "offlineNotAllowed": "The host did not allow this while offline.",
       "notesTooLong": "These notes are too long.",
-      "levelZero": "This attribute is already at level 0."
+      "levelZero": "This attribute is already at level 0.",
+      "notInTree": "This skill isn't in the class tree.",
+      "skillLocked": "This skill is still locked.",
+      "skillMaxRank": "This skill is already at its max rank.",
+      "noSkillPoints": "Not enough skill points.",
+      "skillNeeded": "Another learned skill needs this rank.",
+      "skillNotLearned": "This skill isn't learned.",
+      "unknownSkill": "This skill doesn't exist in this world.",
+      "invalidRank": "This rank is not valid for this skill.",
+      "unknownClass": "This class doesn't exist in this world."
     },
     "sheet": {
       "playedBy": "Played by {{ name }}",
@@ -238,7 +250,8 @@
       "tabs": {
         "stats": "Stats",
         "equipment": "Equipment",
-        "inventory": "Inventory"
+        "inventory": "Inventory",
+        "skills": "Skills"
       },
       "base": "Base",
       "level": "Level",
@@ -252,9 +265,16 @@
       "xp": "Experience",
       "grantXpLabel": "Experience",
       "grantXp": "Grant",
-      "levelUp": "Level {{ level }}! +{{ points }} stat points",
+      "levelUp": "Level {{ level }}! +{{ points }} stat points, +{{ skillPoints }} skill points",
       "maxLevel": "Max level",
       "levelBadge": "Level {{ level }}",
+      "skillPoints": "Skill points",
+      "skillCost": "{{ cost }} per rank",
+      "learnSkill": "Learn {{ name }}",
+      "refundSkill": "Take back a rank of {{ name }}",
+      "removeSkill": "Remove {{ name }}",
+      "noClass": "No class yet.",
+      "taughtSkills": "Other skills",
       "refundFrom": "Take back a point from {{ name }}",
       "tip": {
         "base": "Base: {{ value }}",

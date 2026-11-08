@@ -1,18 +1,32 @@
 import { formulaMax } from './character-stats';
 import { Character, World } from '../../world/models/world';
-import { CHARACTER_NAME_MAX_LENGTH, CreateCharacterRequest, PORTRAIT_MAX_BASE64_LENGTH } from '../models/character-api';
+import {
+  CHARACTER_NAME_MAX_LENGTH,
+  CreateCharacterRequest,
+  PORTRAIT_MAX_BASE64_LENGTH,
+} from '../models/character-api';
 
 /** Translation key of what's wrong with a create request, or null when it's fine. */
 export function validateCreateCharacter(request: unknown): string | null {
-  if (typeof request !== 'object' || request === null) return 'character.errors.invalid';
+  if (typeof request !== 'object' || request === null)
+    return 'character.errors.invalid';
   const { name, portrait } = request as Record<string, unknown>;
-  if (typeof name !== 'string' || !name.trim()) return 'character.errors.nameRequired';
-  if (name.trim().length > CHARACTER_NAME_MAX_LENGTH) return 'character.errors.nameTooLong';
+  if (typeof name !== 'string' || !name.trim())
+    return 'character.errors.nameRequired';
+  if (name.trim().length > CHARACTER_NAME_MAX_LENGTH)
+    return 'character.errors.nameTooLong';
   if (portrait !== undefined) {
-    if (typeof portrait !== 'object' || portrait === null) return 'character.errors.invalid';
+    if (typeof portrait !== 'object' || portrait === null)
+      return 'character.errors.invalid';
     const { type, data } = portrait as Record<string, unknown>;
-    if (typeof type !== 'string' || !type.startsWith('image/') || typeof data !== 'string') return 'character.errors.invalid';
-    if (data.length > PORTRAIT_MAX_BASE64_LENGTH) return 'character.errors.portraitTooLarge';
+    if (
+      typeof type !== 'string' ||
+      !type.startsWith('image/') ||
+      typeof data !== 'string'
+    )
+      return 'character.errors.invalid';
+    if (data.length > PORTRAIT_MAX_BASE64_LENGTH)
+      return 'character.errors.portraitTooLarge';
   }
   return null;
 }
@@ -21,7 +35,10 @@ export function normalizeCharacterName(name: string): string {
   return name.trim().replace(/\s+/g, ' ').slice(0, CHARACTER_NAME_MAX_LENGTH);
 }
 
-export function findCharacterOf(world: Pick<World, 'characters'>, playerId: string): Character | undefined {
+export function findCharacterOf(
+  world: Pick<World, 'characters'>,
+  playerId: string,
+): Character | undefined {
   return world.characters.find((character) => character.playerId === playerId);
 }
 
@@ -30,12 +47,16 @@ export function findCharacterOf(world: Pick<World, 'characters'>, playerId: stri
  * the world's starting stat points and money, an empty inventory.
  */
 export function createCharacter(
-  world: Pick<World, 'attributes' | 'startingStatPoints' | 'startingMoney'>,
+  world: Pick<World, 'attributes' | 'startingStatPoints' | 'startingMoney'> & {
+    startingSkillPoints: number;
+  },
   input: { playerId: string; name: string; portraitId?: string },
   id: string,
   now: number,
 ): Character {
-  const levels = Object.fromEntries(world.attributes.map((attribute) => [attribute.name, 0]));
+  const levels = Object.fromEntries(
+    world.attributes.map((attribute) => [attribute.name, 0]),
+  );
   return {
     id,
     playerId: input.playerId,
@@ -53,7 +74,7 @@ export function createCharacter(
     inventory: [],
     rev: 1,
     updatedAt: now,
-    skillPoints: 0,
+    skillPoints: world.startingSkillPoints,
     skills: [],
   };
 }

@@ -13,13 +13,14 @@ import {
   GAME_MASTER_ACTIONS,
   parseCharacterAction,
 } from '../helpers/character-actions.rules';
+import { classViewOf } from '../helpers/class-view.rules';
 import { parseNotesPayload } from '../helpers/offline-actions.rules';
 import {
   createCharacter,
   findCharacterOf,
   validateCreateCharacter,
 } from '../helpers/character.rules';
-import { CreateCharacterRequest } from '../models/character-api';
+import { ClassView, CreateCharacterRequest } from '../models/character-api';
 import { CharacterService } from '../services/character.service';
 import { PlayerCopyGateBusiness } from './player-copy-gate.business';
 
@@ -42,6 +43,7 @@ export class CharacterHostBusiness {
       this.service.serveSaveNotes((payload, { from }) =>
         this.onSaveNotes(payload, from),
       ),
+      this.service.serveMyClass((_payload, { from }) => this.onMyClass(from)),
       ...CHARACTER_ACTION_KINDS.map((kind) =>
         this.service.serveAction(kind, (payload, { from }) =>
           this.onAction(kind, payload, from),
@@ -85,6 +87,7 @@ export class CharacterHostBusiness {
         character,
         action,
         world,
+        world,
       );
       if (!result.ok) throw new PeerApiError('rejected', result.error);
       changed = {
@@ -101,6 +104,17 @@ export class CharacterHostBusiness {
     });
     this.publish();
     return changed!;
+  }
+
+  /** The requesting player's class, the skills its tree references and the skills on their sheet: nothing else. */
+  private onMyClass(from: PeerId): ClassView {
+    const world = this.session.$world();
+    const playerId =
+      from === SELF_PEER ? undefined : this.roomHost.playerIdOf(from);
+    if (!world || !playerId)
+      throw new PeerApiError('forbidden', 'character.errors.notInRoom');
+    const character = findCharacterOf(world, playerId);
+    return classViewOf(character ?? { skills: [] }, world);
   }
 
   /** Only the owner (or the game master) changes a character's notes. */

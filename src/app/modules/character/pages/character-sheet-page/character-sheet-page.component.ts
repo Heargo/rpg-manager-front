@@ -21,7 +21,10 @@ import { OfflineBusiness } from '../../business/offline.business';
 import { PlayerCopyBusiness } from '../../business/player-copy.business';
 import { PlayerNotesComponent } from '../../components/player-notes/player-notes.component';
 import { CharacterSheetComponent } from '../../components/character-sheet/character-sheet.component';
-import { CHARACTER_ACTION_KINDS, CharacterAction } from '../../helpers/character-actions.rules';
+import {
+  CHARACTER_ACTION_KINDS,
+  CharacterAction,
+} from '../../helpers/character-actions.rules';
 
 /** A character's sheet in the room: the player acts on their own, the game master on anyone's. */
 @Component({
@@ -58,6 +61,7 @@ import { CHARACTER_ACTION_KINDS, CharacterAction } from '../../helpers/character
             <app-character-sheet
               [character]="c"
               [world]="world"
+              [classView]="classView()"
               [canPlay]="characters.canPlay(c) && !copy.$readOnly()"
               [gameMaster]="characters.$isGameMaster()"
               [busy]="busy() || copy.$readOnly()"
@@ -131,11 +135,32 @@ export class CharacterSheetPageComponent {
   protected readonly locked = computed(() =>
     CHARACTER_ACTION_KINDS.filter((kind) => !this.offline.canAct(kind)),
   );
+  /** The game master reads the catalogues; a player has their own `class/mine` view. */
+  protected readonly classView = computed(() => {
+    const c = this.character();
+    if (!c) return null;
+    return this.characters.$isGameMaster()
+      ? this.characters.classViewOf(c)
+      : this.characters.$classView();
+  });
   protected readonly busy = signal(false);
   private readonly ready = signal(false);
 
   constructor() {
     void this.room.whenReady().then(() => this.ready.set(true));
+    // A player's view of their class is asked again when their sheet or the world changes.
+    effect(() => {
+      const mine = this.character();
+      this.characters.$world();
+      if (
+        !mine ||
+        this.characters.$isGameMaster() ||
+        !this.isMine(mine) ||
+        this.offline.$offline()
+      )
+        return;
+      void this.characters.loadMyClass().catch(() => undefined);
+    });
     effect(() => {
       if (this.ready() && this.room.$status() === 'idle')
         void this.router.navigate(['/play']);
@@ -170,7 +195,11 @@ export class CharacterSheetPageComponent {
       const after = await this.offline.act(characterId, action);
       const message = before && this.characters.levelUpMessage(before, after);
       if (message)
-        this.messages.add({ severity: MessageLevel.Success, summary: message, life: 4000 });
+        this.messages.add({
+          severity: MessageLevel.Success,
+          summary: message,
+          life: 4000,
+        });
     } catch (error) {
       this.messages.add({
         severity: MessageLevel.Error,

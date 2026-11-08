@@ -89,6 +89,7 @@
       "manaBar": "Seconde barre (mana…)",
       "noBar": "Aucune",
       "startingStatPoints": "Points de stats de départ",
+      "startingSkillPoints": "Points de compétence de départ",
       "startingMoney": "Argent de départ",
       "starterItems": "Remplir le catalogue avec des objets par défaut",
       "starterItemsHint": "Une vingtaine d'objets générés à partir de vos attributs (un équipement par emplacement, des potions, des objets) sont ajoutés au catalogue du monde. Les personnages commencent avec un sac vide : le MJ leur donne des objets depuis le catalogue.",
@@ -105,7 +106,8 @@
       "spendStatPoints": "Dépenser des points de stats",
       "equip": "Équiper et retirer des objets",
       "useConsumables": "Utiliser des consommables",
-      "sell": "Vendre des objets"
+      "sell": "Vendre des objets",
+      "learnSkills": "Apprendre des compétences"
     },
     "defaults": {
       "life": "Vie",
@@ -149,6 +151,7 @@
       "preview": "XP des niveaux 2 à 6",
       "maxLevel": "Niveau max",
       "statPointsPerLevel": "Points de stats par niveau",
+      "skillPointsPerLevel": "Points de compétence par niveau",
       "customHelp": "Écrivez une expression utilisant uniquement level, par exemple level * 50.",
       "presets": {
         "flat": "Constante (100 XP par niveau)",
@@ -225,7 +228,16 @@
       "held": "Votre copie est en cours de vérification, ou attend le choix du MJ. Réessayez dans un instant.",
       "offlineNotAllowed": "L'hôte n'a pas autorisé cette action hors ligne.",
       "notesTooLong": "Ces notes sont trop longues.",
-      "levelZero": "Cet attribut est déjà au niveau 0."
+      "levelZero": "Cet attribut est déjà au niveau 0.",
+      "notInTree": "Cette compétence n'est pas dans l'arbre de la classe.",
+      "skillLocked": "Cette compétence est encore verrouillée.",
+      "skillMaxRank": "Cette compétence est déjà au rang maximum.",
+      "noSkillPoints": "Pas assez de points de compétence.",
+      "skillNeeded": "Une autre compétence apprise a besoin de ce rang.",
+      "skillNotLearned": "Cette compétence n'est pas apprise.",
+      "unknownSkill": "Cette compétence n'existe pas dans ce monde.",
+      "invalidRank": "Ce rang n'est pas valide pour cette compétence.",
+      "unknownClass": "Cette classe n'existe pas dans ce monde."
     },
     "sheet": {
       "playedBy": "Joué par {{ name }}",
@@ -238,7 +250,8 @@
       "tabs": {
         "stats": "Stats",
         "equipment": "Équipement",
-        "inventory": "Inventaire"
+        "inventory": "Inventaire",
+        "skills": "Compétences"
       },
       "base": "Base",
       "level": "Niveau",
@@ -252,9 +265,16 @@
       "xp": "Expérience",
       "grantXpLabel": "Expérience",
       "grantXp": "Donner",
-      "levelUp": "Niveau {{ level }} ! +{{ points }} points de stats",
+      "levelUp": "Niveau {{ level }} ! +{{ points }} points de stats, +{{ skillPoints }} points de compétence",
       "maxLevel": "Niveau max",
       "levelBadge": "Niveau {{ level }}",
+      "skillPoints": "Points de compétence",
+      "skillCost": "{{ cost }} par rang",
+      "learnSkill": "Apprendre {{ name }}",
+      "refundSkill": "Reprendre un rang de {{ name }}",
+      "removeSkill": "Retirer {{ name }}",
+      "noClass": "Pas encore de classe.",
+      "taughtSkills": "Autres compétences",
       "refundFrom": "Reprendre un point à {{ name }}",
       "tip": {
         "base": "Base : {{ value }}",

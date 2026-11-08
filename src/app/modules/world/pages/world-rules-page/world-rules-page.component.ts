@@ -89,6 +89,8 @@ export class WorldRulesPageComponent {
       levelCurve: world?.levelCurve,
       maxLevel: world?.maxLevel,
       statPointsPerLevel: world?.statPointsPerLevel,
+      startingSkillPoints: world?.startingSkillPoints,
+      skillPointsPerLevel: world?.skillPointsPerLevel,
       offlineFeatures: world?.offlineFeatures,
       npcVisibility: world?.npcVisibility,
     }),
@@ -124,6 +126,8 @@ export class WorldRulesPageComponent {
       levelCurve: fields.levelCurve ?? world!.levelCurve,
       maxLevel: fields.maxLevel ?? world!.maxLevel,
       statPointsPerLevel: fields.statPointsPerLevel ?? 0,
+      startingSkillPoints: fields.startingSkillPoints ?? 0,
+      skillPointsPerLevel: fields.skillPointsPerLevel ?? 0,
       offlineFeatures: { ...world!.offlineFeatures, ...fields.offlineFeatures },
       npcVisibility: fields.npcVisibility ?? world!.npcVisibility,
     };

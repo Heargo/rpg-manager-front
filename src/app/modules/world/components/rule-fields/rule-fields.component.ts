@@ -81,6 +81,12 @@ export class RuleFieldsComponent {
   protected readonly statPointsPerLevel = computed(
     () => this.draft().statPointsPerLevel ?? DEFAULT_STAT_POINTS_PER_LEVEL,
   );
+  protected readonly startingSkillPoints = computed(
+    () => this.draft().startingSkillPoints ?? 1,
+  );
+  protected readonly skillPointsPerLevel = computed(
+    () => this.draft().skillPointsPerLevel ?? 1,
+  );
   protected readonly offline = computed<OfflineFeatures>(() => ({
     ...DEFAULT_OFFLINE_FEATURES,
     ...this.draft().offlineFeatures,

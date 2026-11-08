@@ -13,6 +13,7 @@ import { Character } from '../../world/models/world';
 import {
   CharacterAction,
   CharacterActionKind,
+  SkillCatalogue,
 } from '../helpers/character-actions.rules';
 import {
   applyOffline,
@@ -70,9 +71,19 @@ export class OfflineBusiness {
             action,
             this.$features(),
             world.barAttributes,
+            this.catalogue(),
           )
         : { ok: false, error: 'character.errors.invalid' },
     );
+  }
+
+  /** Offline, a player only knows their own class and its skills. */
+  private catalogue(): SkillCatalogue {
+    const view = this.characters.$classView();
+    return {
+      skills: view?.skills ?? [],
+      classes: view?.characterClass ? [view.characterClass] : [],
+    };
   }
 
   async saveNotes(notes: string): Promise<Character> {

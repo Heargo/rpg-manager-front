@@ -105,12 +105,12 @@ describe('host offline mode (host + player over the fake network)', () => {
 
   describe('offline features (lobby toggles)', () => {
     it('the host changes them and every player receives them; the world keeps them', async () => {
-      expect(ada.offline.$features()).toEqual({ dice: true, notes: true, spendStatPoints: false, equip: false, useConsumables: false, sell: false });
+      expect(ada.offline.$features()).toEqual({ dice: true, notes: true, spendStatPoints: false, equip: false, useConsumables: false, sell: false, learnSkills: false });
 
-      await gm.features.set({ dice: false, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: true });
+      await gm.features.set({ dice: false, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: true, learnSkills: false });
       await settle();
 
-      const expected = { dice: false, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: true };
+      const expected = { dice: false, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: true, learnSkills: false };
       expect(ada.injector.get(WorldInfoBusiness).$info()!.offlineFeatures).toEqual(expected);
       expect(ada.offline.$features()).toEqual(expected);
       const saved = await gm.injector.get(WorldLibraryBusiness).get(rooms(gm).$room()!.worldId!);
@@ -152,7 +152,7 @@ describe('host offline mode (host + player over the fake network)', () => {
     });
 
     it('an allowed action changes the local copy (kept per room) and is queued', async () => {
-      await gm.features.set({ dice: true, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: false });
+      await gm.features.set({ dice: true, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: false, learnSkills: false });
       await settle();
       await hostGoesOffline();
 
@@ -178,7 +178,7 @@ describe('host offline mode (host + player over the fake network)', () => {
     });
 
     it('a notes edit is refused when notes are not allowed offline', async () => {
-      await gm.features.set({ dice: true, notes: false, spendStatPoints: false, equip: false, useConsumables: false, sell: false });
+      await gm.features.set({ dice: true, notes: false, spendStatPoints: false, equip: false, useConsumables: false, sell: false, learnSkills: false });
       await settle();
       await hostGoesOffline();
 
@@ -190,7 +190,7 @@ describe('host offline mode (host + player over the fake network)', () => {
 
   describe('on reconnect', () => {
     async function spendOfflineThenRejoin() {
-      await gm.features.set({ dice: true, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: false });
+      await gm.features.set({ dice: true, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: false, learnSkills: false });
       await settle();
       await hostGoesOffline();
       await ada.offline.act(hostCharacter().id, spend());
@@ -284,7 +284,7 @@ describe('host offline mode (host + player over the fake network)', () => {
     });
 
     it('a held player (waiting for a pick) is refused', async () => {
-      await gm.features.set({ dice: true, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: false });
+      await gm.features.set({ dice: true, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: false, learnSkills: false });
       await settle();
       await hostGoesOffline();
       await ada.offline.act(hostCharacter().id, spend());
@@ -297,7 +297,7 @@ describe('host offline mode (host + player over the fake network)', () => {
   });
 
   describe('using the player version replays the queue on the host record', () => {
-    const spendOn = { dice: true, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: false };
+    const spendOn = { dice: true, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: false, learnSkills: false };
 
     it('a forged copy (extra money) is not applied, the queued actions are', async () => {
       await gm.features.set(spendOn);
@@ -331,7 +331,7 @@ describe('host offline mode (host + player over the fake network)', () => {
 
   describe('the queue survives a reload', () => {
     it('a new player-copy business on the same device finds the queue and the changed copy', async () => {
-      await gm.features.set({ dice: true, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: false });
+      await gm.features.set({ dice: true, notes: true, spendStatPoints: true, equip: false, useConsumables: false, sell: false, learnSkills: false });
       await settle();
       await hostGoesOffline();
       await ada.offline.act(hostCharacter().id, spend());

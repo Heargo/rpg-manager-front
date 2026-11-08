@@ -126,6 +126,8 @@ export class WorldNewPageComponent {
   protected readonly levelCurve = signal<LevelCurve>(DEFAULT_LEVEL_CURVE);
   protected readonly maxLevel = signal(DEFAULT_MAX_LEVEL);
   protected readonly statPointsPerLevel = signal(DEFAULT_STAT_POINTS_PER_LEVEL);
+  protected readonly startingSkillPoints = signal(1);
+  protected readonly skillPointsPerLevel = signal(1);
   protected readonly starterItems = signal(true);
   protected readonly npcVisibility = signal<NpcVisibilityRules>(
     DEFAULT_NPC_VISIBILITY,
@@ -159,6 +161,8 @@ export class WorldNewPageComponent {
     levelCurve: this.levelCurve(),
     maxLevel: this.maxLevel(),
     statPointsPerLevel: this.statPointsPerLevel(),
+    startingSkillPoints: this.startingSkillPoints(),
+    skillPointsPerLevel: this.skillPointsPerLevel(),
     startingMoney: this.startingMoney(),
     offlineFeatures: this.offline(),
     npcVisibility: this.npcVisibility(),
@@ -222,7 +226,9 @@ export class WorldNewPageComponent {
         !errors.startingMoney &&
         !errors.levelCurve &&
         !errors.maxLevel &&
-        !errors.statPointsPerLevel,
+        !errors.statPointsPerLevel &&
+        !errors.startingSkillPoints &&
+        !errors.skillPointsPerLevel,
     } as Record<number, boolean>;
   });
   protected readonly canCreate = computed(
@@ -355,6 +361,8 @@ export class WorldNewPageComponent {
     this.statPointsPerLevel.set(
       draft.statPointsPerLevel ?? DEFAULT_STAT_POINTS_PER_LEVEL,
     );
+    this.startingSkillPoints.set(draft.startingSkillPoints ?? 1);
+    this.skillPointsPerLevel.set(draft.skillPointsPerLevel ?? 1);
     this.offline.set({ ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures });
     this.npcVisibility.set(draft.npcVisibility ?? DEFAULT_NPC_VISIBILITY);
   }

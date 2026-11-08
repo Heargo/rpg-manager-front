@@ -356,3 +356,29 @@ p-tab p-badge {
 ::ng-deep .stat-tip {
   white-space: pre-line;
 }
+
+.skill-points {
+  margin: 0 0 1rem;
+}
+
+.skills-title {
+  margin: 1rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+.skill-rows {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.25rem 0;
+  }
+
+  .skill-name {
+    flex: 1;
+  }
+}

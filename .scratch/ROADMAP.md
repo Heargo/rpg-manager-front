@@ -106,7 +106,8 @@ Tickets in `npcs-skills-combat/` (N). Status: validated (2026-11-08), every tick
 | 39 | **N10** Show NPCs on the table | Small win; per-role visibility set in the world rules. | N03, N15 |
 | 40 | **N05** Skill model and skill catalogue (done) | Classes and combat need skills. | N01 |
 | 41 | **N06** Classes and skill tree editor (done) | Trees need skills. | N05 |
-| 42 | **N07** Skill points and learning skills | Players use the trees; NPC class-based generation. | N06, N15 |
+| 42 | **N07** Skill points and learning skills (players) (done) | Players use the trees. | N06, N15 |
+| 42b | **N18** NPC class and skills | Split from N07 (2026-11-08): NPC class-based generation. | N07 |
 | 43 | **N08** Class choice at character creation | Needs classes and skill points. | N07 |
 | 44 | **N09** Default classes and skills | A world is playable without designing a tree first. | N06 |
 | 45 | **N11** Selling rules and merchants | Needs the NPC editor's stock and shown NPCs. | N04, N10, N15 |

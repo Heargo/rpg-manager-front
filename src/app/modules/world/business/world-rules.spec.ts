@@ -29,6 +29,8 @@ describe('saving the world rules (GM + player)', () => {
       levelCurve: world.levelCurve,
       maxLevel: world.maxLevel,
       statPointsPerLevel: world.statPointsPerLevel,
+      startingSkillPoints: world.startingSkillPoints,
+      skillPointsPerLevel: world.skillPointsPerLevel,
       offlineFeatures: world.offlineFeatures,
       ...changes,
     };

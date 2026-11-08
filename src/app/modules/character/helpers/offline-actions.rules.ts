@@ -18,6 +18,7 @@ import {
   GAME_MASTER_ACTIONS,
   LevelRules,
   parseCharacterAction,
+  SkillCatalogue,
 } from './character-actions.rules';
 import { BarAttributes } from './character-stats';
 
@@ -29,6 +30,7 @@ export type OfflineResult =
 const NO_XP_RULES: LevelRules = {
   levelCurve: { preset: 'flat' },
   statPointsPerLevel: 0,
+  skillPointsPerLevel: 0,
   maxLevel: 2,
   barAttributes: {},
 };
@@ -42,6 +44,7 @@ const FEATURE_OF: Partial<Record<CharacterActionKind, keyof OfflineFeatures>> =
     unequip: 'equip',
     use: 'useConsumables',
     sell: 'sell',
+    'learn-skill': 'learnSkills',
   };
 
 /** Whether an action may be done while the host is offline: its feature is on, and it isn't a game master action. */
@@ -61,6 +64,7 @@ export function applyOffline(
   action: CharacterAction,
   features: OfflineFeatures,
   barAttributes: BarAttributes,
+  catalogue: SkillCatalogue,
 ): OfflineResult {
   if (!isOfflineAllowed(features, action.kind))
     return { ok: false, error: NOT_ALLOWED };
@@ -69,6 +73,7 @@ export function applyOffline(
     character,
     action,
     { ...NO_XP_RULES, barAttributes },
+    catalogue,
   );
   if (!result.ok) return result;
   const { kind, ...fields } = action;
@@ -178,6 +183,7 @@ export function replayQueue(
   queue: QueuedAction[],
   features: OfflineFeatures,
   barAttributes: BarAttributes,
+  catalogue: SkillCatalogue,
 ): { character: Character; refused: QueuedRefusal[] } {
   let character = host;
   const refused: QueuedRefusal[] = [];
@@ -199,11 +205,12 @@ export function replayQueue(
       refused.push({ route: entry.route, error: NOT_ALLOWED });
     else {
       const result = applyCharacterAction(
-    attributes,
-    character,
-    action,
-    { ...NO_XP_RULES, barAttributes },
-  );
+        attributes,
+        character,
+        action,
+        { ...NO_XP_RULES, barAttributes },
+        catalogue,
+      );
       if (result.ok) character = result.character;
       else refused.push({ route: entry.route, error: result.error });
     }

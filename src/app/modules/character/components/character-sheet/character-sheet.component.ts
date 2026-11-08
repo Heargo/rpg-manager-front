@@ -26,6 +26,9 @@ import { ItemCardComponent } from '../../../item/components/item-card/item-card.
 import { RARITY_SEVERITY } from '../../../item/helpers/item-display';
 import { CharacterCardComponent } from '../character-card/character-card.component';
 import { SlotSilhouetteComponent } from '../../../../core/components/slot-silhouette/slot-silhouette.component';
+import { SkillTreeComponent } from '../../../class/components/skill-tree/skill-tree.component';
+import { treeNodeStates } from '../../../class/helpers/class.rules';
+import { ClassView } from '../../models/character-api';
 import { Character, InventoryItem } from '../../../world/models/world';
 import {
   CharacterBusiness,
@@ -63,6 +66,7 @@ const ITEM_ICONS: Record<string, string> = {
     TabsModule,
     TooltipModule,
     CharacterCardComponent,
+    SkillTreeComponent,
     StoredImageComponent,
     ItemCardComponent,
     SlotSilhouetteComponent,
@@ -77,6 +81,8 @@ export class CharacterSheetComponent {
 
   readonly character = input.required<Character>();
   readonly world = input.required<SheetWorld>();
+  /** The player's own class, its tree and the skills it references (from `class/mine`); the game master's from the catalogue. */
+  readonly classView = input<ClassView | null>(null);
   /** Spend points and use the items (the character's player, or the game master). */
   readonly canPlay = input(false);
   /** Grant points and set current values. */
@@ -121,6 +127,72 @@ export class CharacterSheetComponent {
     return entry ? this.itemMenu(entry) : [];
   });
 
+  protected readonly treeStates = computed(() => {
+    const tree = this.classView()?.characterClass?.tree;
+    return tree ? treeNodeStates(tree, this.character()) : [];
+  });
+  protected readonly ranks = computed(() =>
+    Object.fromEntries(
+      this.character().skills.map((entry) => [entry.skillId, entry.rank]),
+    ),
+  );
+  /** One row per skill of the class tree, with what the player can do with it. */
+  protected readonly treeRows = computed(() => {
+    const view = this.classView();
+    const character = this.character();
+    return (view?.characterClass?.tree ?? []).map((node) => {
+      const skill = view!.skills.find((entry) => entry.id === node.skillId);
+      const state = this.treeStates().find(
+        (entry) => entry.skillId === node.skillId,
+      )?.state;
+      const rank = this.ranks()[node.skillId] ?? 0;
+      return {
+        skillId: node.skillId,
+        name: skill?.name ?? node.skillId,
+        rank,
+        maxRank: skill?.maxRank ?? 0,
+        cost: skill?.pointCost ?? 0,
+        learnable:
+          !!skill &&
+          state !== 'locked' &&
+          rank < skill.maxRank &&
+          character.skillPoints >= skill.pointCost,
+      };
+    });
+  });
+  /** Skills on the sheet that the class tree doesn't teach (given by the game master). */
+  protected readonly taughtRows = computed(() => {
+    const view = this.classView();
+    const inTree = new Set(
+      view?.characterClass?.tree.map((node) => node.skillId),
+    );
+    return this.character()
+      .skills.filter((entry) => !inTree.has(entry.skillId))
+      .map((entry) => {
+        const skill = view?.skills.find(
+          (candidate) => candidate.id === entry.skillId,
+        );
+        return {
+          skillId: entry.skillId,
+          name: skill?.name ?? entry.skillId,
+          rank: entry.rank,
+          maxRank: skill?.maxRank ?? entry.rank,
+        };
+      });
+  });
+
+  protected learn(skillId: string): void {
+    this.act.emit({ kind: 'learn-skill', skillId });
+  }
+
+  protected refundSkill(skillId: string): void {
+    this.act.emit({ kind: 'refund-skill', skillId });
+  }
+
+  protected removeTaught(skillId: string): void {
+    this.act.emit({ kind: 'set-skill', skillId, rank: 0 });
+  }
+
   protected isLocked(kind: CharacterActionKind): boolean {
     return this.lockedActions().includes(kind);
   }
@@ -144,7 +216,8 @@ export class CharacterSheetComponent {
 
   protected grantXp(): void {
     const amount = this.grantXpAmount();
-    if (Number.isInteger(amount) && amount >= 1) this.act.emit({ kind: 'grant-xp', amount });
+    if (Number.isInteger(amount) && amount >= 1)
+      this.act.emit({ kind: 'grant-xp', amount });
   }
 
   protected refund(attributeId: string): void {
@@ -153,10 +226,15 @@ export class CharacterSheetComponent {
 
   /** The value's details, one per line: base, level, formula and its result, cap, equipment bonus, max, current. */
   protected tooltip(attributeId: string): string {
-    const stat = this.stats().find((entry) => entry.attributeId === attributeId);
-    const attribute = this.world().attributes.find((entry) => entry.id === attributeId);
+    const stat = this.stats().find(
+      (entry) => entry.attributeId === attributeId,
+    );
+    const attribute = this.world().attributes.find(
+      (entry) => entry.id === attributeId,
+    );
     if (!stat || !attribute) return '';
-    const t = (key: string, params?: Record<string, unknown>) => this.language.t(key, params);
+    const t = (key: string, params?: Record<string, unknown>) =>
+      this.language.t(key, params);
     const formula =
       attribute.formula.preset === 'custom'
         ? `${t('world.formula.presets.custom')}: ${attribute.formula.expression}`
@@ -168,13 +246,23 @@ export class CharacterSheetComponent {
       t('character.sheet.tip.formula', { value: formula }),
       t('character.sheet.tip.result', { value: result }),
     ];
-    if (attribute.cap !== undefined) lines.push(t('character.sheet.tip.cap', { value: attribute.cap }));
-    lines.push(t('character.sheet.tip.bonus', { value: `${stat.bonus > 0 ? '+' : ''}${stat.bonus}` }));
+    if (attribute.cap !== undefined)
+      lines.push(t('character.sheet.tip.cap', { value: attribute.cap }));
+    lines.push(
+      t('character.sheet.tip.bonus', {
+        value: `${stat.bonus > 0 ? '+' : ''}${stat.bonus}`,
+      }),
+    );
     if (stat.skillBonus !== 0) {
-      lines.push(t('character.sheet.tip.skills', { value: `${stat.skillBonus > 0 ? '+' : ''}${stat.skillBonus}` }));
+      lines.push(
+        t('character.sheet.tip.skills', {
+          value: `${stat.skillBonus > 0 ? '+' : ''}${stat.skillBonus}`,
+        }),
+      );
     }
     lines.push(t('character.sheet.tip.max', { value: stat.max }));
-    if (stat.isBar) lines.push(t('character.sheet.tip.current', { value: stat.current }));
+    if (stat.isBar)
+      lines.push(t('character.sheet.tip.current', { value: stat.current }));
     return lines.join('\n');
   }
 

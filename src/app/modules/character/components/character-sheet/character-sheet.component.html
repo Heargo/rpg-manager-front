@@ -22,6 +22,12 @@
           {{ "character.sheet.tabs.inventory" | transloco }}
           <p-badge [value]="c.inventory.length" severity="secondary" />
         </p-tab>
+        <p-tab value="skills">
+          {{ "character.sheet.tabs.skills" | transloco }}
+          @if (c.skillPoints > 0) {
+            <p-badge [value]="c.skillPoints" severity="info" />
+          }
+        </p-tab>
       </p-tablist>
       <p-tabpanels>
         <!-- Stats -->
@@ -225,6 +231,100 @@
             </ul>
           } @else {
             <p class="hint">{{ "character.items.empty" | transloco }}</p>
+          }
+        </p-tabpanel>
+
+        <!-- Skills -->
+        <p-tabpanel value="skills">
+          <p class="skill-points" data-skill-points>
+            <i class="pi pi-star" aria-hidden="true"></i>
+            {{ "character.sheet.skillPoints" | transloco }}:
+            <strong>{{ c.skillPoints }}</strong>
+          </p>
+          @if (classView()?.characterClass; as characterClass) {
+            <h3 class="skills-title">{{ characterClass.name }}</h3>
+            <app-skill-tree
+              [tree]="characterClass.tree"
+              [skills]="classView()!.skills"
+              [states]="treeStates()"
+              [ranks]="ranks()"
+            />
+            <ul class="skill-rows">
+              @for (row of treeRows(); track row.skillId) {
+                <li>
+                  <span class="skill-name">{{ row.name }}</span>
+                  <span class="skill-rank">{{
+                    "class.tree.rank"
+                      | transloco: { rank: row.rank, max: row.maxRank }
+                  }}</span>
+                  <small>{{
+                    "character.sheet.skillCost" | transloco: { cost: row.cost }
+                  }}</small>
+                  @if (canPlay() && !gameMaster() && row.learnable) {
+                    <p-button
+                      icon="pi pi-plus"
+                      [rounded]="true"
+                      [text]="true"
+                      [attr.data-learn]="row.skillId"
+                      [disabled]="busy() || isLocked('learn-skill')"
+                      [ariaLabel]="
+                        'character.sheet.learnSkill'
+                          | transloco: { name: row.name }
+                      "
+                      (onClick)="learn(row.skillId)"
+                    />
+                  }
+                  @if (gameMaster() && row.rank > 0) {
+                    <p-button
+                      icon="pi pi-minus"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="secondary"
+                      [attr.data-refund]="row.skillId"
+                      [disabled]="busy()"
+                      [ariaLabel]="
+                        'character.sheet.refundSkill'
+                          | transloco: { name: row.name }
+                      "
+                      (onClick)="refundSkill(row.skillId)"
+                    />
+                  }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="hint">{{ "character.sheet.noClass" | transloco }}</p>
+          }
+          @if (taughtRows().length) {
+            <h3 class="skills-title">
+              {{ "character.sheet.taughtSkills" | transloco }}
+            </h3>
+            <ul class="skill-rows">
+              @for (row of taughtRows(); track row.skillId) {
+                <li [attr.data-taught]="row.skillId">
+                  <span class="skill-name">{{ row.name }}</span>
+                  <span class="skill-rank">{{
+                    "class.tree.rank"
+                      | transloco: { rank: row.rank, max: row.maxRank }
+                  }}</span>
+                  @if (gameMaster()) {
+                    <p-button
+                      icon="pi pi-trash"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="secondary"
+                      [attr.data-remove-taught]="row.skillId"
+                      [disabled]="busy()"
+                      [ariaLabel]="
+                        'character.sheet.removeSkill'
+                          | transloco: { name: row.name }
+                      "
+                      (onClick)="removeTaught(row.skillId)"
+                    />
+                  }
+                </li>
+              }
+            </ul>
           }
         </p-tabpanel>
       </p-tabpanels>

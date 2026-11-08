@@ -20,7 +20,7 @@ const base: WorldDraft = {
   levelCurve: { preset: 'growing' },
   maxLevel: 20,
   statPointsPerLevel: 3,
-  offlineFeatures: { dice: true, notes: true, spendStatPoints: false, equip: false, useConsumables: false, sell: false },
+  offlineFeatures: { dice: true, notes: true, spendStatPoints: false, equip: false, useConsumables: false, sell: false, learnSkills: false },
 };
 
 async function open(errors: Record<string, string> = {}) {
@@ -55,7 +55,7 @@ describe('RuleFieldsComponent', () => {
     expect((progression.querySelector('#stat-points-per-level') as HTMLInputElement).value).toBe('3');
     expect(progression.querySelector('[data-testid="level-curve-preview"]')!.textContent!.trim()).toBe('200 300 400 500 600');
     expect(economy.querySelector('app-coin-input')).not.toBeNull();
-    expect(offline.querySelectorAll('input').length).toBe(6);
+    expect(offline.querySelectorAll('input').length).toBe(7);
   });
 
   it('emits the draft with the new level curve when the preset changes', async () => {

@@ -1,4 +1,12 @@
 import { Base64Image } from '../../../core/business/image.business';
+import { CharacterClass } from '../../class/models/class';
+import { Skill } from '../../skill/models/skill';
+
+/** What `class/mine` answers: the player's own class (null without one), its tree's skills and their sheet's skills. */
+export interface ClassView {
+  characterClass: CharacterClass | null;
+  skills: Skill[];
+}
 
 export interface CreateCharacterRequest {
   name: string;
@@ -9,6 +17,7 @@ export interface CreateCharacterRequest {
 export const CHARACTER_ROUTES = {
   create: 'character/create',
   saveNotes: 'character/save-notes',
+  myClass: 'class/mine',
 } as const;
 
 /** One route per character action: `character/<kind>`, payload `{ characterId, ...action fields }`. */

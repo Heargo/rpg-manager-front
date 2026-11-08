@@ -17,6 +17,8 @@ const attributes: WorldAttribute[] = [
   { id: 'str', name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
 ];
 
+const noCatalogue = { skills: [], classes: [] };
+
 const none: OfflineFeatures = {
   dice: true,
   notes: false,
@@ -24,6 +26,7 @@ const none: OfflineFeatures = {
   equip: false,
   useConsumables: false,
   sell: false,
+  learnSkills: false,
 };
 const all: OfflineFeatures = {
   dice: true,
@@ -32,6 +35,7 @@ const all: OfflineFeatures = {
   equip: true,
   useConsumables: true,
   sell: true,
+  learnSkills: true,
 };
 
 const helm = {
@@ -125,7 +129,7 @@ describe('applyOffline', () => {
       ada,
       [],
       { kind: 'spend-stat-point', attributeId: 'str' },
-      all, bars);
+      all, bars, noCatalogue);
     expect(result).toEqual({
       ok: true,
       character: {
@@ -151,14 +155,14 @@ describe('applyOffline', () => {
       ada,
       [],
       { kind: 'equip', inventoryId: 'inv-helm' },
-      all, bars);
+      all, bars, noCatalogue);
     if (!first.ok) throw new Error('expected ok');
     const second = applyOffline(
       attributes,
       first.character,
       first.queue,
       { kind: 'sell', inventoryId: 'inv-potion' },
-      all, bars);
+      all, bars, noCatalogue);
     expect(second).toMatchObject({
       ok: true,
       character: { money: 65, inventory: [{ id: 'inv-helm', equipped: true }] },
@@ -187,7 +191,7 @@ describe('applyOffline', () => {
       ada,
       queue,
       { kind: 'sell', inventoryId: 'inv-potion' },
-      { ...all, sell: false }, bars);
+      { ...all, sell: false }, bars, noCatalogue);
     expect(result).toEqual({
       ok: false,
       error: 'character.errors.offlineNotAllowed',
@@ -200,7 +204,7 @@ describe('applyOffline', () => {
       { ...ada, statPoints: 0 },
       [],
       { kind: 'spend-stat-point', attributeId: 'str' },
-      all, bars);
+      all, bars, noCatalogue);
     expect(result).toEqual({
       ok: false,
       error: 'character.errors.noStatPoints',
@@ -348,7 +352,7 @@ describe('replayQueue', () => {
         payload: { characterId: 'c1', notes: 'hi' },
       },
     ];
-    const { character, refused } = replayQueue(attributes, ada, queue, all, bars);
+    const { character, refused } = replayQueue(attributes, ada, queue, all, bars, noCatalogue);
     expect(refused).toEqual([]);
     expect(character).toMatchObject({
       statPoints: 1,
@@ -380,7 +384,7 @@ describe('replayQueue', () => {
     const { character, refused } = replayQueue(attributes, ada, queue, {
       ...all,
       spendStatPoints: false,
-    }, bars);
+    }, bars, noCatalogue);
     expect(refused).toEqual([
       { route: 'character/sell', error: 'character.errors.unknownItem' },
       {

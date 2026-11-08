@@ -1,20 +1,31 @@
 import { Skill } from '../../skill/models/skill';
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ImageBusiness } from '../../../core/business/image.business';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { ProfileBusiness } from '../../../core/business/profile.business';
 import { PeerApiError } from '../../../core/p2p/helpers/peer-api-error';
 import { RoomBusiness } from '../../room/business/room.business';
+import { WorldSessionBusiness } from '../../world/business/world-session.business';
 import { WorldInfoBusiness } from '../../world/business/world-info.business';
 import { Character, WorldInfo } from '../../world/models/world';
 
 /** What a character sheet needs from its world (the room's, or the sandbox's). */
-export type SheetWorld = Pick<WorldInfo, 'attributes' | 'barAttributes' | 'levelCurve' | 'maxLevel'>;
+export type SheetWorld = Pick<
+  WorldInfo,
+  'attributes' | 'barAttributes' | 'levelCurve' | 'maxLevel'
+>;
 import { coinDisplayParts } from '../../../core/helpers/money.rules';
+import { classViewOf } from '../helpers/class-view.rules';
 import { levelProgress, LevelProgress } from '../helpers/level.rules';
 import { CharacterAction } from '../helpers/character-actions.rules';
-import { attributeStats, AttributeStat, barStats, BarStat } from '../helpers/character-stats';
+import {
+  attributeStats,
+  AttributeStat,
+  barStats,
+  BarStat,
+} from '../helpers/character-stats';
+import { ClassView } from '../models/character-api';
 import { CharacterService } from '../services/character.service';
 
 /** Characters of the room this device is in, and creating one's own. */
@@ -25,18 +36,44 @@ export class CharacterBusiness {
   private readonly profile = inject(ProfileBusiness);
   private readonly images = inject(ImageBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly session = inject(WorldSessionBusiness);
 
   readonly $world = inject(WorldInfoBusiness).$info;
   /** null until the host sent the list. */
-  readonly $characters = toSignal<Character[] | null>(this.service.watchCharacters(), { initialValue: null });
+  readonly $characters = toSignal<Character[] | null>(
+    this.service.watchCharacters(),
+    { initialValue: null },
+  );
   readonly $myCharacter = computed(() => {
     const playerId = this.profile.$profile().playerId;
-    return this.$characters()?.find((character) => character.playerId === playerId);
+    return this.$characters()?.find(
+      (character) => character.playerId === playerId,
+    );
   });
   /** A connected player whose seat has no character yet. */
   readonly $needsCharacter = computed(
-    () => this.room.$status() === 'connected' && this.$characters() !== null && !this.$myCharacter(),
+    () =>
+      this.room.$status() === 'connected' &&
+      this.$characters() !== null &&
+      !this.$myCharacter(),
   );
+
+  private readonly myClassView = signal<ClassView | null>(null);
+  /** The last `class/mine` answer; offline actions read it as their catalogue. */
+  readonly $classView = this.myClassView.asReadonly();
+
+  /** Asks the host for the player's own class and the skills it needs. */
+  async loadMyClass(): Promise<ClassView> {
+    const view = await this.service.loadMyClass();
+    this.myClassView.set(view);
+    return view;
+  }
+
+  /** Game master: a character's class and the skills it references, straight from the world's catalogues. */
+  classViewOf(character: Character): ClassView {
+    const world = this.session.$world();
+    return classViewOf(character, world ?? { skills: [], classes: [] });
+  }
 
   private creationOffered = false;
 
@@ -56,7 +93,10 @@ export class CharacterBusiness {
 
   /** Whether this device may spend points and use the items of a character: its player, or the game master. */
   canPlay(character: Character): boolean {
-    return this.$isGameMaster() || character.playerId === this.profile.$profile().playerId;
+    return (
+      this.$isGameMaster() ||
+      character.playerId === this.profile.$profile().playerId
+    );
   }
 
   /** Sends an action on a character to the host; resolves with the character as the host saved it. */
@@ -75,13 +115,26 @@ export class CharacterBusiness {
   }
 
   /** Every attribute of a character with its max (base + points + equipment) and current value. */
-  statsOf(character: Character, world: SheetWorld | null = this.$world()): AttributeStat[] {
-    return attributeStats(world?.attributes ?? [], character, world?.barAttributes ?? {}, (world as { skills?: Skill[] } | null)?.skills ?? []);
+  statsOf(
+    character: Character,
+    world: SheetWorld | null = this.$world(),
+  ): AttributeStat[] {
+    return attributeStats(
+      world?.attributes ?? [],
+      character,
+      world?.barAttributes ?? {},
+      (world as { skills?: Skill[] } | null)?.skills ?? [],
+    );
   }
 
   /** The character's level and progress towards the next one, from the world's level curve. */
-  progressOf(character: Character, world: Pick<WorldInfo, 'levelCurve' | 'maxLevel'> | null = this.$world()): LevelProgress | null {
-    return world ? levelProgress(world.levelCurve, character.xp, world.maxLevel) : null;
+  progressOf(
+    character: Character,
+    world: Pick<WorldInfo, 'levelCurve' | 'maxLevel'> | null = this.$world(),
+  ): LevelProgress | null {
+    return world
+      ? levelProgress(world.levelCurve, character.xp, world.maxLevel)
+      : null;
   }
 
   /** "Level 3! +3 stat points" when a change raised the level, else null. */
@@ -90,28 +143,42 @@ export class CharacterBusiness {
     return this.language.t('character.sheet.levelUp', {
       level: after.level,
       points: after.statPoints - before.statPoints,
+      skillPoints: after.skillPoints - before.skillPoints,
     });
   }
 
   /** The world's life and mana bars for a character. */
-  barsOf(character: Character, world: SheetWorld | null = this.$world()): { life?: BarStat; mana?: BarStat } {
-    return world ? barStats(this.statsOf(character, world), world.barAttributes) : {};
+  barsOf(
+    character: Character,
+    world: SheetWorld | null = this.$world(),
+  ): { life?: BarStat; mana?: BarStat } {
+    return world
+      ? barStats(this.statsOf(character, world), world.barAttributes)
+      : {};
   }
 
   /** An amount of copper as text ("1 gold 12 silver 3 copper"), for confirmations and toasts. */
   money(amount: number): string {
     return coinDisplayParts(amount)
-      .map(({ coin, amount: count }) => `${count} ${this.language.t('coin.' + coin).toLowerCase()}`)
+      .map(
+        ({ coin, amount: count }) =>
+          `${count} ${this.language.t('coin.' + coin).toLowerCase()}`,
+      )
       .join(' ');
   }
 
   /** Name of the player behind a character, from the room's seats. */
   playerName(playerId: string): string | undefined {
-    return this.room.$room()?.members.find((member) => member.playerId === playerId)?.name;
+    return this.room
+      .$room()
+      ?.members.find((member) => member.playerId === playerId)?.name;
   }
 
   describeError(error: unknown): string {
-    if (error instanceof PeerApiError && error.message.startsWith('character.')) {
+    if (
+      error instanceof PeerApiError &&
+      error.message.startsWith('character.')
+    ) {
       console.error('Character error', error);
       return this.language.t(error.message);
     }

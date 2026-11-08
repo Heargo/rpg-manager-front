@@ -121,6 +121,36 @@
         <small class="error">{{ key | transloco }}</small>
       }
     </div>
+    <div class="field">
+      <label for="starting-skill-points">{{
+        "world.fields.startingSkillPoints" | transloco
+      }}</label>
+      <p-inputnumber
+        inputId="starting-skill-points"
+        [min]="0"
+        [showButtons]="true"
+        [ngModel]="startingSkillPoints()"
+        (ngModelChange)="patch({ startingSkillPoints: $event ?? 0 })"
+      />
+      @if (errors().startingSkillPoints; as key) {
+        <small class="error">{{ key | transloco }}</small>
+      }
+    </div>
+    <div class="field">
+      <label for="skill-points-per-level">{{
+        "world.level.skillPointsPerLevel" | transloco
+      }}</label>
+      <p-inputnumber
+        inputId="skill-points-per-level"
+        [min]="0"
+        [showButtons]="true"
+        [ngModel]="skillPointsPerLevel()"
+        (ngModelChange)="patch({ skillPointsPerLevel: $event ?? 0 })"
+      />
+      @if (errors().skillPointsPerLevel; as key) {
+        <small class="error">{{ key | transloco }}</small>
+      }
+    </div>
   </fieldset>
 </section>
 

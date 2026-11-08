@@ -14,10 +14,10 @@ import {
 } from './character-actions.rules';
 import { attributeStats } from './character-stats';
 
-const levelRules = { levelCurve: { preset: 'growing' as const }, statPointsPerLevel: 3, maxLevel: 20, barAttributes: { life: 'life', mana: 'wit' } };
+const levelRules = { levelCurve: { preset: 'growing' as const }, statPointsPerLevel: 3, skillPointsPerLevel: 1, maxLevel: 20, barAttributes: { life: 'life', mana: 'wit' } };
 const applyCharacterAction = (
   ...args: [WorldAttribute[], Character, Parameters<typeof applyWithRules>[2]]
-) => applyWithRules(...args, levelRules);
+) => applyWithRules(...args, levelRules, { skills: [], classes: [] });
 
 const attributes: WorldAttribute[] = [
   { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },

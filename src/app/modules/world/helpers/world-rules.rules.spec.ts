@@ -71,6 +71,8 @@ function setup(): { world: World; rules: WorldRules } {
     levelCurve: world.levelCurve,
     maxLevel: world.maxLevel,
     statPointsPerLevel: world.statPointsPerLevel,
+    startingSkillPoints: world.startingSkillPoints,
+    skillPointsPerLevel: world.skillPointsPerLevel,
     offlineFeatures: world.offlineFeatures,
   };
   return { world, rules };

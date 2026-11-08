@@ -7,7 +7,7 @@ const attributes: WorldAttribute[] = [
   { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
   { id: 'str', name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
 ];
-const levelRules = { levelCurve: { preset: 'growing' as const }, statPointsPerLevel: 3, maxLevel: 20, barAttributes: { life: 'life' } };
+const levelRules = { levelCurve: { preset: 'growing' as const }, statPointsPerLevel: 3, skillPointsPerLevel: 1, maxLevel: 20, barAttributes: { life: 'life' } };
 
 const entry = (id: string, modifiers: { attribute: string; value: number }[], type: 'equipment' | 'consumable', equipped = false) => ({
   id,
@@ -47,19 +47,19 @@ describe('rules on a plain sheet', () => {
 
   it('equips and unequips', () => {
     const helm = entry('helm', [{ attribute: 'Life', value: 3 }], 'equipment');
-    const equipped = applyCharacterAction(attributes, sheet({ inventory: [helm] }), { kind: 'equip', inventoryId: 'helm' }, levelRules);
+    const equipped = applyCharacterAction(attributes, sheet({ inventory: [helm] }), { kind: 'equip', inventoryId: 'helm' }, levelRules, { skills: [], classes: [] });
     expect(equipped.ok).toBe(true);
     if (!equipped.ok) return;
     expect(equipped.character.inventory[0].equipped).toBe(true);
     expect(equipped.character).not.toHaveProperty('playerId');
 
-    const removed = applyCharacterAction(attributes, equipped.character, { kind: 'unequip', inventoryId: 'helm' }, levelRules);
+    const removed = applyCharacterAction(attributes, equipped.character, { kind: 'unequip', inventoryId: 'helm' }, levelRules, { skills: [], classes: [] });
     expect(removed.ok && removed.character.inventory[0].equipped).toBe(false);
   });
 
   it('uses a consumable on a bar attribute and keeps the new fields', () => {
     const potion = entry('potion', [{ attribute: 'Life', value: 4 }], 'consumable');
-    const result = applyCharacterAction(attributes, sheet({ inventory: [potion] }), { kind: 'use', inventoryId: 'potion' }, levelRules);
+    const result = applyCharacterAction(attributes, sheet({ inventory: [potion] }), { kind: 'use', inventoryId: 'potion' }, levelRules, { skills: [], classes: [] });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.character.inventory).toEqual([]);

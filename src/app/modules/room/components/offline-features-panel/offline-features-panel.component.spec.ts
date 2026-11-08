@@ -3,7 +3,7 @@ import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { OfflineFeatures } from '../../../world/models/world';
 import { OfflineFeaturesPanelComponent } from './offline-features-panel.component';
 
-const features: OfflineFeatures = { dice: true, notes: true, spendStatPoints: false, equip: false, useConsumables: false, sell: false };
+const features: OfflineFeatures = { dice: true, notes: true, spendStatPoints: false, equip: false, useConsumables: false, sell: false, learnSkills: false };
 
 /**
  * Contract: one `[data-feature="<key>"]` row per feature (the OfflineFeatures keys), each holding a

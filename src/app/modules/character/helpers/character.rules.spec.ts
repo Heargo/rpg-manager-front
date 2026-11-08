@@ -1,13 +1,14 @@
 import { World } from '../../world/models/world';
 import { createCharacter, findCharacterOf, normalizeCharacterName, validateCreateCharacter } from './character.rules';
 
-const world: Pick<World, 'attributes' | 'startingStatPoints' | 'startingMoney'> = {
+const world: Pick<World, 'attributes' | 'startingStatPoints' | 'startingMoney' | 'startingSkillPoints'> = {
   attributes: [
     { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
     { id: 'str', name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
   ],
   startingStatPoints: 5,
   startingMoney: 5000,
+  startingSkillPoints: 0,
 };
 
 describe('character rules', () => {

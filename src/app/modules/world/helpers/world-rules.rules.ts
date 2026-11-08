@@ -98,6 +98,8 @@ export function applyWorldRules<T extends World>(
     levelCurve: rules.levelCurve,
     maxLevel: rules.maxLevel,
     statPointsPerLevel: rules.statPointsPerLevel,
+    startingSkillPoints: rules.startingSkillPoints,
+    skillPointsPerLevel: rules.skillPointsPerLevel,
     offlineFeatures: rules.offlineFeatures,
     npcVisibility: rules.npcVisibility ?? world.npcVisibility,
     items: world.items.map(fixItem),

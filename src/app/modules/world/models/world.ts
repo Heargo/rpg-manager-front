@@ -18,12 +18,20 @@ export interface WorldAttribute {
 
 /** The editable rules of a world (the rules page, the wizard's Rules step); attributes without an id are new. */
 export interface WorldRules {
-  attributes: { id?: string; name: string; baseValue: number; formula: AttributeFormula; cap?: number }[];
+  attributes: {
+    id?: string;
+    name: string;
+    baseValue: number;
+    formula: AttributeFormula;
+    cap?: number;
+  }[];
   startingStatPoints: number;
   startingMoney: number;
   levelCurve: LevelCurve;
   maxLevel: number;
   statPointsPerLevel: number;
+  startingSkillPoints: number;
+  skillPointsPerLevel: number;
   offlineFeatures: OfflineFeatures;
   /** Kept as is when omitted. */
   npcVisibility?: NpcVisibilityRules;
@@ -37,6 +45,7 @@ export interface OfflineFeatures {
   equip: boolean;
   useConsumables: boolean;
   sell: boolean;
+  learnSkills: boolean;
 }
 
 /** A catalogue item: a draft with an id and an optional image. */
@@ -111,6 +120,8 @@ export interface World {
   /** Highest level a character can reach (2 to 100). */
   maxLevel: number;
   statPointsPerLevel: number;
+  startingSkillPoints: number;
+  skillPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
   /** Per NPC role, what the players see of an NPC shown on the table. */
@@ -146,13 +157,20 @@ export interface WorldDraft {
   name: string;
   description?: string;
   imageId?: string;
-  attributes: { name: string; baseValue: number; formula: AttributeFormula; cap?: number }[];
+  attributes: {
+    name: string;
+    baseValue: number;
+    formula: AttributeFormula;
+    cap?: number;
+  }[];
   /** Attribute names to show as bars. */
   barAttributes?: { life?: string; mana?: string };
   startingStatPoints?: number;
   levelCurve?: LevelCurve;
   maxLevel?: number;
   statPointsPerLevel?: number;
+  startingSkillPoints?: number;
+  skillPointsPerLevel?: number;
   startingMoney?: number;
   offlineFeatures?: Partial<OfflineFeatures>;
   npcVisibility?: NpcVisibilityRules;
@@ -171,6 +189,7 @@ export interface WorldInfo {
   /** Highest level a character can reach (2 to 100). */
   maxLevel: number;
   statPointsPerLevel: number;
+  skillPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
 }
