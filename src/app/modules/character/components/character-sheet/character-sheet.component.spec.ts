@@ -94,6 +94,24 @@ describe('CharacterSheetComponent', () => {
     expect(el.querySelector('#grant-points')).toBeNull();
   });
 
+  it('shows only the value for a non-bar attribute and current / max for a bar', async () => {
+    const { el } = await render({ canPlay: false, gameMaster: false });
+    const rows = [...el.querySelectorAll('.stats tbody tr')];
+    const text = (name: string) =>
+      rows.find((row) => row.querySelector('th')!.textContent!.includes(name))!.textContent!;
+    expect(text('Strength')).not.toContain('/');
+    expect(text('Strength')).toContain('2');
+    expect(text('Life')).toContain('6 / 12');
+  });
+
+  it('leaves the current line out of the tooltip of a non-bar attribute', async () => {
+    const { fixture } = await render({ canPlay: false, gameMaster: false });
+    const tooltip = (id: string) => (fixture.componentInstance as unknown as { tooltip(id: string): string }).tooltip(id);
+    expect(tooltip('str')).toContain('Max: 2');
+    expect(tooltip('str')).not.toContain('Current');
+    expect(tooltip('life')).toContain('Current: 6');
+  });
+
   it('shows an equipment bonus next to the attribute name, with no bonus column', async () => {
     const { el } = await render({ canPlay: false, gameMaster: false });
     const headers = [...el.querySelectorAll('.stats thead th')].map((th) => th.textContent!.trim());

@@ -116,7 +116,7 @@
                       tooltipPosition="left"
                       tooltipStyleClass="stat-tip"
                       tabindex="0"
-                      >{{ stat.current }} / {{ stat.max }}</span
+                      >{{ stat.isBar ? stat.current + " / " + stat.max : stat.max }}</span
                     >
                   </td>
                   @if ((canPlay() && c.statPoints > 0) || gameMaster()) {

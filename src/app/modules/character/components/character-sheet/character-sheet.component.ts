@@ -172,8 +172,8 @@ export class CharacterSheetComponent {
     lines.push(
       t('character.sheet.tip.bonus', { value: `${stat.bonus > 0 ? '+' : ''}${stat.bonus}` }),
       t('character.sheet.tip.max', { value: stat.max }),
-      t('character.sheet.tip.current', { value: stat.current }),
     );
+    if (stat.isBar) lines.push(t('character.sheet.tip.current', { value: stat.current }));
     return lines.join('\n');
   }
 

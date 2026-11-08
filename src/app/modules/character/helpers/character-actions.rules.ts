@@ -3,7 +3,7 @@ import {
   CharacterAttribute,
   WorldAttribute,
 } from '../../world/models/world';
-import { attributeStats, formulaMax, levelsByName } from './character-stats';
+import { attributeStats, BarAttributes, formulaMax, levelsByName } from './character-stats';
 import { grantXp, LevelCurve } from './level.rules';
 
 /** Everything that changes a character during play. The host applies these; the sandbox applies them locally. */
@@ -48,6 +48,7 @@ export interface LevelRules {
   levelCurve: LevelCurve;
   statPointsPerLevel: number;
   maxLevel: number;
+  barAttributes: BarAttributes;
 }
 
 export type ActionResult =
@@ -103,7 +104,7 @@ export function applyCharacterAction(
     case 'spend-stat-point': {
       if (character.statPoints < 1)
         return fail('character.errors.noStatPoints');
-      const stat = attributeStats(attributes, character).find(
+      const stat = attributeStats(attributes, character, levelRules.barAttributes).find(
         (entry) => entry.attributeId === action.attributeId,
       );
       if (!stat) return fail('character.errors.unknownAttribute');
@@ -118,7 +119,7 @@ export function applyCharacterAction(
         level: stat.level + 1,
         current: stat.current,
       });
-      const after = attributeStats(attributes, raised).find(
+      const after = attributeStats(attributes, raised, levelRules.barAttributes).find(
         (entry) => entry.attributeId === action.attributeId,
       )!;
       const next = setAttribute(raised, action.attributeId, {
@@ -131,7 +132,7 @@ export function applyCharacterAction(
       };
     }
     case 'refund-stat-point': {
-      const stat = attributeStats(attributes, character).find(
+      const stat = attributeStats(attributes, character, levelRules.barAttributes).find(
         (entry) => entry.attributeId === action.attributeId,
       );
       if (!stat) return fail('character.errors.unknownAttribute');
@@ -141,7 +142,7 @@ export function applyCharacterAction(
         level: stat.level - 1,
         current: stat.current,
       });
-      const after = attributeStats(attributes, lowered).find(
+      const after = attributeStats(attributes, lowered, levelRules.barAttributes).find(
         (entry) => entry.attributeId === action.attributeId,
       )!;
       const next = setAttribute(lowered, action.attributeId, {
@@ -176,8 +177,8 @@ export function applyCharacterAction(
       );
       const leveled: Character = { ...character, xp: grant.xp, level: grant.level };
       // A new level can raise maxima that read playerLevel: current rises by the same delta.
-      const before = attributeStats(attributes, character);
-      const after = attributeStats(attributes, leveled);
+      const before = attributeStats(attributes, character, levelRules.barAttributes);
+      const after = attributeStats(attributes, leveled, levelRules.barAttributes);
       let next = leveled;
       for (const stat of after) {
         const old = before.find((entry) => entry.attributeId === stat.attributeId);
@@ -193,10 +194,11 @@ export function applyCharacterAction(
       };
     }
     case 'set-current': {
-      const stat = attributeStats(attributes, character).find(
+      const stat = attributeStats(attributes, character, levelRules.barAttributes).find(
         (entry) => entry.attributeId === action.attributeId,
       );
       if (!stat) return fail('character.errors.unknownAttribute');
+      if (!stat.isBar) return fail('character.errors.notABar');
       const current = Math.max(0, Math.min(action.value, stat.max));
       return {
         ok: true,
@@ -250,10 +252,11 @@ export function applyCharacterAction(
         ),
       };
       for (const modifier of entry.item.modifiers) {
-        const stat = attributeStats(attributes, next).find(
+        const stat = attributeStats(attributes, next, levelRules.barAttributes).find(
           (candidate) => candidate.name === modifier.attribute,
         );
-        if (!stat) continue;
+        // Only bars keep a current value; a modifier on another attribute has no lasting effect.
+        if (!stat?.isBar) continue;
         const current = Math.max(
           0,
           Math.min(stat.current + modifier.value, stat.max),

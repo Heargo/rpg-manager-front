@@ -11,6 +11,7 @@ import {
   replayQueue,
 } from './offline-actions.rules';
 
+const bars = { life: 'life' };
 const attributes: WorldAttribute[] = [
   { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
   { id: 'str', name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
@@ -122,8 +123,7 @@ describe('applyOffline', () => {
       ada,
       [],
       { kind: 'spend-stat-point', attributeId: 'str' },
-      all,
-    );
+      all, bars);
     expect(result).toEqual({
       ok: true,
       character: {
@@ -149,16 +149,14 @@ describe('applyOffline', () => {
       ada,
       [],
       { kind: 'equip', inventoryId: 'inv-helm' },
-      all,
-    );
+      all, bars);
     if (!first.ok) throw new Error('expected ok');
     const second = applyOffline(
       attributes,
       first.character,
       first.queue,
       { kind: 'sell', inventoryId: 'inv-potion' },
-      all,
-    );
+      all, bars);
     expect(second).toMatchObject({
       ok: true,
       character: { money: 65, inventory: [{ id: 'inv-helm', equipped: true }] },
@@ -187,8 +185,7 @@ describe('applyOffline', () => {
       ada,
       queue,
       { kind: 'sell', inventoryId: 'inv-potion' },
-      { ...all, sell: false },
-    );
+      { ...all, sell: false }, bars);
     expect(result).toEqual({
       ok: false,
       error: 'character.errors.offlineNotAllowed',
@@ -201,8 +198,7 @@ describe('applyOffline', () => {
       { ...ada, statPoints: 0 },
       [],
       { kind: 'spend-stat-point', attributeId: 'str' },
-      all,
-    );
+      all, bars);
     expect(result).toEqual({
       ok: false,
       error: 'character.errors.noStatPoints',
@@ -350,7 +346,7 @@ describe('replayQueue', () => {
         payload: { characterId: 'c1', notes: 'hi' },
       },
     ];
-    const { character, refused } = replayQueue(attributes, ada, queue, all);
+    const { character, refused } = replayQueue(attributes, ada, queue, all, bars);
     expect(refused).toEqual([]);
     expect(character).toMatchObject({
       statPoints: 1,
@@ -382,7 +378,7 @@ describe('replayQueue', () => {
     const { character, refused } = replayQueue(attributes, ada, queue, {
       ...all,
       spendStatPoints: false,
-    });
+    }, bars);
     expect(refused).toEqual([
       { route: 'character/sell', error: 'character.errors.unknownItem' },
       {

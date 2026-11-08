@@ -183,6 +183,7 @@
       "attributeCapped": "This attribute is already at its cap.",
       "noStatPoints": "No stat points left to spend.",
       "unknownAttribute": "This attribute doesn't exist in this world.",
+      "notABar": "Only life and mana have a current value; the other attributes are always at their maximum.",
       "invalidAmount": "Grant between 1 and 100 points.",
       "unknownItem": "This item isn't in the inventory anymore.",
       "notEquipment": "Only equipment can be equipped.",

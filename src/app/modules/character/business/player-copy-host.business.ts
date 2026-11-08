@@ -198,6 +198,7 @@ export class PlayerCopyHostBusiness {
           host,
           conflict.queued,
           world.offlineFeatures,
+          world.barAttributes,
         );
         refused = replay.refused;
         picked = {

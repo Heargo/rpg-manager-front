@@ -69,6 +69,7 @@ export class OfflineBusiness {
             this.$queue(),
             action,
             this.$features(),
+            world.barAttributes,
           )
         : { ok: false, error: 'character.errors.invalid' },
     );

@@ -75,7 +75,7 @@ export class CharacterBusiness {
 
   /** Every attribute of a character with its max (base + points + equipment) and current value. */
   statsOf(character: Character, world: SheetWorld | null = this.$world()): AttributeStat[] {
-    return attributeStats(world?.attributes ?? [], character);
+    return attributeStats(world?.attributes ?? [], character, world?.barAttributes ?? {});
   }
 
   /** The character's level and progress towards the next one, from the world's level curve. */

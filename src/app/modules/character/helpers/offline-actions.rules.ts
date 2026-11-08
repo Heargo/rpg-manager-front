@@ -19,6 +19,7 @@ import {
   LevelRules,
   parseCharacterAction,
 } from './character-actions.rules';
+import { BarAttributes } from './character-stats';
 
 export type OfflineResult =
   | { ok: true; character: Character; queue: QueuedAction[] }
@@ -29,6 +30,7 @@ const NO_XP_RULES: LevelRules = {
   levelCurve: { preset: 'flat' },
   statPointsPerLevel: 0,
   maxLevel: 2,
+  barAttributes: {},
 };
 
 const NOT_ALLOWED = 'character.errors.offlineNotAllowed';
@@ -58,6 +60,7 @@ export function applyOffline(
   queue: QueuedAction[],
   action: CharacterAction,
   features: OfflineFeatures,
+  barAttributes: BarAttributes,
 ): OfflineResult {
   if (!isOfflineAllowed(features, action.kind))
     return { ok: false, error: NOT_ALLOWED };
@@ -65,7 +68,7 @@ export function applyOffline(
     attributes,
     character,
     action,
-    NO_XP_RULES,
+    { ...NO_XP_RULES, barAttributes },
   );
   if (!result.ok) return result;
   const { kind, ...fields } = action;
@@ -174,6 +177,7 @@ export function replayQueue(
   host: Character,
   queue: QueuedAction[],
   features: OfflineFeatures,
+  barAttributes: BarAttributes,
 ): { character: Character; refused: QueuedRefusal[] } {
   let character = host;
   const refused: QueuedRefusal[] = [];
@@ -198,7 +202,7 @@ export function replayQueue(
     attributes,
     character,
     action,
-    NO_XP_RULES,
+    { ...NO_XP_RULES, barAttributes },
   );
       if (result.ok) character = result.character;
       else refused.push({ route: entry.route, error: result.error });

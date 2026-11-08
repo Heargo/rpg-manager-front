@@ -63,6 +63,7 @@ describe('character actions (host + players)', () => {
         { name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
         { name: 'Mana', baseValue: 10, formula: { preset: 'custom', expression: 'base + playerLevel * 10' } },
       ],
+      barAttributes: { life: 'Life', mana: 'Mana' },
       levelCurve: { preset: 'growing' },
       statPointsPerLevel: 3,
       maxLevel: 20,
@@ -212,6 +213,7 @@ describe('character actions (host + players)', () => {
       const stat = attributeStats(
         gm.injector.get(WorldSessionBusiness).$world()!.attributes,
         mine(ada),
+        gm.injector.get(WorldSessionBusiness).$world()!.barAttributes,
       ).find((entry) => entry.attributeId === manaId)!;
       expect(stat).toMatchObject({ max: 30, current: 15 });
     });

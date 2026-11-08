@@ -11,8 +11,14 @@ export interface AttributeStat {
   /** Total of the equipped items' modifiers for it. */
   bonus: number;
   max: number;
+  /** The stored current value for a bar attribute; always the max for any other. */
   current: number;
+  /** Whether the world shows it as a life or mana bar: only those have a current value apart from the max. */
+  isBar: boolean;
 }
+
+/** The world's bar attributes, by attribute id. */
+export type BarAttributes = { life?: string; mana?: string };
 
 export interface BarStat {
   name: string;
@@ -24,11 +30,12 @@ export interface BarStat {
 
 /**
  * Every attribute of the world for one character: round(formula at level) + equipped modifiers = max, and the current value
- * (capped at max, never below 0). Item modifiers name attributes, so they match by name.
+ * (capped at max, never below 0) for the bar attributes; any other attribute's current is its max. Item modifiers name attributes, so they match by name.
  */
 export function attributeStats(
   attributes: WorldAttribute[],
   character: Character,
+  barAttributes: BarAttributes,
 ): AttributeStat[] {
   const bonusByName = new Map<string, number>();
   for (const entry of character.inventory) {
@@ -48,7 +55,8 @@ export function attributeStats(
     const level = own?.level ?? 0;
     const bonus = bonusByName.get(attribute.name) ?? 0;
     const max = formulaMax(attribute, level, levels, character.level) + bonus;
-    const current = Math.max(0, Math.min(own?.current ?? max, max));
+    const isBar = [barAttributes.life, barAttributes.mana].includes(attribute.id);
+    const current = isBar ? Math.max(0, Math.min(own?.current ?? max, max)) : max;
     return {
       attributeId: attribute.id,
       name: attribute.name,
@@ -57,6 +65,7 @@ export function attributeStats(
       bonus,
       max,
       current,
+      isBar,
     };
   });
 }
@@ -94,7 +103,7 @@ export function formulaMax(
 /** The world's bar attributes (life, mana) for one character; a bar is missing when the world has none. */
 export function barStats(
   stats: AttributeStat[],
-  barAttributes: { life?: string; mana?: string },
+  barAttributes: BarAttributes,
 ): { life?: BarStat; mana?: BarStat } {
   const bar = (attributeId?: string): BarStat | undefined => {
     const stat = stats.find((entry) => entry.attributeId === attributeId);

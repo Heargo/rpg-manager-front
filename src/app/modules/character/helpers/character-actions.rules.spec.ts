@@ -14,7 +14,7 @@ import {
 } from './character-actions.rules';
 import { attributeStats } from './character-stats';
 
-const levelRules = { levelCurve: { preset: 'growing' as const }, statPointsPerLevel: 3, maxLevel: 20 };
+const levelRules = { levelCurve: { preset: 'growing' as const }, statPointsPerLevel: 3, maxLevel: 20, barAttributes: { life: 'life', mana: 'wit' } };
 const applyCharacterAction = (
   ...args: [WorldAttribute[], Character, Parameters<typeof applyWithRules>[2]]
 ) => applyWithRules(...args, levelRules);
@@ -91,9 +91,49 @@ function ok(result: ActionResult): Character {
 }
 
 const stat = (c: Character, id: string) =>
-  attributeStats(attributes, c).find((s) => s.attributeId === id)!;
+  attributeStats(attributes, c, levelRules.barAttributes).find((s) => s.attributeId === id)!;
 
 describe('character actions', () => {
+  describe('only bar attributes have a current value', () => {
+    const wearing = (equipped: InventoryItem[] = []) =>
+      character({ inventory: equipped, attributes: [
+        { attributeId: 'life', level: 0, current: 4 },
+        { attributeId: 'str', level: 0, current: 0 },
+      ] });
+    const step = (c: Character, kind: 'spend-stat-point' | 'refund-stat-point', attributeId: string) =>
+      ok(applyCharacterAction(attributes, c, { kind, attributeId }));
+
+    it('a non-bar current equals its max after a spend, a refund and equipping gear', () => {
+      const spent = step(wearing(), 'spend-stat-point', 'str');
+      expect(stat(spent, 'str')).toMatchObject({ max: 3, current: 3 });
+      const refunded = step(spent, 'refund-stat-point', 'str');
+      expect(stat(refunded, 'str')).toMatchObject({ max: 2, current: 2 });
+      const geared = ok(applyCharacterAction(attributes, wearing([helmB]), { kind: 'equip', inventoryId: 'helmB' }));
+      expect(stat(geared, 'str')).toMatchObject({ max: 3, current: 3 });
+    });
+
+    it('a bar attribute stays below max after a hit and moves by the max delta', () => {
+      const spent = step(wearing(), 'spend-stat-point', 'life');
+      expect(stat(spent, 'life')).toMatchObject({ max: 11, current: 5 });
+      expect(stat(step(spent, 'refund-stat-point', 'life'), 'life')).toMatchObject({ max: 10, current: 4 });
+    });
+
+    it('refuses set-current on a non-bar attribute', () => {
+      expect(applyCharacterAction(attributes, wearing(), { kind: 'set-current', attributeId: 'str', value: 1 })).toEqual({
+        ok: false,
+        error: 'character.errors.notABar',
+      });
+      expect(stat(ok(applyCharacterAction(attributes, wearing(), { kind: 'set-current', attributeId: 'life', value: 2 })), 'life').current).toBe(2);
+    });
+
+    it('uses a consumable on a non-bar attribute without lasting effect, and still consumes it', () => {
+      const tonic = entry('tonic', { type: 'consumable', modifiers: [{ attribute: 'Strength', value: 5 }] });
+      const next = ok(applyCharacterAction(attributes, character({ inventory: [tonic] }), { kind: 'use', inventoryId: 'tonic' }));
+      expect(next.inventory).toEqual([]);
+      expect(stat(next, 'str')).toMatchObject({ max: 2, current: 2 });
+    });
+  });
+
   it('spends a stat point: max and current go up, points down', () => {
     const next = ok(
       applyCharacterAction(attributes, character(), {
@@ -116,13 +156,13 @@ describe('character actions', () => {
       attributes: [{ attributeId: 'wit', level: 0, current: 4 }],
     });
     const first = ok(applyCharacterAction(wit, start, { kind: 'spend-stat-point', attributeId: 'wit' }));
-    expect(attributeStats(wit, first).find((s) => s.attributeId === 'wit')).toMatchObject({
+    expect(attributeStats(wit, first, levelRules.barAttributes).find((s) => s.attributeId === 'wit')).toMatchObject({
       level: 1,
       max: 18,
       current: 12,
     });
     const second = ok(applyCharacterAction(wit, first, { kind: 'spend-stat-point', attributeId: 'wit' }));
-    expect(attributeStats(wit, second).find((s) => s.attributeId === 'wit')).toMatchObject({
+    expect(attributeStats(wit, second, levelRules.barAttributes).find((s) => s.attributeId === 'wit')).toMatchObject({
       level: 2,
       max: 21,
       current: 15,
@@ -371,10 +411,10 @@ describe('refund-stat-point', () => {
   it('keeps current within [0, max] when it was already lower', () => {
     const hurt = character({
       statPoints: 0,
-      attributes: [{ attributeId: 'str', level: 1, current: 1 }],
+      attributes: [{ attributeId: 'life', level: 1, current: 1 }],
     });
-    const next = ok(applyCharacterAction(attributes, hurt, { kind: 'refund-stat-point', attributeId: 'str' }));
-    expect(stat(next, 'str')).toMatchObject({ level: 0, max: 2, current: 0 });
+    const next = ok(applyCharacterAction(attributes, hurt, { kind: 'refund-stat-point', attributeId: 'life' }));
+    expect(stat(next, 'life')).toMatchObject({ level: 0, max: 10, current: 0 });
   });
 
   it('is refused at level 0 and on an unknown attribute', () => {
@@ -431,7 +471,7 @@ describe('character actions with an attribute cap', () => {
   it('accepts the point that reaches the cap, then refuses the next', () => {
     const first = ok(applyCharacterAction(capped, at(1, 11), { kind: 'spend-stat-point', attributeId: 'life' }));
     expect(first.statPoints).toBe(1);
-    expect(attributeStats(capped, first).find((s) => s.attributeId === 'life')).toMatchObject({ level: 2, max: 12, current: 12 });
+    expect(attributeStats(capped, first, levelRules.barAttributes).find((s) => s.attributeId === 'life')).toMatchObject({ level: 2, max: 12, current: 12 });
     const second = applyCharacterAction(capped, first, { kind: 'spend-stat-point', attributeId: 'life' });
     expect(second).toEqual({ ok: false, error: 'character.errors.attributeCapped' });
   });
@@ -451,6 +491,6 @@ describe('character actions with an attribute cap', () => {
     });
     const next = ok(applyCharacterAction(scaling, start, { kind: 'grant-xp', amount: 1_000_000 }));
     expect(next.level).toBeGreaterThan(2);
-    expect(attributeStats(scaling, next)[0]).toMatchObject({ max: 30, current: 30 });
+    expect(attributeStats(scaling, next, levelRules.barAttributes)[0]).toMatchObject({ max: 30, current: 30 });
   });
 });
