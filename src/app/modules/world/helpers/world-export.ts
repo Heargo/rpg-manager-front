@@ -1,6 +1,7 @@
 import { checkAttributeFormula } from '../../../core/helpers/formula';
 import { ITEM_RARITIES, ITEM_TYPES } from '../../../core/models/item';
 import { isValidMaxLevel, LEVEL_CURVE_PRESETS, validateLevelCurve } from '../../character/helpers/level.rules';
+import { NPC_ROLES } from '../../npc/models/npc';
 import { World } from '../models/world';
 
 export const WORLD_EXPORT_FORMAT = 'rpg-manager-world';
@@ -106,6 +107,37 @@ function validateWorld(world: unknown, errors: string[]): void {
     });
     list(character['attributes'], `${path}.attributes`, errors, () => undefined);
     list(character['inventory'], `${path}.inventory`, errors, (entry, entryPath) => {
+      if (!isRecord(entry['item'])) errors.push(`${entryPath}.item must be an object`);
+      else validateItem(entry['item'], `${entryPath}.item`, errors);
+    });
+  });
+  list(world['npcs'], 'world.npcs', errors, (npc, path) => {
+    for (const key of ['id', 'name', 'description'] as const) {
+      if (typeof npc[key] !== 'string') errors.push(`${path}.${key} must be a string`);
+    }
+    if (!Array.isArray(npc['roles']) || npc['roles'].length === 0 || !npc['roles'].every((role) => (NPC_ROLES as readonly unknown[]).includes(role))) {
+      errors.push(`${path}.roles must be a non-empty list of known roles`);
+    }
+    if (!Number.isInteger(npc['xpReward']) || (npc['xpReward'] as number) < 0) errors.push(`${path}.xpReward must be an integer of 0 or more`);
+    if (!Array.isArray(npc['loot']) || !npc['loot'].every((id) => typeof id === 'string')) errors.push(`${path}.loot must be a list of ids`);
+    if (npc['merchant'] !== undefined) {
+      const merchant = npc['merchant'];
+      const ok = isRecord(merchant) && ['buyRatio', 'sellRatio'].every((k) => merchant[k] === undefined || (typeof merchant[k] === 'number' && (merchant[k] as number) >= 0 && (merchant[k] as number) <= 10));
+      if (!ok) errors.push(`${path}.merchant is invalid`);
+    }
+    for (const key of ['statPoints', 'updatedAt'] as const) {
+      if (typeof npc[key] !== 'number') errors.push(`${path}.${key} must be a number`);
+    }
+    if (!Number.isInteger(npc['xp']) || (npc['xp'] as number) < 0) errors.push(`${path}.xp must be an integer of 0 or more`);
+    if (!Number.isInteger(npc['level']) || (npc['level'] as number) < 1) errors.push(`${path}.level must be an integer of 1 or more`);
+    if (!Number.isInteger(npc['money'])) errors.push(`${path}.money must be an integer`);
+    if (!Number.isInteger(npc['skillPoints']) || (npc['skillPoints'] as number) < 0) errors.push(`${path}.skillPoints must be an integer of 0 or more`);
+    list(npc['skills'], `${path}.skills`, errors, (skill, skillPath) => {
+      if (typeof skill['skillId'] !== 'string') errors.push(`${skillPath}.skillId must be a string`);
+      if (!Number.isInteger(skill['rank']) || (skill['rank'] as number) < 1) errors.push(`${skillPath}.rank must be an integer of 1 or more`);
+    });
+    list(npc['attributes'], `${path}.attributes`, errors, () => undefined);
+    list(npc['inventory'], `${path}.inventory`, errors, (entry, entryPath) => {
       if (!isRecord(entry['item'])) errors.push(`${entryPath}.item must be an object`);
       else validateItem(entry['item'], `${entryPath}.item`, errors);
     });

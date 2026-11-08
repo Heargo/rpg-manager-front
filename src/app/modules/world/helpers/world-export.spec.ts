@@ -212,4 +212,44 @@ describe('world import of sheet skills and class', () => {
     expect(noId.ok).toBe(false);
     if (!noId.ok) expect(noId.errors).toContain('world.characters[0].skills[0].skillId must be a string');
   });
+
+  describe('NPCs', () => {
+    const goblin = {
+      id: 'n1', name: 'Goblin', statPoints: 0, xp: 0, level: 3, money: 5, updatedAt: 1, skillPoints: 0, skills: [],
+      attributes: [], inventory: [], roles: ['enemy'], description: 'Green.', xpReward: 20, loot: [],
+    };
+    const exported = (npcs: unknown) => {
+      const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
+      if (npcs === undefined) delete file.world.npcs;
+      else file.world.npcs = npcs;
+      return parseWorldExport(JSON.stringify(file));
+    };
+
+    it('round-trips the NPCs, merchant fields included', () => {
+      const npcs = [goblin, { ...goblin, id: 'n2', roles: ['merchant'], merchant: { buyRatio: 1.5, sellRatio: 0.25 } }];
+      const file = buildWorldExport({ ...world, npcs: npcs as never }, {}, 9);
+      expect(parseWorldExport(JSON.stringify(file))).toEqual({ ok: true, value: file });
+    });
+
+    it('refuses an export without npcs', () => {
+      const parsed = exported(undefined);
+      expect(parsed.ok).toBe(false);
+      if (!parsed.ok) expect(parsed.errors).toContain('world.npcs must be a list');
+    });
+
+    it('refuses a malformed NPC', () => {
+      for (const bad of [
+        { ...goblin, roles: [] },
+        { ...goblin, roles: ['boss'] },
+        { ...goblin, xpReward: -1 },
+        { ...goblin, loot: 'sword' },
+        { ...goblin, description: undefined },
+        { ...goblin, skills: undefined },
+        { ...goblin, merchant: { buyRatio: 11 } },
+        { ...goblin, name: 3 },
+      ]) {
+        expect(exported([bad]).ok).toBe(false);
+      }
+    });
+  });
 });

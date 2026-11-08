@@ -1,6 +1,7 @@
 import { AttributeFormula } from '../../../core/helpers/formula';
 import { ItemDraft } from '../../../core/models/item';
 import { LevelCurve } from '../../character/helpers/level.rules';
+import { Npc } from '../../npc/models/npc';
 
 /** An attribute every character of the world has (Strength, Life…). */
 export interface WorldAttribute {
@@ -110,6 +111,8 @@ export interface World {
   offlineFeatures: OfflineFeatures;
   items: Item[];
   characters: Character[];
+  /** The GM's NPC catalogue; host-only, never sent in WorldInfo. */
+  npcs: Npc[];
   /** GM notes. */
   notes: string;
   illustrationId?: string;

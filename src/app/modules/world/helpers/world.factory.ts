@@ -41,6 +41,7 @@ export function createWorld(draft: WorldDraft, newId: () => string, now: number)
     offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures },
     items: [],
     characters: [],
+    npcs: [],
     notes: '',
     quickImageIds: [],
     createdAt: now,

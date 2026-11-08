@@ -7,6 +7,11 @@ function ids() {
 }
 
 describe('createWorld', () => {
+  it('starts with no NPCs', () => {
+    const world = createWorld({ name: 'W', attributes: [] }, ids(), 1);
+    expect(world.npcs).toEqual([]);
+  });
+
   it('has no money format: money is always integer copper', () => {
     const world = createWorld({ name: 'Eldoria', attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }, { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } }], barAttributes: { life: 'Life', mana: 'Mana' } }, ids(), 1000);
     expect(world).not.toHaveProperty('moneyFormat');
