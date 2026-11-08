@@ -137,25 +137,20 @@
   }
 }
 
+// The hero shows a character card cut out with transparent corners, tilted like a card on the table.
 .window {
-  flex: 1 1 20rem;
+  flex: 0 1 18rem;
   min-width: 0;
-  overflow: hidden;
-  border: 1px solid var(--p-content-border-color);
-  border-radius: 12px;
-  background: var(--p-content-background);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 0.18);
-  transform: rotate(1.5deg);
-  max-height: 22rem;
-  -webkit-mask-image: linear-gradient(#000 70%, transparent);
-  mask-image: linear-gradient(#000 70%, transparent);
+  margin-inline: auto;
+  transform: rotate(2deg);
+  filter: drop-shadow(0 12px 24px rgb(0 0 0 / 0.25));
 }
 
 img {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 580 / 480;
+  aspect-ratio: 776 / 1102;
 }
 
 .highlights {

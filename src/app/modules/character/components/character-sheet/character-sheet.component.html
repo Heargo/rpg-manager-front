@@ -27,51 +27,57 @@
         <!-- Stats -->
         <p-tabpanel value="stats">
           @if (gameMaster()) {
-            <form class="grant" (ngSubmit)="grantXp()">
-              <label for="grant-xp">{{
-                "character.sheet.grantXpLabel" | transloco
-              }}</label>
-              <p-inputnumber
-                inputId="grant-xp"
-                [min]="1"
-                [step]="1"
-                [showButtons]="true"
-                buttonLayout="horizontal"
-                inputStyleClass="grant-input"
-                name="grant-xp"
-                [ngModel]="grantXpAmount()"
-                (ngModelChange)="grantXpAmount.set($event ?? 0)"
-              />
-              <p-button
-                type="submit"
-                data-testid="grant-xp-button"
-                icon="pi pi-star"
-                [label]="'character.sheet.grantXp' | transloco"
-                [disabled]="busy()"
-              />
-            </form>
-            <form class="grant" (ngSubmit)="grant()">
-              <label for="grant-points">{{
-                "character.sheet.grantLabel" | transloco
-              }}</label>
-              <p-inputnumber
-                inputId="grant-points"
-                [min]="1"
-                [max]="maxGranted"
-                [showButtons]="true"
-                buttonLayout="horizontal"
-                inputStyleClass="grant-input"
-                name="grant"
-                [ngModel]="grantAmount()"
-                (ngModelChange)="grantAmount.set($event ?? 1)"
-              />
-              <p-button
-                type="submit"
-                icon="pi pi-plus"
-                [label]="'character.sheet.grant' | transloco"
-                [disabled]="busy()"
-              />
-            </form>
+            <section class="grant-panel" aria-labelledby="grant-title">
+              <h3 id="grant-title" class="grant-title">
+                <i class="pi pi-gift" aria-hidden="true"></i>
+                {{ "character.sheet.grantTitle" | transloco }}
+              </h3>
+              <form class="grant" (ngSubmit)="grantXp()">
+                <label for="grant-xp">{{
+                  "character.sheet.grantXpLabel" | transloco
+                }}</label>
+                <p-inputnumber
+                  inputId="grant-xp"
+                  [min]="1"
+                  [step]="1"
+                  [showButtons]="true"
+                  buttonLayout="horizontal"
+                  inputStyleClass="grant-input"
+                  name="grant-xp"
+                  [ngModel]="grantXpAmount()"
+                  (ngModelChange)="grantXpAmount.set($event ?? 0)"
+                />
+                <p-button
+                  type="submit"
+                  data-testid="grant-xp-button"
+                  icon="pi pi-plus"
+                  [label]="'character.sheet.grantXp' | transloco"
+                  [disabled]="busy()"
+                />
+              </form>
+              <form class="grant" (ngSubmit)="grant()">
+                <label for="grant-points">{{
+                  "character.sheet.grantLabel" | transloco
+                }}</label>
+                <p-inputnumber
+                  inputId="grant-points"
+                  [min]="1"
+                  [max]="maxGranted"
+                  [showButtons]="true"
+                  buttonLayout="horizontal"
+                  inputStyleClass="grant-input"
+                  name="grant"
+                  [ngModel]="grantAmount()"
+                  (ngModelChange)="grantAmount.set($event ?? 1)"
+                />
+                <p-button
+                  type="submit"
+                  icon="pi pi-plus"
+                  [label]="'character.sheet.grant' | transloco"
+                  [disabled]="busy()"
+                />
+              </form>
+            </section>
           }
           <table class="stats">
             <thead>
@@ -144,7 +150,6 @@
                         >
                           <p-button
                             icon="pi pi-plus"
-                            size="small"
                             [rounded]="true"
                             [text]="true"
                             [disabled]="busy() || isLocked('spend-stat-point')"
@@ -159,7 +164,6 @@
                       @if (gameMaster() && stat.level > 0) {
                         <p-button
                           icon="pi pi-minus"
-                          size="small"
                           [rounded]="true"
                           [text]="true"
                           severity="secondary"
@@ -267,7 +271,6 @@
     </button>
     <p-button
       icon="pi pi-ellipsis-v"
-      size="small"
       [rounded]="true"
       [text]="true"
       severity="secondary"
