@@ -966,7 +966,14 @@
       "empty": "Aucune classe trouvée.",
       "copySuffix": "(copie)",
       "skills": "{{ count }} compétence(s) dans l'arbre",
-      "failed": "La classe n'a pas pu être enregistrée."
+      "failed": "La classe n'a pas pu être enregistrée.",
+      "view": "Voir",
+      "detailsTitle": "Détails de la classe",
+      "bonuses": "Bonus",
+      "startingItems": "Objets de départ",
+      "tree": "Arbre de compétences",
+      "skillList": "Compétences",
+      "maxRank": "Rang max {{ count }}"
     },
     "tree": {
       "rank": "{{ rank }}/{{ max }}",
@@ -979,17 +986,33 @@
       "jsonHint": "Modifiez la classe en JSON ; il est appliqué au formulaire tant qu'il est valide.",
       "back": "Retour au catalogue",
       "save": "Enregistrer",
-      "treeHint": "Ajoutez des compétences comme nœuds, placez-les sur la grille et reliez-les par des prérequis.",
+      "treeHint": "Glissez des compétences de la palette vers le plateau, déplacez un nœud pour le déplacer, et tirez sa poignée de lien sur une autre compétence pour en faire un prérequis.",
       "noMoreSkills": "Toutes les compétences du catalogue sont dans l'arbre.",
       "removeNode": "Retirer le nœud",
-      "addRequirement": "Ajouter un prérequis",
       "removeRequirement": "Retirer le prérequis",
+      "addRequirement": "Ajouter un prérequis",
+      "selectLink": "Sélectionner ce lien",
+      "deleteLink": "Supprimer le lien",
+      "connectHint": "Glissez sur une autre compétence pour la lier",
+      "palette": {
+        "title": "Compétences",
+        "search": "Rechercher une compétence",
+        "add": "Ajouter au plateau",
+        "noMatch": "Aucune compétence ne correspond."
+      },
+      "node": {
+        "maxRank": "Max {{ count }}",
+        "level": "Niv. {{ count }}"
+      },
+      "inspector": {
+        "empty": "Sélectionnez une compétence ou un lien sur le plateau pour le modifier.",
+        "noPrerequisites": "Aucun prérequis : une racine de l'arbre.",
+        "link": "Prérequis"
+      },
       "fields": {
         "name": "Nom",
         "description": "Description",
         "tree": "Arbre de compétences",
-        "column": "Colonne",
-        "row": "Ligne",
         "minLevel": "Niveau minimum",
         "requires": "Nécessite",
         "rank": "Rang requis"

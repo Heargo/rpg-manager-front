@@ -966,7 +966,14 @@
       "empty": "No class found.",
       "copySuffix": "(copy)",
       "skills": "{{ count }} skill(s) in the tree",
-      "failed": "The class could not be saved."
+      "failed": "The class could not be saved.",
+      "view": "View",
+      "detailsTitle": "Class details",
+      "bonuses": "Bonuses",
+      "startingItems": "Starting items",
+      "tree": "Skill tree",
+      "skillList": "Skills",
+      "maxRank": "Max rank {{ count }}"
     },
     "tree": {
       "rank": "{{ rank }}/{{ max }}",
@@ -979,17 +986,33 @@
       "jsonHint": "Edit the class as JSON; it is applied to the form while it is valid.",
       "back": "Back to the catalogue",
       "save": "Save",
-      "treeHint": "Add skills as nodes, place them on the grid and link them with prerequisites.",
+      "treeHint": "Drag skills from the palette onto the board, drag a node to move it, and pull its link handle onto another skill to make it a prerequisite.",
       "noMoreSkills": "Every skill of the catalogue is in the tree.",
       "removeNode": "Remove the node",
-      "addRequirement": "Add a prerequisite",
       "removeRequirement": "Remove the prerequisite",
+      "addRequirement": "Add a prerequisite",
+      "selectLink": "Select this link",
+      "deleteLink": "Delete the link",
+      "connectHint": "Drag onto another skill to link it",
+      "palette": {
+        "title": "Skills",
+        "search": "Search a skill",
+        "add": "Add to the board",
+        "noMatch": "No skill matches."
+      },
+      "node": {
+        "maxRank": "Max {{ count }}",
+        "level": "Lv {{ count }}"
+      },
+      "inspector": {
+        "empty": "Select a skill or a link on the board to edit it.",
+        "noPrerequisites": "No prerequisite: a root of the tree.",
+        "link": "Prerequisite"
+      },
       "fields": {
         "name": "Name",
         "description": "Description",
         "tree": "Skill tree",
-        "column": "Column",
-        "row": "Row",
         "minLevel": "Minimum level",
         "requires": "Requires",
         "rank": "Required rank"

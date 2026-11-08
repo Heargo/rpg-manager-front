@@ -4,18 +4,26 @@ import {
   computed,
   inject,
   input,
+  output,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { Skill } from '../../../skill/models/skill';
+import { BoardGeometry, linkRoute } from '../../helpers/tree-board.rules';
 import { TreeNode, TreeNodeStatus } from '../../models/class';
 
-const CELL = 96;
-const NODE = 64;
+const GEOMETRY: BoardGeometry = {
+  cellWidth: 152,
+  cellHeight: 120,
+  nodeWidth: 136,
+  nodeHeight: 72,
+};
+/** Room right of the last column for a link that bulges out. */
+const BULGE = 36;
 
 /**
- * Draws a class tree: a node per skill (its icon, name, rank / max rank) placed on its grid cell, a line from each
- * prerequisite to the node that needs it. With `states` (from `treeNodeStates`) nodes are locked, available or
+ * Draws a class tree: a node per skill (its icon, name, rank / max rank) placed on its grid cell, a curve from the
+ * bottom of each prerequisite to the top of the node that needs it. With `states` (from `treeNodeStates`) nodes are locked, available or
  * learned; `ranks` gives the rank a sheet has in each skill.
  */
 @Component({
@@ -33,13 +41,21 @@ const NODE = 64;
         [attr.width]="size().width"
         [attr.height]="size().height"
       >
+        <defs>
+          <marker
+            id="tree-arrow"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="7"
+            markerHeight="7"
+            orient="auto"
+          >
+            <path d="M0 0 L10 5 L0 10 z" class="arrow" />
+          </marker>
+        </defs>
         @for (line of lines(); track $index) {
-          <line
-            [attr.x1]="line.x1"
-            [attr.y1]="line.y1"
-            [attr.x2]="line.x2"
-            [attr.y2]="line.y2"
-          />
+          <path [attr.d]="line" marker-end="url(#tree-arrow)" />
         }
       </svg>
       @for (node of nodes(); track node.skillId) {
@@ -52,14 +68,19 @@ const NODE = 64;
           [attr.data-state]="node.state"
           [style.left.px]="node.x"
           [style.top.px]="node.y"
-          [title]="node.hint"
+          [title]="node.hint || node.name"
+          [style.width.px]="geometry.nodeWidth"
+          [style.height.px]="geometry.nodeHeight"
+          (click)="nodeSelected.emit(node.skillId)"
         >
-          <i [class]="node.icon"></i>
-          <span class="name">{{ node.name }}</span>
-          <span class="rank" data-field="rank">{{
-            'class.tree.rank'
-              | transloco: { rank: node.rank, max: node.maxRank }
-          }}</span>
+          <i class="icon" [class]="node.icon"></i>
+          <div class="body">
+            <span class="name">{{ node.name }}</span>
+            <span class="rank" data-field="rank">{{
+              'class.tree.rank'
+                | transloco: { rank: node.rank, max: node.maxRank }
+            }}</span>
+          </div>
         </div>
       }
     </div>
@@ -76,24 +97,33 @@ const NODE = 64;
       position: absolute;
       inset: 0;
       pointer-events: none;
-      stroke: var(--p-content-border-color);
+      stroke: var(--p-text-muted-color);
       stroke-width: 2;
+      fill: none;
+    }
+    .arrow {
+      fill: var(--p-text-muted-color);
+      stroke: none;
     }
     .node {
       position: absolute;
-      width: 64px;
-      height: 64px;
       box-sizing: border-box;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.6rem;
       border: 2px solid var(--p-content-border-color);
-      border-radius: 0.5rem;
+      border-radius: 0.75rem;
       background: var(--p-content-background);
-      font-size: 0.7rem;
-      text-align: center;
-      overflow: hidden;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.08);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+    }
+    .node:hover {
+      box-shadow: 0 4px 14px rgb(0 0 0 / 0.16);
     }
     .node.locked {
       opacity: 0.5;
@@ -105,11 +135,24 @@ const NODE = 64;
       border-color: var(--p-primary-color);
       background: var(--p-highlight-background);
     }
+    .icon {
+      flex: none;
+      color: var(--p-primary-color);
+    }
+    .body {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
     .name {
-      max-width: 100%;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-weight: 600;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
     }
     .rank {
       color: var(--p-text-muted-color);
@@ -117,6 +160,7 @@ const NODE = 64;
   `,
 })
 export class SkillTreeComponent {
+  protected readonly geometry = GEOMETRY;
   private readonly language = inject(LanguageBusiness);
 
   readonly tree = input.required<TreeNode[]>();
@@ -125,6 +169,8 @@ export class SkillTreeComponent {
   readonly states = input<TreeNodeStatus[]>();
   /** The sheet's rank per skill id. */
   readonly ranks = input<Record<string, number>>({});
+  /** A node was tapped: its skill id. */
+  readonly nodeSelected = output<string>();
 
   protected readonly nodes = computed(() =>
     this.tree().map((node) => {
@@ -152,8 +198,12 @@ export class SkillTreeComponent {
                   }),
             )
             .join(', ') ?? '',
-        x: node.column * CELL,
-        y: node.row * CELL,
+        x:
+          node.column * GEOMETRY.cellWidth +
+          (GEOMETRY.cellWidth - GEOMETRY.nodeWidth) / 2,
+        y:
+          node.row * GEOMETRY.cellHeight +
+          (GEOMETRY.cellHeight - GEOMETRY.nodeHeight) / 2,
       };
     }),
   );
@@ -163,23 +213,21 @@ export class SkillTreeComponent {
     return this.tree().flatMap((node) =>
       node.requires.flatMap((requirement) => {
         const from = at.get(requirement.skillId);
-        return from
-          ? [
-              {
-                x1: from.column * CELL + NODE / 2,
-                y1: from.row * CELL + NODE / 2,
-                x2: node.column * CELL + NODE / 2,
-                y2: node.row * CELL + NODE / 2,
-              },
-            ]
-          : [];
+        return from ? [linkRoute(from, node, GEOMETRY).path] : [];
       }),
     );
   });
 
   protected readonly size = computed(() => ({
-    width: Math.max(0, ...this.tree().map((node) => node.column * CELL + NODE)),
-    height: Math.max(0, ...this.tree().map((node) => node.row * CELL + NODE)),
+    width: this.tree().length
+      ? Math.max(...this.tree().map((node) => node.column + 1)) *
+          GEOMETRY.cellWidth +
+        BULGE
+      : 0,
+    height: this.tree().length
+      ? Math.max(...this.tree().map((node) => node.row + 1)) *
+        GEOMETRY.cellHeight
+      : 0,
   }));
 
   private nameOf(skillId: string): string {

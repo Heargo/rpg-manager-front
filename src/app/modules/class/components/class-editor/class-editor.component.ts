@@ -1,4 +1,12 @@
 import {
+  CdkDrag,
+  CdkDragEnd,
+  CdkDragHandle,
+  CdkDragPlaceholder,
+  CdkDragPreview,
+  CdkDropList,
+} from '@angular/cdk/drag-drop';
+import {
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -6,6 +14,8 @@ import {
   input,
   linkedSignal,
   output,
+  signal,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -16,19 +26,40 @@ import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
+import { Skill } from '../../../skill/models/skill';
 import { World } from '../../../world/models/world';
 import { ClassEditorBusiness } from '../../business/class-editor.business';
 import { ClassIssue } from '../../helpers/class.rules';
+import {
+  addNodeAt,
+  BoardCell,
+  boardSize,
+  involvedInIssues,
+  linkPrerequisite,
+  moveNode,
+  removeNode,
+  unlinkPrerequisite,
+} from '../../helpers/tree-board.rules';
 import { CharacterClass, ClassDraft, TreeNode } from '../../models/class';
-import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
+import {
+  BoardSelection,
+  TreeBoardComponent,
+} from '../tree-board/tree-board.component';
 
-/** Creates or edits a class on a world: a form with the grid tree editor and its JSON (kept in sync). */
+const never = (): boolean => false;
+
+/** Creates or edits a class on a world: a form with the tree board (drag and drop) and its JSON (kept in sync). */
 @Component({
   selector: 'app-class-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
     TranslocoPipe,
+    CdkDrag,
+    CdkDragHandle,
+    CdkDropList,
+    CdkDragPreview,
+    CdkDragPlaceholder,
     ButtonModule,
     InputNumberModule,
     InputTextModule,
@@ -36,8 +67,9 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
     SelectModule,
     TabsModule,
     TextareaModule,
-    SkillTreeComponent,
+    TreeBoardComponent,
   ],
+  styleUrl: './class-editor.component.scss',
   template: `
     <p-tabs value="form">
       <p-tablist>
@@ -74,152 +106,250 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
               ></textarea>
             </div>
 
-            <fieldset class="tree">
-              <legend>{{ 'class.editor.fields.tree' | transloco }}</legend>
+            <section class="tree">
+              <h3>{{ 'class.editor.fields.tree' | transloco }}</h3>
               <p class="hint">{{ 'class.editor.treeHint' | transloco }}</p>
-              <div class="available">
-                @for (skill of available(); track skill.id) {
-                  <button
-                    pButton
-                    type="button"
-                    data-action="add-node"
-                    icon="pi pi-plus"
-                    severity="secondary"
-                    size="small"
-                    [attr.data-skill-id]="skill.id"
-                    [label]="skill.name"
-                    (click)="addNode(skill.id)"
-                  ></button>
-                } @empty {
-                  <span class="hint">{{
-                    'class.editor.noMoreSkills' | transloco
-                  }}</span>
-                }
-              </div>
-              <app-skill-tree [tree]="draft().tree" [skills]="world().skills" />
-              @for (
-                node of draft().tree;
-                track node.skillId;
-                let index = $index
-              ) {
-                <div class="node" [attr.data-node]="node.skillId">
-                  <div class="head">
-                    <strong>{{ nameOf(node.skillId) }}</strong>
-                    <button
-                      pButton
-                      type="button"
-                      data-action="remove-node"
-                      icon="pi pi-trash"
-                      severity="danger"
-                      [text]="true"
-                      [attr.aria-label]="'class.editor.removeNode' | transloco"
-                      (click)="removeNode(index)"
-                    ></button>
-                  </div>
-                  <div class="row">
-                    <div class="field">
-                      <label>{{
-                        'class.editor.fields.column' | transloco
-                      }}</label>
-                      <p-inputnumber
-                        data-field="node-column"
-                        [min]="0"
-                        [showButtons]="true"
-                        [ngModel]="node.column"
-                        (ngModelChange)="
-                          patchNode(index, { column: $event ?? 0 })
+
+              <div class="workbench">
+                <aside class="panel palette">
+                  <h4>{{ 'class.editor.palette.title' | transloco }}</h4>
+                  <input
+                    pInputText
+                    data-field="palette-search"
+                    type="search"
+                    autocomplete="off"
+                    [attr.aria-label]="
+                      'class.editor.palette.search' | transloco
+                    "
+                    [placeholder]="'class.editor.palette.search' | transloco"
+                    [value]="paletteSearch()"
+                    (input)="paletteSearch.set($any($event.target).value)"
+                  />
+                  <div
+                    class="palette-list"
+                    cdkDropList
+                    cdkDropListSortingDisabled
+                    [cdkDropListEnterPredicate]="never"
+                  >
+                    @for (skill of palette(); track skill.id) {
+                      <div
+                        class="palette-item"
+                        cdkDrag
+                        [attr.data-palette-item]="skill.id"
+                        (cdkDragMoved)="
+                          board().setHover($event.pointerPosition)
                         "
-                      />
-                    </div>
-                    <div class="field">
-                      <label>{{ 'class.editor.fields.row' | transloco }}</label>
-                      <p-inputnumber
-                        data-field="node-row"
-                        [min]="0"
-                        [showButtons]="true"
-                        [ngModel]="node.row"
-                        (ngModelChange)="patchNode(index, { row: $event ?? 0 })"
-                      />
-                    </div>
-                    <div class="field">
-                      <label>{{
-                        'class.editor.fields.minLevel' | transloco
-                      }}</label>
-                      <p-inputnumber
-                        data-field="node-min-level"
-                        [min]="1"
-                        [showButtons]="true"
-                        [ngModel]="node.minLevel"
-                        (ngModelChange)="
-                          patchNode(index, { minLevel: $event ?? 0 })
-                        "
-                      />
-                    </div>
-                  </div>
-                  @for (
-                    requirement of node.requires;
-                    track $index;
-                    let at = $index
-                  ) {
-                    <div class="row">
-                      <div class="field">
-                        <label>{{
-                          'class.editor.fields.requires' | transloco
-                        }}</label>
-                        <p-select
-                          data-field="requirement-skill"
-                          [options]="requirementOptions(node.skillId)"
-                          optionLabel="label"
-                          optionValue="value"
-                          [ngModel]="requirement.skillId"
-                          (ngModelChange)="
-                            patchRequirement(index, at, { skillId: $event })
+                        (cdkDragEnded)="endPaletteDrag($event, skill.id)"
+                      >
+                        <i
+                          class="pi pi-arrows-alt grip"
+                          cdkDragHandle
+                          aria-hidden="true"
+                        ></i>
+                        <i [class]="iconOf(skill)"></i>
+                        <span class="label">{{ skill.name }}</span>
+                        <button
+                          pButton
+                          type="button"
+                          data-action="add-node"
+                          icon="pi pi-plus"
+                          severity="secondary"
+                          size="small"
+                          [text]="true"
+                          [rounded]="true"
+                          [attr.aria-label]="
+                            'class.editor.palette.add' | transloco
                           "
-                        />
+                          (click)="addFirstFree(skill.id)"
+                        ></button>
+                        <div *cdkDragPreview class="palette-item preview">
+                          <i [class]="iconOf(skill)"></i>
+                          <span class="label">{{ skill.name }}</span>
+                        </div>
+                        <div
+                          *cdkDragPlaceholder
+                          class="palette-item ghost"
+                        ></div>
                       </div>
-                      <div class="field">
-                        <label>{{
-                          'class.editor.fields.rank' | transloco
-                        }}</label>
-                        <p-inputnumber
-                          data-field="requirement-rank"
-                          [min]="1"
-                          [showButtons]="true"
-                          [ngModel]="requirement.rank"
-                          (ngModelChange)="
-                            patchRequirement(index, at, { rank: $event ?? 0 })
-                          "
-                        />
-                      </div>
-                      <button
-                        pButton
-                        type="button"
-                        data-action="remove-requirement"
-                        icon="pi pi-times"
-                        severity="danger"
-                        [text]="true"
-                        [attr.aria-label]="
-                          'class.editor.removeRequirement' | transloco
-                        "
-                        (click)="removeRequirement(index, at)"
-                      ></button>
+                    } @empty {
+                      <p class="hint">
+                        {{
+                          (paletteSearch()
+                            ? 'class.editor.palette.noMatch'
+                            : 'class.editor.noMoreSkills'
+                          ) | transloco
+                        }}
+                      </p>
+                    }
+                  </div>
+                </aside>
+
+                <app-tree-board
+                  data-board
+                  [tree]="draft().tree"
+                  [skills]="world().skills"
+                  [invalid]="involved()"
+                  [(selection)]="selection"
+                  (nodeDrop)="onNodeDrop($event.skillId, $event.cell)"
+                  (linkDrop)="onLinkDrop($event.from, $event.to)"
+                />
+
+                <aside class="panel inspector-panel">
+                  @if (inspected(); as target) {
+                    <div class="inspector" data-inspector>
+                      @if (target.kind === 'node') {
+                        <h4>
+                          <i [class]="iconOf(target.skill)"></i>
+                          {{ target.skill.name }}
+                        </h4>
+                        <div class="field">
+                          <label>{{
+                            'class.editor.fields.minLevel' | transloco
+                          }}</label>
+                          <p-inputnumber
+                            data-field="node-min-level"
+                            [min]="1"
+                            [showButtons]="true"
+                            [ngModel]="target.node.minLevel"
+                            (ngModelChange)="
+                              patchNode(target.node.skillId, {
+                                minLevel: $event ?? 0,
+                              })
+                            "
+                          />
+                        </div>
+                        <h5>
+                          {{ 'class.editor.fields.requires' | transloco }}
+                        </h5>
+                        @for (
+                          requirement of target.requirements;
+                          track requirement.skillId
+                        ) {
+                          <div class="requirement">
+                            <span class="req-name">{{ requirement.name }}</span>
+                            <p-inputnumber
+                              data-field="requirement-rank"
+                              [min]="1"
+                              [max]="requirement.maxRank"
+                              [showButtons]="true"
+                              [ngModel]="requirement.rank"
+                              (ngModelChange)="
+                                setRank(
+                                  target.node.skillId,
+                                  requirement.skillId,
+                                  $event ?? 0
+                                )
+                              "
+                            />
+                            <button
+                              pButton
+                              type="button"
+                              data-action="remove-requirement"
+                              icon="pi pi-times"
+                              severity="danger"
+                              [text]="true"
+                              [rounded]="true"
+                              [attr.aria-label]="
+                                'class.editor.removeRequirement' | transloco
+                              "
+                              (click)="
+                                unlink(requirement.skillId, target.node.skillId)
+                              "
+                            ></button>
+                          </div>
+                        } @empty {
+                          <p class="hint">
+                            {{
+                              'class.editor.inspector.noPrerequisites'
+                                | transloco
+                            }}
+                          </p>
+                        }
+                        @if (candidates().length) {
+                          <div class="add-requirement">
+                            <p-select
+                              data-field="add-requirement"
+                              [options]="candidates()"
+                              optionLabel="label"
+                              optionValue="value"
+                              [ngModel]="null"
+                              [placeholder]="
+                                'class.editor.addRequirement' | transloco
+                              "
+                              (ngModelChange)="
+                                $event &&
+                                  addRequirement($event, target.node.skillId)
+                              "
+                            />
+                            <p-inputnumber
+                              data-field="new-requirement-rank"
+                              [min]="1"
+                              [showButtons]="true"
+                              [ngModel]="newRank()"
+                              (ngModelChange)="newRank.set($event ?? 1)"
+                            />
+                          </div>
+                        }
+                        <button
+                          pButton
+                          type="button"
+                          data-action="remove-node"
+                          icon="pi pi-trash"
+                          severity="danger"
+                          size="small"
+                          [outlined]="true"
+                          [label]="'class.editor.removeNode' | transloco"
+                          (click)="remove(target.node.skillId)"
+                        ></button>
+                      } @else {
+                        <h4>
+                          <i class="pi pi-link"></i>
+                          {{ 'class.editor.inspector.link' | transloco }}
+                        </h4>
+                        <p class="hint">
+                          {{ target.fromName }}
+                          <i class="pi pi-arrow-right"></i>
+                          {{ target.toName }}
+                        </p>
+                        <div class="field">
+                          <label>{{
+                            'class.editor.fields.rank' | transloco
+                          }}</label>
+                          <p-inputnumber
+                            data-field="requirement-rank"
+                            [min]="1"
+                            [max]="target.maxRank"
+                            [showButtons]="true"
+                            [ngModel]="target.rank"
+                            (ngModelChange)="
+                              setRank(target.to, target.from, $event ?? 0)
+                            "
+                          />
+                        </div>
+                        <button
+                          pButton
+                          type="button"
+                          data-action="delete-link"
+                          icon="pi pi-trash"
+                          severity="danger"
+                          size="small"
+                          [outlined]="true"
+                          [label]="'class.editor.deleteLink' | transloco"
+                          (click)="unlink(target.from, target.to)"
+                        ></button>
+                      }
+                    </div>
+                  } @else {
+                    <div class="inspector-empty">
+                      <i class="pi pi-info-circle"></i>
+                      <p class="hint">
+                        {{ 'class.editor.inspector.empty' | transloco }}
+                      </p>
                     </div>
                   }
-                  <div>
-                    <button
-                      pButton
-                      type="button"
-                      data-action="add-requirement"
-                      icon="pi pi-link"
-                      severity="secondary"
-                      size="small"
-                      [label]="'class.editor.addRequirement' | transloco"
-                      (click)="addRequirement(index)"
-                    ></button>
-                  </div>
-                </div>
-              }
-            </fieldset>
+                </aside>
+              </div>
+            </section>
           </div>
         </p-tabpanel>
 
@@ -256,59 +386,6 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
       ></button>
     </div>
   `,
-  styles: `
-    :host {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .form,
-    .tree {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .row,
-    .available,
-    .head {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: flex-end;
-    }
-    .head {
-      justify-content: space-between;
-    }
-    .node {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      padding: 0.75rem;
-      border: 1px solid var(--p-content-border-color);
-      border-radius: 0.5rem;
-    }
-    fieldset {
-      border: 1px solid var(--p-content-border-color);
-      border-radius: 0.5rem;
-    }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      min-width: 0;
-    }
-    .json {
-      font-family: monospace;
-    }
-    .hint {
-      margin: 0;
-      color: var(--p-text-muted-color);
-    }
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-    }
-  `,
 })
 export class ClassEditorComponent {
   private readonly editor = inject(ClassEditorBusiness);
@@ -321,6 +398,10 @@ export class ClassEditorComponent {
   /** The class to save; for a new class it has no id yet. */
   readonly save = output<CharacterClass>();
 
+  protected readonly never = never;
+
+  protected readonly board = viewChild.required(TreeBoardComponent);
+
   private readonly initial = computed<ClassDraft>(
     () => this.characterClass() ?? this.editor.empty(),
   );
@@ -332,6 +413,12 @@ export class ClassEditorComponent {
     this.characterClass();
     return [];
   });
+  protected readonly selection = linkedSignal<BoardSelection | null>(() => {
+    this.characterClass();
+    return null;
+  });
+  protected readonly paletteSearch = signal('');
+  protected readonly newRank = signal(1);
 
   protected readonly issues = computed(() =>
     this.editor.validate(this.draft(), this.world()),
@@ -340,90 +427,176 @@ export class ClassEditorComponent {
     ...this.issues(),
     ...this.jsonIssues(),
   ]);
-  protected readonly available = computed(() => {
+  protected readonly involved = computed(() =>
+    involvedInIssues(this.draft().tree, this.issues()),
+  );
+
+  protected readonly palette = computed(() => {
     const used = new Set(this.draft().tree.map((node) => node.skillId));
-    return this.world().skills.filter((skill) => !used.has(skill.id));
+    const search = this.paletteSearch().trim().toLowerCase();
+    return this.world().skills.filter(
+      (skill) =>
+        !used.has(skill.id) && skill.name.toLowerCase().includes(search),
+    );
+  });
+
+  /** The other nodes that can still become a prerequisite of the selected node. */
+  protected readonly candidates = computed(() => {
+    const selection = this.selection();
+    const tree = this.draft().tree;
+    const node =
+      selection?.kind === 'node'
+        ? tree.find((entry) => entry.skillId === selection.skillId)
+        : undefined;
+    if (!node) return [];
+    return tree
+      .filter(
+        (other) =>
+          other.skillId !== node.skillId &&
+          !node.requires.some((r) => r.skillId === other.skillId),
+      )
+      .map((other) => ({
+        value: other.skillId,
+        label: this.nameOf(other.skillId),
+      }));
+  });
+
+  /** What the inspector shows: the selected node with its prerequisites, or the selected link. */
+  protected readonly inspected = computed(() => {
+    const selection = this.selection();
+    const tree = this.draft().tree;
+    if (selection?.kind === 'node') {
+      const node = tree.find((entry) => entry.skillId === selection.skillId);
+      const skill = this.skillOf(selection.skillId);
+      if (!node || !skill) return null;
+      return {
+        kind: 'node' as const,
+        node,
+        skill,
+        requirements: node.requires.map((requirement) => ({
+          ...requirement,
+          name: this.nameOf(requirement.skillId),
+          maxRank: this.skillOf(requirement.skillId)?.maxRank ?? 99,
+        })),
+      };
+    }
+    if (selection?.kind === 'link') {
+      const requirement = tree
+        .find((entry) => entry.skillId === selection.to)
+        ?.requires.find((r) => r.skillId === selection.from);
+      if (!requirement) return null;
+      return {
+        kind: 'link' as const,
+        from: selection.from,
+        to: selection.to,
+        fromName: this.nameOf(selection.from),
+        toName: this.nameOf(selection.to),
+        rank: requirement.rank,
+        maxRank: this.skillOf(selection.from)?.maxRank ?? 99,
+      };
+    }
+    return null;
   });
 
   protected nameOf(skillId: string): string {
-    return (
-      this.world().skills.find((skill) => skill.id === skillId)?.name ?? skillId
-    );
+    return this.skillOf(skillId)?.name ?? skillId;
   }
 
-  protected requirementOptions(
-    skillId: string,
-  ): { value: string; label: string }[] {
-    return this.draft()
-      .tree.filter((node) => node.skillId !== skillId)
-      .map((node) => ({
-        value: node.skillId,
-        label: this.nameOf(node.skillId),
-      }));
+  protected iconOf(skill: Skill | undefined): string {
+    return skill?.type === 'passive' ? 'pi pi-shield' : 'pi pi-bolt';
   }
 
   protected patch(change: Partial<ClassDraft>): void {
     this.setDraft({ ...this.draft(), ...change });
   }
 
-  protected addNode(skillId: string): void {
+  // ---- Drops (fed by the CDK events below, public for tests)
+
+  /** A catalogue skill dropped on a cell: adds it there. */
+  onPaletteDrop(skillId: string, cell: BoardCell): void {
+    const tree = addNodeAt(this.draft().tree, skillId, cell);
+    if (tree === this.draft().tree) return;
+    this.setTree(tree);
+    this.selection.set({ kind: 'node', skillId });
+  }
+
+  /** A node dropped on a cell: moves it, or swaps with the node there. */
+  onNodeDrop(skillId: string, cell: BoardCell): void {
+    this.setTree(moveNode(this.draft().tree, skillId, cell));
+  }
+
+  /** A connector dropped on a node: the first skill becomes a prerequisite of the second. */
+  onLinkDrop(fromSkillId: string, toSkillId: string): void {
+    const tree = linkPrerequisite(this.draft().tree, fromSkillId, toSkillId);
+    if (tree === this.draft().tree) return;
+    this.setTree(tree);
+    this.selection.set({ kind: 'link', from: fromSkillId, to: toSkillId });
+  }
+
+  protected endPaletteDrag(event: CdkDragEnd, skillId: string): void {
+    const cell = this.board().locate(event.dropPoint);
+    this.board().setHover(null);
+    event.source.reset();
+    if (cell) this.onPaletteDrop(skillId, cell);
+  }
+
+  protected addRequirement(prerequisiteId: string, skillId: string): void {
+    this.onLinkDrop(prerequisiteId, skillId);
+    const rank = this.newRank();
+    if (rank > 1) this.setRank(skillId, prerequisiteId, rank);
+    this.selection.set({ kind: 'node', skillId });
+    this.newRank.set(1);
+  }
+
+  /** Adds a palette skill at the first free cell (button, keyboard and touch alternative to dragging). */
+  protected addFirstFree(skillId: string): void {
     const tree = this.draft().tree;
-    const column = tree.reduce(
-      (max, node) => Math.max(max, node.column + 1),
-      0,
+    const size = boardSize(tree);
+    for (let row = 0; row < size.rows; row++) {
+      for (let column = 0; column < size.columns; column++) {
+        if (!tree.some((n) => n.column === column && n.row === row))
+          return this.onPaletteDrop(skillId, { column, row });
+      }
+    }
+  }
+
+  protected remove(skillId: string): void {
+    this.setTree(removeNode(this.draft().tree, skillId));
+    this.selection.set(null);
+  }
+
+  protected unlink(prerequisiteId: string, skillId: string): void {
+    this.setTree(
+      unlinkPrerequisite(this.draft().tree, prerequisiteId, skillId),
     );
-    this.patch({
-      tree: [...tree, { skillId, requires: [], minLevel: 1, column, row: 0 }],
-    });
+    if (this.selection()?.kind === 'link') this.selection.set(null);
   }
 
-  /** Removes the node and the prerequisites on it. */
-  protected removeNode(index: number): void {
-    const removed = this.draft().tree[index].skillId;
-    this.patch({
-      tree: this.draft()
-        .tree.filter((_, i) => i !== index)
-        .map((node) => ({
-          ...node,
-          requires: node.requires.filter((r) => r.skillId !== removed),
-        })),
-    });
-  }
-
-  protected patchNode(index: number, change: Partial<TreeNode>): void {
-    this.patch({
-      tree: this.draft().tree.map((node, i) =>
-        i === index ? { ...node, ...change } : node,
+  protected patchNode(skillId: string, change: Partial<TreeNode>): void {
+    this.setTree(
+      this.draft().tree.map((node) =>
+        node.skillId === skillId ? { ...node, ...change } : node,
       ),
-    });
-  }
-
-  protected addRequirement(index: number): void {
-    const node = this.draft().tree[index];
-    const other = this.draft().tree.find(
-      (entry) => entry.skillId !== node.skillId,
     );
-    this.patchNode(index, {
-      requires: [...node.requires, { skillId: other?.skillId ?? '', rank: 1 }],
-    });
   }
 
-  protected removeRequirement(index: number, at: number): void {
-    this.patchNode(index, {
-      requires: this.draft().tree[index].requires.filter((_, i) => i !== at),
-    });
-  }
-
-  protected patchRequirement(
-    index: number,
-    at: number,
-    change: Partial<TreeNode['requires'][number]>,
+  protected setRank(
+    skillId: string,
+    prerequisiteId: string,
+    rank: number,
   ): void {
-    this.patchNode(index, {
-      requires: this.draft().tree[index].requires.map((r, i) =>
-        i === at ? { ...r, ...change } : r,
+    this.setTree(
+      this.draft().tree.map((node) =>
+        node.skillId === skillId
+          ? {
+              ...node,
+              requires: node.requires.map((r) =>
+                r.skillId === prerequisiteId ? { ...r, rank } : r,
+              ),
+            }
+          : node,
       ),
-    });
+    );
   }
 
   protected editJson(text: string): void {
@@ -439,6 +612,14 @@ export class ClassEditorComponent {
       ...this.draft(),
       id: this.characterClass()?.id,
     } as CharacterClass);
+  }
+
+  private skillOf(skillId: string): Skill | undefined {
+    return this.world().skills.find((skill) => skill.id === skillId);
+  }
+
+  private setTree(tree: TreeNode[]): void {
+    this.patch({ tree });
   }
 
   private setDraft(characterClass: ClassDraft): void {

@@ -61,6 +61,8 @@ import { CharacterClass } from '../../models/class';
         } @else {
           <app-class-catalogue
             [classes]="world.classes"
+            [skills]="world.skills"
+            [items]="world.items"
             (create)="editing.set('new')"
             (addDefaults)="run(catalogue.addDefaults())"
             (edit)="editing.set($event)"

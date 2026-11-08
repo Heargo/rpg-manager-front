@@ -107,6 +107,7 @@ Tickets in `npcs-skills-combat/` (N). Status: validated (2026-11-08), every tick
 | 40 | **N05** Skill model and skill catalogue (done) | Classes and combat need skills. | N01 |
 | 41 | **N06** Classes and skill tree editor (done) | Trees need skills. | N05 |
 | 42 | **N07** Skill points and learning skills (players) (done) | Players use the trees. | N06, N15 |
+| 41b | **N19** Tree editor drag & drop, class details (done) | User request (2026-11-08): modern tree editor, class details view. | N06 |
 | 42b | **N18** NPC class and skills (done) | Split from N07 (2026-11-08): NPC class-based generation. | N07 |
 | 43 | **N08** Class choice at character creation (done) | Needs classes and skill points. | N07 |
 | 44 | **N09** Default classes and skills (done) | A world is playable without designing a tree first. | N06 |

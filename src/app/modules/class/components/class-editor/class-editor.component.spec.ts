@@ -1,4 +1,3 @@
-import { By } from '@angular/platform-browser';
 import { TestBed } from '@angular/core/testing';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
@@ -8,13 +7,15 @@ import { CharacterClass } from '../../models/class';
 import { ClassEditorComponent } from './class-editor.component';
 
 /**
- * Hooks (all tab panels rendered). Inputs: `world`, `characterClass` (optional, a new class when absent). Output:
- * `save`. `[data-field]`: `name`, `description` (pInputText / textarea), `json` (textarea), `error` (one per
- * validation issue, absent while valid). Catalogue skills not yet in the tree: `[data-action="add-node"]` buttons with
- * `data-skill-id`. Each tree node is `[data-node="<skillId>"]` and holds `[data-field]` `node-column`, `node-row`,
- * `node-min-level` (p-inputnumber hosts), `[data-action="add-requirement"]`, and per requirement
- * `[data-field="requirement-skill"]` (p-select bound with ngModel; ngModelChange gives the skill id) and
- * `requirement-rank` (p-inputnumber). `[data-action="save"]` emits the class, disabled / ignored while issues remain.
+ * Hooks (all tab panels rendered). Inputs: `world`, `characterClass` (optional). Output: `save`. `[data-field]`: `name`,
+ * `description`, `json` (textarea), `error` (one per validation issue), `palette-search` (input). Board: `[data-board]`,
+ * a node per tree skill `[data-node="<skillId>"]` with `data-column` / `data-row`, `data-invalid="true"` when a
+ * validation issue involves it, a link per prerequisite `[data-link="<prereqId>><nodeId>"]` (clickable to select it).
+ * Palette: `[data-palette-item="<skillId>"]` for skills not in the tree. Clicking a node opens `[data-inspector]` with
+ * `[data-field="node-min-level"]` (p-inputnumber), per prerequisite `[data-field="requirement-rank"]` (p-inputnumber) and
+ * `[data-action="remove-requirement"]`, plus `[data-action="remove-node"]`; a selected link shows
+ * `[data-action="delete-link"]`. Public drop handlers: `onPaletteDrop(skillId, cell)`, `onNodeDrop(skillId, cell)`,
+ * `onLinkDrop(fromSkillId, toSkillId)`. `[data-action="save"]` emits the class, ignored while issues remain.
  */
 describe('ClassEditorComponent', () => {
   const skill = (id: string): Skill => ({
@@ -55,7 +56,7 @@ describe('ClassEditorComponent', () => {
       await fixture.whenStable();
     };
     const click = async (selector: string, scope: ParentNode = el) => {
-      scope.querySelector<HTMLElement>(selector)!.click();
+      (selector ? scope.querySelector<HTMLElement>(selector)! : (scope as HTMLElement)).click();
       await fixture.whenStable();
     };
     const saved: CharacterClass[] = [];
@@ -67,56 +68,139 @@ describe('ClassEditorComponent', () => {
     return { fixture, el, node, field, type, click, saved, save };
   }
 
-  it('fills the form and the JSON from the class and shows its nodes', async () => {
+  interface Drops {
+    onPaletteDrop(skillId: string, cell: { column: number; row: number }): void;
+    onNodeDrop(skillId: string, cell: { column: number; row: number }): void;
+    onLinkDrop(fromSkillId: string, toSkillId: string): void;
+  }
+  // Not on the component yet.
+  const drops = (fixture: { componentInstance: unknown }) => fixture.componentInstance as Drops;
+  const cell = (column: number, row: number) => ({ column, row });
+
+  it('fills the form and the JSON from the class and draws a node per skill and a link per prerequisite', async () => {
     const { field, node, el } = await setup(warrior);
     expect(field('name').value).toBe('Warrior');
     expect(JSON.parse(field('json').value)).toMatchObject({ name: 'Warrior', tree: [{ skillId: 's1' }, { skillId: 's2' }] });
-    expect(node('s1')).not.toBeNull();
-    expect(field('node-column', node('s2')).value).toBe('1');
-    expect(field('node-min-level', node('s2')).value).toBe('2');
+    expect(node('s1').dataset['column']).toBe('0');
+    expect(node('s2').dataset['column']).toBe('1');
+    expect(node('s2').dataset['row']).toBe('0');
+    expect(el.querySelectorAll('[data-link]')).toHaveLength(1);
+    expect(el.querySelector('[data-link="s1>s2"]')).not.toBeNull();
     expect(el.querySelector('[data-field="error"]')).toBeNull();
   });
 
-  it('offers only the catalogue skills that are not in the tree, and adds one as a node', async () => {
-    const { el, click, save, saved } = await setup(warrior);
-    expect(el.querySelector('[data-action="add-node"][data-skill-id="s1"]')).toBeNull();
-    await click('[data-action="add-node"][data-skill-id="s3"]');
-    expect(el.querySelector('[data-node="s3"]')).not.toBeNull();
-    expect(el.querySelector('[data-action="add-node"][data-skill-id="s3"]')).toBeNull();
-    await save();
-    expect(saved[0].tree.map((n) => n.skillId)).toEqual(['s1', 's2', 's3']);
-    expect(saved[0].tree[2]).toMatchObject({ skillId: 's3', requires: [], minLevel: 1 });
+  it('lists in the palette only the skills not in the tree, filtered by its search', async () => {
+    const { el, type } = await setup(warrior);
+    expect(el.querySelector('[data-palette-item="s1"]')).toBeNull();
+    expect(el.querySelector('[data-palette-item="s3"]')).not.toBeNull();
+    await type('palette-search', 'zzz');
+    expect(el.querySelector('[data-palette-item="s3"]')).toBeNull();
+    await type('palette-search', 's3');
+    expect(el.querySelector('[data-palette-item="s3"]')).not.toBeNull();
   });
 
-  it('sets the cell of a node', async () => {
-    const { node, type, save, saved } = await setup(warrior);
-    await type('node-column', '3', node('s2'));
-    await type('node-row', '2', node('s2'));
-    await save();
-    expect(saved[0].tree[1]).toMatchObject({ skillId: 's2', column: 3, row: 2 });
-  });
-
-  it('sets prerequisites with a required rank and the min level of a node', async () => {
-    const { fixture, node, click, type, save, saved } = await setup(warrior);
-    await click('[data-action="add-node"][data-skill-id="s3"]');
-    await click('[data-action="add-requirement"]', node('s3'));
-    fixture.debugElement
-      .query(By.css('[data-node="s3"] [data-field="requirement-skill"]'))
-      .triggerEventHandler('ngModelChange', 's2');
+  it('adds a palette skill at the dropped cell', async () => {
+    const { fixture, el, save, saved } = await setup(warrior);
+    drops(fixture).onPaletteDrop('s3', cell(3, 2));
     await fixture.whenStable();
-    await type('requirement-rank', '2', node('s3'));
-    await type('node-min-level', '4', node('s3'));
+    expect(el.querySelector('[data-palette-item="s3"]')).toBeNull();
+    expect(el.querySelector<HTMLElement>('[data-node="s3"]')!.dataset['column']).toBe('3');
     await save();
-    expect(saved[0].tree[2]).toMatchObject({ skillId: 's3', requires: [{ skillId: 's2', rank: 2 }], minLevel: 4 });
+    expect(saved[0].tree[2]).toMatchObject({ skillId: 's3', requires: [], minLevel: 1, column: 3, row: 2 });
+  });
+
+  it('moves a node to the dropped cell, and swaps with the node already there', async () => {
+    const { fixture, save, saved } = await setup(warrior);
+    drops(fixture).onNodeDrop('s2', cell(3, 2));
+    drops(fixture).onNodeDrop('s1', cell(3, 2));
+    await fixture.whenStable();
+    await save();
+    expect(saved[0].tree[0]).toMatchObject({ skillId: 's1', column: 3, row: 2 });
+    expect(saved[0].tree[1]).toMatchObject({ skillId: 's2', column: 0, row: 0 });
+  });
+
+  it('makes a prerequisite of rank 1 when a node is dropped on another, and draws the link', async () => {
+    const { fixture, el, save, saved } = await setup(warrior);
+    drops(fixture).onPaletteDrop('s3', cell(2, 0));
+    drops(fixture).onLinkDrop('s2', 's3');
+    await fixture.whenStable();
+    expect(el.querySelector('[data-link="s2>s3"]')).not.toBeNull();
+    await save();
+    expect(saved[0].tree[2].requires).toEqual([{ skillId: 's2', rank: 1 }]);
+  });
+
+  it('refuses a drop link that would make a cycle', async () => {
+    const { fixture, el } = await setup(warrior);
+    drops(fixture).onLinkDrop('s2', 's1');
+    await fixture.whenStable();
+    expect(el.querySelector('[data-link="s2>s1"]')).toBeNull();
+    expect(el.querySelector('[data-field="error"]')).toBeNull();
+  });
+
+  it('opens the inspector on a selected node and edits its min level and prerequisite rank', async () => {
+    const { el, node, click, type, save, saved } = await setup(warrior);
+    expect(el.querySelector('[data-inspector]')).toBeNull();
+    await click('', node('s2'));
+    const inspector = el.querySelector<HTMLElement>('[data-inspector]')!;
+    expect(inspector.querySelector<HTMLInputElement>('[data-field="node-min-level"] input')!.value).toBe('2');
+    await type('node-min-level', '4', inspector);
+    await type('requirement-rank', '3', inspector);
+    await save();
+    expect(saved[0].tree[1]).toMatchObject({ skillId: 's2', requires: [{ skillId: 's1', rank: 3 }], minLevel: 4 });
+  });
+
+  it('removes a prerequisite from the inspector', async () => {
+    const { el, node, click, save, saved } = await setup(warrior);
+    await click('', node('s2'));
+    await click('[data-action="remove-requirement"]', el.querySelector('[data-inspector]')!);
+    expect(el.querySelector('[data-link]')).toBeNull();
+    await save();
+    expect(saved[0].tree[1].requires).toEqual([]);
+  });
+
+  it('removes a node from the tree from the inspector, with its links, and gives it back to the palette', async () => {
+    const { el, node, click, save, saved } = await setup(warrior);
+    await click('', node('s1'));
+    await click('[data-action="remove-node"]', el.querySelector('[data-inspector]')!);
+    expect(el.querySelector('[data-node="s1"]')).toBeNull();
+    expect(el.querySelector('[data-link]')).toBeNull();
+    expect(el.querySelector('[data-palette-item="s1"]')).not.toBeNull();
+    await save();
+    expect(saved[0].tree).toMatchObject([{ skillId: 's2', requires: [] }]);
+  });
+
+  it('selects a link by clicking it and deletes it', async () => {
+    const { el, click, save, saved } = await setup(warrior);
+    await click('', el.querySelector<HTMLElement>('[data-link="s1>s2"]')!);
+    await click('[data-action="delete-link"]');
+    expect(el.querySelector('[data-link]')).toBeNull();
+    await save();
+    expect(saved[0].tree[1].requires).toEqual([]);
+  });
+
+  it('highlights the nodes involved in a validation error and does not save', async () => {
+    const outside: CharacterClass = {
+      ...warrior,
+      tree: [warrior.tree[0], { ...warrior.tree[1], requires: [{ skillId: 's3', rank: 1 }] }],
+    };
+    const { el, node, save, saved } = await setup(outside);
+    expect(el.querySelector('[data-field="error"]')).not.toBeNull();
+    expect(node('s2').dataset['invalid']).toBe('true');
+    expect(node('s1').dataset['invalid']).toBeUndefined();
+    await save();
+    expect(saved).toEqual([]);
   });
 
   it('shows a validation error and does not save while the tree has a cycle', async () => {
-    const { fixture, el, node, click, save, saved } = await setup(warrior);
-    await click('[data-action="add-requirement"]', node('s1'));
-    fixture.debugElement
-      .query(By.css('[data-node="s1"] [data-field="requirement-skill"]'))
-      .triggerEventHandler('ngModelChange', 's2');
-    await fixture.whenStable();
+    const cycle: CharacterClass = {
+      ...warrior,
+      tree: [
+        { skillId: 's1', requires: [], minLevel: 1, column: 0, row: 0 },
+        { skillId: 's2', requires: [{ skillId: 's3', rank: 1 }], minLevel: 1, column: 1, row: 0 },
+        { skillId: 's3', requires: [{ skillId: 's2', rank: 1 }], minLevel: 1, column: 2, row: 0 },
+      ],
+    };
+    const { el, save, saved } = await setup(cycle);
     expect(el.querySelector('[data-field="error"]')).not.toBeNull();
     await save();
     expect(saved).toEqual([]);
