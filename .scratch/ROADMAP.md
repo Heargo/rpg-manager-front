@@ -102,6 +102,7 @@ Tickets in `npcs-skills-combat/` (N). Status: validated (2026-11-08), every tick
 | 36 | **N02** NPC model, storage and export | Data first. | N01 |
 | 37 | **N03** NPC catalogue page | Like the item catalogue. | N02 |
 | 38 | **N04** NPC editor (form, JSON, generate) | Makes NPCs usable. | N03 |
+| 38b | **N17** NPC person names (done) | User feedback after N04: generated names read like items. | N04 |
 | 39 | **N10** Show NPCs on the table | Small win; per-role visibility set in the world rules. | N03, N15 |
 | 40 | **N05** Skill model and skill catalogue | Classes and combat need skills. | N01 |
 | 41 | **N06** Classes and skill tree editor | Trees need skills. | N05 |
