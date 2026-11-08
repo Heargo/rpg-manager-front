@@ -842,7 +842,11 @@
         "buyRatio": "Buy ratio",
         "sellRatio": "Sell ratio",
         "inventory": "Equipment and inventory",
-        "addItem": "Add an item from the catalogue"
+        "addItem": "Add an item from the catalogue",
+        "class": "Class",
+        "noClass": "No class",
+        "skills": "Skills",
+        "addSkill": "Add a skill from the catalogue"
       },
       "issue": {
         "name": "The name is required.",
@@ -859,7 +863,11 @@
         "attributes": "The attributes are not valid.",
         "inventory": "The inventory is not valid.",
         "skills": "The skills are not valid."
-      }
+      },
+      "skillPoints": "Skill points left: {{count}}",
+      "learnFromClass": "Learn from the class",
+      "removeSkill": "Remove the skill",
+      "randomClass": "Random class"
     }
   },
   "skill": {

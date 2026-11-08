@@ -842,7 +842,11 @@
         "buyRatio": "Ratio d'achat",
         "sellRatio": "Ratio de vente",
         "inventory": "Équipement et inventaire",
-        "addItem": "Ajouter un objet du catalogue"
+        "addItem": "Ajouter un objet du catalogue",
+        "class": "Classe",
+        "noClass": "Aucune classe",
+        "skills": "Compétences",
+        "addSkill": "Ajouter une compétence du catalogue"
       },
       "issue": {
         "name": "Le nom est obligatoire.",
@@ -859,7 +863,11 @@
         "attributes": "Les attributs ne sont pas valides.",
         "inventory": "L'inventaire n'est pas valide.",
         "skills": "Les compétences ne sont pas valides."
-      }
+      },
+      "skillPoints": "Points de compétence restants : {{count}}",
+      "learnFromClass": "Apprendre selon la classe",
+      "removeSkill": "Retirer la compétence",
+      "randomClass": "Classe au hasard"
     }
   },
   "skill": {

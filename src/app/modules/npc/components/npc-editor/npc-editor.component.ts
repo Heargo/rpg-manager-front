@@ -195,6 +195,79 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
               </div>
             }
 
+            <div class="field">
+              <label for="npc-class">{{
+                'npc.editor.fields.class' | transloco
+              }}</label>
+              <p-select
+                inputId="npc-class"
+                data-field="class"
+                [options]="world().classes"
+                optionLabel="name"
+                optionValue="id"
+                [showClear]="true"
+                [ngModel]="draft().classId ?? null"
+                (ngModelChange)="setClass($event)"
+                [placeholder]="'npc.editor.fields.noClass' | transloco"
+              />
+            </div>
+
+            <fieldset class="inventory" data-field="skills">
+              <legend>{{ 'npc.editor.fields.skills' | transloco }}</legend>
+              <p class="hint">
+                {{
+                  'npc.editor.skillPoints'
+                    | transloco: { count: draft().skillPoints }
+                }}
+              </p>
+              <div class="entry">
+                <button
+                  pButton
+                  type="button"
+                  data-action="learn-from-class"
+                  icon="pi pi-sitemap"
+                  size="small"
+                  [disabled]="!draft().classId"
+                  [label]="'npc.editor.learnFromClass' | transloco"
+                  (click)="learnFromClass()"
+                ></button>
+                <p-select
+                  data-field="add-skill"
+                  [options]="world().skills"
+                  optionLabel="name"
+                  optionValue="id"
+                  [ngModel]="null"
+                  (ngModelChange)="addSkill($event)"
+                  [placeholder]="'npc.editor.fields.addSkill' | transloco"
+                  [filter]="true"
+                />
+              </div>
+              @for (entry of draft().skills; track entry.skillId) {
+                <div class="entry" data-field="skill-entry">
+                  <span class="name">{{ skillName(entry.skillId) }}</span>
+                  <p-inputnumber
+                    data-field="skill-rank"
+                    [min]="0"
+                    [max]="skillMaxRank(entry.skillId)"
+                    [showButtons]="true"
+                    [ngModel]="entry.rank"
+                    (ngModelChange)="setSkillRank(entry.skillId, $event)"
+                  />
+                  <button
+                    pButton
+                    type="button"
+                    data-action="remove-skill"
+                    icon="pi pi-trash"
+                    size="small"
+                    severity="danger"
+                    [text]="true"
+                    [attr.aria-label]="'npc.editor.removeSkill' | transloco"
+                    (click)="setSkillRank(entry.skillId, 0)"
+                  ></button>
+                </div>
+              }
+            </fieldset>
+
             <fieldset class="inventory">
               <legend>{{ 'npc.editor.fields.inventory' | transloco }}</legend>
               <p-select
@@ -289,6 +362,22 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                   spellcheck="false"
                   [value]="seed()"
                   (input)="seed.set($any($event.target).value)"
+                />
+              </div>
+              <div class="field">
+                <label for="npc-generate-class">{{
+                  'npc.editor.fields.class' | transloco
+                }}</label>
+                <p-select
+                  inputId="npc-generate-class"
+                  data-field="generate-class"
+                  [options]="world().classes"
+                  optionLabel="name"
+                  optionValue="id"
+                  [showClear]="true"
+                  [ngModel]="generateClassId()"
+                  (ngModelChange)="generateClassId.set($event)"
+                  [placeholder]="'npc.editor.randomClass' | transloco"
                 />
               </div>
               <button
@@ -408,6 +497,7 @@ export class NpcEditorComponent {
     return [];
   });
   protected readonly seed = signal(this.editor.newSeed());
+  protected readonly generateClassId = signal<string | null>(null);
 
   protected readonly issues = computed(() =>
     this.editor.validate(this.draft()),
@@ -469,6 +559,40 @@ export class NpcEditorComponent {
     this.patch({ merchant });
   }
 
+  protected setClass(classId: string | null): void {
+    this.setDraft(this.editor.setClass(this.draft(), classId));
+  }
+
+  protected learnFromClass(): void {
+    this.setDraft(this.editor.learnFromClass(this.draft(), this.world()));
+  }
+
+  protected addSkill(skillId: string | null): void {
+    if (skillId)
+      this.setDraft(
+        this.editor.setSkill(this.draft(), skillId, 1, this.world()),
+      );
+  }
+
+  protected setSkillRank(skillId: string, rank: number | null): void {
+    this.setDraft(
+      this.editor.setSkill(
+        this.draft(),
+        skillId,
+        Math.trunc(rank ?? 0),
+        this.world(),
+      ),
+    );
+  }
+
+  protected skillName(skillId: string): string {
+    return this.world().skills.find((s) => s.id === skillId)?.name ?? skillId;
+  }
+
+  protected skillMaxRank(skillId: string): number {
+    return this.world().skills.find((s) => s.id === skillId)?.maxRank ?? 1;
+  }
+
   protected addItem(itemId: string | null): void {
     const item = this.world().items.find((i) => i.id === itemId);
     if (item) this.setDraft(this.editor.addItem(this.draft(), item));
@@ -498,7 +622,11 @@ export class NpcEditorComponent {
   }
 
   protected async generate(): Promise<void> {
-    const generated = await this.editor.generate(this.seed(), this.world());
+    const generated = await this.editor.generate(
+      this.seed(),
+      this.world(),
+      this.generateClassId() ?? undefined,
+    );
     this.setDraft({ ...generated, id: this.draft().id });
   }
 

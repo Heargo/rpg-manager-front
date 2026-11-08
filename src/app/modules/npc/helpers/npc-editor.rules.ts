@@ -8,6 +8,11 @@ import {
   levelsByName,
 } from '../../character/helpers/character-stats';
 import { levelCost, levelRarity } from '../../character/helpers/level.rules';
+import {
+  ActionResult,
+  applyCharacterAction,
+  LevelRules,
+} from '../../character/helpers/character-actions.rules';
 import { Item, World } from '../../world/models/world';
 import { Npc, NPC_ROLES, NpcRole } from '../models/npc';
 import { validateNpc } from './npc.rules';
@@ -239,6 +244,7 @@ export function generateNpc(
   world: World,
   random: RandomSource,
   names: NpcNameList,
+  classId?: string,
 ): Omit<Npc, 'id'> {
   const level = randomInt(random, 1, world.maxLevel);
   const rarity = levelRarity(level, world.maxLevel);
@@ -296,6 +302,102 @@ export function generateNpc(
       setNpcAttributeLevel(npc, attribute.id, levels.get(attribute.id)!, world),
     { ...sized, statPoints: available - spent },
   );
-  const { id: _id, ...generated } = attributes;
+  const characterClass = world.classes.length
+    ? (world.classes.find((c) => c.id === classId) ??
+      pick(random, world.classes))
+    : undefined;
+  const classed = characterClass
+    ? learnNpcSkills(setNpcClass(attributes, characterClass.id), world, (ids) =>
+        pick(random, ids),
+      )
+    : attributes;
+  const { id: _id, ...generated } = classed;
   return generated;
+}
+
+/** Skill points an NPC of this level has to spend. */
+export function npcSkillPoints(level: number, world: World): number {
+  return world.startingSkillPoints + world.skillPointsPerLevel * (level - 1);
+}
+
+/** The NPC in this class (or none); its skills are left as they are. */
+export function setNpcClass(npc: Npc, classId: string | undefined): Npc {
+  const next = { ...npc, classId };
+  if (classId === undefined) delete next.classId;
+  return next;
+}
+
+/** The NPC with this skill at that rank (0 removes it); an unknown skill or a rank out of range changes nothing. */
+export function setNpcSkill(
+  npc: Npc,
+  skillId: string,
+  rank: number,
+  world: World,
+): Npc {
+  const result = applyNpcAction(
+    npc,
+    { kind: 'set-skill', skillId, rank },
+    world,
+  );
+  return result.ok ? result.character : npc;
+}
+
+/**
+ * The NPC spending the points of its level along its class tree, one rank at a time on the first node
+ * (row, then column) it can learn. Skills already on the sheet are kept.
+ */
+export function learnNpcSkillsFromClass(npc: Npc, world: World): Npc {
+  return learnNpcSkills(npc, world, (ids) => ids[0]);
+}
+
+function applyNpcAction(
+  npc: Npc,
+  action: Parameters<typeof applyCharacterAction>[2],
+  world: World,
+): ActionResult<Npc> {
+  const levelRules: LevelRules = {
+    levelCurve: world.levelCurve,
+    statPointsPerLevel: world.statPointsPerLevel,
+    skillPointsPerLevel: world.skillPointsPerLevel,
+    maxLevel: world.maxLevel,
+    barAttributes: world.barAttributes,
+  };
+  return applyCharacterAction(world.attributes, npc, action, levelRules, world);
+}
+
+function learnNpcSkills(
+  npc: Npc,
+  world: World,
+  choose: (skillIds: string[]) => string,
+): Npc {
+  const tree = world.classes.find((c) => c.id === npc.classId)?.tree;
+  if (!tree) return npc;
+  const spent = npc.skills.reduce((sum, entry) => {
+    const skill = world.skills.find((s) => s.id === entry.skillId);
+    const inTree = tree.some((node) => node.skillId === entry.skillId);
+    return sum + (inTree && skill ? entry.rank * skill.pointCost : 0);
+  }, 0);
+  let current: Npc = {
+    ...npc,
+    skillPoints: Math.max(0, npcSkillPoints(npc.level, world) - spent),
+  };
+  const ordered = [...tree].sort(
+    (a, b) => a.row - b.row || a.column - b.column,
+  );
+  for (;;) {
+    const options = ordered
+      .map((node) => ({
+        id: node.skillId,
+        result: applyNpcAction(
+          current,
+          { kind: 'learn-skill', skillId: node.skillId },
+          world,
+        ),
+      }))
+      .filter((option) => option.result.ok);
+    if (!options.length) return current;
+    const id = choose(options.map((option) => option.id));
+    const chosen = options.find((option) => option.id === id)!.result;
+    if (chosen.ok) current = chosen.character;
+  }
 }

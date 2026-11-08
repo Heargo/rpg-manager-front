@@ -9,12 +9,15 @@ import {
   addNpcItem,
   emptyNpc,
   generateNpc,
+  learnNpcSkillsFromClass,
   NpcEditorIssue,
   npcToJson,
   ParsedNpc,
   parseNpcJson,
   removeNpcEntry,
   setNpcAttributeLevel,
+  setNpcClass,
+  setNpcSkill,
   setNpcLevel,
   setNpcRoles,
   toggleNpcEquipped,
@@ -61,6 +64,18 @@ export class NpcEditorBusiness {
     return setNpcRoles(npc, roles);
   }
 
+  setClass(npc: Npc, classId: string | null): Npc {
+    return setNpcClass(npc, classId ?? undefined);
+  }
+
+  learnFromClass(npc: Npc, world: World): Npc {
+    return learnNpcSkillsFromClass(npc, world);
+  }
+
+  setSkill(npc: Npc, skillId: string, rank: number, world: World): Npc {
+    return setNpcSkill(npc, skillId, rank, world);
+  }
+
   addItem(npc: Npc, item: Item): Npc {
     return addNpcItem(npc, item, crypto.randomUUID());
   }
@@ -81,11 +96,16 @@ export class NpcEditorBusiness {
     return createSeed();
   }
 
-  async generate(seed: string, world: World): Promise<Omit<Npc, 'id'>> {
+  async generate(
+    seed: string,
+    world: World,
+    classId?: string,
+  ): Promise<Omit<Npc, 'id'>> {
     return generateNpc(
       world,
       seededRandomSource(seed),
       await this.names.names(),
+      classId,
     );
   }
 }
