@@ -13,6 +13,17 @@ export interface WorldAttribute {
   cap?: number;
 }
 
+/** The editable rules of a world (the rules page, the wizard's Rules step); attributes without an id are new. */
+export interface WorldRules {
+  attributes: { id?: string; name: string; baseValue: number; formula: AttributeFormula; cap?: number }[];
+  startingStatPoints: number;
+  startingMoney: number;
+  levelCurve: LevelCurve;
+  maxLevel: number;
+  statPointsPerLevel: number;
+  offlineFeatures: OfflineFeatures;
+}
+
 /** What players can still do while the host is offline (p2p-rooms spec, Host offline). */
 export interface OfflineFeatures {
   dice: boolean;

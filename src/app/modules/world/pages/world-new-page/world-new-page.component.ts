@@ -22,10 +22,8 @@ import { SelectModule } from '@openng/optimus-ui/select';
 import { StepperModule } from '@openng/optimus-ui/stepper';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
-import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 import { FormulaChartComponent } from '../../../../core/components/formula-chart/formula-chart.component';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
-import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import {
   AttributeFormula,
@@ -40,13 +38,8 @@ import { WorldCardComponent } from '../../components/world-card/world-card.compo
 import {
   DEFAULT_LEVEL_CURVE,
   DEFAULT_MAX_LEVEL,
-  MAX_LEVEL,
-  MIN_MAX_LEVEL,
   DEFAULT_STAT_POINTS_PER_LEVEL,
-  LEVEL_CURVE_PRESETS,
   LevelCurve,
-  levelCost,
-  checkLevelCurve,
 } from '../../../character/helpers/level.rules';
 import { DEFAULT_OFFLINE_FEATURES } from '../../helpers/world.factory';
 import {
@@ -55,6 +48,7 @@ import {
   attributeFormulaErrors,
   WORLD_NAME_MAX_LENGTH,
 } from '../../helpers/world-draft.rules';
+import { RuleFieldsComponent } from '../../components/rule-fields/rule-fields.component';
 import { OfflineFeatures, WorldDraft } from '../../models/world';
 
 interface AttributeRow {
@@ -72,10 +66,6 @@ const PRESETS: readonly (FormulaPreset | 'custom')[] = [
   'percent',
   'custom',
 ];
-
-const OFFLINE_FEATURES = Object.keys(
-  DEFAULT_OFFLINE_FEATURES,
-) as (keyof OfflineFeatures)[];
 
 /** New game wizard: identity → attributes → rules, with a live preview. */
 import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
@@ -96,11 +86,10 @@ import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
     StepperModule,
     TagModule,
     TextareaModule,
-    ToggleSwitchModule,
     TooltipModule,
     FormulaChartComponent,
-    CoinInputComponent,
     WorldCardComponent,
+    RuleFieldsComponent,
   ],
   templateUrl: './world-new-page.component.html',
   styleUrl: './world-new-page.component.scss',
@@ -113,7 +102,6 @@ export class WorldNewPageComponent {
 
   protected readonly nameMax = WORLD_NAME_MAX_LENGTH;
   protected readonly attributeMax = ATTRIBUTE_NAME_MAX_LENGTH;
-  protected readonly offlineFeatures = OFFLINE_FEATURES;
   protected readonly presets = [...PRESETS];
 
   protected readonly step = signal(1);
@@ -135,9 +123,7 @@ export class WorldNewPageComponent {
   protected readonly startingMoney = signal(5000);
   protected readonly levelCurve = signal<LevelCurve>(DEFAULT_LEVEL_CURVE);
   protected readonly maxLevel = signal(DEFAULT_MAX_LEVEL);
-  protected readonly maxLevelBounds = { min: MIN_MAX_LEVEL, max: MAX_LEVEL };
   protected readonly statPointsPerLevel = signal(DEFAULT_STAT_POINTS_PER_LEVEL);
-  protected readonly curvePresets = LEVEL_CURVE_PRESETS;
   protected readonly starterItems = signal(true);
   protected readonly offline = signal<OfflineFeatures>({
     ...DEFAULT_OFFLINE_FEATURES,
@@ -217,25 +203,6 @@ export class WorldNewPageComponent {
     if ((event as PointerEvent).pointerType === 'mouse') return;
     this.chartOpen.update((open) => (open === target ? null : target));
   }
-  protected readonly curveError = computed(() =>
-    checkLevelCurve(this.levelCurve()),
-  );
-  /** XP cost of levels 2 to 6 (empty while a custom curve is invalid). */
-  protected readonly curvePreview = computed(() =>
-    this.curveError()
-      ? ''
-      : [2, 3, 4, 5, 6]
-          .map((level) => levelCost(this.levelCurve(), level))
-          .join(' '),
-  );
-  /** XP cost of levels 2 to 11 for the chart (empty while a custom curve is invalid). */
-  protected readonly curveChart = computed(() =>
-    this.curveError()
-      ? []
-      : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((level) =>
-          levelCost(this.levelCurve(), level),
-        ),
-  );
   protected readonly errors = computed(() =>
     this.library.validateDraft(this.draft()),
   );
@@ -302,28 +269,6 @@ export class WorldNewPageComponent {
     this.attributes.update((rows) =>
       rows.map((row) => (row.key === key ? { ...row, ...change } : row)),
     );
-  }
-
-  protected setCurvePreset(preset: string): void {
-    const current = this.levelCurve();
-    this.levelCurve.set(
-      preset === 'custom'
-        ? {
-            preset,
-            expression:
-              current.preset === 'custom' ? current.expression : 'level * 100',
-          }
-        : { preset: preset as 'flat' | 'growing' | 'steep' | 'classic' },
-    );
-  }
-
-  protected setCurveExpression(expression: string): void {
-    this.levelCurve.set({ preset: 'custom', expression });
-  }
-
-  protected curveExpression(): string {
-    const curve = this.levelCurve();
-    return curve.preset === 'custom' ? curve.expression : '';
   }
 
   protected setPreset(key: number, preset: string): void {
@@ -395,8 +340,14 @@ export class WorldNewPageComponent {
     return formula.preset === 'custom' ? formula.expression : '';
   }
 
-  protected setOffline(feature: keyof OfflineFeatures, enabled: boolean): void {
-    this.offline.update((features) => ({ ...features, [feature]: enabled }));
+  /** The shared rule fields hand back the whole draft; keep the rule parts. */
+  protected applyRules(draft: WorldDraft): void {
+    this.startingStatPoints.set(draft.startingStatPoints ?? 0);
+    this.startingMoney.set(draft.startingMoney ?? 0);
+    this.levelCurve.set(draft.levelCurve ?? DEFAULT_LEVEL_CURVE);
+    this.maxLevel.set(draft.maxLevel ?? DEFAULT_MAX_LEVEL);
+    this.statPointsPerLevel.set(draft.statPointsPerLevel ?? DEFAULT_STAT_POINTS_PER_LEVEL);
+    this.offline.set({ ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures });
   }
 
   protected async create(): Promise<void> {

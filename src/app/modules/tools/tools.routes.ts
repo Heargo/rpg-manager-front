@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { WorldSessionBusiness } from '../world/business/world-session.business';
+import { SandboxRulesBusiness } from './business/sandbox-rules.business';
 import { NavigationGuard } from '../../core/guards/navigation.guard';
 
 /** Tools work without a world or a room. */
@@ -33,6 +35,15 @@ export const routesTools: Routes = [
     loadComponent: () =>
       import('./pages/sheet-tool-page/sheet-tool-page.component').then(
         (m) => m.SheetToolPageComponent,
+      ),
+  },
+  {
+    path: 'tools/world-rules',
+    canActivate: [NavigationGuard],
+    providers: [{ provide: WorldSessionBusiness, useClass: SandboxRulesBusiness }],
+    loadComponent: () =>
+      import('../world/pages/world-rules-page/world-rules-page.component').then(
+        (m) => m.WorldRulesPageComponent,
       ),
   },
   {

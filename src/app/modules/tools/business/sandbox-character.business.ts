@@ -9,7 +9,7 @@ import {
 import { createCharacter } from '../../character/helpers/character.rules';
 import { SandboxWorldBusiness } from '../../world/business/sandbox-world.business';
 import { generateStarterItems } from '../../world/helpers/starter-items';
-import { Character } from '../../world/models/world';
+import { Character, World } from '../../world/models/world';
 
 export const SANDBOX_PLAYER_ID = 'sandbox-player';
 /** A proper name, the same in every language. */
@@ -70,6 +70,7 @@ export class SandboxCharacterBusiness {
   });
   private readonly edited = signal<{
     lang: string;
+    world: World;
     character: Character;
   } | null>(null);
 
@@ -77,7 +78,8 @@ export class SandboxCharacterBusiness {
   readonly $character = computed<Character | undefined>(() => {
     const lang = this.language.$language();
     const edited = this.edited();
-    if (edited?.lang === lang) return edited.character;
+    if (edited?.lang === lang && edited.world === this.sandbox.$world())
+      return edited.character;
     return this.sample.hasValue() && this.sample.value().lang === lang
       ? this.sample.value().character
       : undefined;
@@ -96,6 +98,7 @@ export class SandboxCharacterBusiness {
     if (!result.ok) throw new Error(result.error);
     this.edited.set({
       lang: this.language.$language(),
+      world: this.$world(),
       character: { ...result.character, rev: character.rev + 1 },
     });
   }

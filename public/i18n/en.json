@@ -18,7 +18,8 @@
     "itemCatalogue": "Item catalogue",
     "externalTools": "External tools",
     "characterSheet": "Character sheet",
-    "itemEditor": "Item editor"
+    "itemEditor": "Item editor",
+    "worldRules": "World rules"
   },
   "play": {
     "title": "Play",
@@ -152,6 +153,20 @@
         "classic": "Classic tabletop",
         "custom": "Custom"
       }
+    },
+    "rules": {
+      "title": "World rules",
+      "intro": "Edit the attributes and rules of the world. Changes reach the players right away; sheets are updated to match.",
+      "open": "World rules",
+      "attributes": "Attributes",
+      "progression": "Progression",
+      "economy": "Economy",
+      "save": "Save rules",
+      "saved": "Rules saved",
+      "remove": "Delete",
+      "removeTitle": "Delete this attribute?",
+      "removeMessage": "\"{{ name }}\" will be removed from every sheet and from the item modifiers that use it.",
+      "notHosting": "Host a room to edit its world rules."
     }
   },
   "character": {

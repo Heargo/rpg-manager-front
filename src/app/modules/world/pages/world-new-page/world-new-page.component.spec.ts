@@ -311,3 +311,14 @@ describe('WorldNewPageComponent formula chart', () => {
     expect(el.querySelector('app-formula-chart')).toBeNull();
   });
 });
+
+describe('WorldNewPageComponent shared rule fields', () => {
+  it('renders its Rules step with the shared app-rule-fields component', async () => {
+    const { el } = await openAttributesStep();
+    const host = el.querySelector('[data-testid="attributes-next"]')!;
+    (host.matches('button') ? (host as HTMLButtonElement) : host.querySelector('button')!).click();
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(el.querySelectorAll('app-rule-fields').length).toBe(1);
+    expect(el.querySelector('app-rule-fields [data-testid="rules-section-progression"]')).not.toBeNull();
+  });
+});

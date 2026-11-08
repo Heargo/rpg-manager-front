@@ -13,6 +13,7 @@ describe('MenuService', () => {
       '/tools/character-sheet',
       '/tools/item-catalogue',
       '/tools/item-editor',
+      '/tools/world-rules',
       '/tools/links',
     ]);
     expect(items.some((item) => item.label === 'nav.tools')).toBe(false);

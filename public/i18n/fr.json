@@ -18,7 +18,8 @@
     "itemCatalogue": "Catalogue d'objets",
     "externalTools": "Outils externes",
     "characterSheet": "Fiche de personnage",
-    "itemEditor": "Éditeur d'objets"
+    "itemEditor": "Éditeur d'objets",
+    "worldRules": "Règles du monde"
   },
   "play": {
     "title": "Jouer",
@@ -152,6 +153,20 @@
         "classic": "Jeu de rôle classique",
         "custom": "Personnalisée"
       }
+    },
+    "rules": {
+      "title": "Règles du monde",
+      "intro": "Modifiez les attributs et les règles du monde. Les changements arrivent aussitôt chez les joueurs; les fiches sont mises à jour.",
+      "open": "Règles du monde",
+      "attributes": "Attributs",
+      "progression": "Progression",
+      "economy": "Économie",
+      "save": "Enregistrer les règles",
+      "saved": "Règles enregistrées",
+      "remove": "Supprimer",
+      "removeTitle": "Supprimer cet attribut ?",
+      "removeMessage": "« {{ name }} » sera retiré de toutes les fiches et des modificateurs d'objets qui l'utilisent.",
+      "notHosting": "Hébergez une salle pour modifier les règles de son monde."
     }
   },
   "character": {
