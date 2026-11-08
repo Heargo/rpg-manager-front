@@ -50,6 +50,8 @@ function character(overrides: Partial<Character> = {}): Character {
     inventory: [],
     rev: 1,
     updatedAt: 0,
+    skillPoints: 0,
+    skills: [],
     ...overrides,
   };
 }

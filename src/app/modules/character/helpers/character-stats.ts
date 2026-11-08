@@ -1,5 +1,5 @@
 import { evaluateFormula } from '../../../core/helpers/formula';
-import { Character, WorldAttribute } from '../../world/models/world';
+import { Sheet, WorldAttribute } from '../../world/models/world';
 
 export interface AttributeStat {
   attributeId: string;
@@ -34,7 +34,7 @@ export interface BarStat {
  */
 export function attributeStats(
   attributes: WorldAttribute[],
-  character: Character,
+  character: Sheet,
   barAttributes: BarAttributes,
 ): AttributeStat[] {
   const bonusByName = new Map<string, number>();
@@ -73,7 +73,7 @@ export function attributeStats(
 /** Every attribute's level by name, for the formulas that read other attributes. */
 export function levelsByName(
   attributes: WorldAttribute[],
-  character: Pick<Character, 'attributes'>,
+  character: Pick<Sheet, 'attributes'>,
 ): Record<string, number> {
   const levels: Record<string, number> = {};
   for (const attribute of attributes) {

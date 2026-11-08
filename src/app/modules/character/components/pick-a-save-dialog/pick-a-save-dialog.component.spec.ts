@@ -17,6 +17,8 @@ const hostVersion: Character = {
   inventory: [],
   rev: 2,
   updatedAt: 2000,
+  skillPoints: 0,
+  skills: [],
 };
 const playerVersion: Character = { ...hostVersion, statPoints: 3, rev: 1, updatedAt: 1000 };
 

@@ -28,7 +28,10 @@ describe('character rules', () => {
       inventory: [],
       rev: 1,
       updatedAt: 1000,
+      skillPoints: 0,
+      skills: [],
     });
+    expect(createCharacter(world, { playerId: 'p1', name: 'Ada' }, 'c1', 0)).not.toHaveProperty('classId');
   });
 
   it('starts every attribute at level 0 with current = max from its formula', () => {

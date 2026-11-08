@@ -29,6 +29,8 @@ const character: Character = {
   inventory: [],
   rev: 1,
   updatedAt: 0,
+  skillPoints: 0,
+  skills: [],
 };
 
 async function render(overrides: Partial<Character> = {}, worldOverrides: Partial<typeof world> = {}) {

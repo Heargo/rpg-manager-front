@@ -46,6 +46,8 @@ const character: Character = {
   ],
   rev: 1,
   updatedAt: 0,
+  skillPoints: 0,
+  skills: [],
 };
 
 async function render(inputs: { canPlay: boolean; gameMaster: boolean; locked?: string[]; character?: Character }) {

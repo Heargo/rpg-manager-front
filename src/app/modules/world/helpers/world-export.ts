@@ -98,6 +98,12 @@ function validateWorld(world: unknown, errors: string[]): void {
     if (!Number.isInteger(character['xp']) || (character['xp'] as number) < 0) errors.push(`${path}.xp must be an integer of 0 or more`);
     if (!Number.isInteger(character['level']) || (character['level'] as number) < 1) errors.push(`${path}.level must be an integer of 1 or more`);
     if (!Number.isInteger(character['money'])) errors.push(`${path}.money must be an integer`);
+    if (character['classId'] !== undefined && typeof character['classId'] !== 'string') errors.push(`${path}.classId must be a string`);
+    if (!Number.isInteger(character['skillPoints']) || (character['skillPoints'] as number) < 0) errors.push(`${path}.skillPoints must be an integer of 0 or more`);
+    list(character['skills'], `${path}.skills`, errors, (skill, skillPath) => {
+      if (typeof skill['skillId'] !== 'string') errors.push(`${skillPath}.skillId must be a string`);
+      if (!Number.isInteger(skill['rank']) || (skill['rank'] as number) < 1) errors.push(`${skillPath}.rank must be an integer of 1 or more`);
+    });
     list(character['attributes'], `${path}.attributes`, errors, () => undefined);
     list(character['inventory'], `${path}.inventory`, errors, (entry, entryPath) => {
       if (!isRecord(entry['item'])) errors.push(`${entryPath}.item must be an object`);

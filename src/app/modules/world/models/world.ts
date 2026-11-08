@@ -47,10 +47,9 @@ export interface InventoryItem {
   position: number;
 }
 
-export interface Character {
+/** What a character and an NPC share: the stats, the inventory, the class and the skills. */
+export interface Sheet {
   id: string;
-  /** The player's profile id; gives the seat back on rejoin. */
-  playerId: string;
   name: string;
   portraitId?: string;
   /** Bundled image path (under the app's base href) used when there is no stored portrait; sandbox character only. */
@@ -63,12 +62,25 @@ export interface Character {
   money: number;
   attributes: CharacterAttribute[];
   inventory: InventoryItem[];
+  updatedAt: number;
+  classId?: string;
+  skillPoints: number;
+  skills: SheetSkill[];
+}
+
+export interface SheetSkill {
+  skillId: string;
+  rank: number;
+}
+
+export type Character = Sheet & {
+  /** The player's profile id; gives the seat back on rejoin. */
+  playerId: string;
   /** Bumped by the host on every change (p2p-rooms spec, Player data). */
   rev: number;
-  updatedAt: number;
   /** The player's personal notes, saved by the host with the record. */
   notes?: string;
-}
+};
 
 export interface World {
   id: string;

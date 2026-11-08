@@ -80,6 +80,8 @@ const ada: Character = {
   inventory: [helm, potion],
   rev: 3,
   updatedAt: 1000,
+  skillPoints: 0,
+  skills: [],
 };
 
 describe('isOfflineAllowed', () => {

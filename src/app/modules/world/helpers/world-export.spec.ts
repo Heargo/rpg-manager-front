@@ -31,7 +31,7 @@ describe('world export', () => {
     const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
     file.world.startingMoney = 12.5;
     file.world.items = [{ id: 'i', name: 'Sword', rarity: 'common', type: 'object', price: 1.5, modifiers: [] }];
-    file.world.characters = [{ id: 'c', playerId: 'p', name: 'Ada', statPoints: 0, money: 0.5, rev: 0, updatedAt: 0, attributes: [], inventory: [] }];
+    file.world.characters = [{ id: 'c', playerId: 'p', name: 'Ada', statPoints: 0, money: 0.5, rev: 0, updatedAt: 0, attributes: [], inventory: [], skillPoints: 0, skills: [] }];
 
     const parsed = parseWorldExport(JSON.stringify(file));
 
@@ -112,7 +112,7 @@ describe('world import of character xp and level', () => {
   const withCharacter = (changes: Record<string, unknown>) => {
     const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
     file.world.characters = [
-      { id: 'c', playerId: 'p', name: 'Ada', statPoints: 0, xp: 0, level: 1, money: 0, rev: 0, updatedAt: 0, attributes: [], inventory: [], ...changes },
+      { id: 'c', playerId: 'p', name: 'Ada', statPoints: 0, xp: 0, level: 1, money: 0, rev: 0, updatedAt: 0, attributes: [], inventory: [], skillPoints: 0, skills: [], ...changes },
     ];
     return parseWorldExport(JSON.stringify(file));
   };
@@ -173,5 +173,43 @@ describe('world export of attribute caps', () => {
 
   it('accepts an attribute without a cap', () => {
     expect(reparse((file) => delete file.world.attributes[0].cap).ok).toBe(true);
+  });
+});
+
+describe('world import of sheet skills and class', () => {
+  const character = { id: 'c', playerId: 'p', name: 'Ada', statPoints: 0, xp: 0, level: 1, money: 0, rev: 0, updatedAt: 0, attributes: [], inventory: [], skillPoints: 3, skills: [{ skillId: 's1', rank: 2 }], classId: 'warrior' };
+  const parse = (changes: Record<string, unknown>, remove: string[] = []) => {
+    const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
+    const next: Record<string, unknown> = { ...character, ...changes };
+    for (const key of remove) delete next[key];
+    file.world.characters = [next];
+    return parseWorldExport(JSON.stringify(file));
+  };
+
+  it('refuses an old export without skillPoints or skills, and keeps the new fields of a valid one', () => {
+    const valid = parse({});
+    expect(valid.ok).toBe(true);
+    if (valid.ok) expect(valid.value.world.characters[0]).toMatchObject({ classId: 'warrior', skillPoints: 3, skills: [{ skillId: 's1', rank: 2 }] });
+    expect(parse({}, ['classId']).ok).toBe(true);
+    const noPoints = parse({}, ['skillPoints']);
+    expect(noPoints.ok).toBe(false);
+    if (!noPoints.ok) expect(noPoints.errors).toContain('world.characters[0].skillPoints must be an integer of 0 or more');
+    const noSkills = parse({}, ['skills']);
+    expect(noSkills.ok).toBe(false);
+    if (!noSkills.ok) expect(noSkills.errors).toContain('world.characters[0].skills must be a list');
+  });
+
+  it('refuses a malformed classId, skillPoints or skills entry', () => {
+    const badClass = parse({ classId: 5 });
+    expect(badClass.ok).toBe(false);
+    if (!badClass.ok) expect(badClass.errors).toContain('world.characters[0].classId must be a string');
+    const badPoints = parse({ skillPoints: -1 });
+    expect(badPoints.ok).toBe(false);
+    const badSkill = parse({ skills: [{ skillId: 's1', rank: 0 }] });
+    expect(badSkill.ok).toBe(false);
+    if (!badSkill.ok) expect(badSkill.errors).toContain('world.characters[0].skills[0].rank must be an integer of 1 or more');
+    const noId = parse({ skills: [{ rank: 1 }] });
+    expect(noId.ok).toBe(false);
+    if (!noId.ok) expect(noId.errors).toContain('world.characters[0].skills[0].skillId must be a string');
   });
 });

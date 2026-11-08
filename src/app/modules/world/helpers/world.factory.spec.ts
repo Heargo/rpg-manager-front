@@ -99,7 +99,7 @@ function worldWithImages(): World {
     items: [item],
     characters: [
       {
-        id: 'c1', playerId: 'p1', name: 'Ada', portraitId: 'img-portrait', statPoints: 0, xp: 0, level: 1, money: 0, attributes: [], rev: 1, updatedAt: 0,
+        id: 'c1', playerId: 'p1', name: 'Ada', portraitId: 'img-portrait', statPoints: 0, xp: 0, level: 1, money: 0, attributes: [], rev: 1, updatedAt: 0, skillPoints: 0, skills: [],
         inventory: [{ id: 'e1', item: { ...item, imageId: 'img-copy' }, equipped: false, position: 0 }],
       },
     ],

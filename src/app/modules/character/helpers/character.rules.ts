@@ -53,5 +53,7 @@ export function createCharacter(
     inventory: [],
     rev: 1,
     updatedAt: now,
+    skillPoints: 0,
+    skills: [],
   };
 }

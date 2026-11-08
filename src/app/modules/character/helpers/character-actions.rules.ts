@@ -1,5 +1,6 @@
 import {
   Character,
+  Sheet,
   CharacterAttribute,
   WorldAttribute,
 } from '../../world/models/world';
@@ -51,10 +52,10 @@ export interface LevelRules {
   barAttributes: BarAttributes;
 }
 
-export type ActionResult =
-  { ok: true; character: Character } | { ok: false; error: string };
+export type ActionResult<T extends Sheet = Character> =
+  { ok: true; character: T } | { ok: false; error: string };
 
-const fail = (error: string): ActionResult => ({ ok: false, error });
+const fail = (error: string): { ok: false; error: string } => ({ ok: false, error });
 
 /** The action in a request payload, or null when it isn't a well-formed action of that kind. */
 export function parseCharacterAction(
@@ -94,12 +95,12 @@ export function parseCharacterAction(
  * Applies an action to a character with the world's rules. Pure: returns the changed character (same `rev`;
  * the caller bumps it) or the translation key of why it's refused.
  */
-export function applyCharacterAction(
+export function applyCharacterAction<T extends Sheet = Character>(
   attributes: WorldAttribute[],
-  character: Character,
+  character: T,
   action: CharacterAction,
   levelRules: LevelRules,
-): ActionResult {
+): ActionResult<T> {
   switch (action.kind) {
     case 'spend-stat-point': {
       if (character.statPoints < 1)
@@ -175,7 +176,7 @@ export function applyCharacterAction(
         action.amount,
         levelRules.maxLevel,
       );
-      const leveled: Character = { ...character, xp: grant.xp, level: grant.level };
+      const leveled: T = { ...character, xp: grant.xp, level: grant.level };
       // A new level can raise maxima that read playerLevel: current rises by the same delta.
       const before = attributeStats(attributes, character, levelRules.barAttributes);
       const after = attributeStats(attributes, leveled, levelRules.barAttributes);
@@ -245,7 +246,7 @@ export function applyCharacterAction(
       if (entry.item.type !== 'consumable')
         return fail('character.errors.notConsumable');
       // Consumables add their modifiers to current values, capped at max (and never below 0).
-      let next: Character = {
+      let next: T = {
         ...character,
         inventory: character.inventory.filter(
           (candidate) => candidate.id !== entry.id,
@@ -288,11 +289,11 @@ export function applyCharacterAction(
 }
 
 /** Sets one attribute's entry, adding it when the attribute was added to the world after the character. */
-function setAttribute(
-  character: Character,
+function setAttribute<T extends Sheet>(
+  character: T,
   attributeId: string,
   values: Omit<CharacterAttribute, 'attributeId'>,
-): Character {
+): T {
   const exists = character.attributes.some(
     (entry) => entry.attributeId === attributeId,
   );

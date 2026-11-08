@@ -13,6 +13,8 @@ const ada: Character = {
   inventory: [],
   rev: 2,
   updatedAt: 1000,
+  skillPoints: 0,
+  skills: [],
 };
 
 describe('player copy rules', () => {
@@ -20,6 +22,8 @@ describe('player copy rules', () => {
     it('is the same whatever the key order, nested keys included', async () => {
       const shuffled = {
         updatedAt: 1000,
+        skillPoints: 0,
+        skills: [],
         rev: 2,
         inventory: [],
         attributes: [{ current: 10, level: 0, attributeId: 'life' }],
