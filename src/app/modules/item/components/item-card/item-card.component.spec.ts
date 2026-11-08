@@ -52,4 +52,43 @@ describe('ItemCardComponent', () => {
       }
     },
   );
+
+  it('shows the slot silhouette with its label for equipment', async () => {
+    TestBed.configureTestingModule({
+      imports: [ItemCardComponent],
+      providers: TEST_PROVIDERS,
+    });
+    TestBed.inject(TranslocoService).setActiveLang('en');
+    const fixture = TestBed.createComponent(ItemCardComponent);
+    const item = generateItem(seededRandomSource('slot'), en as WordList, {
+      attributes: ['Life'],
+      type: 'equipment',
+      slot: 'ring',
+    });
+    fixture.componentRef.setInput('item', item);
+    await fixture.whenStable();
+    const icon = fixture.nativeElement.querySelector(
+      '[data-slot-silhouette="ring"]',
+    );
+    expect(icon).not.toBeNull();
+    expect(icon.getAttribute('aria-label')).toBe('Ring');
+  });
+
+  it('shows no silhouette for a consumable', async () => {
+    TestBed.configureTestingModule({
+      imports: [ItemCardComponent],
+      providers: TEST_PROVIDERS,
+    });
+    TestBed.inject(TranslocoService).setActiveLang('en');
+    const fixture = TestBed.createComponent(ItemCardComponent);
+    const item = generateItem(seededRandomSource('slot'), en as WordList, {
+      attributes: ['Life'],
+      type: 'consumable',
+    });
+    fixture.componentRef.setInput('item', item);
+    await fixture.whenStable();
+    expect(
+      fixture.nativeElement.querySelector('[data-slot-silhouette]'),
+    ).toBeNull();
+  });
 });

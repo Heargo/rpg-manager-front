@@ -203,7 +203,7 @@
           @for (entry of inventory(); track entry.id) {
             <li>
               <ng-container
-                *ngTemplateOutlet="tile; context: { $implicit: entry }"
+                *ngTemplateOutlet="tile; context: { $implicit: entry, showSlot: true }"
               />
             </li>
           }
@@ -217,7 +217,7 @@
   </div>
 </div>
 
-<ng-template #tile let-entry>
+<ng-template #tile let-entry let-showSlot="showSlot">
   <div
     class="tile"
     [class]="'rarity-' + entry.item.rarity"
@@ -241,6 +241,13 @@
         <span class="tile-equipped">{{
           "character.items.equipped" | transloco
         }}</span>
+      }
+      @if (showSlot && entry.item.type === "equipment" && entry.item.slot !== "none") {
+        <app-slot-silhouette
+          class="tile-slot"
+          [slot]="entry.item.slot"
+          [label]="'item.slot.' + entry.item.slot | transloco"
+        />
       }
     </button>
     <p-button

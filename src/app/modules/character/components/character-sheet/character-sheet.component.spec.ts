@@ -203,9 +203,9 @@ describe('CharacterSheetComponent', () => {
 
     it('shows the item, not a silhouette, in a filled slot', async () => {
       const { el } = await openEquipment();
-      expect(el.querySelector('[data-slot-silhouette="head"]')).toBeNull();
+      expect(el.querySelector('.slots [data-slot-silhouette="head"]')).toBeNull();
       expect(el.querySelector('.slots')!.textContent).toContain('Iron helm');
-      expect(el.querySelectorAll('[data-slot-silhouette]').length).toBe(9);
+      expect(el.querySelectorAll('.slots [data-slot-silhouette]').length).toBe(9);
     });
   });
 });

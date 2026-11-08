@@ -4,7 +4,7 @@ import {
   computed,
   input,
 } from '@angular/core';
-import { EquipmentSlot } from '../../../../core/models/item';
+import { EquipmentSlot } from '../../models/item';
 
 /**
  * Faceted silhouettes (bold straight cuts, small gaps), like the logo.

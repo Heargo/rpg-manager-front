@@ -25,7 +25,7 @@ import { EQUIPMENT_SLOTS, EquipmentSlot } from '../../../../core/models/item';
 import { ItemCardComponent } from '../../../item/components/item-card/item-card.component';
 import { RARITY_SEVERITY } from '../../../item/helpers/item-display';
 import { CharacterCardComponent } from '../character-card/character-card.component';
-import { SlotSilhouetteComponent } from '../slot-silhouette/slot-silhouette.component';
+import { SlotSilhouetteComponent } from '../../../../core/components/slot-silhouette/slot-silhouette.component';
 import { Character, InventoryItem } from '../../../world/models/world';
 import {
   CharacterBusiness,

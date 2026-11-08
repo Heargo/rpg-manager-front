@@ -3,6 +3,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { CardModule } from '@openng/optimus-ui/card';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
+import { SlotSilhouetteComponent } from '../../../../core/components/slot-silhouette/slot-silhouette.component';
 import { ItemDraft } from '../../../../core/models/item';
 import { RARITY_SEVERITY } from '../../helpers/item-display';
 
@@ -10,7 +11,13 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
 @Component({
   selector: 'app-item-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, CardModule, TagModule, CoinDisplayComponent],
+  imports: [
+    TranslocoPipe,
+    CardModule,
+    TagModule,
+    CoinDisplayComponent,
+    SlotSilhouetteComponent,
+  ],
   template: `
     @let item = this.item();
     <p-card styleClass="item-card">
@@ -43,11 +50,28 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
       <p class="price">
         <app-coin-display [copper]="item.price" />
       </p>
+      @if (item.slot !== 'none') {
+        <app-slot-silhouette
+          class="slot-icon"
+          [slot]="item.slot"
+          [label]="'item.slot.' + item.slot | transloco"
+        />
+      }
     </p-card>
   `,
   styles: `
     :host {
       display: block;
+    }
+    p-card {
+      position: relative;
+    }
+    .slot-icon {
+      position: absolute;
+      right: 0.75rem;
+      bottom: 0.75rem;
+      width: 1.5rem;
+      height: 1.5rem;
     }
     .head {
       display: flex;
@@ -86,6 +110,7 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
     }
     .price {
       margin: 0;
+      padding-right: 2rem;
       font-weight: 600;
     }
   `,
