@@ -9,6 +9,7 @@ import { grantXp, LevelCurve } from './level.rules';
 /** Everything that changes a character during play. The host applies these; the sandbox applies them locally. */
 export type CharacterAction =
   | { kind: 'spend-stat-point'; attributeId: string }
+  | { kind: 'refund-stat-point'; attributeId: string }
   | { kind: 'grant-stat-points'; amount: number }
   | { kind: 'grant-xp'; amount: number }
   | { kind: 'set-current'; attributeId: string; value: number }
@@ -21,6 +22,7 @@ export type CharacterActionKind = CharacterAction['kind'];
 
 export const CHARACTER_ACTION_KINDS: readonly CharacterActionKind[] = [
   'spend-stat-point',
+  'refund-stat-point',
   'grant-stat-points',
   'grant-xp',
   'set-current',
@@ -32,6 +34,7 @@ export const CHARACTER_ACTION_KINDS: readonly CharacterActionKind[] = [
 
 /** Only the game master grants points and sets current values (a hit, a rest…). */
 export const GAME_MASTER_ACTIONS: readonly CharacterActionKind[] = [
+  'refund-stat-point',
   'grant-stat-points',
   'grant-xp',
   'set-current',
@@ -63,6 +66,7 @@ export function parseCharacterAction(
     typeof value === 'string' && value.length > 0 && value.length <= 100;
   switch (kind) {
     case 'spend-stat-point':
+    case 'refund-stat-point':
       return text(p['attributeId'])
         ? { kind, attributeId: p['attributeId'] }
         : null;
@@ -124,6 +128,29 @@ export function applyCharacterAction(
       return {
         ok: true,
         character: { ...next, statPoints: character.statPoints - 1 },
+      };
+    }
+    case 'refund-stat-point': {
+      const stat = attributeStats(attributes, character).find(
+        (entry) => entry.attributeId === action.attributeId,
+      );
+      if (!stat) return fail('character.errors.unknownAttribute');
+      if (stat.level < 1) return fail('character.errors.levelZero');
+      // Undoes a spend: max and current drop by the formula delta.
+      const lowered = setAttribute(character, action.attributeId, {
+        level: stat.level - 1,
+        current: stat.current,
+      });
+      const after = attributeStats(attributes, lowered).find(
+        (entry) => entry.attributeId === action.attributeId,
+      )!;
+      const next = setAttribute(lowered, action.attributeId, {
+        level: after.level,
+        current: Math.max(0, Math.min(after.max, stat.current + (after.max - stat.max))),
+      });
+      return {
+        ok: true,
+        character: { ...next, statPoints: character.statPoints + 1 },
       };
     }
     case 'grant-stat-points': {

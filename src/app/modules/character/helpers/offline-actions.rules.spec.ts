@@ -111,6 +111,7 @@ describe('isOfflineAllowed', () => {
   it('never allows the game master actions offline', () => {
     expect(isOfflineAllowed(all, 'grant-stat-points')).toBe(false);
     expect(isOfflineAllowed(all, 'set-current')).toBe(false);
+    expect(isOfflineAllowed(all, 'refund-stat-point')).toBe(false);
   });
 });
 

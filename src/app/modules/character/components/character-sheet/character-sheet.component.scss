@@ -118,10 +118,13 @@ p-tab p-badge {
     margin-left: 0.25rem;
   }
 
-  ::ng-deep .current-input {
-    width: 3.5rem;
+  .value-text {
+    cursor: help;
+  }
+
+  .actions {
+    white-space: nowrap;
     text-align: right;
-    padding-block: 0.25rem;
   }
 }
 
@@ -308,9 +311,6 @@ p-tab p-badge {
   white-space: nowrap;
 }
 
-
-@media (max-width: 480px) {
-  .stats .optional {
-    display: none;
-  }
+::ng-deep .stat-tip {
+  white-space: pre-line;
 }

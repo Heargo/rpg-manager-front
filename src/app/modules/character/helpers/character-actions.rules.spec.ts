@@ -342,6 +342,48 @@ describe('character actions', () => {
     expect(parseCharacterAction('grant-xp', {})).toBeNull();
     expect(CHARACTER_ACTION_KINDS).toContain('grant-xp');
     expect(GAME_MASTER_ACTIONS).toContain('grant-xp');
+    expect(parseCharacterAction('refund-stat-point', { attributeId: 'str' })).toEqual({
+      kind: 'refund-stat-point',
+      attributeId: 'str',
+    });
+    expect(parseCharacterAction('refund-stat-point', {})).toBeNull();
+    expect(CHARACTER_ACTION_KINDS).toContain('refund-stat-point');
+    expect(GAME_MASTER_ACTIONS).toContain('refund-stat-point');
+  });
+});
+
+describe('refund-stat-point', () => {
+  const spent = () =>
+    character({
+      statPoints: 0,
+      attributes: [
+        { attributeId: 'life', level: 0, current: 4 },
+        { attributeId: 'str', level: 1, current: 3 },
+      ],
+    });
+
+  it('lowers the level, gives the point back, and lowers max and current by the delta', () => {
+    const next = ok(applyCharacterAction(attributes, spent(), { kind: 'refund-stat-point', attributeId: 'str' }));
+    expect(next.statPoints).toBe(1);
+    expect(stat(next, 'str')).toMatchObject({ level: 0, max: 2, current: 2 });
+  });
+
+  it('keeps current within [0, max] when it was already lower', () => {
+    const hurt = character({
+      statPoints: 0,
+      attributes: [{ attributeId: 'str', level: 1, current: 1 }],
+    });
+    const next = ok(applyCharacterAction(attributes, hurt, { kind: 'refund-stat-point', attributeId: 'str' }));
+    expect(stat(next, 'str')).toMatchObject({ level: 0, max: 2, current: 0 });
+  });
+
+  it('is refused at level 0 and on an unknown attribute', () => {
+    expect(
+      applyCharacterAction(attributes, character(), { kind: 'refund-stat-point', attributeId: 'str' }),
+    ).toMatchObject({ ok: false });
+    expect(
+      applyCharacterAction(attributes, spent(), { kind: 'refund-stat-point', attributeId: 'luck' }),
+    ).toMatchObject({ ok: false });
   });
 });
 

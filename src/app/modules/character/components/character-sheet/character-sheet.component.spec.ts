@@ -48,7 +48,7 @@ const character: Character = {
   updatedAt: 0,
 };
 
-async function render(inputs: { canPlay: boolean; gameMaster: boolean; locked?: string[] }) {
+async function render(inputs: { canPlay: boolean; gameMaster: boolean; locked?: string[]; character?: Character }) {
   // jsdom has no matchMedia nor ResizeObserver; the tabs use them.
   vi.stubGlobal(
     'ResizeObserver',
@@ -71,7 +71,7 @@ async function render(inputs: { canPlay: boolean; gameMaster: boolean; locked?: 
     providers: TEST_PROVIDERS,
   });
   const fixture = TestBed.createComponent(CharacterSheetComponent);
-  fixture.componentRef.setInput('character', character);
+  fixture.componentRef.setInput('character', inputs.character ?? character);
   fixture.componentRef.setInput('world', world);
   fixture.componentRef.setInput('canPlay', inputs.canPlay);
   fixture.componentRef.setInput('gameMaster', inputs.gameMaster);
@@ -101,6 +101,49 @@ describe('CharacterSheetComponent', () => {
     const bonus = el.querySelector('.stats tbody th .bonus');
     expect(bonus?.textContent?.trim()).toMatch(/^[+-]\d+$/);
     expect(el.querySelector('.stats-scroll')).toBeNull();
+  });
+
+  it('has no Base column and no free current input, even for the game master', async () => {
+    const { el } = await render({ canPlay: true, gameMaster: true });
+    const headers = [...el.querySelectorAll('.stats thead th')].map((th) => th.textContent!.trim());
+    expect(headers).not.toContain('Base');
+    expect(el.querySelector('.stats p-inputnumber')).toBeNull();
+    expect(el.querySelector('.stats input')).toBeNull();
+    expect(el.querySelector('.stats tbody')!.textContent).toContain('6 / 12');
+  });
+
+  it('shows the minus button to the game master only, on attributes above level 0', async () => {
+    const levelled: Character = {
+      ...character,
+      attributes: [
+        { attributeId: 'life', level: 0, current: 6 },
+        { attributeId: 'str', level: 1, current: 3 },
+      ],
+    };
+    const player = await render({ canPlay: true, gameMaster: false, character: levelled });
+    expect(player.el.querySelector('[aria-label="Take back a point from Strength"]')).toBeNull();
+    TestBed.resetTestingModule();
+    const gm = await render({ canPlay: true, gameMaster: true, character: levelled });
+    expect(gm.el.querySelector('[aria-label="Take back a point from Life"]')).toBeNull();
+    (gm.el.querySelector('[aria-label="Take back a point from Strength"]') as HTMLButtonElement).click();
+    expect(gm.actions).toEqual([{ kind: 'refund-stat-point', attributeId: 'str' }]);
+  });
+
+  it('shows the plus button to a player with points, none without', async () => {
+    const player = await render({ canPlay: true, gameMaster: false });
+    expect(player.el.querySelector('[aria-label="Spend a point on Strength"]')).not.toBeNull();
+    TestBed.resetTestingModule();
+    const broke = await render({ canPlay: true, gameMaster: false, character: { ...character, statPoints: 0 } });
+    expect(broke.el.querySelector('[aria-label="Spend a point on Strength"]')).toBeNull();
+  });
+
+  it('gives the value a tooltip with the base, level, formula, result, cap, bonus, max and current', async () => {
+    const { fixture } = await render({ canPlay: false, gameMaster: false });
+    const text = (fixture.componentInstance as unknown as { tooltip(id: string): string }).tooltip('life');
+    for (const part of ['Base: 10', 'Level: 0', 'Linear', 'Formula result: 10', 'Bonus: +2', 'Max: 12', 'Current: 6'])
+      expect(text).toContain(part);
+    expect(text).not.toContain('Cap');
+    expect(text.split('\n').length).toBeGreaterThan(5);
   });
 
   it('shows the level and an XP progress bar', async () => {

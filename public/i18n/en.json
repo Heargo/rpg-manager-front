@@ -192,7 +192,8 @@
       "notYours": "This isn't your character.",
       "held": "Your copy is being checked, or waits for the game master's pick. Try again in a moment.",
       "offlineNotAllowed": "The host did not allow this while offline.",
-      "notesTooLong": "These notes are too long."
+      "notesTooLong": "These notes are too long.",
+      "levelZero": "This attribute is already at level 0."
     },
     "sheet": {
       "playedBy": "Played by {{ name }}",
@@ -212,7 +213,6 @@
       "bonus": "Bonus",
       "spend": "Spend a point",
       "spendOn": "Spend a point on {{ name }}",
-      "currentOf": "Current {{ name }}",
       "grant": "Grant",
       "grantLabel": "Grant stat points",
       "lockedOffline": "Not available while the host is offline",
@@ -221,7 +221,18 @@
       "grantXp": "Grant XP",
       "levelUp": "Level {{ level }}! +{{ points }} stat points",
       "maxLevel": "Max level",
-      "levelBadge": "Level {{ level }}"
+      "levelBadge": "Level {{ level }}",
+      "refundFrom": "Take back a point from {{ name }}",
+      "tip": {
+        "base": "Base: {{ value }}",
+        "level": "Level: {{ value }}",
+        "formula": "Formula: {{ value }}",
+        "result": "Formula result: {{ value }}",
+        "cap": "Cap: {{ value }}",
+        "bonus": "Bonus: {{ value }}",
+        "max": "Max: {{ value }}",
+        "current": "Current: {{ value }}"
+      }
     },
     "items": {
       "details": "Details",

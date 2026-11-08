@@ -113,10 +113,23 @@ describe('character actions (host + players)', () => {
       message: 'character.errors.gameMasterOnly',
     });
     await expect(
+      adaChars.act(mine(ada).id, { kind: 'refund-stat-point', attributeId: mine(ada).attributes[0].attributeId }),
+    ).rejects.toMatchObject({ message: 'character.errors.gameMasterOnly' });
+    await expect(
       adaChars.act(mine(bob).id, { kind: 'sell', inventoryId: 'x' }),
     ).rejects.toMatchObject({
       message: 'character.errors.notYours',
     });
+  });
+
+  it('lets the game master refund a spent point', async () => {
+    const lifeId = mine(ada).attributes[0].attributeId;
+    await ada.injector.get(CharacterBusiness).act(mine(ada).id, { kind: 'spend-stat-point', attributeId: lifeId });
+    await settle();
+    await gm.injector.get(CharacterBusiness).act(mine(ada).id, { kind: 'refund-stat-point', attributeId: lifeId });
+    await settle();
+    expect(mine(ada)).toMatchObject({ statPoints: 1 });
+    expect(mine(ada).attributes[0]).toMatchObject({ level: 0, current: 10 });
   });
 
   it('lets the game master grant points, set values, and players use and sell items', async () => {

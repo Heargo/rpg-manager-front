@@ -192,7 +192,8 @@
       "notYours": "Ce n'est pas votre personnage.",
       "held": "Votre copie est en cours de vérification, ou attend le choix du MJ. Réessayez dans un instant.",
       "offlineNotAllowed": "L'hôte n'a pas autorisé cette action hors ligne.",
-      "notesTooLong": "Ces notes sont trop longues."
+      "notesTooLong": "Ces notes sont trop longues.",
+      "levelZero": "Cet attribut est déjà au niveau 0."
     },
     "sheet": {
       "playedBy": "Joué par {{ name }}",
@@ -212,7 +213,6 @@
       "bonus": "Bonus",
       "spend": "Dépenser un point",
       "spendOn": "Dépenser un point en {{ name }}",
-      "currentOf": "{{ name }} actuel",
       "grant": "Donner",
       "grantLabel": "Donner des points de stats",
       "lockedOffline": "Indisponible tant que l'hôte est hors ligne",
@@ -221,7 +221,18 @@
       "grantXp": "Donner",
       "levelUp": "Niveau {{ level }} ! +{{ points }} points de stats",
       "maxLevel": "Niveau max",
-      "levelBadge": "Niveau {{ level }}"
+      "levelBadge": "Niveau {{ level }}",
+      "refundFrom": "Reprendre un point à {{ name }}",
+      "tip": {
+        "base": "Base : {{ value }}",
+        "level": "Niveau : {{ value }}",
+        "formula": "Formule : {{ value }}",
+        "result": "Résultat de la formule : {{ value }}",
+        "cap": "Plafond : {{ value }}",
+        "bonus": "Bonus : {{ value }}",
+        "max": "Maximum : {{ value }}",
+        "current": "Actuel : {{ value }}"
+      }
     },
     "items": {
       "details": "Détails",

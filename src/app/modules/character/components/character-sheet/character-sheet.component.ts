@@ -147,13 +147,34 @@ export class CharacterSheetComponent {
     if (Number.isInteger(amount) && amount >= 1) this.act.emit({ kind: 'grant-xp', amount });
   }
 
-  protected setCurrent(
-    attributeId: string,
-    value: number | null | undefined,
-    previous: number,
-  ): void {
-    if (value === null || value === undefined || value === previous) return;
-    this.act.emit({ kind: 'set-current', attributeId, value });
+  protected refund(attributeId: string): void {
+    this.act.emit({ kind: 'refund-stat-point', attributeId });
+  }
+
+  /** The value's details, one per line: base, level, formula and its result, cap, equipment bonus, max, current. */
+  protected tooltip(attributeId: string): string {
+    const stat = this.stats().find((entry) => entry.attributeId === attributeId);
+    const attribute = this.world().attributes.find((entry) => entry.id === attributeId);
+    if (!stat || !attribute) return '';
+    const t = (key: string, params?: Record<string, unknown>) => this.language.t(key, params);
+    const formula =
+      attribute.formula.preset === 'custom'
+        ? `${t('world.formula.presets.custom')}: ${attribute.formula.expression}`
+        : `${t('world.formula.presets.' + attribute.formula.preset)} (${attribute.formula.step})`;
+    const result = stat.max - stat.bonus;
+    const lines = [
+      t('character.sheet.tip.base', { value: stat.base }),
+      t('character.sheet.tip.level', { value: stat.level }),
+      t('character.sheet.tip.formula', { value: formula }),
+      t('character.sheet.tip.result', { value: result }),
+    ];
+    if (attribute.cap !== undefined) lines.push(t('character.sheet.tip.cap', { value: attribute.cap }));
+    lines.push(
+      t('character.sheet.tip.bonus', { value: `${stat.bonus > 0 ? '+' : ''}${stat.bonus}` }),
+      t('character.sheet.tip.max', { value: stat.max }),
+      t('character.sheet.tip.current', { value: stat.current }),
+    );
+    return lines.join('\n');
   }
 
   protected showDetails(entry: InventoryItem): void {
