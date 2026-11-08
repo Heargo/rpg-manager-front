@@ -94,6 +94,15 @@ describe('CharacterSheetComponent', () => {
     expect(el.querySelector('#grant-points')).toBeNull();
   });
 
+  it('shows an equipment bonus next to the attribute name, with no bonus column', async () => {
+    const { el } = await render({ canPlay: false, gameMaster: false });
+    const headers = [...el.querySelectorAll('.stats thead th')].map((th) => th.textContent!.trim());
+    expect(headers).not.toContain('Bonus');
+    const bonus = el.querySelector('.stats tbody th .bonus');
+    expect(bonus?.textContent?.trim()).toMatch(/^[+-]\d+$/);
+    expect(el.querySelector('.stats-scroll')).toBeNull();
+  });
+
   it('shows the level and an XP progress bar', async () => {
     const { el } = await render({ canPlay: false, gameMaster: false });
     expect(el.querySelector('[data-testid="character-level"]')!.textContent).toContain('2');

@@ -71,6 +71,14 @@ p-tab p-badge {
   width: 100%;
   border-collapse: collapse;
 
+  // The bonus sits next to the name, not in its own column, so the table fits without scrolling.
+  .bonus {
+    margin-left: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
   th,
   td {
     text-align: left;
@@ -300,9 +308,6 @@ p-tab p-badge {
   white-space: nowrap;
 }
 
-.stats-scroll {
-  overflow-x: auto;
-}
 
 @media (max-width: 480px) {
   .stats .optional {

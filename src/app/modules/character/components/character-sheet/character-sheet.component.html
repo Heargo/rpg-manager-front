@@ -70,8 +70,7 @@
           />
         </form>
       }
-      <div class="stats-scroll">
-<table class="stats">
+      <table class="stats">
         <thead>
           <tr>
             <th scope="col">{{ "character.sheet.attribute" | transloco }}</th>
@@ -80,9 +79,6 @@
             </th>
             <th scope="col" class="num optional">
               {{ "character.sheet.level" | transloco }}
-            </th>
-            <th scope="col" class="num">
-              {{ "character.sheet.bonus" | transloco }}
             </th>
             <th scope="col" class="num">
               {{ "character.sheet.value" | transloco }}
@@ -99,16 +95,20 @@
         <tbody>
           @for (stat of stats(); track stat.attributeId) {
             <tr>
-              <th scope="row">{{ stat.name }}</th>
+              <th scope="row">
+                {{ stat.name }}
+                @if (stat.bonus !== 0) {
+                  <span
+                    class="bonus"
+                    [class.plus]="stat.bonus > 0"
+                    [class.minus]="stat.bonus < 0"
+                    [attr.aria-label]="'character.sheet.bonus' | transloco"
+                    >{{ stat.bonus > 0 ? "+" : "" }}{{ stat.bonus }}</span
+                  >
+                }
+              </th>
               <td class="num optional">{{ stat.base }}</td>
               <td class="num optional">{{ stat.level }}</td>
-              <td
-                class="num"
-                [class.plus]="stat.bonus > 0"
-                [class.minus]="stat.bonus < 0"
-              >
-                {{ stat.bonus > 0 ? "+" : "" }}{{ stat.bonus }}
-              </td>
               <td class="num value">
                 @if (gameMaster()) {
                   <p-inputnumber
@@ -168,7 +168,6 @@
           }
         </tbody>
       </table>
-</div>
     </p-tabpanel>
 
     <!-- Equipment -->
