@@ -2,7 +2,7 @@
 
 Status: validated (2026-11-06)
 
-Tickets across two specs: `p2p-rooms/` (P) and `legacy-parity/` (L). The order follows the `Blocked by:` lines, and within that:
+Tickets across specs: `p2p-rooms/` (P), `legacy-parity/` (L), `ui-feedback/` (U) and `npcs-skills-combat/` (N). The order follows the `Blocked by:` lines, and within that:
 
 1. Remove the backend first, so the app runs on its own from now on.
 2. Do the **riskiest** thing early: the manual WebRTC handshake (P02) proves or kills the whole serverless idea, so it comes before any game feature.
@@ -90,6 +90,29 @@ Tickets in `ui-feedback/` (U). Bugs first, then cheap visual wins, then the mode
 | 33e | **U13** Original logo (done) | The old mark was Font Awesome Pro. | none |
 | 33f | **U14** Formula validation gaps | Found by probing custom formulas. | U07, U08 |
 | 33g | **U15** Attributes step cleanup | User feedback: clunky. | U14 |
+
+## Phase 8: NPCs, skills, classes and combat (draft, 2026-11-08)
+
+Tickets in `npcs-skills-combat/` (N). Status: needs-triage; the user's answers of 2026-11-08 are in the spec (Decisions). Model and the World rules page first (later tickets add their settings to it), then the catalogues, then what players use; combat last because it builds on everything, and the grid after the list mode works.
+
+| # | Ticket | Why now | Blocked by |
+| - | --- | --- | --- |
+| 34 | **N01** Shared sheet model | Characters and NPCs share every rule; refactor before adding fields. | none |
+| 35 | **N15** World rules page | Every later setting (skill points, selling, combat) lands here, not only in the wizard. | N01 |
+| 36 | **N02** NPC model, storage and export | Data first. | N01 |
+| 37 | **N03** NPC catalogue page | Like the item catalogue. | N02 |
+| 38 | **N04** NPC editor (form, JSON, generate) | Makes NPCs usable. | N03 |
+| 39 | **N10** Show NPCs on the table | Small win; per-role visibility set in the world rules. | N03, N15 |
+| 40 | **N05** Skill model and skill catalogue | Classes and combat need skills. | N01 |
+| 41 | **N06** Classes and skill tree editor | Trees need skills. | N05 |
+| 42 | **N07** Skill points and learning skills | Players use the trees; NPC class-based generation. | N06, N15 |
+| 43 | **N08** Class choice at character creation | Needs classes and skill points. | N07 |
+| 44 | **N09** Default classes and skills | A world is playable without designing a tree first. | N06 |
+| 45 | **N11** Selling rules and merchants | Needs the NPC editor's stock and shown NPCs. | N04, N10, N15 |
+| 46 | **N12** Combat rules (pure) and world combat settings | Pure rules first. | N05, N15 |
+| 47 | **N13** Combat protocol and host persistence | | N12, N02, N10 |
+| 48 | **N14** Combat UI and sandbox tool (list mode) | | N13, N07 |
+| 49 | **N16** Combat grid | Optional per world; after list mode works. | N14 |
 
 ## How each ticket is developed
 
