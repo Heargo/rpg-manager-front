@@ -15,6 +15,18 @@ describe('world export', () => {
     expect(parseWorldExport('{"format":"other"}')).toEqual({ ok: false, errors: ['the file is not a world export'] });
   });
 
+  it('round-trips the max level and refuses an invalid one', () => {
+    const file = JSON.parse(JSON.stringify(buildWorldExport({ ...world, maxLevel: 30 }, {}, 9)));
+    expect(file.world.maxLevel).toBe(30);
+    expect(parseWorldExport(JSON.stringify(file)).ok).toBe(true);
+    for (const bad of [1, 101, 2.5, '20', undefined]) {
+      file.world.maxLevel = bad;
+      const parsed = parseWorldExport(JSON.stringify(file));
+      expect(parsed.ok).toBe(false);
+      if (!parsed.ok) expect(parsed.errors).toContain('world.maxLevel must be an integer from 2 to 100');
+    }
+  });
+
   it('refuses fractional money in starting money, character money and item prices', () => {
     const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
     file.world.startingMoney = 12.5;

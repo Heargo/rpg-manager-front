@@ -14,7 +14,7 @@ import {
 } from './character-actions.rules';
 import { attributeStats } from './character-stats';
 
-const levelRules = { levelCurve: { preset: 'growing' as const }, statPointsPerLevel: 3 };
+const levelRules = { levelCurve: { preset: 'growing' as const }, statPointsPerLevel: 3, maxLevel: 20 };
 const applyCharacterAction = (
   ...args: [WorldAttribute[], Character, Parameters<typeof applyWithRules>[2]]
 ) => applyWithRules(...args, levelRules);

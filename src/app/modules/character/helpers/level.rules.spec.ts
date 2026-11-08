@@ -2,6 +2,8 @@ import {
   LevelCurve,
   MAX_LEVEL,
   grantXp,
+  levelRarity,
+  isValidMaxLevel,
   levelCost,
   levelProgress,
   checkLevelCurve,
@@ -53,20 +55,20 @@ describe('levelProgress', () => {
   const growing: LevelCurve = { preset: 'growing' };
 
   it('starts at level 1 with nothing earned', () => {
-    expect(levelProgress(growing, 0)).toEqual({ level: 1, xpIntoLevel: 0, xpForNext: 200, percent: 0 });
+    expect(levelProgress(growing, 0, 20)).toEqual({ level: 1, xpIntoLevel: 0, xpForNext: 200, percent: 0, maxed: false });
   });
 
   it('is still level 1 one XP short of the first level-up', () => {
-    expect(levelProgress(growing, 199)).toMatchObject({ level: 1, xpIntoLevel: 199, xpForNext: 200 });
+    expect(levelProgress(growing, 199, 20)).toMatchObject({ level: 1, xpIntoLevel: 199, xpForNext: 200 });
   });
 
   it('levels up exactly at the cost', () => {
-    expect(levelProgress(growing, 200)).toEqual({ level: 2, xpIntoLevel: 0, xpForNext: 300, percent: 0 });
+    expect(levelProgress(growing, 200, 20)).toEqual({ level: 2, xpIntoLevel: 0, xpForNext: 300, percent: 0, maxed: false });
   });
 
   it('reports progress inside a level', () => {
-    expect(levelProgress(growing, 250)).toEqual({ level: 2, xpIntoLevel: 50, xpForNext: 300, percent: 17 });
-    expect(levelProgress({ preset: 'flat' }, 150)).toEqual({ level: 2, xpIntoLevel: 50, xpForNext: 100, percent: 50 });
+    expect(levelProgress(growing, 250, 20)).toEqual({ level: 2, xpIntoLevel: 50, xpForNext: 300, percent: 17, maxed: false });
+    expect(levelProgress({ preset: 'flat' }, 150, 20)).toEqual({ level: 2, xpIntoLevel: 50, xpForNext: 100, percent: 50, maxed: false });
   });
 });
 
@@ -74,27 +76,27 @@ describe('grantXp', () => {
   const growing: LevelCurve = { preset: 'growing' };
 
   it('adds XP without a level-up', () => {
-    expect(grantXp(growing, 3, 0, 150)).toEqual({ xp: 150, level: 1, levelsGained: 0, statPointsGranted: 0 });
+    expect(grantXp(growing, 3, 0, 150, 20)).toEqual({ xp: 150, level: 1, levelsGained: 0, statPointsGranted: 0 });
   });
 
   it('gains a level and its stat points', () => {
-    expect(grantXp(growing, 3, 150, 100)).toEqual({ xp: 250, level: 2, levelsGained: 1, statPointsGranted: 3 });
+    expect(grantXp(growing, 3, 150, 100, 20)).toEqual({ xp: 250, level: 2, levelsGained: 1, statPointsGranted: 3 });
   });
 
   it('gains several levels at once', () => {
     // 200 + 300 + 400 = 900 reaches level 4, 1400 would be level 5.
-    expect(grantXp(growing, 3, 0, 1000)).toEqual({ xp: 1000, level: 4, levelsGained: 3, statPointsGranted: 9 });
+    expect(grantXp(growing, 3, 0, 1000, 20)).toEqual({ xp: 1000, level: 4, levelsGained: 3, statPointsGranted: 9 });
   });
 
   it('grants the world setting per level', () => {
-    expect(grantXp({ preset: 'flat' }, 5, 0, 250)).toEqual({ xp: 250, level: 3, levelsGained: 2, statPointsGranted: 10 });
-    expect(grantXp({ preset: 'flat' }, 0, 0, 100)).toMatchObject({ level: 2, statPointsGranted: 0 });
+    expect(grantXp({ preset: 'flat' }, 5, 0, 250, 20)).toEqual({ xp: 250, level: 3, levelsGained: 2, statPointsGranted: 10 });
+    expect(grantXp({ preset: 'flat' }, 0, 0, 100, 20)).toMatchObject({ level: 2, statPointsGranted: 0 });
   });
 });
 
 describe('level limits', () => {
   it('stops at MAX_LEVEL whatever the amount', () => {
-    expect(grantXp({ preset: 'flat' }, 3, 0, 1e12)).toMatchObject({ level: MAX_LEVEL, levelsGained: MAX_LEVEL - 1 });
+    expect(grantXp({ preset: 'flat' }, 3, 0, 1e12, MAX_LEVEL)).toMatchObject({ level: MAX_LEVEL, levelsGained: MAX_LEVEL - 1 });
   });
 
   it('checks a custom curve up to MAX_LEVEL', () => {
@@ -123,5 +125,47 @@ describe('checkLevelCurve', () => {
   it('reports the first level that costs less than 1 XP', () => {
     expect(check('level - 5')).toEqual({ key: 'world.errors.levelCostTooLow', level: 2 });
     expect(check('1000 - level * 16')).toEqual({ key: 'world.errors.levelCostTooLow', level: 63 });
+  });
+});
+
+describe('levelRarity', () => {
+  it('level 1 is common and the max is legendary', () => {
+    expect(levelRarity(1, 20)).toBe('common');
+    expect(levelRarity(20, 20)).toBe('legendary');
+  });
+
+  it('steps through the scale by progress towards the max (max 20)', () => {
+    // progress = (level - 1) / 19: 0.25 is level 5.75, 0.5 is 10.5, 0.75 is 15.25.
+    expect(levelRarity(5, 20)).toBe('common');
+    expect(levelRarity(6, 20)).toBe('uncommon');
+    expect(levelRarity(10, 20)).toBe('uncommon');
+    expect(levelRarity(11, 20)).toBe('rare');
+    expect(levelRarity(15, 20)).toBe('rare');
+    expect(levelRarity(16, 20)).toBe('mythic');
+    expect(levelRarity(19, 20)).toBe('mythic');
+  });
+
+  it('with a max of 2, level 1 is common then level 2 is legendary', () => {
+    expect(levelRarity(1, 2)).toBe('common');
+    expect(levelRarity(2, 2)).toBe('legendary');
+  });
+});
+
+describe('max level cap', () => {
+  const flat: LevelCurve = { preset: 'flat' };
+
+  it('grantXp stops levelling at the max: XP adds up, no extra stat points', () => {
+    expect(grantXp(flat, 3, 0, 10_000, 5)).toEqual({ xp: 10_000, level: 5, levelsGained: 4, statPointsGranted: 12 });
+    expect(grantXp(flat, 3, 400, 500, 5)).toEqual({ xp: 900, level: 5, levelsGained: 0, statPointsGranted: 0 });
+  });
+
+  it('levelProgress is maxed at the cap', () => {
+    expect(levelProgress(flat, 400, 5)).toMatchObject({ level: 5, maxed: true, percent: 100 });
+    expect(levelProgress(flat, 399, 5)).toMatchObject({ level: 4, maxed: false });
+  });
+
+  it('accepts integers from 2 to 100 only', () => {
+    expect([2, 20, 100].every(isValidMaxLevel)).toBe(true);
+    expect([1, 101, 5.5, NaN, '20', undefined].some(isValidMaxLevel)).toBe(false);
   });
 });

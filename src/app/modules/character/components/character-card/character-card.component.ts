@@ -10,6 +10,8 @@ import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
+import { RARITY_SEVERITY } from '../../../item/helpers/item-display';
+import { levelRarity } from '../../helpers/level.rules';
 import { Character } from '../../../world/models/world';
 import {
   CharacterBusiness,
@@ -38,6 +40,12 @@ export class CharacterCardComponent {
 
   protected readonly progress = computed(() =>
     this.characters.progressOf(this.character(), this.world()),
+  );
+  protected readonly levelRarityName = computed(() =>
+    levelRarity(this.character().level, this.world().maxLevel),
+  );
+  protected readonly levelSeverity = computed(
+    () => RARITY_SEVERITY[this.levelRarityName()],
   );
   protected readonly bars = computed(() => {
     const { life, mana } = this.characters.barsOf(

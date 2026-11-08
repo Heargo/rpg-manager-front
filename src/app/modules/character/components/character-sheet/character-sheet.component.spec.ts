@@ -12,6 +12,7 @@ const world = {
   ],
   barAttributes: { life: 'life' },
   levelCurve: { preset: 'growing' },
+  maxLevel: 20,
 };
 
 const character: Character = {

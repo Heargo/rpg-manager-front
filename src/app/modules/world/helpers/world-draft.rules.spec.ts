@@ -26,6 +26,11 @@ describe('validateWorldDraft level rules', () => {
   it('rejects an invalid custom curve and a bad stat points per level', () => {
     expect(validateWorldDraft(draft({ levelCurve: { preset: 'custom', expression: 'level +' } })).levelCurve).toEqual(expect.any(String));
     expect(validateWorldDraft(draft({ levelCurve: { preset: 'custom', expression: 'base' } })).levelCurve).toEqual(expect.any(String));
+    expect(validateWorldDraft(draft({ maxLevel: 2 }))).toEqual({});
+    expect(validateWorldDraft(draft({ maxLevel: 100 }))).toEqual({});
+    for (const maxLevel of [1, 101, 5.5, Number.NaN]) {
+      expect(validateWorldDraft(draft({ maxLevel })).maxLevel).toBe('world.errors.maxLevelInvalid');
+    }
     expect(validateWorldDraft(draft({ statPointsPerLevel: -1 })).statPointsPerLevel).toBe('world.errors.nonNegativeInteger');
     expect(validateWorldDraft(draft({ statPointsPerLevel: 1.5 })).statPointsPerLevel).toBe('world.errors.nonNegativeInteger');
   });

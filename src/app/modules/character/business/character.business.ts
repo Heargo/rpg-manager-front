@@ -9,7 +9,7 @@ import { WorldInfoBusiness } from '../../world/business/world-info.business';
 import { Character, WorldInfo } from '../../world/models/world';
 
 /** What a character sheet needs from its world (the room's, or the sandbox's). */
-export type SheetWorld = Pick<WorldInfo, 'attributes' | 'barAttributes' | 'levelCurve'>;
+export type SheetWorld = Pick<WorldInfo, 'attributes' | 'barAttributes' | 'levelCurve' | 'maxLevel'>;
 import { coinDisplayParts } from '../../../core/helpers/money.rules';
 import { levelProgress, LevelProgress } from '../helpers/level.rules';
 import { CharacterAction } from '../helpers/character-actions.rules';
@@ -79,8 +79,8 @@ export class CharacterBusiness {
   }
 
   /** The character's level and progress towards the next one, from the world's level curve. */
-  progressOf(character: Character, world: Pick<WorldInfo, 'levelCurve'> | null = this.$world()): LevelProgress | null {
-    return world ? levelProgress(world.levelCurve, character.xp) : null;
+  progressOf(character: Character, world: Pick<WorldInfo, 'levelCurve' | 'maxLevel'> | null = this.$world()): LevelProgress | null {
+    return world ? levelProgress(world.levelCurve, character.xp, world.maxLevel) : null;
   }
 
   /** "Level 3! +3 stat points" when a change raised the level, else null. */

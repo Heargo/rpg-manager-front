@@ -457,6 +457,22 @@
                   </small>
                 </div>
                 <div class="field">
+                  <label for="max-level">{{
+                    "world.level.maxLevel" | transloco
+                  }}</label>
+                  <p-inputnumber
+                    inputId="max-level"
+                    [min]="maxLevelBounds.min"
+                    [max]="maxLevelBounds.max"
+                    [showButtons]="true"
+                    [ngModel]="maxLevel()"
+                    (ngModelChange)="maxLevel.set($event ?? 0)"
+                  />
+                  @if (errors().maxLevel; as key) {
+                    <small class="error">{{ key | transloco }}</small>
+                  }
+                </div>
+                <div class="field">
                   <label for="stat-points-per-level">{{
                     "world.level.statPointsPerLevel" | transloco
                   }}</label>

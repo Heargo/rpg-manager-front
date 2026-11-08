@@ -1,3 +1,4 @@
+import { ItemRarity } from '../../../core/models/item';
 import {
   evaluateFormula,
   FormulaError,
@@ -20,6 +21,29 @@ export const DEFAULT_LEVEL_CURVE: LevelCurve = { preset: 'growing' };
 export const DEFAULT_STAT_POINTS_PER_LEVEL = 3;
 /** No character goes beyond this level, which also bounds every loop. */
 export const MAX_LEVEL = 100;
+/** Lowest cap a world can set. */
+export const MIN_MAX_LEVEL = 2;
+export const DEFAULT_MAX_LEVEL = 20;
+
+/** Whether `value` is a usable per-world level cap: an integer from 2 to MAX_LEVEL. */
+export function isValidMaxLevel(value: unknown): value is number {
+  return (
+    typeof value === 'number' &&
+    Number.isInteger(value) &&
+    value >= MIN_MAX_LEVEL &&
+    value <= MAX_LEVEL
+  );
+}
+
+/** Badge rarity of a level: by progress towards the cap, legendary at the cap. */
+export function levelRarity(level: number, maxLevel: number): ItemRarity {
+  if (level >= maxLevel) return 'legendary';
+  const progress = (level - 1) / (maxLevel - 1);
+  if (progress < 0.25) return 'common';
+  if (progress < 0.5) return 'uncommon';
+  if (progress < 0.75) return 'rare';
+  return 'mythic';
+}
 
 const INVALID = 'world.errors.levelCurveInvalid';
 /** Cost of levels 2 to 6 of the classic table, then +50 % per level. */
@@ -32,6 +56,8 @@ export interface LevelProgress {
   xpForNext: number;
   /** 0 to 100. */
   percent: number;
+  /** True at the world's max level, where there is no next level. */
+  maxed: boolean;
 }
 
 export interface XpGrant {
@@ -102,10 +128,14 @@ export function validateLevelCurve(curve: LevelCurve): string | null {
 }
 
 /** The level for a total XP, and how far into it. */
-export function levelProgress(curve: LevelCurve, xp: number): LevelProgress {
+export function levelProgress(
+  curve: LevelCurve,
+  xp: number,
+  maxLevel: number,
+): LevelProgress {
   let level = 1;
   let left = Math.max(0, xp);
-  while (level < MAX_LEVEL) {
+  while (level < maxLevel) {
     const cost = levelCost(curve, level + 1);
     if (left < cost) break;
     left -= cost;
@@ -116,7 +146,9 @@ export function levelProgress(curve: LevelCurve, xp: number): LevelProgress {
     level,
     xpIntoLevel: left,
     xpForNext,
-    percent: Math.round((left / xpForNext) * 100),
+    percent:
+      level >= maxLevel ? 100 : Math.round((left / xpForNext) * 100),
+    maxed: level >= maxLevel,
   };
 }
 
@@ -126,10 +158,11 @@ export function grantXp(
   perLevel: number,
   xp: number,
   amount: number,
+  maxLevel: number,
 ): XpGrant {
-  const before = levelProgress(curve, xp).level;
+  const before = levelProgress(curve, xp, maxLevel).level;
   const total = xp + amount;
-  const level = levelProgress(curve, total).level;
+  const level = levelProgress(curve, total, maxLevel).level;
   const levelsGained = level - before;
   return {
     xp: total,

@@ -1,6 +1,6 @@
 import { checkAttributeFormula } from '../../../core/helpers/formula';
 import { ITEM_RARITIES, ITEM_TYPES } from '../../../core/models/item';
-import { LEVEL_CURVE_PRESETS, validateLevelCurve } from '../../character/helpers/level.rules';
+import { isValidMaxLevel, LEVEL_CURVE_PRESETS, validateLevelCurve } from '../../character/helpers/level.rules';
 import { World } from '../models/world';
 
 export const WORLD_EXPORT_FORMAT = 'rpg-manager-world';
@@ -70,6 +70,7 @@ function validateWorld(world: unknown, errors: string[]): void {
     if (typeof world[key] !== 'number') errors.push(`world.${key} must be a number`);
   }
   if (!isValidLevelCurve(world['levelCurve'])) errors.push('world.levelCurve is invalid');
+  if (!isValidMaxLevel(world['maxLevel'])) errors.push('world.maxLevel must be an integer from 2 to 100');
   if (!Number.isInteger(world['statPointsPerLevel']) || (world['statPointsPerLevel'] as number) < 0) {
     errors.push('world.statPointsPerLevel must be a non-negative integer');
   }

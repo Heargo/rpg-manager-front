@@ -121,6 +121,7 @@
       "capInvalid": "Le plafond doit être un nombre entier, 1 ou plus.",
       "capTooLow": "Le plafond ne peut pas être sous la valeur de base ({{ base }}).",
       "formulaInvalid": "Corrigez les formules des attributs en rouge.",
+      "maxLevelInvalid": "Le niveau max doit être un entier de 2 à 100.",
       "levelCurveInvalid": "Courbe invalide : utilisez uniquement level, et chaque niveau doit coûter au moins 1 XP.",
       "levelCostTooLow": "Le niveau {{ level }} coûte moins de 1 XP : chaque niveau doit coûter au moins 1 XP."
     },
@@ -141,6 +142,7 @@
       "title": "Expérience et niveaux",
       "curve": "Courbe de niveaux",
       "preview": "XP des niveaux 2 à 6",
+      "maxLevel": "Niveau max",
       "statPointsPerLevel": "Points de stats par niveau",
       "customHelp": "Écrivez une expression utilisant uniquement level, par exemple level * 50.",
       "presets": {
@@ -218,6 +220,7 @@
       "grantXpLabel": "Donner de l'XP",
       "grantXp": "Donner",
       "levelUp": "Niveau {{ level }} ! +{{ points }} points de stats",
+      "maxLevel": "Niveau max",
       "levelBadge": "Niveau {{ level }}"
     },
     "items": {

@@ -39,6 +39,9 @@ import { WorldLibraryBusiness } from '../../business/world-library.business';
 import { WorldCardComponent } from '../../components/world-card/world-card.component';
 import {
   DEFAULT_LEVEL_CURVE,
+  DEFAULT_MAX_LEVEL,
+  MAX_LEVEL,
+  MIN_MAX_LEVEL,
   DEFAULT_STAT_POINTS_PER_LEVEL,
   LEVEL_CURVE_PRESETS,
   LevelCurve,
@@ -131,6 +134,8 @@ export class WorldNewPageComponent {
   protected readonly startingStatPoints = signal(5);
   protected readonly startingMoney = signal(5000);
   protected readonly levelCurve = signal<LevelCurve>(DEFAULT_LEVEL_CURVE);
+  protected readonly maxLevel = signal(DEFAULT_MAX_LEVEL);
+  protected readonly maxLevelBounds = { min: MIN_MAX_LEVEL, max: MAX_LEVEL };
   protected readonly statPointsPerLevel = signal(DEFAULT_STAT_POINTS_PER_LEVEL);
   protected readonly curvePresets = LEVEL_CURVE_PRESETS;
   protected readonly starterItems = signal(true);
@@ -161,6 +166,7 @@ export class WorldNewPageComponent {
     },
     startingStatPoints: this.startingStatPoints(),
     levelCurve: this.levelCurve(),
+    maxLevel: this.maxLevel(),
     statPointsPerLevel: this.statPointsPerLevel(),
     startingMoney: this.startingMoney(),
     offlineFeatures: this.offline(),
@@ -242,6 +248,7 @@ export class WorldNewPageComponent {
         !errors.startingStatPoints &&
         !errors.startingMoney &&
         !errors.levelCurve &&
+        !errors.maxLevel &&
         !errors.statPointsPerLevel,
     } as Record<number, boolean>;
   });

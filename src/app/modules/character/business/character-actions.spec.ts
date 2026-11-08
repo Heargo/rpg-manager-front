@@ -65,6 +65,7 @@ describe('character actions (host + players)', () => {
       ],
       levelCurve: { preset: 'growing' },
       statPointsPerLevel: 3,
+      maxLevel: 20,
       startingStatPoints: 1,
       startingMoney: 5,
     });

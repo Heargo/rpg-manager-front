@@ -11,6 +11,7 @@ const world = {
   ],
   barAttributes: { life: 'life', mana: 'mana' },
   levelCurve: { preset: 'growing' },
+  maxLevel: 20,
 };
 
 const character: Character = {
@@ -30,7 +31,7 @@ const character: Character = {
   updatedAt: 0,
 };
 
-async function render(overrides: Partial<Character> = {}) {
+async function render(overrides: Partial<Character> = {}, worldOverrides: Partial<typeof world> = {}) {
   vi.stubGlobal(
     'ResizeObserver',
     class {
@@ -45,13 +46,35 @@ async function render(overrides: Partial<Character> = {}) {
   });
   const fixture = TestBed.createComponent(CharacterCardComponent);
   fixture.componentRef.setInput('character', { ...character, ...overrides });
-  fixture.componentRef.setInput('world', world);
+  fixture.componentRef.setInput('world', { ...world, ...worldOverrides });
   await fixture.whenStable();
   return { fixture, el: fixture.nativeElement as HTMLElement };
 }
 
 describe('CharacterCardComponent', () => {
   afterEach(() => vi.unstubAllGlobals());
+
+  it('colours the level badge by rarity, legendary at the max level', async () => {
+    const rarityOf = (el: HTMLElement) => el.querySelector('[data-testid="character-level"]')!.getAttribute('data-rarity');
+    expect(rarityOf((await render({ level: 1, xp: 0 })).el)).toBe('common');
+    TestBed.resetTestingModule();
+    expect(rarityOf((await render({ level: 12 })).el)).toBe('rare');
+    TestBed.resetTestingModule();
+    expect(rarityOf((await render({ level: 20, xp: 100000 })).el)).toBe('legendary');
+  });
+
+  it('uses the danger severity tag for the max level and secondary for level 1', async () => {
+    const { el } = await render({ level: 1, xp: 0 });
+    expect(el.querySelector('[data-testid="character-level"] p-tag .p-tag-secondary, [data-testid="character-level"] .p-tag.p-tag-secondary')).not.toBeNull();
+    TestBed.resetTestingModule();
+    const max = await render({ level: 20, xp: 100000 });
+    expect(max.el.querySelector('[data-testid="character-level"] .p-tag-danger')).not.toBeNull();
+  });
+
+  it('shows "Max level" instead of xp / next at the max', async () => {
+    const { el } = await render({ level: 3, xp: 600 }, { maxLevel: 3 });
+    expect(el.querySelector('[data-testid="xp-text"]')!.textContent).toContain('Max level');
+  });
 
   it('shows the name and the level badge', async () => {
     const { el } = await render();

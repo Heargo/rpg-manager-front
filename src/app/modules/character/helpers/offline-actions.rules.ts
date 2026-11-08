@@ -28,6 +28,7 @@ export type OfflineResult =
 const NO_XP_RULES: LevelRules = {
   levelCurve: { preset: 'flat' },
   statPointsPerLevel: 0,
+  maxLevel: 2,
 };
 
 const NOT_ALLOWED = 'character.errors.offlineNotAllowed';

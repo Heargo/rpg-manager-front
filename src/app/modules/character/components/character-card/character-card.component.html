@@ -13,9 +13,12 @@
 
     <header class="overlay top">
       <h2 data-testid="card-name" [id]="'card-name-' + c.id">{{ c.name }}</h2>
-      <span data-testid="character-level">
+      <span
+        data-testid="character-level"
+        [attr.data-rarity]="levelRarityName()"
+      >
         <p-tag
-          severity="info"
+          [severity]="levelSeverity()"
           [value]="'character.sheet.levelBadge' | transloco: { level: c.level }"
         />
       </span>
@@ -52,7 +55,15 @@
         [showValue]="false"
         [attr.aria-label]="'character.sheet.xp' | transloco"
       />
-      <span data-testid="xp-text">{{ p.xpIntoLevel }} / {{ p.xpForNext }}</span>
+      @if (p.maxed) {
+        <span data-testid="xp-text">{{
+          "character.sheet.maxLevel" | transloco
+        }}</span>
+      } @else {
+        <span data-testid="xp-text"
+          >{{ p.xpIntoLevel }} / {{ p.xpForNext }}</span
+        >
+      }
     </div>
   }
 </div>

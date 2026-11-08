@@ -1,12 +1,12 @@
 import { FormulaError, checkAttributeFormula, normalizeName } from '../../../core/helpers/formula';
-import { validateLevelCurve } from '../../character/helpers/level.rules';
+import { isValidMaxLevel, validateLevelCurve } from '../../character/helpers/level.rules';
 import { WorldDraft } from '../models/world';
 
 export const WORLD_NAME_MAX_LENGTH = 48;
 export const ATTRIBUTE_NAME_MAX_LENGTH = 24;
 
 /** Field → translation key of the problem. Empty when the draft can be saved. */
-export type WorldDraftErrors = Partial<Record<'name' | 'attributes' | 'startingStatPoints' | 'startingMoney' | 'levelCurve' | 'statPointsPerLevel', string>>;
+export type WorldDraftErrors = Partial<Record<'name' | 'attributes' | 'startingStatPoints' | 'startingMoney' | 'levelCurve' | 'maxLevel' | 'statPointsPerLevel', string>>;
 
 /** What the wizard checks before creating a world. */
 export function validateWorldDraft(draft: WorldDraft): WorldDraftErrors {
@@ -29,6 +29,7 @@ export function validateWorldDraft(draft: WorldDraft): WorldDraftErrors {
     const problem = validateLevelCurve(draft.levelCurve);
     if (problem) errors.levelCurve = problem;
   }
+  if (draft.maxLevel !== undefined && !isValidMaxLevel(draft.maxLevel)) errors.maxLevel = 'world.errors.maxLevelInvalid';
   if (!isNonNegativeInteger(draft.statPointsPerLevel ?? 0)) errors.statPointsPerLevel = 'world.errors.nonNegativeInteger';
   return errors;
 }

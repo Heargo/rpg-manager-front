@@ -121,6 +121,7 @@
       "capInvalid": "The cap must be a whole number, 1 or more.",
       "capTooLow": "The cap can't be below the base value ({{ base }}).",
       "formulaInvalid": "Fix the formulas of the attributes marked in red.",
+      "maxLevelInvalid": "Max level must be a whole number from 2 to 100.",
       "levelCurveInvalid": "Invalid level curve: use only level, and every level must cost at least 1 XP.",
       "levelCostTooLow": "Level {{ level }} costs less than 1 XP: every level must cost at least 1 XP."
     },
@@ -141,6 +142,7 @@
       "title": "Experience and levels",
       "curve": "Level curve",
       "preview": "XP for levels 2 to 6",
+      "maxLevel": "Max level",
       "statPointsPerLevel": "Stat points per level",
       "customHelp": "Write an expression using only level, for example level * 50.",
       "presets": {
@@ -218,6 +220,7 @@
       "grantXpLabel": "Grant XP",
       "grantXp": "Grant XP",
       "levelUp": "Level {{ level }}! +{{ points }} stat points",
+      "maxLevel": "Max level",
       "levelBadge": "Level {{ level }}"
     },
     "items": {

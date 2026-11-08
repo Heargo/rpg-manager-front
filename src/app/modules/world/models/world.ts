@@ -80,6 +80,8 @@ export interface World {
   barAttributes: { life?: string; mana?: string };
   startingStatPoints: number;
   levelCurve: LevelCurve;
+  /** Highest level a character can reach (2 to 100). */
+  maxLevel: number;
   statPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
@@ -113,6 +115,7 @@ export interface WorldDraft {
   barAttributes?: { life?: string; mana?: string };
   startingStatPoints?: number;
   levelCurve?: LevelCurve;
+  maxLevel?: number;
   statPointsPerLevel?: number;
   startingMoney?: number;
   offlineFeatures?: Partial<OfflineFeatures>;
@@ -128,6 +131,8 @@ export interface WorldInfo {
   barAttributes: { life?: string; mana?: string };
   startingStatPoints: number;
   levelCurve: LevelCurve;
+  /** Highest level a character can reach (2 to 100). */
+  maxLevel: number;
   statPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;

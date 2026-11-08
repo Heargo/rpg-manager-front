@@ -39,6 +39,7 @@ describe('createWorld', () => {
       startingStatPoints: 0,
       levelCurve: { preset: 'growing' },
       statPointsPerLevel: 3,
+      maxLevel: 20,
       startingMoney: 0,
       offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, sell: true },
       items: [],
@@ -47,6 +48,11 @@ describe('createWorld', () => {
       createdAt: 1000,
       updatedAt: 1000,
     });
+  });
+
+  it('keeps the max level of the draft, 20 by default', () => {
+    expect(createWorld({ name: 'W', attributes: [], maxLevel: 35 }, ids(), 0).maxLevel).toBe(35);
+    expect(createWorld({ name: 'W', attributes: [] }, ids(), 0).maxLevel).toBe(20);
   });
 
   it('keeps the level curve and stat points per level of the draft', () => {

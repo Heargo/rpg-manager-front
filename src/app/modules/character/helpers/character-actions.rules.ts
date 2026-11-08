@@ -44,6 +44,7 @@ export const MAX_GRANTED_XP = 1_000_000;
 export interface LevelRules {
   levelCurve: LevelCurve;
   statPointsPerLevel: number;
+  maxLevel: number;
 }
 
 export type ActionResult =
@@ -144,6 +145,7 @@ export function applyCharacterAction(
         levelRules.statPointsPerLevel,
         character.xp,
         action.amount,
+        levelRules.maxLevel,
       );
       const leveled: Character = { ...character, xp: grant.xp, level: grant.level };
       // A new level can raise maxima that read playerLevel: current rises by the same delta.
