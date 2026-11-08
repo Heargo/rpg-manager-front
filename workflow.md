@@ -30,7 +30,7 @@ Done when: you can say the ticket's behaviours in one line each, and whether it 
 
 Done when: `## Baseline` is in the ticket. A red baseline is fine: it is recorded, and later steps compare against it.
 
-## 3. Agree the seams
+## 3. Choose and validate the seams
 
 Propose 1 to 3 seams: the public interfaces the tests will go through. In this app they are usually:
 
@@ -38,11 +38,19 @@ Propose 1 to 3 seams: the public interfaces the tests will go through. In this a
 - a business class over the fake peer network (`src/testing/game-device.ts`: a host and players in one test),
 - a component's inputs/outputs (`TEST_PROVIDERS`).
 
-One line each: what it catches, what it misses. Ask the user to confirm.
+One line each: what it catches, what it misses.
 
-More than 3 seams means the ticket is too big: propose a split and stop.
+Then validate them yourself, without asking the user. The seams pass when all of these hold:
 
-Done when: the user confirmed, and the seams are written in the ticket as `## Seams`.
+- Every behaviour from step 1 is reached by at least one seam.
+- Each seam is a public interface: an exported function or class method, or a component's inputs/outputs. Never a private member, a template's DOM internals, or a signal set from outside.
+- Each seam is one of the three kinds above, or the ticket or `spec.md` names it.
+- Between them they mock nothing the repo doesn't already mock (the boundaries listed in `.claude/agents/tdd-red.md`).
+- There are at most 3. More means the ticket is too big: propose a split and stop.
+
+If a check fails, fix the seams and validate again. Ask the user only when no set of seams passes, naming the check that fails.
+
+Done when: the seams pass every check and are written in the ticket as `## Seams`, each with its one line.
 
 ## 4. Red
 
