@@ -31,12 +31,13 @@
               <label for="grant-xp">{{
                 "character.sheet.grantXpLabel" | transloco
               }}</label>
-              <input
-                id="grant-xp"
-                class="p-inputtext grant-input"
-                type="number"
-                min="1"
-                step="1"
+              <p-inputnumber
+                inputId="grant-xp"
+                [min]="1"
+                [step]="1"
+                [showButtons]="true"
+                buttonLayout="horizontal"
+                inputStyleClass="grant-input"
                 name="grant-xp"
                 [ngModel]="grantXpAmount()"
                 (ngModelChange)="grantXpAmount.set($event ?? 0)"
@@ -116,7 +117,9 @@
                       tooltipPosition="left"
                       tooltipStyleClass="stat-tip"
                       tabindex="0"
-                      >{{ stat.isBar ? stat.current + " / " + stat.max : stat.max }}</span
+                      >{{
+                        stat.isBar ? stat.current + " / " + stat.max : stat.max
+                      }}</span
                     >
                   </td>
                   @if ((canPlay() && c.statPoints > 0) || gameMaster()) {

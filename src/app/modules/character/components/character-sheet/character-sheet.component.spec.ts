@@ -178,8 +178,10 @@ describe('CharacterSheetComponent', () => {
   it('gives the game master a grant XP control that emits grant-xp', async () => {
     const { el, actions, fixture } = await render({ canPlay: true, gameMaster: true });
     const input = el.querySelector('#grant-xp') as HTMLInputElement;
+    input.focus();
     input.value = '120';
     input.dispatchEvent(new Event('input'));
+    input.dispatchEvent(new Event('blur'));
     await fixture.whenStable();
     const host = el.querySelector('[data-testid="grant-xp-button"]')!;
     (host.matches('button') ? (host as HTMLButtonElement) : host.querySelector('button')!).click();

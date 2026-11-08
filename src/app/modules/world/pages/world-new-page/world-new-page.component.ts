@@ -259,9 +259,9 @@ export class WorldNewPageComponent {
     ]);
   }
 
-  protected setCap(key: number, text: string): void {
+  protected setCap(key: number, value: number | null): void {
     this.updateAttribute(key, {
-      cap: text.trim() === '' ? undefined : Number(text),
+      cap: value ?? undefined,
     });
   }
 

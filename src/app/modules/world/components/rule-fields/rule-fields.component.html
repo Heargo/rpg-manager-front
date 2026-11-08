@@ -17,29 +17,30 @@
       }
     </div>
     <div class="formula">
-      <label class="formula-field">
-        <span>{{ "world.level.curve" | transloco }}</span>
-        <select
-          class="native"
+      <div class="formula-field">
+        <label for="level-curve">{{ "world.level.curve" | transloco }}</label>
+        <p-select
+          inputId="level-curve"
           name="level-curve"
-          [value]="levelCurve().preset"
-          (change)="setCurvePreset($any($event.target).value)"
+          data-testid="level-curve-select"
+          [options]="curvePresets"
+          [ngModel]="levelCurve().preset"
+          (ngModelChange)="setCurvePreset($event)"
+          appendTo="body"
         >
-          @for (preset of curvePresets; track preset) {
-            <option
-              [value]="preset"
-              [selected]="preset === levelCurve().preset"
-            >
-              {{ "world.level.presets." + preset | transloco }}
-            </option>
-          }
-        </select>
-      </label>
+          <ng-template #selectedItem let-preset>{{
+            "world.level.presets." + preset | transloco
+          }}</ng-template>
+          <ng-template #item let-preset>{{
+            "world.level.presets." + preset | transloco
+          }}</ng-template>
+        </p-select>
+      </div>
       @if (levelCurve().preset === "custom") {
         <label class="formula-field wide">
           <span>{{ "world.fields.expression" | transloco }}</span>
           <input
-            class="native"
+            pInputText
             type="text"
             autocomplete="off"
             spellcheck="false"

@@ -4,7 +4,9 @@ import {
   computed,
   model,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import {
   COINS,
   Coin,
@@ -16,18 +18,18 @@ import {
 @Component({
   selector: 'app-coin-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [FormsModule, InputNumberModule, TranslocoPipe],
   template: `
     @for (coin of coins; track coin) {
       <label class="coin">
-        <input
-          type="number"
-          min="0"
-          step="1"
+        <p-inputnumber
+          [min]="0"
+          [step]="1"
           [name]="coin"
-          [attr.aria-label]="'coin.' + coin | transloco"
-          [value]="split()[coin]"
-          (input)="set(coin, $event)"
+          [ariaLabel]="'coin.' + coin | transloco"
+          [ngModel]="split()[coin]"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="set(coin, $event)"
         />
         <img
           [src]="'assets/icons/money/' + coin + '-coin.svg'"
@@ -47,13 +49,11 @@ import {
       align-items: center;
       gap: 0.3rem;
     }
-    input {
-      width: 5rem;
-      padding: 0.4rem 0.5rem;
-      color: inherit;
-      background: var(--p-inputtext-background, transparent);
-      border: 1px solid var(--p-inputtext-border-color, currentColor);
-      border-radius: var(--p-inputtext-border-radius, 6px);
+    p-inputnumber {
+      width: 5.5rem;
+    }
+    :host ::ng-deep p-inputnumber .p-inputtext {
+      width: 100%;
     }
     img {
       width: 1.3em;
@@ -67,11 +67,8 @@ export class CoinInputComponent {
   protected readonly coins = COINS;
   protected readonly split = computed(() => splitCopper(this.value()));
 
-  protected set(coin: Coin, event: Event): void {
-    const amount = Math.max(
-      0,
-      Math.floor(Number((event.target as HTMLInputElement).value) || 0),
-    );
+  protected set(coin: Coin, value: number | null): void {
+    const amount = Math.max(0, Math.floor(value || 0));
     this.value.set(coinsToCopper({ ...this.split(), [coin]: amount }));
   }
 }

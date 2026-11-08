@@ -31,9 +31,13 @@ describe('NpcCatalogueComponent', () => {
     const el: HTMLElement = fixture.nativeElement;
     const q = (selector: string) => el.querySelectorAll<HTMLElement>(selector);
     const type = async (field: string, value: string) => {
-      const input = q(`[data-field="${field}"]`)[0] as HTMLInputElement;
+      const host = q(`[data-field="${field}"]`)[0];
+      // Number fields are p-inputnumber hosts: drive the inner input and commit on blur.
+      const input = (host.matches('input') ? host : (host.querySelector('input') ?? host)) as HTMLInputElement;
+      input.focus();
       input.value = value;
       input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new Event('blur'));
       await fixture.whenStable();
     };
     return { fixture, el, q, type, component: fixture.componentInstance };

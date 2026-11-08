@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ConfirmationService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { LanguageBusiness } from '../../../../core/business/language.business';
@@ -29,6 +30,7 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
     TranslocoPipe,
     ButtonModule,
     InputTextModule,
+    InputNumberModule,
     MultiSelectModule,
     NpcCardComponent,
   ],
@@ -55,23 +57,21 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
         [showToggleAll]="false"
         display="chip"
       />
-      <input
-        pInputText
+      <p-inputnumber
         data-field="level-min"
-        type="number"
-        min="1"
-        [attr.aria-label]="'npc.catalogue.levelMin' | transloco"
+        [min]="1"
+        [ariaLabel]="'npc.catalogue.levelMin' | transloco"
         [placeholder]="'npc.catalogue.levelMin' | transloco"
-        (input)="levelMin.set($any($event.target).value)"
+        [ngModel]="levelMin()"
+        (ngModelChange)="levelMin.set($event)"
       />
-      <input
-        pInputText
+      <p-inputnumber
         data-field="level-max"
-        type="number"
-        min="1"
-        [attr.aria-label]="'npc.catalogue.levelMax' | transloco"
+        [min]="1"
+        [ariaLabel]="'npc.catalogue.levelMax' | transloco"
         [placeholder]="'npc.catalogue.levelMax' | transloco"
-        (input)="levelMax.set($any($event.target).value)"
+        [ngModel]="levelMax()"
+        (ngModelChange)="levelMax.set($event)"
       />
       <button
         pButton
@@ -165,8 +165,12 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
       gap: 0.75rem;
       align-items: center;
     }
-    .toolbar input[type='number'] {
+    .toolbar p-inputnumber {
       width: 10rem;
+    }
+    .toolbar p-inputnumber ::ng-deep input {
+      width: 100%;
+      min-width: 0;
     }
     .grid {
       display: grid;
@@ -207,13 +211,13 @@ export class NpcCatalogueComponent {
 
   protected readonly search = signal('');
   protected readonly roles = signal<NpcRole[]>([]);
-  /** Raw field values: empty means no bound. */
-  protected readonly levelMin = signal('');
-  protected readonly levelMax = signal('');
+  /** Field values: null means no bound. */
+  protected readonly levelMin = signal<number | null>(null);
+  protected readonly levelMax = signal<number | null>(null);
 
   protected readonly shown = computed(() => {
-    const min = parseInt(this.levelMin(), 10);
-    const max = parseInt(this.levelMax(), 10);
+    const min = Math.trunc(this.levelMin() ?? NaN);
+    const max = Math.trunc(this.levelMax() ?? NaN);
     return filterNpcs(this.world().npcs, {
       search: this.search(),
       roles: this.roles(),

@@ -11,6 +11,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
@@ -33,6 +34,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
     TranslocoPipe,
     ButtonModule,
     InputTextModule,
+    InputNumberModule,
     MessageModule,
     MultiSelectModule,
     SelectModule,
@@ -99,15 +101,14 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 <label for="npc-level">{{
                   'npc.editor.fields.level' | transloco
                 }}</label>
-                <input
-                  pInputText
-                  id="npc-level"
+                <p-inputnumber
+                  inputId="npc-level"
                   data-field="level"
-                  type="number"
-                  min="1"
+                  [min]="1"
                   [max]="world().maxLevel"
-                  [value]="draft().level"
-                  (input)="setLevel($any($event.target).value)"
+                  [showButtons]="true"
+                  [ngModel]="draft().level"
+                  (ngModelChange)="setLevel($event)"
                 />
               </div>
               <div class="field">
@@ -130,16 +131,13 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                   <label [for]="'npc-attr-' + attribute.id">{{
                     attribute.name
                   }}</label>
-                  <input
-                    pInputText
-                    type="number"
-                    min="0"
-                    [id]="'npc-attr-' + attribute.id"
+                  <p-inputnumber
+                    [min]="0"
+                    [inputId]="'npc-attr-' + attribute.id"
                     [attr.data-field]="'attribute-level-' + attribute.id"
-                    [value]="attributeLevel(attribute.id)"
-                    (input)="
-                      setAttributeLevel(attribute.id, $any($event.target).value)
-                    "
+                    [showButtons]="true"
+                    [ngModel]="attributeLevel(attribute.id)"
+                    (ngModelChange)="setAttributeLevel(attribute.id, $event)"
                   />
                 </div>
               }
@@ -150,16 +148,13 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 <label for="npc-xp-reward">{{
                   'npc.editor.fields.xpReward' | transloco
                 }}</label>
-                <input
-                  pInputText
-                  id="npc-xp-reward"
+                <p-inputnumber
+                  inputId="npc-xp-reward"
                   data-field="xp-reward"
-                  type="number"
-                  min="0"
-                  [value]="draft().xpReward"
-                  (input)="
-                    patch({ xpReward: numberOr($any($event.target).value, 0) })
-                  "
+                  [min]="0"
+                  [showButtons]="true"
+                  [ngModel]="draft().xpReward"
+                  (ngModelChange)="patch({ xpReward: $event ?? 0 })"
                 />
               </div>
             }
@@ -169,30 +164,32 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                   <label for="npc-buy-ratio">{{
                     'npc.editor.fields.buyRatio' | transloco
                   }}</label>
-                  <input
-                    pInputText
-                    id="npc-buy-ratio"
+                  <p-inputnumber
+                    inputId="npc-buy-ratio"
                     data-field="buy-ratio"
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    [value]="draft().merchant?.buyRatio ?? ''"
-                    (input)="setRatio('buyRatio', $any($event.target).value)"
+                    [min]="0"
+                    [step]="0.1"
+                    [minFractionDigits]="0"
+                    [maxFractionDigits]="2"
+                    [showButtons]="true"
+                    [ngModel]="draft().merchant?.buyRatio ?? null"
+                    (ngModelChange)="setRatio('buyRatio', $event)"
                   />
                 </div>
                 <div class="field">
                   <label for="npc-sell-ratio">{{
                     'npc.editor.fields.sellRatio' | transloco
                   }}</label>
-                  <input
-                    pInputText
-                    id="npc-sell-ratio"
+                  <p-inputnumber
+                    inputId="npc-sell-ratio"
                     data-field="sell-ratio"
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    [value]="draft().merchant?.sellRatio ?? ''"
-                    (input)="setRatio('sellRatio', $any($event.target).value)"
+                    [min]="0"
+                    [step]="0.1"
+                    [minFractionDigits]="0"
+                    [maxFractionDigits]="2"
+                    [showButtons]="true"
+                    [ngModel]="draft().merchant?.sellRatio ?? null"
+                    (ngModelChange)="setRatio('sellRatio', $event)"
                   />
                 </div>
               </div>
@@ -436,9 +433,9 @@ export class NpcEditorComponent {
     this.setDraft(this.editor.setRoles(this.draft(), roles));
   }
 
-  protected setLevel(text: string): void {
-    const level = Math.trunc(+text);
-    if (!text.trim() || !Number.isFinite(level)) return;
+  protected setLevel(value: number | null): void {
+    if (value === null || !Number.isFinite(value)) return;
+    const level = Math.trunc(value);
     const clamped = Math.min(Math.max(level, 1), this.world().maxLevel);
     this.setDraft(this.editor.setLevel(this.draft(), clamped, this.world()));
   }
@@ -450,25 +447,24 @@ export class NpcEditorComponent {
     );
   }
 
-  protected setAttributeLevel(attributeId: string, text: string): void {
+  protected setAttributeLevel(attributeId: string, value: number | null): void {
     this.setDraft(
       this.editor.setAttributeLevel(
         this.draft(),
         attributeId,
-        Math.max(0, Math.trunc(+text) || 0),
+        Math.max(0, Math.trunc(value ?? 0) || 0),
         this.world(),
       ),
     );
   }
 
-  protected numberOr(text: string, fallback: number): number {
-    return text.trim() && Number.isFinite(+text) ? +text : fallback;
-  }
-
   /** A blank ratio is removed. */
-  protected setRatio(key: 'buyRatio' | 'sellRatio', text: string): void {
+  protected setRatio(
+    key: 'buyRatio' | 'sellRatio',
+    value: number | null,
+  ): void {
     const merchant = { ...this.draft().merchant };
-    if (text.trim() && Number.isFinite(+text)) merchant[key] = +text;
+    if (value !== null && Number.isFinite(value)) merchant[key] = value;
     else delete merchant[key];
     this.patch({ merchant });
   }

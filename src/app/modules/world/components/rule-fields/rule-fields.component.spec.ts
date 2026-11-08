@@ -6,7 +6,7 @@ import { RuleFieldsComponent } from './rule-fields.component';
 /**
  * Contract: `app-rule-fields` takes `draft` (a `model` of the WorldDraft rule fields: startingStatPoints, startingMoney,
  * levelCurve, maxLevel, statPointsPerLevel, offlineFeatures) and `errors` (WorldDraftErrors), and keeps the wizard's selectors:
- * `#stat-points`, `#max-level`, `#stat-points-per-level` (p-inputnumber inputIds), `select[name="level-curve"]`,
+ * `#stat-points`, `#max-level`, `#stat-points-per-level` (p-inputnumber inputIds), `p-select[data-testid="level-curve-select"]`,
  * `input[name="level-curve-expression"]`, `[data-testid="level-curve-preview"]`, `[data-testid="level-curve-error"]`.
  * Sections: `[data-testid="rules-section-progression"]` (stat points, level curve, max level, stat points per level),
  * `[data-testid="rules-section-economy"]` (starting money, `app-coin-input`), `[data-testid="rules-section-offline"]` (toggles
@@ -48,7 +48,9 @@ describe('RuleFieldsComponent', () => {
     const offline = el.querySelector('[data-testid="rules-section-offline"]')!;
 
     expect((progression.querySelector('#stat-points') as HTMLInputElement).value).toBe('5');
-    expect((progression.querySelector('select[name="level-curve"]') as HTMLSelectElement).value).toBe('growing');
+    expect(progression.querySelector('[data-testid="level-curve-select"] .p-select-label')!.textContent!.trim()).toBe(
+      'Growing (100 x level)',
+    );
     expect((progression.querySelector('#max-level') as HTMLInputElement).value).toBe('20');
     expect((progression.querySelector('#stat-points-per-level') as HTMLInputElement).value).toBe('3');
     expect(progression.querySelector('[data-testid="level-curve-preview"]')!.textContent!.trim()).toBe('200 300 400 500 600');
@@ -58,9 +60,12 @@ describe('RuleFieldsComponent', () => {
 
   it('emits the draft with the new level curve when the preset changes', async () => {
     const { el, emitted, settle } = await open();
-    const select = el.querySelector('select[name="level-curve"]') as HTMLSelectElement;
-    select.value = 'flat';
-    select.dispatchEvent(new Event('change'));
+    (el.querySelector('[data-testid="level-curve-select"]') as HTMLElement).click();
+    await settle();
+    const option = Array.from(document.querySelectorAll('li[role="option"]')).find(
+      (item) => item.textContent?.trim() === 'Flat (100 XP per level)',
+    ) as HTMLElement;
+    option.click();
     await settle();
 
     expect(emitted.at(-1)!.levelCurve).toEqual({ preset: 'flat' });

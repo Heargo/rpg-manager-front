@@ -3,7 +3,7 @@ import { TEST_PROVIDERS } from '../../../../testing/test-providers';
 import { CoinInputComponent } from './coin-input.component';
 
 /**
- * Contract: two-way `value` model holding integer copper; three native `input[name="gold|silver|copper"]`
+ * Contract: two-way `value` model holding integer copper; three p-inputnumber `input[name="gold|silver|copper"]`
  * fields showing the split amounts. Typing in one updates `value`.
  */
 async function render(value: number) {
@@ -14,8 +14,10 @@ async function render(value: number) {
   const el = fixture.nativeElement as HTMLElement;
   const field = (name: string) => el.querySelector(`input[name="${name}"]`) as HTMLInputElement;
   const type = async (name: string, text: string) => {
+    field(name).focus();
     field(name).value = text;
     field(name).dispatchEvent(new Event('input'));
+    field(name).dispatchEvent(new Event('blur'));
     await fixture.whenStable();
   };
   return { fixture, field, type };

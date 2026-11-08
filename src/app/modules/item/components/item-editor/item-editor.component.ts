@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
+import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
@@ -67,6 +68,7 @@ function toDraft(item: Item | undefined): ItemDraft {
     FormsModule,
     TranslocoPipe,
     ButtonModule,
+    InputNumberModule,
     InputTextModule,
     MessageModule,
     SelectModule,
@@ -187,13 +189,12 @@ function toDraft(item: Item | undefined): ItemDraft {
               @for (name of attributeNames(); track name) {
                 <div class="field">
                   <label [for]="'item-mod-' + name">{{ name }}</label>
-                  <input
-                    pInputText
-                    type="number"
-                    [id]="'item-mod-' + name"
+                  <p-inputnumber
+                    [inputId]="'item-mod-' + name"
                     [attr.data-modifier]="name"
-                    [value]="modifierValue(name)"
-                    (input)="setModifier(name, $any($event.target).value)"
+                    [showButtons]="true"
+                    [ngModel]="modifierValue(name)"
+                    (ngModelChange)="setModifier(name, $event)"
                   />
                 </div>
               }
@@ -413,8 +414,8 @@ export class ItemEditorComponent {
   }
 
   /** 0 or blank removes the modifier. */
-  protected setModifier(attribute: string, text: string): void {
-    const value = Math.trunc(+text) || 0;
+  protected setModifier(attribute: string, amount: number | null): void {
+    const value = Math.trunc(amount ?? 0) || 0;
     const others = this.draft().modifiers.filter(
       (m) => m.attribute !== attribute,
     );

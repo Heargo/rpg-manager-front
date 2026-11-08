@@ -54,9 +54,13 @@ describe('ItemEditorComponent', () => {
     const action = (name: string) =>
       el.querySelector<HTMLElement>(`[data-action="${name}"]`)!;
     const type = async (name: string, value: string) => {
-      const input = field(name);
+      const host = field(name);
+      // Number fields are p-inputnumber hosts: drive the inner input and commit on blur.
+      const input = host.matches('input') ? host : ((host as HTMLElement).querySelector('input') ?? host);
+      input.focus();
       input.value = value;
       input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new Event('blur'));
       await fixture.whenStable();
     };
     const click = async (name: string) => {

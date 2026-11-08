@@ -183,8 +183,8 @@ export class WorldRulesPageComponent {
     );
   }
 
-  protected setCap(key: number, text: string): void {
-    this.update(key, { cap: text.trim() === '' ? undefined : Number(text) });
+  protected setCap(key: number, value: number | null): void {
+    this.update(key, { cap: value ?? undefined });
   }
 
   protected setPreset(key: number, preset: string): void {

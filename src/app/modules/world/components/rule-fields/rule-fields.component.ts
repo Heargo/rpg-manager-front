@@ -10,6 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { CheckboxModule } from '@openng/optimus-ui/checkbox';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { SelectModule } from '@openng/optimus-ui/select';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
 import { FormulaChartComponent } from '../../../../core/components/formula-chart/formula-chart.component';
@@ -44,6 +46,8 @@ const OFFLINE_FEATURES = Object.keys(
     FormsModule,
     TranslocoPipe,
     InputNumberModule,
+    InputTextModule,
+    SelectModule,
     ToggleSwitchModule,
     CheckboxModule,
     CoinInputComponent,
@@ -59,7 +63,7 @@ export class RuleFieldsComponent {
   protected readonly offlineFeatures = OFFLINE_FEATURES;
   protected readonly npcRoles = NPC_ROLES;
   protected readonly npcFields = NPC_VISIBILITY_FIELDS;
-  protected readonly curvePresets = LEVEL_CURVE_PRESETS;
+  protected readonly curvePresets = [...LEVEL_CURVE_PRESETS];
   protected readonly maxLevelBounds = { min: MIN_MAX_LEVEL, max: MAX_LEVEL };
 
   protected readonly startingStatPoints = computed(

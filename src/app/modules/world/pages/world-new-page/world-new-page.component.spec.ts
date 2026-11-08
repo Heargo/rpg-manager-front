@@ -229,7 +229,7 @@ describe('WorldNewPageComponent life and mana bars', () => {
 
 /**
  * Contract (step 3, Rules), reached from the attributes step through `[data-testid="attributes-next"]`:
- * - native `select[name="level-curve"]` with the values flat, growing (default), steep, classic, custom;
+ * - `p-select[data-testid="level-curve-select"]` with the values flat, growing (default), steep, classic, custom;
  * - native `input[name="level-curve-expression"]` for custom only;
  * - `[data-testid="level-curve-preview"]`: XP cost of levels 2 to 6, separated by single spaces;
  * - `[data-testid="level-curve-error"]` present only while a custom curve is invalid, and the Create button is disabled;
@@ -242,22 +242,34 @@ describe('WorldNewPageComponent level curve', () => {
     (host.matches('button') ? (host as HTMLButtonElement) : host.querySelector('button')!).click();
     await new Promise((resolve) => setTimeout(resolve));
     const text = (selector: string) => base.el.querySelector(selector)?.textContent?.trim().replace(/\s+/g, ' ');
+    // The curve is an Optimus p-select: open it and click the option by its label.
+    const labels: Record<string, string> = {
+      flat: 'Flat (100 XP per level)',
+      growing: 'Growing (100 x level)',
+      steep: 'Steep (+50 % per level)',
+      classic: 'Classic tabletop',
+      custom: 'Custom',
+    };
+    const curveLabel = () => base.el.querySelector('[data-testid="level-curve-select"] .p-select-label')?.textContent?.trim();
     const choose = async (value: string) => {
-      const select = base.field('select[name="level-curve"]')!;
-      select.value = value;
-      select.dispatchEvent(new Event('change'));
+      (base.el.querySelector('[data-testid="level-curve-select"]') as HTMLElement).click();
+      await new Promise((resolve) => setTimeout(resolve));
+      const option = Array.from(document.querySelectorAll('li[role="option"]')).find(
+        (item) => item.textContent?.trim() === labels[value],
+      ) as HTMLElement;
+      option.click();
       await new Promise((resolve) => setTimeout(resolve));
     };
     const createDisabled = () => {
       const button = Array.from(base.el.querySelectorAll('button')).find((b) => b.textContent?.trim() === 'Create');
       return button!.disabled;
     };
-    return { ...base, text, choose, createDisabled };
+    return { ...base, text, choose, curveLabel, createDisabled };
   }
 
   it('defaults to Growing, with a preview of levels 2 to 6 and 3 stat points per level', async () => {
-    const { field, text } = await openRulesStep();
-    expect(field('select[name="level-curve"]')!.value).toBe('growing');
+    const { text, curveLabel } = await openRulesStep();
+    expect(curveLabel()).toBe('Growing (100 x level)');
     expect(text('[data-testid="level-curve-preview"]')).toBe('200 300 400 500 600');
     expect((document.querySelector('#stat-points-per-level') as HTMLInputElement).value).toBe('3');
   });

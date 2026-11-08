@@ -82,19 +82,18 @@
               } @else {
                 <span class="step"></span>
               }
-              <input
-                pInputText
+              <p-inputnumber
                 class="cap"
-                type="number"
-                inputmode="numeric"
-                min="1"
-                step="1"
+                inputStyleClass="number"
+                [min]="1"
+                [step]="1"
                 placeholder="∞"
                 [attr.data-testid]="'formula-cap-' + i"
                 [attr.aria-invalid]="capErrors()[i] ? 'true' : null"
                 [ariaLabel]="('world.fields.cap' | transloco) + ' ' + (i + 1)"
-                [value]="attribute.cap ?? ''"
-                (input)="setCap(attribute.key, $any($event.target).value)"
+                [ngModel]="attribute.cap ?? null"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="setCap(attribute.key, $event)"
               />
               <p-button
                 class="remove"

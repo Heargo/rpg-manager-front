@@ -51,10 +51,13 @@ describe('NpcEditorComponent', () => {
     if (npc) fixture.componentRef.setInput('npc', npc);
     await fixture.whenStable();
     const el: HTMLElement = fixture.nativeElement;
-    const field = (name: string) =>
-      el.querySelector<HTMLInputElement>(
+    // Number fields are p-inputnumber hosts: resolve them to their inner input.
+    const field = (name: string) => {
+      const host = el.querySelector<HTMLInputElement>(
         name === 'money' ? '[data-field="money"] input[name="copper"]' : `[data-field="${name}"]`,
       )!;
+      return host.tagName === 'P-INPUTNUMBER' ? (host.querySelector('input') as HTMLInputElement) : host;
+    };
     const settleAll = async () => {
       for (let i = 0; i < 5; i++) {
         await new Promise((resolve) => setTimeout(resolve, 0));
@@ -62,9 +65,13 @@ describe('NpcEditorComponent', () => {
       }
     };
     const type = async (name: string, value: string) => {
-      const input = field(name);
+      const host = field(name);
+      // Number fields are p-inputnumber hosts: drive the inner input and commit on blur.
+      const input = host.matches('input') ? host : ((host as HTMLElement).querySelector('input') ?? host);
+      input.focus();
       input.value = value;
       input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new Event('blur'));
       await fixture.whenStable();
     };
     const click = async (selector: string, index = 0) => {

@@ -75,6 +75,7 @@ The app is zoneless, so signals are the default for state.
 
 - Use Optimus UI components (`@openng/optimus-ui/<component>`, selectors `p-*`) before writing custom ones. Use the Optimus UI docs, not PrimeNG's v22+ docs. Never add `primeng` back. Theme tokens go in `ui.preset.ts`, not in component SCSS.
 - Icons come from `@openng/icons` (`pi pi-<name>`); check the name exists in `node_modules/@openng/icons/openng-icons.css`.
+- Every form control is an Optimus UI one, never a native element styled by hand: numbers `p-inputNumber` (`showButtons` where steps make sense), text `pInputText`, checkboxes `p-checkbox`, switches `p-toggleSwitch`, choices `p-select` / `p-multiselect`. No `<input type="number">`, no bare `<input type="checkbox">`.
 - Toasts go through Optimus UI `MessageService` (provided in `app.config.ts`) with the levels in `core/models/toast-level.ts`.
 
 ## i18n
