@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../../public/i18n/generators/en/items.json';
+import npcNames from '../../../../../../public/i18n/generators/en/npcs.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { WordListService } from '../../../../core/services/word-list.service';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
@@ -44,7 +44,7 @@ describe('NpcEditorComponent', () => {
   async function setup(npc?: Npc) {
     TestBed.configureTestingModule({
       imports: [NpcEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: WordListService, useValue: { loadItemWords: async () => en } }],
+      providers: [...TEST_PROVIDERS, { provide: WordListService, useValue: { loadNpcNames: async () => npcNames } }],
     });
     const fixture = TestBed.createComponent(NpcEditorComponent);
     fixture.componentRef.setInput('world', world);

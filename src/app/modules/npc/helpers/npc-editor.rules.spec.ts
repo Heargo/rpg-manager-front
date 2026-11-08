@@ -1,7 +1,6 @@
-import en from '../../../../../public/i18n/generators/en/items.json';
 import { ITEM_RARITIES } from '../../../core/models/item';
 import { seededRandomSource } from '../../../core/generators/random-source';
-import { WordList } from '../../../core/generators/word-list';
+import { NpcNameList } from '../../../core/generators/npc-name-list';
 import { levelRarity } from '../../character/helpers/level.rules';
 import { createSandboxWorld } from '../../world/helpers/default-world';
 import { Item, World } from '../../world/models/world';
@@ -9,7 +8,15 @@ import { Npc } from '../models/npc';
 import { validateNpc } from './npc.rules';
 import { generateNpc, npcToJson, parseNpcJson, setNpcLevel } from './npc-editor.rules';
 
-const words = en as unknown as WordList;
+const names: NpcNameList = {
+  version: 1,
+  given: [
+    { text: 'Aro', gender: 'm' },
+    { text: 'Mila', gender: 'f' },
+  ],
+  epithets: ['Grim'],
+  templates: ['{given} {epithet}'],
+};
 const items: Item[] = ITEM_RARITIES.flatMap((rarity) =>
   (['weapon1', 'head', 'chest'] as const).map((slot) => ({
     id: `${rarity}-${slot}`,
@@ -141,7 +148,7 @@ describe('parseNpcJson with malformed sheet parts', () => {
 });
 
 describe('generateNpc', () => {
-  const draw = (seed: string) => ({ id: 'g', ...generateNpc(world, seededRandomSource(seed), words) });
+  const draw = (seed: string) => ({ id: 'g', ...generateNpc(world, seededRandomSource(seed), names) });
 
   it('gives the same NPC for the same seed, and another for another seed', () => {
     expect(draw('s1')).toEqual(draw('s1'));
@@ -185,8 +192,14 @@ describe('generateNpc', () => {
     }
   });
 
+  it('takes its name from the NPC name list, not the item words', () => {
+    for (let i = 0; i < 20; i++) {
+      expect(['Aro Grim', 'Mila Grim']).toContain(draw(`name-${i}`).name);
+    }
+  });
+
   it('copes with a world without items', () => {
-    const generated = generateNpc({ ...world, items: [] }, seededRandomSource('empty'), words);
+    const generated = generateNpc({ ...world, items: [] }, seededRandomSource('empty'), names);
     expect(generated.inventory).toEqual([]);
     expect(validateNpc({ id: 'g', ...generated })).toEqual([]);
   });

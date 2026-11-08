@@ -1,7 +1,7 @@
-import { generateItemName } from '../../../core/generators/name-generator';
+import { generateNpcName } from '../../../core/generators/name-generator';
 import { pick, randomInt } from '../../../core/generators/random';
 import { RandomSource } from '../../../core/generators/random-source';
-import { WordList } from '../../../core/generators/word-list';
+import { NpcNameList } from '../../../core/generators/npc-name-list';
 import { EQUIPMENT_SLOTS } from '../../../core/models/item';
 import {
   formulaMax,
@@ -234,11 +234,11 @@ function isObject(value: unknown): value is Record<string, any> {
   return !!value && typeof value === 'object';
 }
 
-/** A random NPC from the world's rules and catalogue: level, attribute levels, gear of its rarity and a name from the word list. */
+/** A random NPC from the world's rules and catalogue: level, attribute levels, gear of its rarity and a name from the NPC name list. */
 export function generateNpc(
   world: World,
   random: RandomSource,
-  words: WordList,
+  names: NpcNameList,
 ): Omit<Npc, 'id'> {
   const level = randomInt(random, 1, world.maxLevel);
   const rarity = levelRarity(level, world.maxLevel);
@@ -284,7 +284,7 @@ export function generateNpc(
 
   const draft: Npc = {
     ...emptyNpc(world),
-    name: generateItemName(random, words, { base: 'item', rarity }),
+    name: generateNpcName(random, names),
     roles: [role],
     inventory,
     money: randomInt(random, 0, level * 50),

@@ -1,9 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { WordListBusiness } from '../../../core/business/word-list.business';
 import {
   createSeed,
   seededRandomSource,
 } from '../../../core/generators/random-source';
+import { NpcNamesBusiness } from './npc-names.business';
 import { Item, World } from '../../world/models/world';
 import {
   addNpcItem,
@@ -26,7 +26,7 @@ import { Npc, NpcRole } from '../models/npc';
 /** What the NPC editor needs: checks, JSON, form edits and the random Generate. */
 @Injectable({ providedIn: 'root' })
 export class NpcEditorBusiness {
-  private readonly words = inject(WordListBusiness);
+  private readonly names = inject(NpcNamesBusiness);
 
   empty(world: World): Npc {
     return emptyNpc(world);
@@ -85,7 +85,7 @@ export class NpcEditorBusiness {
     return generateNpc(
       world,
       seededRandomSource(seed),
-      await this.words.itemWords(),
+      await this.names.names(),
     );
   }
 }
