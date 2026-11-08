@@ -3,7 +3,9 @@ import { ITEM_RARITIES, ITEM_TYPES } from '../../../core/models/item';
 import { isValidMaxLevel, LEVEL_CURVE_PRESETS, validateLevelCurve } from '../../character/helpers/level.rules';
 import { isValidNpcVisibility } from '../../npc/helpers/npc-visibility.rules';
 import { emptySkill, parseSkillJson } from '../../skill/helpers/skill.rules';
+import { emptyClass, parseClassJson } from '../../class/helpers/class.rules';
 import { NPC_ROLES } from '../../npc/models/npc';
+import { Skill } from '../../skill/models/skill';
 import { World } from '../models/world';
 
 export const WORLD_EXPORT_FORMAT = 'rpg-manager-world';
@@ -150,6 +152,13 @@ function validateWorld(world: unknown, errors: string[]): void {
   list(world['skills'], 'world.skills', errors, (skill, path) => {
     if (typeof skill['id'] !== 'string') errors.push(`${path}.id must be a string`);
     for (const issue of parseSkillJson(JSON.stringify(skill), emptySkill(), attributeNames).issues) {
+      errors.push(`${path}.${issue.field} is invalid`);
+    }
+  });
+  const skills = Array.isArray(world['skills']) ? (world['skills'] as Skill[]) : [];
+  list(world['classes'], 'world.classes', errors, (entry, path) => {
+    if (typeof entry['id'] !== 'string') errors.push(`${path}.id must be a string`);
+    for (const issue of parseClassJson(JSON.stringify(entry), emptyClass(), skills, attributeNames).issues) {
       errors.push(`${path}.${issue.field} is invalid`);
     }
   });

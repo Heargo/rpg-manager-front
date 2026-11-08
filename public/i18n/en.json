@@ -22,7 +22,8 @@
     "worldRules": "World rules",
     "npcCatalogue": "NPC catalogue",
     "npcEditor": "NPC editor",
-    "skillCatalogue": "Skill catalogue"
+    "skillCatalogue": "Skill catalogue",
+    "classCatalogue": "Class catalogue"
   },
   "play": {
     "title": "Play",
@@ -909,6 +910,61 @@
         "target": "An active skill needs a target; a passive one has none.",
         "effects_amount": "An effect amount is not a valid formula.",
         "json": "This JSON is not a valid skill."
+      }
+    }
+  },
+  "class": {
+    "catalogue": {
+      "title": "Class catalogue",
+      "back": "Back to the room",
+      "toolIntro": "Try the class catalogue on the sandbox world. Nothing is saved.",
+      "notHosting": "Host a game to edit its classes.",
+      "search": "Search by name",
+      "create": "New class",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "deleteTitle": "Delete this class?",
+      "deleteMessage": "{{ name }} will be removed from the world.",
+      "empty": "No class found.",
+      "copySuffix": "(copy)",
+      "skills": "{{ count }} skill(s) in the tree",
+      "failed": "The class could not be saved."
+    },
+    "tree": {
+      "rank": "{{ rank }}/{{ max }}",
+      "missingLevel": "Level {{ level }}",
+      "missingRequires": "{{ name }} rank {{ rank }}"
+    },
+    "editor": {
+      "tabForm": "Form",
+      "tabJson": "JSON",
+      "jsonHint": "Edit the class as JSON; it is applied to the form while it is valid.",
+      "back": "Back to the catalogue",
+      "save": "Save",
+      "treeHint": "Add skills as nodes, place them on the grid and link them with prerequisites.",
+      "noMoreSkills": "Every skill of the catalogue is in the tree.",
+      "removeNode": "Remove the node",
+      "addRequirement": "Add a prerequisite",
+      "removeRequirement": "Remove the prerequisite",
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "tree": "Skill tree",
+        "column": "Column",
+        "row": "Row",
+        "minLevel": "Minimum level",
+        "requires": "Requires",
+        "rank": "Required rank"
+      },
+      "issue": {
+        "required": "Give the class a name.",
+        "invalid": "A value is out of range or invalid (min level, required rank, bonus attribute or JSON).",
+        "noRoot": "The tree needs at least one skill with no prerequisite.",
+        "cycle": "The prerequisites form a cycle.",
+        "outsideTree": "A prerequisite must be a skill of the same tree.",
+        "duplicate": "A skill can be in the tree only once.",
+        "unknownSkill": "A skill of the tree is not in the catalogue."
       }
     }
   }

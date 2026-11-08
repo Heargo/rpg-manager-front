@@ -3,6 +3,7 @@ import { LanguageBusiness } from '../../../core/business/language.business';
 import { createSandboxWorld } from '../helpers/default-world';
 import { applyWorldRules } from '../helpers/world-rules.rules';
 import { Npc } from '../../npc/models/npc';
+import { CharacterClass } from '../../class/models/class';
 import { Skill } from '../../skill/models/skill';
 import { World, WorldRules } from '../models/world';
 
@@ -37,5 +38,10 @@ export class SandboxWorldBusiness {
   /** Changes the sandbox skills, in memory. */
   updateSkills(change: (skills: Skill[]) => Skill[]): void {
     this.world.update((world) => ({ ...world, skills: change(world.skills) }));
+  }
+
+  /** Changes the sandbox classes, in memory. */
+  updateClasses(change: (classes: CharacterClass[]) => CharacterClass[]): void {
+    this.world.update((world) => ({ ...world, classes: change(world.classes) }));
   }
 }

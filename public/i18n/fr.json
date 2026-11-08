@@ -22,7 +22,8 @@
     "worldRules": "Règles du monde",
     "npcCatalogue": "Catalogue de PNJ",
     "npcEditor": "Éditeur de PNJ",
-    "skillCatalogue": "Catalogue de compétences"
+    "skillCatalogue": "Catalogue de compétences",
+    "classCatalogue": "Catalogue de classes"
   },
   "play": {
     "title": "Jouer",
@@ -909,6 +910,61 @@
         "target": "Une compétence active a une cible ; une passive n'en a pas.",
         "effects_amount": "Le montant d'un effet n'est pas une formule valide.",
         "json": "Ce JSON n'est pas une compétence valide."
+      }
+    }
+  },
+  "class": {
+    "catalogue": {
+      "title": "Catalogue de classes",
+      "back": "Retour à la salle",
+      "toolIntro": "Essayez le catalogue de classes sur le monde bac à sable. Rien n'est enregistré.",
+      "notHosting": "Hébergez une partie pour modifier ses classes.",
+      "search": "Rechercher par nom",
+      "create": "Nouvelle classe",
+      "edit": "Modifier",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer cette classe ?",
+      "deleteMessage": "{{ name }} sera retirée du monde.",
+      "empty": "Aucune classe trouvée.",
+      "copySuffix": "(copie)",
+      "skills": "{{ count }} compétence(s) dans l'arbre",
+      "failed": "La classe n'a pas pu être enregistrée."
+    },
+    "tree": {
+      "rank": "{{ rank }}/{{ max }}",
+      "missingLevel": "Niveau {{ level }}",
+      "missingRequires": "{{ name }} rang {{ rank }}"
+    },
+    "editor": {
+      "tabForm": "Formulaire",
+      "tabJson": "JSON",
+      "jsonHint": "Modifiez la classe en JSON ; il est appliqué au formulaire tant qu'il est valide.",
+      "back": "Retour au catalogue",
+      "save": "Enregistrer",
+      "treeHint": "Ajoutez des compétences comme nœuds, placez-les sur la grille et reliez-les par des prérequis.",
+      "noMoreSkills": "Toutes les compétences du catalogue sont dans l'arbre.",
+      "removeNode": "Retirer le nœud",
+      "addRequirement": "Ajouter un prérequis",
+      "removeRequirement": "Retirer le prérequis",
+      "fields": {
+        "name": "Nom",
+        "description": "Description",
+        "tree": "Arbre de compétences",
+        "column": "Colonne",
+        "row": "Ligne",
+        "minLevel": "Niveau minimum",
+        "requires": "Nécessite",
+        "rank": "Rang requis"
+      },
+      "issue": {
+        "required": "Donnez un nom à la classe.",
+        "invalid": "Une valeur est invalide ou hors limites (niveau min, rang requis, attribut de bonus ou JSON).",
+        "noRoot": "L'arbre a besoin d'au moins une compétence sans prérequis.",
+        "cycle": "Les prérequis forment un cycle.",
+        "outsideTree": "Un prérequis doit être une compétence du même arbre.",
+        "duplicate": "Une compétence ne peut être qu'une fois dans l'arbre.",
+        "unknownSkill": "Une compétence de l'arbre n'est pas dans le catalogue."
       }
     }
   }

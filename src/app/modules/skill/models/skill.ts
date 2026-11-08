@@ -49,9 +49,9 @@ export interface SkillFilter {
   type: SkillType | undefined;
 }
 
-/** A sheet that has a skill. */
+/** A sheet or class that has a skill. */
 export interface SkillUsage {
-  kind: 'character' | 'npc';
+  kind: 'character' | 'npc' | 'class';
   id: string;
   name: string;
 }

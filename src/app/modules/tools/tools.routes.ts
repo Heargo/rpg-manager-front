@@ -83,6 +83,15 @@ export const routesTools: Routes = [
       ),
   },
   {
+    path: 'tools/classes',
+    canActivate: [NavigationGuard],
+    data: { tool: true },
+    loadComponent: () =>
+      import('./pages/class-catalogue-tool-page/class-catalogue-tool-page.component').then(
+        (m) => m.ClassCatalogueToolPageComponent,
+      ),
+  },
+  {
     path: 'tools/links',
     canActivate: [NavigationGuard],
     loadComponent: () =>

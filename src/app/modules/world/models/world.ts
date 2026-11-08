@@ -2,6 +2,7 @@ import { AttributeFormula } from '../../../core/helpers/formula';
 import { ItemDraft } from '../../../core/models/item';
 import { LevelCurve } from '../../character/helpers/level.rules';
 import { Npc, NpcVisibilityRules } from '../../npc/models/npc';
+import { CharacterClass } from '../../class/models/class';
 import { Skill } from '../../skill/models/skill';
 
 /** An attribute every character of the world has (Strength, Life…). */
@@ -120,6 +121,8 @@ export interface World {
   npcs: Npc[];
   /** The GM's skill catalogue; host-only, never sent in WorldInfo. */
   skills: Skill[];
+  /** The GM's classes, with their skill trees; host-only, never sent in WorldInfo. */
+  classes: CharacterClass[];
   /** GM notes. */
   notes: string;
   illustrationId?: string;

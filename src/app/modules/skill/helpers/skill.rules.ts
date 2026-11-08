@@ -110,10 +110,14 @@ export function filterSkills(skills: Skill[], filter: SkillFilter): Skill[] {
   );
 }
 
-/** The characters and NPCs that have the skill. */
+/** The characters and NPCs that have the skill, then the classes whose tree has it. */
 export function skillUsages(
   skillId: string,
-  sheets: { characters: Sheet[]; npcs: Sheet[] },
+  sheets: {
+    characters: Sheet[];
+    npcs: Sheet[];
+    classes?: { id: string; name: string; tree: { skillId: string }[] }[];
+  },
 ): SkillUsage[] {
   const has = (sheet: Sheet) =>
     sheet.skills.some((entry) => entry.skillId === skillId);
@@ -124,6 +128,9 @@ export function skillUsages(
     ...sheets.npcs
       .filter(has)
       .map((s) => ({ kind: 'npc' as const, id: s.id, name: s.name })),
+    ...(sheets.classes ?? [])
+      .filter((c) => c.tree.some((node) => node.skillId === skillId))
+      .map((c) => ({ kind: 'class' as const, id: c.id, name: c.name })),
   ];
 }
 

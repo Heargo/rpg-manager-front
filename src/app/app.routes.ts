@@ -11,6 +11,7 @@ import { routesItem } from './modules/item/item.routes';
 import { routesTools } from './modules/tools/tools.routes';
 import { routesNpc } from './modules/npc/npc.routes';
 import { routesSkill } from './modules/skill/skill.routes';
+import { routesClass } from './modules/class/class.routes';
 
 export const routes: Routes = [
   ...routesHome,
@@ -24,6 +25,7 @@ export const routes: Routes = [
   ...routesItem,
   ...routesNpc,
   ...routesSkill,
+  ...routesClass,
   ...routesTools,
   { path: '**', redirectTo: '' },
 ];
