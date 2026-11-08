@@ -610,7 +610,7 @@
     "tools": "La page des outils renvoie vers des générateurs gratuits créés par d'autres : Procgen Arcana de Watabou, Fantasy Map Generator d'Azgaar et Squoosh. Ils ne font pas partie de cette application.",
     "illustrationsTitle": "Illustrations",
     "sampleHeroPrefix": "Portrait du héros d'exemple : illustration de",
-    "sampleHeroSuffix": ". Utilisée avec crédit et lien vers son site, comme l'autorise sa FAQ."
+    "sampleHeroSuffix": "."
   },
   "contact": {
     "title": "Contact",
