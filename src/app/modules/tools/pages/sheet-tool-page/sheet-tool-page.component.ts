@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
-import { CardModule } from '@openng/optimus-ui/card';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
+import { CharacterBusiness } from '../../../character/business/character.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterSheetComponent } from '../../../character/components/character-sheet/character-sheet.component';
@@ -17,7 +17,6 @@ import { SandboxCharacterBusiness } from '../../business/sandbox-character.busin
   imports: [
     TranslocoPipe,
     ButtonModule,
-    CardModule,
     SkeletonModule,
     CharacterSheetComponent,
   ],
@@ -36,7 +35,7 @@ import { SandboxCharacterBusiness } from '../../business/sandbox-character.busin
           (onClick)="sandbox.reset()"
         />
       </header>
-      <p-card>
+      <div class="sheet-body">
         @if (sandbox.$character(); as character) {
           <app-character-sheet
             [character]="character"
@@ -48,7 +47,7 @@ import { SandboxCharacterBusiness } from '../../business/sandbox-character.busin
         } @else {
           <p-skeleton height="20rem" />
         }
-      </p-card>
+      </div>
     </div>
   `,
   styles: `
@@ -79,10 +78,16 @@ export class SheetToolPageComponent {
   protected readonly sandbox = inject(SandboxCharacterBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly messages = inject(MessageService);
+  private readonly characters = inject(CharacterBusiness);
 
   protected act(action: CharacterAction): void {
     try {
+      const before = this.sandbox.$character();
       this.sandbox.act(action);
+      const after = this.sandbox.$character();
+      const message = before && after && this.characters.levelUpMessage(before, after);
+      if (message)
+        this.messages.add({ severity: MessageLevel.Success, summary: message, life: 4000 });
     } catch (error) {
       const key =
         error instanceof Error ? error.message : 'room.errors.generic';

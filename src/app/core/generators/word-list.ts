@@ -88,15 +88,15 @@ export function validateWordList(json: unknown): WordListValidation {
   return errors.length === 0 ? { ok: true, value: json as unknown as WordList } : { ok: false, errors };
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function nonEmptyString(value: unknown): value is string {
+export function nonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
-function isAdjective(value: unknown): value is Adjective {
+export function isAdjective(value: unknown): value is Adjective {
   return nonEmptyString(value) || (isRecord(value) && nonEmptyString(value['m']) && nonEmptyString(value['f']));
 }
 

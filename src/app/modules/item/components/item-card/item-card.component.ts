@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { CardModule } from '@openng/optimus-ui/card';
 import { TagModule } from '@openng/optimus-ui/tag';
+import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
+import { SlotSilhouetteComponent } from '../../../../core/components/slot-silhouette/slot-silhouette.component';
 import { ItemDraft } from '../../../../core/models/item';
 import { RARITY_SEVERITY } from '../../helpers/item-display';
 
@@ -9,7 +11,13 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
 @Component({
   selector: 'app-item-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, CardModule, TagModule],
+  imports: [
+    TranslocoPipe,
+    CardModule,
+    TagModule,
+    CoinDisplayComponent,
+    SlotSilhouetteComponent,
+  ],
   template: `
     @let item = this.item();
     <p-card styleClass="item-card">
@@ -40,14 +48,49 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
       }
       <p class="description">{{ item.description }}</p>
       <p class="price">
-        <i class="pi pi-wallet"></i>
-        {{ priceText() ?? ('item.price' | transloco: { price: item.price }) }}
+        <app-coin-display [copper]="item.price" />
       </p>
+      @if (item.slot !== 'none') {
+        <app-slot-silhouette
+          class="slot-icon"
+          [slot]="item.slot"
+          [label]="'item.slot.' + item.slot | transloco"
+        />
+      }
     </p-card>
   `,
   styles: `
     :host {
       display: block;
+      height: 100%;
+    }
+    p-card {
+      position: relative;
+      display: block;
+      height: 100%;
+    }
+    // Fill the cell so every card in a row (and the catalogue) has the same size; the price sits at the bottom.
+    :host ::ng-deep .item-card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    :host ::ng-deep .item-card .p-card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    :host ::ng-deep .item-card .p-card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .slot-icon {
+      position: absolute;
+      right: 0.75rem;
+      bottom: 0.75rem;
+      width: 1.5rem;
+      height: 1.5rem;
     }
     .head {
       display: flex;
@@ -83,16 +126,22 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
     .description {
       margin: 0 0 0.75rem;
       font-style: italic;
+      // Three lines at most, so one long description doesn't stretch every card.
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .price {
+      // Bottom-aligned in every card.
+      margin-top: auto;
       margin: 0;
+      padding-right: 2rem;
       font-weight: 600;
     }
   `,
 })
 export class ItemCardComponent {
   readonly item = input.required<ItemDraft>();
-  /** The price in the world's money format; coins when not given. */
-  readonly priceText = input<string>();
   protected readonly severity = RARITY_SEVERITY;
 }

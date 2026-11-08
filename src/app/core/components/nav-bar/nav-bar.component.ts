@@ -6,6 +6,7 @@ import { MenubarModule } from '@openng/optimus-ui/menubar';
 import { TieredMenu } from '@openng/optimus-ui/tieredmenu';
 import { LanguageBusiness } from '../../business/language.business';
 import { ProfileBusiness } from '../../business/profile.business';
+import { HostOfflineIconComponent } from '../host-offline-icon/host-offline-icon.component';
 import { MenuService } from '../../services/menu.service';
 
 @Component({
@@ -13,7 +14,7 @@ import { MenuService } from '../../services/menu.service';
   templateUrl: './nav-bar.component.html',
   styleUrls: ['./nav-bar.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [MenubarModule, AvatarModule, TieredMenu],
+  imports: [MenubarModule, AvatarModule, TieredMenu, HostOfflineIconComponent],
 })
 export class NavBarComponent {
   protected readonly profileBusiness = inject(ProfileBusiness);

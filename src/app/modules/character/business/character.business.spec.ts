@@ -43,8 +43,8 @@ describe('character creation (host + players)', () => {
     const world = await gm.injector.get(WorldLibraryBusiness).create({
       name: 'Eldoria',
       attributes: [
-        { name: 'Life', baseValue: 10 },
-        { name: 'Strength', baseValue: 2 },
+        { name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+        { name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
       ],
       startingStatPoints: 3,
       startingMoney: 20,

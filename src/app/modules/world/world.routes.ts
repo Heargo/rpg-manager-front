@@ -7,4 +7,9 @@ export const routesWorld: Routes = [
     canActivate: [NavigationGuard],
     loadComponent: () => import('./pages/world-new-page/world-new-page.component').then((m) => m.WorldNewPageComponent),
   },
+  {
+    path: 'room/rules',
+    canActivate: [NavigationGuard],
+    loadComponent: () => import('./pages/world-rules-page/world-rules-page.component').then((m) => m.WorldRulesPageComponent),
+  },
 ];

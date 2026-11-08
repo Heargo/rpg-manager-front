@@ -13,7 +13,9 @@ export class WorldService {
     return this.api.watchCurrent(WORLD_TOPICS.info);
   }
 
+  /** Host only: with no room open there is nobody to tell, and the world is still edited. */
   publishInfo(info: WorldInfo): void {
+    if (this.api.$role() !== 'host') return;
     this.api.publish(WORLD_TOPICS.info, info);
   }
 }

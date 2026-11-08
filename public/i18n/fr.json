@@ -1,6 +1,12 @@
 {
+  "coin": {
+    "gold": "Or",
+    "silver": "Argent",
+    "copper": "Cuivre"
+  },
   "common": {
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "offlineBanner": "Vous êtes hors ligne. Les données enregistrées restent disponibles ; rejoindre une salle demande un réseau."
   },
   "nav": {
     "play": "Jouer",
@@ -9,8 +15,15 @@
     "dice": "Dés",
     "tools": "Outils",
     "itemGenerator": "Générateur d'objets",
+    "itemCatalogue": "Catalogue d'objets",
     "externalTools": "Outils externes",
-    "characterSheet": "Fiche de personnage"
+    "characterSheet": "Fiche de personnage",
+    "itemEditor": "Éditeur d'objets",
+    "worldRules": "Règles du monde",
+    "npcCatalogue": "Catalogue de PNJ",
+    "npcEditor": "Éditeur de PNJ",
+    "skillCatalogue": "Catalogue de compétences",
+    "classCatalogue": "Catalogue de classes"
   },
   "play": {
     "title": "Jouer",
@@ -47,13 +60,20 @@
       },
       "next": "Suivant",
       "back": "Retour",
-      "create": "Créer le monde",
+      "create": "Créer",
       "preview": "Aperçu",
       "attributeCount": "{{ count }} attributs",
       "attributesHint": "Chaque personnage de ce monde a ces attributs. Les joueurs les augmentent avec des points de stats ; les objets peuvent les améliorer.",
       "addAttribute": "Ajouter un attribut",
       "removeAttribute": "Retirer cet attribut",
-      "barsHint": "Les barres s'affichent sur la vue joueur (vie, mana…). Laissez vide si votre jeu n'en a pas."
+      "barsHint": "Les barres s'affichent sur la vue joueur (vie, mana…). Laissez vide si votre jeu n'en a pas.",
+      "formulaHint": "Chaque attribut a une formule qui donne son maximum selon son niveau (de 0 à 5 affichés). Le pas est ce qu'ajoute chaque niveau.",
+      "columns": {
+        "base": "Base",
+        "progression": "Progression",
+        "cap": "Plafond",
+        "max": "Max"
+      }
     },
     "fields": {
       "name": "Nom",
@@ -69,21 +89,18 @@
       "manaBar": "Seconde barre (mana…)",
       "noBar": "Aucune",
       "startingStatPoints": "Points de stats de départ",
+      "startingSkillPoints": "Points de compétence de départ",
       "startingMoney": "Argent de départ",
-      "currency": "Monnaie",
-      "currencySymbol": "Symbole de la monnaie",
-      "starterItems": "Commencer avec des objets par défaut",
-      "starterItemsHint": "Une vingtaine d'objets générés à partir de vos attributs : un équipement par emplacement, des potions, des objets.",
+      "starterItems": "Remplir le catalogue avec des objets par défaut",
+      "starterItemsHint": "Une vingtaine d'objets générés à partir de vos attributs (un équipement par emplacement, des potions, des objets) sont ajoutés au catalogue du monde. Les personnages commencent avec un sac vide : le MJ leur donne des objets depuis le catalogue.",
+      "starterClasses": "Ajouter des classes et compétences par défaut",
+      "starterClassesHint": "Guerrier, Mage et Voleur, chacun avec un arbre de compétences construit sur vos attributs, sont ajoutés au monde. Vous pourrez les modifier ou les supprimer ensuite.",
       "offlineTitle": "Quand l'hôte est hors ligne",
-      "offlineHint": "Les joueurs peuvent toujours lire leur fiche. Choisissez ce qu'ils peuvent encore faire ; les changements sont vérifiés au retour de l'hôte."
-    },
-    "money": {
-      "coins": "Pièces",
-      "dollars": "Dollars ($)",
-      "euros": "Euros (€)",
-      "pounds": "Livres (£)",
-      "yen": "Yens (¥)",
-      "custom": "Personnalisée…"
+      "offlineHint": "Les joueurs peuvent toujours lire leur fiche. Choisissez ce qu'ils peuvent encore faire ; les changements sont vérifiés au retour de l'hôte.",
+      "formula": "Progression",
+      "cap": "Plafond du maximum (avant équipement)",
+      "step": "Pas",
+      "expression": "Expression"
     },
     "offline": {
       "dice": "Lancer les dés",
@@ -91,7 +108,8 @@
       "spendStatPoints": "Dépenser des points de stats",
       "equip": "Équiper et retirer des objets",
       "useConsumables": "Utiliser des consommables",
-      "sell": "Vendre des objets"
+      "sell": "Vendre des objets",
+      "learnSkills": "Apprendre des compétences"
     },
     "defaults": {
       "life": "Vie",
@@ -108,8 +126,68 @@
       "attributeNamesUnique": "Deux attributs ont le même nom.",
       "baseValueInteger": "Les valeurs de base doivent être des nombres entiers.",
       "nonNegativeInteger": "Utilisez un nombre entier, 0 ou plus.",
-      "symbolRequired": "Saisissez le symbole de la monnaie.",
-      "image": "Cette image n'a pas pu être utilisée."
+      "image": "Cette image n'a pas pu être utilisée.",
+      "capInvalid": "Le plafond doit être un nombre entier, 1 ou plus.",
+      "capTooLow": "Le plafond ne peut pas être sous la valeur de base ({{ base }}).",
+      "formulaInvalid": "Corrigez les formules des attributs en rouge.",
+      "maxLevelInvalid": "Le niveau max doit être un entier de 2 à 100.",
+      "levelCurveInvalid": "Courbe invalide : utilisez uniquement level, et chaque niveau doit coûter au moins 1 XP.",
+      "levelCostTooLow": "Le niveau {{ level }} coûte moins de 1 XP : chaque niveau doit coûter au moins 1 XP."
+    },
+    "formula": {
+      "presets": {
+        "linear": "Linéaire",
+        "steep-linear": "Linéaire raide",
+        "diminishing": "Dégressive",
+        "percent": "Pourcentage",
+        "custom": "Personnalisée"
+      },
+      "preview": "Maximum aux niveaux 0 à 5",
+      "help": "Variables : level, base, playerLevel (0 pour l'instant). Lisez le niveau d'un autre attribut par son nom : force, ou [Vie max] entre crochets quand le nom contient des espaces. La casse n'a pas d'importance. Opérateurs : + - * / ^ et parenthèses. Fonctions : min, max, floor, round, sqrt. Le maximum est arrondi à l'entier.",
+      "max": "max {{ from }} → {{ to }}",
+      "helpShort": "Variables : level, base, playerLevel ; un autre attribut par son nom, [entre crochets] s'il a des espaces. + - * / ^ ( ) min max floor round sqrt."
+    },
+    "level": {
+      "title": "Expérience et niveaux",
+      "curve": "Courbe de niveaux",
+      "preview": "XP des niveaux 2 à 6",
+      "maxLevel": "Niveau max",
+      "statPointsPerLevel": "Points de stats par niveau",
+      "skillPointsPerLevel": "Points de compétence par niveau",
+      "customHelp": "Écrivez une expression utilisant uniquement level, par exemple level * 50.",
+      "presets": {
+        "flat": "Constante (100 XP par niveau)",
+        "growing": "Croissante (100 x niveau)",
+        "steep": "Raide (+50 % par niveau)",
+        "classic": "Jeu de rôle classique",
+        "custom": "Personnalisée"
+      }
+    },
+    "rules": {
+      "title": "Règles du monde",
+      "intro": "Modifiez les attributs et les règles du monde. Les changements arrivent aussitôt chez les joueurs; les fiches sont mises à jour.",
+      "open": "Règles du monde",
+      "attributes": "Attributs",
+      "progression": "Progression",
+      "economy": "Économie",
+      "save": "Enregistrer les règles",
+      "saved": "Règles enregistrées",
+      "remove": "Supprimer",
+      "removeTitle": "Supprimer cet attribut ?",
+      "removeMessage": "« {{ name }} » sera retiré de toutes les fiches et des modificateurs d'objets qui l'utilisent.",
+      "notHosting": "Hébergez une salle pour modifier les règles de son monde.",
+      "npcs": {
+        "title": "PNJ sur la table",
+        "hint": "Ce que les joueurs voient d'un PNJ montré par le MJ, selon son rôle. Le nom et le portrait sont toujours visibles ; avec plusieurs rôles, les cases s'additionnent.",
+        "fields": {
+          "description": "Description",
+          "level": "Niveau",
+          "lifeBar": "Barre de vie",
+          "lifeNumbers": "Points de vie",
+          "attributes": "Tous les attributs",
+          "equipment": "Objets équipés"
+        }
+      }
     }
   },
   "character": {
@@ -124,29 +202,48 @@
       "name": "Nom du personnage",
       "portrait": "Portrait",
       "choosePortrait": "Choisir un portrait",
+      "class": "Classe",
       "startsWith": "Votre personnage commence avec",
       "statPoints": "{{ count }} points de stats à dépenser",
-      "money": "{{ count }} d'argent",
+      "money": "Argent de départ",
       "submit": "Créer",
       "later": "Plus tard"
     },
     "errors": {
       "invalid": "Ce personnage ne peut pas être créé.",
       "nameRequired": "Donnez un nom à votre personnage.",
+      "classRequired": "Choisissez une classe pour votre personnage.",
+      "unknownClass": "Cette classe n'existe pas dans ce monde.",
+      "noClasses": "Ce monde n'a pas de classes.",
       "nameTooLong": "Ce nom est trop long.",
       "portraitTooLarge": "Ce portrait est trop lourd.",
       "alreadyExists": "Vous avez déjà un personnage dans cette salle.",
       "notInRoom": "Vous n'êtes plus dans cette salle. Demandez une nouvelle invitation.",
       "hostHasNoCharacter": "Le maître du jeu ne joue pas de personnage.",
+      "attributeCapped": "Cet attribut a déjà atteint son plafond.",
       "noStatPoints": "Plus de points de stats à dépenser.",
       "unknownAttribute": "Cet attribut n'existe pas dans ce monde.",
+      "notABar": "Seuls la vie et le mana ont une valeur actuelle ; les autres attributs sont toujours à leur maximum.",
       "invalidAmount": "Donnez entre 1 et 100 points.",
       "unknownItem": "Cet objet n'est plus dans l'inventaire.",
       "notEquipment": "Seul l'équipement peut être équipé.",
       "notConsumable": "Seuls les consommables peuvent être utilisés.",
       "gameMasterOnly": "Seul le maître du jeu peut faire ça.",
       "unknownCharacter": "Ce personnage n'est pas dans le salon.",
-      "notYours": "Ce n'est pas votre personnage."
+      "notYours": "Ce n'est pas votre personnage.",
+      "held": "Votre copie est en cours de vérification, ou attend le choix du MJ. Réessayez dans un instant.",
+      "offlineNotAllowed": "L'hôte n'a pas autorisé cette action hors ligne.",
+      "notesTooLong": "Ces notes sont trop longues.",
+      "levelZero": "Cet attribut est déjà au niveau 0.",
+      "notInTree": "Cette compétence n'est pas dans l'arbre de la classe.",
+      "skillLocked": "Cette compétence est encore verrouillée.",
+      "skillMaxRank": "Cette compétence est déjà au rang maximum.",
+      "noSkillPoints": "Pas assez de points de compétence.",
+      "skillNeeded": "Une autre compétence apprise a besoin de ce rang.",
+      "skillNotLearned": "Cette compétence n'est pas apprise.",
+      "unknownSkill": "Cette compétence n'existe pas dans ce monde.",
+      "invalidRank": "Ce rang n'est pas valide pour cette compétence.",
+      "unknownClass": "Cette classe n'existe pas dans ce monde."
     },
     "sheet": {
       "playedBy": "Joué par {{ name }}",
@@ -154,22 +251,49 @@
       "money": "Argent",
       "attribute": "Attribut",
       "value": "Valeur",
-      "coins": "{{ count }} pièces",
       "open": "Ouvrir la fiche",
       "notFound": "Ce personnage n'est pas dans le salon.",
       "tabs": {
         "stats": "Stats",
         "equipment": "Équipement",
-        "inventory": "Inventaire"
+        "inventory": "Inventaire",
+        "skills": "Compétences"
       },
       "base": "Base",
-      "points": "Points",
+      "level": "Niveau",
       "bonus": "Bonus",
       "spend": "Dépenser un point",
       "spendOn": "Dépenser un point en {{ name }}",
-      "currentOf": "{{ name }} actuel",
       "grant": "Donner",
-      "grantLabel": "Donner des points de stats"
+      "grantTitle": "Récompenser",
+      "grantLabel": "Points de stats",
+      "lockedOffline": "Indisponible tant que l'hôte est hors ligne",
+      "xp": "Expérience",
+      "grantXpLabel": "Expérience",
+      "grantXp": "Donner",
+      "levelUp": "Niveau {{ level }} ! +{{ points }} points de stats, +{{ skillPoints }} points de compétence",
+      "maxLevel": "Niveau max",
+      "levelBadge": "Niveau {{ level }}",
+      "skillPoints": "Points de compétence",
+      "skillCost": "{{ cost }} par rang",
+      "learnSkill": "Apprendre {{ name }}",
+      "refundSkill": "Reprendre un rang de {{ name }}",
+      "removeSkill": "Retirer {{ name }}",
+      "noClass": "Pas encore de classe.",
+      "taughtSkills": "Autres compétences",
+      "refundFrom": "Reprendre un point à {{ name }}",
+      "tip": {
+        "base": "Base : {{ value }}",
+        "level": "Niveau : {{ value }}",
+        "formula": "Formule : {{ value }}",
+        "result": "Résultat de la formule : {{ value }}",
+        "cap": "Plafond : {{ value }}",
+        "bonus": "Bonus : {{ value }}",
+        "max": "Maximum : {{ value }}",
+        "current": "Actuel : {{ value }}",
+        "class": "Classe : {{ value }}",
+        "skills": "Compétences : {{ value }}"
+      }
     },
     "items": {
       "details": "Détails",
@@ -183,6 +307,34 @@
       "equipped": "Équipé",
       "empty": "L'inventaire est vide.",
       "actions": "Actions pour {{ name }}"
+    },
+    "pickASave": {
+      "title": "Choisir une sauvegarde pour {{name}}",
+      "intro": "La copie de ce joueur diffère de la vôtre. Choisissez la version à conserver ; elle devient la nouvelle version pour tout le monde.",
+      "field": "Champ",
+      "host": "Version de l'hôte",
+      "player": "Version du joueur",
+      "queued": "Actions en attente hors ligne",
+      "keepHost": "Garder la version de l'hôte",
+      "usePlayer": "Utiliser la version du joueur",
+      "fields": {
+        "name": "Nom",
+        "portraitId": "Portrait",
+        "statPoints": "Points de caractéristiques",
+        "money": "Argent",
+        "attributes": "Attributs",
+        "inventory": "Inventaire",
+        "rev": "Révision",
+        "updatedAt": "Mis à jour"
+      },
+      "refused": "{{count}} action(s) en attente n'ont pas pu être appliquées."
+    },
+    "readOnly": "Votre copie de ce personnage diffère de celle de l'hôte. Les actions sont désactivées tant que le MJ n'a pas choisi une sauvegarde.",
+    "notes": {
+      "title": "Notes personnelles",
+      "placeholder": "Seuls vous et le maître du jeu voyez ces notes.",
+      "save": "Enregistrer les notes",
+      "readOnly": "Les notes ne sont pas modifiables tant que l'hôte est hors ligne."
     }
   },
   "item": {
@@ -213,10 +365,74 @@
     "fields": {
       "rarity": "Rareté",
       "type": "Type",
-      "slot": "Emplacement"
+      "slot": "Emplacement",
+      "name": "Nom",
+      "description": "Description",
+      "price": "Prix",
+      "image": "Image"
     },
     "modifiers": "Modificateurs",
-    "price": "{{ price }} pièces"
+    "catalogue": {
+      "title": "Catalogue d'objets",
+      "back": "Retour à la salle",
+      "search": "Rechercher par nom",
+      "price": "Prix",
+      "priceTo": "à",
+      "addDefaults": "Ajouter les objets par défaut",
+      "give": "Donner",
+      "delete": "Supprimer",
+      "empty": "Aucun objet ne correspond.",
+      "deleteTitle": "Supprimer cet objet ?",
+      "deleteMessage": "{{ name }} quitte le catalogue. Les copies déjà dans les inventaires restent.",
+      "giveTitle": "Donner {{ name }}",
+      "giveTo": "Donner à",
+      "noPlayers": "Aucun joueur n'a encore de personnage.",
+      "given": "{{ item }} donné à {{ name }}",
+      "notHosting": "Hébergez un monde pour gérer son catalogue d'objets.",
+      "toolIntro": "Un catalogue d'exemple sur les attributs par défaut. Rien n'est enregistré.",
+      "create": "Nouvel objet",
+      "edit": "Modifier"
+    },
+    "errors": {
+      "invalid": "Cet objet ne peut pas être donné.",
+      "gameMasterOnly": "Seul le maître du jeu donne des objets.",
+      "unknownItem": "Cet objet n'est pas dans le catalogue.",
+      "unknownCharacter": "Ce personnage n'existe pas."
+    },
+    "editor": {
+      "title": "Éditeur d'objets",
+      "titleNew": "Nouvel objet",
+      "titleEdit": "Modifier {{ name }}",
+      "back": "Retour au catalogue",
+      "tabForm": "Formulaire",
+      "tabJson": "JSON",
+      "tabGenerate": "Générer",
+      "jsonHint": "Modifiez l'objet en JSON. Le formulaire suit dès que le JSON est valide.",
+      "generateHint": "Tire un objet au hasard sur les attributs de ce monde et remplit le formulaire. La même graine donne le même objet.",
+      "generate": "Générer",
+      "copyPrompt": "Copier le prompt IA",
+      "copyPromptHint": "Collez-le dans n'importe quelle IA, puis collez le JSON obtenu dans l'onglet JSON.",
+      "promptCopied": "Prompt copié",
+      "copyFailed": "Le prompt n'a pas pu être copié",
+      "imageFailed": "Cette image n'a pas pu être utilisée",
+      "save": "Enregistrer",
+      "saved": "{{ name }} enregistré",
+      "notHosting": "Hébergez un monde pour modifier ses objets.",
+      "notFound": "Cet objet n'est pas dans le catalogue.",
+      "toolIntro": "Créez ou modifiez un objet sur les attributs par défaut. Le résultat reste sur cette page.",
+      "toolIntroEdit": "Modifiez un PNJ du monde bac à sable. Il reste en mémoire et apparaît dans l'outil Catalogue de PNJ.",
+      "result": "Résultat",
+      "issue": {
+        "name": "Le nom est obligatoire.",
+        "description": "La description doit être du texte.",
+        "rarity": "Choisissez une rareté valide.",
+        "type": "Choisissez un type valide.",
+        "slot": "Un emplacement est requis pour l'équipement, et seulement pour lui.",
+        "price": "Le prix doit être de 0 ou plus.",
+        "modifiers": "Les modificateurs sont des entiers sur les attributs de ce monde.",
+        "json": "Ce JSON n'est pas un objet valide."
+      }
+    }
   },
   "dice": {
     "title": "Dés",
@@ -250,6 +466,20 @@
   },
   "room": {
     "title": "Salle",
+    "scan": {
+      "button": "Scanner",
+      "title": "Scanner un QR code",
+      "hintAnswer": "Pointez la caméra vers le QR code affiché sur l'écran du joueur.",
+      "hintInvite": "Pointez la caméra vers le QR code de l'invitation.",
+      "close": "Fermer",
+      "wrongKind": "Ce n'est pas le bon type de code ici.",
+      "unknown": "Ce QR code n'est pas un code de connexion.",
+      "denied": "L'accès à la caméra a été refusé. Collez le code à la place.",
+      "noCamera": "Aucune caméra disponible. Collez le code à la place.",
+      "paste": "Collez le code",
+      "use": "Utiliser ce code",
+      "video": "Aperçu de la caméra"
+    },
     "start": {
       "title": "Jouer ensemble",
       "hostTitle": "Créer une salle",
@@ -287,7 +517,15 @@
       "accept": "Connecter",
       "cancel": "Annuler l'invitation",
       "privacy": "Le lien contient votre adresse réseau : ne l'envoyez qu'aux joueurs que vous invitez.",
-      "forPlayer": "Réinviter {{ name }}"
+      "forPlayer": "Réinviter {{ name }}",
+      "connecting": "Connexion…",
+      "failed": "Connexion directe impossible. Essayez via le relais, ou envoyez une nouvelle invitation",
+      "retry": "Nouvelle invitation",
+      "relay": "Essayer via le relais",
+      "relayUnavailable": "Le relais n'est pas disponible pour le moment. Envoyez plutôt une nouvelle invitation.",
+      "auto": "Le joueur se connecte tout seul dès qu'il ouvre le lien.",
+      "paste": "Coller le code du joueur",
+      "mailboxDown": "Connexion automatique indisponible : demandez son code au joueur"
     },
     "join": {
       "title": "Vous êtes invité",
@@ -296,7 +534,14 @@
       "hint": "L'hôte le colle pour vous faire entrer. Gardez cette page ouverte.",
       "qrAlt": "QR code de votre réponse",
       "waiting": "En attente de l'hôte…",
-      "noCode": "Ce lien ne contient pas de code d'invitation."
+      "noCode": "Ce lien ne contient pas de code d'invitation.",
+      "send": "Envoyer à l'hôte",
+      "comeBack": "Revenez sur cette page : vous serez connecté dès que l'hôte aura collé votre code.",
+      "stillWaiting": "L'hôte n'a pas encore collé votre code.",
+      "failedAway": "La connexion a expiré pendant votre absence. Demandez un nouveau lien à l'hôte, ou une invitation par relais.",
+      "failed": "La connexion a échoué. Demandez un nouveau lien à l'hôte, ou une invitation par relais.",
+      "connectingAuto": "Connexion automatique…",
+      "autoHint": "Gardez cette page ouverte. Si le premier essai échoue, elle réessaie toute seule tant que l'hôte garde l'invitation."
     },
     "lobby": {
       "hosting": "Vous êtes l'hôte",
@@ -306,6 +551,7 @@
       "leave": "Quitter la salle",
       "close": "Fermer la salle",
       "removed": "L'hôte vous a retiré de cette salle.",
+      "pendingInvitesNote": "Les invitations en attente sont perdues si vous rechargez ou fermez cette page.",
       "restored": "Salle rouverte après un rechargement. Les connexions ne survivent pas à un rechargement : utilisez Réinviter à côté de chaque joueur."
     },
     "errors": {
@@ -316,6 +562,8 @@
         "wrongType": "Mauvais type de code : l'hôte a besoin de la réponse du joueur, le joueur de l'invitation."
       },
       "timeout": "Connexion impossible. Réessayez sur le même Wi-Fi.",
+      "inviteUsed": "Cette invitation a déjà été utilisée. Demandez-en une nouvelle à l'hôte.",
+      "inviteExpired": "Cette invitation a expiré. Demandez-en une nouvelle à l'hôte.",
       "unknownInvite": "Cette invitation n'existe plus. Demandez-en une nouvelle.",
       "seatTaken": "Vous êtes déjà dans cette salle sur un autre appareil.",
       "generic": "Une erreur est survenue.",
@@ -327,6 +575,15 @@
       "hostedBy": "Hôte : {{ name }}",
       "lastSeen": "vue {{ date }}",
       "forget": "Oublier cette salle"
+    },
+    "hostOfflineTooltip": "Hôte hors ligne : certaines fonctions restent disponibles ; demandez un nouveau lien d'invitation à l'hôte pour vous reconnecter",
+    "offline": {
+      "title": "Fonctions hors ligne"
+    },
+    "size": {
+      "max": "Maximum conseillé pour cet appareil : {{max}} personnes (vous compris).",
+      "over": "La salle dépasse le maximum conseillé de {{max}} personnes. Vous pouvez continuer, mais le jeu risque de ramer.",
+      "struggling": "Votre connexion peine : les joueurs peuvent subir des délais. Moins de joueurs ou une meilleure connexion aideront."
     }
   },
   "table": {
@@ -360,12 +617,28 @@
       "notesTooLong": "Ces notes sont trop longues.",
       "tooManyImages": "Trop d'images rapides : retirez-en d'abord.",
       "imageMissing": "Cette image n'est pas sur l'appareil de l'hôte.",
-      "gameMasterOnly": "Seul le maître du jeu peut faire ça."
-    }
+      "gameMasterOnly": "Seul le maître du jeu peut faire ça.",
+      "tooManyNpcs": "Quatre PNJ sont déjà sur la table : masquez-en un d'abord."
+    },
+    "npcs": "PNJ"
   },
   "tools": {
     "sandbox": {
-      "name": "Bac à sable"
+      "name": "Bac à sable",
+      "npcs": {
+        "elder": {
+          "name": "Doyenne Maren",
+          "description": "La doyenne du village, gardienne des vieilles histoires."
+        },
+        "merchant": {
+          "name": "Tobias le colporteur",
+          "description": "Vend potions et bibelots depuis sa charrette."
+        },
+        "goblin": {
+          "name": "Gobelin des cavernes",
+          "description": "Un gobelin sournois qui garde un butin."
+        }
+      }
     },
     "itemGenerator": {
       "title": "Générateur d'objets",
@@ -396,8 +669,81 @@
     "sheet": {
       "title": "Fiche de personnage",
       "intro": "Un personnage d'exemple sur les attributs par défaut, avec les objets par défaut dans son sac. Tout suit les règles du jeu et reste sur cette page.",
-      "reset": "Recommencer",
-      "sampleName": "Héros d'exemple"
+      "reset": "Recommencer"
+    }
+  },
+  "home": {
+    "title": "RPG Manager",
+    "pitch": "Construisez votre monde, créez personnages et objets, et jouez avec vos amis directement depuis le navigateur. Pas de compte, pas de serveur : votre partie vit sur votre appareil et les joueurs se connectent directement à l'hôte.",
+    "ctaPlay": "Commencer à jouer",
+    "ctaTools": "Découvrir les outils",
+    "screenshotAlt": "Une carte de personnage de RPG Manager, avec son portrait, son niveau, sa vie et sa mana",
+    "footerCredits": "Crédits",
+    "footerContact": "Contact",
+    "footerPrivacy": "Politique de confidentialité",
+    "scrollDown": "Défiler vers le contenu",
+    "heading": "Votre table, dans le navigateur",
+    "highlightsLabel": "Points forts",
+    "buildTitle": "Construisez votre monde",
+    "buildText": "Attributs, objets et personnages, façonnés pour votre jeu.",
+    "p2pTitle": "Jouez ensemble",
+    "p2pText": "De pair à pair, sans compte et sans serveur.",
+    "toolsTitle": "Des outils sans partie",
+    "toolsText": "Dés, générateur d'objets et fiche de personnage, toujours prêts.",
+    "footerBrand": "RPG Manager",
+    "footerTagline": "Pas de compte, pas de serveur : vos données restent dans votre navigateur.",
+    "footerNav": "Liens du site"
+  },
+  "credits": {
+    "title": "Crédits",
+    "intro": "RPG Manager repose sur le travail de nombreux projets open source et outils gratuits. Merci à leurs auteurs.",
+    "librariesTitle": "Bibliothèques",
+    "toolsTitle": "Outils externes",
+    "tools": "La page des outils renvoie vers des générateurs gratuits créés par d'autres : Procgen Arcana de Watabou, Fantasy Map Generator d'Azgaar et Squoosh. Ils ne font pas partie de cette application.",
+    "illustrationsTitle": "Illustrations",
+    "sampleHeroPrefix": "Portrait du héros d'exemple : illustration de",
+    "sampleHeroSuffix": "."
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "Une question, un bug ou une idée ? Envoyez un message.",
+    "name": "Nom",
+    "email": "E-mail",
+    "message": "Message",
+    "send": "Envoyer",
+    "nameRequired": "Veuillez saisir votre nom.",
+    "emailInvalid": "Veuillez saisir une adresse e-mail valide.",
+    "messageRequired": "Veuillez écrire un message.",
+    "success": "Merci, votre message a été envoyé.",
+    "error": "Votre message n'a pas pu être envoyé. Réessayez plus tard.",
+    "unavailable": "Le formulaire de contact n'est pas disponible dans cette version de l'application."
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "intro": "RPG Manager n'a ni compte ni base de données. Cette page indique ce qui quitte votre appareil.",
+    "local": {
+      "title": "Ce qui reste sur votre appareil",
+      "text": "Votre profil, vos mondes, personnages, objets et réglages sont stockés dans votre navigateur (localStorage et IndexedDB). Ils ne nous sont jamais envoyés. Effacer les données du navigateur les supprime."
+    },
+    "stun": {
+      "title": "Connexion des joueurs (STUN)",
+      "text": "Pour relier les joueurs directement, votre navigateur demande son adresse réseau au serveur STUN public de Google (stun.l.google.com). Ce serveur voit donc votre adresse IP."
+    },
+    "mailbox": {
+      "title": "Boîte aux lettres de signalisation",
+      "text": "Pour permettre de rejoindre via un lien d'invitation, les codes de connexion sont conservés dans une petite boîte aux lettres. Ils deviennent indisponibles après 30 minutes, puis sont purgés."
+    },
+    "relay": {
+      "title": "Relais",
+      "text": "Le relais n'est utilisé qu'en nouvel essai, quand la connexion directe échoue. L'application demande alors à notre fonction Netlify (/.netlify/functions/ice-servers) des identifiants TURN d'Open Relay (Metered). Le relais voit les adresses IP et transporte du trafic chiffré, pas de contenu lisible."
+    },
+    "hosting": {
+      "title": "Hébergement",
+      "text": "L'application est hébergée sur Netlify, qui voit les requêtes qui lui sont faites (comme votre adresse IP et les pages chargées)."
+    },
+    "contact": {
+      "title": "Formulaire de contact",
+      "text": "Les messages envoyés par le formulaire de contact (nom, e-mail et message) sont reçus par Web3Forms, qui nous les transmet. Ne l'utilisez pas si vous ne le souhaitez pas."
     }
   },
   "notFound": {
@@ -429,5 +775,257 @@
       "Zo",
       "Yo"
     ]
+  },
+  "formula": {
+    "errors": {
+      "syntax": "Formule invalide (caractère {{ position }})",
+      "unknownName": "Nom inconnu (caractère {{ position }})",
+      "divisionByZero": "Division par zéro (caractère {{ position }})",
+      "notFinite": "Le résultat n'est pas un nombre fini",
+      "tooLong": "Formule trop longue (200 caractères au maximum)",
+      "tooDeep": "Formule trop imbriquée (32 niveaux au maximum)",
+      "negative": "Max négatif au niveau {{ level }}",
+      "divisionByZeroAtLevel": "Division par zéro (caractère {{ position }}, niveau {{ level }})",
+      "notFiniteAtLevel": "Le résultat n'est pas un nombre fini (niveau {{ level }})"
+    },
+    "chart": {
+      "level": "niv. {{ level }}",
+      "cap": "Plafond {{ cap }}",
+      "maxLabel": "Maximum par niveau",
+      "xpLabel": "Coût en XP par niveau"
+    }
+  },
+  "npc": {
+    "catalogue": {
+      "title": "Catalogue de PNJ",
+      "back": "Retour à la salle",
+      "search": "Rechercher par nom",
+      "roles": "Rôles",
+      "levelMin": "Niveau min",
+      "levelMax": "Niveau max",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer ce PNJ ?",
+      "deleteMessage": "{{ name }} sera retiré du monde.",
+      "empty": "Aucun PNJ trouvé.",
+      "notHosting": "Hébergez une salle pour gérer les PNJ de votre monde.",
+      "toolIntro": "Parcourez les PNJ d'exemple du monde bac à sable. Rien n'est enregistré.",
+      "edit": "Modifier",
+      "create": "Ajouter un PNJ",
+      "copySuffix": "(copie)",
+      "show": "Montrer sur la table",
+      "hide": "Retirer de la table"
+    },
+    "role": {
+      "story": "Histoire",
+      "merchant": "Marchand",
+      "enemy": "Ennemi"
+    },
+    "editor": {
+      "title": "Éditeur de PNJ",
+      "back": "Retour aux PNJ",
+      "toolIntro": "Créez un PNJ sur le monde bac à sable. Il reste en mémoire et apparaît dans l'outil Catalogue de PNJ.",
+      "notFound": "Ce PNJ n'existe pas.",
+      "notHosting": "Hébergez une salle pour gérer les PNJ de votre monde.",
+      "saved": "{{ name }} enregistré.",
+      "tabForm": "Formulaire",
+      "tabJson": "JSON",
+      "tabGenerate": "Générer",
+      "jsonHint": "Modifiez le PNJ en JSON ; il est appliqué au formulaire tant qu'il est valide.",
+      "generateHint": "Tire un PNJ au hasard (nom, niveau, attributs, équipement) depuis une graine ; le formulaire est remplacé.",
+      "generate": "Générer",
+      "save": "Enregistrer",
+      "equipped": "Équipé",
+      "loot": "Butin",
+      "removeItem": "Retirer",
+      "fields": {
+        "name": "Nom",
+        "description": "Description",
+        "roles": "Rôles",
+        "level": "Niveau",
+        "money": "Argent",
+        "attributes": "Niveaux des attributs",
+        "xpReward": "XP donnée",
+        "buyRatio": "Ratio d'achat",
+        "sellRatio": "Ratio de vente",
+        "inventory": "Équipement et inventaire",
+        "addItem": "Ajouter un objet du catalogue",
+        "class": "Classe",
+        "noClass": "Aucune classe",
+        "skills": "Compétences",
+        "addSkill": "Ajouter une compétence du catalogue"
+      },
+      "issue": {
+        "name": "Le nom est obligatoire.",
+        "roles": "Choisissez au moins un rôle valide.",
+        "xpReward": "L'XP donnée doit être un entier, 0 ou plus.",
+        "loot": "Le butin doit venir de l'inventaire.",
+        "merchant": "Les ratios du marchand doivent être entre 0 et 10.",
+        "json": "Le JSON n'est pas valide.",
+        "description": "La description doit être du texte.",
+        "level": "Le niveau doit être un nombre.",
+        "xp": "L'XP doit être un nombre.",
+        "money": "L'argent doit être un nombre.",
+        "statPoints": "Les points de stats doivent être un nombre.",
+        "attributes": "Les attributs ne sont pas valides.",
+        "inventory": "L'inventaire n'est pas valide.",
+        "skills": "Les compétences ne sont pas valides."
+      },
+      "skillPoints": "Points de compétence restants : {{count}}",
+      "learnFromClass": "Apprendre selon la classe",
+      "removeSkill": "Retirer la compétence",
+      "randomClass": "Classe au hasard"
+    }
+  },
+  "skill": {
+    "type": {
+      "active": "Active",
+      "passive": "Passive"
+    },
+    "target": {
+      "self": "Soi",
+      "one-ally": "Un allié",
+      "one-enemy": "Un ennemi",
+      "all-allies": "Tous les alliés",
+      "all-enemies": "Tous les ennemis",
+      "area": "Zone"
+    },
+    "effectKind": {
+      "damage": "Dégâts",
+      "heal": "Soin",
+      "modify": "Modification"
+    },
+    "catalogue": {
+      "title": "Catalogue de compétences",
+      "back": "Retour à la salle",
+      "toolIntro": "Essayez le catalogue de compétences sur le monde bac à sable. Rien n'est enregistré.",
+      "notHosting": "Hébergez une partie pour modifier ses compétences.",
+      "search": "Rechercher par nom",
+      "type": "Type",
+      "create": "Nouvelle compétence",
+      "edit": "Modifier",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer cette compétence ?",
+      "deleteMessage": "{{ name }} sera retirée du monde.",
+      "empty": "Aucune compétence trouvée.",
+      "copySuffix": "(copie)",
+      "ranks": "Jusqu'au rang {{ max }}, {{ cost }} point(s) par rang",
+      "inUse": "{{ name }} est utilisée par {{ usages }} : retirez-la d'abord.",
+      "failed": "La compétence n'a pas pu être enregistrée."
+    },
+    "editor": {
+      "tabForm": "Formulaire",
+      "tabJson": "JSON",
+      "jsonHint": "Modifiez la compétence en JSON ; elle est appliquée au formulaire tant qu'elle est valide.",
+      "back": "Retour au catalogue",
+      "save": "Enregistrer",
+      "addEffect": "Ajouter un effet",
+      "removeEffect": "Retirer l'effet",
+      "formulaHint": "Les montants sont des formules : rank, level et noms d'attributs (les maxima du lanceur).",
+      "preview": "Rang 1 : {{ rank1 }} · Rang {{ max }} : {{ maxRank }}",
+      "fields": {
+        "name": "Nom",
+        "description": "Description",
+        "type": "Type",
+        "rarity": "Rareté",
+        "maxRank": "Rang max (1 à 10)",
+        "pointCost": "Points de compétence par rang",
+        "target": "Cible",
+        "cooldown": "Récupération (tours)",
+        "costAttribute": "Coût : attribut",
+        "costAmount": "Coût : montant",
+        "effects": "Effets",
+        "amount": "Montant",
+        "duration": "Durée (tours, 0 = permanent)"
+      },
+      "issue": {
+        "name": "Donnez un nom à la compétence.",
+        "maxRank": "Le rang max va de 1 à 10.",
+        "pointCost": "Un rang coûte au moins 1 point de compétence.",
+        "target": "Une compétence active a une cible ; une passive n'en a pas.",
+        "effects_amount": "Le montant d'un effet n'est pas une formule valide.",
+        "json": "Ce JSON n'est pas une compétence valide."
+      }
+    }
+  },
+  "class": {
+    "catalogue": {
+      "title": "Catalogue de classes",
+      "back": "Retour à la salle",
+      "toolIntro": "Essayez le catalogue de classes sur le monde bac à sable. Rien n'est enregistré.",
+      "notHosting": "Hébergez une partie pour modifier ses classes.",
+      "search": "Rechercher par nom",
+      "create": "Nouvelle classe",
+      "addDefaults": "Ajouter les classes et compétences par défaut",
+      "edit": "Modifier",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer cette classe ?",
+      "deleteMessage": "{{ name }} sera retirée du monde.",
+      "empty": "Aucune classe trouvée.",
+      "copySuffix": "(copie)",
+      "skills": "{{ count }} compétence(s) dans l'arbre",
+      "failed": "La classe n'a pas pu être enregistrée.",
+      "view": "Voir",
+      "detailsTitle": "Détails de la classe",
+      "bonuses": "Bonus",
+      "startingItems": "Objets de départ",
+      "tree": "Arbre de compétences",
+      "skillList": "Compétences",
+      "maxRank": "Rang max {{ count }}"
+    },
+    "tree": {
+      "rank": "{{ rank }}/{{ max }}",
+      "missingLevel": "Niveau {{ level }}",
+      "missingRequires": "{{ name }} rang {{ rank }}"
+    },
+    "editor": {
+      "tabForm": "Formulaire",
+      "tabJson": "JSON",
+      "jsonHint": "Modifiez la classe en JSON ; il est appliqué au formulaire tant qu'il est valide.",
+      "back": "Retour au catalogue",
+      "save": "Enregistrer",
+      "treeHint": "Glissez des compétences de la palette vers le plateau, déplacez un nœud pour le déplacer, et tirez sa poignée de lien sur une autre compétence pour en faire un prérequis.",
+      "noMoreSkills": "Toutes les compétences du catalogue sont dans l'arbre.",
+      "removeNode": "Retirer le nœud",
+      "removeRequirement": "Retirer le prérequis",
+      "addRequirement": "Ajouter un prérequis",
+      "selectLink": "Sélectionner ce lien",
+      "deleteLink": "Supprimer le lien",
+      "connectHint": "Glissez sur une autre compétence pour la lier",
+      "palette": {
+        "title": "Compétences",
+        "search": "Rechercher une compétence",
+        "add": "Ajouter au plateau",
+        "noMatch": "Aucune compétence ne correspond."
+      },
+      "node": {
+        "maxRank": "Max {{ count }}",
+        "level": "Niv. {{ count }}"
+      },
+      "inspector": {
+        "empty": "Sélectionnez une compétence ou un lien sur le plateau pour le modifier.",
+        "noPrerequisites": "Aucun prérequis : une racine de l'arbre.",
+        "link": "Prérequis"
+      },
+      "fields": {
+        "name": "Nom",
+        "description": "Description",
+        "tree": "Arbre de compétences",
+        "minLevel": "Niveau minimum",
+        "requires": "Nécessite",
+        "rank": "Rang requis"
+      },
+      "issue": {
+        "required": "Donnez un nom à la classe.",
+        "invalid": "Une valeur est invalide ou hors limites (niveau min, rang requis, attribut de bonus ou JSON).",
+        "noRoot": "L'arbre a besoin d'au moins une compétence sans prérequis.",
+        "cycle": "Les prérequis forment un cycle.",
+        "outsideTree": "Un prérequis doit être une compétence du même arbre.",
+        "duplicate": "Une compétence ne peut être qu'une fois dans l'arbre.",
+        "unknownSkill": "Une compétence de l'arbre n'est pas dans le catalogue."
+      }
+    }
   }
 }

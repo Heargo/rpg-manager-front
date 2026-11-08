@@ -8,6 +8,7 @@ import {
 import { TranslocoPipe } from '@jsverse/transloco';
 import { BadgeModule } from '@openng/optimus-ui/badge';
 import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
+import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { Character } from '../../../world/models/world';
 import { CharacterBusiness } from '../../business/character.business';
@@ -20,6 +21,7 @@ import { CharacterBusiness } from '../../business/character.business';
     TranslocoPipe,
     BadgeModule,
     ProgressBarModule,
+    CoinDisplayComponent,
     StoredImageComponent,
   ],
   template: `
@@ -69,7 +71,7 @@ import { CharacterBusiness } from '../../business/character.business';
       </div>
       <div>
         <dt>{{ 'character.sheet.money' | transloco }}</dt>
-        <dd>{{ characters.money(c.money) }}</dd>
+        <dd><app-coin-display [copper]="c.money" /></dd>
       </div>
     </dl>
 

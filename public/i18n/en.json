@@ -1,6 +1,12 @@
 {
+  "coin": {
+    "gold": "Gold",
+    "silver": "Silver",
+    "copper": "Copper"
+  },
   "common": {
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "offlineBanner": "You're offline. Saved data still works; connecting to a room needs a network."
   },
   "nav": {
     "play": "Play",
@@ -9,8 +15,15 @@
     "dice": "Dice",
     "tools": "Tools",
     "itemGenerator": "Item generator",
+    "itemCatalogue": "Item catalogue",
     "externalTools": "External tools",
-    "characterSheet": "Character sheet"
+    "characterSheet": "Character sheet",
+    "itemEditor": "Item editor",
+    "worldRules": "World rules",
+    "npcCatalogue": "NPC catalogue",
+    "npcEditor": "NPC editor",
+    "skillCatalogue": "Skill catalogue",
+    "classCatalogue": "Class catalogue"
   },
   "play": {
     "title": "Play",
@@ -47,13 +60,20 @@
       },
       "next": "Next",
       "back": "Back",
-      "create": "Create the world",
+      "create": "Create",
       "preview": "Preview",
       "attributeCount": "{{ count }} attributes",
       "attributesHint": "Every character of this world has these attributes. Players raise them with stat points; items can boost them.",
       "addAttribute": "Add an attribute",
       "removeAttribute": "Remove this attribute",
-      "barsHint": "Bars are shown on the player view (health, mana…). Leave empty if your game has none."
+      "barsHint": "Bars are shown on the player view (health, mana…). Leave empty if your game has none.",
+      "formulaHint": "Each attribute has a formula that gives its max from its level (0 to 5 shown). Step is how much each level adds.",
+      "columns": {
+        "base": "Base",
+        "progression": "Progression",
+        "cap": "Cap",
+        "max": "Max"
+      }
     },
     "fields": {
       "name": "Name",
@@ -69,21 +89,18 @@
       "manaBar": "Second bar (mana…)",
       "noBar": "None",
       "startingStatPoints": "Starting stat points",
+      "startingSkillPoints": "Starting skill points",
       "startingMoney": "Starting money",
-      "currency": "Currency",
-      "currencySymbol": "Currency symbol",
-      "starterItems": "Start with default items",
-      "starterItemsHint": "About 20 items generated from your attributes: equipment for every slot, potions, objects.",
+      "starterItems": "Fill the catalogue with default items",
+      "starterItemsHint": "About 20 items generated from your attributes (equipment for every slot, potions, objects) are added to the world's catalogue. Characters start with an empty bag: the game master gives them items from the catalogue.",
+      "starterClasses": "Add default classes and skills",
+      "starterClassesHint": "Warrior, Mage and Rogue, each with a skill tree built on your attributes, are added to the world. You can edit or delete them afterwards.",
       "offlineTitle": "When the host is offline",
-      "offlineHint": "Players can always read their sheet. Choose what else they can still do; changes are checked when the host is back."
-    },
-    "money": {
-      "coins": "Coins",
-      "dollars": "Dollars ($)",
-      "euros": "Euros (€)",
-      "pounds": "Pounds (£)",
-      "yen": "Yen (¥)",
-      "custom": "Custom…"
+      "offlineHint": "Players can always read their sheet. Choose what else they can still do; changes are checked when the host is back.",
+      "formula": "Growth",
+      "cap": "Cap of the max (before gear)",
+      "step": "Step",
+      "expression": "Expression"
     },
     "offline": {
       "dice": "Roll dice",
@@ -91,7 +108,8 @@
       "spendStatPoints": "Spend stat points",
       "equip": "Equip and unequip items",
       "useConsumables": "Use consumables",
-      "sell": "Sell items"
+      "sell": "Sell items",
+      "learnSkills": "Learn skills"
     },
     "defaults": {
       "life": "Life",
@@ -108,8 +126,68 @@
       "attributeNamesUnique": "Two attributes have the same name.",
       "baseValueInteger": "Base values must be whole numbers.",
       "nonNegativeInteger": "Use a whole number, 0 or more.",
-      "symbolRequired": "Enter the currency symbol.",
-      "image": "This picture couldn't be used."
+      "image": "This picture couldn't be used.",
+      "capInvalid": "The cap must be a whole number, 1 or more.",
+      "capTooLow": "The cap can't be below the base value ({{ base }}).",
+      "formulaInvalid": "Fix the formulas of the attributes marked in red.",
+      "maxLevelInvalid": "Max level must be a whole number from 2 to 100.",
+      "levelCurveInvalid": "Invalid level curve: use only level, and every level must cost at least 1 XP.",
+      "levelCostTooLow": "Level {{ level }} costs less than 1 XP: every level must cost at least 1 XP."
+    },
+    "formula": {
+      "presets": {
+        "linear": "Linear",
+        "steep-linear": "Steep linear",
+        "diminishing": "Diminishing",
+        "percent": "Percent",
+        "custom": "Custom"
+      },
+      "preview": "Max at levels 0 to 5",
+      "help": "Variables: level, base, playerLevel (0 for now). Read another attribute's level by its name: strength, or [Max life] in square brackets when the name has spaces. Case does not matter. Operators: + - * / ^ and parentheses. Functions: min, max, floor, round, sqrt. The max is rounded to a whole number.",
+      "max": "max {{ from }} → {{ to }}",
+      "helpShort": "Variables: level, base, playerLevel; another attribute by name, [in brackets] if it has spaces. + - * / ^ ( ) min max floor round sqrt."
+    },
+    "level": {
+      "title": "Experience and levels",
+      "curve": "Level curve",
+      "preview": "XP for levels 2 to 6",
+      "maxLevel": "Max level",
+      "statPointsPerLevel": "Stat points per level",
+      "skillPointsPerLevel": "Skill points per level",
+      "customHelp": "Write an expression using only level, for example level * 50.",
+      "presets": {
+        "flat": "Flat (100 XP per level)",
+        "growing": "Growing (100 x level)",
+        "steep": "Steep (+50 % per level)",
+        "classic": "Classic tabletop",
+        "custom": "Custom"
+      }
+    },
+    "rules": {
+      "title": "World rules",
+      "intro": "Edit the attributes and rules of the world. Changes reach the players right away; sheets are updated to match.",
+      "open": "World rules",
+      "attributes": "Attributes",
+      "progression": "Progression",
+      "economy": "Economy",
+      "save": "Save rules",
+      "saved": "Rules saved",
+      "remove": "Delete",
+      "removeTitle": "Delete this attribute?",
+      "removeMessage": "\"{{ name }}\" will be removed from every sheet and from the item modifiers that use it.",
+      "notHosting": "Host a room to edit its world rules.",
+      "npcs": {
+        "title": "NPCs on the table",
+        "hint": "What the players see of an NPC the game master shows, by role. The name and portrait are always shown; with several roles, the ticks add up.",
+        "fields": {
+          "description": "Description",
+          "level": "Level",
+          "lifeBar": "Life bar",
+          "lifeNumbers": "Life numbers",
+          "attributes": "Every attribute",
+          "equipment": "Equipped items"
+        }
+      }
     }
   },
   "character": {
@@ -124,29 +202,48 @@
       "name": "Character name",
       "portrait": "Portrait",
       "choosePortrait": "Choose a portrait",
+      "class": "Class",
       "startsWith": "Your character starts with",
       "statPoints": "{{ count }} stat points to spend",
-      "money": "{{ count }} money",
+      "money": "Starting money",
       "submit": "Create",
       "later": "Later"
     },
     "errors": {
       "invalid": "This character can't be created.",
       "nameRequired": "Give your character a name.",
+      "classRequired": "Choose a class for your character.",
+      "unknownClass": "This class doesn't exist in this world.",
+      "noClasses": "This world has no classes.",
       "nameTooLong": "That name is too long.",
       "portraitTooLarge": "This portrait is too large.",
       "alreadyExists": "You already have a character in this room.",
       "notInRoom": "You're not in this room anymore. Ask for a new invite.",
       "hostHasNoCharacter": "The game master doesn't play a character.",
+      "attributeCapped": "This attribute is already at its cap.",
       "noStatPoints": "No stat points left to spend.",
       "unknownAttribute": "This attribute doesn't exist in this world.",
+      "notABar": "Only life and mana have a current value; the other attributes are always at their maximum.",
       "invalidAmount": "Grant between 1 and 100 points.",
       "unknownItem": "This item isn't in the inventory anymore.",
       "notEquipment": "Only equipment can be equipped.",
       "notConsumable": "Only consumables can be used.",
       "gameMasterOnly": "Only the game master can do that.",
       "unknownCharacter": "This character isn't in the room.",
-      "notYours": "This isn't your character."
+      "notYours": "This isn't your character.",
+      "held": "Your copy is being checked, or waits for the game master's pick. Try again in a moment.",
+      "offlineNotAllowed": "The host did not allow this while offline.",
+      "notesTooLong": "These notes are too long.",
+      "levelZero": "This attribute is already at level 0.",
+      "notInTree": "This skill isn't in the class tree.",
+      "skillLocked": "This skill is still locked.",
+      "skillMaxRank": "This skill is already at its max rank.",
+      "noSkillPoints": "Not enough skill points.",
+      "skillNeeded": "Another learned skill needs this rank.",
+      "skillNotLearned": "This skill isn't learned.",
+      "unknownSkill": "This skill doesn't exist in this world.",
+      "invalidRank": "This rank is not valid for this skill.",
+      "unknownClass": "This class doesn't exist in this world."
     },
     "sheet": {
       "playedBy": "Played by {{ name }}",
@@ -154,22 +251,49 @@
       "money": "Money",
       "attribute": "Attribute",
       "value": "Value",
-      "coins": "{{ count }} coins",
       "open": "Open the sheet",
       "notFound": "This character isn't in the room.",
       "tabs": {
         "stats": "Stats",
         "equipment": "Equipment",
-        "inventory": "Inventory"
+        "inventory": "Inventory",
+        "skills": "Skills"
       },
       "base": "Base",
-      "points": "Points",
+      "level": "Level",
       "bonus": "Bonus",
       "spend": "Spend a point",
       "spendOn": "Spend a point on {{ name }}",
-      "currentOf": "Current {{ name }}",
       "grant": "Grant",
-      "grantLabel": "Grant stat points"
+      "grantTitle": "Reward",
+      "grantLabel": "Stat points",
+      "lockedOffline": "Not available while the host is offline",
+      "xp": "Experience",
+      "grantXpLabel": "Experience",
+      "grantXp": "Grant",
+      "levelUp": "Level {{ level }}! +{{ points }} stat points, +{{ skillPoints }} skill points",
+      "maxLevel": "Max level",
+      "levelBadge": "Level {{ level }}",
+      "skillPoints": "Skill points",
+      "skillCost": "{{ cost }} per rank",
+      "learnSkill": "Learn {{ name }}",
+      "refundSkill": "Take back a rank of {{ name }}",
+      "removeSkill": "Remove {{ name }}",
+      "noClass": "No class yet.",
+      "taughtSkills": "Other skills",
+      "refundFrom": "Take back a point from {{ name }}",
+      "tip": {
+        "base": "Base: {{ value }}",
+        "level": "Level: {{ value }}",
+        "formula": "Formula: {{ value }}",
+        "result": "Formula result: {{ value }}",
+        "cap": "Cap: {{ value }}",
+        "bonus": "Bonus: {{ value }}",
+        "max": "Max: {{ value }}",
+        "current": "Current: {{ value }}",
+        "class": "Class: {{ value }}",
+        "skills": "Skills: {{ value }}"
+      }
     },
     "items": {
       "details": "Details",
@@ -183,6 +307,34 @@
       "equipped": "Equipped",
       "empty": "The inventory is empty.",
       "actions": "Actions for {{ name }}"
+    },
+    "pickASave": {
+      "title": "Pick a save for {{name}}",
+      "intro": "This player's copy differs from yours. Choose the version to keep; it becomes the new version for everyone.",
+      "field": "Field",
+      "host": "Host version",
+      "player": "Player version",
+      "queued": "Actions queued while offline",
+      "keepHost": "Keep host version",
+      "usePlayer": "Use player version",
+      "fields": {
+        "name": "Name",
+        "portraitId": "Portrait",
+        "statPoints": "Stat points",
+        "money": "Money",
+        "attributes": "Attributes",
+        "inventory": "Inventory",
+        "rev": "Revision",
+        "updatedAt": "Updated"
+      },
+      "refused": "{{count}} queued action(s) could not be applied."
+    },
+    "readOnly": "Your copy of this character differs from the host's. Actions are off until the game master picks a save.",
+    "notes": {
+      "title": "Personal notes",
+      "placeholder": "Only you and the game master see these notes.",
+      "save": "Save notes",
+      "readOnly": "Notes can't be edited while the host is offline."
     }
   },
   "item": {
@@ -213,10 +365,74 @@
     "fields": {
       "rarity": "Rarity",
       "type": "Type",
-      "slot": "Slot"
+      "slot": "Slot",
+      "name": "Name",
+      "description": "Description",
+      "price": "Price",
+      "image": "Image"
     },
     "modifiers": "Modifiers",
-    "price": "{{ price }} coins"
+    "catalogue": {
+      "title": "Item catalogue",
+      "back": "Back to the room",
+      "search": "Search by name",
+      "price": "Price",
+      "priceTo": "to",
+      "addDefaults": "Add default items",
+      "give": "Give",
+      "delete": "Delete",
+      "empty": "No item matches.",
+      "deleteTitle": "Delete this item?",
+      "deleteMessage": "{{ name }} leaves the catalogue. Copies already in inventories stay.",
+      "giveTitle": "Give {{ name }}",
+      "giveTo": "Give to",
+      "noPlayers": "No player has a character yet.",
+      "given": "{{ item }} given to {{ name }}",
+      "notHosting": "Host a world to manage its item catalogue.",
+      "toolIntro": "A sample catalogue on the default attributes. Nothing is saved.",
+      "create": "New item",
+      "edit": "Edit"
+    },
+    "errors": {
+      "invalid": "This item can't be given.",
+      "gameMasterOnly": "Only the game master gives items.",
+      "unknownItem": "This item isn't in the catalogue.",
+      "unknownCharacter": "This character doesn't exist."
+    },
+    "editor": {
+      "title": "Item editor",
+      "titleNew": "New item",
+      "titleEdit": "Edit {{ name }}",
+      "back": "Back to the catalogue",
+      "tabForm": "Form",
+      "tabJson": "JSON",
+      "tabGenerate": "Generate",
+      "jsonHint": "Edit the item as JSON. The form follows as soon as the JSON is valid.",
+      "generateHint": "Draws a random item on this world's attributes and fills the form. The same seed gives the same item.",
+      "generate": "Generate",
+      "copyPrompt": "Copy the AI prompt",
+      "copyPromptHint": "Paste it in any AI chat, then paste the JSON it gives back in the JSON tab.",
+      "promptCopied": "Prompt copied",
+      "copyFailed": "The prompt could not be copied",
+      "imageFailed": "This image could not be used",
+      "save": "Save",
+      "saved": "{{ name }} saved",
+      "notHosting": "Host a world to edit its items.",
+      "notFound": "This item isn't in the catalogue.",
+      "toolIntro": "Create or edit an item on the default attributes. The result stays on this page.",
+      "toolIntroEdit": "Edit an NPC of the sandbox world. It stays in memory and shows in the NPC catalogue tool.",
+      "result": "Result",
+      "issue": {
+        "name": "The name is required.",
+        "description": "The description must be text.",
+        "rarity": "Pick a valid rarity.",
+        "type": "Pick a valid type.",
+        "slot": "A slot is needed for equipment and only for equipment.",
+        "price": "The price must be 0 or more.",
+        "modifiers": "Modifiers must be whole numbers on the attributes of this world.",
+        "json": "This is not valid JSON for an item."
+      }
+    }
   },
   "dice": {
     "title": "Dice",
@@ -250,6 +466,20 @@
   },
   "room": {
     "title": "Room",
+    "scan": {
+      "button": "Scan",
+      "title": "Scan a QR code",
+      "hintAnswer": "Point the camera at the QR code on the player's screen.",
+      "hintInvite": "Point the camera at the invite QR code.",
+      "close": "Close",
+      "wrongKind": "This is not the right kind of code here.",
+      "unknown": "This QR code is not a connection code.",
+      "denied": "Camera access was denied. Paste the code instead.",
+      "noCamera": "No camera available. Paste the code instead.",
+      "paste": "Paste the code",
+      "use": "Use this code",
+      "video": "Camera preview"
+    },
     "start": {
       "title": "Play together",
       "hostTitle": "Host a room",
@@ -287,7 +517,15 @@
       "accept": "Connect",
       "cancel": "Cancel invite",
       "privacy": "The link contains your network address: only send it to players you're inviting.",
-      "forPlayer": "Re-invite {{ name }}"
+      "forPlayer": "Re-invite {{ name }}",
+      "connecting": "Connecting…",
+      "failed": "Couldn't connect directly. Try through the relay, or send a new invite",
+      "retry": "New invite",
+      "relay": "Try through the relay",
+      "relayUnavailable": "The relay isn't available right now. Send a new invite instead.",
+      "auto": "The player connects by themselves once they open the link.",
+      "paste": "Paste the player's code",
+      "mailboxDown": "Automatic connection unavailable: ask the player for their code"
     },
     "join": {
       "title": "You've been invited",
@@ -296,7 +534,14 @@
       "hint": "The host pastes it to let you in. Keep this page open.",
       "qrAlt": "QR code of your answer",
       "waiting": "Waiting for the host…",
-      "noCode": "This link has no invite code."
+      "noCode": "This link has no invite code.",
+      "send": "Send to the host",
+      "comeBack": "Come back to this page: you'll be connected as soon as the host pastes your code.",
+      "stillWaiting": "Still waiting for the host to paste your code.",
+      "failedAway": "The connection timed out while you were away. Ask the host for a new link, or for a relay invite.",
+      "failed": "The connection failed. Ask the host for a new link, or for a relay invite.",
+      "connectingAuto": "Connecting automatically…",
+      "autoHint": "Keep this page open. If the first try fails, it tries again by itself while the host keeps the invite."
     },
     "lobby": {
       "hosting": "You're hosting",
@@ -306,6 +551,7 @@
       "leave": "Leave the room",
       "close": "Close the room",
       "removed": "The host removed you from this room.",
+      "pendingInvitesNote": "Pending invites are lost if you reload or close this page.",
       "restored": "Room reopened after a reload. Connections don't survive a reload: use Re-invite next to each player."
     },
     "errors": {
@@ -316,6 +562,8 @@
         "wrongType": "Wrong kind of code: the host needs the player's answer, the player needs the invite."
       },
       "timeout": "Couldn't connect. Try again on the same Wi-Fi.",
+      "inviteUsed": "This invite was already used. Ask the host for a new one.",
+      "inviteExpired": "This invite has expired. Ask the host for a new one.",
       "unknownInvite": "This invite no longer exists. Ask for a new one.",
       "seatTaken": "You're already in this room on another device.",
       "generic": "Something went wrong.",
@@ -327,6 +575,15 @@
       "hostedBy": "Host: {{ name }}",
       "lastSeen": "last seen {{ date }}",
       "forget": "Forget this room"
+    },
+    "hostOfflineTooltip": "Host offline: some features still work; ask the host for a new invite to reconnect",
+    "offline": {
+      "title": "Offline features"
+    },
+    "size": {
+      "max": "Recommended maximum for this device: {{max}} people (you included).",
+      "over": "The room is over the recommended maximum of {{max}} people. You can keep playing, but the game may lag.",
+      "struggling": "Your connection is struggling: players may see delays. Fewer players or a better connection will help."
     }
   },
   "table": {
@@ -360,12 +617,28 @@
       "notesTooLong": "These notes are too long.",
       "tooManyImages": "Too many quick images: remove some first.",
       "imageMissing": "This picture isn't on the host's device.",
-      "gameMasterOnly": "Only the game master can do that."
-    }
+      "gameMasterOnly": "Only the game master can do that.",
+      "tooManyNpcs": "Four NPCs are already on the table: hide one first."
+    },
+    "npcs": "NPCs"
   },
   "tools": {
     "sandbox": {
-      "name": "Sandbox"
+      "name": "Sandbox",
+      "npcs": {
+        "elder": {
+          "name": "Elder Maren",
+          "description": "The village elder, keeper of old stories."
+        },
+        "merchant": {
+          "name": "Tobias the peddler",
+          "description": "Sells potions and trinkets from his cart."
+        },
+        "goblin": {
+          "name": "Cave goblin",
+          "description": "A sneaky goblin guarding a stash of loot."
+        }
+      }
     },
     "itemGenerator": {
       "title": "Item generator",
@@ -396,8 +669,81 @@
     "sheet": {
       "title": "Character sheet",
       "intro": "A sample character on the default attributes, with the default items in the bag. Everything follows the game rules and stays on this page.",
-      "reset": "Start over",
-      "sampleName": "Sample hero"
+      "reset": "Start over"
+    }
+  },
+  "home": {
+    "title": "RPG Manager",
+    "pitch": "Build your world, create characters and items, and play with your friends straight from the browser. No account, no server: your game lives on your device and players connect directly to the host.",
+    "ctaPlay": "Start playing",
+    "ctaTools": "Discover the tools",
+    "screenshotAlt": "An RPG Manager character card with its portrait, level, life and mana",
+    "footerCredits": "Credits",
+    "footerContact": "Contact",
+    "footerPrivacy": "Privacy policy",
+    "scrollDown": "Scroll down to the content",
+    "heading": "Your table, in the browser",
+    "highlightsLabel": "Highlights",
+    "buildTitle": "Build your world",
+    "buildText": "Attributes, items and characters, shaped to your game.",
+    "p2pTitle": "Play together",
+    "p2pText": "Peer to peer, with no account and no server.",
+    "toolsTitle": "Tools without a game",
+    "toolsText": "Dice, item generator and character sheet, ready any time.",
+    "footerBrand": "RPG Manager",
+    "footerTagline": "No account, no server: your data stays in your browser.",
+    "footerNav": "Site links"
+  },
+  "credits": {
+    "title": "Credits",
+    "intro": "RPG Manager is built on the work of many open source projects and free tools. Thank you to their authors.",
+    "librariesTitle": "Libraries",
+    "toolsTitle": "External tools",
+    "tools": "The tools page links to free generators by others: Watabou's Procgen Arcana, Azgaar's Fantasy Map Generator and Squoosh. They are not part of this app.",
+    "illustrationsTitle": "Illustrations",
+    "sampleHeroPrefix": "Sample hero portrait: art by",
+    "sampleHeroSuffix": "."
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "A question, a bug or an idea? Send a message.",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send",
+    "nameRequired": "Please enter your name.",
+    "emailInvalid": "Please enter a valid email address.",
+    "messageRequired": "Please write a message.",
+    "success": "Thank you, your message was sent.",
+    "error": "Your message could not be sent. Try again later.",
+    "unavailable": "The contact form is unavailable in this version of the app."
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "intro": "RPG Manager has no accounts and no database. This page says what leaves your device.",
+    "local": {
+      "title": "What stays on your device",
+      "text": "Your profile, worlds, characters, items and settings are stored in your browser (localStorage and IndexedDB). They are never sent to us. Clearing your browser data erases them."
+    },
+    "stun": {
+      "title": "Connecting players (STUN)",
+      "text": "To connect players directly, your browser asks Google's public STUN server (stun.l.google.com) for its network address. That server therefore sees your IP address."
+    },
+    "mailbox": {
+      "title": "Signalling mailbox",
+      "text": "To let a player join from an invite link, the connection codes are held in a small mailbox. They become unavailable after 30 minutes, then are purged."
+    },
+    "relay": {
+      "title": "Relay",
+      "text": "The relay is only used on retry, when a direct connection fails. The app then asks our Netlify Function (/.netlify/functions/ice-servers) for TURN credentials from Open Relay (Metered). The relay sees IP addresses and carries encrypted traffic, not readable content."
+    },
+    "hosting": {
+      "title": "Hosting",
+      "text": "The app is hosted on Netlify, which sees the requests made to it (such as your IP address and the pages you load)."
+    },
+    "contact": {
+      "title": "Contact form",
+      "text": "Messages sent with the contact form (name, email and message) are received by Web3Forms, which forwards them to us. Do not use it if you do not want this."
     }
   },
   "notFound": {
@@ -429,5 +775,257 @@
       "ZB",
       "YB"
     ]
+  },
+  "formula": {
+    "errors": {
+      "syntax": "Invalid formula (character {{ position }})",
+      "unknownName": "Unknown name (character {{ position }})",
+      "divisionByZero": "Division by zero (character {{ position }})",
+      "notFinite": "The result is not a finite number",
+      "tooLong": "Formula too long (200 characters at most)",
+      "tooDeep": "Formula too deeply nested (32 levels at most)",
+      "negative": "Negative max at level {{ level }}",
+      "divisionByZeroAtLevel": "Division by zero (character {{ position }}, level {{ level }})",
+      "notFiniteAtLevel": "The result is not a finite number (level {{ level }})"
+    },
+    "chart": {
+      "level": "lvl {{ level }}",
+      "cap": "Cap {{ cap }}",
+      "maxLabel": "Max per level",
+      "xpLabel": "XP cost per level"
+    }
+  },
+  "npc": {
+    "catalogue": {
+      "title": "NPC catalogue",
+      "back": "Back to the room",
+      "search": "Search by name",
+      "roles": "Roles",
+      "levelMin": "Min level",
+      "levelMax": "Max level",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "deleteTitle": "Delete this NPC?",
+      "deleteMessage": "{{ name }} will be removed from the world.",
+      "empty": "No NPC found.",
+      "notHosting": "Host a room to manage the NPCs of your world.",
+      "toolIntro": "Browse the sample NPCs of the sandbox world. Nothing is saved.",
+      "edit": "Edit",
+      "create": "Add NPC",
+      "copySuffix": "(copy)",
+      "show": "Show on the table",
+      "hide": "Hide from the table"
+    },
+    "role": {
+      "story": "Story",
+      "merchant": "Merchant",
+      "enemy": "Enemy"
+    },
+    "editor": {
+      "title": "NPC editor",
+      "back": "Back to the NPCs",
+      "toolIntro": "Create an NPC on the sandbox world. It stays in memory and shows in the NPC catalogue tool.",
+      "notFound": "This NPC does not exist.",
+      "notHosting": "Host a room to manage the NPCs of your world.",
+      "saved": "{{ name }} saved.",
+      "tabForm": "Form",
+      "tabJson": "JSON",
+      "tabGenerate": "Generate",
+      "jsonHint": "Edit the NPC as JSON; it is applied to the form while it is valid.",
+      "generateHint": "Draw a random NPC (name, level, attributes, equipment) from a seed; the form is replaced.",
+      "generate": "Generate",
+      "save": "Save",
+      "equipped": "Equipped",
+      "loot": "Loot",
+      "removeItem": "Remove",
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "roles": "Roles",
+        "level": "Level",
+        "money": "Money",
+        "attributes": "Attribute levels",
+        "xpReward": "XP reward",
+        "buyRatio": "Buy ratio",
+        "sellRatio": "Sell ratio",
+        "inventory": "Equipment and inventory",
+        "addItem": "Add an item from the catalogue",
+        "class": "Class",
+        "noClass": "No class",
+        "skills": "Skills",
+        "addSkill": "Add a skill from the catalogue"
+      },
+      "issue": {
+        "name": "The name is required.",
+        "roles": "Pick at least one valid role.",
+        "xpReward": "The XP reward must be a whole number, 0 or more.",
+        "loot": "The loot must come from the inventory.",
+        "merchant": "The merchant ratios must be between 0 and 10.",
+        "json": "The JSON is not valid.",
+        "description": "The description must be text.",
+        "level": "The level must be a number.",
+        "xp": "The XP must be a number.",
+        "money": "The money must be a number.",
+        "statPoints": "The stat points must be a number.",
+        "attributes": "The attributes are not valid.",
+        "inventory": "The inventory is not valid.",
+        "skills": "The skills are not valid."
+      },
+      "skillPoints": "Skill points left: {{count}}",
+      "learnFromClass": "Learn from the class",
+      "removeSkill": "Remove the skill",
+      "randomClass": "Random class"
+    }
+  },
+  "skill": {
+    "type": {
+      "active": "Active",
+      "passive": "Passive"
+    },
+    "target": {
+      "self": "Self",
+      "one-ally": "One ally",
+      "one-enemy": "One enemy",
+      "all-allies": "All allies",
+      "all-enemies": "All enemies",
+      "area": "Area"
+    },
+    "effectKind": {
+      "damage": "Damage",
+      "heal": "Heal",
+      "modify": "Modify"
+    },
+    "catalogue": {
+      "title": "Skill catalogue",
+      "back": "Back to the room",
+      "toolIntro": "Try the skill catalogue on the sandbox world. Nothing is saved.",
+      "notHosting": "Host a game to edit its skills.",
+      "search": "Search by name",
+      "type": "Type",
+      "create": "New skill",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "deleteTitle": "Delete this skill?",
+      "deleteMessage": "{{ name }} will be removed from the world.",
+      "empty": "No skill found.",
+      "copySuffix": "(copy)",
+      "ranks": "Up to rank {{ max }}, {{ cost }} point(s) per rank",
+      "inUse": "{{ name }} is used by {{ usages }}: remove it from them first.",
+      "failed": "The skill could not be saved."
+    },
+    "editor": {
+      "tabForm": "Form",
+      "tabJson": "JSON",
+      "jsonHint": "Edit the skill as JSON; it is applied to the form while it is valid.",
+      "back": "Back to the catalogue",
+      "save": "Save",
+      "addEffect": "Add an effect",
+      "removeEffect": "Remove the effect",
+      "formulaHint": "Amounts are formulas: rank, level and attribute names (the caster's maxima).",
+      "preview": "Rank 1: {{ rank1 }} · Rank {{ max }}: {{ maxRank }}",
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "type": "Type",
+        "rarity": "Rarity",
+        "maxRank": "Max rank (1 to 10)",
+        "pointCost": "Skill points per rank",
+        "target": "Target",
+        "cooldown": "Cooldown (turns)",
+        "costAttribute": "Cost: attribute",
+        "costAmount": "Cost: amount",
+        "effects": "Effects",
+        "amount": "Amount",
+        "duration": "Duration (turns, 0 = permanent)"
+      },
+      "issue": {
+        "name": "Give the skill a name.",
+        "maxRank": "The max rank is from 1 to 10.",
+        "pointCost": "A rank costs at least 1 skill point.",
+        "target": "An active skill needs a target; a passive one has none.",
+        "effects_amount": "An effect amount is not a valid formula.",
+        "json": "This JSON is not a valid skill."
+      }
+    }
+  },
+  "class": {
+    "catalogue": {
+      "title": "Class catalogue",
+      "back": "Back to the room",
+      "toolIntro": "Try the class catalogue on the sandbox world. Nothing is saved.",
+      "notHosting": "Host a game to edit its classes.",
+      "search": "Search by name",
+      "create": "New class",
+      "addDefaults": "Add default classes and skills",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "deleteTitle": "Delete this class?",
+      "deleteMessage": "{{ name }} will be removed from the world.",
+      "empty": "No class found.",
+      "copySuffix": "(copy)",
+      "skills": "{{ count }} skill(s) in the tree",
+      "failed": "The class could not be saved.",
+      "view": "View",
+      "detailsTitle": "Class details",
+      "bonuses": "Bonuses",
+      "startingItems": "Starting items",
+      "tree": "Skill tree",
+      "skillList": "Skills",
+      "maxRank": "Max rank {{ count }}"
+    },
+    "tree": {
+      "rank": "{{ rank }}/{{ max }}",
+      "missingLevel": "Level {{ level }}",
+      "missingRequires": "{{ name }} rank {{ rank }}"
+    },
+    "editor": {
+      "tabForm": "Form",
+      "tabJson": "JSON",
+      "jsonHint": "Edit the class as JSON; it is applied to the form while it is valid.",
+      "back": "Back to the catalogue",
+      "save": "Save",
+      "treeHint": "Drag skills from the palette onto the board, drag a node to move it, and pull its link handle onto another skill to make it a prerequisite.",
+      "noMoreSkills": "Every skill of the catalogue is in the tree.",
+      "removeNode": "Remove the node",
+      "removeRequirement": "Remove the prerequisite",
+      "addRequirement": "Add a prerequisite",
+      "selectLink": "Select this link",
+      "deleteLink": "Delete the link",
+      "connectHint": "Drag onto another skill to link it",
+      "palette": {
+        "title": "Skills",
+        "search": "Search a skill",
+        "add": "Add to the board",
+        "noMatch": "No skill matches."
+      },
+      "node": {
+        "maxRank": "Max {{ count }}",
+        "level": "Lv {{ count }}"
+      },
+      "inspector": {
+        "empty": "Select a skill or a link on the board to edit it.",
+        "noPrerequisites": "No prerequisite: a root of the tree.",
+        "link": "Prerequisite"
+      },
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "tree": "Skill tree",
+        "minLevel": "Minimum level",
+        "requires": "Requires",
+        "rank": "Required rank"
+      },
+      "issue": {
+        "required": "Give the class a name.",
+        "invalid": "A value is out of range or invalid (min level, required rank, bonus attribute or JSON).",
+        "noRoot": "The tree needs at least one skill with no prerequisite.",
+        "cycle": "The prerequisites form a cycle.",
+        "outsideTree": "A prerequisite must be a skill of the same tree.",
+        "duplicate": "A skill can be in the tree only once.",
+        "unknownSkill": "A skill of the tree is not in the catalogue."
+      }
+    }
   }
 }

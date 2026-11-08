@@ -26,6 +26,7 @@ export interface HelloResponse {
 
 export const ROOM_ROUTES = {
   hello: 'room/hello',
+  ping: 'room/ping',
 } as const;
 
 export const ROOM_TOPICS = {

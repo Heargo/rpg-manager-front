@@ -8,11 +8,23 @@
         </div>
         <div class="header-actions">
           <p-button icon="pi pi-th-large" [label]="'table.open' | transloco" routerLink="/room/table" />
+          <p-button icon="pi pi-box" severity="secondary" [label]="'item.catalogue.title' | transloco" routerLink="/room/items" />
+          <p-button icon="pi pi-users" severity="secondary" [label]="'npc.catalogue.title' | transloco" routerLink="/room/npcs" data-testid="open-npcs" />
+          <p-button icon="pi pi-bolt" severity="secondary" [label]="'skill.catalogue.title' | transloco" routerLink="/room/skills" data-testid="open-skills" />
+          <p-button icon="pi pi-sitemap" severity="secondary" [label]="'class.catalogue.title' | transloco" routerLink="/room/classes" data-testid="open-classes" />
+          <p-button icon="pi pi-sliders-h" severity="secondary" [label]="'world.rules.open' | transloco" routerLink="/room/rules" data-testid="open-rules" />
           <p-button icon="pi pi-times" [label]="'room.lobby.close' | transloco" severity="secondary" [text]="true" (onClick)="leave()" />
         </div>
       </header>
       @if (room.$restored()) {
         <p-message severity="info" icon="pi pi-replay">{{ 'room.lobby.restored' | transloco }}</p-message>
+      }
+      <p class="hint room-size-max"><i class="pi pi-users"></i> {{ 'room.size.max' | transloco: { max: size.$recommendedMax() } }}</p>
+      @if (size.$overMax()) {
+        <p-message class="room-size-warning" severity="warn" icon="pi pi-exclamation-triangle">{{ 'room.size.over' | transloco: { max: size.$recommendedMax() } }}</p-message>
+      }
+      @if (size.$struggling()) {
+        <p-message class="room-size-struggling" severity="warn" icon="pi pi-wifi">{{ 'room.size.struggling' | transloco }}</p-message>
       }
       <div class="lobby">
         <app-character-list />
@@ -27,10 +39,18 @@
             />
           }
         </p-card>
+        @if (offlineFeatures.$features(); as features) {
+          <p-card [header]="'room.offline.title' | transloco">
+            <app-offline-features-panel [features]="features" (featuresChange)="setOfflineFeatures($event)" />
+          </p-card>
+        }
         <section class="stack">
           <p-button icon="pi pi-user-plus" [label]="'room.invite.add' | transloco" [loading]="inviting()" (onClick)="invite()" />
           @if (error()) {
             <p-message severity="error" size="small">{{ error() }}</p-message>
+          }
+          @if (room.$pendingInvites().length) {
+            <p class="hint pending-invites-note"><i class="pi pi-info-circle"></i> {{ 'room.lobby.pendingInvitesNote' | transloco }}</p>
           }
           @for (invite of room.$pendingInvites(); track invite.id) {
             <app-invite-card [invite]="invite" />

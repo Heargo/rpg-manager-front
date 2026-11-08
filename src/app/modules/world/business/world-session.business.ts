@@ -1,6 +1,11 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, Injector, signal } from '@angular/core';
+import { CharacterHostBusiness } from '../../character/business/character-host.business';
+import {
+  applyWorldRules,
+  validateWorldRules,
+} from '../helpers/world-rules.rules';
 import { toWorldInfo } from '../helpers/world.factory';
-import { World } from '../models/world';
+import { World, WorldRules } from '../models/world';
 import { WorldService } from '../services/world.service';
 import { WorldLibraryBusiness } from './world-library.business';
 
@@ -12,6 +17,7 @@ import { WorldLibraryBusiness } from './world-library.business';
 export class WorldSessionBusiness {
   private readonly library = inject(WorldLibraryBusiness);
   private readonly service = inject(WorldService);
+  private readonly injector = inject(Injector);
 
   private readonly world = signal<World | null>(null);
   private queue: Promise<unknown> = Promise.resolve();
@@ -45,5 +51,26 @@ export class WorldSessionBusiness {
     });
     this.queue = run.catch(() => undefined);
     return run;
+  }
+
+  /** GM: validates and stores edited rules, republishes `world/info` and the sheets the change touched. */
+  async saveRules(rules: WorldRules): Promise<World> {
+    if (Object.keys(validateWorldRules(rules)).length)
+      throw new Error('Invalid world rules');
+    const saved = await this.update((world) => {
+      const next = applyWorldRules(world, rules, () => crypto.randomUUID());
+      const now = Date.now();
+      return {
+        ...next,
+        characters: next.characters.map((character, i) =>
+          JSON.stringify(character) === JSON.stringify(world.characters[i])
+            ? character
+            : { ...character, rev: character.rev + 1, updatedAt: now },
+        ),
+      };
+    });
+    // Looked up when needed: the character host itself depends on this session.
+    this.injector.get(CharacterHostBusiness).publish();
+    return saved;
   }
 }

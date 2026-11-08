@@ -1,0 +1,56 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  /* fill the viewport below the sticky nav (50px tall, under the 0.5rem body margin) so the footer sits at the bottom */
+  min-height: calc(100vh - 50px - 0.5rem);
+  min-height: calc(100svh - 50px - 0.5rem);
+  /* cancel the global body margin so the footer touches the bottom edge */
+  margin-bottom: -0.5rem;
+}
+
+.page {
+  flex: 1;
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+  padding-block: 1.5rem 2.5rem;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  .lead {
+    margin: 0;
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--p-text-muted-color);
+  }
+}
+
+h2 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.25rem;
+}
+
+.card {
+  padding: 1.25rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 12px;
+  background: var(--p-content-background);
+
+  p {
+    margin: 0;
+    line-height: 1.6;
+  }
+}
+
+a {
+  color: var(--p-primary-color);
+}

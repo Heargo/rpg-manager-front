@@ -41,6 +41,8 @@ export class PeerApi {
   private transport?: RoomTransport;
   private wiring: Subscription[] = [];
   private readonly tracker = createRequestTracker();
+  /** Host: who each request to a player was sent to; only that player's answer counts. */
+  private readonly askedPeer = new Map<string, PeerId>();
   private readonly handlers = new Map<string, PeerHandler>();
   /** Host: last published value per topic. Client: last seq received per topic. */
   private readonly topics = new Map<string, { seq: number; payload: unknown }>();
@@ -66,8 +68,8 @@ export class PeerApi {
     this.open('host');
   }
 
-  createInvite(): Promise<Invite> {
-    return this.hostTransport().createInvite();
+  createInvite(options?: { relay?: boolean }): Promise<Invite> {
+    return this.hostTransport().createInvite(options);
   }
 
   acceptAnswer(inviteId: string, answerCode: string): Promise<PeerId> {
@@ -95,6 +97,7 @@ export class PeerApi {
     this.transport?.close();
     this.transport = undefined;
     this.tracker.rejectAll(new PeerApiError('host-offline', 'Left the room'));
+    this.askedPeer.clear();
     this.topics.clear();
     this.peers.set([]);
     this.role.set('none');
@@ -125,6 +128,32 @@ export class PeerApi {
     return () => {
       if (this.handlers.get(route) === handler) this.handlers.delete(route);
     };
+  }
+
+  /** Host: asks one player (they answer with a handler they `serve`). */
+  requestPeer<Response = unknown, Request = unknown>(
+    peer: PeerId,
+    route: string,
+    payload: Request,
+    timeoutMs = PEER_API_TIMEOUT_MS,
+  ): Promise<Response> {
+    assertValidRoute(route);
+    const transport = this.hostTransport();
+    const { id, promise } = this.tracker.start<Response>(timeoutMs, 'The player did not answer in time');
+    this.askedPeer.set(id, peer);
+    const forget = () => this.askedPeer.delete(id);
+    promise.then(forget, forget);
+    try {
+      transport.send(peer, encodeEnvelope({ v: 1, kind: 'request', id, route, payload }));
+    } catch {
+      this.tracker.reject(id, new PeerApiError('host-offline', 'The player is not connected'));
+    }
+    return promise;
+  }
+
+  /** Host: bytes waiting in a player's channel. */
+  bufferedAmount(peer: PeerId): number {
+    return this.transport?.bufferedAmount(peer) ?? 0;
   }
 
   /** Host: sends a topic's full current state to every player (and to the host's own watchers). */
@@ -200,6 +229,12 @@ export class PeerApi {
   }
 
   private onHostMessage(from: PeerId, envelope: Envelope): void {
+    if (envelope.kind === 'response' || envelope.kind === 'error') {
+      if (this.askedPeer.get(envelope.id) !== from) return;
+      if (envelope.kind === 'response') this.tracker.resolve(envelope.id, envelope.payload);
+      else this.tracker.reject(envelope.id, new PeerApiError(envelope.code, envelope.message));
+      return;
+    }
     if (envelope.kind !== 'request') return;
     const reply = (message: Envelope) => {
       try {
@@ -216,6 +251,9 @@ export class PeerApi {
 
   private onClientMessage(envelope: Envelope): void {
     switch (envelope.kind) {
+      case 'request':
+        this.answerHost(envelope);
+        break;
       case 'response':
         this.tracker.resolve(envelope.id, envelope.payload);
         break;
@@ -230,6 +268,21 @@ export class PeerApi {
         break;
       }
     }
+  }
+
+  /** Player: answers a request from the host. */
+  private answerHost(envelope: Extract<Envelope, { kind: 'request' }>): void {
+    const reply = (message: Envelope) => {
+      try {
+        this.transport?.send(HOST_PEER, encodeEnvelope(message));
+      } catch {
+        // The host is gone: nothing to do.
+      }
+    };
+    this.handle(envelope.route, envelope.payload, HOST_PEER).then(
+      (payload) => reply({ v: 1, kind: 'response', id: envelope.id, payload: payload ?? null }),
+      (error: unknown) => reply({ v: 1, kind: 'error', id: envelope.id, ...toWireError(error) }),
+    );
   }
 
   /** Runs a handler; anything but a PeerApiError becomes `internal`, the same for the host's UI as for players. */

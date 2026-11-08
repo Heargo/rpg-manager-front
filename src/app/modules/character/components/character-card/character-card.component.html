@@ -1,0 +1,72 @@
+@let c = character();
+<div class="frame">
+  <article class="card" [attr.aria-labelledby]="'card-name-' + c.id">
+    <app-stored-image
+      class="portrait"
+      data-testid="card-portrait"
+      [imageId]="c.portraitId"
+      [fallbackSrc]="c.samplePortrait"
+      [alt]="c.name"
+    >
+      <span class="initial">{{ c.name.charAt(0).toUpperCase() }}</span>
+    </app-stored-image>
+
+    <header class="overlay top">
+      <h2 data-testid="card-name" [id]="'card-name-' + c.id">{{ c.name }}</h2>
+      @if (c.className) {
+        <span data-testid="card-class">{{ c.className }}</span>
+      }
+      <span
+        data-testid="character-level"
+        [attr.data-rarity]="levelRarityName()"
+      >
+        <p-tag
+          [severity]="levelSeverity()"
+          [value]="'character.sheet.levelBadge' | transloco: { level: c.level }"
+        />
+      </span>
+    </header>
+
+    <footer class="overlay bottom">
+      <div class="facts">
+        <div class="fact">
+          <app-coin-display [copper]="c.money" />
+        </div>
+      </div>
+      <div class="bars" data-testid="card-bars">
+        @for (bar of bars(); track bar.kind) {
+          <div class="bar" [class]="bar.kind">
+            <div class="bar-label">
+              <span>{{ bar.stat.name }}</span>
+              <span>{{ bar.stat.current }} / {{ bar.stat.max }}</span>
+            </div>
+            <p-progressbar
+              [value]="bar.stat.percent"
+              [showValue]="false"
+              [attr.aria-label]="bar.stat.name"
+            />
+          </div>
+        }
+      </div>
+    </footer>
+  </article>
+  @if (progress(); as p) {
+    <div class="xp-pill">
+      <p-progressbar
+        data-testid="xp-progress"
+        [value]="p.percent"
+        [showValue]="false"
+        [attr.aria-label]="'character.sheet.xp' | transloco"
+      />
+      @if (p.maxed) {
+        <span data-testid="xp-text">{{
+          "character.sheet.maxLevel" | transloco
+        }}</span>
+      } @else {
+        <span data-testid="xp-text"
+          >{{ p.xpIntoLevel }} / {{ p.xpForNext }}</span
+        >
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,77 @@
+:host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.links {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.link {
+  fill: none;
+  stroke: var(--p-text-muted-color);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  transition: stroke 0.15s;
+  &.selected {
+    stroke: var(--p-primary-color);
+    stroke-width: 3;
+  }
+  &.invalid {
+    stroke: var(--p-orange-500, #f97316);
+    stroke-dasharray: 6 4;
+  }
+  &.wire {
+    stroke: var(--p-primary-color);
+    stroke-dasharray: 5 5;
+  }
+}
+.link-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 16;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+.arrow {
+  fill: var(--p-text-muted-color);
+  &.selected {
+    fill: var(--p-primary-color);
+  }
+  &.invalid {
+    fill: var(--p-orange-500, #f97316);
+  }
+}
+.chip {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.3rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 999px;
+  background: var(--p-content-background);
+  color: var(--p-text-color);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.15s;
+  &:hover,
+  &.selected {
+    transform: translate(-50%, -50%) scale(1.12);
+    border-color: var(--p-primary-color);
+    background: var(--p-primary-color);
+    color: var(--p-primary-contrast-color);
+  }
+  &.invalid {
+    border-color: var(--p-orange-500, #f97316);
+  }
+}

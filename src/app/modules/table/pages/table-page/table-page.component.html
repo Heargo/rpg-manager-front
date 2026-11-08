@@ -11,6 +11,7 @@
       </p>
     </div>
     <div class="header-actions">
+      <app-host-offline-icon />
       @if (table.$isGameMaster() && narrow()) {
         <p-button
           icon="pi pi-users"
@@ -80,6 +81,7 @@
     <div class="player-layout">
       <section class="illustration-area">
         <ng-container [ngTemplateOutlet]="illustration" />
+        <app-table-npcs [npcs]="table.$npcs()" />
       </section>
       <aside class="player-side">
         <p-card>
@@ -207,6 +209,7 @@
 <ng-template #scenePanel>
   <div class="scene">
     <ng-container [ngTemplateOutlet]="illustration" />
+    <app-table-npcs [npcs]="table.$npcs()" />
     <div class="scene-actions">
       <p-fileupload
         #uploader

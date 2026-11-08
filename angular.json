@@ -31,6 +31,7 @@
             ],
             "allowedCommonJsDependencies": [
               "dijkstrajs",
+              "jsqr",
               "qrcode"
             ]
           },
@@ -40,7 +41,7 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumError": "1.025MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -81,7 +82,8 @@
           "options": {
             "tsConfig": "tsconfig.spec.json",
             "buildTarget": ":build:testing",
-            "runner": "vitest"
+            "runner": "vitest",
+            "setupFiles": ["src/testing/jsdom-setup.ts"]
           }
         }
       }

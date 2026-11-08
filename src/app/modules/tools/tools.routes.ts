@@ -12,11 +12,80 @@ export const routesTools: Routes = [
       ),
   },
   {
+    path: 'tools/item-catalogue',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/item-catalogue-tool-page/item-catalogue-tool-page.component').then(
+        (m) => m.ItemCatalogueToolPageComponent,
+      ),
+  },
+  {
+    path: 'tools/item-editor',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/item-editor-tool-page/item-editor-tool-page.component').then(
+        (m) => m.ItemEditorToolPageComponent,
+      ),
+  },
+  {
     path: 'tools/character-sheet',
     canActivate: [NavigationGuard],
     loadComponent: () =>
       import('./pages/sheet-tool-page/sheet-tool-page.component').then(
         (m) => m.SheetToolPageComponent,
+      ),
+  },
+  {
+    path: 'tools/world-rules',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/world-rules-tool-page/world-rules-tool-page.component').then(
+        (m) => m.WorldRulesToolPageComponent,
+      ),
+  },
+  {
+    path: 'tools/npc-catalogue',
+    canActivate: [NavigationGuard],
+    data: { tool: true },
+    loadComponent: () =>
+      import('./pages/npc-catalogue-tool-page/npc-catalogue-tool-page.component').then(
+        (m) => m.NpcCatalogueToolPageComponent,
+      ),
+  },
+  {
+    path: 'tools/npc-editor',
+    canActivate: [NavigationGuard],
+    data: { tool: true },
+    loadComponent: () =>
+      import('./pages/npc-editor-tool-page/npc-editor-tool-page.component').then(
+        (m) => m.NpcEditorToolPageComponent,
+      ),
+  },
+  {
+    path: 'tools/npc-editor/:id',
+    canActivate: [NavigationGuard],
+    data: { tool: true },
+    loadComponent: () =>
+      import('./pages/npc-editor-tool-page/npc-editor-tool-page.component').then(
+        (m) => m.NpcEditorToolPageComponent,
+      ),
+  },
+  {
+    path: 'tools/skills',
+    canActivate: [NavigationGuard],
+    data: { tool: true },
+    loadComponent: () =>
+      import('./pages/skill-catalogue-tool-page/skill-catalogue-tool-page.component').then(
+        (m) => m.SkillCatalogueToolPageComponent,
+      ),
+  },
+  {
+    path: 'tools/classes',
+    canActivate: [NavigationGuard],
+    data: { tool: true },
+    loadComponent: () =>
+      import('./pages/class-catalogue-tool-page/class-catalogue-tool-page.component').then(
+        (m) => m.ClassCatalogueToolPageComponent,
       ),
   },
   {

@@ -1,0 +1,56 @@
+:host {
+  display: inline-block;
+  width: 14rem;
+  height: 8rem;
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.line {
+  fill: none;
+  stroke: var(--p-primary-color);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.area {
+  fill: var(--p-primary-color);
+  opacity: 0.15;
+}
+
+.dot {
+  fill: var(--p-primary-color);
+}
+
+.axis {
+  stroke: var(--p-content-border-color);
+  stroke-width: 1;
+}
+
+.cap {
+  stroke: var(--p-text-muted-color);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.cap-label {
+  fill: var(--p-text-muted-color);
+  font-size: 10px;
+}
+
+.value {
+  fill: var(--p-text-color);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tick {
+  fill: var(--p-text-muted-color);
+  font-size: 10px;
+}

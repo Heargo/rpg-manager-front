@@ -1,209 +1,338 @@
 @let c = character();
-<header class="sheet-header">
-  <app-stored-image class="portrait" [imageId]="c.portraitId" [alt]="c.name">
-    <span class="initial">{{ c.name.charAt(0).toUpperCase() }}</span>
-  </app-stored-image>
-  <div class="who">
-    <h1>{{ c.name }}</h1>
+<div class="layout">
+  <app-character-card class="card" [character]="c" [world]="world()" />
+  <div class="details" data-testid="character-details">
     @if (characters.playerName(c.playerId); as player) {
-      <small>{{
+      <small class="played-by">{{
         "character.sheet.playedBy" | transloco: { name: player }
       }}</small>
     }
-    <div class="facts">
-      <span><i class="pi pi-wallet"></i> {{ money(c.money) }}</span>
-      <span>
-        {{ "character.sheet.statPoints" | transloco }}
-        <p-badge
-          [value]="c.statPoints"
-          [severity]="c.statPoints > 0 ? 'info' : 'secondary'"
-        />
-      </span>
-    </div>
-  </div>
-</header>
-
-@for (bar of bars(); track bar.kind) {
-  <div class="bar" [class]="bar.kind">
-    <div class="bar-label">
-      <span>{{ bar.stat.name }}</span>
-      <span>{{ bar.stat.current }} / {{ bar.stat.max }}</span>
-    </div>
-    <p-progressbar
-      [value]="bar.stat.percent"
-      [showValue]="false"
-      [attr.aria-label]="bar.stat.name"
-    />
-  </div>
-}
-
-<p-tabs value="stats">
-  <p-tablist>
-    <p-tab value="stats">
-      {{ "character.sheet.tabs.stats" | transloco }}
-      @if (c.statPoints > 0) {
-        <p-badge [value]="c.statPoints" severity="info" />
-      }
-    </p-tab>
-    <p-tab value="equipment">{{
-      "character.sheet.tabs.equipment" | transloco
-    }}</p-tab>
-    <p-tab value="inventory">
-      {{ "character.sheet.tabs.inventory" | transloco }}
-      <p-badge [value]="c.inventory.length" severity="secondary" />
-    </p-tab>
-  </p-tablist>
-  <p-tabpanels>
-    <!-- Stats -->
-    <p-tabpanel value="stats">
-      @if (gameMaster()) {
-        <form class="grant" (ngSubmit)="grant()">
-          <label for="grant-points">{{
-            "character.sheet.grantLabel" | transloco
-          }}</label>
-          <p-inputnumber
-            inputId="grant-points"
-            [min]="1"
-            [max]="maxGranted"
-            [showButtons]="true"
-            buttonLayout="horizontal"
-            inputStyleClass="grant-input"
-            name="grant"
-            [ngModel]="grantAmount()"
-            (ngModelChange)="grantAmount.set($event ?? 1)"
-          />
-          <p-button
-            type="submit"
-            icon="pi pi-plus"
-            [label]="'character.sheet.grant' | transloco"
-            [disabled]="busy()"
-          />
-        </form>
-      }
-      <table class="stats">
-        <thead>
-          <tr>
-            <th scope="col">{{ "character.sheet.attribute" | transloco }}</th>
-            <th scope="col" class="num">
-              {{ "character.sheet.base" | transloco }}
-            </th>
-            <th scope="col" class="num">
-              {{ "character.sheet.points" | transloco }}
-            </th>
-            <th scope="col" class="num">
-              {{ "character.sheet.bonus" | transloco }}
-            </th>
-            <th scope="col" class="num">
-              {{ "character.sheet.value" | transloco }}
-            </th>
-            @if (canPlay() && c.statPoints > 0) {
-              <th scope="col">
-                <span class="sr-only">{{
-                  "character.sheet.spend" | transloco
-                }}</span>
-              </th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (stat of stats(); track stat.attributeId) {
-            <tr>
-              <th scope="row">{{ stat.name }}</th>
-              <td class="num">{{ stat.base }}</td>
-              <td class="num">{{ stat.points }}</td>
-              <td
-                class="num"
-                [class.plus]="stat.bonus > 0"
-                [class.minus]="stat.bonus < 0"
-              >
-                {{ stat.bonus > 0 ? "+" : "" }}{{ stat.bonus }}
-              </td>
-              <td class="num value">
-                @if (gameMaster()) {
-                  <p-inputnumber
-                    [inputId]="'current-' + stat.attributeId"
-                    [min]="0"
-                    [max]="stat.max"
-                    [ngModel]="stat.current"
-                    (onBlur)="
-                      setCurrent(stat.attributeId, current.value, stat.current)
-                    "
-                    (keydown.enter)="
-                      setCurrent(stat.attributeId, current.value, stat.current)
-                    "
-                    #current
-                    inputStyleClass="current-input"
-                    [ariaLabel]="
-                      'character.sheet.currentOf'
-                        | transloco: { name: stat.name }
-                    "
-                  />
-                  <span class="max">/ {{ stat.max }}</span>
-                } @else {
-                  {{ stat.current }} / {{ stat.max }}
+    <p-tabs value="stats">
+      <p-tablist>
+        <p-tab value="stats">
+          {{ "character.sheet.tabs.stats" | transloco }}
+          @if (c.statPoints > 0) {
+            <p-badge [value]="c.statPoints" severity="info" />
+          }
+        </p-tab>
+        <p-tab value="equipment">{{
+          "character.sheet.tabs.equipment" | transloco
+        }}</p-tab>
+        <p-tab value="inventory">
+          {{ "character.sheet.tabs.inventory" | transloco }}
+          <p-badge [value]="c.inventory.length" severity="secondary" />
+        </p-tab>
+        <p-tab value="skills">
+          {{ "character.sheet.tabs.skills" | transloco }}
+          @if (c.skillPoints > 0) {
+            <p-badge [value]="c.skillPoints" severity="info" />
+          }
+        </p-tab>
+      </p-tablist>
+      <p-tabpanels>
+        <!-- Stats -->
+        <p-tabpanel value="stats">
+          @if (gameMaster()) {
+            <section class="grant-panel" aria-labelledby="grant-title">
+              <h3 id="grant-title" class="grant-title">
+                <i class="pi pi-gift" aria-hidden="true"></i>
+                {{ "character.sheet.grantTitle" | transloco }}
+              </h3>
+              <form class="grant" (ngSubmit)="grantXp()">
+                <label for="grant-xp">{{
+                  "character.sheet.grantXpLabel" | transloco
+                }}</label>
+                <p-inputnumber
+                  inputId="grant-xp"
+                  [min]="1"
+                  [step]="1"
+                  [showButtons]="true"
+                  buttonLayout="horizontal"
+                  inputStyleClass="grant-input"
+                  name="grant-xp"
+                  [ngModel]="grantXpAmount()"
+                  (ngModelChange)="grantXpAmount.set($event ?? 0)"
+                />
+                <p-button
+                  type="submit"
+                  data-testid="grant-xp-button"
+                  icon="pi pi-plus"
+                  [label]="'character.sheet.grantXp' | transloco"
+                  [disabled]="busy()"
+                />
+              </form>
+              <form class="grant" (ngSubmit)="grant()">
+                <label for="grant-points">{{
+                  "character.sheet.grantLabel" | transloco
+                }}</label>
+                <p-inputnumber
+                  inputId="grant-points"
+                  [min]="1"
+                  [max]="maxGranted"
+                  [showButtons]="true"
+                  buttonLayout="horizontal"
+                  inputStyleClass="grant-input"
+                  name="grant"
+                  [ngModel]="grantAmount()"
+                  (ngModelChange)="grantAmount.set($event ?? 1)"
+                />
+                <p-button
+                  type="submit"
+                  icon="pi pi-plus"
+                  [label]="'character.sheet.grant' | transloco"
+                  [disabled]="busy()"
+                />
+              </form>
+            </section>
+          }
+          <table class="stats">
+            <thead>
+              <tr>
+                <th scope="col">
+                  {{ "character.sheet.attribute" | transloco }}
+                </th>
+                <th scope="col" class="num optional">
+                  {{ "character.sheet.level" | transloco }}
+                </th>
+                <th scope="col" class="num">
+                  {{ "character.sheet.value" | transloco }}
+                </th>
+                @if ((canPlay() && c.statPoints > 0) || gameMaster()) {
+                  <th scope="col">
+                    <span class="sr-only">{{
+                      "character.sheet.spend" | transloco
+                    }}</span>
+                  </th>
                 }
-              </td>
-              @if (canPlay() && c.statPoints > 0) {
-                <td>
-                  <p-button
-                    icon="pi pi-plus"
-                    size="small"
-                    [rounded]="true"
-                    [text]="true"
-                    [disabled]="busy()"
-                    [ariaLabel]="
-                      'character.sheet.spendOn' | transloco: { name: stat.name }
-                    "
-                    (onClick)="spend(stat.attributeId)"
-                  />
-                </td>
+              </tr>
+            </thead>
+            <tbody>
+              @for (stat of stats(); track stat.attributeId) {
+                <tr>
+                  <th scope="row">
+                    {{ stat.name }}
+                    @if (stat.bonus !== 0) {
+                      <span
+                        class="bonus"
+                        [class.plus]="stat.bonus > 0"
+                        [class.minus]="stat.bonus < 0"
+                        [attr.aria-label]="'character.sheet.bonus' | transloco"
+                        >{{ stat.bonus > 0 ? "+" : "" }}{{ stat.bonus }}</span
+                      >
+                    }
+                  </th>
+                  <td class="num optional">{{ stat.level }}</td>
+                  <td class="num value">
+                    <span
+                      class="value-text"
+                      [pTooltip]="tooltip(stat.attributeId)"
+                      tooltipPosition="left"
+                      tooltipStyleClass="stat-tip"
+                      tabindex="0"
+                      >{{
+                        stat.isBar ? stat.current + " / " + stat.max : stat.max
+                      }}</span
+                    >
+                  </td>
+                  @if ((canPlay() && c.statPoints > 0) || gameMaster()) {
+                    <td class="actions">
+                      @if (canPlay() && c.statPoints > 0) {
+                        <span
+                          class="lock-wrap"
+                          [attr.data-locked]="
+                            isLocked('spend-stat-point')
+                              ? 'spend-stat-point'
+                              : null
+                          "
+                          [attr.aria-label]="
+                            isLocked('spend-stat-point')
+                              ? ('character.sheet.lockedOffline' | transloco)
+                              : null
+                          "
+                          [pTooltip]="
+                            'character.sheet.lockedOffline' | transloco
+                          "
+                          [tooltipDisabled]="!isLocked('spend-stat-point')"
+                        >
+                          <p-button
+                            icon="pi pi-plus"
+                            [rounded]="true"
+                            [text]="true"
+                            [disabled]="busy() || isLocked('spend-stat-point')"
+                            [ariaLabel]="
+                              'character.sheet.spendOn'
+                                | transloco: { name: stat.name }
+                            "
+                            (onClick)="spend(stat.attributeId)"
+                          />
+                        </span>
+                      }
+                      @if (gameMaster() && stat.level > 0) {
+                        <p-button
+                          icon="pi pi-minus"
+                          [rounded]="true"
+                          [text]="true"
+                          severity="secondary"
+                          [disabled]="busy()"
+                          [ariaLabel]="
+                            'character.sheet.refundFrom'
+                              | transloco: { name: stat.name }
+                          "
+                          (onClick)="refund(stat.attributeId)"
+                        />
+                      }
+                    </td>
+                  }
+                </tr>
               }
-            </tr>
-          }
-        </tbody>
-      </table>
-    </p-tabpanel>
+            </tbody>
+          </table>
+        </p-tabpanel>
 
-    <!-- Equipment -->
-    <p-tabpanel value="equipment">
-      <ul class="slots">
-        @for (slot of slots(); track slot.slot) {
-          <li>
-            <span class="slot-name">{{
-              slotLabel(slot.slot) | transloco
-            }}</span>
-            @if (slot.entry; as entry) {
-              <ng-container
-                *ngTemplateOutlet="tile; context: { $implicit: entry }"
-              />
-            } @else {
-              <div class="tile empty"><i class="pi pi-minus"></i></div>
+        <!-- Equipment -->
+        <p-tabpanel value="equipment">
+          <ul class="slots">
+            @for (slot of slots(); track slot.slot) {
+              <li>
+                <span class="slot-name">{{
+                  slotLabel(slot.slot) | transloco
+                }}</span>
+                @if (slot.entry; as entry) {
+                  <ng-container
+                    *ngTemplateOutlet="tile; context: { $implicit: entry }"
+                  />
+                } @else {
+                  <div class="tile empty">
+                    <app-slot-silhouette
+                      [slot]="slot.slot"
+                      [label]="slotLabel(slot.slot) | transloco"
+                    />
+                  </div>
+                }
+              </li>
             }
-          </li>
-        }
-      </ul>
-    </p-tabpanel>
+          </ul>
+        </p-tabpanel>
 
-    <!-- Inventory -->
-    <p-tabpanel value="inventory">
-      @if (inventory().length) {
-        <ul class="bag">
-          @for (entry of inventory(); track entry.id) {
-            <li>
-              <ng-container
-                *ngTemplateOutlet="tile; context: { $implicit: entry }"
-              />
-            </li>
+        <!-- Inventory -->
+        <p-tabpanel value="inventory">
+          @if (inventory().length) {
+            <ul class="bag">
+              @for (entry of inventory(); track entry.id) {
+                <li>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      tile;
+                      context: { $implicit: entry, showSlot: true }
+                    "
+                  />
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="hint">{{ "character.items.empty" | transloco }}</p>
           }
-        </ul>
-      } @else {
-        <p class="hint">{{ "character.items.empty" | transloco }}</p>
-      }
-    </p-tabpanel>
-  </p-tabpanels>
-</p-tabs>
+        </p-tabpanel>
 
-<ng-template #tile let-entry>
+        <!-- Skills -->
+        <p-tabpanel value="skills">
+          <p class="skill-points" data-skill-points>
+            <i class="pi pi-star" aria-hidden="true"></i>
+            {{ "character.sheet.skillPoints" | transloco }}:
+            <strong>{{ c.skillPoints }}</strong>
+          </p>
+          @if (classView()?.characterClass; as characterClass) {
+            <h3 class="skills-title">{{ characterClass.name }}</h3>
+            <app-skill-tree
+              [tree]="characterClass.tree"
+              [skills]="classView()!.skills"
+              [states]="treeStates()"
+              [ranks]="ranks()"
+            />
+            <ul class="skill-rows">
+              @for (row of treeRows(); track row.skillId) {
+                <li>
+                  <span class="skill-name">{{ row.name }}</span>
+                  <span class="skill-rank">{{
+                    "class.tree.rank"
+                      | transloco: { rank: row.rank, max: row.maxRank }
+                  }}</span>
+                  <small>{{
+                    "character.sheet.skillCost" | transloco: { cost: row.cost }
+                  }}</small>
+                  @if (canPlay() && !gameMaster() && row.learnable) {
+                    <p-button
+                      icon="pi pi-plus"
+                      [rounded]="true"
+                      [text]="true"
+                      [attr.data-learn]="row.skillId"
+                      [disabled]="busy() || isLocked('learn-skill')"
+                      [ariaLabel]="
+                        'character.sheet.learnSkill'
+                          | transloco: { name: row.name }
+                      "
+                      (onClick)="learn(row.skillId)"
+                    />
+                  }
+                  @if (gameMaster() && row.rank > 0) {
+                    <p-button
+                      icon="pi pi-minus"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="secondary"
+                      [attr.data-refund]="row.skillId"
+                      [disabled]="busy()"
+                      [ariaLabel]="
+                        'character.sheet.refundSkill'
+                          | transloco: { name: row.name }
+                      "
+                      (onClick)="refundSkill(row.skillId)"
+                    />
+                  }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="hint">{{ "character.sheet.noClass" | transloco }}</p>
+          }
+          @if (taughtRows().length) {
+            <h3 class="skills-title">
+              {{ "character.sheet.taughtSkills" | transloco }}
+            </h3>
+            <ul class="skill-rows">
+              @for (row of taughtRows(); track row.skillId) {
+                <li [attr.data-taught]="row.skillId">
+                  <span class="skill-name">{{ row.name }}</span>
+                  <span class="skill-rank">{{
+                    "class.tree.rank"
+                      | transloco: { rank: row.rank, max: row.maxRank }
+                  }}</span>
+                  @if (gameMaster()) {
+                    <p-button
+                      icon="pi pi-trash"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="secondary"
+                      [attr.data-remove-taught]="row.skillId"
+                      [disabled]="busy()"
+                      [ariaLabel]="
+                        'character.sheet.removeSkill'
+                          | transloco: { name: row.name }
+                      "
+                      (onClick)="removeTaught(row.skillId)"
+                    />
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </div>
+</div>
+
+<ng-template #tile let-entry let-showSlot="showSlot">
   <div
     class="tile"
     [class]="'rarity-' + entry.item.rarity"
@@ -228,10 +357,20 @@
           "character.items.equipped" | transloco
         }}</span>
       }
+      @if (
+        showSlot &&
+        entry.item.type === "equipment" &&
+        entry.item.slot !== "none"
+      ) {
+        <app-slot-silhouette
+          class="tile-slot"
+          [slot]="entry.item.slot"
+          [label]="'item.slot.' + entry.item.slot | transloco"
+        />
+      }
     </button>
     <p-button
       icon="pi pi-ellipsis-v"
-      size="small"
       [rounded]="true"
       [text]="true"
       severity="secondary"
@@ -256,7 +395,7 @@
   [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
 >
   @if (openItem(); as entry) {
-    <app-item-card [item]="entry.item" [priceText]="money(entry.item.price)" />
+    <app-item-card [item]="entry.item" />
     @if (canPlay()) {
       <div class="dialog-actions">
         @if (entry.item.type === "equipment" && entry.item.slot !== "none") {
@@ -268,7 +407,11 @@
                 : 'character.items.equip'
               ) | transloco
             "
-            [disabled]="busy()"
+            [disabled]="
+              busy() || isLocked(entry.equipped ? 'unequip' : 'equip')
+            "
+            [pTooltip]="'character.sheet.lockedOffline' | transloco"
+            [tooltipDisabled]="!isLocked(entry.equipped ? 'unequip' : 'equip')"
             (onClick)="equip(entry)"
           />
         }
@@ -276,7 +419,9 @@
           <p-button
             icon="pi pi-heart"
             [label]="'character.items.use' | transloco"
-            [disabled]="busy()"
+            [disabled]="busy() || isLocked('use')"
+            [pTooltip]="'character.sheet.lockedOffline' | transloco"
+            [tooltipDisabled]="!isLocked('use')"
             (onClick)="use(entry)"
           />
         }
@@ -287,7 +432,9 @@
               | transloco: { price: money(entry.item.price) }
           "
           severity="secondary"
-          [disabled]="busy()"
+          [disabled]="busy() || isLocked('sell')"
+          [pTooltip]="'character.sheet.lockedOffline' | transloco"
+          [tooltipDisabled]="!isLocked('sell')"
           (onClick)="sell(entry)"
         />
       </div>

@@ -28,8 +28,8 @@ export interface AnsweredInvite {
  * Implemented by `WebRtcTransport` (manual handshake) and `FakeTransport` (tests). Only `PeerApi` uses it.
  */
 export interface RoomTransport {
-  /** Host: start a pending invite, one per player. */
-  createInvite(): Promise<Invite>;
+  /** Host: start a pending invite, one per player. `relay`: make a relay invite (TURN only); rejects `relay-unavailable` when it can't. */
+  createInvite(options?: { relay?: boolean }): Promise<Invite>;
   /** Host: finish the handshake with the player's answer code. Resolves with the new peer when the channel opens. */
   acceptAnswer(inviteId: string, answerCode: string): Promise<PeerId>;
   /** Host: drop a pending invite. */
@@ -41,6 +41,8 @@ export interface RoomTransport {
   send(peer: PeerId, data: string): void;
   /** Host: send to every connected player. */
   broadcast(data: string): void;
+  /** Bytes queued and not yet sent to a peer (0 when unknown). */
+  bufferedAmount(peer: PeerId): number;
   /** Close one connection (kick, leave). */
   disconnect(peer: PeerId): void;
 
@@ -52,7 +54,7 @@ export interface RoomTransport {
   close(): void;
 }
 
-export type TransportErrorReason = 'unknown-invite' | 'not-connected' | 'timeout' | 'closed';
+export type TransportErrorReason = 'unknown-invite' | 'invite-used' | 'invite-expired' | 'not-connected' | 'timeout' | 'closed' | 'relay-unavailable';
 
 export class TransportError extends Error {
   constructor(readonly reason: TransportErrorReason, message?: string) {

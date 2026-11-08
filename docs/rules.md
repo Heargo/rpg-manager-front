@@ -1,6 +1,6 @@
 # rpg-manager-front — rules
 
-Angular 22 app (TypeScript 6.0), zoneless, standalone components, Optimus UI 2 (MIT fork of PrimeNG 21, see `docs/adr/0001-replace-primeng-with-optimus-ui.md`; Aura preset in `src/app/ui.preset.ts`), installable as a PWA (`@angular/service-worker`). No backend: players talk peer-to-peer over WebRTC in host-dispatched rooms (`.scratch/p2p-rooms/spec.md`). The only server code is one Netlify Function (`netlify/functions/ice-servers.mts`) that hands out TURN credentials (`docs/adr/0003-open-relay-turn.md`). There are no accounts: the player is a local profile (`core/business/profile.business.ts`) with a stable `playerId`. `HttpClient` only loads the app's own static files; `fetchIceServers()` calls the ICE servers function.
+Angular 22 app (TypeScript 6.0), zoneless, standalone components, Optimus UI 2 (MIT fork of PrimeNG 21, see `docs/adr/0001-replace-primeng-with-optimus-ui.md`; Aura preset in `src/app/ui.preset.ts`), installable as a PWA (`@angular/service-worker`). No backend: players talk peer-to-peer over WebRTC in host-dispatched rooms (`.scratch/p2p-rooms/spec.md`). The only server code is two Netlify Functions: `netlify/functions/ice-servers.mts`, which hands out TURN credentials (`docs/adr/0003-open-relay-turn.md`), and `netlify/functions/signal.mts`, an optional mailbox that lets a join work from the invite link alone (`docs/adr/0004-signal-mailbox.md`). There are no accounts: the player is a local profile (`core/business/profile.business.ts`) with a stable `playerId`. `HttpClient` only loads the app's own static files; `fetchIceServers()` calls the ICE servers function and `SignalMailboxService` (`fetch`, 5 s timeout) calls the mailbox function; both fall back gracefully when the function is unreachable.
 
 ## Structure
 
@@ -75,6 +75,7 @@ The app is zoneless, so signals are the default for state.
 
 - Use Optimus UI components (`@openng/optimus-ui/<component>`, selectors `p-*`) before writing custom ones. Use the Optimus UI docs, not PrimeNG's v22+ docs. Never add `primeng` back. Theme tokens go in `ui.preset.ts`, not in component SCSS.
 - Icons come from `@openng/icons` (`pi pi-<name>`); check the name exists in `node_modules/@openng/icons/openng-icons.css`.
+- Every form control is an Optimus UI one, never a native element styled by hand: numbers `p-inputNumber` (`showButtons` where steps make sense), text `pInputText`, checkboxes `p-checkbox`, switches `p-toggleSwitch`, choices `p-select` / `p-multiselect`. No `<input type="number">`, no bare `<input type="checkbox">`.
 - Toasts go through Optimus UI `MessageService` (provided in `app.config.ts`) with the levels in `core/models/toast-level.ts`.
 
 ## i18n

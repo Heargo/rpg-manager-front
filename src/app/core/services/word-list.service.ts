@@ -10,4 +10,8 @@ export class WordListService {
   loadItemWords(lang: string): Promise<unknown> {
     return firstValueFrom(this.http.get<unknown>(`i18n/generators/${lang}/items.json`));
   }
+
+  loadNpcNames(lang: string): Promise<unknown> {
+    return firstValueFrom(this.http.get<unknown>(`i18n/generators/${lang}/npcs.json`));
+  }
 }

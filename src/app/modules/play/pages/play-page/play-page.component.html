@@ -1,20 +1,33 @@
 <div class="main-container play">
   <header class="play-header">
-    <h1>{{ 'play.title' | transloco }}</h1>
+    <h1>{{ "play.title" | transloco }}</h1>
     <div class="header-actions">
-      <label class="p-button p-button-secondary p-button-text import" for="world-import">
-        <i class="pi pi-upload"></i> {{ 'play.worlds.import' | transloco }}
+      <label
+        class="p-button p-button-secondary p-button-text import"
+        for="world-import"
+      >
+        <i class="pi pi-upload"></i> {{ "play.worlds.import" | transloco }}
       </label>
-      <input id="world-import" type="file" accept=".json,application/json" hidden (change)="importWorld($event)" />
-      <p-button icon="pi pi-plus" [label]="'play.worlds.new' | transloco" routerLink="/worlds/new" />
+      <input
+        id="world-import"
+        type="file"
+        accept=".json,application/json"
+        hidden
+        (change)="importWorld($event)"
+      />
+      <p-button
+        icon="pi pi-plus"
+        [label]="'play.worlds.new' | transloco"
+        routerLink="/worlds/new"
+      />
     </div>
   </header>
 
-  @if (play.$roomStatus() !== 'idle') {
+  @if (play.$roomStatus() !== "idle") {
     <p-message severity="info" icon="pi pi-users">
       <span class="room-banner">
-        {{ 'play.activeRoom' | transloco: { name: play.$roomName() ?? '' } }}
-        <a routerLink="/room">{{ 'play.backToRoom' | transloco }}</a>
+        {{ "play.activeRoom" | transloco: { name: play.$roomName() ?? "" } }}
+        <a routerLink="/room">{{ "play.backToRoom" | transloco }}</a>
       </span>
     </p-message>
   }
@@ -23,14 +36,22 @@
   }
 
   <section>
-    <h2>{{ 'play.worlds.title' | transloco }}</h2>
+    <h2>{{ "play.worlds.title" | transloco }}</h2>
     <p-dataview [value]="play.$worlds()" layout="grid" [emptyMessage]="' '">
       <ng-template #grid let-worlds>
         <div class="grid">
           @for (world of worlds; track world.id) {
-            <app-world-card [name]="world.name" [description]="world.description" [imageId]="world.imageId">
+            <app-world-card
+              [name]="world.name"
+              [description]="world.description"
+              [imageId]="world.imageId"
+            >
               <span meta>
-                {{ 'play.worlds.characters' | transloco: { count: world.characterCount } }} ·
+                {{
+                  "play.worlds.characters"
+                    | transloco: { count: world.characterCount }
+                }}
+                ·
                 {{ world.updatedAt | localDate }}
               </span>
               <ng-container actions>
@@ -49,7 +70,11 @@
                   (onClick)="exportWorld(world.id)"
                 />
                 @if (play.$hostedWorldId() === world.id) {
-                  <p-button icon="pi pi-arrow-right" [label]="'play.worlds.openRoom' | transloco" routerLink="/room" />
+                  <p-button
+                    icon="pi pi-arrow-right"
+                    [label]="'play.worlds.openRoom' | transloco"
+                    routerLink="/room"
+                  />
                 } @else {
                   <p-button
                     icon="pi pi-crown"
@@ -66,8 +91,12 @@
       <ng-template #emptymessage>
         <div class="empty">
           <i class="pi pi-globe"></i>
-          <p>{{ 'play.worlds.empty' | transloco }}</p>
-          <p-button icon="pi pi-plus" [label]="'play.worlds.new' | transloco" routerLink="/worlds/new" />
+          <p>{{ "play.worlds.empty" | transloco }}</p>
+          <p-button
+            icon="pi pi-plus"
+            [label]="'play.worlds.new' | transloco"
+            routerLink="/worlds/new"
+          />
         </div>
       </ng-template>
     </p-dataview>
@@ -76,24 +105,56 @@
   <div class="columns">
     <p-card [header]="'room.start.joinTitle' | transloco">
       <form class="stack" (ngSubmit)="join()">
-        <p class="hint">{{ 'room.start.joinHint' | transloco }}</p>
-        <label for="invite-code">{{ 'room.start.inviteCode' | transloco }}</label>
-        <textarea pTextarea id="invite-code" name="inviteCode" rows="3" [(ngModel)]="inviteInput"></textarea>
-        <p-button type="submit" icon="pi pi-sign-in" [label]="'room.start.join' | transloco" [disabled]="!inviteInput().trim()" />
+        <p class="hint">{{ "room.start.joinHint" | transloco }}</p>
+        <label for="invite-code">{{
+          "room.start.inviteCode" | transloco
+        }}</label>
+        <textarea
+          pTextarea
+          id="invite-code"
+          name="inviteCode"
+          rows="3"
+          [(ngModel)]="inviteInput"
+        ></textarea>
+        <div class="join-actions">
+          <p-button
+            type="submit"
+            icon="pi pi-sign-in"
+            [label]="'room.start.join' | transloco"
+            [disabled]="!inviteInput().trim()"
+          />
+          <button
+            pButton
+            type="button"
+            data-test="scan"
+            icon="pi pi-camera"
+            severity="secondary"
+            [label]="'room.scan.button' | transloco"
+            (click)="scanning.set(true)"
+          ></button>
+        </div>
       </form>
     </p-card>
 
     <p-card [header]="'room.recent.title' | transloco">
       @if (play.$joinedRooms().length) {
-        <p class="hint">{{ 'room.recent.hint' | transloco }}</p>
+        <p class="hint">{{ "room.recent.hint" | transloco }}</p>
         <ul class="recent">
           @for (recent of play.$joinedRooms(); track recent.id) {
             <li>
               <div class="recent-text">
                 <strong>{{ recent.name }}</strong>
                 <small>
-                  {{ 'room.recent.hostedBy' | transloco: { name: recent.hostName } }} ·
-                  {{ 'room.recent.lastSeen' | transloco: { date: (recent.lastSeenAt | localDate: 'dateTime') } }}
+                  {{
+                    "room.recent.hostedBy"
+                      | transloco: { name: recent.hostName }
+                  }}
+                  ·
+                  {{
+                    "room.recent.lastSeen"
+                      | transloco
+                        : { date: (recent.lastSeenAt | localDate: "dateTime") }
+                  }}
                 </small>
               </div>
               <p-button
@@ -108,8 +169,16 @@
           }
         </ul>
       } @else {
-        <p class="hint">{{ 'play.rooms.empty' | transloco }}</p>
+        <p class="hint">{{ "play.rooms.empty" | transloco }}</p>
       }
     </p-card>
   </div>
 </div>
+
+@if (scanning()) {
+  <app-qr-scan
+    place="join-entry"
+    (scanned)="scanned($event)"
+    (closed)="closeScanner()"
+  />
+}

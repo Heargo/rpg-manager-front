@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "node scripts/ng-with-env.mjs serve",
+    "build": "node scripts/ng-with-env.mjs build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
     "test:watch": "ng test"
@@ -31,10 +31,12 @@
     "@angular/service-worker": "^22.2.5",
     "@dimforge/rapier3d-compat": "^0.21.0",
     "@jsverse/transloco": "^8.4.0",
+    "@netlify/blobs": "^11.1.8",
     "@openng/icons": "^1.0.0",
     "@openng/optimus-ui": "^2.0.2",
     "@openng/optimus-ui-themes": "^2.0.2",
     "idb": "^8.0.4",
+    "jsqr": "1.4.0",
     "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",
     "three": "^0.187.0",

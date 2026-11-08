@@ -29,6 +29,40 @@
         </div>
       </div>
 
+      @if (classChoices().length) {
+        <section class="classes">
+          <h2>{{ 'character.create.class' | transloco }}</h2>
+          <div class="class-list" role="radiogroup" [attr.aria-label]="'character.create.class' | transloco">
+            @for (choice of classChoices(); track choice.id) {
+              <button
+                type="button"
+                role="radio"
+                class="class-card"
+                data-testid="class-card"
+                [class.selected]="classId() === choice.id"
+                [attr.aria-checked]="classId() === choice.id"
+                (click)="classId.set(choice.id)"
+              >
+                <app-stored-image class="class-image" [imageId]="choice.imageId" [alt]="choice.name">
+                  <i class="pi pi-shield"></i>
+                </app-stored-image>
+                <span class="class-text">
+                  <strong>{{ choice.name }}</strong>
+                  <small>{{ choice.description }}</small>
+                  @if (choice.bonuses?.length) {
+                    <span class="class-bonuses">
+                      @for (bonus of choice.bonuses; track $index) {
+                        <span>{{ bonus.attribute }} {{ bonus.value > 0 ? '+' : '' }}{{ bonus.value }}</span>
+                      }
+                    </span>
+                  }
+                </span>
+              </button>
+            }
+          </div>
+        </section>
+      }
+
       @if (characters.$world(); as world) {
         <section class="start">
           <h2>{{ 'character.create.startsWith' | transloco }}</h2>
@@ -39,7 +73,7 @@
           </ul>
           <p class="hint">
             {{ 'character.create.statPoints' | transloco: { count: world.startingStatPoints } }} ·
-            {{ 'character.create.money' | transloco: { count: world.startingMoney } }}
+            {{ 'character.create.money' | transloco }} <app-coin-display [copper]="world.startingMoney" />
           </p>
         </section>
       }

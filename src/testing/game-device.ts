@@ -8,6 +8,7 @@ import { ImageStorageService } from '../app/core/services/image-storage.service'
 import { ImageTransferService } from '../app/core/services/image-transfer.service';
 import { CharacterHostBusiness } from '../app/modules/character/business/character-host.business';
 import { CharacterBusiness } from '../app/modules/character/business/character.business';
+import { PlayerCopyGateBusiness } from '../app/modules/character/business/player-copy-gate.business';
 import { CharacterService } from '../app/modules/character/services/character.service';
 import { DiceHostBusiness } from '../app/modules/dice/business/dice-host.business';
 import { DiceRollBusiness } from '../app/modules/dice/business/dice-roll.business';
@@ -18,6 +19,11 @@ import { RoomBusiness } from '../app/modules/room/business/room.business';
 import { HostLockService } from '../app/modules/room/services/host-lock.service';
 import { RoomStorageService } from '../app/modules/room/services/room-storage.service';
 import { RoomService } from '../app/modules/room/services/room.service';
+import { ItemHostBusiness } from '../app/modules/item/business/item-host.business';
+import { ItemService } from '../app/modules/item/services/item.service';
+import { NpcCatalogueBusiness } from '../app/modules/npc/business/npc-catalogue.business';
+import { SkillCatalogueBusiness } from '../app/modules/skill/business/skill-catalogue.business';
+import { ClassCatalogueBusiness } from '../app/modules/class/business/class-catalogue.business';
 import { TableHostBusiness } from '../app/modules/table/business/table-host.business';
 import { TableBusiness } from '../app/modules/table/business/table.business';
 import { TableService } from '../app/modules/table/services/table.service';
@@ -45,6 +51,7 @@ const GAME_DEVICE = [
   WorldSessionBusiness,
   WorldInfoBusiness,
   CharacterService,
+  PlayerCopyGateBusiness,
   CharacterHostBusiness,
   CharacterBusiness,
   TableService,
@@ -53,6 +60,11 @@ const GAME_DEVICE = [
   DiceService,
   DiceHostBusiness,
   DiceRollBusiness,
+  ItemService,
+  ItemHostBusiness,
+  NpcCatalogueBusiness,
+  SkillCatalogueBusiness,
+  ClassCatalogueBusiness,
   GameSessionBusiness,
   ImageTransferService,
   ImageBusiness,

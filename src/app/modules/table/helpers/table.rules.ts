@@ -51,3 +51,13 @@ export function removeQuickImage(world: World, imageId: string): World {
 export function saveNotes(world: World, notes: string): World {
   return { ...world, notes };
 }
+
+/** The NPC request (`{ npcId, shown }`), or null when it isn't one. */
+export function parseNpcRequest(
+  payload: unknown,
+): { npcId: string; shown: boolean } | null {
+  const { npcId, shown } = (payload ?? {}) as Record<string, unknown>;
+  return typeof npcId === 'string' && npcId && typeof shown === 'boolean'
+    ? { npcId, shown }
+    : null;
+}

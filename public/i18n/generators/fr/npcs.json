@@ -1,0 +1,248 @@
+{
+  "version": 1,
+  "given": [
+    {
+      "text": "Brannoc",
+      "gender": "m"
+    },
+    {
+      "text": "Telwyn",
+      "gender": "m"
+    },
+    {
+      "text": "Orsic",
+      "gender": "m"
+    },
+    {
+      "text": "Dravel",
+      "gender": "m"
+    },
+    {
+      "text": "Kesmar",
+      "gender": "m"
+    },
+    {
+      "text": "Joric",
+      "gender": "m"
+    },
+    {
+      "text": "Halvane",
+      "gender": "m"
+    },
+    {
+      "text": "Torvik",
+      "gender": "m"
+    },
+    {
+      "text": "Eldrin",
+      "gender": "m"
+    },
+    {
+      "text": "Maldek",
+      "gender": "m"
+    },
+    {
+      "text": "Sorrel",
+      "gender": "m"
+    },
+    {
+      "text": "Varnek",
+      "gender": "m"
+    },
+    {
+      "text": "Ulric",
+      "gender": "m"
+    },
+    {
+      "text": "Pellam",
+      "gender": "m"
+    },
+    {
+      "text": "Rovane",
+      "gender": "m"
+    },
+    {
+      "text": "Dunmar",
+      "gender": "m"
+    },
+    {
+      "text": "Ixavier",
+      "gender": "m"
+    },
+    {
+      "text": "Corvane",
+      "gender": "m"
+    },
+    {
+      "text": "Garrick",
+      "gender": "m"
+    },
+    {
+      "text": "Mirelle",
+      "gender": "f"
+    },
+    {
+      "text": "Sylvane",
+      "gender": "f"
+    },
+    {
+      "text": "Orlaith",
+      "gender": "f"
+    },
+    {
+      "text": "Tamsin",
+      "gender": "f"
+    },
+    {
+      "text": "Ysoret",
+      "gender": "f"
+    },
+    {
+      "text": "Brenna",
+      "gender": "f"
+    },
+    {
+      "text": "Calista",
+      "gender": "f"
+    },
+    {
+      "text": "Neriel",
+      "gender": "f"
+    },
+    {
+      "text": "Fenwick",
+      "gender": "f"
+    },
+    {
+      "text": "Ilvara",
+      "gender": "f"
+    },
+    {
+      "text": "Zephra",
+      "gender": "f"
+    },
+    {
+      "text": "Lunette",
+      "gender": "f"
+    },
+    {
+      "text": "Odalys",
+      "gender": "f"
+    },
+    {
+      "text": "Maribel",
+      "gender": "f"
+    },
+    {
+      "text": "Verene",
+      "gender": "f"
+    },
+    {
+      "text": "Kaelith",
+      "gender": "f"
+    },
+    {
+      "text": "Jessamy",
+      "gender": "f"
+    },
+    {
+      "text": "Thessaly",
+      "gender": "f"
+    },
+    {
+      "text": "Rowena",
+      "gender": "f"
+    },
+    {
+      "text": "Ysmera",
+      "gender": "f"
+    },
+    {
+      "text": "Pyrra",
+      "gender": "f"
+    }
+  ],
+  "epithets": [
+    {
+      "m": "le Prudent",
+      "f": "la Prudente"
+    },
+    {
+      "m": "le Gris",
+      "f": "la Grise"
+    },
+    {
+      "m": "le Boiteux",
+      "f": "la Boiteuse"
+    },
+    {
+      "m": "le Silencieux",
+      "f": "la Silencieuse"
+    },
+    {
+      "m": "le Patient",
+      "f": "la Patiente"
+    },
+    {
+      "m": "le Malchanceux",
+      "f": "la Malchanceuse"
+    },
+    {
+      "m": "le Hardi",
+      "f": "la Hardie"
+    },
+    {
+      "m": "le Rapide",
+      "f": "la Rapide"
+    },
+    {
+      "m": "le Rôdeur",
+      "f": "la Rôdeuse"
+    },
+    {
+      "m": "le Bricoleur",
+      "f": "la Bricoleuse"
+    },
+    {
+      "m": "le Borgne",
+      "f": "la Borgne"
+    },
+    {
+      "m": "le Vagabond",
+      "f": "la Vagabonde"
+    },
+    {
+      "m": "le Rusé",
+      "f": "la Rusée"
+    },
+    {
+      "m": "le Taciturne",
+      "f": "la Taciturne"
+    },
+    {
+      "m": "le Têtu",
+      "f": "la Têtue"
+    },
+    {
+      "m": "le Joyeux",
+      "f": "la Joyeuse"
+    },
+    {
+      "m": "le Cendré",
+      "f": "la Cendrée"
+    },
+    {
+      "m": "le Barbu",
+      "f": "la Barbue"
+    },
+    {
+      "m": "le Veilleur",
+      "f": "la Veilleuse"
+    },
+    {
+      "m": "le Pâle",
+      "f": "la Pâle"
+    }
+  ],
+  "templates": ["{given}", "{given} {epithet}", "{given} {epithet}"]
+}

@@ -39,7 +39,7 @@ describe('game table (host + player)', () => {
         .get(WorldLibraryBusiness)
         .create({
           name: 'Eldoria',
-          attributes: [{ name: 'Life', baseValue: 10 }],
+          attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }],
         })
     ).id;
     await gm.injector.get(RoomBusiness).hostRoom('Eldoria', worldId);

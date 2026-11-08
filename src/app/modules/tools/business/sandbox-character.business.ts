@@ -9,9 +9,13 @@ import {
 import { createCharacter } from '../../character/helpers/character.rules';
 import { SandboxWorldBusiness } from '../../world/business/sandbox-world.business';
 import { generateStarterItems } from '../../world/helpers/starter-items';
-import { Character } from '../../world/models/world';
+import { Character, World } from '../../world/models/world';
 
 export const SANDBOX_PLAYER_ID = 'sandbox-player';
+/** A proper name, the same in every language. */
+export const SANDBOX_HERO_NAME = 'Yusica';
+/** Bundled portrait (art by Yuumei, credited on the credits page). */
+export const SANDBOX_HERO_PORTRAIT = 'images/sample-hero.webp';
 
 /**
  * The character sheet tool: a sample character on the sandbox world, with the world's default items in the bag.
@@ -44,7 +48,7 @@ export class SandboxCharacterBusiness {
         world,
         {
           playerId: SANDBOX_PLAYER_ID,
-          name: this.language.t('tools.sheet.sampleName'),
+          name: SANDBOX_HERO_NAME,
         },
         'sandbox-character',
         0,
@@ -53,6 +57,7 @@ export class SandboxCharacterBusiness {
         lang,
         character: {
           ...character,
+          samplePortrait: SANDBOX_HERO_PORTRAIT,
           inventory: items.map((item, index) => ({
             id: `inv-${index}`,
             item: { ...item, id: `item-${index}` },
@@ -65,6 +70,7 @@ export class SandboxCharacterBusiness {
   });
   private readonly edited = signal<{
     lang: string;
+    world: World;
     character: Character;
   } | null>(null);
 
@@ -72,7 +78,8 @@ export class SandboxCharacterBusiness {
   readonly $character = computed<Character | undefined>(() => {
     const lang = this.language.$language();
     const edited = this.edited();
-    if (edited?.lang === lang) return edited.character;
+    if (edited?.lang === lang && edited.world === this.sandbox.$world())
+      return edited.character;
     return this.sample.hasValue() && this.sample.value().lang === lang
       ? this.sample.value().character
       : undefined;
@@ -86,10 +93,13 @@ export class SandboxCharacterBusiness {
       this.$world().attributes,
       character,
       action,
+      this.$world(),
+      this.$world(),
     );
     if (!result.ok) throw new Error(result.error);
     this.edited.set({
       lang: this.language.$language(),
+      world: this.$world(),
       character: { ...result.character, rev: character.rev + 1 },
     });
   }

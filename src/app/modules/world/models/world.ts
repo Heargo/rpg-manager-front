@@ -1,15 +1,41 @@
-import { ItemDraft } from '../../../core/models/item';
+import { AttributeFormula } from '../../../core/helpers/formula';
+import { ItemDraft, ItemModifier } from '../../../core/models/item';
+import { LevelCurve } from '../../character/helpers/level.rules';
+import { Npc, NpcVisibilityRules } from '../../npc/models/npc';
+import { CharacterClass } from '../../class/models/class';
+import { Skill } from '../../skill/models/skill';
 
 /** An attribute every character of the world has (Strength, Life…). */
 export interface WorldAttribute {
   id: string;
   name: string;
   baseValue: number;
+  /** How the max grows with the level. */
+  formula: AttributeFormula;
+  /** Optional hard cap (integer >= 1) on the formula result; equipment bonuses still add on top. */
+  cap?: number;
 }
 
-export type MoneyFormat =
-  | { kind: 'coins' | 'dollars' | 'euros' | 'pounds' | 'yen' }
-  | { kind: 'custom'; symbol: string };
+/** The editable rules of a world (the rules page, the wizard's Rules step); attributes without an id are new. */
+export interface WorldRules {
+  attributes: {
+    id?: string;
+    name: string;
+    baseValue: number;
+    formula: AttributeFormula;
+    cap?: number;
+  }[];
+  startingStatPoints: number;
+  startingMoney: number;
+  levelCurve: LevelCurve;
+  maxLevel: number;
+  statPointsPerLevel: number;
+  startingSkillPoints: number;
+  skillPointsPerLevel: number;
+  offlineFeatures: OfflineFeatures;
+  /** Kept as is when omitted. */
+  npcVisibility?: NpcVisibilityRules;
+}
 
 /** What players can still do while the host is offline (p2p-rooms spec, Host offline). */
 export interface OfflineFeatures {
@@ -19,6 +45,7 @@ export interface OfflineFeatures {
   equip: boolean;
   useConsumables: boolean;
   sell: boolean;
+  learnSkills: boolean;
 }
 
 /** A catalogue item: a draft with an id and an optional image. */
@@ -30,9 +57,9 @@ export interface Item extends ItemDraft {
 
 export interface CharacterAttribute {
   attributeId: string;
-  /** Stat points spent on it, on top of the world's base value. */
-  points: number;
-  /** Current value (life after a hit…); max = base value + points + equipped modifiers. */
+  /** Level of the attribute (stat points spent on it). */
+  level: number;
+  /** Current value (life after a hit…); max = round(formula at level) + equipped modifiers. */
   current: number;
 }
 
@@ -45,20 +72,44 @@ export interface InventoryItem {
   position: number;
 }
 
-export interface Character {
+/** What a character and an NPC share: the stats, the inventory, the class and the skills. */
+export interface Sheet {
   id: string;
-  /** The player's profile id; gives the seat back on rejoin. */
-  playerId: string;
   name: string;
   portraitId?: string;
+  /** Bundled image path (under the app's base href) used when there is no stored portrait; sandbox character only. */
+  samplePortrait?: string;
   statPoints: number;
+  /** Total experience points. */
+  xp: number;
+  /** Derived from the XP by the world's level curve; kept so formulas and lists read it directly. */
+  level: number;
   money: number;
   attributes: CharacterAttribute[];
   inventory: InventoryItem[];
+  updatedAt: number;
+  classId?: string;
+  skillPoints: number;
+  skills: SheetSkill[];
+}
+
+export interface SheetSkill {
+  skillId: string;
+  rank: number;
+}
+
+export type Character = Sheet & {
+  /** The player's profile id; gives the seat back on rejoin. */
+  playerId: string;
   /** Bumped by the host on every change (p2p-rooms spec, Player data). */
   rev: number;
-  updatedAt: number;
-}
+  /** The player's personal notes, saved by the host with the record. */
+  notes?: string;
+  /** Set on the published list only: the name of the class, never its tree. */
+  className?: string;
+  /** Set on the published list only: the class's always-on bonuses, so every device computes the same maxima. */
+  classBonuses?: ItemModifier[];
+};
 
 export interface World {
   id: string;
@@ -69,11 +120,24 @@ export interface World {
   /** Attributes shown as bars on the player view, by attribute id. */
   barAttributes: { life?: string; mana?: string };
   startingStatPoints: number;
+  levelCurve: LevelCurve;
+  /** Highest level a character can reach (2 to 100). */
+  maxLevel: number;
+  statPointsPerLevel: number;
+  startingSkillPoints: number;
+  skillPointsPerLevel: number;
   startingMoney: number;
-  moneyFormat: MoneyFormat;
   offlineFeatures: OfflineFeatures;
+  /** Per NPC role, what the players see of an NPC shown on the table. */
+  npcVisibility: NpcVisibilityRules;
   items: Item[];
   characters: Character[];
+  /** The GM's NPC catalogue; host-only, never sent in WorldInfo. */
+  npcs: Npc[];
+  /** The GM's skill catalogue; host-only, never sent in WorldInfo. */
+  skills: Skill[];
+  /** The GM's classes, with their skill trees; host-only, never sent in WorldInfo. */
+  classes: CharacterClass[];
   /** GM notes. */
   notes: string;
   illustrationId?: string;
@@ -97,13 +161,23 @@ export interface WorldDraft {
   name: string;
   description?: string;
   imageId?: string;
-  attributes: { name: string; baseValue: number }[];
+  attributes: {
+    name: string;
+    baseValue: number;
+    formula: AttributeFormula;
+    cap?: number;
+  }[];
   /** Attribute names to show as bars. */
   barAttributes?: { life?: string; mana?: string };
   startingStatPoints?: number;
+  levelCurve?: LevelCurve;
+  maxLevel?: number;
+  statPointsPerLevel?: number;
+  startingSkillPoints?: number;
+  skillPointsPerLevel?: number;
   startingMoney?: number;
-  moneyFormat?: MoneyFormat;
   offlineFeatures?: Partial<OfflineFeatures>;
+  npcVisibility?: NpcVisibilityRules;
 }
 
 /** What players receive about the hosted world (no catalogue, characters or GM notes). */
@@ -115,8 +189,12 @@ export interface WorldInfo {
   attributes: WorldAttribute[];
   barAttributes: { life?: string; mana?: string };
   startingStatPoints: number;
+  levelCurve: LevelCurve;
+  /** Highest level a character can reach (2 to 100). */
+  maxLevel: number;
+  statPointsPerLevel: number;
+  skillPointsPerLevel: number;
   startingMoney: number;
-  moneyFormat: MoneyFormat;
   offlineFeatures: OfflineFeatures;
 }
 

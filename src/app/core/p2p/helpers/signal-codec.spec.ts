@@ -58,4 +58,37 @@ describe('signal codec', () => {
     expect(extractSignalCode(' 2.abc ')).toBe('2.abc');
     expect(extractSignalCode('http://x/join#2.ab\ncd')).toBe('2.abcd');
   });
+
+  describe('relay flag', () => {
+    it('round-trips the flag in an offer code', () => {
+      const relay = encodeSignal({ type: 'offer', sdp: CHROME_OFFER, relay: true });
+
+      const decoded = decodeSignal(relay, 'offer');
+
+      expect(decoded.relay).toBe(true);
+      expect(parseDataChannelSdp(decoded.sdp)?.ufrag).toBe('x9cm');
+    });
+
+    it('decodes a code made without the flag as a direct one', () => {
+      const direct = encodeSignal({ type: 'offer', sdp: CHROME_OFFER });
+
+      expect(decodeSignal(direct, 'offer').relay).toBe(false);
+      expect(decodeSignal(encodeSignal({ type: 'offer', sdp: CHROME_OFFER, relay: false }), 'offer').relay).toBe(false);
+    });
+
+    it('makes a different code for a relay offer than for a direct one, still short and URL-safe', () => {
+      const direct = encodeSignal({ type: 'offer', sdp: CHROME_OFFER });
+      const relay = encodeSignal({ type: 'offer', sdp: CHROME_OFFER, relay: true });
+
+      expect(relay).not.toBe(direct);
+      expect(relay).toMatch(/^2\.[A-Za-z0-9_-]+$/);
+      expect(relay.length).toBeLessThan(200);
+    });
+
+    it('keeps the flag when the code comes inside an invite link with a box id', () => {
+      const relay = encodeSignal({ type: 'offer', sdp: CHROME_OFFER, relay: true });
+
+      expect(decodeSignal(`https://rpg.example/join#${relay}~AAAAAAAAAAAAAAAAAAAAAA`, 'offer').relay).toBe(true);
+    });
+  });
 });

@@ -20,7 +20,7 @@
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+  grid-template-columns: minmax(0, 3fr) minmax(14rem, 1fr);
   gap: 1.5rem;
   align-items: start;
 
@@ -52,38 +52,134 @@
   flex-direction: column;
   gap: 0.5rem;
 
+  .attribute {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--p-content-border-color);
+  }
+
+  // name, base, progression, step, cap, preview, bars, delete on one line.
   .row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 6rem auto;
+    grid-template-columns:
+      minmax(4rem, 1fr)
+      4rem 11.5rem 4rem 4.5rem 6.5rem 4.25rem 2.5rem;
     gap: 0.5rem;
     align-items: center;
   }
 
   .head {
-    font-weight: 600;
+    padding: 0 0 0.25rem;
     color: var(--p-text-muted-color);
+    font-size: 0.8rem;
   }
 
-  :host ::ng-deep .number {
+  .cap {
     width: 100%;
-    text-align: center;
+    min-width: 0;
+    text-align: right;
+  }
+
+  .max {
+    color: var(--p-text-muted-color);
+    white-space: nowrap;
+  }
+
+  p-inputnumber,
+  p-select {
+    display: flex;
+    min-width: 0;
+  }
+
+  .bar-toggles {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .bar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--p-form-field-border-color);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--p-text-muted-color);
+    cursor: pointer;
+
+    &[aria-pressed="true"] {
+      border-color: var(--p-primary-color);
+      background: var(--p-primary-color);
+      color: var(--p-primary-contrast-color);
+    }
+  }
+
+  .custom {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .formula-error {
+    color: var(--p-red-500);
+  }
+
+  .row > .formula-error {
+    grid-column: 1 / -1;
+  }
+
+  // Two lines: name, base, bars and delete on top; progression, step and preview below.
+  @media (max-width: 40rem) {
+    .head {
+      display: none;
+    }
+
+    .row {
+      // A phone can't fit the full progression label, the step and the max on one line: the max gets its own short line.
+      // Fixed widths: with `auto`, the wide step input would grow those columns and squeeze the name.
+      grid-template-columns: minmax(0, 1fr) 4rem 4.5rem 2.5rem;
+      grid-template-areas:
+        "name base bars remove"
+        "preset preset step step"
+        "max max cap cap";
+    }
+
+    .name {
+      grid-area: name;
+    }
+    .base {
+      grid-area: base;
+    }
+    .bar-toggles {
+      grid-area: bars;
+    }
+    .remove {
+      grid-area: remove;
+    }
+    .preset {
+      grid-area: preset;
+    }
+    .step {
+      grid-area: step;
+    }
+    .cap {
+      grid-area: cap;
+    }
+    .max {
+      grid-area: max;
+    }
   }
 }
 
-.bars {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
-  gap: 0.75rem;
+// Outside `.attributes`: nested, `:host` would compile to `.attributes :host …` and never match.
+:host ::ng-deep .attributes .number {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.check,
-.toggle {
+.check {
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -101,21 +197,6 @@
 
 .check {
   margin-top: 1rem;
-}
-
-.offline {
-  border: 1px solid var(--p-content-border-color);
-  border-radius: 6px;
-  padding: 0.75rem 1rem;
-  margin-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
-  legend {
-    font-weight: 600;
-    padding: 0 0.25rem;
-  }
 }
 
 .actions {
@@ -148,7 +229,23 @@
 
 // On phones only the current step keeps its title, so the step list fits.
 @media (max-width: 30rem) {
-  :host ::ng-deep p-step:not([data-p-active='true']) .p-step-title {
+  :host ::ng-deep p-step:not([data-p-active="true"]) .p-step-title {
     display: none;
+  }
+}
+
+:host ::ng-deep [data-chart-trigger] {
+  position: relative;
+  cursor: help;
+  .chart-card {
+    position: absolute;
+    z-index: 10;
+    bottom: 100%;
+    right: 0;
+    padding: 0.5rem;
+    background: var(--p-content-background);
+    border: 1px solid var(--p-content-border-color);
+    border-radius: 6px;
+    white-space: normal;
   }
 }

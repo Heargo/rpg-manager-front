@@ -23,7 +23,7 @@ export function provideTestTranslations(options: Partial<TranslocoTestingOptions
 
 /** Providers shared by component specs: router, mocked HTTP, translations and Optimus UI services. */
 export const TEST_PROVIDERS = [
-  provideRouter([{ path: '**', children: [] }]),
+  provideRouter([]),
   provideHttpClient(),
   provideHttpClientTesting(),
   provideTestTranslations(),

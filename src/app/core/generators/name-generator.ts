@@ -1,4 +1,5 @@
 import { ItemRarity } from '../models/item';
+import { NpcNameList } from './npc-name-list';
 import { pick } from './random';
 import { RandomSource } from './random-source';
 import { Adjective, BaseKey, Gender, WordList } from './word-list';
@@ -17,6 +18,16 @@ export function generateItemName(source: RandomSource, words: WordList, options:
     .replace('{base}', noun.text)
     .replace('{adjective}', () => adjectiveForm(pick(source, words.adjectives[options.rarity]), gender))
     .replace('{suffix}', () => pick(source, words.suffixes[options.rarity]));
+  return capitalize(name.replace(/\s+/g, ' ').trim());
+}
+
+/** Builds a person's name: a template, a given name, and an epithet agreeing with the given name's gender. */
+export function generateNpcName(source: RandomSource, names: NpcNameList): string {
+  const template = pick(source, names.templates);
+  const given = pick(source, names.given);
+  const name = template
+    .replace('{given}', capitalize(given.text))
+    .replace('{epithet}', () => adjectiveForm(pick(source, names.epithets), given.gender));
   return capitalize(name.replace(/\s+/g, ' ').trim());
 }
 

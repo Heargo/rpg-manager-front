@@ -1,44 +1,94 @@
 import {
   Character,
+  Sheet,
   CharacterAttribute,
   WorldAttribute,
 } from '../../world/models/world';
-import { attributeStats } from './character-stats';
+import {
+  attributeStats,
+  BarAttributes,
+  formulaMax,
+  levelsByName,
+} from './character-stats';
+import { grantXp, LevelCurve } from './level.rules';
+import { CharacterClass } from '../../class/models/class';
+import { treeNodeStates } from '../../class/helpers/class.rules';
+import { classBonusesOf } from './class-view.rules';
+import { Skill } from '../../skill/models/skill';
 
 /** Everything that changes a character during play. The host applies these; the sandbox applies them locally. */
 export type CharacterAction =
   | { kind: 'spend-stat-point'; attributeId: string }
+  | { kind: 'refund-stat-point'; attributeId: string }
   | { kind: 'grant-stat-points'; amount: number }
+  | { kind: 'grant-xp'; amount: number }
   | { kind: 'set-current'; attributeId: string; value: number }
   | { kind: 'equip'; inventoryId: string }
   | { kind: 'unequip'; inventoryId: string }
   | { kind: 'use'; inventoryId: string }
-  | { kind: 'sell'; inventoryId: string };
+  | { kind: 'sell'; inventoryId: string }
+  | { kind: 'learn-skill'; skillId: string }
+  | { kind: 'refund-skill'; skillId: string }
+  | { kind: 'grant-skill-points'; amount: number }
+  | { kind: 'set-skill'; skillId: string; rank: number }
+  | { kind: 'set-class'; classId: string };
 
 export type CharacterActionKind = CharacterAction['kind'];
 
 export const CHARACTER_ACTION_KINDS: readonly CharacterActionKind[] = [
   'spend-stat-point',
+  'refund-stat-point',
   'grant-stat-points',
+  'grant-xp',
   'set-current',
   'equip',
   'unequip',
   'use',
   'sell',
+  'learn-skill',
+  'refund-skill',
+  'grant-skill-points',
+  'set-skill',
+  'set-class',
 ];
 
 /** Only the game master grants points and sets current values (a hit, a rest…). */
 export const GAME_MASTER_ACTIONS: readonly CharacterActionKind[] = [
+  'refund-stat-point',
   'grant-stat-points',
+  'grant-xp',
   'set-current',
+  'refund-skill',
+  'grant-skill-points',
+  'set-skill',
+  'set-class',
 ];
 
 export const MAX_GRANTED_POINTS = 100;
+export const MAX_GRANTED_XP = 1_000_000;
 
-export type ActionResult =
-  { ok: true; character: Character } | { ok: false; error: string };
+/** The world settings that turn XP into levels and stat points. */
+export interface LevelRules {
+  levelCurve: LevelCurve;
+  statPointsPerLevel: number;
+  skillPointsPerLevel: number;
+  maxLevel: number;
+  barAttributes: BarAttributes;
+}
 
-const fail = (error: string): ActionResult => ({ ok: false, error });
+/** The world catalogues the skill actions read (host side; players only get their own view). */
+export interface SkillCatalogue {
+  skills: Skill[];
+  classes: CharacterClass[];
+}
+
+export type ActionResult<T extends Sheet = Character> =
+  { ok: true; character: T } | { ok: false; error: string };
+
+const fail = (error: string): { ok: false; error: string } => ({
+  ok: false,
+  error,
+});
 
 /** The action in a request payload, or null when it isn't a well-formed action of that kind. */
 export function parseCharacterAction(
@@ -51,10 +101,28 @@ export function parseCharacterAction(
     typeof value === 'string' && value.length > 0 && value.length <= 100;
   switch (kind) {
     case 'spend-stat-point':
+    case 'refund-stat-point':
       return text(p['attributeId'])
         ? { kind, attributeId: p['attributeId'] }
         : null;
     case 'grant-stat-points':
+      return Number.isInteger(p['amount'])
+        ? { kind, amount: p['amount'] as number }
+        : null;
+    case 'grant-skill-points':
+      return Number.isInteger(p['amount'])
+        ? { kind, amount: p['amount'] as number }
+        : null;
+    case 'learn-skill':
+    case 'refund-skill':
+      return text(p['skillId']) ? { kind, skillId: p['skillId'] } : null;
+    case 'set-skill':
+      return text(p['skillId']) && Number.isInteger(p['rank'])
+        ? { kind, skillId: p['skillId'], rank: p['rank'] as number }
+        : null;
+    case 'set-class':
+      return text(p['classId']) ? { kind, classId: p['classId'] } : null;
+    case 'grant-xp':
       return Number.isInteger(p['amount'])
         ? { kind, amount: p['amount'] as number }
         : null;
@@ -73,27 +141,75 @@ export function parseCharacterAction(
  * Applies an action to a character with the world's rules. Pure: returns the changed character (same `rev`;
  * the caller bumps it) or the translation key of why it's refused.
  */
-export function applyCharacterAction(
+export function applyCharacterAction<T extends Sheet = Character>(
   attributes: WorldAttribute[],
-  character: Character,
+  character: T,
   action: CharacterAction,
-): ActionResult {
+  levelRules: LevelRules,
+  catalogue: SkillCatalogue,
+): ActionResult<T> {
+  const statsOf = (sheet: T) =>
+    attributeStats(
+      attributes,
+      sheet,
+      levelRules.barAttributes,
+      catalogue.skills,
+      classBonusesOf(sheet, catalogue.classes),
+    );
   switch (action.kind) {
     case 'spend-stat-point': {
       if (character.statPoints < 1)
         return fail('character.errors.noStatPoints');
-      const stat = attributeStats(attributes, character).find(
-        (entry) => entry.attributeId === action.attributeId,
-      );
+      const stat = statsOf(character).find((entry) => entry.attributeId === action.attributeId);
       if (!stat) return fail('character.errors.unknownAttribute');
-      // A new point raises the max and the current value together.
-      const next = setAttribute(character, action.attributeId, {
-        points: stat.points + 1,
-        current: stat.current + 1,
+      const spent = attributes.find(
+        (entry) => entry.id === action.attributeId,
+      )!;
+      if (
+        spent.cap !== undefined &&
+        formulaMax(
+          spent,
+          stat.level,
+          levelsByName(attributes, character),
+          character.level,
+        ) >= spent.cap
+      )
+        return fail('character.errors.attributeCapped');
+      // A new level raises the max and the current value by the same delta.
+      const raised = setAttribute(character, action.attributeId, {
+        level: stat.level + 1,
+        current: stat.current,
+      });
+      const after = statsOf(raised).find((entry) => entry.attributeId === action.attributeId)!;
+      const next = setAttribute(raised, action.attributeId, {
+        level: after.level,
+        current: Math.max(0, stat.current + (after.max - stat.max)),
       });
       return {
         ok: true,
         character: { ...next, statPoints: character.statPoints - 1 },
+      };
+    }
+    case 'refund-stat-point': {
+      const stat = statsOf(character).find((entry) => entry.attributeId === action.attributeId);
+      if (!stat) return fail('character.errors.unknownAttribute');
+      if (stat.level < 1) return fail('character.errors.levelZero');
+      // Undoes a spend: max and current drop by the formula delta.
+      const lowered = setAttribute(character, action.attributeId, {
+        level: stat.level - 1,
+        current: stat.current,
+      });
+      const after = statsOf(lowered).find((entry) => entry.attributeId === action.attributeId)!;
+      const next = setAttribute(lowered, action.attributeId, {
+        level: after.level,
+        current: Math.max(
+          0,
+          Math.min(after.max, stat.current + (after.max - stat.max)),
+        ),
+      });
+      return {
+        ok: true,
+        character: { ...next, statPoints: character.statPoints + 1 },
       };
     }
     case 'grant-stat-points': {
@@ -107,16 +223,157 @@ export function applyCharacterAction(
         },
       };
     }
-    case 'set-current': {
-      const stat = attributeStats(attributes, character).find(
-        (entry) => entry.attributeId === action.attributeId,
+    case 'grant-xp': {
+      if (action.amount < 1 || action.amount > MAX_GRANTED_XP)
+        return fail('character.errors.invalidAmount');
+      const grant = grantXp(
+        levelRules.levelCurve,
+        levelRules.statPointsPerLevel,
+        character.xp,
+        action.amount,
+        levelRules.maxLevel,
       );
+      const leveled: T = { ...character, xp: grant.xp, level: grant.level };
+      // A new level can raise maxima that read playerLevel: current rises by the same delta.
+      const before = statsOf(character);
+      const after = statsOf(leveled);
+      let next = leveled;
+      for (const stat of after) {
+        const old = before.find(
+          (entry) => entry.attributeId === stat.attributeId,
+        );
+        if (!old || stat.max === old.max) continue;
+        next = setAttribute(next, stat.attributeId, {
+          level: stat.level,
+          current: Math.max(
+            0,
+            Math.min(stat.max, old.current + (stat.max - old.max)),
+          ),
+        });
+      }
+      return {
+        ok: true,
+        character: {
+          ...next,
+          statPoints: character.statPoints + grant.statPointsGranted,
+          skillPoints:
+            character.skillPoints +
+            grant.levelsGained * levelRules.skillPointsPerLevel,
+        },
+      };
+    }
+    case 'grant-skill-points': {
+      if (action.amount < 1 || action.amount > MAX_GRANTED_POINTS)
+        return fail('character.errors.invalidAmount');
+      return {
+        ok: true,
+        character: {
+          ...character,
+          skillPoints: character.skillPoints + action.amount,
+        },
+      };
+    }
+    case 'learn-skill': {
+      const tree = catalogue.classes.find(
+        (entry) => entry.id === character.classId,
+      )?.tree;
+      const node = tree?.find((entry) => entry.skillId === action.skillId);
+      const skill = catalogue.skills.find(
+        (entry) => entry.id === action.skillId,
+      );
+      if (!tree || !node || !skill) return fail('character.errors.notInTree');
+      const status = treeNodeStates(tree, character).find(
+        (entry) => entry.skillId === action.skillId,
+      )!;
+      const rank = rankOf(character, action.skillId);
+      if (status.state === 'locked')
+        return fail('character.errors.skillLocked');
+      if (rank >= skill.maxRank) return fail('character.errors.skillMaxRank');
+      if (character.skillPoints < skill.pointCost)
+        return fail('character.errors.noSkillPoints');
+      return {
+        ok: true,
+        character: {
+          ...withRank(character, action.skillId, rank + 1),
+          skillPoints: character.skillPoints - skill.pointCost,
+        },
+      };
+    }
+    case 'refund-skill': {
+      const rank = rankOf(character, action.skillId);
+      if (rank < 1) return fail('character.errors.skillNotLearned');
+      const tree =
+        catalogue.classes.find((entry) => entry.id === character.classId)
+          ?.tree ?? [];
+      const needed = tree.some(
+        (node) =>
+          rankOf(character, node.skillId) > 0 &&
+          node.requires.some(
+            (req) => req.skillId === action.skillId && req.rank > rank - 1,
+          ),
+      );
+      if (needed) return fail('character.errors.skillNeeded');
+      const back = tree.some((node) => node.skillId === action.skillId)
+        ? (catalogue.skills.find((entry) => entry.id === action.skillId)
+            ?.pointCost ?? 0)
+        : 0;
+      return {
+        ok: true,
+        character: {
+          ...withRank(character, action.skillId, rank - 1),
+          skillPoints: character.skillPoints + back,
+        },
+      };
+    }
+    case 'set-skill': {
+      const skill = catalogue.skills.find(
+        (entry) => entry.id === action.skillId,
+      );
+      if (!skill) return fail('character.errors.unknownSkill');
+      if (action.rank < 0 || action.rank > skill.maxRank)
+        return fail('character.errors.invalidRank');
+      return {
+        ok: true,
+        character: withRank(character, action.skillId, action.rank),
+      };
+    }
+    case 'set-class': {
+      const next = catalogue.classes.find(
+        (entry) => entry.id === action.classId,
+      );
+      if (!next) return fail('character.errors.unknownClass');
+      const old = catalogue.classes.find(
+        (entry) => entry.id === character.classId,
+      );
+      let refunded = 0;
+      const treeIds = new Set(old?.tree.map((node) => node.skillId) ?? []);
+      for (const entry of character.skills)
+        if (treeIds.has(entry.skillId))
+          refunded +=
+            entry.rank *
+            (catalogue.skills.find((s) => s.id === entry.skillId)?.pointCost ??
+              0);
+      return {
+        ok: true,
+        character: {
+          ...character,
+          classId: next.id,
+          skillPoints: character.skillPoints + refunded,
+          skills: character.skills.filter(
+            (entry) => !treeIds.has(entry.skillId),
+          ),
+        },
+      };
+    }
+    case 'set-current': {
+      const stat = statsOf(character).find((entry) => entry.attributeId === action.attributeId);
       if (!stat) return fail('character.errors.unknownAttribute');
+      if (!stat.isBar) return fail('character.errors.notABar');
       const current = Math.max(0, Math.min(action.value, stat.max));
       return {
         ok: true,
         character: setAttribute(character, action.attributeId, {
-          points: stat.points,
+          level: stat.level,
           current,
         }),
       };
@@ -158,23 +415,22 @@ export function applyCharacterAction(
       if (entry.item.type !== 'consumable')
         return fail('character.errors.notConsumable');
       // Consumables add their modifiers to current values, capped at max (and never below 0).
-      let next: Character = {
+      let next: T = {
         ...character,
         inventory: character.inventory.filter(
           (candidate) => candidate.id !== entry.id,
         ),
       };
       for (const modifier of entry.item.modifiers) {
-        const stat = attributeStats(attributes, next).find(
-          (candidate) => candidate.name === modifier.attribute,
-        );
-        if (!stat) continue;
+        const stat = statsOf(next).find((candidate) => candidate.name === modifier.attribute);
+        // Only bars keep a current value; a modifier on another attribute has no lasting effect.
+        if (!stat?.isBar) continue;
         const current = Math.max(
           0,
           Math.min(stat.current + modifier.value, stat.max),
         );
         next = setAttribute(next, stat.attributeId, {
-          points: stat.points,
+          level: stat.level,
           current,
         });
       }
@@ -200,11 +456,11 @@ export function applyCharacterAction(
 }
 
 /** Sets one attribute's entry, adding it when the attribute was added to the world after the character. */
-function setAttribute(
-  character: Character,
+function setAttribute<T extends Sheet>(
+  character: T,
   attributeId: string,
   values: Omit<CharacterAttribute, 'attributeId'>,
-): Character {
+): T {
   const exists = character.attributes.some(
     (entry) => entry.attributeId === attributeId,
   );
@@ -214,4 +470,22 @@ function setAttribute(
       )
     : [...character.attributes, { attributeId, ...values }];
   return { ...character, attributes };
+}
+
+function rankOf(sheet: Sheet, skillId: string): number {
+  return sheet.skills.find((entry) => entry.skillId === skillId)?.rank ?? 0;
+}
+
+/** The sheet with one skill at a rank (added at the end, replaced in place, or removed at 0). */
+function withRank<T extends Sheet>(sheet: T, skillId: string, rank: number): T {
+  const exists = sheet.skills.some((entry) => entry.skillId === skillId);
+  const skills =
+    rank < 1
+      ? sheet.skills.filter((entry) => entry.skillId !== skillId)
+      : exists
+        ? sheet.skills.map((entry) =>
+            entry.skillId === skillId ? { ...entry, rank } : entry,
+          )
+        : [...sheet.skills, { skillId, rank }];
+  return { ...sheet, skills };
 }

@@ -24,6 +24,7 @@ import { MessageModule } from '@openng/optimus-ui/message';
 import { SplitterModule } from '@openng/optimus-ui/splitter';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
+import { HostOfflineIconComponent } from '../../../../core/components/host-offline-icon/host-offline-icon.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterBusiness } from '../../../character/business/character.business';
@@ -32,6 +33,7 @@ import { DiceOverlayComponent } from '../../../dice/components/dice-overlay/dice
 import { DiceRollerComponent } from '../../../dice/components/dice-roller/dice-roller.component';
 import { RoomBusiness } from '../../../room/business/room.business';
 import { TableBusiness } from '../../business/table.business';
+import { TableNpcsComponent } from '../../components/table-npcs/table-npcs.component';
 import { NOTES_MAX_LENGTH } from '../../models/table';
 
 /** Below this width the game master's splitter becomes one column, with the players in a drawer. */
@@ -42,6 +44,7 @@ const NARROW_QUERY = '(max-width: 960px)';
   selector: 'app-table-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    TableNpcsComponent,
     NgTemplateOutlet,
     FormsModule,
     RouterLink,
@@ -55,6 +58,7 @@ const NARROW_QUERY = '(max-width: 960px)';
     TextareaModule,
     TooltipModule,
     StoredImageComponent,
+    HostOfflineIconComponent,
     CharacterSummaryComponent,
     DiceRollerComponent,
     DiceOverlayComponent,

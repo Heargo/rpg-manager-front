@@ -1,12 +1,14 @@
+import { World } from '../../world/models/world';
 import { createCharacter, findCharacterOf, normalizeCharacterName, validateCreateCharacter } from './character.rules';
 
-const world = {
+const world: Pick<World, 'attributes' | 'startingStatPoints' | 'startingMoney' | 'startingSkillPoints'> = {
   attributes: [
-    { id: 'life', name: 'Life', baseValue: 10 },
-    { id: 'str', name: 'Strength', baseValue: 2 },
+    { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+    { id: 'str', name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
   ],
   startingStatPoints: 5,
-  startingMoney: 50,
+  startingMoney: 5000,
+  startingSkillPoints: 0,
 };
 
 describe('character rules', () => {
@@ -17,15 +19,36 @@ describe('character rules', () => {
       name: 'Ada la Brave',
       portraitId: 'img',
       statPoints: 5,
-      money: 50,
+      xp: 0,
+      level: 1,
+      money: 5000,
       attributes: [
-        { attributeId: 'life', points: 0, current: 10 },
-        { attributeId: 'str', points: 0, current: 2 },
+        { attributeId: 'life', level: 0, current: 10 },
+        { attributeId: 'str', level: 0, current: 2 },
       ],
       inventory: [],
       rev: 1,
       updatedAt: 1000,
+      skillPoints: 0,
+      skills: [],
     });
+    expect(createCharacter(world, { playerId: 'p1', name: 'Ada' }, 'c1', 0)).not.toHaveProperty('classId');
+  });
+
+  it('starts every attribute at level 0 with current = max from its formula', () => {
+    const formulaWorld = {
+      ...world,
+      attributes: [
+        { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'steep-linear' as const, step: 5 } },
+        { id: 'focus', name: 'Focus', baseValue: 5, formula: { preset: 'percent' as const, step: 10 } },
+        { id: 'luck', name: 'Luck', baseValue: 5, formula: { preset: 'custom' as const, expression: 'base + 3 + level' } },
+      ],
+    };
+    expect(createCharacter(formulaWorld, { playerId: 'p', name: 'Ada' }, 'c', 0).attributes).toEqual([
+      { attributeId: 'life', level: 0, current: 10 },
+      { attributeId: 'focus', level: 0, current: 5 },
+      { attributeId: 'luck', level: 0, current: 8 },
+    ]);
   });
 
   it('finds the character of a player', () => {

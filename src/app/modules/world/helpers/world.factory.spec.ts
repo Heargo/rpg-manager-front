@@ -7,13 +7,23 @@ function ids() {
 }
 
 describe('createWorld', () => {
+  it('starts with no NPCs', () => {
+    const world = createWorld({ name: 'W', attributes: [] }, ids(), 1);
+    expect(world.npcs).toEqual([]);
+  });
+
+  it('has no money format: money is always integer copper', () => {
+    const world = createWorld({ name: 'Eldoria', attributes: [{ name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } }, { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } }], barAttributes: { life: 'Life', mana: 'Mana' } }, ids(), 1000);
+    expect(world).not.toHaveProperty('moneyFormat');
+  });
+
   it('builds a world with ids, trimmed names and defaults', () => {
     const world = createWorld(
       {
         name: '  Eldoria ',
         attributes: [
-          { name: ' Life ', baseValue: 10 },
-          { name: 'Mana', baseValue: 5 },
+          { name: ' Life ', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+          { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } },
         ],
         barAttributes: { life: 'Life', mana: 'Mana' },
         offlineFeatures: { sell: true },
@@ -27,13 +37,15 @@ describe('createWorld', () => {
       name: 'Eldoria',
       description: '',
       attributes: [
-        { id: 'id1', name: 'Life', baseValue: 10 },
-        { id: 'id2', name: 'Mana', baseValue: 5 },
+        { id: 'id1', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+        { id: 'id2', name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } },
       ],
       barAttributes: { life: 'id1', mana: 'id2' },
       startingStatPoints: 0,
+      levelCurve: { preset: 'growing' },
+      statPointsPerLevel: 3,
+      maxLevel: 20,
       startingMoney: 0,
-      moneyFormat: { kind: 'coins' },
       offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, sell: true },
       items: [],
       characters: [],
@@ -41,6 +53,38 @@ describe('createWorld', () => {
       createdAt: 1000,
       updatedAt: 1000,
     });
+  });
+
+  it('keeps the max level of the draft, 20 by default', () => {
+    expect(createWorld({ name: 'W', attributes: [], maxLevel: 35 }, ids(), 0).maxLevel).toBe(35);
+    expect(createWorld({ name: 'W', attributes: [] }, ids(), 0).maxLevel).toBe(20);
+  });
+
+  it('keeps the level curve and stat points per level of the draft', () => {
+    const world = createWorld(
+      { name: 'W', attributes: [], levelCurve: { preset: 'custom', expression: 'level * 50' }, statPointsPerLevel: 5 },
+      ids(),
+      0,
+    );
+    expect(world).toMatchObject({ levelCurve: { preset: 'custom', expression: 'level * 50' }, statPointsPerLevel: 5 });
+  });
+
+  it('keeps each attribute formula, preset or custom', () => {
+    const world = createWorld(
+      {
+        name: 'W',
+        attributes: [
+          { name: 'Life', baseValue: 10, formula: { preset: 'steep-linear', step: 5 } },
+          { name: 'Luck', baseValue: 1, formula: { preset: 'custom', expression: 'base + level ^ 2' } },
+        ],
+      },
+      ids(),
+      0,
+    );
+    expect(world.attributes.map((attribute) => attribute.formula)).toEqual([
+      { preset: 'steep-linear', step: 5 },
+      { preset: 'custom', expression: 'base + level ^ 2' },
+    ]);
   });
 
   it('leaves a bar empty when its attribute name does not exist', () => {
@@ -60,7 +104,7 @@ function worldWithImages(): World {
     items: [item],
     characters: [
       {
-        id: 'c1', playerId: 'p1', name: 'Ada', portraitId: 'img-portrait', statPoints: 0, money: 0, attributes: [], rev: 1, updatedAt: 0,
+        id: 'c1', playerId: 'p1', name: 'Ada', portraitId: 'img-portrait', statPoints: 0, xp: 0, level: 1, money: 0, attributes: [], rev: 1, updatedAt: 0, skillPoints: 0, skills: [],
         inventory: [{ id: 'e1', item: { ...item, imageId: 'img-copy' }, equipped: false, position: 0 }],
       },
     ],
@@ -86,5 +130,23 @@ describe('world images', () => {
     expect(summarizeWorld(worldWithImages())).toEqual({
       id: 'id1', name: 'W', description: '', imageId: 'img-icon', characterCount: 1, updatedAt: 0,
     });
+  });
+});
+
+describe('createWorld attribute cap', () => {
+  it('keeps the cap on the world attribute, and leaves it absent otherwise', () => {
+    const world = createWorld(
+      {
+        name: 'Eldoria',
+        attributes: [
+          { name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 }, ...({ cap: 1000 } as object) },
+          { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } },
+        ],
+      },
+      ids(),
+      1000,
+    );
+    expect((world.attributes[0] as { cap?: number }).cap).toBe(1000);
+    expect((world.attributes[1] as { cap?: number }).cap).toBeUndefined();
   });
 });

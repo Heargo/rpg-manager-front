@@ -1,22 +1,32 @@
 <div class="main-container wizard">
   <header class="wizard-header">
-    <a routerLink="/play" class="back"><i class="pi pi-arrow-left"></i> {{ 'play.title' | transloco }}</a>
-    <h1>{{ 'world.new.title' | transloco }}</h1>
+    <a routerLink="/play" class="back"
+      ><i class="pi pi-arrow-left"></i> {{ "play.title" | transloco }}</a
+    >
+    <h1>{{ "world.new.title" | transloco }}</h1>
   </header>
 
   <div class="layout">
     <p-stepper [(value)]="step" [linear]="true" class="steps">
       <p-step-list>
-        <p-step [value]="1">{{ 'world.new.steps.identity' | transloco }}</p-step>
-        <p-step [value]="2" [disabled]="!stepValid()[1]">{{ 'world.new.steps.attributes' | transloco }}</p-step>
-        <p-step [value]="3" [disabled]="!stepValid()[1] || !stepValid()[2]">{{ 'world.new.steps.rules' | transloco }}</p-step>
+        <p-step [value]="1">{{
+          "world.new.steps.identity" | transloco
+        }}</p-step>
+        <p-step [value]="2" [disabled]="!stepValid()[1]">{{
+          "world.new.steps.attributes" | transloco
+        }}</p-step>
+        <p-step [value]="3" [disabled]="!stepValid()[1] || !stepValid()[2]">{{
+          "world.new.steps.rules" | transloco
+        }}</p-step>
       </p-step-list>
       <p-step-panels>
         <!-- 1. Identity -->
         <p-step-panel [value]="1">
           <ng-template #content>
             <div class="panel">
-              <label for="world-name">{{ 'world.fields.name' | transloco }}</label>
+              <label for="world-name">{{
+                "world.fields.name" | transloco
+              }}</label>
               <input
                 pInputText
                 id="world-name"
@@ -25,28 +35,43 @@
                 [ngModel]="name()"
                 (ngModelChange)="name.set($event)"
               />
-              <label for="world-description">{{ 'world.fields.description' | transloco }}</label>
+              <label for="world-description">{{
+                "world.fields.description" | transloco
+              }}</label>
               <textarea
                 pTextarea
                 id="world-description"
                 rows="4"
-                [placeholder]="'world.fields.descriptionPlaceholder' | transloco"
+                [placeholder]="
+                  'world.fields.descriptionPlaceholder' | transloco
+                "
                 [ngModel]="description()"
                 (ngModelChange)="description.set($event)"
               ></textarea>
-              <span class="label">{{ 'world.fields.image' | transloco }}</span>
+              <span class="label">{{ "world.fields.image" | transloco }}</span>
               <p-fileupload
                 mode="basic"
                 accept="image/*"
                 [auto]="true"
                 [customUpload]="true"
-                [chooseLabel]="(imageId() ? 'world.fields.changeImage' : 'world.fields.chooseImage') | transloco"
+                [chooseLabel]="
+                  (imageId()
+                    ? 'world.fields.changeImage'
+                    : 'world.fields.chooseImage'
+                  ) | transloco
+                "
                 chooseIcon="pi pi-image"
                 [disabled]="uploading()"
                 (uploadHandler)="upload($event)"
               />
               <div class="actions">
-                <p-button [label]="'world.new.next' | transloco" icon="pi pi-arrow-right" iconPos="right" [disabled]="!stepValid()[1]" (onClick)="step.set(2)" />
+                <p-button
+                  [label]="'world.new.next' | transloco"
+                  icon="pi pi-arrow-right"
+                  iconPos="right"
+                  [disabled]="!stepValid()[1]"
+                  (onClick)="step.set(2)"
+                />
               </div>
             </div>
           </ng-template>
@@ -56,74 +81,268 @@
         <p-step-panel [value]="2">
           <ng-template #content>
             <div class="panel">
-              <p class="hint">{{ 'world.new.attributesHint' | transloco }}</p>
+              <p class="hint">{{ "world.new.attributesHint" | transloco }}</p>
+              <p class="hint">{{ "world.new.formulaHint" | transloco }}</p>
               <div class="attributes" role="table">
-                <div class="row head" role="row">
-                  <span role="columnheader">{{ 'world.fields.attributeName' | transloco }}</span>
-                  <span role="columnheader">{{ 'world.fields.baseValue' | transloco }}</span>
-                  <span></span>
+                <div class="row head" aria-hidden="true">
+                  <span>{{ "world.fields.attributeName" | transloco }}</span>
+                  <span>{{ "world.new.columns.base" | transloco }}</span>
+                  <span>{{ "world.new.columns.progression" | transloco }}</span>
+                  <span>{{ "world.fields.step" | transloco }}</span>
+                  <span>{{ "world.new.columns.cap" | transloco }}</span>
+                  <span>{{ "world.new.columns.max" | transloco }}</span>
+                  <span class="bar-toggles"></span>
+                  <span class="remove"></span>
                 </div>
-                @for (attribute of attributes(); track attribute.key; let i = $index) {
-                  <div class="row" role="row">
-                    <input
-                      pInputText
-                      [maxlength]="attributeMax"
-                      [ariaLabel]="('world.fields.attributeName' | transloco) + ' ' + (i + 1)"
-                      [ngModel]="attribute.name"
-                      (ngModelChange)="updateAttribute(attribute.key, { name: $event })"
-                    />
-                    <p-inputnumber
-                      [ngModel]="attribute.baseValue"
-                      (ngModelChange)="updateAttribute(attribute.key, { baseValue: $event ?? 0 })"
-                      [step]="1"
-                      inputStyleClass="number"
-                      [ariaLabel]="('world.fields.baseValue' | transloco) + ' ' + (i + 1)"
-                    />
-                    <p-button
-                      icon="pi pi-trash"
-                      severity="secondary"
-                      [text]="true"
-                      [rounded]="true"
-                      [ariaLabel]="'world.new.removeAttribute' | transloco"
-                      (onClick)="removeAttribute(attribute.key)"
-                    />
+                @for (
+                  attribute of attributes();
+                  track attribute.key;
+                  let i = $index
+                ) {
+                  <div class="attribute" role="rowgroup">
+                    <div
+                      class="row"
+                      role="row"
+                      [attr.data-testid]="'attribute-row-' + i"
+                    >
+                      <input
+                        pInputText
+                        class="name"
+                        [maxlength]="attributeMax"
+                        [placeholder]="'world.fields.attributeName' | transloco"
+                        [ariaLabel]="
+                          ('world.fields.attributeName' | transloco) +
+                          ' ' +
+                          (i + 1)
+                        "
+                        [ngModel]="attribute.name"
+                        (ngModelChange)="
+                          updateAttribute(attribute.key, { name: $event })
+                        "
+                      />
+                      <p-inputnumber
+                        class="base"
+                        [ngModel]="attribute.baseValue"
+                        (ngModelChange)="
+                          updateAttribute(attribute.key, {
+                            baseValue: $event ?? 0,
+                          })
+                        "
+                        [step]="1"
+                        inputStyleClass="number"
+                        [pTooltip]="'world.fields.baseValue' | transloco"
+                        [ariaLabel]="
+                          ('world.fields.baseValue' | transloco) + ' ' + (i + 1)
+                        "
+                      />
+                      <p-select
+                        class="preset"
+                        [attr.data-testid]="'formula-preset-' + i"
+                        [options]="presets"
+                        [ngModel]="attribute.formula.preset"
+                        (ngModelChange)="setPreset(attribute.key, $event)"
+                        [ariaLabel]="
+                          ('world.fields.formula' | transloco) + ' ' + (i + 1)
+                        "
+                        appendTo="body"
+                      >
+                        <ng-template #selectedItem let-preset>{{
+                          "world.formula.presets." + preset | transloco
+                        }}</ng-template>
+                        <ng-template #item let-preset>{{
+                          "world.formula.presets." + preset | transloco
+                        }}</ng-template>
+                      </p-select>
+                      @if (stepOf(attribute.formula) !== null) {
+                        <p-inputnumber
+                          class="step"
+                          [attr.data-testid]="'formula-step-' + i"
+                          [ngModel]="stepOf(attribute.formula)"
+                          (ngModelChange)="setStep(attribute.key, $event)"
+                          [minFractionDigits]="0"
+                          [maxFractionDigits]="2"
+                          inputStyleClass="number"
+                          [pTooltip]="'world.fields.step' | transloco"
+                          [ariaLabel]="
+                            ('world.fields.step' | transloco) + ' ' + (i + 1)
+                          "
+                        />
+                      } @else {
+                        <span class="step"></span>
+                      }
+                      <p-inputnumber
+                        class="cap"
+                        inputStyleClass="number"
+                        [min]="1"
+                        [step]="1"
+                        placeholder="∞"
+                        [attr.data-testid]="'formula-cap-' + i"
+                        [attr.aria-invalid]="capErrors()[i] ? 'true' : null"
+                        [pTooltip]="'world.fields.cap' | transloco"
+                        [ariaLabel]="
+                          ('world.fields.cap' | transloco) + ' ' + (i + 1)
+                        "
+                        [ngModel]="attribute.cap ?? null"
+                        [ngModelOptions]="{ standalone: true }"
+                        (ngModelChange)="setCap(attribute.key, $event)"
+                      />
+                      <span
+                        class="max"
+                        [attr.data-testid]="'formula-preview-' + i"
+                        [attr.data-levels]="previews()[i].levels"
+                        data-chart-trigger
+                        [attr.tabindex]="previews()[i].levels ? 0 : null"
+                        [attr.aria-expanded]="chartOpen() === i"
+                        (pointerenter)="hoverChart($event, i)"
+                        (pointerleave)="hoverChart($event, null)"
+                        (focus)="focusChart($event, i)"
+                        (blur)="setChart(null)"
+                        (click)="tapChart($event, i)"
+                        (keydown.escape)="setChart(null)"
+                      >
+                        @if (previews()[i].levels) {
+                          {{
+                            "world.formula.max"
+                              | transloco
+                                : {
+                                    from: previews()[i].first,
+                                    to: previews()[i].last,
+                                  }
+                          }}
+                        } @else {
+                          –
+                        }
+                        @if (chartOpen() === i && previews()[i].chart.length) {
+                          <span class="chart-card" role="tooltip">
+                            <app-formula-chart
+                              [values]="previews()[i].chart"
+                              [cap]="previews()[i].cap"
+                              [label]="'formula.chart.maxLabel' | transloco"
+                            />
+                          </span>
+                        }
+                      </span>
+                      <span class="bar-toggles">
+                        <button
+                          type="button"
+                          class="bar-toggle"
+                          [attr.data-testid]="'bar-life-' + i"
+                          [attr.aria-pressed]="lifeBar() === attribute.key"
+                          [attr.aria-label]="'world.fields.lifeBar' | transloco"
+                          [pTooltip]="'world.fields.lifeBar' | transloco"
+                          (click)="setBar('life', attribute.key)"
+                        >
+                          <i class="pi pi-heart"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="bar-toggle"
+                          [attr.data-testid]="'bar-mana-' + i"
+                          [attr.aria-pressed]="manaBar() === attribute.key"
+                          [attr.aria-label]="'world.fields.manaBar' | transloco"
+                          [pTooltip]="'world.fields.manaBar' | transloco"
+                          (click)="setBar('mana', attribute.key)"
+                        >
+                          <i class="pi pi-bolt"></i>
+                        </button>
+                      </span>
+                      <p-button
+                        class="remove"
+                        icon="pi pi-trash"
+                        severity="secondary"
+                        [text]="true"
+                        [rounded]="true"
+                        [ariaLabel]="'world.new.removeAttribute' | transloco"
+                        (onClick)="removeAttribute(attribute.key)"
+                      />
+                      @if (capErrors()[i]; as capError) {
+                        <small
+                          class="formula-error"
+                          role="alert"
+                          [attr.data-testid]="'formula-cap-error-' + i"
+                          >{{
+                            capError | transloco: { base: attribute.baseValue }
+                          }}</small
+                        >
+                      }
+                    </div>
+                    @if (attribute.formula.preset === "custom") {
+                      <div
+                        class="custom"
+                        [attr.data-testid]="'formula-custom-' + i"
+                      >
+                        <input
+                          pInputText
+                          type="text"
+                          autocomplete="off"
+                          spellcheck="false"
+                          [attr.data-testid]="'formula-expression-' + i"
+                          [attr.aria-label]="
+                            'world.fields.expression' | transloco
+                          "
+                          [placeholder]="'world.fields.expression' | transloco"
+                          [value]="expressionText(attribute.formula)"
+                          (input)="
+                            setExpression(
+                              attribute.key,
+                              $any($event.target).value
+                            )
+                          "
+                        />
+                        <small class="hint">{{
+                          "world.formula.helpShort" | transloco
+                        }}</small>
+                        @if (formulaErrors()[i]; as formulaError) {
+                          <small
+                            class="formula-error"
+                            role="alert"
+                            [attr.data-testid]="'formula-error-' + i"
+                          >
+                            {{
+                              formulaErrorKey(formulaError)
+                                | transloco
+                                  : {
+                                      position: formulaError.position + 1,
+                                      level: formulaError.level,
+                                    }
+                            }}
+                          </small>
+                        }
+                      </div>
+                    }
                   </div>
                 }
               </div>
-              <p-button icon="pi pi-plus" [label]="'world.new.addAttribute' | transloco" severity="secondary" [text]="true" (onClick)="addAttribute()" />
+              <p-button
+                icon="pi pi-plus"
+                [label]="'world.new.addAttribute' | transloco"
+                severity="secondary"
+                [text]="true"
+                (onClick)="addAttribute()"
+              />
               @if (errors().attributes; as error) {
-                <p-message severity="error" size="small" variant="simple">{{ error | transloco }}</p-message>
+                <p-message severity="error" size="small" variant="simple">{{
+                  error | transloco
+                }}</p-message>
               }
 
-              <div class="bars">
-                <div class="field">
-                  <label for="life-bar">{{ 'world.fields.lifeBar' | transloco }}</label>
-                  <p-select
-                    inputId="life-bar"
-                    [options]="attributeNames()"
-                    [showClear]="true"
-                    [placeholder]="'world.fields.noBar' | transloco"
-                    [ngModel]="lifeBar()"
-                    (ngModelChange)="lifeBar.set($event)"
-                  />
-                </div>
-                <div class="field">
-                  <label for="mana-bar">{{ 'world.fields.manaBar' | transloco }}</label>
-                  <p-select
-                    inputId="mana-bar"
-                    [options]="attributeNames()"
-                    [showClear]="true"
-                    [placeholder]="'world.fields.noBar' | transloco"
-                    [ngModel]="manaBar()"
-                    (ngModelChange)="manaBar.set($event)"
-                  />
-                </div>
-              </div>
-              <p class="hint">{{ 'world.new.barsHint' | transloco }}</p>
+              <p class="hint">{{ "world.new.barsHint" | transloco }}</p>
 
               <div class="actions">
-                <p-button [label]="'world.new.back' | transloco" severity="secondary" [text]="true" (onClick)="step.set(1)" />
-                <p-button [label]="'world.new.next' | transloco" icon="pi pi-arrow-right" iconPos="right" [disabled]="!stepValid()[2]" (onClick)="step.set(3)" />
+                <p-button
+                  [label]="'world.new.back' | transloco"
+                  severity="secondary"
+                  [text]="true"
+                  (onClick)="step.set(1)"
+                />
+                <p-button
+                  data-testid="attributes-next"
+                  [label]="'world.new.next' | transloco"
+                  icon="pi pi-arrow-right"
+                  iconPos="right"
+                  [disabled]="!stepValid()[2]"
+                  (onClick)="step.set(3)"
+                />
               </div>
             </div>
           </ng-template>
@@ -133,52 +352,56 @@
         <p-step-panel [value]="3">
           <ng-template #content>
             <div class="panel">
-              <div class="bars">
-                <div class="field">
-                  <label for="stat-points">{{ 'world.fields.startingStatPoints' | transloco }}</label>
-                  <p-inputnumber inputId="stat-points" [min]="0" [showButtons]="true" [ngModel]="startingStatPoints()" (ngModelChange)="startingStatPoints.set($event ?? 0)" />
-                </div>
-                <div class="field">
-                  <label for="money">{{ 'world.fields.startingMoney' | transloco }}</label>
-                  <p-inputnumber inputId="money" [min]="0" [showButtons]="true" [ngModel]="startingMoney()" (ngModelChange)="startingMoney.set($event ?? 0)" />
-                </div>
-                <div class="field">
-                  <label for="money-kind">{{ 'world.fields.currency' | transloco }}</label>
-                  <p-select inputId="money-kind" [options]="moneyOptions()" optionLabel="label" optionValue="value" [ngModel]="moneyKind()" (ngModelChange)="moneyKind.set($event)" />
-                </div>
-                @if (moneyKind() === 'custom') {
-                  <div class="field">
-                    <label for="money-symbol">{{ 'world.fields.currencySymbol' | transloco }}</label>
-                    <input pInputText id="money-symbol" maxlength="12" [ngModel]="moneySymbol()" (ngModelChange)="moneySymbol.set($event)" />
-                  </div>
-                }
-              </div>
-              @if (errors().moneySymbol; as error) {
-                <p-message severity="error" size="small" variant="simple">{{ error | transloco }}</p-message>
-              }
+              <app-rule-fields
+                [draft]="draft()"
+                (draftChange)="applyRules($event)"
+                [errors]="errors()"
+              />
 
               <div class="check">
-                <p-checkbox inputId="starter-items" [binary]="true" [ngModel]="starterItems()" (ngModelChange)="starterItems.set($event)" />
+                <p-checkbox
+                  inputId="starter-items"
+                  [binary]="true"
+                  [ngModel]="starterItems()"
+                  (ngModelChange)="starterItems.set($event)"
+                />
                 <label for="starter-items">
-                  {{ 'world.fields.starterItems' | transloco }}
-                  <small>{{ 'world.fields.starterItemsHint' | transloco }}</small>
+                  {{ "world.fields.starterItems" | transloco }}
+                  <small>{{
+                    "world.fields.starterItemsHint" | transloco
+                  }}</small>
                 </label>
               </div>
 
-              <fieldset class="offline">
-                <legend>{{ 'world.fields.offlineTitle' | transloco }}</legend>
-                <p class="hint">{{ 'world.fields.offlineHint' | transloco }}</p>
-                @for (feature of offlineFeatures; track feature) {
-                  <div class="toggle">
-                    <p-toggleswitch [inputId]="'offline-' + feature" [ngModel]="offline()[feature]" (ngModelChange)="setOffline(feature, $event)" />
-                    <label [for]="'offline-' + feature">{{ 'world.offline.' + feature | transloco }}</label>
-                  </div>
-                }
-              </fieldset>
+              <div class="check">
+                <p-checkbox
+                  inputId="starter-classes"
+                  [binary]="true"
+                  [ngModel]="starterClasses()"
+                  (ngModelChange)="starterClasses.set($event)"
+                />
+                <label for="starter-classes">
+                  {{ "world.fields.starterClasses" | transloco }}
+                  <small>{{
+                    "world.fields.starterClassesHint" | transloco
+                  }}</small>
+                </label>
+              </div>
 
               <div class="actions">
-                <p-button [label]="'world.new.back' | transloco" severity="secondary" [text]="true" (onClick)="step.set(2)" />
-                <p-button [label]="'world.new.create' | transloco" icon="pi pi-check" [loading]="creating()" [disabled]="!canCreate()" (onClick)="create()" />
+                <p-button
+                  [label]="'world.new.back' | transloco"
+                  severity="secondary"
+                  [text]="true"
+                  (onClick)="step.set(2)"
+                />
+                <p-button
+                  [label]="'world.new.create' | transloco"
+                  icon="pi pi-check"
+                  [loading]="creating()"
+                  [disabled]="!canCreate()"
+                  (onClick)="create()"
+                />
               </div>
             </div>
           </ng-template>
@@ -187,9 +410,16 @@
     </p-stepper>
 
     <aside class="preview">
-      <span class="label">{{ 'world.new.preview' | transloco }}</span>
-      <app-world-card [name]="name().trim() || ('world.fields.namePlaceholder' | transloco)" [description]="description()" [imageId]="imageId()">
-        <span meta>{{ 'world.new.attributeCount' | transloco: { count: attributeNames().length } }}</span>
+      <span class="label">{{ "world.new.preview" | transloco }}</span>
+      <app-world-card
+        [name]="name().trim() || ('world.fields.namePlaceholder' | transloco)"
+        [description]="description()"
+        [imageId]="imageId()"
+      >
+        <span meta>{{
+          "world.new.attributeCount"
+            | transloco: { count: attributeNames().length }
+        }}</span>
         <div actions class="chips">
           @for (attribute of attributeNames(); track attribute) {
             <p-tag [value]="attribute" severity="secondary" />

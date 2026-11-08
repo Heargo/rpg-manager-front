@@ -6,21 +6,27 @@ import { CardModule } from '@openng/optimus-ui/card';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { ProfileBusiness } from '../../../../core/business/profile.business';
 import { RoomBusiness } from '../../business/room.business';
+import { RoomSizeBusiness } from '../../business/room-size.business';
 import { InviteCardComponent } from '../../components/invite-card/invite-card.component';
 import { MemberListComponent } from '../../components/member-list/member-list.component';
+import { OfflineFeaturesBusiness } from '../../../world/business/offline-features.business';
+import { OfflineFeatures } from '../../../world/models/world';
+import { OfflineFeaturesPanelComponent } from '../../components/offline-features-panel/offline-features-panel.component';
 import { CharacterListComponent } from '../../../character/components/character-list/character-list.component';
 
 /** The open room's lobby. With no room open (or after leaving), the Play hub takes over. */
 @Component({
   selector: 'app-room-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, ButtonModule, CardModule, MessageModule, InviteCardComponent, MemberListComponent, CharacterListComponent],
+  imports: [RouterLink, TranslocoPipe, ButtonModule, CardModule, MessageModule, InviteCardComponent, MemberListComponent, CharacterListComponent, OfflineFeaturesPanelComponent],
   templateUrl: './room-page.component.html',
   styleUrl: './room-page.component.scss',
 })
 export class RoomPageComponent {
   protected readonly room = inject(RoomBusiness);
+  protected readonly size = inject(RoomSizeBusiness);
   protected readonly profile = inject(ProfileBusiness);
+  protected readonly offlineFeatures = inject(OfflineFeaturesBusiness);
   private readonly router = inject(Router);
 
   protected readonly inviting = signal(false);
@@ -44,6 +50,14 @@ export class RoomPageComponent {
       this.error.set(this.room.describeError(error));
     } finally {
       this.inviting.set(false);
+    }
+  }
+
+  protected async setOfflineFeatures(features: OfflineFeatures): Promise<void> {
+    try {
+      await this.offlineFeatures.set(features);
+    } catch (error) {
+      this.error.set(this.room.describeError(error));
     }
   }
 

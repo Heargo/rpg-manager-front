@@ -14,6 +14,9 @@ export function roomErrorKey(error: unknown): string {
   if (error instanceof SignalCodeError) return CODE_KEYS[error.reason];
   if (error instanceof TransportError) {
     if (error.reason === 'timeout') return 'room.errors.timeout';
+    if (error.reason === 'relay-unavailable') return 'room.invite.relayUnavailable';
+    if (error.reason === 'invite-used') return 'room.errors.inviteUsed';
+    if (error.reason === 'invite-expired') return 'room.errors.inviteExpired';
     if (error.reason === 'unknown-invite') return 'room.errors.unknownInvite';
   }
   if (error instanceof PeerApiError) {

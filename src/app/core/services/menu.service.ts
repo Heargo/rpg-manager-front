@@ -16,17 +16,18 @@ export class MenuService {
       icon: 'pi pi-users',
       routerLink: '/play',
     },
-    {
-      label: 'nav.tools',
-      icon: 'pi pi-wrench',
-      // Every tool works without a world or a room.
-      items: [
-        { label: 'nav.dice', icon: 'pi pi-box', routerLink: '/dice' },
-        { label: 'nav.itemGenerator', icon: 'pi pi-sparkles', routerLink: '/tools/item-generator' },
-        { label: 'nav.characterSheet', icon: 'pi pi-id-card', routerLink: '/tools/character-sheet' },
-        { label: 'nav.externalTools', icon: 'pi pi-external-link', routerLink: '/tools/links' },
-      ],
-    },
+    // Every tool works without a world or a room; they sit directly in the bar (user, 2026-11-08).
+    { label: 'nav.dice', icon: 'pi pi-box', routerLink: '/dice' },
+    { label: 'nav.itemGenerator', icon: 'pi pi-sparkles', routerLink: '/tools/item-generator' },
+    { label: 'nav.characterSheet', icon: 'pi pi-id-card', routerLink: '/tools/character-sheet' },
+    { label: 'nav.itemCatalogue', icon: 'pi pi-shopping-bag', routerLink: '/tools/item-catalogue' },
+    { label: 'nav.itemEditor', icon: 'pi pi-pencil', routerLink: '/tools/item-editor' },
+    { label: 'nav.worldRules', icon: 'pi pi-sliders-h', routerLink: '/tools/world-rules' },
+    { label: 'nav.npcCatalogue', icon: 'pi pi-users', routerLink: '/tools/npc-catalogue' },
+    { label: 'nav.npcEditor', icon: 'pi pi-user-edit', routerLink: '/tools/npc-editor' },
+    { label: 'nav.skillCatalogue', icon: 'pi pi-bolt', routerLink: '/tools/skills' },
+    { label: 'nav.classCatalogue', icon: 'pi pi-sitemap', routerLink: '/tools/classes' },
+    { label: 'nav.externalTools', icon: 'pi pi-external-link', routerLink: '/tools/links' },
   ];
 
   constructor() {

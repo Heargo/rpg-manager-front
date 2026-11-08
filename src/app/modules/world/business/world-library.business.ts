@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { ImageBusiness } from '../../../core/business/image.business';
+import { LanguageBusiness } from '../../../core/business/language.business';
 import { WordListBusiness } from '../../../core/business/word-list.business';
 import { seededRandomSource } from '../../../core/generators/random-source';
 import { generateStarterItems } from '../helpers/starter-items';
@@ -21,6 +22,7 @@ export class WorldLibraryBusiness {
   private readonly storage = inject(WorldStorageService);
   private readonly imageBusiness = inject(ImageBusiness);
   private readonly wordLists = inject(WordListBusiness);
+  private readonly language = inject(LanguageBusiness);
 
   private readonly worlds = signal<WorldSummary[]>([]);
   /** Most recently changed first. */
@@ -34,8 +36,8 @@ export class WorldLibraryBusiness {
     return this.storage.get(id);
   }
 
-  /** Creates a world, optionally with the default items drawn from its own attributes (in the active language). */
-  async create(draft: WorldDraft, options: { starterItems?: boolean } = {}): Promise<World> {
+  /** Creates a world, optionally with the default items and the starter classes and skills built on its own attributes (in the active language). */
+  async create(draft: WorldDraft, options: { starterItems?: boolean; starterClasses?: boolean } = {}): Promise<World> {
     let world = createWorld(draft, () => crypto.randomUUID(), Date.now());
     if (options.starterItems) {
       const words = await this.wordLists.itemWords();
@@ -45,6 +47,10 @@ export class WorldLibraryBusiness {
         barAttributes: world.attributes.filter((attribute) => barIds.includes(attribute.id)).map((attribute) => attribute.name),
       });
       world = { ...world, items: items.map((item) => ({ ...item, id: crypto.randomUUID() })) };
+    }
+    if (options.starterClasses) {
+      const { buildStarterClasses } = await import('../helpers/starter-classes');
+      world = { ...world, ...buildStarterClasses(world, this.language.$language(), () => crypto.randomUUID()) };
     }
     await this.persist(world);
     return world;
