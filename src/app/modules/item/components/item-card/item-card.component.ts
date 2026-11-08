@@ -62,9 +62,28 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
   styles: `
     :host {
       display: block;
+      height: 100%;
     }
     p-card {
       position: relative;
+      display: block;
+      height: 100%;
+    }
+    // Fill the cell so every card in a row (and the catalogue) has the same size; the price sits at the bottom.
+    :host ::ng-deep .item-card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    :host ::ng-deep .item-card .p-card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    :host ::ng-deep .item-card .p-card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
     .slot-icon {
       position: absolute;
@@ -107,8 +126,15 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
     .description {
       margin: 0 0 0.75rem;
       font-style: italic;
+      // Three lines at most, so one long description doesn't stretch every card.
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .price {
+      // Bottom-aligned in every card.
+      margin-top: auto;
       margin: 0;
       padding-right: 2rem;
       font-weight: 600;

@@ -186,12 +186,17 @@ import { ItemCardComponent } from '../item-card/item-card.component';
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+      // Every row as tall as the tallest card: uniform cards across the catalogue (user, 2026-11-08).
+      grid-auto-rows: 1fr;
       gap: 1rem;
     }
     .entry {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+    }
+    .entry app-item-card {
+      flex: 1;
     }
     .actions {
       display: flex;
