@@ -1,3 +1,4 @@
+import { Skill } from '../../skill/models/skill';
 import {
   attributeStats,
   barStats,
@@ -45,9 +46,9 @@ export function isValidNpcVisibility(value: unknown): boolean {
 /** The public projection of an NPC: portrait and name, plus the union of what the ticks of its roles allow. */
 export function toPublicNpc(
   npc: Npc,
-  world: Pick<World, 'attributes' | 'barAttributes' | 'npcVisibility'>,
+  world: Pick<World, 'attributes' | 'barAttributes' | 'npcVisibility'> & { skills?: Skill[] },
 ): PublicNpc {
-  const stats = attributeStats(world.attributes, npc, world.barAttributes);
+  const stats = attributeStats(world.attributes, npc, world.barAttributes, world.skills ?? []);
   const life = barStats(stats, world.barAttributes).life;
   const when = <T>(field: keyof NpcVisibility, value: T): T | undefined =>
     npc.roles.some((role) => world.npcVisibility[role][field])

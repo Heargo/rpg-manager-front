@@ -25,6 +25,7 @@ export class MenuService {
     { label: 'nav.worldRules', icon: 'pi pi-sliders-h', routerLink: '/tools/world-rules' },
     { label: 'nav.npcCatalogue', icon: 'pi pi-users', routerLink: '/tools/npc-catalogue' },
     { label: 'nav.npcEditor', icon: 'pi pi-user-edit', routerLink: '/tools/npc-editor' },
+    { label: 'nav.skillCatalogue', icon: 'pi pi-bolt', routerLink: '/tools/skills' },
     { label: 'nav.externalTools', icon: 'pi pi-external-link', routerLink: '/tools/links' },
   ];
 

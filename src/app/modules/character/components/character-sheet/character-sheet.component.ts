@@ -161,7 +161,7 @@ export class CharacterSheetComponent {
       attribute.formula.preset === 'custom'
         ? `${t('world.formula.presets.custom')}: ${attribute.formula.expression}`
         : `${t('world.formula.presets.' + attribute.formula.preset)} (${attribute.formula.step})`;
-    const result = stat.max - stat.bonus;
+    const result = stat.max - stat.bonus - stat.skillBonus;
     const lines = [
       t('character.sheet.tip.base', { value: stat.base }),
       t('character.sheet.tip.level', { value: stat.level }),
@@ -169,10 +169,11 @@ export class CharacterSheetComponent {
       t('character.sheet.tip.result', { value: result }),
     ];
     if (attribute.cap !== undefined) lines.push(t('character.sheet.tip.cap', { value: attribute.cap }));
-    lines.push(
-      t('character.sheet.tip.bonus', { value: `${stat.bonus > 0 ? '+' : ''}${stat.bonus}` }),
-      t('character.sheet.tip.max', { value: stat.max }),
-    );
+    lines.push(t('character.sheet.tip.bonus', { value: `${stat.bonus > 0 ? '+' : ''}${stat.bonus}` }));
+    if (stat.skillBonus !== 0) {
+      lines.push(t('character.sheet.tip.skills', { value: `${stat.skillBonus > 0 ? '+' : ''}${stat.skillBonus}` }));
+    }
+    lines.push(t('character.sheet.tip.max', { value: stat.max }));
     if (stat.isBar) lines.push(t('character.sheet.tip.current', { value: stat.current }));
     return lines.join('\n');
   }

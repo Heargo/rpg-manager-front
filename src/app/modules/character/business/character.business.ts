@@ -1,3 +1,4 @@
+import { Skill } from '../../skill/models/skill';
 import { computed, inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ImageBusiness } from '../../../core/business/image.business';
@@ -75,7 +76,7 @@ export class CharacterBusiness {
 
   /** Every attribute of a character with its max (base + points + equipment) and current value. */
   statsOf(character: Character, world: SheetWorld | null = this.$world()): AttributeStat[] {
-    return attributeStats(world?.attributes ?? [], character, world?.barAttributes ?? {});
+    return attributeStats(world?.attributes ?? [], character, world?.barAttributes ?? {}, (world as { skills?: Skill[] } | null)?.skills ?? []);
   }
 
   /** The character's level and progress towards the next one, from the world's level curve. */

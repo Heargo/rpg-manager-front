@@ -44,6 +44,7 @@ export function createWorld(draft: WorldDraft, newId: () => string, now: number)
     items: [],
     characters: [],
     npcs: [],
+    skills: [],
     notes: '',
     quickImageIds: [],
     createdAt: now,

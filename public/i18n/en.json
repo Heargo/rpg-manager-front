@@ -21,7 +21,8 @@
     "itemEditor": "Item editor",
     "worldRules": "World rules",
     "npcCatalogue": "NPC catalogue",
-    "npcEditor": "NPC editor"
+    "npcEditor": "NPC editor",
+    "skillCatalogue": "Skill catalogue"
   },
   "play": {
     "title": "Play",
@@ -261,7 +262,8 @@
         "cap": "Cap: {{ value }}",
         "bonus": "Bonus: {{ value }}",
         "max": "Max: {{ value }}",
-        "current": "Current: {{ value }}"
+        "current": "Current: {{ value }}",
+        "skills": "Skills: {{ value }}"
       }
     },
     "items": {
@@ -835,6 +837,78 @@
         "attributes": "The attributes are not valid.",
         "inventory": "The inventory is not valid.",
         "skills": "The skills are not valid."
+      }
+    }
+  },
+  "skill": {
+    "type": {
+      "active": "Active",
+      "passive": "Passive"
+    },
+    "target": {
+      "self": "Self",
+      "one-ally": "One ally",
+      "one-enemy": "One enemy",
+      "all-allies": "All allies",
+      "all-enemies": "All enemies",
+      "area": "Area"
+    },
+    "effectKind": {
+      "damage": "Damage",
+      "heal": "Heal",
+      "modify": "Modify"
+    },
+    "catalogue": {
+      "title": "Skill catalogue",
+      "back": "Back to the room",
+      "toolIntro": "Try the skill catalogue on the sandbox world. Nothing is saved.",
+      "notHosting": "Host a game to edit its skills.",
+      "search": "Search by name",
+      "type": "Type",
+      "create": "New skill",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "deleteTitle": "Delete this skill?",
+      "deleteMessage": "{{ name }} will be removed from the world.",
+      "empty": "No skill found.",
+      "copySuffix": "(copy)",
+      "ranks": "Up to rank {{ max }}, {{ cost }} point(s) per rank",
+      "inUse": "{{ name }} is used by {{ usages }}: remove it from them first.",
+      "failed": "The skill could not be saved."
+    },
+    "editor": {
+      "tabForm": "Form",
+      "tabJson": "JSON",
+      "jsonHint": "Edit the skill as JSON; it is applied to the form while it is valid.",
+      "back": "Back to the catalogue",
+      "save": "Save",
+      "addEffect": "Add an effect",
+      "removeEffect": "Remove the effect",
+      "formulaHint": "Amounts are formulas: rank, level and attribute names (the caster's maxima).",
+      "preview": "Rank 1: {{ rank1 }} · Rank {{ max }}: {{ maxRank }}",
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "type": "Type",
+        "rarity": "Rarity",
+        "maxRank": "Max rank (1 to 10)",
+        "pointCost": "Skill points per rank",
+        "target": "Target",
+        "cooldown": "Cooldown (turns)",
+        "costAttribute": "Cost: attribute",
+        "costAmount": "Cost: amount",
+        "effects": "Effects",
+        "amount": "Amount",
+        "duration": "Duration (turns, 0 = permanent)"
+      },
+      "issue": {
+        "name": "Give the skill a name.",
+        "maxRank": "The max rank is from 1 to 10.",
+        "pointCost": "A rank costs at least 1 skill point.",
+        "target": "An active skill needs a target; a passive one has none.",
+        "effects_amount": "An effect amount is not a valid formula.",
+        "json": "This JSON is not a valid skill."
       }
     }
   }

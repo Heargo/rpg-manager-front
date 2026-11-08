@@ -2,6 +2,7 @@ import { checkAttributeFormula } from '../../../core/helpers/formula';
 import { ITEM_RARITIES, ITEM_TYPES } from '../../../core/models/item';
 import { isValidMaxLevel, LEVEL_CURVE_PRESETS, validateLevelCurve } from '../../character/helpers/level.rules';
 import { isValidNpcVisibility } from '../../npc/helpers/npc-visibility.rules';
+import { emptySkill, parseSkillJson } from '../../skill/helpers/skill.rules';
 import { NPC_ROLES } from '../../npc/models/npc';
 import { World } from '../models/world';
 
@@ -145,6 +146,12 @@ function validateWorld(world: unknown, errors: string[]): void {
       if (!isRecord(entry['item'])) errors.push(`${entryPath}.item must be an object`);
       else validateItem(entry['item'], `${entryPath}.item`, errors);
     });
+  });
+  list(world['skills'], 'world.skills', errors, (skill, path) => {
+    if (typeof skill['id'] !== 'string') errors.push(`${path}.id must be a string`);
+    for (const issue of parseSkillJson(JSON.stringify(skill), emptySkill(), attributeNames).issues) {
+      errors.push(`${path}.${issue.field} is invalid`);
+    }
   });
   if (!Array.isArray(world['quickImageIds']) || !world['quickImageIds'].every((id) => typeof id === 'string')) {
     errors.push('world.quickImageIds must be a list of ids');

@@ -21,7 +21,8 @@
     "itemEditor": "Éditeur d'objets",
     "worldRules": "Règles du monde",
     "npcCatalogue": "Catalogue de PNJ",
-    "npcEditor": "Éditeur de PNJ"
+    "npcEditor": "Éditeur de PNJ",
+    "skillCatalogue": "Catalogue de compétences"
   },
   "play": {
     "title": "Jouer",
@@ -261,7 +262,8 @@
         "cap": "Plafond : {{ value }}",
         "bonus": "Bonus : {{ value }}",
         "max": "Maximum : {{ value }}",
-        "current": "Actuel : {{ value }}"
+        "current": "Actuel : {{ value }}",
+        "skills": "Compétences : {{ value }}"
       }
     },
     "items": {
@@ -835,6 +837,78 @@
         "attributes": "Les attributs ne sont pas valides.",
         "inventory": "L'inventaire n'est pas valide.",
         "skills": "Les compétences ne sont pas valides."
+      }
+    }
+  },
+  "skill": {
+    "type": {
+      "active": "Active",
+      "passive": "Passive"
+    },
+    "target": {
+      "self": "Soi",
+      "one-ally": "Un allié",
+      "one-enemy": "Un ennemi",
+      "all-allies": "Tous les alliés",
+      "all-enemies": "Tous les ennemis",
+      "area": "Zone"
+    },
+    "effectKind": {
+      "damage": "Dégâts",
+      "heal": "Soin",
+      "modify": "Modification"
+    },
+    "catalogue": {
+      "title": "Catalogue de compétences",
+      "back": "Retour à la salle",
+      "toolIntro": "Essayez le catalogue de compétences sur le monde bac à sable. Rien n'est enregistré.",
+      "notHosting": "Hébergez une partie pour modifier ses compétences.",
+      "search": "Rechercher par nom",
+      "type": "Type",
+      "create": "Nouvelle compétence",
+      "edit": "Modifier",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer cette compétence ?",
+      "deleteMessage": "{{ name }} sera retirée du monde.",
+      "empty": "Aucune compétence trouvée.",
+      "copySuffix": "(copie)",
+      "ranks": "Jusqu'au rang {{ max }}, {{ cost }} point(s) par rang",
+      "inUse": "{{ name }} est utilisée par {{ usages }} : retirez-la d'abord.",
+      "failed": "La compétence n'a pas pu être enregistrée."
+    },
+    "editor": {
+      "tabForm": "Formulaire",
+      "tabJson": "JSON",
+      "jsonHint": "Modifiez la compétence en JSON ; elle est appliquée au formulaire tant qu'elle est valide.",
+      "back": "Retour au catalogue",
+      "save": "Enregistrer",
+      "addEffect": "Ajouter un effet",
+      "removeEffect": "Retirer l'effet",
+      "formulaHint": "Les montants sont des formules : rank, level et noms d'attributs (les maxima du lanceur).",
+      "preview": "Rang 1 : {{ rank1 }} · Rang {{ max }} : {{ maxRank }}",
+      "fields": {
+        "name": "Nom",
+        "description": "Description",
+        "type": "Type",
+        "rarity": "Rareté",
+        "maxRank": "Rang max (1 à 10)",
+        "pointCost": "Points de compétence par rang",
+        "target": "Cible",
+        "cooldown": "Récupération (tours)",
+        "costAttribute": "Coût : attribut",
+        "costAmount": "Coût : montant",
+        "effects": "Effets",
+        "amount": "Montant",
+        "duration": "Durée (tours, 0 = permanent)"
+      },
+      "issue": {
+        "name": "Donnez un nom à la compétence.",
+        "maxRank": "Le rang max va de 1 à 10.",
+        "pointCost": "Un rang coûte au moins 1 point de compétence.",
+        "target": "Une compétence active a une cible ; une passive n'en a pas.",
+        "effects_amount": "Le montant d'un effet n'est pas une formule valide.",
+        "json": "Ce JSON n'est pas une compétence valide."
       }
     }
   }

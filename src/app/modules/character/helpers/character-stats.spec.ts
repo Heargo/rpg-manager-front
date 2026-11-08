@@ -4,6 +4,7 @@ import {
   WorldAttribute,
 } from '../../world/models/world';
 import { attributeStats, barStats, formulaMax } from './character-stats';
+import { Skill } from '../../skill/models/skill';
 
 const attributes: WorldAttribute[] = [
   { id: 'life', name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
@@ -79,6 +80,7 @@ describe('attributeStats', () => {
       base: 10,
       level: 2,
       bonus: 4,
+      skillBonus: 0,
       max: 16,
       current: 7,
       isBar: true,
@@ -267,5 +269,44 @@ describe('attribute cap', () => {
   it('does nothing without a cap', () => {
     const [stat] = attributeStats([{ ...capped[0], ...cap(undefined) }], withLevel(10, 5), barIds);
     expect(stat.max).toBe(60);
+  });
+});
+
+describe('attributeStats with passive skills', () => {
+  const passive = (id: string, attribute: string, amount: string, duration = 0): Skill => ({
+    id, name: id, description: '', rarity: 'common', type: 'passive', maxRank: 3, pointCost: 1,
+    effects: [{ kind: 'modify', attribute, amount, duration }],
+  });
+
+  it('adds the permanent modify effects at the sheet rank to the max, as their own line', () => {
+    const stats = attributeStats(
+      attributes,
+      character({ skills: [{ skillId: 'tough', rank: 2 }] }),
+      barIds,
+      [passive('tough', 'Life', '5 + rank')],
+    );
+    expect(stats[0]).toMatchObject({ bonus: 0, skillBonus: 7, max: 19 });
+    expect(stats[2]).toMatchObject({ skillBonus: 0, max: 3 });
+  });
+
+  it('reads the caster attribute maxima in the formula', () => {
+    const stats = attributeStats(
+      attributes,
+      character({ skills: [{ skillId: 'tough', rank: 1 }] }),
+      barIds,
+      [passive('tough', 'Life', 'Strength')],
+    );
+    expect(stats[0]).toMatchObject({ skillBonus: 3, max: 15 });
+  });
+
+  it('ignores active skills, timed effects and skills the sheet does not have', () => {
+    const active: Skill = { ...passive('act', 'Life', '50'), type: 'active', target: 'self' };
+    const stats = attributeStats(
+      attributes,
+      character({ skills: [{ skillId: 'act', rank: 1 }, { skillId: 'timed', rank: 1 }] }),
+      barIds,
+      [active, passive('timed', 'Life', '50', 3), passive('other', 'Life', '50')],
+    );
+    expect(stats[0]).toMatchObject({ skillBonus: 0, max: 12 });
   });
 });

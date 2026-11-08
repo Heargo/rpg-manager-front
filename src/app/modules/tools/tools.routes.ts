@@ -74,6 +74,15 @@ export const routesTools: Routes = [
       ),
   },
   {
+    path: 'tools/skills',
+    canActivate: [NavigationGuard],
+    data: { tool: true },
+    loadComponent: () =>
+      import('./pages/skill-catalogue-tool-page/skill-catalogue-tool-page.component').then(
+        (m) => m.SkillCatalogueToolPageComponent,
+      ),
+  },
+  {
     path: 'tools/links',
     canActivate: [NavigationGuard],
     loadComponent: () =>
