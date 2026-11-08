@@ -47,6 +47,15 @@ export const routesTools: Routes = [
       ),
   },
   {
+    path: 'tools/npc-catalogue',
+    canActivate: [NavigationGuard],
+    data: { tool: true },
+    loadComponent: () =>
+      import('./pages/npc-catalogue-tool-page/npc-catalogue-tool-page.component').then(
+        (m) => m.NpcCatalogueToolPageComponent,
+      ),
+  },
+  {
     path: 'tools/links',
     canActivate: [NavigationGuard],
     loadComponent: () =>

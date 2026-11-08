@@ -1,4 +1,4 @@
-import { Npc, NPC_ROLES, NpcFilter } from '../models/npc';
+import { Npc, NPC_ROLES, NpcFilter, NpcRole } from '../models/npc';
 
 export interface NpcIssue {
   field: 'name' | 'roles' | 'xpReward' | 'loot' | 'merchant';
@@ -48,4 +48,41 @@ export function filterNpcs(npcs: Npc[], filter: NpcFilter): Npc[] {
       npc.level >= filter.minLevel &&
       npc.level <= filter.maxLevel,
   );
+}
+
+/** The NPCs with a copy of the one with this id added at the end (unchanged when there is none). */
+export function addNpcCopy(
+  npcs: Npc[],
+  id: string,
+  newId: () => string,
+): Npc[] {
+  const source = npcs.find((npc) => npc.id === id);
+  return source ? [...npcs, duplicateNpc(source, newId)] : npcs;
+}
+
+const SAMPLE_NPCS: [string, NpcRole, number, number][] = [
+  ['elder', 'story', 8, 0],
+  ['merchant', 'merchant', 4, 0],
+  ['goblin', 'enemy', 2, 30],
+];
+
+/** The example NPCs of the sandbox world (a story, a merchant and an enemy), named through `translate`. */
+export function sampleNpcs(translate: (key: string) => string): Npc[] {
+  return SAMPLE_NPCS.map(([key, role, level, xpReward]) => ({
+    id: `sandbox-npc-${key}`,
+    name: translate(`tools.sandbox.npcs.${key}.name`),
+    description: translate(`tools.sandbox.npcs.${key}.description`),
+    roles: [role],
+    level,
+    xpReward,
+    loot: [],
+    statPoints: 0,
+    xp: 0,
+    money: 0,
+    updatedAt: 0,
+    skillPoints: 0,
+    skills: [],
+    attributes: [],
+    inventory: [],
+  }));
 }

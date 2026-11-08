@@ -19,7 +19,8 @@
     "externalTools": "Outils externes",
     "characterSheet": "Fiche de personnage",
     "itemEditor": "Éditeur d'objets",
-    "worldRules": "Règles du monde"
+    "worldRules": "Règles du monde",
+    "npcCatalogue": "Catalogue de PNJ"
   },
   "play": {
     "title": "Jouer",
@@ -576,7 +577,21 @@
   },
   "tools": {
     "sandbox": {
-      "name": "Bac à sable"
+      "name": "Bac à sable",
+      "npcs": {
+        "elder": {
+          "name": "Doyenne Maren",
+          "description": "La doyenne du village, gardienne des vieilles histoires."
+        },
+        "merchant": {
+          "name": "Tobias le colporteur",
+          "description": "Vend potions et bibelots depuis sa charrette."
+        },
+        "goblin": {
+          "name": "Gobelin des cavernes",
+          "description": "Un gobelin sournois qui garde un butin."
+        }
+      }
     },
     "itemGenerator": {
       "title": "Générateur d'objets",
@@ -731,6 +746,28 @@
       "cap": "Plafond {{ cap }}",
       "maxLabel": "Maximum par niveau",
       "xpLabel": "Coût en XP par niveau"
+    }
+  },
+  "npc": {
+    "catalogue": {
+      "title": "Catalogue de PNJ",
+      "back": "Retour à la salle",
+      "search": "Rechercher par nom",
+      "roles": "Rôles",
+      "levelMin": "Niveau min",
+      "levelMax": "Niveau max",
+      "duplicate": "Dupliquer",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer ce PNJ ?",
+      "deleteMessage": "{{ name }} sera retiré du monde.",
+      "empty": "Aucun PNJ trouvé.",
+      "notHosting": "Hébergez une salle pour gérer les PNJ de votre monde.",
+      "toolIntro": "Parcourez les PNJ d'exemple du monde bac à sable. Rien n'est enregistré."
+    },
+    "role": {
+      "story": "Histoire",
+      "merchant": "Marchand",
+      "enemy": "Ennemi"
     }
   }
 }

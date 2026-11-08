@@ -23,6 +23,7 @@ export class MenuService {
     { label: 'nav.itemCatalogue', icon: 'pi pi-shopping-bag', routerLink: '/tools/item-catalogue' },
     { label: 'nav.itemEditor', icon: 'pi pi-pencil', routerLink: '/tools/item-editor' },
     { label: 'nav.worldRules', icon: 'pi pi-sliders-h', routerLink: '/tools/world-rules' },
+    { label: 'nav.npcCatalogue', icon: 'pi pi-users', routerLink: '/tools/npc-catalogue' },
     { label: 'nav.externalTools', icon: 'pi pi-external-link', routerLink: '/tools/links' },
   ];
 

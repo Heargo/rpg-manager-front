@@ -9,6 +9,7 @@
         <div class="header-actions">
           <p-button icon="pi pi-th-large" [label]="'table.open' | transloco" routerLink="/room/table" />
           <p-button icon="pi pi-box" severity="secondary" [label]="'item.catalogue.title' | transloco" routerLink="/room/items" />
+          <p-button icon="pi pi-users" severity="secondary" [label]="'npc.catalogue.title' | transloco" routerLink="/room/npcs" data-testid="open-npcs" />
           <p-button icon="pi pi-sliders-h" severity="secondary" [label]="'world.rules.open' | transloco" routerLink="/room/rules" data-testid="open-rules" />
           <p-button icon="pi pi-times" [label]="'room.lobby.close' | transloco" severity="secondary" [text]="true" (onClick)="leave()" />
         </div>

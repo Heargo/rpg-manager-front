@@ -21,6 +21,7 @@ import { RoomStorageService } from '../app/modules/room/services/room-storage.se
 import { RoomService } from '../app/modules/room/services/room.service';
 import { ItemHostBusiness } from '../app/modules/item/business/item-host.business';
 import { ItemService } from '../app/modules/item/services/item.service';
+import { NpcCatalogueBusiness } from '../app/modules/npc/business/npc-catalogue.business';
 import { TableHostBusiness } from '../app/modules/table/business/table-host.business';
 import { TableBusiness } from '../app/modules/table/business/table.business';
 import { TableService } from '../app/modules/table/services/table.service';
@@ -59,6 +60,7 @@ const GAME_DEVICE = [
   DiceRollBusiness,
   ItemService,
   ItemHostBusiness,
+  NpcCatalogueBusiness,
   GameSessionBusiness,
   ImageTransferService,
   ImageBusiness,

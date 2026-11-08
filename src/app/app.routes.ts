@@ -9,6 +9,7 @@ import { routesDice } from './modules/dice/dice.routes';
 import { routesTable } from './modules/table/table.routes';
 import { routesItem } from './modules/item/item.routes';
 import { routesTools } from './modules/tools/tools.routes';
+import { routesNpc } from './modules/npc/npc.routes';
 
 export const routes: Routes = [
   ...routesHome,
@@ -20,6 +21,7 @@ export const routes: Routes = [
   ...routesWorld,
   ...routesDice,
   ...routesItem,
+  ...routesNpc,
   ...routesTools,
   { path: '**', redirectTo: '' },
 ];

@@ -19,7 +19,8 @@
     "externalTools": "External tools",
     "characterSheet": "Character sheet",
     "itemEditor": "Item editor",
-    "worldRules": "World rules"
+    "worldRules": "World rules",
+    "npcCatalogue": "NPC catalogue"
   },
   "play": {
     "title": "Play",
@@ -576,7 +577,21 @@
   },
   "tools": {
     "sandbox": {
-      "name": "Sandbox"
+      "name": "Sandbox",
+      "npcs": {
+        "elder": {
+          "name": "Elder Maren",
+          "description": "The village elder, keeper of old stories."
+        },
+        "merchant": {
+          "name": "Tobias the peddler",
+          "description": "Sells potions and trinkets from his cart."
+        },
+        "goblin": {
+          "name": "Cave goblin",
+          "description": "A sneaky goblin guarding a stash of loot."
+        }
+      }
     },
     "itemGenerator": {
       "title": "Item generator",
@@ -731,6 +746,28 @@
       "cap": "Cap {{ cap }}",
       "maxLabel": "Max per level",
       "xpLabel": "XP cost per level"
+    }
+  },
+  "npc": {
+    "catalogue": {
+      "title": "NPC catalogue",
+      "back": "Back to the room",
+      "search": "Search by name",
+      "roles": "Roles",
+      "levelMin": "Min level",
+      "levelMax": "Max level",
+      "duplicate": "Duplicate",
+      "delete": "Delete",
+      "deleteTitle": "Delete this NPC?",
+      "deleteMessage": "{{ name }} will be removed from the world.",
+      "empty": "No NPC found.",
+      "notHosting": "Host a room to manage the NPCs of your world.",
+      "toolIntro": "Browse the sample NPCs of the sandbox world. Nothing is saved."
+    },
+    "role": {
+      "story": "Story",
+      "merchant": "Merchant",
+      "enemy": "Enemy"
     }
   }
 }

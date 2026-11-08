@@ -2,6 +2,7 @@ import { inject, Injectable, linkedSignal } from '@angular/core';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { createSandboxWorld } from '../helpers/default-world';
 import { applyWorldRules } from '../helpers/world-rules.rules';
+import { Npc } from '../../npc/models/npc';
 import { World, WorldRules } from '../models/world';
 
 /**
@@ -25,5 +26,10 @@ export class SandboxWorldBusiness {
     );
     this.world.set(next);
     return next;
+  }
+
+  /** Changes the sandbox NPCs, in memory. */
+  updateNpcs(change: (npcs: Npc[]) => Npc[]): void {
+    this.world.update((world) => ({ ...world, npcs: change(world.npcs) }));
   }
 }
