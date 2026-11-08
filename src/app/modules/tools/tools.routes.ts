@@ -56,6 +56,24 @@ export const routesTools: Routes = [
       ),
   },
   {
+    path: 'tools/npc-editor',
+    canActivate: [NavigationGuard],
+    data: { tool: true },
+    loadComponent: () =>
+      import('./pages/npc-editor-tool-page/npc-editor-tool-page.component').then(
+        (m) => m.NpcEditorToolPageComponent,
+      ),
+  },
+  {
+    path: 'tools/npc-editor/:id',
+    canActivate: [NavigationGuard],
+    data: { tool: true },
+    loadComponent: () =>
+      import('./pages/npc-editor-tool-page/npc-editor-tool-page.component').then(
+        (m) => m.NpcEditorToolPageComponent,
+      ),
+  },
+  {
     path: 'tools/links',
     canActivate: [NavigationGuard],
     loadComponent: () =>

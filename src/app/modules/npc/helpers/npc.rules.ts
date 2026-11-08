@@ -34,8 +34,12 @@ export function validateNpc(npc: Npc): NpcIssue[] {
   return issues;
 }
 
-export function duplicateNpc(npc: Npc, newId: () => string): Npc {
-  return { ...structuredClone(npc), id: newId(), name: `${npc.name} (copy)` };
+export function duplicateNpc(
+  npc: Npc,
+  newId: () => string,
+  suffix = ' (copy)',
+): Npc {
+  return { ...structuredClone(npc), id: newId(), name: `${npc.name}${suffix}` };
 }
 
 export function filterNpcs(npcs: Npc[], filter: NpcFilter): Npc[] {
@@ -55,9 +59,10 @@ export function addNpcCopy(
   npcs: Npc[],
   id: string,
   newId: () => string,
+  suffix?: string,
 ): Npc[] {
   const source = npcs.find((npc) => npc.id === id);
-  return source ? [...npcs, duplicateNpc(source, newId)] : npcs;
+  return source ? [...npcs, duplicateNpc(source, newId, suffix)] : npcs;
 }
 
 const SAMPLE_NPCS: [string, NpcRole, number, number][] = [

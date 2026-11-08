@@ -72,6 +72,14 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
         [placeholder]="'npc.catalogue.levelMax' | transloco"
         (input)="levelMax.set($any($event.target).value)"
       />
+      <button
+        pButton
+        type="button"
+        data-action="create"
+        icon="pi pi-plus"
+        [label]="'npc.catalogue.create' | transloco"
+        (click)="create.emit()"
+      ></button>
     </div>
 
     @if (shown().length) {
@@ -80,6 +88,16 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
           <div class="entry">
             <app-npc-card [npc]="npc" [world]="world()" />
             <div class="actions">
+              <button
+                pButton
+                type="button"
+                data-action="edit"
+                icon="pi pi-pencil"
+                severity="secondary"
+                [text]="true"
+                [attr.aria-label]="'npc.catalogue.edit' | transloco"
+                (click)="edit.emit(npc)"
+              ></button>
               <button
                 pButton
                 type="button"
@@ -148,6 +166,8 @@ export class NpcCatalogueComponent {
 
   readonly world = input.required<World>();
 
+  readonly create = output<void>();
+  readonly edit = output<Npc>();
   readonly duplicate = output<Npc>();
   readonly remove = output<Npc>();
 

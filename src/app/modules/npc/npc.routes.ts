@@ -10,4 +10,20 @@ export const routesNpc: Routes = [
         (m) => m.NpcCataloguePageComponent,
       ),
   },
+  {
+    path: 'room/npcs/editor',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/npc-editor-page/npc-editor-page.component').then(
+        (m) => m.NpcEditorPageComponent,
+      ),
+  },
+  {
+    path: 'room/npcs/editor/:id',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/npc-editor-page/npc-editor-page.component').then(
+        (m) => m.NpcEditorPageComponent,
+      ),
+  },
 ];

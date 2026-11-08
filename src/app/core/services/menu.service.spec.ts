@@ -15,6 +15,7 @@ describe('MenuService', () => {
       '/tools/item-editor',
       '/tools/world-rules',
       '/tools/npc-catalogue',
+      '/tools/npc-editor',
       '/tools/links',
     ]);
     expect(items.some((item) => item.label === 'nav.tools')).toBe(false);

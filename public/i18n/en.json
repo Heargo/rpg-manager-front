@@ -20,7 +20,8 @@
     "characterSheet": "Character sheet",
     "itemEditor": "Item editor",
     "worldRules": "World rules",
-    "npcCatalogue": "NPC catalogue"
+    "npcCatalogue": "NPC catalogue",
+    "npcEditor": "NPC editor"
   },
   "play": {
     "title": "Play",
@@ -376,6 +377,7 @@
       "notHosting": "Host a world to edit its items.",
       "notFound": "This item isn't in the catalogue.",
       "toolIntro": "Create or edit an item on the default attributes. The result stays on this page.",
+      "toolIntroEdit": "Edit an NPC of the sandbox world. It stays in memory and shows in the NPC catalogue tool.",
       "result": "Result",
       "issue": {
         "name": "The name is required.",
@@ -762,12 +764,62 @@
       "deleteMessage": "{{ name }} will be removed from the world.",
       "empty": "No NPC found.",
       "notHosting": "Host a room to manage the NPCs of your world.",
-      "toolIntro": "Browse the sample NPCs of the sandbox world. Nothing is saved."
+      "toolIntro": "Browse the sample NPCs of the sandbox world. Nothing is saved.",
+      "edit": "Edit",
+      "create": "Add NPC",
+      "copySuffix": "(copy)"
     },
     "role": {
       "story": "Story",
       "merchant": "Merchant",
       "enemy": "Enemy"
+    },
+    "editor": {
+      "title": "NPC editor",
+      "back": "Back to the NPCs",
+      "toolIntro": "Create an NPC on the sandbox world. It stays in memory and shows in the NPC catalogue tool.",
+      "notFound": "This NPC does not exist.",
+      "notHosting": "Host a room to manage the NPCs of your world.",
+      "saved": "{{ name }} saved.",
+      "tabForm": "Form",
+      "tabJson": "JSON",
+      "tabGenerate": "Generate",
+      "jsonHint": "Edit the NPC as JSON; it is applied to the form while it is valid.",
+      "generateHint": "Draw a random NPC (name, level, attributes, equipment) from a seed; the form is replaced.",
+      "generate": "Generate",
+      "save": "Save",
+      "equipped": "Equipped",
+      "loot": "Loot",
+      "removeItem": "Remove",
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "roles": "Roles",
+        "level": "Level",
+        "money": "Money",
+        "attributes": "Attribute levels",
+        "xpReward": "XP reward",
+        "buyRatio": "Buy ratio",
+        "sellRatio": "Sell ratio",
+        "inventory": "Equipment and inventory",
+        "addItem": "Add an item from the catalogue"
+      },
+      "issue": {
+        "name": "The name is required.",
+        "roles": "Pick at least one valid role.",
+        "xpReward": "The XP reward must be a whole number, 0 or more.",
+        "loot": "The loot must come from the inventory.",
+        "merchant": "The merchant ratios must be between 0 and 10.",
+        "json": "The JSON is not valid.",
+        "description": "The description must be text.",
+        "level": "The level must be a number.",
+        "xp": "The XP must be a number.",
+        "money": "The money must be a number.",
+        "statPoints": "The stat points must be a number.",
+        "attributes": "The attributes are not valid.",
+        "inventory": "The inventory is not valid.",
+        "skills": "The skills are not valid."
+      }
     }
   }
 }

@@ -17,7 +17,7 @@ const dragon = npc('n3', 'Dragon', 15, ['enemy']);
 
 /**
  * Hooks: `[data-field="search"]`, `[data-field="level-min"]` and `[data-field="level-max"]` (number inputs),
- * `p-multiselect[data-field="roles"]`, and `[data-action]` `duplicate` / `delete` on each card. No `edit` yet.
+ * `p-multiselect[data-field="roles"]`, and `[data-action]` `duplicate` / `delete` on each card.
  */
 describe('NpcCatalogueComponent', () => {
   const world: World = { ...createSandboxWorld((key) => key), npcs: [goblin, baker, dragon] };
@@ -101,8 +101,13 @@ describe('NpcCatalogueComponent', () => {
     expect(removed).toEqual([dragon]);
   });
 
-  it('has no edit action yet', async () => {
-    const { q } = await setup();
-    expect(q('[data-action="edit"]')).toHaveLength(0);
+  it('emits the NPC to edit', async () => {
+    const { fixture, q, component } = await setup();
+    expect(q('[data-action="edit"]')).toHaveLength(3);
+    const edited: Npc[] = [];
+    component.edit.subscribe((n: Npc) => edited.push(n));
+    q('[data-action="edit"]')[0].click();
+    await fixture.whenStable();
+    expect(edited).toEqual([goblin]);
   });
 });

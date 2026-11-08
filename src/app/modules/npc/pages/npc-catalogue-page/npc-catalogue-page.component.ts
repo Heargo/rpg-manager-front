@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -40,6 +40,8 @@ import { Npc } from '../../models/npc';
       @if (catalogue.$world(); as world) {
         <app-npc-catalogue
           [world]="world"
+          (create)="openEditor()"
+          (edit)="openEditor($event.id)"
           (duplicate)="run(catalogue.duplicate($event.id))"
           (remove)="run(catalogue.remove($event.id))"
         />
@@ -74,8 +76,14 @@ import { Npc } from '../../models/npc';
 export class NpcCataloguePageComponent {
   protected readonly catalogue = inject(NpcCatalogueBusiness);
   protected readonly tool = !!inject(ActivatedRoute).snapshot.data['tool'];
+  private readonly router = inject(Router);
   private readonly room = inject(RoomBusiness);
   private readonly messages = inject(MessageService);
+
+  protected openEditor(id?: string): Promise<boolean> {
+    const base = this.tool ? '/tools/npc-editor' : '/room/npcs/editor';
+    return this.router.navigate(id ? [base, id] : [base]);
+  }
 
   protected async run(action: Promise<unknown>): Promise<void> {
     try {

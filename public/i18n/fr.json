@@ -20,7 +20,8 @@
     "characterSheet": "Fiche de personnage",
     "itemEditor": "Éditeur d'objets",
     "worldRules": "Règles du monde",
-    "npcCatalogue": "Catalogue de PNJ"
+    "npcCatalogue": "Catalogue de PNJ",
+    "npcEditor": "Éditeur de PNJ"
   },
   "play": {
     "title": "Jouer",
@@ -376,6 +377,7 @@
       "notHosting": "Hébergez un monde pour modifier ses objets.",
       "notFound": "Cet objet n'est pas dans le catalogue.",
       "toolIntro": "Créez ou modifiez un objet sur les attributs par défaut. Le résultat reste sur cette page.",
+      "toolIntroEdit": "Modifiez un PNJ du monde bac à sable. Il reste en mémoire et apparaît dans l'outil Catalogue de PNJ.",
       "result": "Résultat",
       "issue": {
         "name": "Le nom est obligatoire.",
@@ -762,12 +764,62 @@
       "deleteMessage": "{{ name }} sera retiré du monde.",
       "empty": "Aucun PNJ trouvé.",
       "notHosting": "Hébergez une salle pour gérer les PNJ de votre monde.",
-      "toolIntro": "Parcourez les PNJ d'exemple du monde bac à sable. Rien n'est enregistré."
+      "toolIntro": "Parcourez les PNJ d'exemple du monde bac à sable. Rien n'est enregistré.",
+      "edit": "Modifier",
+      "create": "Ajouter un PNJ",
+      "copySuffix": "(copie)"
     },
     "role": {
       "story": "Histoire",
       "merchant": "Marchand",
       "enemy": "Ennemi"
+    },
+    "editor": {
+      "title": "Éditeur de PNJ",
+      "back": "Retour aux PNJ",
+      "toolIntro": "Créez un PNJ sur le monde bac à sable. Il reste en mémoire et apparaît dans l'outil Catalogue de PNJ.",
+      "notFound": "Ce PNJ n'existe pas.",
+      "notHosting": "Hébergez une salle pour gérer les PNJ de votre monde.",
+      "saved": "{{ name }} enregistré.",
+      "tabForm": "Formulaire",
+      "tabJson": "JSON",
+      "tabGenerate": "Générer",
+      "jsonHint": "Modifiez le PNJ en JSON ; il est appliqué au formulaire tant qu'il est valide.",
+      "generateHint": "Tire un PNJ au hasard (nom, niveau, attributs, équipement) depuis une graine ; le formulaire est remplacé.",
+      "generate": "Générer",
+      "save": "Enregistrer",
+      "equipped": "Équipé",
+      "loot": "Butin",
+      "removeItem": "Retirer",
+      "fields": {
+        "name": "Nom",
+        "description": "Description",
+        "roles": "Rôles",
+        "level": "Niveau",
+        "money": "Argent",
+        "attributes": "Niveaux des attributs",
+        "xpReward": "XP donnée",
+        "buyRatio": "Ratio d'achat",
+        "sellRatio": "Ratio de vente",
+        "inventory": "Équipement et inventaire",
+        "addItem": "Ajouter un objet du catalogue"
+      },
+      "issue": {
+        "name": "Le nom est obligatoire.",
+        "roles": "Choisissez au moins un rôle valide.",
+        "xpReward": "L'XP donnée doit être un entier, 0 ou plus.",
+        "loot": "Le butin doit venir de l'inventaire.",
+        "merchant": "Les ratios du marchand doivent être entre 0 et 10.",
+        "json": "Le JSON n'est pas valide.",
+        "description": "La description doit être du texte.",
+        "level": "Le niveau doit être un nombre.",
+        "xp": "L'XP doit être un nombre.",
+        "money": "L'argent doit être un nombre.",
+        "statPoints": "Les points de stats doivent être un nombre.",
+        "attributes": "Les attributs ne sont pas valides.",
+        "inventory": "L'inventaire n'est pas valide.",
+        "skills": "Les compétences ne sont pas valides."
+      }
     }
   }
 }
