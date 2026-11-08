@@ -373,6 +373,21 @@
                 </label>
               </div>
 
+              <div class="check">
+                <p-checkbox
+                  inputId="starter-classes"
+                  [binary]="true"
+                  [ngModel]="starterClasses()"
+                  (ngModelChange)="starterClasses.set($event)"
+                />
+                <label for="starter-classes">
+                  {{ "world.fields.starterClasses" | transloco }}
+                  <small>{{
+                    "world.fields.starterClassesHint" | transloco
+                  }}</small>
+                </label>
+              </div>
+
               <div class="actions">
                 <p-button
                   [label]="'world.new.back' | transloco"

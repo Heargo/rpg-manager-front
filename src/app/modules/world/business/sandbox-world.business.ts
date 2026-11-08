@@ -1,6 +1,8 @@
 import { inject, Injectable, linkedSignal } from '@angular/core';
 import { LanguageBusiness } from '../../../core/business/language.business';
-import { createSandboxWorld } from '../helpers/default-world';
+import { createSandboxWorld, SANDBOX_WORLD_ID } from '../helpers/default-world';
+// Static on purpose: the sandbox world only loads in the lazy Tools chunks, never in the initial bundle.
+import { buildStarterClasses } from '../helpers/starter-classes';
 import { applyWorldRules } from '../helpers/world-rules.rules';
 import { Npc } from '../../npc/models/npc';
 import { CharacterClass } from '../../class/models/class';
@@ -15,9 +17,18 @@ import { World, WorldRules } from '../models/world';
 export class SandboxWorldBusiness {
   private readonly language = inject(LanguageBusiness);
 
-  private readonly world = linkedSignal<World>(() =>
-    createSandboxWorld((key) => this.language.t(key)),
-  );
+  private readonly world = linkedSignal<World>(() => {
+    const world = createSandboxWorld((key) => this.language.t(key));
+    let next = 0;
+    return {
+      ...world,
+      ...buildStarterClasses(
+        world,
+        this.language.$language(),
+        () => `${SANDBOX_WORLD_ID}-starter-${next++}`,
+      ),
+    };
+  });
 
   readonly $world = this.world.asReadonly();
 

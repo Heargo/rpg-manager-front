@@ -129,6 +129,7 @@ export class WorldNewPageComponent {
   protected readonly startingSkillPoints = signal(1);
   protected readonly skillPointsPerLevel = signal(1);
   protected readonly starterItems = signal(true);
+  protected readonly starterClasses = signal(true);
   protected readonly npcVisibility = signal<NpcVisibilityRules>(
     DEFAULT_NPC_VISIBILITY,
   );
@@ -373,6 +374,7 @@ export class WorldNewPageComponent {
     try {
       await this.library.create(this.draft(), {
         starterItems: this.starterItems(),
+        starterClasses: this.starterClasses(),
       });
       this.messages.add({
         severity: MessageLevel.Success,

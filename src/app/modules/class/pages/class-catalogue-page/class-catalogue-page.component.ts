@@ -62,6 +62,7 @@ import { CharacterClass } from '../../models/class';
           <app-class-catalogue
             [classes]="world.classes"
             (create)="editing.set('new')"
+            (addDefaults)="run(catalogue.addDefaults())"
             (edit)="editing.set($event)"
             (duplicate)="run(catalogue.duplicate($event.id))"
             (remove)="run(catalogue.remove($event.id))"

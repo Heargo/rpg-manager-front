@@ -40,6 +40,15 @@ import { CharacterClass } from '../../models/class';
         [label]="'class.catalogue.create' | transloco"
         (click)="create.emit()"
       ></button>
+      <button
+        pButton
+        type="button"
+        data-action="add-defaults"
+        icon="pi pi-plus"
+        severity="secondary"
+        [label]="'class.catalogue.addDefaults' | transloco"
+        (click)="addDefaults.emit()"
+      ></button>
     </div>
 
     @if (shown().length) {
@@ -132,6 +141,7 @@ export class ClassCatalogueComponent {
   readonly classes = input.required<CharacterClass[]>();
 
   readonly create = output<void>();
+  readonly addDefaults = output<void>();
   readonly edit = output<CharacterClass>();
   readonly duplicate = output<CharacterClass>();
   readonly remove = output<CharacterClass>();

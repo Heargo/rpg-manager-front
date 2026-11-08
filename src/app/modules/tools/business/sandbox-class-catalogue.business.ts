@@ -2,6 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { SandboxWorldBusiness } from '../../world/business/sandbox-world.business';
 import {
+  buildStarterClasses,
+  mergeStarterClasses,
+} from '../../world/helpers/starter-classes';
+import {
   addClassCopy,
   filterClasses,
   upsertClass,
@@ -47,6 +51,19 @@ export class SandboxClassCatalogueBusiness {
         ` ${this.language.t('class.catalogue.copySuffix')}`,
       ),
     );
+  }
+
+  /** Adds the starter classes and skills; the ones the sandbox already has (by name) are kept. */
+  async addDefaults(): Promise<void> {
+    const world = this.sandbox.$world();
+    const merged = mergeStarterClasses(
+      { skills: world.skills, classes: world.classes },
+      buildStarterClasses(world, this.language.$language(), () =>
+        crypto.randomUUID(),
+      ),
+    );
+    this.sandbox.updateSkills(() => merged.skills);
+    this.sandbox.updateClasses(() => merged.classes);
   }
 
   async remove(classId: string): Promise<void> {

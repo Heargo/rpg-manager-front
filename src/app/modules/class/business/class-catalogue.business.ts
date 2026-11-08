@@ -46,6 +46,27 @@ export class ClassCatalogueBusiness {
     }));
   }
 
+  /** Adds the starter classes and skills built on the world's attributes; the ones it already has (by name) are kept. */
+  async addDefaults(): Promise<void> {
+    const { buildStarterClasses, mergeStarterClasses } = await import(
+      '../../world/helpers/starter-classes'
+    );
+    await this.session.update((world) => {
+      const starter = buildStarterClasses(
+        world,
+        this.language.$language(),
+        () => crypto.randomUUID(),
+      );
+      return {
+        ...world,
+        ...mergeStarterClasses(
+          { skills: world.skills, classes: world.classes },
+          starter,
+        ),
+      };
+    });
+  }
+
   async remove(classId: string): Promise<void> {
     await this.session.update((world) => ({
       ...world,
