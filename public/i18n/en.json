@@ -462,7 +462,16 @@
     "save": "Save",
     "saved": "Profile saved",
     "playerId": "Player ID",
-    "playerIdHint": "Identifies you on this device; it gives you your seat back when you rejoin a room."
+    "playerIdHint": "Identifies you on this device; it gives you your seat back when you rejoin a room.",
+    "debugLog": {
+      "title": "Diagnostics",
+      "hint": "If something goes wrong (lost connection, error message), export this log right away and send it with a description of what happened. It stays on this device: {{ count }} lines.",
+      "export": "Export the log",
+      "clear": "Clear",
+      "exported": "Log exported",
+      "exportFailed": "Could not export the log",
+      "cleared": "Log cleared"
+    }
   },
   "room": {
     "title": "Room",

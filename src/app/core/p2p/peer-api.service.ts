@@ -1,5 +1,7 @@
 import { computed, inject, Injectable, InjectionToken, signal } from '@angular/core';
 import { BehaviorSubject, Observable, ReplaySubject, startWith, Subject, Subscription, switchMap } from 'rxjs';
+import { LogLevel } from '../helpers/debug-log.rules';
+import { DebugLogService } from '../services/debug-log.service';
 import { createRequestTracker } from './helpers/correlation';
 import { decodeEnvelope, encodeEnvelope, Envelope } from './helpers/envelope';
 import { PeerApiError, toWireError } from './helpers/peer-api-error';
@@ -10,7 +12,10 @@ import { WebRtcTransport } from './webrtc-transport';
 /** How PeerApi gets a transport; tests swap in the fake network. */
 export const ROOM_TRANSPORT_FACTORY = new InjectionToken<() => RoomTransport>('ROOM_TRANSPORT_FACTORY', {
   providedIn: 'root',
-  factory: () => () => new WebRtcTransport(),
+  factory: () => {
+    const debug = inject(DebugLogService);
+    return () => new WebRtcTransport({ log: (level, scope, message, data) => debug.log(level, scope, message, data) });
+  },
 });
 
 export const PEER_API_TIMEOUT_MS = 10_000;
@@ -37,6 +42,7 @@ export type PeerHandler<Request = unknown, Response = unknown> = (
 @Injectable({ providedIn: 'root' })
 export class PeerApi {
   private readonly createTransport = inject(ROOM_TRANSPORT_FACTORY);
+  private readonly debug = inject(DebugLogService);
 
   private transport?: RoomTransport;
   private wiring: Subscription[] = [];
@@ -92,6 +98,7 @@ export class PeerApi {
   }
 
   leave(): void {
+    if (this.role() !== 'none') this.log('info', 'Leaving the room', { role: this.role(), pending: this.tracker.size });
     this.wiring.forEach((subscription) => subscription.unsubscribe());
     this.wiring = [];
     this.transport?.close();
@@ -114,10 +121,22 @@ export class PeerApi {
     assertValidRoute(route);
     if (this.role() === 'host') return this.handle(route, payload, SELF_PEER) as Promise<Response>;
     if (!this.transport || !this.$hostOnline()) {
+      this.log('warn', 'Request while the host is offline', { route, role: this.role() });
       return Promise.reject(new PeerApiError('host-offline', 'Not connected to the host'));
     }
     const { id, promise } = this.tracker.start<Response>(timeoutMs);
-    this.transport.send(HOST_PEER, encodeEnvelope({ v: 1, kind: 'request', id, route, payload }));
+    const data = encodeEnvelope({ v: 1, kind: 'request', id, route, payload });
+    const started = Date.now();
+    this.log('debug', 'Request', { route, id: id.slice(0, 8), chars: data.length });
+    promise.then(
+      () => this.log('debug', 'Response', { route, id: id.slice(0, 8), ms: Date.now() - started }),
+      (error: unknown) => this.log('error', 'Request failed', { route, id: id.slice(0, 8), ms: Date.now() - started, error }),
+    );
+    try {
+      this.transport.send(HOST_PEER, data);
+    } catch (error) {
+      this.tracker.reject(id, new PeerApiError('host-offline', `Could not send to the host: ${toWireError(error).message}`));
+    }
     return promise;
   }
 
@@ -148,6 +167,7 @@ export class PeerApi {
     } catch {
       this.tracker.reject(id, new PeerApiError('host-offline', 'The player is not connected'));
     }
+    promise.catch((error: unknown) => this.log('warn', 'Request to a player failed', { peer: peer.slice(0, 8), route, error }));
     return promise;
   }
 
@@ -163,7 +183,14 @@ export class PeerApi {
     const seq = (this.topics.get(topic)?.seq ?? 0) + 1;
     this.topics.set(topic, { seq, payload });
     this.stream(topic).next(payload);
-    this.transport?.broadcast(encodeEnvelope({ v: 1, kind: 'publish', topic, seq, payload }));
+    const data = encodeEnvelope({ v: 1, kind: 'publish', topic, seq, payload });
+    this.log('debug', 'Publish', { topic, seq, chars: data.length, players: this.peers().length });
+    try {
+      this.transport?.broadcast(data);
+    } catch (error) {
+      // One player's broken channel must not fail the request that changed the state, nor skip the other players.
+      this.log('error', 'Publish failed', { topic, error });
+    }
   }
 
   /**
@@ -188,6 +215,7 @@ export class PeerApi {
     const transport = this.createTransport();
     this.transport = transport;
     this.role.set(role);
+    this.log('info', role === 'host' ? 'Hosting a room' : 'Joining a room');
     this.newSession();
     this.wiring = [
       transport.messages$.subscribe(({ from, data }) => this.onMessage(from, data)),
@@ -203,6 +231,7 @@ export class PeerApi {
   }
 
   private onPeerJoined(peer: PeerId): void {
+    this.log('info', 'Peer joined', { peer: peer.slice(0, 8), topics: this.role() === 'host' ? this.topics.size : undefined });
     this.peers.update((peers) => [...peers, peer]);
     if (this.role() === 'host') {
       // A new player gets every topic's current state right away.
@@ -214,6 +243,7 @@ export class PeerApi {
   }
 
   private onPeerLeft(peer: PeerId): void {
+    this.log('warn', 'Peer left', { peer: peer.slice(0, 8), pending: this.tracker.size });
     this.peers.update((peers) => peers.filter((p) => p !== peer));
     if (this.role() === 'client' && peer === HOST_PEER) {
       this.tracker.rejectAll(new PeerApiError('host-offline', 'The host went offline'));
@@ -223,7 +253,10 @@ export class PeerApi {
 
   private onMessage(from: PeerId, data: string): void {
     const envelope = decodeEnvelope(data);
-    if (!envelope) return;
+    if (!envelope) {
+      this.log('warn', 'Unreadable message', { from: from.slice(0, 8), chars: data.length, start: data.slice(0, 40) });
+      return;
+    }
     if (this.role() === 'host') this.onHostMessage(from, envelope);
     else if (from === HOST_PEER) this.onClientMessage(envelope);
   }
@@ -236,16 +269,25 @@ export class PeerApi {
       return;
     }
     if (envelope.kind !== 'request') return;
+    const started = Date.now();
+    const route = envelope.route;
     const reply = (message: Envelope) => {
       try {
         this.transport?.send(from, encodeEnvelope(message));
-      } catch {
-        // The player left before the answer: nothing to do.
+      } catch (error) {
+        // The player left before the answer: nothing more to do.
+        this.log('warn', 'Could not answer a player', { from: from.slice(0, 8), route, error });
       }
     };
-    this.handle(envelope.route, envelope.payload, from).then(
-      (payload) => reply({ v: 1, kind: 'response', id: envelope.id, payload: payload ?? null }),
-      (error: unknown) => reply({ v: 1, kind: 'error', id: envelope.id, ...toWireError(error) }),
+    this.handle(route, envelope.payload, from).then(
+      (payload) => {
+        this.log('debug', 'Served', { from: from.slice(0, 8), route, ms: Date.now() - started });
+        reply({ v: 1, kind: 'response', id: envelope.id, payload: payload ?? null });
+      },
+      (error: unknown) => {
+        this.log('warn', 'Served with an error', { from: from.slice(0, 8), route, ms: Date.now() - started, error });
+        reply({ v: 1, kind: 'error', id: envelope.id, ...toWireError(error) });
+      },
     );
   }
 
@@ -296,6 +338,10 @@ export class PeerApi {
       console.error(`Handler for ${route} failed`, error);
       throw new PeerApiError('internal', toWireError(error).message);
     }
+  }
+
+  private log(level: LogLevel, message: string, data?: unknown): void {
+    this.debug.log(level, 'peer-api', message, data);
   }
 
   private newSession(): void {

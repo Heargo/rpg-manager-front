@@ -33,5 +33,27 @@
         <small>{{ 'profile.playerIdHint' | transloco }}</small>
       </div>
     </form>
+
+    <section class="flex-col debug-log" aria-labelledby="debug-log-title">
+      <h2 id="debug-log-title">{{ 'profile.debugLog.title' | transloco }}</h2>
+      <small>{{ 'profile.debugLog.hint' | transloco: { count: debugLog.$count() } }}</small>
+      <div class="flex-row debug-log-actions">
+        <p-button
+          icon="pi pi-download"
+          [label]="'profile.debugLog.export' | transloco"
+          [loading]="exporting()"
+          (onClick)="exportLog()"
+          data-testid="export-debug-log"
+        />
+        <p-button
+          icon="pi pi-trash"
+          severity="secondary"
+          [outlined]="true"
+          [label]="'profile.debugLog.clear' | transloco"
+          (onClick)="clearLog()"
+          data-testid="clear-debug-log"
+        />
+      </div>
+    </section>
   </p-card>
 </div>

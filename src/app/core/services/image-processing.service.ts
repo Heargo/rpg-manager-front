@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
-import { fitWithin } from '../helpers/image-size';
+import { fitWithin, isOpaque } from '../helpers/image-size';
 
 export const DEFAULT_IMAGE_MAX_SIZE = 512;
 
-/** Browser image APIs: decode, shrink and re-encode as WebP (PNG where WebP encoding isn't supported). */
+/**
+ * Browser image APIs: decode, shrink and re-encode as WebP. Safari can't encode WebP and returns PNG, often several
+ * hundred KB for a photo: an opaque image becomes JPEG there instead, transparent ones stay PNG.
+ */
 @Injectable({ providedIn: 'root' })
 export class ImageProcessingService {
   async resize(file: Blob, max = DEFAULT_IMAGE_MAX_SIZE): Promise<Blob> {
@@ -15,8 +18,11 @@ export class ImageProcessingService {
       if (!context) throw new Error('2D canvas unavailable');
       context.drawImage(bitmap, 0, 0, width, height);
       const webp = await canvas.convertToBlob({ type: 'image/webp', quality: 0.85 });
-      // Browsers that can't encode WebP silently return PNG; keep whatever came back.
-      return webp;
+      if (webp.type === 'image/webp') return webp;
+      // No WebP encoder (Safari): the browser silently returned PNG.
+      if (!isOpaque(context.getImageData(0, 0, width, height).data)) return webp;
+      const jpeg = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.85 });
+      return jpeg.size < webp.size ? jpeg : webp;
     } finally {
       bitmap.close();
     }
