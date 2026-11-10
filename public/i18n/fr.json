@@ -462,7 +462,16 @@
     "save": "Enregistrer",
     "saved": "Profil enregistré",
     "playerId": "Identifiant de joueur",
-    "playerIdHint": "Vous identifie sur cet appareil ; il vous rend votre place quand vous rejoignez une salle."
+    "playerIdHint": "Vous identifie sur cet appareil ; il vous rend votre place quand vous rejoignez une salle.",
+    "debugLog": {
+      "title": "Diagnostic",
+      "hint": "En cas de problème (connexion perdue, message d'erreur), exportez ce journal tout de suite et envoyez-le avec une description de ce qui s'est passé. Il reste sur cet appareil : {{ count }} lignes.",
+      "export": "Exporter le journal",
+      "clear": "Effacer",
+      "exported": "Journal exporté",
+      "exportFailed": "Impossible d'exporter le journal",
+      "cleared": "Journal effacé"
+    }
   },
   "room": {
     "title": "Salle",

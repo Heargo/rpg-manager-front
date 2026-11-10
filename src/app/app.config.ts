@@ -13,6 +13,7 @@ import { detectInitialLanguage } from './core/i18n/initial-language';
 import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
 import { translocoSettings } from './core/i18n/transloco-config';
 import { LanguageBusiness } from './core/business/language.business';
+import { DebugLogBusiness } from './core/business/debug-log.business';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -36,6 +37,8 @@ export const appConfig: ApplicationConfig = {
     }),
     // Load the starting language before the first render (no flash of keys), and start LanguageBusiness.
     provideAppInitializer(() => {
+      // First, so the debug log sees everything that follows.
+      inject(DebugLogBusiness).start();
       const transloco = inject(TranslocoService);
       const injector = inject(Injector);
       inject(LanguageBusiness);

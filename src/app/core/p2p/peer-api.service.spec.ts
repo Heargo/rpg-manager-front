@@ -3,7 +3,7 @@ import { firstValueFrom, take, toArray } from 'rxjs';
 import { createPeerNetwork, flush } from '../../../testing/peer-network';
 import { PeerApiError } from './helpers/peer-api-error';
 import { PeerApi, SELF_PEER } from './peer-api.service';
-import { HOST_PEER } from './room-transport';
+import { HOST_PEER, RoomTransport } from './room-transport';
 
 describe('PeerApi', () => {
   let net: ReturnType<typeof createPeerNetwork>;
@@ -36,6 +36,30 @@ describe('PeerApi', () => {
     host.serve<{ n: number }, { double: number; from: string }>('math/double', ({ n }, { from }) => ({ double: n * 2, from }));
 
     expect(await playerA.request('math/double', { n: 21 })).toEqual({ double: 42, from: peerA });
+  });
+
+  it('rejects a request with host-offline when the message cannot be sent, instead of throwing', async () => {
+    await net.connect(injectors[0], injectors[1]);
+    host.serve('math/echo', (payload) => payload);
+    const transport = (playerA as unknown as { transport: RoomTransport }).transport;
+    vi.spyOn(transport, 'send').mockImplementation(() => {
+      throw new Error('message too big');
+    });
+
+    const result = playerA.request('math/echo', { n: 1 }, 50);
+
+    await expect(result).rejects.toMatchObject({ code: 'host-offline' });
+  });
+
+  it('keeps the host going when a publish cannot reach a player', async () => {
+    await net.connect(injectors[0], injectors[1]);
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const transport = (host as unknown as { transport: RoomTransport }).transport;
+    vi.spyOn(transport, 'broadcast').mockImplementation(() => {
+      throw new Error('channel broken');
+    });
+
+    expect(() => host.publish('topic/state', { n: 1 })).not.toThrow();
   });
 
   it('runs the host own requests in-process, as SELF', async () => {
