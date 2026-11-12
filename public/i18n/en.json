@@ -595,9 +595,6 @@
       "forget": "Forget this room"
     },
     "hostOfflineTooltip": "Host offline: some features still work; ask the host for a new invite to reconnect",
-    "offline": {
-      "title": "Offline features"
-    },
     "size": {
       "max": "Recommended maximum for this device: {{max}} people (you included).",
       "over": "The room is over the recommended maximum of {{max}} people. You can keep playing, but the game may lag.",

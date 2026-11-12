@@ -120,4 +120,16 @@ describe('WorldRulesPageComponent', () => {
     const saved = (saveRules.mock.calls as unknown as [any][])[0][0];
     expect(saved.attributes.map((a: { name: string }) => a.name)).toEqual(['Life']);
   });
+
+  it('saves the offline features toggled in its offline section with the other rules', async () => {
+    const { el, saveRules, click, settle } = await open();
+    const toggle = el.querySelector('#offline-equip') as HTMLInputElement;
+    toggle.click();
+    await settle();
+    await click('rules-save');
+
+    expect(saveRules).toHaveBeenCalledTimes(1);
+    const saved = (saveRules.mock.calls as unknown as [any][])[0][0];
+    expect(saved.offlineFeatures.equip).toBe(true);
+  });
 });

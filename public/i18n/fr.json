@@ -595,9 +595,6 @@
       "forget": "Oublier cette salle"
     },
     "hostOfflineTooltip": "Hôte hors ligne : certaines fonctions restent disponibles ; demandez un nouveau lien d'invitation à l'hôte pour vous reconnecter",
-    "offline": {
-      "title": "Fonctions hors ligne"
-    },
     "size": {
       "max": "Maximum conseillé pour cet appareil : {{max}} personnes (vous compris).",
       "over": "La salle dépasse le maximum conseillé de {{max}} personnes. Vous pouvez continuer, mais le jeu risque de ramer.",

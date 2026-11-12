@@ -6,7 +6,6 @@ import { OfflineFeaturesBusiness } from '../../../world/business/offline-feature
 import { CharacterListComponent } from '../../../character/components/character-list/character-list.component';
 import { InviteCardComponent } from '../../components/invite-card/invite-card.component';
 import { MemberListComponent } from '../../components/member-list/member-list.component';
-import { OfflineFeaturesPanelComponent } from '../../components/offline-features-panel/offline-features-panel.component';
 import { PendingInvite, RoomBusiness } from '../../business/room.business';
 import { RoomSizeBusiness } from '../../business/room-size.business';
 import { RoomPageComponent } from './room-page.component';
@@ -33,7 +32,7 @@ async function render(invites: PendingInvite[]) {
       { provide: OfflineFeaturesBusiness, useValue: { $features: signal(null) } },
     ],
   }).overrideComponent(RoomPageComponent, {
-    remove: { imports: [CharacterListComponent, InviteCardComponent, MemberListComponent, OfflineFeaturesPanelComponent] },
+    remove: { imports: [CharacterListComponent, InviteCardComponent, MemberListComponent] },
     add: { schemas: [NO_ERRORS_SCHEMA] },
   });
   const fixture = TestBed.createComponent(RoomPageComponent);
@@ -84,7 +83,7 @@ describe('RoomPageComponent room size', () => {
         { provide: OfflineFeaturesBusiness, useValue: { $features: signal(null) } },
       ],
     }).overrideComponent(RoomPageComponent, {
-      remove: { imports: [CharacterListComponent, InviteCardComponent, MemberListComponent, OfflineFeaturesPanelComponent] },
+      remove: { imports: [CharacterListComponent, InviteCardComponent, MemberListComponent] },
       add: { schemas: [NO_ERRORS_SCHEMA] },
     });
     const fixture = TestBed.createComponent(RoomPageComponent);
@@ -115,5 +114,37 @@ describe('RoomPageComponent room size', () => {
     $struggling.set(true);
     await fixture.whenStable();
     expect(el.querySelector('.room-size-struggling')!.textContent).toMatch(/connection is struggling/i);
+  });
+});
+
+describe('RoomPageComponent offline features', () => {
+  it('no longer hosts the offline features panel, even when the world has features', async () => {
+    const room = {
+      $status: signal('hosting'),
+      $room: signal({ name: 'Friday table', members: [] }),
+      $restored: signal(false),
+      $pendingInvites: signal<PendingInvite[]>([]),
+      whenReady: async () => undefined,
+    };
+    const features = { dice: true, notes: true, spendStatPoints: false, equip: false, useConsumables: false, sell: false, learnSkills: false };
+    TestBed.configureTestingModule({
+      imports: [RoomPageComponent],
+      providers: [
+        ...TEST_PROVIDERS,
+        { provide: RoomBusiness, useValue: room },
+        { provide: ProfileBusiness, useValue: { $profile: signal({ playerId: 'gm', name: 'Gm' }) } },
+        { provide: OfflineFeaturesBusiness, useValue: { $features: signal(features) } },
+      ],
+    }).overrideComponent(RoomPageComponent, {
+      remove: { imports: [CharacterListComponent, InviteCardComponent, MemberListComponent] },
+      add: { schemas: [NO_ERRORS_SCHEMA] },
+    });
+    const fixture = TestBed.createComponent(RoomPageComponent);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('app-offline-features-panel')).toBeNull();
+    expect(el.textContent).not.toContain('Offline');
+    expect(el.querySelector('h1')!.textContent).toContain('Friday table');
   });
 });
