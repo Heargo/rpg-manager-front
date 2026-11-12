@@ -41,7 +41,8 @@
     "npcCatalogue": "Catalogue de PNJ",
     "npcEditor": "Éditeur de PNJ",
     "skillCatalogue": "Catalogue de compétences",
-    "classCatalogue": "Catalogue de classes"
+    "classCatalogue": "Catalogue de classes",
+    "spriteColorizer": "Colorisation de sprites"
   },
   "play": {
     "title": "Mondes",
@@ -1081,6 +1082,80 @@
         "duplicate": "Une compétence ne peut être qu'une fois dans l'arbre.",
         "unknownSkill": "Une compétence de l'arbre n'est pas dans le catalogue."
       }
+    }
+  },
+  "sprite": {
+    "title": "Colorisation de sprites",
+    "intro": "Recolorez un sprite en niveaux de gris matériau par matériau. Tout reste dans votre navigateur.",
+    "openImage": "Ouvrir une image",
+    "demo": "Sprite de démo",
+    "exportPng": "Exporter en PNG",
+    "exportJson": "Exporter en JSON",
+    "importJson": "Importer un JSON",
+    "undo": "Annuler",
+    "redo": "Rétablir",
+    "importFailed": "Ce fichier n'est pas une configuration pour une image de cette taille.",
+    "loadFailed": "Cette image n'a pas pu être lue.",
+    "empty": "Ouvrez une image ou essayez le sprite de démo pour commencer.",
+    "tools": {
+      "title": "Outils",
+      "brush": "Pinceau",
+      "eraser": "Gomme",
+      "bucket": "Pot de peinture",
+      "wand": "Baguette magique",
+      "pan": "Déplacer",
+      "size": "Taille",
+      "hardness": "Dureté",
+      "tolerance": "Tolérance",
+      "contiguous": "Contigu",
+      "global": "Global",
+      "applySelection": "Appliquer la sélection",
+      "invertSelection": "Inverser la sélection",
+      "clearSelection": "Effacer la sélection",
+      "wandHint": "Maj ajoute à la sélection, Alt en retire."
+    },
+    "view": {
+      "zoomIn": "Zoom avant",
+      "zoomOut": "Zoom arrière",
+      "fit": "Ajuster",
+      "original": "Original",
+      "recolored": "Recoloré",
+      "overlay": "Afficher le masque du matériau"
+    },
+    "materials": {
+      "title": "Matériaux",
+      "add": "Ajouter un matériau",
+      "defaultName": "Matériau {{n}}",
+      "base": "Base",
+      "rename": "Renommer",
+      "delete": "Supprimer le matériau",
+      "show": "Afficher",
+      "hide": "Masquer",
+      "lock": "Verrouiller",
+      "unlock": "Déverrouiller",
+      "up": "Monter",
+      "down": "Descendre",
+      "select": "Sélectionner"
+    },
+    "gradient": {
+      "title": "Dégradé",
+      "stopColor": "Couleur du point",
+      "stopPosition": "Position du point (%)",
+      "addStop": "Ajouter un point",
+      "removeStop": "Retirer le point"
+    },
+    "presets": {
+      "title": "Préréglages",
+      "steel": "Acier",
+      "wood": "Bois",
+      "gold": "Or",
+      "ice": "Glace",
+      "fire": "Feu",
+      "leaf": "Feuille",
+      "arcane": "Arcane",
+      "name": "Nom du préréglage",
+      "save": "Enregistrer comme préréglage",
+      "delete": "Supprimer le préréglage"
     }
   }
 }

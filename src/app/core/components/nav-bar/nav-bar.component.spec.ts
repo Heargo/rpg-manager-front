@@ -78,6 +78,7 @@ describe('NavBarComponent out of a room', () => {
   it('puts the internal tools then External tools in the Tools submenu', async () => {
     const { el } = await render('idle');
     expect(subLabels(el, 'Tools')).toEqual([
+      'Sprite colorizer',
       'Item generator',
       'Character sheet',
       'World rules',

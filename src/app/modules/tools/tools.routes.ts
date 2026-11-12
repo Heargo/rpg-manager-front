@@ -89,6 +89,14 @@ export const routesTools: Routes = [
       ),
   },
   {
+    path: 'tools/sprite-colorizer',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('../sprite/pages/sprite-colorizer-page/sprite-colorizer-page.component').then(
+        (m) => m.SpriteColorizerPageComponent,
+      ),
+  },
+  {
     path: 'tools/links',
     canActivate: [NavigationGuard],
     loadComponent: () =>

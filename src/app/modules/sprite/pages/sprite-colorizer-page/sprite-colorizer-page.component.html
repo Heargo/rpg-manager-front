@@ -1,0 +1,480 @@
+<div class="main-container sprite">
+  <header class="head">
+    <div>
+      <h1>{{ "sprite.title" | transloco }}</h1>
+      <p class="hint">{{ "sprite.intro" | transloco }}</p>
+    </div>
+    <div class="row">
+      <input
+        #imageInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="openImage(imageInput)"
+      />
+      <input
+        #jsonInput
+        type="file"
+        accept="application/json,.json"
+        hidden
+        (change)="importJson(jsonInput)"
+      />
+      <p-button
+        icon="pi pi-image"
+        [label]="'sprite.openImage' | transloco"
+        severity="secondary"
+        (onClick)="imageInput.click()"
+      />
+      <p-button
+        icon="pi pi-sparkles"
+        [label]="'sprite.demo' | transloco"
+        severity="secondary"
+        (onClick)="business.loadDemo()"
+      />
+      <p-button
+        icon="pi pi-undo"
+        [ariaLabel]="'sprite.undo' | transloco"
+        [pTooltip]="'sprite.undo' | transloco"
+        severity="secondary"
+        [disabled]="!business.$canUndo()"
+        (onClick)="business.undo()"
+      />
+      <p-button
+        icon="pi pi-refresh"
+        [ariaLabel]="'sprite.redo' | transloco"
+        [pTooltip]="'sprite.redo' | transloco"
+        severity="secondary"
+        [disabled]="!business.$canRedo()"
+        (onClick)="business.redo()"
+      />
+      <p-button
+        icon="pi pi-download"
+        [ariaLabel]="'sprite.exportPng' | transloco"
+        [pTooltip]="'sprite.exportPng' | transloco"
+        [label]="'PNG'"
+        [disabled]="!business.$document()"
+        (onClick)="business.downloadPng()"
+      />
+      <p-button
+        icon="pi pi-file-export"
+        [ariaLabel]="'sprite.exportJson' | transloco"
+        [pTooltip]="'sprite.exportJson' | transloco"
+        [label]="'JSON'"
+        severity="secondary"
+        [disabled]="!business.$document()"
+        (onClick)="business.downloadJson()"
+      />
+      <p-button
+        icon="pi pi-file-import"
+        [ariaLabel]="'sprite.importJson' | transloco"
+        [pTooltip]="'sprite.importJson' | transloco"
+        severity="secondary"
+        [disabled]="!business.$document()"
+        (onClick)="jsonInput.click()"
+      />
+    </div>
+  </header>
+
+  <div class="layout">
+    <main class="stage">
+      <div class="row view-bar">
+        <p-button
+          icon="pi pi-search-minus"
+          severity="secondary"
+          [ariaLabel]="'sprite.view.zoomOut' | transloco"
+          [pTooltip]="'sprite.view.zoomOut' | transloco"
+          (onClick)="zoomBy(1 / 1.25)"
+        />
+        <span class="zoom">{{ zoom() * 100 | number: "1.0-0" }}%</span>
+        <p-button
+          icon="pi pi-search-plus"
+          severity="secondary"
+          [ariaLabel]="'sprite.view.zoomIn' | transloco"
+          [pTooltip]="'sprite.view.zoomIn' | transloco"
+          (onClick)="zoomBy(1.25)"
+        />
+        <p-button
+          icon="pi pi-expand"
+          severity="secondary"
+          [ariaLabel]="'sprite.view.fit' | transloco"
+          [pTooltip]="'sprite.view.fit' | transloco"
+          (onClick)="fit()"
+        />
+        <p-button
+          icon="pi pi-arrows-alt"
+          [ariaLabel]="'sprite.tools.pan' | transloco"
+          [pTooltip]="'sprite.tools.pan' | transloco"
+          [severity]="panMode() ? 'primary' : 'secondary'"
+          [outlined]="!panMode()"
+          (onClick)="panMode.set(!panMode())"
+        />
+        <p-selectbutton
+          [options]="viewModes()"
+          optionLabel="label"
+          optionValue="value"
+          [allowEmpty]="false"
+          [ngModel]="showOriginal()"
+          (ngModelChange)="showOriginal.set($event)"
+        />
+        <label class="switch">
+          <p-toggleswitch
+            [ngModel]="showMask()"
+            (ngModelChange)="showMask.set($event)"
+          />
+          {{ "sprite.view.overlay" | transloco }}
+        </label>
+      </div>
+      <div
+        #viewport
+        class="viewport"
+        [class.panning]="panMode()"
+        (wheel)="onWheel($event)"
+        (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)"
+        (pointerup)="onPointerUp()"
+        (pointercancel)="onPointerUp()"
+        (contextmenu)="$event.preventDefault()"
+      >
+        @if (business.$image(); as image) {
+          <div
+            class="sheet"
+            [style.width.px]="image.width"
+            [style.height.px]="image.height"
+            [style.transform]="transform()"
+          >
+            <canvas #main></canvas>
+            <canvas #overlay class="overlay"></canvas>
+          </div>
+        } @else {
+          <p class="empty">{{ "sprite.empty" | transloco }}</p>
+        }
+      </div>
+    </main>
+
+    <aside class="panel">
+      <section>
+        <h2>{{ "sprite.tools.title" | transloco }}</h2>
+        <div class="row">
+          @for (tool of tools; track tool.id) {
+            <p-button
+              [icon]="tool.icon"
+              [ariaLabel]="tool.label | transloco"
+              [pTooltip]="tool.label | transloco"
+              [severity]="
+                business.$tool() === tool.id ? 'primary' : 'secondary'
+              "
+              [outlined]="business.$tool() !== tool.id"
+              (onClick)="business.setTool(tool.id)"
+            />
+          }
+        </div>
+
+        @if (business.$tool() === "brush" || business.$tool() === "eraser") {
+          <div class="field">
+            <label
+              >{{ "sprite.tools.size" | transloco }}:
+              {{ business.$brush().size }}</label
+            >
+            <p-slider
+              [min]="1"
+              [max]="100"
+              [ngModel]="business.$brush().size"
+              (ngModelChange)="setBrush({ size: $event })"
+            />
+          </div>
+          <div class="field">
+            <label
+              >{{ "sprite.tools.hardness" | transloco }}:
+              {{ business.$brush().hardness * 100 | number: "1.0-0" }}%</label
+            >
+            <p-slider
+              [min]="0"
+              [max]="100"
+              [ngModel]="business.$brush().hardness * 100"
+              (ngModelChange)="setBrush({ hardness: $event / 100 })"
+            />
+          </div>
+        }
+        @if (business.$tool() === "bucket" || business.$tool() === "wand") {
+          <div class="field">
+            <label
+              >{{ "sprite.tools.tolerance" | transloco }}:
+              {{ business.$tolerance() }}</label
+            >
+            <p-slider
+              [min]="0"
+              [max]="255"
+              [ngModel]="business.$tolerance()"
+              (ngModelChange)="business.setTolerance($event)"
+            />
+          </div>
+        }
+        @if (business.$tool() === "wand") {
+          <p-selectbutton
+            [options]="wandModes()"
+            optionLabel="label"
+            optionValue="value"
+            [allowEmpty]="false"
+            [ngModel]="business.$wandMode()"
+            (ngModelChange)="business.setWandMode($event)"
+          />
+          <p class="hint">{{ "sprite.tools.wandHint" | transloco }}</p>
+          <div class="row">
+            <p-button
+              icon="pi pi-check"
+              [ariaLabel]="'sprite.tools.applySelection' | transloco"
+              [pTooltip]="'sprite.tools.applySelection' | transloco"
+              (onClick)="business.applySelection()"
+            />
+            <p-button
+              icon="pi pi-sync"
+              [ariaLabel]="'sprite.tools.invertSelection' | transloco"
+              [pTooltip]="'sprite.tools.invertSelection' | transloco"
+              severity="secondary"
+              (onClick)="business.invertSelection()"
+            />
+            <p-button
+              icon="pi pi-times"
+              [ariaLabel]="'sprite.tools.clearSelection' | transloco"
+              [pTooltip]="'sprite.tools.clearSelection' | transloco"
+              severity="secondary"
+              (onClick)="business.clearSelection()"
+            />
+          </div>
+        }
+      </section>
+
+      <section>
+        <div class="row between">
+          <h2>{{ "sprite.materials.title" | transloco }}</h2>
+          <p-button
+            icon="pi pi-plus"
+            [ariaLabel]="'sprite.materials.add' | transloco"
+            [pTooltip]="'sprite.materials.add' | transloco"
+            [disabled]="!business.$document()"
+            (onClick)="addMaterial()"
+          />
+        </div>
+        <ul class="materials">
+          @for (
+            layer of layers();
+            track layer.id;
+            let i = $index;
+            let last = $last
+          ) {
+            <li
+              class="material-item"
+              [class.active]="layer.id === business.$activeLayerId()"
+            >
+              <button
+                type="button"
+                class="chip"
+                [style.background]="swatch(layer.gradient.stops)"
+                [attr.aria-label]="'sprite.materials.select' | transloco"
+                (click)="business.selectMaterial(layer.id)"
+              ></button>
+              @if (editingId() === layer.id) {
+                <input
+                  pInputText
+                  class="name-input"
+                  [value]="layer.name"
+                  (keydown.enter)="rename(layer, $any($event.target).value)"
+                  (keydown.escape)="editingId.set(null)"
+                  (blur)="rename(layer, $any($event.target).value)"
+                />
+              } @else {
+                <span
+                  class="name"
+                  (click)="business.selectMaterial(layer.id)"
+                  (dblclick)="editingId.set(layer.id)"
+                  >{{ materialName(layer) }}</span
+                >
+              }
+              <span class="row tight">
+                <p-button
+                  icon="pi pi-pencil"
+                  size="small"
+                  [text]="true"
+                  severity="secondary"
+                  [ariaLabel]="'sprite.materials.rename' | transloco"
+                  [pTooltip]="'sprite.materials.rename' | transloco"
+                  (onClick)="editingId.set(layer.id)"
+                />
+                <p-button
+                  [icon]="layer.visible ? 'pi pi-eye' : 'pi pi-eye-slash'"
+                  size="small"
+                  [text]="true"
+                  severity="secondary"
+                  [ariaLabel]="
+                    (layer.visible
+                      ? 'sprite.materials.hide'
+                      : 'sprite.materials.show'
+                    ) | transloco
+                  "
+                  [pTooltip]="
+                    (layer.visible
+                      ? 'sprite.materials.hide'
+                      : 'sprite.materials.show'
+                    ) | transloco
+                  "
+                  (onClick)="
+                    business.setMaterialVisible(layer.id, !layer.visible)
+                  "
+                />
+                <p-button
+                  [icon]="layer.locked ? 'pi pi-lock' : 'pi pi-lock-open'"
+                  size="small"
+                  [text]="true"
+                  severity="secondary"
+                  [ariaLabel]="
+                    (layer.locked
+                      ? 'sprite.materials.unlock'
+                      : 'sprite.materials.lock'
+                    ) | transloco
+                  "
+                  [pTooltip]="
+                    (layer.locked
+                      ? 'sprite.materials.unlock'
+                      : 'sprite.materials.lock'
+                    ) | transloco
+                  "
+                  (onClick)="
+                    business.setMaterialLocked(layer.id, !layer.locked)
+                  "
+                />
+                <p-button
+                  icon="pi pi-arrow-up"
+                  size="small"
+                  [text]="true"
+                  severity="secondary"
+                  [disabled]="i === 0"
+                  [ariaLabel]="'sprite.materials.up' | transloco"
+                  (onClick)="business.moveMaterial(layer.id, i - 1)"
+                />
+                <p-button
+                  icon="pi pi-arrow-down"
+                  size="small"
+                  [text]="true"
+                  severity="secondary"
+                  [disabled]="last"
+                  [ariaLabel]="'sprite.materials.down' | transloco"
+                  (onClick)="business.moveMaterial(layer.id, i + 1)"
+                />
+                @if (layer.id !== business.$document()?.baseId) {
+                  <p-button
+                    icon="pi pi-trash"
+                    size="small"
+                    [text]="true"
+                    severity="danger"
+                    [ariaLabel]="'sprite.materials.delete' | transloco"
+                    [pTooltip]="'sprite.materials.delete' | transloco"
+                    (onClick)="business.deleteMaterial(layer.id)"
+                  />
+                }
+              </span>
+            </li>
+          }
+        </ul>
+      </section>
+      @if (business.$activeLayer(); as layer) {
+        <section>
+          <h2>
+            {{ "sprite.gradient.title" | transloco }} ·
+            {{ materialName(layer) }}
+          </h2>
+          <div
+            class="bar"
+            [style.background]="swatch(layer.gradient.stops)"
+          ></div>
+          @for (stop of layer.gradient.stops; track $index; let i = $index) {
+            <div class="stop">
+              <p-colorpicker
+                format="hex"
+                [ngModel]="stop.color"
+                (ngModelChange)="setStopColor(i, $event)"
+                [attr.aria-label]="'sprite.gradient.stopColor' | transloco"
+              />
+              <p-inputnumber
+                [ngModel]="stop.position * 100"
+                (ngModelChange)="setStopPosition(i, $event)"
+                [min]="0"
+                [max]="100"
+                [step]="5"
+                suffix="%"
+                [showButtons]="true"
+                buttonLayout="horizontal"
+                inputStyleClass="stop-number"
+                [ariaLabel]="'sprite.gradient.stopPosition' | transloco"
+              />
+              <p-button
+                icon="pi pi-minus"
+                size="small"
+                [text]="true"
+                severity="secondary"
+                [disabled]="layer.gradient.stops.length <= 2"
+                [ariaLabel]="'sprite.gradient.removeStop' | transloco"
+                [pTooltip]="'sprite.gradient.removeStop' | transloco"
+                (onClick)="removeStop(i)"
+              />
+            </div>
+          }
+          <p-button
+            icon="pi pi-plus"
+            size="small"
+            severity="secondary"
+            [label]="'sprite.gradient.addStop' | transloco"
+            (onClick)="addStop()"
+          />
+        </section>
+      }
+
+      <section>
+        <h2>{{ "sprite.presets.title" | transloco }}</h2>
+        <ul class="presets">
+          @for (preset of business.$presets(); track preset.id) {
+            <li>
+              <button
+                type="button"
+                class="preset"
+                (click)="applyPreset(preset.id)"
+              >
+                <span
+                  class="chip wide"
+                  [style.background]="swatch(preset.stops)"
+                ></span>
+                {{ presetLabel(preset.id, preset.name) }}
+              </button>
+              @if (!isBuiltIn(preset.id)) {
+                <p-button
+                  icon="pi pi-trash"
+                  size="small"
+                  [text]="true"
+                  severity="danger"
+                  [ariaLabel]="'sprite.presets.delete' | transloco"
+                  (onClick)="business.deleteCustomPreset(preset.id)"
+                />
+              }
+            </li>
+          }
+        </ul>
+        <div class="row">
+          <input
+            pInputText
+            class="grow"
+            [placeholder]="'sprite.presets.name' | transloco"
+            [ngModel]="presetName()"
+            (ngModelChange)="presetName.set($event)"
+            (keydown.enter)="savePreset()"
+          />
+          <p-button
+            icon="pi pi-save"
+            [ariaLabel]="'sprite.presets.save' | transloco"
+            [pTooltip]="'sprite.presets.save' | transloco"
+            [disabled]="!presetName().trim() || !business.$activeLayer()"
+            (onClick)="savePreset()"
+          />
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>

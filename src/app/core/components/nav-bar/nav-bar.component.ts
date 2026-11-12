@@ -43,6 +43,11 @@ const TOOLS: MenuItem = {
   icon: 'pi pi-wrench',
   items: [
     {
+      label: 'nav.spriteColorizer',
+      icon: 'pi pi-palette',
+      routerLink: '/tools/sprite-colorizer',
+    },
+    {
       label: 'nav.itemGenerator',
       icon: 'pi pi-sparkles',
       routerLink: '/tools/item-generator',

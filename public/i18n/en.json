@@ -41,7 +41,8 @@
     "npcCatalogue": "NPC catalogue",
     "npcEditor": "NPC editor",
     "skillCatalogue": "Skill catalogue",
-    "classCatalogue": "Class catalogue"
+    "classCatalogue": "Class catalogue",
+    "spriteColorizer": "Sprite colorizer"
   },
   "play": {
     "title": "Worlds",
@@ -1081,6 +1082,80 @@
         "duplicate": "A skill can be in the tree only once.",
         "unknownSkill": "A skill of the tree is not in the catalogue."
       }
+    }
+  },
+  "sprite": {
+    "title": "Sprite colorizer",
+    "intro": "Recolour a grayscale sprite material by material. Everything stays in your browser.",
+    "openImage": "Open image",
+    "demo": "Demo sprite",
+    "exportPng": "Export PNG",
+    "exportJson": "Export JSON",
+    "importJson": "Import JSON",
+    "undo": "Undo",
+    "redo": "Redo",
+    "importFailed": "This file is not a configuration for an image of this size.",
+    "loadFailed": "This image could not be read.",
+    "empty": "Open an image or try the demo sprite to start.",
+    "tools": {
+      "title": "Tools",
+      "brush": "Brush",
+      "eraser": "Eraser",
+      "bucket": "Bucket",
+      "wand": "Magic wand",
+      "pan": "Pan",
+      "size": "Size",
+      "hardness": "Hardness",
+      "tolerance": "Tolerance",
+      "contiguous": "Contiguous",
+      "global": "Global",
+      "applySelection": "Apply selection",
+      "invertSelection": "Invert selection",
+      "clearSelection": "Clear selection",
+      "wandHint": "Shift adds to the selection, Alt removes from it."
+    },
+    "view": {
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fit": "Fit",
+      "original": "Original",
+      "recolored": "Recoloured",
+      "overlay": "Show the material mask"
+    },
+    "materials": {
+      "title": "Materials",
+      "add": "Add material",
+      "defaultName": "Material {{n}}",
+      "base": "Base",
+      "rename": "Rename",
+      "delete": "Delete material",
+      "show": "Show",
+      "hide": "Hide",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "up": "Move up",
+      "down": "Move down",
+      "select": "Select"
+    },
+    "gradient": {
+      "title": "Gradient",
+      "stopColor": "Stop colour",
+      "stopPosition": "Stop position (%)",
+      "addStop": "Add stop",
+      "removeStop": "Remove stop"
+    },
+    "presets": {
+      "title": "Presets",
+      "steel": "Steel",
+      "wood": "Wood",
+      "gold": "Gold",
+      "ice": "Ice",
+      "fire": "Fire",
+      "leaf": "Leaf",
+      "arcane": "Arcane",
+      "name": "Preset name",
+      "save": "Save as preset",
+      "delete": "Delete preset"
     }
   }
 }
