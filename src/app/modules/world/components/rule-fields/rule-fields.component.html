@@ -94,64 +94,68 @@
           </span>
         </small>
       </div>
-      <div class="field">
-        <label for="max-level">{{ "world.level.maxLevel" | transloco }}</label>
-        <p-inputnumber
-          inputId="max-level"
-          [min]="maxLevelBounds.min"
-          [max]="maxLevelBounds.max"
-          [showButtons]="true"
-          [ngModel]="maxLevel()"
-          (ngModelChange)="patch({ maxLevel: $event ?? 0 })"
-        />
-        @if (errors().maxLevel; as key) {
-          <small class="error">{{ key | transloco }}</small>
-        }
+      <div class="field-pair">
+        <div class="field">
+          <label for="max-level">{{ "world.level.maxLevel" | transloco }}</label>
+          <p-inputnumber
+            inputId="max-level"
+            [min]="maxLevelBounds.min"
+            [max]="maxLevelBounds.max"
+            [showButtons]="true"
+            [ngModel]="maxLevel()"
+            (ngModelChange)="patch({ maxLevel: $event ?? 0 })"
+          />
+          @if (errors().maxLevel; as key) {
+            <small class="error">{{ key | transloco }}</small>
+          }
+        </div>
+        <div class="field">
+          <label for="stat-points-per-level">{{
+            "world.level.statPointsPerLevel" | transloco
+          }}</label>
+          <p-inputnumber
+            inputId="stat-points-per-level"
+            [min]="0"
+            [showButtons]="true"
+            [ngModel]="statPointsPerLevel()"
+            (ngModelChange)="patch({ statPointsPerLevel: $event ?? 0 })"
+          />
+          @if (errors().statPointsPerLevel; as key) {
+            <small class="error">{{ key | transloco }}</small>
+          }
+        </div>
       </div>
-      <div class="field">
-        <label for="stat-points-per-level">{{
-          "world.level.statPointsPerLevel" | transloco
-        }}</label>
-        <p-inputnumber
-          inputId="stat-points-per-level"
-          [min]="0"
-          [showButtons]="true"
-          [ngModel]="statPointsPerLevel()"
-          (ngModelChange)="patch({ statPointsPerLevel: $event ?? 0 })"
-        />
-        @if (errors().statPointsPerLevel; as key) {
-          <small class="error">{{ key | transloco }}</small>
-        }
-      </div>
-      <div class="field">
-        <label for="starting-skill-points">{{
-          "world.fields.startingSkillPoints" | transloco
-        }}</label>
-        <p-inputnumber
-          inputId="starting-skill-points"
-          [min]="0"
-          [showButtons]="true"
-          [ngModel]="startingSkillPoints()"
-          (ngModelChange)="patch({ startingSkillPoints: $event ?? 0 })"
-        />
-        @if (errors().startingSkillPoints; as key) {
-          <small class="error">{{ key | transloco }}</small>
-        }
-      </div>
-      <div class="field">
-        <label for="skill-points-per-level">{{
-          "world.level.skillPointsPerLevel" | transloco
-        }}</label>
-        <p-inputnumber
-          inputId="skill-points-per-level"
-          [min]="0"
-          [showButtons]="true"
-          [ngModel]="skillPointsPerLevel()"
-          (ngModelChange)="patch({ skillPointsPerLevel: $event ?? 0 })"
-        />
-        @if (errors().skillPointsPerLevel; as key) {
-          <small class="error">{{ key | transloco }}</small>
-        }
+      <div class="field-pair">
+        <div class="field">
+          <label for="starting-skill-points">{{
+            "world.fields.startingSkillPoints" | transloco
+          }}</label>
+          <p-inputnumber
+            inputId="starting-skill-points"
+            [min]="0"
+            [showButtons]="true"
+            [ngModel]="startingSkillPoints()"
+            (ngModelChange)="patch({ startingSkillPoints: $event ?? 0 })"
+          />
+          @if (errors().startingSkillPoints; as key) {
+            <small class="error">{{ key | transloco }}</small>
+          }
+        </div>
+        <div class="field">
+          <label for="skill-points-per-level">{{
+            "world.level.skillPointsPerLevel" | transloco
+          }}</label>
+          <p-inputnumber
+            inputId="skill-points-per-level"
+            [min]="0"
+            [showButtons]="true"
+            [ngModel]="skillPointsPerLevel()"
+            (ngModelChange)="patch({ skillPointsPerLevel: $event ?? 0 })"
+          />
+          @if (errors().skillPointsPerLevel; as key) {
+            <small class="error">{{ key | transloco }}</small>
+          }
+        </div>
       </div>
     </fieldset>
   </section>
