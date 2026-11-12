@@ -315,12 +315,12 @@
       "levelZero": "Cet attribut est déjà au niveau 0.",
       "notInTree": "Cette compétence n'est pas dans l'arbre de la classe.",
       "skillLocked": "Cette compétence est encore verrouillée.",
-      "skillMaxRank": "Cette compétence est déjà au rang maximum.",
+      "skillMaxRank": "Cette compétence est déjà au niveau maximum.",
       "noSkillPoints": "Pas assez de points de compétence.",
-      "skillNeeded": "Une autre compétence apprise a besoin de ce rang.",
+      "skillNeeded": "Une autre compétence apprise a besoin de ce niveau.",
       "skillNotLearned": "Cette compétence n'est pas apprise.",
       "unknownSkill": "Cette compétence n'existe pas dans ce monde.",
-      "invalidRank": "Ce rang n'est pas valide pour cette compétence."
+      "invalidRank": "Ce niveau n'est pas valide pour cette compétence."
     },
     "sheet": {
       "playedBy": "Joué par {{ name }}",
@@ -352,7 +352,7 @@
       "maxLevel": "Niveau max",
       "levelBadge": "Niveau {{ level }}",
       "skillPoints": "Points de compétence",
-      "skillCost": "{{ cost }} par rang",
+      "skillCost": "{{ cost }} par niveau",
       "learnSkill": "Apprendre {{ name }}",
       "useSkill": "Utiliser {{ name }}",
       "useSuccess": "Réussite",
@@ -360,7 +360,7 @@
       "useRolled": "Jet : {{ total }}",
       "useAmount": "{{ kind }} {{ attribute }} : {{ amount }}",
       "useError": "La formule de réussite n'a pas pu être évaluée.",
-      "refundSkill": "Reprendre un rang de {{ name }}",
+      "refundSkill": "Retirer un niveau de {{ name }}",
       "removeSkill": "Retirer {{ name }}",
       "noClass": "Pas encore de classe.",
       "taughtSkills": "Autres compétences",
@@ -779,7 +779,7 @@
     "toolsTitle": "Outils externes",
     "tools": "La page des outils renvoie vers des générateurs gratuits créés par d'autres : Procgen Arcana de Watabou, Fantasy Map Generator d'Azgaar et Squoosh. Ils ne font pas partie de cette application.",
     "aiTitle": "Utilisation de l'IA",
-    "ai": "L'IA a été utilisée pour le code, la documentation, le logo et les icônes SVG personnalisées. L'auteur serait ravi de collaborer avec des artistes pour retirer le « slop » d'IA et donner plus de vie aux interfaces.",
+    "ai": "L'IA a été utilisée pour le code, la documentation, le logo et les icônes SVG personnalisées. Je serais ravi de collaborer avec des artistes pour retirer le slop et donner plus de vie aux interfaces. Note : ce projet existe depuis avant Claude, et la direction artistique et la palette de couleurs sont voulues, ce n'est pas une copie de la DA d'Anthropic.",
     "aiContact": "Me contacter",
     "illustrationsTitle": "Illustrations",
     "sampleHeroPrefix": "Portrait du héros d'exemple : illustration de",
@@ -1020,7 +1020,7 @@
       "deleteMessage": "{{ name }} sera retirée du monde.",
       "empty": "Aucune compétence trouvée.",
       "copySuffix": "(copie)",
-      "ranks": "Jusqu'au rang {{ max }}, {{ cost }} point(s) par rang",
+      "ranks": "Jusqu'au niveau {{ max }}, {{ cost }} point(s) par niveau",
       "cooldown": "Recharge {{ turns }} tour(s)",
       "inUse": "{{ name }} est utilisée par {{ usages }} : retirez-la d'abord.",
       "failed": "La compétence n'a pas pu être enregistrée."
@@ -1040,14 +1040,14 @@
       },
       "successHint": "Variables : roll, rank, level, vos attributs par leur nom, et ceux de la cible en target_<nom>.",
       "formulaHint": "Les montants sont des formules : rank, level et noms d'attributs (les maxima du lanceur).",
-      "preview": "Rang 1 : {{ rank1 }} · Rang {{ max }} : {{ maxRank }}",
+      "preview": "Niveau 1 : {{ rank1 }} · Niveau {{ max }} : {{ maxRank }}",
       "fields": {
         "name": "Nom",
         "description": "Description",
         "type": "Type",
         "rarity": "Rareté",
-        "maxRank": "Rang max (1 à 10)",
-        "pointCost": "Points de compétence par rang",
+        "maxRank": "Niveau max de la compétence (1 à 10)",
+        "pointCost": "Points de compétence par niveau",
         "target": "Cible",
         "cooldown": "Récupération (tours)",
         "costAttribute": "Coût : attribut",
@@ -1063,8 +1063,8 @@
       },
       "issue": {
         "name": "Donnez un nom à la compétence.",
-        "maxRank": "Le rang max va de 1 à 10.",
-        "pointCost": "Un rang coûte au moins 1 point de compétence.",
+        "maxRank": "Le niveau max va de 1 à 10.",
+        "pointCost": "Un niveau coûte au moins 1 point de compétence.",
         "target": "Une compétence active a une cible ; une passive n'en a pas.",
         "effects_amount": "Le montant d'un effet n'est pas une formule valide.",
         "json": "Ce JSON n'est pas une compétence valide.",
@@ -1099,12 +1099,12 @@
       "startingItems": "Objets de départ",
       "tree": "Arbre de compétences",
       "skillList": "Compétences",
-      "maxRank": "Rang max {{ count }}"
+      "maxRank": "Niveau max {{ count }}"
     },
     "tree": {
       "rank": "{{ rank }}/{{ max }}",
       "missingLevel": "Niveau {{ level }}",
-      "missingRequires": "{{ name }} rang {{ rank }}"
+      "missingRequires": "{{ name }} niveau {{ rank }}"
     },
     "editor": {
       "tabForm": "Formulaire",
@@ -1141,11 +1141,11 @@
         "tree": "Arbre de compétences",
         "minLevel": "Niveau minimum",
         "requires": "Nécessite",
-        "rank": "Rang requis"
+        "rank": "Niveau de compétence requis"
       },
       "issue": {
         "required": "Donnez un nom à la classe.",
-        "invalid": "Une valeur est invalide ou hors limites (niveau min, rang requis, attribut de bonus ou JSON).",
+        "invalid": "Une valeur est invalide ou hors limites (niveau min, niveau de compétence requis, attribut de bonus ou JSON).",
         "noRoot": "L'arbre a besoin d'au moins une compétence sans prérequis.",
         "cycle": "Les prérequis forment un cycle.",
         "outsideTree": "Un prérequis doit être une compétence du même arbre.",

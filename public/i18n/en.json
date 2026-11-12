@@ -315,12 +315,12 @@
       "levelZero": "This attribute is already at level 0.",
       "notInTree": "This skill isn't in the class tree.",
       "skillLocked": "This skill is still locked.",
-      "skillMaxRank": "This skill is already at its max rank.",
+      "skillMaxRank": "This skill is already at its max level.",
       "noSkillPoints": "Not enough skill points.",
-      "skillNeeded": "Another learned skill needs this rank.",
+      "skillNeeded": "Another learned skill needs this level.",
       "skillNotLearned": "This skill isn't learned.",
       "unknownSkill": "This skill doesn't exist in this world.",
-      "invalidRank": "This rank is not valid for this skill."
+      "invalidRank": "This level is not valid for this skill."
     },
     "sheet": {
       "playedBy": "Played by {{ name }}",
@@ -352,7 +352,7 @@
       "maxLevel": "Max level",
       "levelBadge": "Level {{ level }}",
       "skillPoints": "Skill points",
-      "skillCost": "{{ cost }} per rank",
+      "skillCost": "{{ cost }} per level",
       "learnSkill": "Learn {{ name }}",
       "useSkill": "Use {{ name }}",
       "useSuccess": "Success",
@@ -360,7 +360,7 @@
       "useRolled": "Rolled {{ total }}",
       "useAmount": "{{ kind }} {{ attribute }}: {{ amount }}",
       "useError": "The success formula could not be evaluated.",
-      "refundSkill": "Take back a rank of {{ name }}",
+      "refundSkill": "Take back a level of {{ name }}",
       "removeSkill": "Remove {{ name }}",
       "noClass": "No class yet.",
       "taughtSkills": "Other skills",
@@ -779,7 +779,7 @@
     "toolsTitle": "External tools",
     "tools": "The tools page links to free generators by others: Watabou's Procgen Arcana, Azgaar's Fantasy Map Generator and Squoosh. They are not part of this app.",
     "aiTitle": "Use of AI",
-    "ai": "AI was used to write the code and the documentation, and to create the logo and the custom SVG icons. The author would be glad to work with artists to remove the AI \"slop\" and give the interfaces more life.",
+    "ai": "AI was used for the code, the documentation, the logo and the custom SVG icons. I would be glad to work with artists to remove the slop and give the interfaces more life. Note: this project predates Claude; its art direction and colour palette are deliberate, not a copy of Anthropic's.",
     "aiContact": "Get in touch",
     "illustrationsTitle": "Illustrations",
     "sampleHeroPrefix": "Sample hero portrait: art by",
@@ -1020,7 +1020,7 @@
       "deleteMessage": "{{ name }} will be removed from the world.",
       "empty": "No skill found.",
       "copySuffix": "(copy)",
-      "ranks": "Up to rank {{ max }}, {{ cost }} point(s) per rank",
+      "ranks": "Up to level {{ max }}, {{ cost }} point(s) per level",
       "cooldown": "Cooldown {{ turns }} turn(s)",
       "inUse": "{{ name }} is used by {{ usages }}: remove it from them first.",
       "failed": "The skill could not be saved."
@@ -1040,14 +1040,14 @@
       },
       "successHint": "Variables: roll, rank, level, your attributes by name, and the target's as target_<name>.",
       "formulaHint": "Amounts are formulas: rank, level and attribute names (the caster's maxima).",
-      "preview": "Rank 1: {{ rank1 }} · Rank {{ max }}: {{ maxRank }}",
+      "preview": "Level 1: {{ rank1 }} · Level {{ max }}: {{ maxRank }}",
       "fields": {
         "name": "Name",
         "description": "Description",
         "type": "Type",
         "rarity": "Rarity",
-        "maxRank": "Max rank (1 to 10)",
-        "pointCost": "Skill points per rank",
+        "maxRank": "Max skill level (1 to 10)",
+        "pointCost": "Skill points per level",
         "target": "Target",
         "cooldown": "Cooldown (turns)",
         "costAttribute": "Cost: attribute",
@@ -1063,8 +1063,8 @@
       },
       "issue": {
         "name": "Give the skill a name.",
-        "maxRank": "The max rank is from 1 to 10.",
-        "pointCost": "A rank costs at least 1 skill point.",
+        "maxRank": "The max level is from 1 to 10.",
+        "pointCost": "A level costs at least 1 skill point.",
         "target": "An active skill needs a target; a passive one has none.",
         "effects_amount": "An effect amount is not a valid formula.",
         "json": "This JSON is not a valid skill.",
@@ -1099,12 +1099,12 @@
       "startingItems": "Starting items",
       "tree": "Skill tree",
       "skillList": "Skills",
-      "maxRank": "Max rank {{ count }}"
+      "maxRank": "Max level {{ count }}"
     },
     "tree": {
       "rank": "{{ rank }}/{{ max }}",
       "missingLevel": "Level {{ level }}",
-      "missingRequires": "{{ name }} rank {{ rank }}"
+      "missingRequires": "{{ name }} level {{ rank }}"
     },
     "editor": {
       "tabForm": "Form",
@@ -1141,11 +1141,11 @@
         "tree": "Skill tree",
         "minLevel": "Minimum level",
         "requires": "Requires",
-        "rank": "Required rank"
+        "rank": "Required skill level"
       },
       "issue": {
         "required": "Give the class a name.",
-        "invalid": "A value is out of range or invalid (min level, required rank, bonus attribute or JSON).",
+        "invalid": "A value is out of range or invalid (min level, required skill level, bonus attribute or JSON).",
         "noRoot": "The tree needs at least one skill with no prerequisite.",
         "cycle": "The prerequisites form a cycle.",
         "outsideTree": "A prerequisite must be a skill of the same tree.",

@@ -13,7 +13,7 @@ export function buildClassPrompt(
       '- name : le nom de la classe. description : quelques phrases.',
       `- bonuses : bonus toujours actifs ; attribute est uniquement l'un de ces attributs : ${attributes} ; value est un entier (négatif pour un malus).`,
       "- tree : l'arbre de compétences. skillId est l'identifiant d'une compétence existante du monde, une seule fois par nœud ; si tu ne les connais pas, laisse tree à [].",
-      '- requires : compétences du même arbre à avoir au rang indiqué (rank, entier de 1 ou plus) ; [] si aucune.',
+      '- requires : compétences du même arbre à avoir au niveau indiqué (rank, entier de 1 ou plus) ; [] si aucune.',
       '- minLevel : niveau minimal, entier de 1 ou plus. column et row : la case du nœud dans la grille, entiers de 0 ou plus. Au moins un nœud racine (requires : []), et aucune exigence circulaire.',
     ].join('\n');
   }
@@ -23,7 +23,7 @@ export function buildClassPrompt(
     '- name: the class name. description: a few sentences.',
     `- bonuses: always-on bonuses; attribute is only one of these attributes: ${attributes}; value is a whole number (negative for a malus).`,
     '- tree: the skill tree. skillId is the id of an existing skill of the world (leave tree as [] if you do not know them).',
-    '- requires: skills of the same tree needed at the given rank (rank, a whole number, 1 or more); [] when none.',
+    '- requires: skills of the same tree needed at the given level (rank, a whole number, 1 or more); [] when none.',
     "- minLevel: minimum level, a whole number, 1 or more. column and row: the node's cell in the grid, whole numbers, 0 or more, one node per skill. At least one root node (requires: []), and no circular requirement.",
   ].join('\n');
 }
