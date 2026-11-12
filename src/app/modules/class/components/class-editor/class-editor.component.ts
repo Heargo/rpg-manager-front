@@ -395,6 +395,15 @@ const never = (): boolean => false;
       <button
         pButton
         type="button"
+        data-action="random"
+        icon="pi pi-sparkles"
+        severity="secondary"
+        [label]="'common.random' | transloco"
+        (click)="random()"
+      ></button>
+      <button
+        pButton
+        type="button"
         data-action="save"
         icon="pi pi-save"
         [label]="'class.editor.save' | transloco"
@@ -644,6 +653,10 @@ export class ClassEditorComponent {
         life: 2500,
       });
     }
+  }
+
+  protected async random(): Promise<void> {
+    this.setDraft(await this.editor.random(this.world()));
   }
 
   protected submit(): void {

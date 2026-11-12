@@ -31,10 +31,10 @@ export function generateNpcName(source: RandomSource, names: NpcNameList): strin
   return capitalize(name.replace(/\s+/g, ' ').trim());
 }
 
-function adjectiveForm(adjective: Adjective, gender: Gender): string {
+export function adjectiveForm(adjective: Adjective, gender: Gender): string {
   return typeof adjective === 'string' ? adjective : adjective[gender];
 }
 
-function capitalize(text: string): string {
+export function capitalize(text: string): string {
   return text.charAt(0).toLocaleUpperCase() + text.slice(1);
 }

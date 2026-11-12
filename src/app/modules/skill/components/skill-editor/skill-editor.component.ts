@@ -339,6 +339,15 @@ import {
       <button
         pButton
         type="button"
+        data-action="random"
+        icon="pi pi-sparkles"
+        severity="secondary"
+        [label]="'common.random' | transloco"
+        (click)="random()"
+      ></button>
+      <button
+        pButton
+        type="button"
         data-action="save"
         icon="pi pi-save"
         [label]="'skill.editor.save' | transloco"
@@ -389,6 +398,7 @@ import {
     .actions {
       display: flex;
       justify-content: flex-end;
+      gap: 0.5rem;
     }
   `,
 })
@@ -566,6 +576,10 @@ export class SkillEditorComponent {
         life: 2500,
       });
     }
+  }
+
+  protected async random(): Promise<void> {
+    this.setDraft(await this.editor.random(this.world()));
   }
 
   protected submit(): void {

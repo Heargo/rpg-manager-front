@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "templates": [
+    "{noun} {adjective}",
+    "{noun} {suffix}",
+    "{noun}",
+    "{noun} {adjective} {suffix}"
+  ],
+  "nouns": [
+    {
+      "text": "Guerrier",
+      "gender": "m"
+    },
+    {
+      "text": "Mage",
+      "gender": "m"
+    },
+    {
+      "text": "Rôdeuse",
+      "gender": "f"
+    },
+    {
+      "text": "Voleur",
+      "gender": "m"
+    },
+    {
+      "text": "Clerc",
+      "gender": "m"
+    },
+    {
+      "text": "Paladin",
+      "gender": "m"
+    },
+    {
+      "text": "Druide",
+      "gender": "m"
+    },
+    {
+      "text": "Barde",
+      "gender": "m"
+    },
+    {
+      "text": "Moine",
+      "gender": "m"
+    },
+    {
+      "text": "Occultiste",
+      "gender": "m"
+    },
+    {
+      "text": "Sentinelle",
+      "gender": "f"
+    },
+    {
+      "text": "Duelliste",
+      "gender": "m"
+    },
+    {
+      "text": "Alchimiste",
+      "gender": "m"
+    },
+    {
+      "text": "Chasseuse",
+      "gender": "f"
+    },
+    {
+      "text": "Templier",
+      "gender": "m"
+    },
+    {
+      "text": "Chamane",
+      "gender": "m"
+    },
+    {
+      "text": "Berserker",
+      "gender": "m"
+    },
+    {
+      "text": "Éclaireuse",
+      "gender": "f"
+    },
+    {
+      "text": "Sage",
+      "gender": "m"
+    },
+    {
+      "text": "Gardienne",
+      "gender": "f"
+    },
+    {
+      "text": "Assassin",
+      "gender": "m"
+    },
+    {
+      "text": "Lame-sorcière",
+      "gender": "f"
+    },
+    {
+      "text": "Garde-forestière",
+      "gender": "f"
+    },
+    {
+      "text": "Mercenaire",
+      "gender": "m"
+    }
+  ],
+  "adjectives": [
+    {
+      "m": "errant",
+      "f": "errante"
+    },
+    "intrépide",
+    "arcanique",
+    {
+      "m": "obscur",
+      "f": "obscure"
+    },
+    {
+      "m": "saint",
+      "f": "sainte"
+    },
+    "sauvage",
+    "inflexible",
+    {
+      "m": "silencieux",
+      "f": "silencieuse"
+    },
+    {
+      "m": "chevronné",
+      "f": "chevronnée"
+    },
+    {
+      "m": "assermenté",
+      "f": "assermentée"
+    },
+    {
+      "m": "maudit",
+      "f": "maudite"
+    },
+    {
+      "m": "tempétueux",
+      "f": "tempétueuse"
+    },
+    {
+      "m": "exilé",
+      "f": "exilée"
+    },
+    {
+      "m": "rusé",
+      "f": "rusée"
+    },
+    "antique",
+    "implacable",
+    {
+      "m": "radieux",
+      "f": "radieuse"
+    },
+    "sinistre",
+    "agile",
+    {
+      "m": "ancien",
+      "f": "ancienne"
+    },
+    {
+      "m": "déchu",
+      "f": "déchue"
+    },
+    {
+      "m": "dévoué",
+      "f": "dévouée"
+    },
+    {
+      "m": "masqué",
+      "f": "masquée"
+    },
+    {
+      "m": "frontalier",
+      "f": "frontalière"
+    }
+  ],
+  "suffixes": [
+    "des terres désolées",
+    "de la couronne",
+    "des anciennes voies",
+    "du vide",
+    "de l'aube",
+    "des bois profonds",
+    "de la flamme",
+    "du dernier guet",
+    "de la lune",
+    "du pacte de fer",
+    "de l'épine",
+    "de la marée",
+    "de la route de cendres",
+    "du voile",
+    "de la cour pâle",
+    "de la montagne",
+    "de la traque",
+    "de l'ordre silencieux",
+    "de la faille",
+    "des terres sauvages",
+    "des sept mers",
+    "du serment",
+    "de la citadelle",
+    "du nord gelé"
+  ],
+  "descriptions": [
+    "A appris le métier à la dure et n'a jamais regardé en arrière.",
+    "Marche sur la ligne entre discipline et instinct.",
+    "S'est entraîné des années, puis est parti chercher une vraie épreuve.",
+    "Se bat pour l'argent, pour l'honneur, ou pour les deux.",
+    "S'appuie sur une vie d'habitudes pour survivre.",
+    "Connaît les dangers de la route mieux que n'importe quelle carte.",
+    "Calme dans la crise, dangereux dans un coin.",
+    "Suit une vieille tradition que peu de gens se rappellent.",
+    "Toujours préparé, rarement surpris.",
+    "Un spécialiste que chacun est content d'avoir de son côté.",
+    "Mêle patience et violence soudaine.",
+    "Porte les leçons d'un maître disparu depuis longtemps.",
+    "Rarement vu, souvent ressenti.",
+    "Croit que le bon outil, c'est le talent et non la chance.",
+    "A choisi cette voie, et la voie l'a choisi en retour.",
+    "Héritier d'un savoir-faire transmis de main en main.",
+    "Jamais le plus bruyant de la salle, toujours le dernier debout.",
+    "Vit selon un code que peu comprennent.",
+    "Traverse le chaos avec un calme rodé.",
+    "Un pilier fiable pour n'importe quelle équipe."
+  ]
+}

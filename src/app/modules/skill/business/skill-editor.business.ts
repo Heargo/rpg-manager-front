@@ -1,4 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { WordListBusiness } from '../../../core/business/word-list.business';
+import { generateSkill } from '../../../core/generators/skill-generator';
+import { createSeed, seededRandomSource } from '../../../core/generators/random-source';
 import { World } from '../../world/models/world';
 import {
   emptySkill,
@@ -17,6 +20,13 @@ import { buildSkillPrompt } from '../helpers/skill-ai-prompt';
 /** What the skill editor needs: checks, JSON and the live preview of an amount formula. */
 @Injectable({ providedIn: 'root' })
 export class SkillEditorBusiness {
+  private readonly words = inject(WordListBusiness);
+
+  /** A new random skill on the world's attributes, in the active language. */
+  async random(world: World): Promise<SkillDraft> {
+    return generateSkill(seededRandomSource(createSeed()), this.names(world), await this.words.skillWords());
+  }
+
   empty(): SkillDraft {
     return emptySkill();
   }

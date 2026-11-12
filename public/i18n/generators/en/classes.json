@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "templates": [
+    "{adjective} {noun}",
+    "{noun} of {suffix}",
+    "{noun}",
+    "{adjective} {noun} of {suffix}"
+  ],
+  "nouns": [
+    {
+      "text": "Warrior"
+    },
+    {
+      "text": "Mage"
+    },
+    {
+      "text": "Ranger"
+    },
+    {
+      "text": "Rogue"
+    },
+    {
+      "text": "Cleric"
+    },
+    {
+      "text": "Paladin"
+    },
+    {
+      "text": "Druid"
+    },
+    {
+      "text": "Bard"
+    },
+    {
+      "text": "Monk"
+    },
+    {
+      "text": "Warlock"
+    },
+    {
+      "text": "Sentinel"
+    },
+    {
+      "text": "Duelist"
+    },
+    {
+      "text": "Alchemist"
+    },
+    {
+      "text": "Hunter"
+    },
+    {
+      "text": "Templar"
+    },
+    {
+      "text": "Shaman"
+    },
+    {
+      "text": "Berserker"
+    },
+    {
+      "text": "Scout"
+    },
+    {
+      "text": "Sage"
+    },
+    {
+      "text": "Guardian"
+    },
+    {
+      "text": "Assassin"
+    },
+    {
+      "text": "Spellblade"
+    },
+    {
+      "text": "Warden"
+    },
+    {
+      "text": "Mercenary"
+    }
+  ],
+  "adjectives": [
+    "Wandering",
+    "Fearless",
+    "Arcane",
+    "Shadow",
+    "Holy",
+    "Wild",
+    "Iron",
+    "Silent",
+    "Veteran",
+    "Sworn",
+    "Cursed",
+    "Stormborn",
+    "Exiled",
+    "Cunning",
+    "Ancient",
+    "Relentless",
+    "Radiant",
+    "Grim",
+    "Nimble",
+    "Elder",
+    "Fallen",
+    "Devoted",
+    "Masked",
+    "Frontier"
+  ],
+  "suffixes": [
+    "the Wastes",
+    "the Crown",
+    "the Old Ways",
+    "the Hollow",
+    "the Dawn",
+    "the Deep Woods",
+    "the Flame",
+    "the Last Watch",
+    "the Moon",
+    "the Iron Pact",
+    "the Thorn",
+    "the Tide",
+    "the Ashen Road",
+    "the Veil",
+    "the Pale Court",
+    "the Mountain",
+    "the Hunt",
+    "the Silent Order",
+    "the Rift",
+    "the Wild",
+    "the Seven Seas",
+    "the Oath",
+    "the Citadel",
+    "the Frozen North"
+  ],
+  "descriptions": [
+    "Learned the craft the hard way and never looked back.",
+    "Walks the line between discipline and instinct.",
+    "Trained for years, then went out to find a real test.",
+    "Fights for coin, for honor or for both.",
+    "Relies on a lifetime of habit to survive.",
+    "Knows the dangers of the road better than any map.",
+    "Calm in a crisis and dangerous in a corner.",
+    "Follows an old tradition few still remember.",
+    "Always prepared, rarely surprised.",
+    "A specialist others are glad to have on their side.",
+    "Mixes patience and sudden violence.",
+    "Carries the lessons of a mentor long gone.",
+    "Rarely seen, often felt.",
+    "Believes the right tool is skill, not luck.",
+    "Chose this path, and the path chose back.",
+    "Heir to a craft passed from hand to hand.",
+    "Never the loudest in the room, always the last standing.",
+    "Lives by a code that few understand.",
+    "Cuts through chaos with practiced calm.",
+    "A reliable pillar of any party."
+  ]
+}
