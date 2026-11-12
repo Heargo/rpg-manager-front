@@ -6,6 +6,7 @@
   },
   "common": {
     "cancel": "Cancel",
+    "imageWarning": "Prefer images made by human artists. AI text is handy, but AI images are lifeless.",
     "offlineBanner": "You're offline. Saved data still works; connecting to a room needs a network."
   },
   "nav": {
@@ -858,7 +859,9 @@
       "equipped": "Equipped",
       "loot": "Loot",
       "removeItem": "Remove",
+      "removePortrait": "Remove portrait",
       "fields": {
+        "portrait": "Portrait",
         "name": "Name",
         "description": "Description",
         "roles": "Roles",

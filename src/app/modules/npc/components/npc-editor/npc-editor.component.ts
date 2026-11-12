@@ -18,8 +18,11 @@ import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
+import { ImageBusiness } from '../../../../core/business/image.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
+import { ImageWarningComponent } from '../../../../core/components/image-warning/image-warning.component';
+import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { World } from '../../../world/models/world';
 import { NpcEditorBusiness } from '../../business/npc-editor.business';
 import { NpcEditorIssue } from '../../helpers/npc-editor.rules';
@@ -41,6 +44,8 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
     TabsModule,
     TextareaModule,
     CoinInputComponent,
+    ImageWarningComponent,
+    StoredImageComponent,
   ],
   template: `
     <p-tabs value="form">
@@ -54,6 +59,35 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
       <p-tabpanels>
         <p-tabpanel value="form">
           <div class="form">
+            <div class="field image">
+              <label for="npc-portrait">{{
+                'npc.editor.fields.portrait' | transloco
+              }}</label>
+              <span data-testid="portrait-preview" class="preview">
+                <app-stored-image [imageId]="draft().portraitId">
+                  <span class="pi pi-image"></span>
+                </app-stored-image>
+              </span>
+              <input
+                id="npc-portrait"
+                data-field="portrait"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                (change)="upload($any($event.target))"
+              />
+              @if (draft().portraitId) {
+                <button
+                  pButton
+                  type="button"
+                  data-action="remove-portrait"
+                  icon="pi pi-trash"
+                  severity="secondary"
+                  [label]="'npc.editor.removePortrait' | transloco"
+                  (click)="patch({ portraitId: undefined })"
+                ></button>
+              }
+              <app-image-warning />
+            </div>
             <div class="field">
               <label for="npc-name">{{
                 'npc.editor.fields.name' | transloco
@@ -423,6 +457,17 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
       flex-direction: column;
       gap: 1rem;
     }
+    .preview {
+      width: 6rem;
+      height: 6rem;
+      border-radius: 0.5rem;
+      background: var(--p-content-hover-background);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .preview app-stored-image { width: 100%; height: 100%; }
     .form {
       display: flex;
       flex-direction: column;
@@ -476,6 +521,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
 export class NpcEditorComponent {
   private readonly editor = inject(NpcEditorBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly images = inject(ImageBusiness);
 
   /** The world whose attributes, level rules and item catalogue the NPC is built on. */
   readonly world = input.required<World>();
@@ -517,6 +563,16 @@ export class NpcEditorComponent {
 
   protected patch(change: Partial<Npc>): void {
     this.setDraft({ ...this.draft(), ...change });
+  }
+
+  protected async upload(input: HTMLInputElement): Promise<void> {
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      this.patch({ portraitId: await this.images.storeUpload(file) });
+    } catch {
+      // Not a usable image: keep the current portrait.
+    }
   }
 
   protected setRoles(roles: NpcRole[]): void {

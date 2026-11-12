@@ -6,6 +6,7 @@
   },
   "common": {
     "cancel": "Annuler",
+    "imageWarning": "Privilégiez les images faites par des artistes humains. Le texte IA est pratique, mais les images IA sont sans vie.",
     "offlineBanner": "Vous êtes hors ligne. Les données enregistrées restent disponibles ; rejoindre une salle demande un réseau."
   },
   "nav": {
@@ -858,7 +859,9 @@
       "equipped": "Équipé",
       "loot": "Butin",
       "removeItem": "Retirer",
+      "removePortrait": "Retirer le portrait",
       "fields": {
+        "portrait": "Portrait",
         "name": "Nom",
         "description": "Description",
         "roles": "Rôles",

@@ -21,6 +21,7 @@ import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { ImageBusiness } from '../../../../core/business/image.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
+import { ImageWarningComponent } from '../../../../core/components/image-warning/image-warning.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import {
   EQUIPMENT_SLOTS,
@@ -76,6 +77,7 @@ function toDraft(item: Item | undefined): ItemDraft {
     TextareaModule,
     CoinInputComponent,
     StoredImageComponent,
+    ImageWarningComponent,
   ],
   template: `
     <p-tabs value="form">
@@ -103,6 +105,7 @@ function toDraft(item: Item | undefined): ItemDraft {
                 accept="image/*"
                 (change)="upload($any($event.target))"
               />
+              <app-image-warning />
             </div>
             <div class="field">
               <label for="item-name">{{

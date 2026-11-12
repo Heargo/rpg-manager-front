@@ -1,3 +1,4 @@
+import { ImageWarningComponent } from '../../../../core/components/image-warning/image-warning.component';
 import { DEFAULT_NPC_VISIBILITY } from '../../../npc/helpers/npc-visibility.rules';
 import { NpcVisibilityRules } from '../../../npc/models/npc';
 import {
@@ -83,6 +84,7 @@ import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
     ButtonModule,
     CheckboxModule,
     FileUploadModule,
+    ImageWarningComponent,
     InputNumberModule,
     InputTextModule,
     MessageModule,
