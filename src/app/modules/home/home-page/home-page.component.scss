@@ -1,80 +1,7 @@
-.hero {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  /* viewport minus sticky nav (60px) and body margin */
-  min-height: calc(100vh - 60px - 1rem);
-  min-height: calc(100svh - 60px - 1rem);
-}
-
-.mark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(90vw, 70vh, 48rem);
-  height: auto;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-
-  path {
-    fill: var(--color-paper-200);
-    opacity: 0.45;
-  }
-}
-
-:host-context(.dark) .mark path {
-  fill: var(--color-paper-700);
-}
-
-.hero-title {
-  position: relative;
-  margin: 0;
-  font-size: clamp(2.5rem, 10vw, 6rem);
-  font-weight: 800;
-  line-height: 1.05;
-  text-align: center;
-}
-
-.scroll-arrow {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  translate: -50% 0;
-  display: grid;
-  place-items: center;
-  width: 3rem;
-  height: 3rem;
-  font-size: 1.75rem;
-  color: inherit;
-  background: transparent;
-  border: 0;
-  border-radius: 50%;
-  cursor: pointer;
-  animation: bob 2s ease-in-out infinite;
-
-  &:focus-visible {
-    outline: 2px solid var(--p-primary-color);
-  }
-}
-
-@keyframes bob {
-  50% {
-    transform: translateY(0.4rem);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scroll-arrow {
-    animation: none;
-  }
-}
-
 .below {
   display: flex;
   flex-direction: column;
-  /* fill the viewport below the hero so the footer sits at the bottom */
+  /* content fills the viewport under the nav bar; the footer is below the fold */
   min-height: calc(100vh - 60px - 1rem);
   min-height: calc(100svh - 60px - 1rem);
   /* cancel the global body margin so the footer touches the bottom edge */
@@ -86,7 +13,7 @@
   width: 100%;
   max-width: 64rem;
   margin-inline: auto;
-  /* centred in the space under the hero, like the hero itself */
+  /* centred in the full-height section */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -122,6 +49,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
+
+  @media (max-width: 640px) {
+    justify-content: center;
+  }
 }
 
 .cta {
