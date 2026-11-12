@@ -30,7 +30,7 @@
         shape="circle"
         (click)="usermenu.toggle($event)"
       />
-      <p-tieredmenu #usermenu [model]="profileItems()" [popup]="true" />
+      <p-tieredmenu #usermenu [model]="profileItems()" [popup]="true" appendTo="body" />
     </div>
   </ng-template>
 </p-menubar>
