@@ -32,6 +32,7 @@ import {
   NPC_VISIBILITY_FIELDS,
 } from '../../../npc/helpers/npc-visibility.rules';
 import { NPC_ROLES, NpcRole, NpcVisibility } from '../../../npc/models/npc';
+import { createPointerKind } from '../../../../core/helpers/pointer-kind';
 import { OfflineFeatures, WorldDraft } from '../../models/world';
 
 const OFFLINE_FEATURES = Object.keys(
@@ -165,10 +166,12 @@ export class RuleFieldsComponent {
     });
   }
 
+  /** Mouse or finger: iOS calls a tap's click a mouse click, so this asks the press. */
+  protected readonly pointer = createPointerKind();
+
   /** Mouse hover opens the chart; touch and pen go through the tap. */
   protected hoverChart(event: Event, open: boolean): void {
-    if ((event as PointerEvent).pointerType === 'mouse')
-      this.chartOpen.set(open);
+    if (this.pointer.isMouseHover(event)) this.chartOpen.set(open);
   }
 
   /** Keyboard focus opens the chart (a pointer press is handled by hover or tap). */
@@ -184,7 +187,7 @@ export class RuleFieldsComponent {
 
   /** A tap (or Enter) toggles the chart; a mouse click leaves the hover state alone. */
   protected tapChart(event: Event): void {
-    if ((event as PointerEvent).pointerType === 'mouse') return;
+    if (this.pointer.isMouseClick(event)) return;
     this.chartOpen.update((open) => !open);
   }
 }

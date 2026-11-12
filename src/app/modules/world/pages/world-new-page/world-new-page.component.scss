@@ -241,7 +241,8 @@
     position: absolute;
     z-index: 10;
     bottom: 100%;
-    right: 0;
+    // From the trigger's left edge: on a phone the trigger starts the row, and a right-aligned card ran off the screen.
+    left: 0;
     padding: 0.5rem;
     background: var(--p-content-background);
     border: 1px solid var(--p-content-border-color);

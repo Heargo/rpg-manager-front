@@ -193,6 +193,7 @@
                         data-chart-trigger
                         [attr.tabindex]="previews()[i].levels ? 0 : null"
                         [attr.aria-expanded]="chartOpen() === i"
+                        (pointerdown)="pointer.down($event)"
                         (pointerenter)="hoverChart($event, i)"
                         (pointerleave)="hoverChart($event, null)"
                         (focus)="focusChart($event, i)"

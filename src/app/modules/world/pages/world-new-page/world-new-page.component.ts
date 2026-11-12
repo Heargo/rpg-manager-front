@@ -69,8 +69,10 @@ const PRESETS: readonly (FormulaPreset | 'custom')[] = [
   'custom',
 ];
 
-/** New game wizard: identity → attributes → rules, with a live preview. */
+import { createPointerKind } from '../../../../core/helpers/pointer-kind';
 import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
+
+/** New game wizard: identity → attributes → rules, with a live preview. */
 @Component({
   selector: 'app-world-new-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -195,9 +197,11 @@ export class WorldNewPageComponent {
   protected setChart(target: number | 'curve' | null): void {
     this.chartOpen.set(target);
   }
+  /** Mouse or finger: iOS calls a tap's click a mouse click, so this asks the press. */
+  protected readonly pointer = createPointerKind();
   /** Mouse hover opens the chart; touch and pen go through the tap. */
   protected hoverChart(event: Event, target: number | 'curve' | null): void {
-    if ((event as PointerEvent).pointerType === 'mouse') this.setChart(target);
+    if (this.pointer.isMouseHover(event)) this.setChart(target);
   }
   /** Keyboard focus opens the chart (a pointer press is handled by hover or tap). */
   protected focusChart(event: Event, target: number | 'curve'): void {
@@ -211,7 +215,7 @@ export class WorldNewPageComponent {
   }
   /** A tap (or Enter) toggles the chart; a mouse click leaves the hover state alone. */
   protected tapChart(event: Event, target: number | 'curve'): void {
-    if ((event as PointerEvent).pointerType === 'mouse') return;
+    if (this.pointer.isMouseClick(event)) return;
     this.chartOpen.update((open) => (open === target ? null : target));
   }
   protected readonly errors = computed(() =>

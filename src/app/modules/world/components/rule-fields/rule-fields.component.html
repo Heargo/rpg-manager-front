@@ -73,6 +73,7 @@
           data-chart-trigger
           [attr.tabindex]="curvePreview() ? 0 : null"
           [attr.aria-expanded]="chartOpen()"
+          (pointerdown)="pointer.down($event)"
           (pointerenter)="hoverChart($event, true)"
           (pointerleave)="hoverChart($event, false)"
           (focus)="focusChart($event)"
