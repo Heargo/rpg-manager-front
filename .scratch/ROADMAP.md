@@ -125,3 +125,26 @@ Follow [workflow.md](../workflow.md): baseline, agreed seams, red / green / revi
 
 - Every ticket triaged to `ready-for-agent` on validation.
 - Shared dice rolls: **off** by default, with a toggle next to the Roll button (validated with this order).
+
+## Phase 9: UI feedback round 2 (2026-11-12)
+
+Tickets in `ui-feedback-2/` (F), developed on the `feedback` branch. Bugs and cheap wins first, then navigation and pages, then the model changes, the sprite colorizer last.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 50 | **F01** Mobile nav menu and dice inputs bugs | none |
+| 51 | **F02** Landing: single full-height section | none |
+| 52 | **F03** Credits: use of AI | none |
+| 53 | **F04** Nav bar two states, close the world | none |
+| 54 | **F05** Room page cleanup, offline features to World rules | none |
+| 55 | **F06** World rules clickable tabs | F05 |
+| 56 | **F07** Character details icon tabs | none |
+| 57 | **F08** Catalogues rework | none |
+| 58 | **F09** NPC portrait, human artists warning | none |
+| 59 | **F10** Random button, Copy AI prompt | none |
+| 60 | **F11** Skill and class generators | F10 |
+| 61 | **F12** Joined worlds offline | none |
+| 62 | **F13** Skill dice rolls | none |
+| 63 | **F14** Sprite colorizer (P0, P1) | none |
+| 64 | **F15** Sprite colorizer advanced (P2) | F14 |
+| 65 | **F16** P2P and encryption learning doc | none |
