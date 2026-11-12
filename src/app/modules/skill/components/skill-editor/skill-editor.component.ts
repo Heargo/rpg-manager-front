@@ -25,7 +25,12 @@ import { SkillEditorBusiness } from '../../business/skill-editor.business';
 import { SkillIssue } from '../../helpers/skill.rules';
 import {
   Skill,
+  DEFAULT_SKILL_ROLL,
   SKILL_MAX_RANK,
+  SKILL_ROLL_COUNT_MAX,
+  SKILL_ROLL_FACES_MAX,
+  SKILL_SUCCESS_MODES,
+  SkillSuccess,
   SKILL_TARGETS,
   SKILL_TYPES,
   SkillDraft,
@@ -207,6 +212,104 @@ import {
                   </div>
                 }
               </div>
+
+              <div class="row">
+                <div class="field">
+                  <label for="skill-roll-count">{{
+                    'skill.editor.fields.rollCount' | transloco
+                  }}</label>
+                  <p-inputnumber
+                    inputId="skill-roll-count"
+                    data-field="roll-count"
+                    [min]="1"
+                    [max]="rollCountLimit"
+                    [showButtons]="true"
+                    [ngModel]="roll().count"
+                    (ngModelChange)="
+                      patch({ roll: { count: $event ?? 0, faces: roll().faces } })
+                    "
+                  />
+                </div>
+                <div class="field">
+                  <label for="skill-roll-faces">{{
+                    'skill.editor.fields.rollFaces' | transloco
+                  }}</label>
+                  <p-inputnumber
+                    inputId="skill-roll-faces"
+                    data-field="roll-faces"
+                    [min]="2"
+                    [max]="rollFacesLimit"
+                    [showButtons]="true"
+                    [ngModel]="roll().faces"
+                    (ngModelChange)="
+                      patch({ roll: { count: roll().count, faces: $event ?? 0 } })
+                    "
+                  />
+                </div>
+                <div class="field">
+                  <label for="skill-success-mode">{{
+                    'skill.editor.fields.successMode' | transloco
+                  }}</label>
+                  <p-select
+                    inputId="skill-success-mode"
+                    data-field="success-mode"
+                    [options]="successOptions()"
+                    optionLabel="label"
+                    optionValue="value"
+                    [ngModel]="success().mode"
+                    (ngModelChange)="setSuccessMode($event)"
+                  />
+                </div>
+                @if (thresholdSuccess(); as threshold) {
+                  <div class="field">
+                    <label for="skill-success-value">{{
+                      'skill.editor.fields.successValue' | transloco
+                    }}</label>
+                    <p-inputnumber
+                      inputId="skill-success-value"
+                      data-field="success-value"
+                      [showButtons]="true"
+                      [ngModel]="threshold.value"
+                      (ngModelChange)="
+                        patch({
+                          success: { mode: 'threshold', value: $event ?? 0 },
+                        })
+                      "
+                    />
+                  </div>
+                }
+                @if (formulaSuccess(); as formula) {
+                  <div class="field">
+                    <label for="skill-success-formula">{{
+                      'skill.editor.fields.successFormula' | transloco
+                    }}</label>
+                    <input
+                      pInputText
+                      id="skill-success-formula"
+                      data-field="success-formula"
+                      autocomplete="off"
+                      spellcheck="false"
+                      [value]="formula.formula"
+                      (input)="
+                        patch({
+                          success: {
+                            mode: 'formula',
+                            formula: $any($event.target).value,
+                          },
+                        })
+                      "
+                    />
+                  </div>
+                }
+              </div>
+              @if (successFormulaError(); as message) {
+                <p-message severity="error" data-field="success-error">{{
+                  message
+                }}</p-message>
+              }
+              @if (success().mode === 'formula') {
+                <p class="hint">{{ 'skill.editor.successHint' | transloco }}</p>
+              }
             }
 
             <fieldset class="effects">
@@ -416,6 +519,8 @@ export class SkillEditorComponent {
   readonly save = output<Skill>();
 
   protected readonly maxRankLimit = SKILL_MAX_RANK;
+  protected readonly rollCountLimit = SKILL_ROLL_COUNT_MAX;
+  protected readonly rollFacesLimit = SKILL_ROLL_FACES_MAX;
 
   private readonly initial = computed<SkillDraft>(
     () => this.skill() ?? this.editor.empty(),
@@ -450,6 +555,34 @@ export class SkillEditorComponent {
           };
     }),
   );
+
+  protected readonly roll = computed(
+    () => this.draft().roll ?? DEFAULT_SKILL_ROLL,
+  );
+  protected readonly success = computed<SkillSuccess>(
+    () => this.draft().success ?? { mode: 'always' },
+  );
+  protected readonly thresholdSuccess = computed(() => {
+    const success = this.success();
+    return success.mode === 'threshold' ? success : null;
+  });
+  protected readonly formulaSuccess = computed(() => {
+    const success = this.success();
+    return success.mode === 'formula' ? success : null;
+  });
+  protected readonly successOptions = computed(() =>
+    SKILL_SUCCESS_MODES.map((value) => ({
+      value,
+      label: this.language.t('skill.editor.successMode.' + value),
+    })),
+  );
+  /** The live check of the success formula (null while valid or not a formula). */
+  protected readonly successFormulaError = computed(() => {
+    const issue = this.issues().find(
+      (entry) => entry.field === 'success.formula',
+    );
+    return issue ? this.language.t('skill.editor.issue.success_formula') : null;
+  });
 
   protected readonly typeOptions = computed(() =>
     SKILL_TYPES.map((value) => ({
@@ -488,7 +621,9 @@ export class SkillEditorComponent {
 
   /** A passive skill has no target, cost nor cooldown; an active one starts with a target. */
   protected setType(type: Skill['type']): void {
-    const { target, cost, cooldown, ...rest } = this.draft();
+    const { target, cost, cooldown, roll, success, ...rest } = this.draft();
+    void roll;
+    void success;
     void target;
     void cost;
     void cooldown;
@@ -497,6 +632,17 @@ export class SkillEditorComponent {
         ? { ...rest, type, target: 'one-enemy', cooldown: 0 }
         : { ...rest, type },
     );
+  }
+
+  protected setSuccessMode(mode: SkillSuccess['mode']): void {
+    this.patch({
+      success:
+        mode === 'threshold'
+          ? { mode, value: 10 }
+          : mode === 'formula'
+            ? { mode, formula: 'roll - 10' }
+            : { mode },
+    });
   }
 
   protected setCostAttribute(attribute: string | null): void {

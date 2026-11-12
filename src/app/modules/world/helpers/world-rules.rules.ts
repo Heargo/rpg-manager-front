@@ -101,6 +101,7 @@ export function applyWorldRules<T extends World>(
     startingSkillPoints: rules.startingSkillPoints,
     skillPointsPerLevel: rules.skillPointsPerLevel,
     offlineFeatures: rules.offlineFeatures,
+    skillRollsEnabled: rules.skillRollsEnabled ?? world.skillRollsEnabled,
     npcVisibility: rules.npcVisibility ?? world.npcVisibility,
     items: world.items.map(fixItem),
     characters: world.characters.map(fixSheet),

@@ -1,7 +1,7 @@
 import { Character, Sheet } from '../../world/models/world';
 import { Npc } from '../../npc/models/npc';
 import { Skill } from '../models/skill';
-import { evaluateSkillAmount, filterSkills, previewSkillAmount, skillUsages, validateSkill } from './skill.rules';
+import { evaluateSkillAmount, filterSkills, parseSkillJson, previewSkillAmount, skillUsages, validateSkill } from './skill.rules';
 
 const fireball: Skill = {
   id: 's1', name: 'Fireball', description: 'Boom.', rarity: 'rare', type: 'active', maxRank: 3, pointCost: 2,
@@ -96,5 +96,23 @@ describe('skillUsages', () => {
 
   it('is empty for an unused skill', () => {
     expect(skillUsages('s9', { characters: [], npcs: [] })).toEqual([]);
+  });
+});
+
+describe('success formula without a formula', () => {
+  const base = {
+    name: 'Bolt', description: '', rarity: 'common', type: 'active', maxRank: 1, pointCost: 1, target: 'one-enemy',
+    effects: [],
+  } as const;
+
+  it('is refused by validation', () => {
+    expect(validateSkill({ ...base, success: { mode: 'formula' } } as never, ['Life'])).toEqual([
+      { field: 'success.formula', code: 'formula' },
+    ]);
+  });
+
+  it('is refused when parsing JSON', () => {
+    const text = JSON.stringify({ ...base, success: { mode: 'formula' } });
+    expect(parseSkillJson(text, base as never, ['Life']).skill).toBeUndefined();
   });
 });

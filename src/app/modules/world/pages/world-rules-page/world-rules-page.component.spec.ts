@@ -136,6 +136,19 @@ describe('WorldRulesPageComponent', () => {
     expect(saved.offlineFeatures.equip).toBe(true);
   });
 
+  it('shows the Skills roll dice setting on, and saves it once switched off', async () => {
+    const { el, saveRules, click, settle } = await open();
+    await click('rules-tab-rules');
+    const toggle = el.querySelector('#skill-rolls') as HTMLInputElement;
+    expect(toggle.checked).toBe(true);
+    toggle.click();
+    await settle();
+    await click('rules-save');
+
+    const saved = (saveRules.mock.calls as unknown as [any][])[0][0];
+    expect(saved.skillRollsEnabled).toBe(false);
+  });
+
   describe('tabs', () => {
     const tabIds = ['rules-tab-attributes', 'rules-tab-rules', 'rules-tab-offline'];
 

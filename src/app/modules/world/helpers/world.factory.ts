@@ -60,6 +60,7 @@ export function createWorld(
     skillPointsPerLevel: draft.skillPointsPerLevel ?? 1,
     startingMoney: draft.startingMoney ?? 0,
     offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures },
+    skillRollsEnabled: draft.skillRollsEnabled ?? true,
     npcVisibility: draft.npcVisibility ?? DEFAULT_NPC_VISIBILITY,
     items: [],
     characters: [],
@@ -142,5 +143,6 @@ export function toWorldInfo(world: World): WorldInfo {
     skillPointsPerLevel: world.skillPointsPerLevel,
     startingMoney: world.startingMoney,
     offlineFeatures: world.offlineFeatures,
+    skillRollsEnabled: world.skillRollsEnabled,
   };
 }

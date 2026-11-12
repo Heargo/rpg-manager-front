@@ -95,6 +95,10 @@ export class RuleFieldsComponent {
     ...this.draft().offlineFeatures,
   }));
 
+  protected readonly skillRollsEnabled = computed(
+    () => this.draft().skillRollsEnabled ?? true,
+  );
+
   protected readonly npcVisibility = computed(
     () => this.draft().npcVisibility ?? DEFAULT_NPC_VISIBILITY,
   );

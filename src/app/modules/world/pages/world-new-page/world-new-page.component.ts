@@ -137,6 +137,7 @@ export class WorldNewPageComponent {
   protected readonly npcVisibility = signal<NpcVisibilityRules>(
     DEFAULT_NPC_VISIBILITY,
   );
+  protected readonly skillRollsEnabled = signal(true);
   protected readonly offline = signal<OfflineFeatures>({
     ...DEFAULT_OFFLINE_FEATURES,
   });
@@ -170,6 +171,7 @@ export class WorldNewPageComponent {
     skillPointsPerLevel: this.skillPointsPerLevel(),
     startingMoney: this.startingMoney(),
     offlineFeatures: this.offline(),
+    skillRollsEnabled: this.skillRollsEnabled(),
     npcVisibility: this.npcVisibility(),
   }));
   /** Per row, the problem of its cap (null when none or valid). */
@@ -371,6 +373,7 @@ export class WorldNewPageComponent {
     this.startingSkillPoints.set(draft.startingSkillPoints ?? 1);
     this.skillPointsPerLevel.set(draft.skillPointsPerLevel ?? 1);
     this.offline.set({ ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures });
+    this.skillRollsEnabled.set(draft.skillRollsEnabled ?? true);
     this.npcVisibility.set(draft.npcVisibility ?? DEFAULT_NPC_VISIBILITY);
   }
 

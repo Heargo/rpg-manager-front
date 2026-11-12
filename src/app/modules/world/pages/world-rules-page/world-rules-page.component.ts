@@ -94,6 +94,7 @@ export class WorldRulesPageComponent {
       startingSkillPoints: world?.startingSkillPoints,
       skillPointsPerLevel: world?.skillPointsPerLevel,
       offlineFeatures: world?.offlineFeatures,
+      skillRollsEnabled: world?.skillRollsEnabled,
       npcVisibility: world?.npcVisibility,
     }),
   });
@@ -131,6 +132,8 @@ export class WorldRulesPageComponent {
       startingSkillPoints: fields.startingSkillPoints ?? 0,
       skillPointsPerLevel: fields.skillPointsPerLevel ?? 0,
       offlineFeatures: { ...world!.offlineFeatures, ...fields.offlineFeatures },
+      skillRollsEnabled:
+        fields.skillRollsEnabled ?? world!.skillRollsEnabled ?? true,
       npcVisibility: fields.npcVisibility ?? world!.npcVisibility,
     };
   });

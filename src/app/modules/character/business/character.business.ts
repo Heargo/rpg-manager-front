@@ -1,4 +1,10 @@
 import { CharacterClass } from '../../class/models/class';
+import { DiceRollBusiness } from '../../dice/business/dice-roll.business';
+import {
+  resolveSkillUse,
+  rollOf,
+  SkillUseResult,
+} from '../../skill/helpers/skill-roll.rules';
 import { Skill } from '../../skill/models/skill';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -10,12 +16,6 @@ import { RoomBusiness } from '../../room/business/room.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
 import { WorldInfoBusiness } from '../../world/business/world-info.business';
 import { Character, WorldInfo } from '../../world/models/world';
-
-/** What a character sheet needs from its world (the room's, or the sandbox's). */
-export type SheetWorld = Pick<
-  WorldInfo,
-  'attributes' | 'barAttributes' | 'levelCurve' | 'maxLevel'
->;
 import { coinDisplayParts } from '../../../core/helpers/money.rules';
 import { classBonusesOf, classViewOf } from '../helpers/class-view.rules';
 import { levelProgress, LevelProgress } from '../helpers/level.rules';
@@ -29,6 +29,12 @@ import {
 import { ClassChoice, ClassView } from '../models/character-api';
 import { CharacterService } from '../services/character.service';
 
+/** What a character sheet needs from its world (the room's, or the sandbox's). */
+export type SheetWorld = Pick<
+  WorldInfo,
+  'attributes' | 'barAttributes' | 'levelCurve' | 'maxLevel' | 'skillRollsEnabled'
+>;
+
 /** Characters of the room this device is in, and creating one's own. */
 @Injectable({ providedIn: 'root' })
 export class CharacterBusiness {
@@ -38,6 +44,7 @@ export class CharacterBusiness {
   private readonly images = inject(ImageBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly session = inject(WorldSessionBusiness);
+  private readonly dice = inject(DiceRollBusiness);
 
   readonly $world = inject(WorldInfoBusiness).$info;
   /** null until the host sent the list. */
@@ -97,6 +104,41 @@ export class CharacterBusiness {
     return (
       this.$isGameMaster() ||
       character.playerId === this.profile.$profile().playerId
+    );
+  }
+
+  /**
+   * Uses an active skill at a rank: rolls its dice at the table (unless the world's skills don't roll) and resolves the
+   * success and the effect amounts. Nothing is applied to a target yet.
+   */
+  async useSkill(
+    skill: Skill,
+    rank: number,
+    character: Character,
+    world: SheetWorld,
+  ): Promise<SkillUseResult> {
+    const enabled = world.skillRollsEnabled !== false;
+    const { count, faces } = rollOf(skill);
+    let rolls: number[] = [];
+    if (enabled) {
+      try {
+        rolls = (await this.dice.rollAtTable(count, faces)).values;
+      } catch (error) {
+        // The host could not draw the shared roll: roll here instead of failing silently.
+        console.error('Shared skill roll failed, rolling locally', error);
+        rolls = this.dice.roll(count, faces).values;
+      }
+    }
+    const maxima = Object.fromEntries(
+      this.statsOf(character, world).map((stat) => [stat.name, stat.max]),
+    );
+    return resolveSkillUse(
+      skill,
+      rank,
+      { level: character.level, maxima },
+      undefined,
+      rolls,
+      enabled,
     );
   }
 

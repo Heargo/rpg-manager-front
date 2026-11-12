@@ -205,6 +205,11 @@
       "removeTitle": "Delete this attribute?",
       "removeMessage": "\"{{ name }}\" will be removed from every sheet and from the item modifiers that use it.",
       "notHosting": "Host a room to edit its world rules.",
+      "skillRolls": {
+        "title": "Skills",
+        "hint": "Active skills roll dice when used, and may fail.",
+        "label": "Skills roll dice"
+      },
       "npcs": {
         "title": "NPCs on the table",
         "hint": "What the players see of an NPC the game master shows, by role. The name and portrait are always shown; with several roles, the ticks add up.",
@@ -306,6 +311,12 @@
       "skillPoints": "Skill points",
       "skillCost": "{{ cost }} per rank",
       "learnSkill": "Learn {{ name }}",
+      "useSkill": "Use {{ name }}",
+      "useSuccess": "Success",
+      "useFailure": "Failure",
+      "useRolled": "Rolled {{ total }}",
+      "useAmount": "{{ kind }} {{ attribute }}: {{ amount }}",
+      "useError": "The success formula could not be evaluated.",
       "refundSkill": "Take back a rank of {{ name }}",
       "removeSkill": "Remove {{ name }}",
       "noClass": "No class yet.",
@@ -951,6 +962,12 @@
       "save": "Save",
       "addEffect": "Add an effect",
       "removeEffect": "Remove the effect",
+      "successMode": {
+        "always": "Always",
+        "threshold": "Total at least",
+        "formula": "Formula"
+      },
+      "successHint": "Variables: roll, rank, level, your attributes by name, and the target's as target_<name>.",
       "formulaHint": "Amounts are formulas: rank, level and attribute names (the caster's maxima).",
       "preview": "Rank 1: {{ rank1 }} · Rank {{ max }}: {{ maxRank }}",
       "fields": {
@@ -966,7 +983,12 @@
         "costAmount": "Cost: amount",
         "effects": "Effects",
         "amount": "Amount",
-        "duration": "Duration (turns, 0 = permanent)"
+        "duration": "Duration (turns, 0 = permanent)",
+        "rollCount": "Dice rolled",
+        "rollFaces": "Dice faces",
+        "successMode": "Success",
+        "successValue": "Succeeds when the total reaches",
+        "successFormula": "Succeeds when this is 0 or more"
       },
       "issue": {
         "name": "Give the skill a name.",
@@ -974,7 +996,11 @@
         "pointCost": "A rank costs at least 1 skill point.",
         "target": "An active skill needs a target; a passive one has none.",
         "effects_amount": "An effect amount is not a valid formula.",
-        "json": "This JSON is not a valid skill."
+        "json": "This JSON is not a valid skill.",
+        "roll_count": "Roll 1 to 100 dice.",
+        "roll_faces": "Dice have 2 to 1000 faces.",
+        "success_value": "The threshold is a whole number.",
+        "success_formula": "The success formula is not valid (roll, rank, level, attribute names, target_<attribute>)."
       }
     }
   },

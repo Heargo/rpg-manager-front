@@ -1,5 +1,5 @@
 import { CharacterClass, TreeNode } from '../../class/models/class';
-import { Skill, SkillEffect, SkillTarget } from '../../skill/models/skill';
+import { Skill, SkillEffect, SkillRoll, SkillSuccess, SkillTarget } from '../../skill/models/skill';
 import { ItemRarity } from '../../../core/models/item';
 import { World } from '../models/world';
 
@@ -29,7 +29,15 @@ interface SkillSpec {
   /** Left out of a world with no mana bar. */
   needsMana?: true;
   /** Absent for a passive skill. */
-  active?: { target: SkillTarget; cost: number; cooldown: number };
+  active?: {
+    target: SkillTarget;
+    cost: number;
+    cooldown: number;
+    /** Default 1d20. */
+    roll?: SkillRoll;
+    /** Default always. */
+    success?: SkillSuccess;
+  };
   effects: (c: Context) => SkillEffect[];
 }
 
@@ -71,7 +79,7 @@ const CLASSES: ClassSpec[] = [
         ],
         rarity: 'common',
         maxRank: 5,
-        active: { target: 'one-enemy', cost: 0, cooldown: 0 },
+        active: { target: 'one-enemy', cost: 0, cooldown: 0, success: { mode: 'threshold', value: 6 } },
         effects: (c) => [
           {
             kind: 'damage',
@@ -107,7 +115,7 @@ const CLASSES: ClassSpec[] = [
         ],
         rarity: 'uncommon',
         maxRank: 5,
-        active: { target: 'all-enemies', cost: 3, cooldown: 2 },
+        active: { target: 'all-enemies', cost: 3, cooldown: 2, success: { mode: 'threshold', value: 8 } },
         effects: (c) => [
           {
             kind: 'damage',
@@ -158,7 +166,7 @@ const CLASSES: ClassSpec[] = [
         ],
         rarity: 'rare',
         maxRank: 3,
-        active: { target: 'one-enemy', cost: 6, cooldown: 3 },
+        active: { target: 'one-enemy', cost: 6, cooldown: 3, success: { mode: 'threshold', value: 10 } },
         effects: (c) => [
           {
             kind: 'damage',
@@ -218,7 +226,7 @@ const CLASSES: ClassSpec[] = [
         ],
         rarity: 'common',
         maxRank: 5,
-        active: { target: 'one-enemy', cost: 2, cooldown: 0 },
+        active: { target: 'one-enemy', cost: 2, cooldown: 0, success: { mode: 'threshold', value: 5 } },
         effects: (c) => [
           {
             kind: 'damage',
@@ -273,7 +281,7 @@ const CLASSES: ClassSpec[] = [
         ],
         rarity: 'uncommon',
         maxRank: 5,
-        active: { target: 'area', cost: 5, cooldown: 2 },
+        active: { target: 'area', cost: 5, cooldown: 2, roll: { count: 2, faces: 6 }, success: { mode: 'threshold', value: 6 } },
         effects: (c) => [
           {
             kind: 'damage',
@@ -310,7 +318,7 @@ const CLASSES: ClassSpec[] = [
         ],
         rarity: 'mythic',
         maxRank: 3,
-        active: { target: 'all-enemies', cost: 10, cooldown: 4 },
+        active: { target: 'all-enemies', cost: 10, cooldown: 4, roll: { count: 3, faces: 6 }, success: { mode: 'threshold', value: 10 } },
         effects: (c) => [
           {
             kind: 'damage',
@@ -364,7 +372,7 @@ const CLASSES: ClassSpec[] = [
         ],
         rarity: 'common',
         maxRank: 5,
-        active: { target: 'one-enemy', cost: 1, cooldown: 0 },
+        active: { target: 'one-enemy', cost: 1, cooldown: 0, success: { mode: 'threshold', value: 5 } },
         effects: (c) => [
           {
             kind: 'damage',
@@ -395,7 +403,7 @@ const CLASSES: ClassSpec[] = [
         ],
         rarity: 'uncommon',
         maxRank: 5,
-        active: { target: 'one-enemy', cost: 2, cooldown: 2 },
+        active: { target: 'one-enemy', cost: 2, cooldown: 2, success: { mode: 'threshold', value: 8 } },
         effects: (c) => [
           {
             kind: 'damage',
@@ -432,7 +440,7 @@ const CLASSES: ClassSpec[] = [
         ],
         rarity: 'rare',
         maxRank: 3,
-        active: { target: 'one-enemy', cost: 6, cooldown: 4 },
+        active: { target: 'one-enemy', cost: 6, cooldown: 4, success: { mode: 'threshold', value: 12 } },
         effects: (c) => [
           {
             kind: 'damage',
@@ -520,6 +528,8 @@ export function buildStarterClasses(
           ? {
               target: entry.active.target,
               cooldown: entry.active.cooldown,
+              ...(entry.active.roll ? { roll: entry.active.roll } : {}),
+              ...(entry.active.success ? { success: entry.active.success } : {}),
               ...(mana && entry.active.cost > 0
                 ? { cost: { attribute: mana, amount: entry.active.cost } }
                 : {}),

@@ -294,6 +294,20 @@
                       (onClick)="learn(row.skillId)"
                     />
                   }
+                  @if (canPlay() && row.usable) {
+                    <p-button
+                      icon="pi pi-bolt"
+                      size="small"
+                      [attr.data-use]="row.skillId"
+                      [disabled]="busy() || pendingUses().includes(row.skillId)"
+                      [label]="'character.sheet.useSkill' | transloco: { name: row.name }"
+                      (onClick)="useSkill(row.skillId)"
+                    />
+                  }
+                  <ng-container
+                    [ngTemplateOutlet]="useResult"
+                    [ngTemplateOutletContext]="{ $implicit: row.skillId }"
+                  />
                   @if (gameMaster() && row.rank > 0) {
                     <p-button
                       icon="pi pi-minus"
@@ -327,6 +341,20 @@
                     "class.tree.rank"
                       | transloco: { rank: row.rank, max: row.maxRank }
                   }}</span>
+                  @if (canPlay() && row.usable) {
+                    <p-button
+                      icon="pi pi-bolt"
+                      size="small"
+                      [attr.data-use]="row.skillId"
+                      [disabled]="busy() || pendingUses().includes(row.skillId)"
+                      [label]="'character.sheet.useSkill' | transloco: { name: row.name }"
+                      (onClick)="useSkill(row.skillId)"
+                    />
+                  }
+                  <ng-container
+                    [ngTemplateOutlet]="useResult"
+                    [ngTemplateOutletContext]="{ $implicit: row.skillId }"
+                  />
                   @if (gameMaster()) {
                     <p-button
                       icon="pi pi-trash"
@@ -351,6 +379,40 @@
     </p-tabs>
   </div>
 </div>
+
+<ng-template #useResult let-skillId>
+  @if (uses()[skillId]; as use) {
+    <span
+      class="use-result"
+      [attr.data-use-result]="skillId"
+      [attr.data-success]="use.success"
+    >
+      <strong>{{
+        (use.success ? "character.sheet.useSuccess" : "character.sheet.useFailure")
+          | transloco
+      }}</strong>
+      @if (use.rolls.length) {
+        <small>{{
+          "character.sheet.useRolled" | transloco: { total: use.total }
+        }}</small>
+      }
+      @if (use.error) {
+        <small>{{ "character.sheet.useError" | transloco }}</small>
+      }
+      @for (effect of use.effects; track $index) {
+        <small>{{
+          "character.sheet.useAmount"
+            | transloco
+              : {
+                  kind: ("skill.effectKind." + effect.kind | transloco),
+                  attribute: effect.attribute,
+                  amount: effect.amount,
+                }
+        }}</small>
+      }
+    </span>
+  }
+</ng-template>
 
 <ng-template #tile let-entry let-showSlot="showSlot">
   <div

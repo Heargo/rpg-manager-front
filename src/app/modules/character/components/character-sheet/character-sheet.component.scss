@@ -389,3 +389,18 @@ p-tab {
   flex: 1 1 0;
   justify-content: center;
 }
+
+.use-result {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+
+  &[data-success='true'] strong {
+    color: var(--p-green-500);
+  }
+
+  &[data-success='false'] strong {
+    color: var(--p-red-500);
+  }
+}

@@ -28,6 +28,7 @@ import { CharacterCardComponent } from '../character-card/character-card.compone
 import { SlotSilhouetteComponent } from '../../../../core/components/slot-silhouette/slot-silhouette.component';
 import { SkillTreeComponent } from '../../../class/components/skill-tree/skill-tree.component';
 import { treeNodeStates } from '../../../class/helpers/class.rules';
+import { SkillUseResult } from '../../../skill/helpers/skill-roll.rules';
 import { ClassView } from '../../models/character-api';
 import { Character, InventoryItem } from '../../../world/models/world';
 import {
@@ -39,6 +40,10 @@ import {
   CharacterActionKind,
   MAX_GRANTED_POINTS,
 } from '../../helpers/character-actions.rules';
+
+interface UseView extends SkillUseResult {
+  effects: { kind: string; attribute: string; amount: number }[];
+}
 
 const ITEM_ICONS: Record<string, string> = {
   item: 'pi pi-box',
@@ -152,6 +157,7 @@ export class CharacterSheetComponent {
         rank,
         maxRank: skill?.maxRank ?? 0,
         cost: skill?.pointCost ?? 0,
+        usable: skill?.type === 'active' && rank > 0,
         learnable:
           !!skill &&
           state !== 'locked' &&
@@ -177,9 +183,48 @@ export class CharacterSheetComponent {
           name: skill?.name ?? entry.skillId,
           rank: entry.rank,
           maxRank: skill?.maxRank ?? entry.rank,
+          usable: skill?.type === 'active' && entry.rank > 0,
         };
       });
   });
+
+  /** The last use of each skill, by id. */
+  protected readonly uses = signal<Record<string, UseView>>({});
+
+  /** Skills whose roll is running: their Use button waits. */
+  protected readonly pendingUses = signal<string[]>([]);
+
+  protected async useSkill(skillId: string): Promise<void> {
+    if (this.pendingUses().includes(skillId)) return;
+    this.pendingUses.update((ids) => [...ids, skillId]);
+    try {
+      await this.runUse(skillId);
+    } finally {
+      this.pendingUses.update((ids) => ids.filter((id) => id !== skillId));
+    }
+  }
+
+  private async runUse(skillId: string): Promise<void> {
+    const skill = this.classView()?.skills.find((entry) => entry.id === skillId);
+    if (!skill) return;
+    const result = await this.characters.useSkill(
+      skill,
+      this.ranks()[skillId] ?? 0,
+      this.character(),
+      this.world(),
+    );
+    this.uses.update((uses) => ({
+      ...uses,
+      [skillId]: {
+        ...result,
+        effects: skill.effects.map((effect, index) => ({
+          kind: effect.kind,
+          attribute: effect.attribute,
+          amount: Math.round(result.amounts[index]),
+        })),
+      },
+    }));
+  }
 
   protected learn(skillId: string): void {
     this.act.emit({ kind: 'learn-skill', skillId });

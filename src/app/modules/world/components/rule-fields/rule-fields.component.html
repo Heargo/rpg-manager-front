@@ -198,6 +198,23 @@
 }
 
 @if (sections() !== "offline") {
+  <section class="section" data-testid="rules-section-skills">
+    <fieldset class="offline">
+      <legend>{{ "world.rules.skillRolls.title" | transloco }}</legend>
+      <p class="hint">{{ "world.rules.skillRolls.hint" | transloco }}</p>
+      <div class="toggle">
+        <p-toggleswitch
+          inputId="skill-rolls"
+          [ngModel]="skillRollsEnabled()"
+          (ngModelChange)="patch({ skillRollsEnabled: $event })"
+        />
+        <label for="skill-rolls">{{
+          "world.rules.skillRolls.label" | transloco
+        }}</label>
+      </div>
+    </fieldset>
+  </section>
+
   <section class="section" data-testid="rules-section-npcs">
     <fieldset class="level-curve">
       <legend>{{ "world.rules.npcs.title" | transloco }}</legend>

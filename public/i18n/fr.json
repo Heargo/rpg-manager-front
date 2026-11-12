@@ -205,6 +205,11 @@
       "removeTitle": "Supprimer cet attribut ?",
       "removeMessage": "« {{ name }} » sera retiré de toutes les fiches et des modificateurs d'objets qui l'utilisent.",
       "notHosting": "Hébergez une salle pour modifier les règles de son monde.",
+      "skillRolls": {
+        "title": "Compétences",
+        "hint": "Les compétences actives lancent des dés quand on les utilise, et peuvent échouer.",
+        "label": "Les compétences lancent des dés"
+      },
       "npcs": {
         "title": "PNJ sur la table",
         "hint": "Ce que les joueurs voient d'un PNJ montré par le MJ, selon son rôle. Le nom et le portrait sont toujours visibles ; avec plusieurs rôles, les cases s'additionnent.",
@@ -306,6 +311,12 @@
       "skillPoints": "Points de compétence",
       "skillCost": "{{ cost }} par rang",
       "learnSkill": "Apprendre {{ name }}",
+      "useSkill": "Utiliser {{ name }}",
+      "useSuccess": "Réussite",
+      "useFailure": "Échec",
+      "useRolled": "Jet : {{ total }}",
+      "useAmount": "{{ kind }} {{ attribute }} : {{ amount }}",
+      "useError": "La formule de réussite n'a pas pu être évaluée.",
       "refundSkill": "Reprendre un rang de {{ name }}",
       "removeSkill": "Retirer {{ name }}",
       "noClass": "Pas encore de classe.",
@@ -951,6 +962,12 @@
       "save": "Enregistrer",
       "addEffect": "Ajouter un effet",
       "removeEffect": "Retirer l'effet",
+      "successMode": {
+        "always": "Toujours",
+        "threshold": "Total d'au moins",
+        "formula": "Formule"
+      },
+      "successHint": "Variables : roll, rank, level, vos attributs par leur nom, et ceux de la cible en target_<nom>.",
       "formulaHint": "Les montants sont des formules : rank, level et noms d'attributs (les maxima du lanceur).",
       "preview": "Rang 1 : {{ rank1 }} · Rang {{ max }} : {{ maxRank }}",
       "fields": {
@@ -966,7 +983,12 @@
         "costAmount": "Coût : montant",
         "effects": "Effets",
         "amount": "Montant",
-        "duration": "Durée (tours, 0 = permanent)"
+        "duration": "Durée (tours, 0 = permanent)",
+        "rollCount": "Dés lancés",
+        "rollFaces": "Faces des dés",
+        "successMode": "Réussite",
+        "successValue": "Réussit quand le total atteint",
+        "successFormula": "Réussit quand ceci vaut 0 ou plus"
       },
       "issue": {
         "name": "Donnez un nom à la compétence.",
@@ -974,7 +996,11 @@
         "pointCost": "Un rang coûte au moins 1 point de compétence.",
         "target": "Une compétence active a une cible ; une passive n'en a pas.",
         "effects_amount": "Le montant d'un effet n'est pas une formule valide.",
-        "json": "Ce JSON n'est pas une compétence valide."
+        "json": "Ce JSON n'est pas une compétence valide.",
+        "roll_count": "Lancez de 1 à 100 dés.",
+        "roll_faces": "Un dé a de 2 à 1000 faces.",
+        "success_value": "Le seuil est un nombre entier.",
+        "success_formula": "La formule de réussite n'est pas valide (roll, rank, level, noms d'attributs, target_<attribut>)."
       }
     }
   },

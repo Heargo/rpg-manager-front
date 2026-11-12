@@ -9,6 +9,9 @@ import { Sheet } from '../../world/models/world';
 import {
   Skill,
   SKILL_MAX_RANK,
+  SKILL_ROLL_COUNT_MAX,
+  SKILL_SUCCESS_MODES,
+  SKILL_ROLL_FACES_MAX,
   SKILL_TARGETS,
   SKILL_TYPES,
   SkillDraft,
@@ -27,6 +30,8 @@ export interface SkillAmountScope {
   level: number;
   /** The caster's attribute maxima, by name. */
   maxima: Record<string, number>;
+  /** The dice total of the use (0 when none). */
+  roll?: number;
 }
 
 const amountFormula = (amount: string) => ({
@@ -58,13 +63,48 @@ export function validateSkill(
     if (
       validateFormula(
         amountFormula(effect.amount),
-        [...attributeNames, 'rank'],
+        [...attributeNames, 'rank', 'roll'],
         ['level'],
       )
     ) {
       issues.push({ field: `effects.${index}.amount`, code: 'formula' });
     }
   });
+  if (skill.type === 'active') {
+    const { roll, success } = skill;
+    if (roll) {
+      if (
+        !Number.isInteger(roll.count) ||
+        roll.count < 1 ||
+        roll.count > SKILL_ROLL_COUNT_MAX
+      )
+        issues.push({ field: 'roll.count', code: 'invalid' });
+      if (
+        !Number.isInteger(roll.faces) ||
+        roll.faces < 2 ||
+        roll.faces > SKILL_ROLL_FACES_MAX
+      )
+        issues.push({ field: 'roll.faces', code: 'invalid' });
+    }
+    if (success?.mode === 'threshold' && !Number.isInteger(success.value))
+      issues.push({ field: 'success.value', code: 'invalid' });
+    if (
+      success?.mode === 'formula' &&
+      (typeof success.formula !== 'string' ||
+        !success.formula.trim() ||
+        validateFormula(
+          amountFormula(success.formula),
+          [
+            ...attributeNames,
+            ...attributeNames.map((name) => 'target_' + name),
+            'rank',
+            'roll',
+          ],
+          ['level'],
+        ))
+    )
+      issues.push({ field: 'success.formula', code: 'formula' });
+  }
   return issues;
 }
 
@@ -77,7 +117,7 @@ export function evaluateSkillAmount(
     level: scope.level,
     base: 0,
     playerLevel: scope.level,
-    levels: { ...scope.maxima, rank: scope.rank },
+    levels: { ...scope.maxima, rank: scope.rank, roll: scope.roll ?? 0 },
   });
 }
 
@@ -213,6 +253,14 @@ export function parseSkillJson(
     (SKILL_TYPES as readonly unknown[]).includes(record['type']) &&
     (record['target'] === undefined ||
       (SKILL_TARGETS as readonly unknown[]).includes(record['target'])) &&
+    (record['roll'] === undefined ||
+      (typeof record['roll'] === 'object' && record['roll'] !== null)) &&
+    (record['success'] === undefined ||
+      (typeof record['success'] === 'object' &&
+        record['success'] !== null &&
+        (SKILL_SUCCESS_MODES as readonly unknown[]).includes(
+          (record['success'] as { mode?: unknown }).mode,
+        ))) &&
     Array.isArray(record['effects']) &&
     record['effects'].every(
       (effect) =>

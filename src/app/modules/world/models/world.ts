@@ -33,6 +33,8 @@ export interface WorldRules {
   startingSkillPoints: number;
   skillPointsPerLevel: number;
   offlineFeatures: OfflineFeatures;
+  /** Active skills roll dice when used (default on when omitted). */
+  skillRollsEnabled?: boolean;
   /** Kept as is when omitted. */
   npcVisibility?: NpcVisibilityRules;
 }
@@ -128,6 +130,8 @@ export interface World {
   skillPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
+  /** Active skills roll dice when used (default on when omitted). */
+  skillRollsEnabled?: boolean;
   /** Per NPC role, what the players see of an NPC shown on the table. */
   npcVisibility: NpcVisibilityRules;
   items: Item[];
@@ -177,6 +181,7 @@ export interface WorldDraft {
   skillPointsPerLevel?: number;
   startingMoney?: number;
   offlineFeatures?: Partial<OfflineFeatures>;
+  skillRollsEnabled?: boolean;
   npcVisibility?: NpcVisibilityRules;
 }
 
@@ -196,6 +201,7 @@ export interface WorldInfo {
   skillPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
+  skillRollsEnabled?: boolean;
 }
 
 export const WORLD_TOPICS = {
