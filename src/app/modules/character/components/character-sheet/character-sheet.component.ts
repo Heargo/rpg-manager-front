@@ -104,6 +104,7 @@ export class CharacterSheetComponent {
   protected readonly icons = ITEM_ICONS;
   protected readonly grantAmount = signal(1);
   protected readonly grantXpAmount = signal(100);
+  protected readonly grantSkillPointsAmount = signal(1);
   /** The item whose details dialog is open. */
   private readonly openItemId = signal<string | null>(null);
   /** The item the context menu / action menu was opened on. */
@@ -276,6 +277,12 @@ export class CharacterSheetComponent {
     const amount = this.grantXpAmount();
     if (Number.isInteger(amount) && amount >= 1)
       this.act.emit({ kind: 'grant-xp', amount });
+  }
+
+  protected grantSkillPoints(): void {
+    const amount = this.grantSkillPointsAmount();
+    if (Number.isInteger(amount) && amount >= 1)
+      this.act.emit({ kind: 'grant-skill-points', amount });
   }
 
   protected refund(attributeId: string): void {

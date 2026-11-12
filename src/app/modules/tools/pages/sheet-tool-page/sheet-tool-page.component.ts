@@ -7,6 +7,7 @@ import { CharacterBusiness } from '../../../character/business/character.busines
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterSheetComponent } from '../../../character/components/character-sheet/character-sheet.component';
+import { ClassView } from '../../../character/models/character-api';
 import { CharacterAction } from '../../../character/helpers/character-actions.rules';
 import { SandboxCharacterBusiness } from '../../business/sandbox-character.business';
 
@@ -40,6 +41,7 @@ import { SandboxCharacterBusiness } from '../../business/sandbox-character.busin
           <app-character-sheet
             [character]="character"
             [world]="sandbox.$world()"
+            [classView]="classView(character.classId)"
             [canPlay]="true"
             [gameMaster]="true"
             (act)="act($event)"
@@ -79,6 +81,12 @@ export class SheetToolPageComponent {
   private readonly language = inject(LanguageBusiness);
   private readonly messages = inject(MessageService);
   private readonly characters = inject(CharacterBusiness);
+
+  protected classView(classId: string | undefined): ClassView | null {
+    const world = this.sandbox.$world();
+    const characterClass = world.classes.find((entry) => entry.id === classId);
+    return characterClass ? { characterClass, skills: world.skills } : null;
+  }
 
   protected act(action: CharacterAction): void {
     try {

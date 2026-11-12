@@ -353,6 +353,8 @@
       "xp": "Experience",
       "grantXpLabel": "Experience",
       "grantXp": "Grant",
+      "grantSkillPointsLabel": "Skill points",
+      "grantSkillPoints": "Grant",
       "levelUp": "Level {{ level }}! +{{ points }} stat points, +{{ skillPoints }} skill points",
       "maxLevel": "Max level",
       "levelBadge": "Level {{ level }}",

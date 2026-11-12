@@ -256,6 +256,38 @@
 
         <!-- Skills -->
         <p-tabpanel value="skills">
+          @if (gameMaster()) {
+            <section class="grant-panel" aria-labelledby="grant-skill-title">
+              <h3 id="grant-skill-title" class="grant-title">
+                <i class="pi pi-gift" aria-hidden="true"></i>
+                {{ "character.sheet.grantTitle" | transloco }}
+              </h3>
+              <form class="grant" (ngSubmit)="grantSkillPoints()">
+                <label for="grant-skill-points">{{
+                  "character.sheet.grantSkillPointsLabel" | transloco
+                }}</label>
+                <p-inputnumber
+                  inputId="grant-skill-points"
+                  [min]="0"
+                  [max]="100"
+                  [step]="1"
+                  [showButtons]="true"
+                  buttonLayout="horizontal"
+                  inputStyleClass="grant-input"
+                  name="grant-skill-points"
+                  [ngModel]="grantSkillPointsAmount()"
+                  (ngModelChange)="grantSkillPointsAmount.set($event ?? 0)"
+                />
+                <p-button
+                  type="submit"
+                  data-testid="grant-skill-points-button"
+                  icon="pi pi-plus"
+                  [label]="'character.sheet.grantSkillPoints' | transloco"
+                  [disabled]="busy()"
+                />
+              </form>
+            </section>
+          }
           <p class="skill-points" data-skill-points>
             <i class="pi pi-star" aria-hidden="true"></i>
             {{ "character.sheet.skillPoints" | transloco }}:
