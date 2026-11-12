@@ -117,10 +117,15 @@ type PresetTarget = 'success' | number;
                   {{ 'skill.variables.exampleLabel' | transloco }}
                   <code data-example="amount">{{ amountExample() }}</code>
                 </p>
+                <p class="hint" data-field="variables-spaces">
+                  {{ 'skill.variables.spaces' | transloco }}
+                  <code>[Points de vie]</code>
+                  <code>[target_Points de vie]</code>
+                </p>
                 <ul class="chips">
                   @for (variable of variables(); track variable.name) {
                     <li [attr.data-variable]="variable.name">
-                      <code>{{ variable.name }}</code>
+                      <code>{{ asVariable(variable.name) }}</code>
                       {{ variable.descriptionKey | transloco }}
                     </li>
                   }
@@ -681,7 +686,7 @@ type PresetTarget = 'success' | number;
         [ariaLabel]="'skill.presets.choose' | transloco"
         [placeholder]="'skill.presets.choose' | transloco"
         [ngModel]="null"
-        (ngModelChange)="pickPreset(target, $event); picker.writeValue(null)"
+        (ngModelChange)="pickPreset(target, $event); resetPicker(picker)"
         #picker
       />
       <button
@@ -701,13 +706,13 @@ type PresetTarget = 'success' | number;
       @if (pending(); as current) {
         @if (current.target === target) {
           <div class="block panel" data-field="preset-mapping">
-            <strong>{{
+            <strong class="panel-title">{{
               'skill.presets.mappingTitle'
                 | transloco: { name: presets.label(current.preset) }
             }}</strong>
             @for (token of tokens(); track token) {
               <div class="map">
-                <span>{{ tokenLabel(token) }}</span>
+                <span class="hint">{{ tokenLabel(token) }}</span>
                 <p-select
                   [attr.data-placeholder]="token"
                   [options]="attributeOptions()"
@@ -953,7 +958,7 @@ type PresetTarget = 'success' | number;
     .panel {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
+      align-items: flex-end;
       gap: 0.5rem;
       padding: 0.5rem 0.75rem;
       border: 1px dashed var(--p-content-border-color);
@@ -963,11 +968,15 @@ type PresetTarget = 'success' | number;
       flex: 1 1 10rem;
       min-width: 0;
     }
+    .panel-title {
+      flex: 1 1 100%;
+      font-size: 0.9rem;
+    }
     .map {
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.5rem;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 12rem;
     }
     .buttons {
       display: flex;
@@ -1102,13 +1111,21 @@ export class SkillEditorComponent {
     return { success: options('success'), effect: options('effect') };
   });
   protected readonly variables = computed(() => formulaVariables(this.world()));
+  /** How a name is written in a formula: bare when it is one word, in `[square brackets]` otherwise. */
+  protected asVariable(name: string): string {
+    return /^[\p{L}_][\p{L}\p{N}_]*$/u.test(name) ? name : `[${name}]`;
+  }
   protected readonly successExample = computed(() => {
     const first = this.world().attributes[0]?.name;
-    return first ? `roll + ${first} - target_${first}` : 'roll - 10';
+    return first
+      ? `roll + ${this.asVariable(first)} - ${this.asVariable('target_' + first)}`
+      : 'roll - 10';
   });
   protected readonly amountExample = computed(() => {
     const first = this.world().attributes[0]?.name;
-    return first ? `skillLevel * 3 + ${first}` : 'skillLevel * 3';
+    return first
+      ? `skillLevel * 3 + ${this.asVariable(first)}`
+      : 'skillLevel * 3';
   });
 
   protected readonly roll = computed(
@@ -1181,6 +1198,15 @@ export class SkillEditorComponent {
         : 'skill.presets.casterAttribute',
       { token },
     );
+  }
+
+  /**
+   * The preset select is an action menu: empty again after each pick. p-select sets its own value after emitting the
+   * change, so the reset runs now and once more on the next tick.
+   */
+  protected resetPicker(picker: { writeValue(value: unknown): void }): void {
+    picker.writeValue(null);
+    setTimeout(() => picker.writeValue(null));
   }
 
   protected pickPreset(target: PresetTarget, id: string | null): void {

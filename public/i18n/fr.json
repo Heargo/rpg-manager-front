@@ -1119,7 +1119,8 @@
       "skillLevel": "Le niveau de compétence que le personnage a investi.",
       "level": "Le niveau du personnage.",
       "caster": "Le maximum du lanceur pour cet attribut.",
-      "target": "Le maximum de la cible pour cet attribut."
+      "target": "Le maximum de la cible pour cet attribut.",
+      "spaces": "Un nom avec des espaces s'écrit entre crochets, celui de la cible aussi :"
     },
     "presets": {
       "manage": "Gérer les préréglages",

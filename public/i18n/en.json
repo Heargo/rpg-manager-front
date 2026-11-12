@@ -1119,7 +1119,8 @@
       "skillLevel": "The skill level the character has put in this skill.",
       "level": "The character's level.",
       "caster": "The caster's maximum of this attribute.",
-      "target": "The target's maximum of this attribute."
+      "target": "The target's maximum of this attribute.",
+      "spaces": "A name with spaces goes in square brackets, the target's too:"
     },
     "presets": {
       "manage": "Manage presets",
