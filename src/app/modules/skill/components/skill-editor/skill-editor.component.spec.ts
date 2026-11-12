@@ -6,10 +6,10 @@ import { Skill } from '../../models/skill';
 import { SkillEditorComponent } from './skill-editor.component';
 
 /**
- * Hooks (all tab panels rendered). `[data-field]`: `name`, `description`, `max-rank`, `point-cost` (p-inputnumber
+ * Hooks (all tab panels rendered). `[data-field]`: `name`, `description`, `max-level`, `point-cost` (p-inputnumber
  * hosts), `type` (p-select, ngModelChange with 'active' | 'passive'), `target`, `cooldown` (active only, absent for
  * passive), `json` (textarea), `json-error` (only while invalid). Per effect (`[data-field="effect"]`): `effect-amount`
- * input, `effect-preview` (text with the rank 1 then the max rank value), `effect-error` (only while the formula is
+ * input, `effect-preview` (text with the level 1 then the max level value), `effect-error` (only while the formula is
  * invalid). `[data-action]`: `add-effect`, `save`. Output: `save`.
  */
 describe('SkillEditorComponent', () => {
@@ -21,9 +21,9 @@ describe('SkillEditorComponent', () => {
     ],
   };
   const fireball: Skill = {
-    id: 's1', name: 'Fireball', description: 'Boom.', rarity: 'rare', type: 'active', maxRank: 3, pointCost: 2,
+    id: 's1', name: 'Fireball', description: 'Boom.', rarity: 'rare', type: 'active', maxLevel: 3, pointCost: 2,
     target: 'one-enemy', cooldown: 1,
-    effects: [{ kind: 'damage', attribute: 'Life', amount: 'rank * 4' }],
+    effects: [{ kind: 'damage', attribute: 'Life', amount: 'skillLevel * 4' }],
   };
 
   async function setup(skill?: Skill) {
@@ -53,11 +53,11 @@ describe('SkillEditorComponent', () => {
   it('fills the form and the JSON from the skill', async () => {
     const { field } = await setup(fireball);
     expect(field('name').value).toBe('Fireball');
-    expect(field('max-rank').value).toBe('3');
-    expect(JSON.parse(field('json').value)).toMatchObject({ name: 'Fireball', maxRank: 3, pointCost: 2 });
+    expect(field('max-level').value).toBe('3');
+    expect(JSON.parse(field('json').value)).toMatchObject({ name: 'Fireball', maxLevel: 3, pointCost: 2 });
   });
 
-  it('shows the amount at rank 1 and at max rank', async () => {
+  it('shows the amount at level 1 and at max level', async () => {
     const { el } = await setup(fireball);
     const preview = el.querySelector('[data-field="effect-preview"]')!.textContent!;
     expect(preview).toContain('4');
@@ -75,8 +75,8 @@ describe('SkillEditorComponent', () => {
 
   it('hides the active-only fields for a passive skill', async () => {
     const passive: Skill = {
-      id: 's2', name: 'Toughness', description: '', rarity: 'common', type: 'passive', maxRank: 2, pointCost: 1,
-      effects: [{ kind: 'modify', attribute: 'Life', amount: 'rank * 2', duration: 0 }],
+      id: 's2', name: 'Toughness', description: '', rarity: 'common', type: 'passive', maxLevel: 2, pointCost: 1,
+      effects: [{ kind: 'modify', attribute: 'Life', amount: 'skillLevel * 2', duration: 0 }],
     };
     const { el } = await setup(passive);
     expect(el.querySelector('[data-field="target"]')).toBeNull();
@@ -86,12 +86,12 @@ describe('SkillEditorComponent', () => {
   it('emits the edited skill with its id on save, from the form and from valid JSON', async () => {
     const { el, type, field, saved } = await setup(fireball);
     await type('name', 'Inferno');
-    await type('max-rank', '5');
-    expect(JSON.parse(field('json').value)).toMatchObject({ name: 'Inferno', maxRank: 5 });
+    await type('max-level', '5');
+    expect(JSON.parse(field('json').value)).toMatchObject({ name: 'Inferno', maxLevel: 5 });
     el.querySelector<HTMLElement>('[data-action="save"]')!.click();
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(saved).toHaveLength(1);
-    expect(saved[0]).toMatchObject({ id: 's1', name: 'Inferno', maxRank: 5, pointCost: 2, type: 'active' });
+    expect(saved[0]).toMatchObject({ id: 's1', name: 'Inferno', maxLevel: 5, pointCost: 2, type: 'active' });
 
     await type('json', JSON.stringify({ ...saved[0], name: 'Meteor' }));
     expect(field('name').value).toBe('Meteor');
@@ -110,8 +110,8 @@ describe('SkillEditorComponent', () => {
 
     it('hides the roll fields for a passive skill', async () => {
       const passive: Skill = {
-        id: 's2', name: 'Toughness', description: '', rarity: 'common', type: 'passive', maxRank: 2, pointCost: 1,
-        effects: [{ kind: 'modify', attribute: 'Life', amount: 'rank * 2', duration: 0 }],
+        id: 's2', name: 'Toughness', description: '', rarity: 'common', type: 'passive', maxLevel: 2, pointCost: 1,
+        effects: [{ kind: 'modify', attribute: 'Life', amount: 'skillLevel * 2', duration: 0 }],
       };
       const { el } = await setup(passive);
       expect(el.querySelector('[data-field="roll-count"]')).toBeNull();

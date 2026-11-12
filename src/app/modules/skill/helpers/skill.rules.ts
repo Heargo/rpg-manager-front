@@ -8,7 +8,7 @@ import { ITEM_RARITIES } from '../../../core/models/item';
 import { Sheet } from '../../world/models/world';
 import {
   Skill,
-  SKILL_MAX_RANK,
+  SKILL_MAX_LEVEL,
   SKILL_ROLL_COUNT_MAX,
   SKILL_SUCCESS_MODES,
   SKILL_ROLL_FACES_MAX,
@@ -25,7 +25,7 @@ export interface SkillIssue {
 }
 
 export interface SkillAmountScope {
-  rank: number;
+  skillLevel: number;
   /** The caster's level. */
   level: number;
   /** The caster's attribute maxima, by name. */
@@ -39,7 +39,7 @@ const amountFormula = (amount: string) => ({
   expression: amount,
 });
 
-/** The checks of the catalogue: name, ranks, cost, active-only fields and every effect amount formula. */
+/** The checks of the catalogue: name, levels, cost, active-only fields and every effect amount formula. */
 export function validateSkill(
   skill: SkillDraft,
   attributeNames: string[],
@@ -47,11 +47,11 @@ export function validateSkill(
   const issues: SkillIssue[] = [];
   if (!skill.name.trim()) issues.push({ field: 'name', code: 'required' });
   if (
-    !Number.isInteger(skill.maxRank) ||
-    skill.maxRank < 1 ||
-    skill.maxRank > SKILL_MAX_RANK
+    !Number.isInteger(skill.maxLevel) ||
+    skill.maxLevel < 1 ||
+    skill.maxLevel > SKILL_MAX_LEVEL
   ) {
-    issues.push({ field: 'maxRank', code: 'invalid' });
+    issues.push({ field: 'maxLevel', code: 'invalid' });
   }
   if (!Number.isInteger(skill.pointCost) || skill.pointCost < 1)
     issues.push({ field: 'pointCost', code: 'invalid' });
@@ -63,7 +63,7 @@ export function validateSkill(
     if (
       validateFormula(
         amountFormula(effect.amount),
-        [...attributeNames, 'rank', 'roll'],
+        [...attributeNames, 'skillLevel', 'roll'],
         ['level'],
       )
     ) {
@@ -97,7 +97,7 @@ export function validateSkill(
           [
             ...attributeNames,
             ...attributeNames.map((name) => 'target_' + name),
-            'rank',
+            'skillLevel',
             'roll',
           ],
           ['level'],
@@ -108,7 +108,7 @@ export function validateSkill(
   return issues;
 }
 
-/** An effect amount for a caster: `rank`, `level` and the caster's attribute maxima by name. */
+/** An effect amount for a caster: `skillLevel`, `level` and the caster's attribute maxima by name. */
 export function evaluateSkillAmount(
   amount: string,
   scope: SkillAmountScope,
@@ -117,28 +117,32 @@ export function evaluateSkillAmount(
     level: scope.level,
     base: 0,
     playerLevel: scope.level,
-    levels: { ...scope.maxima, rank: scope.rank, roll: scope.roll ?? 0 },
+    levels: {
+      ...scope.maxima,
+      skillLevel: scope.skillLevel,
+      roll: scope.roll ?? 0,
+    },
   });
 }
 
 export type SkillAmountPreview =
-  | { ok: true; rank1: number; maxRank: number }
+  | { ok: true; level1: number; maxLevel: number }
   | { ok: false; error: FormulaError };
 
-/** The amount at rank 1 and at max rank for a level 1 caster whose attribute maxima are 1. */
+/** The amount at skillLevel 1 and at max skillLevel for a level 1 caster whose attribute maxima are 1. */
 export function previewSkillAmount(
   amount: string,
   attributeNames: string[],
-  maxRank: number,
+  maxLevel: number,
 ): SkillAmountPreview {
   const maxima = Object.fromEntries(attributeNames.map((name) => [name, 1]));
-  const at = (rank: number) =>
-    evaluateSkillAmount(amount, { rank, level: 1, maxima });
+  const at = (skillLevel: number) =>
+    evaluateSkillAmount(amount, { skillLevel, level: 1, maxima });
   const first = at(1);
   if (!first.ok) return { ok: false, error: first.error };
-  const last = at(maxRank);
+  const last = at(maxLevel);
   if (!last.ok) return { ok: false, error: last.error };
-  return { ok: true, rank1: first.value, maxRank: last.value };
+  return { ok: true, level1: first.value, maxLevel: last.value };
 }
 
 export function filterSkills(skills: Skill[], filter: SkillFilter): Skill[] {
@@ -215,7 +219,7 @@ export function emptySkill(): SkillDraft {
     description: '',
     rarity: 'common',
     type: 'active',
-    maxRank: 1,
+    maxLevel: 1,
     pointCost: 1,
     target: 'one-enemy',
     cooldown: 0,
@@ -248,7 +252,7 @@ export function parseSkillJson(
     typeof value === 'object' &&
     value !== null &&
     typeof record['name'] === 'string' &&
-    typeof record['maxRank'] === 'number' &&
+    typeof record['maxLevel'] === 'number' &&
     typeof record['pointCost'] === 'number' &&
     (SKILL_TYPES as readonly unknown[]).includes(record['type']) &&
     (record['target'] === undefined ||

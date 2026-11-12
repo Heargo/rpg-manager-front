@@ -15,7 +15,7 @@ const npc = (changes: Partial<Npc> = {}): Npc => ({
   inventory: [{ id: 'inv1', item: sword, equipped: false, position: 0 }],
   updatedAt: 1,
   skillPoints: 0,
-  skills: [{ skillId: 'bite', rank: 1 }],
+  skills: [{ skillId: 'bite', level: 1 }],
   roles: ['enemy'],
   description: 'Green.',
   xpReward: 20,
@@ -79,13 +79,13 @@ describe('duplicateNpc', () => {
     copy.loot.push('x');
     copy.attributes[0].current = 1;
     copy.inventory[0].equipped = true;
-    copy.skills[0].rank = 9;
+    copy.skills[0].level = 9;
     copy.merchant!.buyRatio = 5;
     expect(original.roles).toEqual(['merchant']);
     expect(original.loot).toEqual(['inv1']);
     expect(original.attributes[0].current).toBe(12);
     expect(original.inventory[0].equipped).toBe(false);
-    expect(original.skills[0].rank).toBe(1);
+    expect(original.skills[0].level).toBe(1);
     expect(original.merchant).toEqual({ buyRatio: 2 });
   });
 });

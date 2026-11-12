@@ -12,12 +12,12 @@ import { CharacterSheetComponent } from './character-sheet.component';
  * Use rolls through `DiceRollBusiness.rollAtTable(count, faces)` (mocked: values [3, 4], total 7).
  */
 const bolt: Skill = {
-  id: 'bolt', name: 'Bolt', description: '', rarity: 'common', type: 'active', maxRank: 3, pointCost: 1,
+  id: 'bolt', name: 'Bolt', description: '', rarity: 'common', type: 'active', maxLevel: 3, pointCost: 1,
   target: 'one-enemy', cooldown: 0, roll: { count: 2, faces: 6 }, success: { mode: 'threshold', value: 7 },
-  effects: [{ kind: 'damage', attribute: 'Life', amount: 'roll + rank' }],
+  effects: [{ kind: 'damage', attribute: 'Life', amount: 'roll + skillLevel' }],
 };
 const aura: Skill = {
-  id: 'aura', name: 'Aura', description: '', rarity: 'common', type: 'passive', maxRank: 1, pointCost: 1,
+  id: 'aura', name: 'Aura', description: '', rarity: 'common', type: 'passive', maxLevel: 1, pointCost: 1,
   effects: [{ kind: 'modify', attribute: 'Life', amount: '1', duration: 0 }],
 };
 const mage: CharacterClass = {
@@ -38,7 +38,7 @@ const character: Character = {
   id: 'c', playerId: 'p', name: 'Ada', statPoints: 0, xp: 0, level: 1, money: 0,
   attributes: [{ attributeId: 'life', level: 0, current: 10 }],
   inventory: [], rev: 1, updatedAt: 0, classId: 'mage', skillPoints: 0,
-  skills: [{ skillId: 'bolt', rank: 2 }, { skillId: 'aura', rank: 1 }],
+  skills: [{ skillId: 'bolt', level: 2 }, { skillId: 'aura', level: 1 }],
 };
 
 async function render(options: { skillRollsEnabled: boolean; skill?: Skill } = { skillRollsEnabled: true }) {
@@ -88,7 +88,7 @@ describe('CharacterSheetComponent skill Use', () => {
     expect(rollAtTable).toHaveBeenCalledWith(2, 6);
     const result = el.querySelector('[data-use-result="bolt"]')!;
     expect(result.getAttribute('data-success')).toBe('true');
-    // threshold 7 reached by 3 + 4; damage = roll + rank = 7 + 2
+    // threshold 7 reached by 3 + 4; damage = roll + level = 7 + 2
     expect(result.textContent).toContain('9');
   });
 
@@ -109,7 +109,7 @@ describe('CharacterSheetComponent skill Use', () => {
     expect(rollAtTable).not.toHaveBeenCalled();
     const result = el.querySelector('[data-use-result="bolt"]')!;
     expect(result.getAttribute('data-success')).toBe('true');
-    // damage = roll (0) + rank (2)
+    // damage = roll (0) + level (2)
     expect(result.textContent).toContain('2');
   });
 });

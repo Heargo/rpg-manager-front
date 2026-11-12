@@ -20,8 +20,8 @@ import { ClassCatalogueComponent } from './class-catalogue.component';
  */
 describe('ClassCatalogueComponent', () => {
   const skill = (id: string, name: string, description: string): Skill => ({
-    id, name, description, rarity: 'common', type: 'passive', maxRank: 3, pointCost: 1,
-    effects: [{ kind: 'modify', attribute: 'Life', amount: 'rank', duration: 0 }],
+    id, name, description, rarity: 'common', type: 'passive', maxLevel: 3, pointCost: 1,
+    effects: [{ kind: 'modify', attribute: 'Life', amount: 'skillLevel', duration: 0 }],
   });
   const skills = [skill('s1', 'Slash', 'A fast cut.'), skill('s2', 'Parry', 'Turns a blow aside.')];
   const items: Item[] = [
@@ -33,7 +33,7 @@ describe('ClassCatalogueComponent', () => {
     startingItems: ['i1'],
     tree: [
       { skillId: 's1', requires: [], minLevel: 1, column: 0, row: 0 },
-      { skillId: 's2', requires: [{ skillId: 's1', rank: 1 }], minLevel: 2, column: 1, row: 0 },
+      { skillId: 's2', requires: [{ skillId: 's1', level: 1 }], minLevel: 2, column: 1, row: 0 },
     ],
   };
   const mage: CharacterClass = { id: 'c2', name: 'Mage', description: 'Casts.', tree: [], imageId: 'img-mage' };

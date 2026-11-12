@@ -133,8 +133,8 @@ const ARROWS: Record<string, BoardCell> = {
                   <span class="name">{{ node.name }}</span>
                   <span class="badges">
                     <span class="badge">{{
-                      'class.editor.node.maxRank'
-                        | transloco: { count: node.maxRank }
+                      'class.editor.node.maxLevel'
+                        | transloco: { count: node.maxLevel }
                     }}</span>
                     <span class="badge level">{{
                       'class.editor.node.level'
@@ -230,7 +230,7 @@ export class TreeBoardComponent {
         skillId: node.skillId,
         name: skill?.name ?? node.skillId,
         icon: skill?.type === 'passive' ? 'pi pi-shield' : 'pi pi-bolt',
-        maxRank: skill?.maxRank ?? 0,
+        maxLevel: skill?.maxLevel ?? 0,
         minLevel: node.minLevel,
         column: node.column,
         row: node.row,
@@ -261,7 +261,7 @@ export class TreeBoardComponent {
             key,
             from: requirement.skillId,
             to: node.skillId,
-            rank: requirement.rank,
+            level: requirement.level,
             ...linkRoute(from, node, GEOMETRY),
             selected:
               selection?.kind === 'link' &&

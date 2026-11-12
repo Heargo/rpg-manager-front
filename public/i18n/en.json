@@ -320,12 +320,12 @@
       "levelZero": "This attribute is already at level 0.",
       "notInTree": "This skill isn't in the class tree.",
       "skillLocked": "This skill is still locked.",
-      "skillMaxRank": "This skill is already at its max level.",
+      "skillMaxLevel": "This skill is already at its max level.",
       "noSkillPoints": "Not enough skill points.",
       "skillNeeded": "Another learned skill needs this level.",
       "skillNotLearned": "This skill isn't learned.",
       "unknownSkill": "This skill doesn't exist in this world.",
-      "invalidRank": "This level is not valid for this skill."
+      "invalidLevel": "This level is not valid for this skill."
     },
     "sheet": {
       "playedBy": "Played by {{ name }}",
@@ -1026,7 +1026,7 @@
       "deleteMessage": "{{ name }} will be removed from the world.",
       "empty": "No skill found.",
       "copySuffix": "(copy)",
-      "ranks": "Up to level {{ max }}, {{ cost }} point(s) per level",
+      "levels": "Up to level {{ max }}, {{ cost }} point(s) per level",
       "cooldown": "Cooldown {{ turns }} turn(s)",
       "inUse": "{{ name }} is used by {{ usages }}: remove it from them first.",
       "failed": "The skill could not be saved."
@@ -1044,15 +1044,15 @@
         "threshold": "Total at least",
         "formula": "Formula"
       },
-      "successHint": "Variables: roll, rank, level, your attributes by name, and the target's as target_<name>.",
-      "formulaHint": "Amounts are formulas: rank, level and attribute names (the caster's maxima).",
-      "preview": "Level 1: {{ rank1 }} · Level {{ max }}: {{ maxRank }}",
+      "successHint": "Variables: roll, skillLevel, level, your attributes by name, and the target's as target_<name>.",
+      "formulaHint": "Amounts are formulas: skillLevel, level and attribute names (the caster's maxima).",
+      "preview": "Level 1: {{ level1 }} · Level {{ max }}: {{ maxLevel }}",
       "fields": {
         "name": "Name",
         "description": "Description",
         "type": "Type",
         "rarity": "Rarity",
-        "maxRank": "Max skill level (1 to 10)",
+        "maxLevel": "Max skill level (1 to 10)",
         "pointCost": "Skill points per level",
         "target": "Target",
         "cooldown": "Cooldown (turns)",
@@ -1069,7 +1069,7 @@
       },
       "issue": {
         "name": "Give the skill a name.",
-        "maxRank": "The max level is from 1 to 10.",
+        "maxLevel": "The max level is from 1 to 10.",
         "pointCost": "A level costs at least 1 skill point.",
         "target": "An active skill needs a target; a passive one has none.",
         "effects_amount": "An effect amount is not a valid formula.",
@@ -1077,7 +1077,7 @@
         "roll_count": "Roll 1 to 100 dice.",
         "roll_faces": "Dice have 2 to 1000 faces.",
         "success_value": "The threshold is a whole number.",
-        "success_formula": "The success formula is not valid (roll, rank, level, attribute names, target_<attribute>)."
+        "success_formula": "The success formula is not valid (roll, skillLevel, level, attribute names, target_<attribute>)."
       }
     }
   },
@@ -1105,12 +1105,12 @@
       "startingItems": "Starting items",
       "tree": "Skill tree",
       "skillList": "Skills",
-      "maxRank": "Max level {{ count }}"
+      "maxLevel": "Max level {{ count }}"
     },
     "tree": {
-      "rank": "{{ rank }}/{{ max }}",
+      "level": "{{ level }}/{{ max }}",
       "missingLevel": "Level {{ level }}",
-      "missingRequires": "{{ name }} level {{ rank }}"
+      "missingRequires": "{{ name }} level {{ level }}"
     },
     "editor": {
       "tabForm": "Form",
@@ -1133,7 +1133,7 @@
         "noMatch": "No skill matches."
       },
       "node": {
-        "maxRank": "Max {{ count }}",
+        "maxLevel": "Max {{ count }}",
         "level": "Lv {{ count }}"
       },
       "inspector": {
@@ -1147,7 +1147,7 @@
         "tree": "Skill tree",
         "minLevel": "Minimum level",
         "requires": "Requires",
-        "rank": "Required skill level"
+        "level": "Required skill level"
       },
       "issue": {
         "required": "Give the class a name.",

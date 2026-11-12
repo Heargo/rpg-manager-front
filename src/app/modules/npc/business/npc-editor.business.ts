@@ -74,8 +74,8 @@ export class NpcEditorBusiness {
     return learnNpcSkillsFromClass(npc, world);
   }
 
-  setSkill(npc: Npc, skillId: string, rank: number, world: World): Npc {
-    return setNpcSkill(npc, skillId, rank, world);
+  setSkill(npc: Npc, skillId: string, level: number, world: World): Npc {
+    return setNpcSkill(npc, skillId, level, world);
   }
 
   addItem(npc: Npc, item: Item): Npc {

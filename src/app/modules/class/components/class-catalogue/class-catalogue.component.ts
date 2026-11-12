@@ -209,8 +209,8 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
                   <header>
                     <strong>{{ skill.name }}</strong>
                     <span class="hint">{{
-                      'class.catalogue.maxRank'
-                        | transloco: { count: skill.maxRank }
+                      'class.catalogue.maxLevel'
+                        | transloco: { count: skill.maxLevel }
                     }}</span>
                   </header>
                   <p class="hint">{{ skill.description }}</p>

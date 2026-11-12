@@ -39,7 +39,7 @@ export interface BarStat {
  * Every attribute of the world for one character: round(formula at level) + equipped modifiers = max, and the current value
  * (capped at max, never below 0) for the bar attributes; any other attribute's current is its max. Item modifiers name attributes, so they match by name.
  * The sheet's class bonuses add to the max like equipped items, as their own line.
- * The sheet's passive skills add their permanent `modify` effects (at the sheet's rank) to the max, as their own line.
+ * The sheet's passive skills add their permanent `modify` effects (at the sheet's level) to the max, as their own line.
  */
 export function attributeStats(
   attributes: WorldAttribute[],
@@ -107,7 +107,7 @@ function passiveBonuses(
   const bonuses = new Map<string, number>();
   const owned = skills.flatMap((skill) => {
     const entry = character.skills.find((own) => own.skillId === skill.id);
-    return skill.type === 'passive' && entry ? [{ skill, rank: entry.rank }] : [];
+    return skill.type === 'passive' && entry ? [{ skill, skillLevel: entry.level }] : [];
   });
   if (!owned.length) return bonuses;
   const maxima = Object.fromEntries(
@@ -116,10 +116,10 @@ function passiveBonuses(
       formulaMax(attribute, levels[attribute.name], levels, character.level) + (equipmentBonus.get(attribute.name) ?? 0),
     ]),
   );
-  for (const { skill, rank } of owned) {
+  for (const { skill, skillLevel } of owned) {
     for (const effect of skill.effects) {
       if (effect.kind !== 'modify' || effect.duration !== 0) continue;
-      const result = evaluateSkillAmount(effect.amount, { rank, level: character.level, maxima });
+      const result = evaluateSkillAmount(effect.amount, { skillLevel, level: character.level, maxima });
       if (result.ok) bonuses.set(effect.attribute, (bonuses.get(effect.attribute) ?? 0) + Math.round(result.value));
     }
   }

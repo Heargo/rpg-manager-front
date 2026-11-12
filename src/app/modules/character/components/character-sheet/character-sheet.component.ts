@@ -138,9 +138,9 @@ export class CharacterSheetComponent {
     const tree = this.classView()?.characterClass?.tree;
     return tree ? treeNodeStates(tree, this.character()) : [];
   });
-  protected readonly ranks = computed(() =>
+  protected readonly levels = computed(() =>
     Object.fromEntries(
-      this.character().skills.map((entry) => [entry.skillId, entry.rank]),
+      this.character().skills.map((entry) => [entry.skillId, entry.level]),
     ),
   );
   /** One row per skill of the class tree, with what the player can do with it. */
@@ -152,18 +152,18 @@ export class CharacterSheetComponent {
       const state = this.treeStates().find(
         (entry) => entry.skillId === node.skillId,
       )?.state;
-      const rank = this.ranks()[node.skillId] ?? 0;
+      const level = this.levels()[node.skillId] ?? 0;
       return {
         skillId: node.skillId,
         name: skill?.name ?? node.skillId,
-        rank,
-        maxRank: skill?.maxRank ?? 0,
+        level,
+        maxLevel: skill?.maxLevel ?? 0,
         cost: skill?.pointCost ?? 0,
-        usable: skill?.type === 'active' && rank > 0,
+        usable: skill?.type === 'active' && level > 0,
         learnable:
           !!skill &&
           state !== 'locked' &&
-          rank < skill.maxRank &&
+          level < skill.maxLevel &&
           character.skillPoints >= skill.pointCost,
       };
     });
@@ -183,9 +183,9 @@ export class CharacterSheetComponent {
         return {
           skillId: entry.skillId,
           name: skill?.name ?? entry.skillId,
-          rank: entry.rank,
-          maxRank: skill?.maxRank ?? entry.rank,
-          usable: skill?.type === 'active' && entry.rank > 0,
+          level: entry.level,
+          maxLevel: skill?.maxLevel ?? entry.level,
+          usable: skill?.type === 'active' && entry.level > 0,
         };
       });
   });
@@ -211,7 +211,7 @@ export class CharacterSheetComponent {
     if (!skill) return;
     const result = await this.characters.useSkill(
       skill,
-      this.ranks()[skillId] ?? 0,
+      this.levels()[skillId] ?? 0,
       this.character(),
       this.world(),
     );
@@ -237,7 +237,7 @@ export class CharacterSheetComponent {
   }
 
   protected removeTaught(skillId: string): void {
-    this.act.emit({ kind: 'set-skill', skillId, rank: 0 });
+    this.act.emit({ kind: 'set-skill', skillId, level: 0 });
   }
 
   protected isLocked(kind: CharacterActionKind): boolean {

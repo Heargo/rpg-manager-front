@@ -299,15 +299,15 @@
               [tree]="characterClass.tree"
               [skills]="classView()!.skills"
               [states]="treeStates()"
-              [ranks]="ranks()"
+              [levels]="levels()"
             />
             <ul class="skill-rows">
               @for (row of treeRows(); track row.skillId) {
                 <li>
                   <span class="skill-name">{{ row.name }}</span>
-                  <span class="skill-rank">{{
-                    "class.tree.rank"
-                      | transloco: { rank: row.rank, max: row.maxRank }
+                  <span class="skill-level">{{
+                    "class.tree.level"
+                      | transloco: { level: row.level, max: row.maxLevel }
                   }}</span>
                   <small>{{
                     "character.sheet.skillCost" | transloco: { cost: row.cost }
@@ -340,7 +340,7 @@
                     [ngTemplateOutlet]="useResult"
                     [ngTemplateOutletContext]="{ $implicit: row.skillId }"
                   />
-                  @if (gameMaster() && row.rank > 0) {
+                  @if (gameMaster() && row.level > 0) {
                     <p-button
                       icon="pi pi-minus"
                       [rounded]="true"
@@ -369,9 +369,9 @@
               @for (row of taughtRows(); track row.skillId) {
                 <li [attr.data-taught]="row.skillId">
                   <span class="skill-name">{{ row.name }}</span>
-                  <span class="skill-rank">{{
-                    "class.tree.rank"
-                      | transloco: { rank: row.rank, max: row.maxRank }
+                  <span class="skill-level">{{
+                    "class.tree.level"
+                      | transloco: { level: row.level, max: row.maxLevel }
                   }}</span>
                   @if (canPlay() && row.usable) {
                     <p-button

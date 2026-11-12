@@ -62,10 +62,10 @@ function generateTree(
           : [
               {
                 skillId: chosen[parentIndex].id,
-                rank: randomInt(
+                level: randomInt(
                   source,
                   1,
-                  Math.min(2, chosen[parentIndex].maxRank),
+                  Math.min(2, chosen[parentIndex].maxLevel),
                 ),
               },
             ],

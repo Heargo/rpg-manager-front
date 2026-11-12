@@ -27,7 +27,7 @@ const unlinkPrerequisite: Rules['unlinkPrerequisite'] = (...args) => rules.unlin
 const node = (skillId: string, column: number, row: number, requires: TreeNode['requires'] = []): TreeNode => ({
   skillId, requires, minLevel: 1, column, row,
 });
-const tree: TreeNode[] = [node('a', 0, 0), node('b', 1, 0, [{ skillId: 'a', rank: 1 }]), node('c', 2, 1)];
+const tree: TreeNode[] = [node('a', 0, 0), node('b', 1, 0, [{ skillId: 'a', level: 1 }]), node('c', 2, 1)];
 
 describe('addNodeAt', () => {
   it('adds a node with no prerequisite and min level 1 at the cell', () => {
@@ -57,8 +57,8 @@ describe('moveNode', () => {
 });
 
 describe('linkPrerequisite', () => {
-  it('makes the first skill a prerequisite of the second, at rank 1', () => {
-    expect(linkPrerequisite(tree, 'b', 'c')[2].requires).toEqual([{ skillId: 'b', rank: 1 }]);
+  it('makes the first skill a prerequisite of the second, at level 1', () => {
+    expect(linkPrerequisite(tree, 'b', 'c')[2].requires).toEqual([{ skillId: 'b', level: 1 }]);
   });
 
   it('refuses a link that would make a cycle, a link to itself and a duplicate link', () => {

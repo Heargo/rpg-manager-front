@@ -3,15 +3,15 @@ import { validateSkill } from './skill.rules';
 import { resolveSkillUse } from './skill-roll.rules';
 
 /**
- * Formula variables: `roll`, `rank`, `level`, the caster's attribute maxima by name, and the target's as
+ * Formula variables: `roll`, `skillLevel`, `level`, the caster's attribute maxima by name, and the target's as
  * `target_<name>` (the parser only reads bare words of letters, digits and `_`, so `target.<name>` is not available).
  * `rolls` are the dice values already drawn; `target` is `{ maxima }` or undefined.
  */
 const fireball: Skill = {
-  id: 's1', name: 'Fireball', description: '', rarity: 'rare', type: 'active', maxRank: 3, pointCost: 2,
+  id: 's1', name: 'Fireball', description: '', rarity: 'rare', type: 'active', maxLevel: 3, pointCost: 2,
   target: 'one-enemy', cooldown: 0,
   roll: { count: 2, faces: 6 }, success: { mode: 'always' },
-  effects: [{ kind: 'damage', attribute: 'Life', amount: 'roll + rank * 3' }],
+  effects: [{ kind: 'damage', attribute: 'Life', amount: 'roll + skillLevel * 3' }],
 };
 const caster = { level: 3, maxima: { Strength: 4, Life: 20 } };
 const names = ['Life', 'Strength'];
@@ -29,15 +29,15 @@ describe('resolveSkillUse', () => {
     expect(at(8)).toBe(false);
   });
 
-  it('evaluates a formula with roll, rank, level, caster maxima and target maxima, success when it is 0 or more', () => {
+  it('evaluates a formula with roll, skillLevel, level, caster maxima and target maxima, success when it is 0 or more', () => {
     const at = (formula: string, defense = 13) =>
       resolveSkillUse(
         { ...fireball, success: { mode: 'formula', formula } },
         2, caster, { maxima: { Defense: defense } }, [3, 4], true,
       );
     // 7 + 4 + 2 - 13 = 0
-    expect(at('roll + Strength + rank - target_Defense').success).toBe(true);
-    expect(at('roll + Strength + rank - target_Defense', 14).success).toBe(false);
+    expect(at('roll + Strength + skillLevel - target_Defense').success).toBe(true);
+    expect(at('roll + Strength + skillLevel - target_Defense', 14).success).toBe(false);
     expect(at('level - 3').success).toBe(true);
     expect(at('level - 4').success).toBe(false);
   });

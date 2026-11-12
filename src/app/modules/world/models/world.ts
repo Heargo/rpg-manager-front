@@ -132,7 +132,7 @@ export interface Sheet {
 
 export interface SheetSkill {
   skillId: string;
-  rank: number;
+  level: number;
 }
 
 export type Character = Sheet & {

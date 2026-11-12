@@ -36,12 +36,12 @@ export const successOf = (skill: Skill): SkillSuccess =>
 
 /**
  * Resolves one use of a skill from dice already drawn. With rolls on: success per the skill's mode (formulas read
- * `roll`, `rank`, `level`, the caster's maxima and the target's as `target_<name>`; success when it is 0 or more) and
+ * `roll`, `skillLevel`, `level`, the caster's maxima and the target's as `target_<name>`; success when it is 0 or more) and
  * amounts that may read `roll`. With rolls off: always a success and `roll` is 0. Never evaluates code.
  */
 export function resolveSkillUse(
   skill: Skill,
-  rank: number,
+  skillLevel: number,
   caster: SkillCaster,
   target: SkillTargetScope | undefined,
   rolls: number[],
@@ -52,7 +52,7 @@ export function resolveSkillUse(
   let error: string | undefined;
   const amounts = skill.effects.map((effect) => {
     const result = evaluateSkillAmount(effect.amount, {
-      rank,
+      skillLevel,
       level: caster.level,
       maxima: caster.maxima,
       roll: total,
@@ -78,7 +78,7 @@ export function resolveSkillUse(
         level: caster.level,
         base: 0,
         playerLevel: caster.level,
-        levels: { ...caster.maxima, ...targetMaxima, rank, roll: total },
+        levels: { ...caster.maxima, ...targetMaxima, skillLevel, roll: total },
       },
     );
     if (result.ok) success = result.value >= 0;

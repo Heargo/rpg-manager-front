@@ -14,17 +14,17 @@ import { WorldLibraryBusiness } from '../../world/business/world-library.busines
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
 import { CharacterBusiness } from './character.business';
 
-const skill = (id: string, maxRank: number, pointCost: number): Skill => ({
-  id, name: id, description: `secret ${id}`, rarity: 'common', type: 'active', maxRank, pointCost,
+const skill = (id: string, maxLevel: number, pointCost: number): Skill => ({
+  id, name: id, description: `secret ${id}`, rarity: 'common', type: 'active', maxLevel, pointCost,
   target: 'one-enemy', cooldown: 0,
-  effects: [{ kind: 'damage', attribute: 'Life', amount: 'rank' }],
+  effects: [{ kind: 'damage', attribute: 'Life', amount: 'skillLevel' }],
 });
 
 const mage: CharacterClass = {
   id: 'mage', name: 'Mage', description: 'Casts', bonuses: [{ attribute: 'Life', value: 1 }],
   tree: [
     { skillId: 'bolt', requires: [], minLevel: 1, column: 0, row: 0 },
-    { skillId: 'strike', requires: [{ skillId: 'bolt', rank: 2 }], minLevel: 1, column: 1, row: 0 },
+    { skillId: 'strike', requires: [{ skillId: 'bolt', level: 2 }], minLevel: 1, column: 1, row: 0 },
   ],
 };
 const warrior: CharacterClass = {
@@ -98,10 +98,10 @@ describe('skill points (host + players)', () => {
     const saved = await doAct(ada, mine(ada).id, { kind: 'learn-skill', skillId: 'bolt' });
     await settle();
 
-    expect(saved).toMatchObject({ skillPoints: 2, skills: [{ skillId: 'bolt', rank: 1 }] });
-    expect(mine(ada).skills).toEqual([{ skillId: 'bolt', rank: 1 }]);
+    expect(saved).toMatchObject({ skillPoints: 2, skills: [{ skillId: 'bolt', level: 1 }] });
+    expect(mine(ada).skills).toEqual([{ skillId: 'bolt', level: 1 }]);
     const seenByBob = chars(bob).$characters()!.find((c) => c.playerId === 'ada')!;
-    expect(seenByBob.skills).toEqual([{ skillId: 'bolt', rank: 1 }]);
+    expect(seenByBob.skills).toEqual([{ skillId: 'bolt', level: 1 }]);
   });
 
   it('refuses a learn the host rules refuse, and leaves the sheet alone', async () => {
@@ -125,28 +125,28 @@ describe('skill points (host + players)', () => {
     for (const action of [
       { kind: 'refund-skill', skillId: 'bolt' },
       { kind: 'grant-skill-points', amount: 1 },
-      { kind: 'set-skill', skillId: 'taught', rank: 1 },
+      { kind: 'set-skill', skillId: 'taught', level: 1 },
       { kind: 'set-class', classId: 'warrior' },
     ] as Act[]) {
       await expect(doAct(ada, id, action)).rejects.toMatchObject({ message: 'character.errors.gameMasterOnly' });
     }
   });
 
-  it('lets the game master refund, set any skill at any rank, and change the class', async () => {
+  it('lets the game master refund, set any skill at any level, and change the class', async () => {
     await doAct(ada, mine(ada).id, { kind: 'learn-skill', skillId: 'bolt' });
     await settle();
     await gmAct(ada, { kind: 'refund-skill', skillId: 'bolt' });
     expect(mine(ada)).toMatchObject({ skillPoints: 4, skills: [] });
 
-    await gmAct(ada, { kind: 'set-skill', skillId: 'taught', rank: 4 });
-    await gmAct(ada, { kind: 'set-skill', skillId: 'cleave', rank: 1 });
-    expect(mine(ada).skills).toEqual([{ skillId: 'taught', rank: 4 }, { skillId: 'cleave', rank: 1 }]);
-    await gmAct(ada, { kind: 'set-skill', skillId: 'taught', rank: 0 });
-    expect(mine(ada).skills).toEqual([{ skillId: 'cleave', rank: 1 }]);
+    await gmAct(ada, { kind: 'set-skill', skillId: 'taught', level: 4 });
+    await gmAct(ada, { kind: 'set-skill', skillId: 'cleave', level: 1 });
+    expect(mine(ada).skills).toEqual([{ skillId: 'taught', level: 4 }, { skillId: 'cleave', level: 1 }]);
+    await gmAct(ada, { kind: 'set-skill', skillId: 'taught', level: 0 });
+    expect(mine(ada).skills).toEqual([{ skillId: 'cleave', level: 1 }]);
 
     await doAct(ada, mine(ada).id, { kind: 'learn-skill', skillId: 'bolt' });
     await gmAct(ada, { kind: 'set-class', classId: 'warrior' });
-    expect(mine(ada)).toMatchObject({ classId: 'warrior', skillPoints: 4, skills: [{ skillId: 'cleave', rank: 1 }] });
+    expect(mine(ada)).toMatchObject({ classId: 'warrior', skillPoints: 4, skills: [{ skillId: 'cleave', level: 1 }] });
   });
 
   it('a level-up grants skill points next to stat points, and the toast says both', async () => {
@@ -160,7 +160,7 @@ describe('skill points (host + players)', () => {
 
   describe('class/mine', () => {
     it('gives a player their class, its tree, the skills it references and their sheet skills', async () => {
-      await gmAct(ada, { kind: 'set-skill', skillId: 'taught', rank: 2 });
+      await gmAct(ada, { kind: 'set-skill', skillId: 'taught', level: 2 });
 
       const view = await loadMyClass(ada);
 
@@ -182,7 +182,7 @@ describe('skill points (host + players)', () => {
     });
 
     it('has no class and the sheet skills for a character without a class', async () => {
-      await gmAct(ada, { kind: 'set-skill', skillId: 'taught', rank: 1 });
+      await gmAct(ada, { kind: 'set-skill', skillId: 'taught', level: 1 });
       await gm.injector.get(WorldSessionBusiness).update((w: World) => ({
         ...w,
         characters: w.characters.map((c) => (c.playerId === 'ada' ? { ...c, classId: undefined } : c)),

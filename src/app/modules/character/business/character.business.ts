@@ -114,12 +114,12 @@ export class CharacterBusiness {
   }
 
   /**
-   * Uses an active skill at a rank: rolls its dice at the table (unless the world's skills don't roll) and resolves the
+   * Uses an active skill at a level: rolls its dice at the table (unless the world's skills don't roll) and resolves the
    * success and the effect amounts. Nothing is applied to a target yet.
    */
   async useSkill(
     skill: Skill,
-    rank: number,
+    level: number,
     character: Character,
     world: SheetWorld,
   ): Promise<SkillUseResult> {
@@ -140,7 +140,7 @@ export class CharacterBusiness {
     );
     return resolveSkillUse(
       skill,
-      rank,
+      level,
       { level: character.level, maxima },
       undefined,
       rolls,

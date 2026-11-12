@@ -302,12 +302,12 @@ export function setInitiative(
 
 /** The GM's own order (ids not listed go last); the active combatant stays active. */
 export function reorderCombatants(enc: Encounter, ids: string[]): Encounter {
-  const rank = (id: string) => {
+  const position = (id: string) => {
     const i = ids.indexOf(id);
     return i < 0 ? ids.length : i;
   };
   const combatants = [...enc.combatants].sort(
-    (a, b) => rank(a.id) - rank(b.id),
+    (a, b) => position(a.id) - position(b.id),
   );
   return commit(enc, reordered(enc, combatants));
 }
@@ -393,17 +393,17 @@ export interface SkillPreview {
   cooldown: number;
 }
 
-/** A skill's computed effects at a rank, with the dice written out; the "N + XdY" text assumes amounts linear in `roll`. */
+/** A skill's computed effects at a skill level, with the dice written out; the "N + XdY" text assumes amounts linear in `roll`. */
 export function skillPreview(
   skill: Skill,
-  rank: number,
+  skillLevel: number,
   caster: { level: number; maxima: Record<string, number> },
   rollsEnabled: boolean,
 ): SkillPreview {
   const dice = rollOf(skill);
   const at = (amount: string, roll: number) =>
     evaluateSkillAmount(amount, {
-      rank,
+      skillLevel,
       level: caster.level,
       maxima: caster.maxima,
       roll,
@@ -478,7 +478,7 @@ export function useSkill(
   const pending = (targets as Combatant[]).map((target) => {
     const result = resolveSkillUse(
       skill,
-      owned.rank,
+      owned.level,
       { level: caster.level, maxima: maximaOf(caster) },
       { maxima: maximaOf(target) },
       rolls,

@@ -47,7 +47,7 @@ export function generateSkill(
   const rarity = weightedPick(source, RARITY_WEIGHTS);
   const tier = ITEM_RARITIES.indexOf(rarity);
   const type = weightedPick(source, TYPE_WEIGHTS);
-  const maxRank = randomInt(source, 1, 3 + tier);
+  const maxLevel = randomInt(source, 1, 3 + tier);
   const name = skillName(source, words, type);
   const description = pick(source, words.descriptions[type]);
   const base = {
@@ -55,7 +55,7 @@ export function generateSkill(
     description,
     rarity,
     type,
-    maxRank,
+    maxLevel,
     pointCost: 1 + Math.floor(tier / 2),
   };
 
@@ -65,7 +65,11 @@ export function generateSkill(
       .map((attribute): SkillEffect => ({
         kind: 'modify',
         attribute,
-        amount: pick(source, ['rank', 'rank * 2', `rank + ${tier}`]),
+        amount: pick(source, [
+          'skillLevel',
+          'skillLevel * 2',
+          `skillLevel + ${tier}`,
+        ]),
         duration: 0,
       }));
     return { ...base, effects };
@@ -82,7 +86,7 @@ export function generateSkill(
   const effects = shuffle(source, unique)
     .slice(0, 1)
     .map((attribute): SkillEffect => {
-      const amount = `${randomInt(source, power, power + 3)} + rank * ${randomInt(source, 2, 3 + tier)}`;
+      const amount = `${randomInt(source, power, power + 3)} + skillLevel * ${randomInt(source, 2, 3 + tier)}`;
       return kind === 'modify'
         ? { kind, attribute, amount, duration: randomInt(source, 1, 4) }
         : { kind, attribute, amount };

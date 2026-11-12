@@ -54,12 +54,12 @@ export function validateClass(
       }
       const required = skills.find((entry) => entry.id === requirement.skillId);
       if (
-        !Number.isInteger(requirement.rank) ||
-        requirement.rank < 1 ||
-        (required && requirement.rank > required.maxRank)
+        !Number.isInteger(requirement.level) ||
+        requirement.level < 1 ||
+        (required && requirement.level > required.maxLevel)
       ) {
         issues.push({
-          field: `tree.${index}.requires.${at}.rank`,
+          field: `tree.${index}.requires.${at}.level`,
           code: 'invalid',
         });
       }
@@ -89,28 +89,30 @@ function hasCycle(tree: TreeNode[]): boolean {
   return tree.some((node) => visit(node.skillId));
 }
 
-/** Each node of the tree for a sheet: learned (has a rank), available, or locked with what is missing. */
+/** Each node of the tree for a sheet: learned (has a level), available, or locked with what is missing. */
 export function treeNodeStates(
   tree: TreeNode[],
-  sheet: { level: number; skills: { skillId: string; rank: number }[] },
+  sheet: { level: number; skills: { skillId: string; level: number }[] },
 ): TreeNodeStatus[] {
-  const rankOf = (skillId: string) =>
-    sheet.skills.find((entry) => entry.skillId === skillId)?.rank ?? 0;
+  const levelOf = (skillId: string) =>
+    sheet.skills.find((entry) => entry.skillId === skillId)?.level ?? 0;
   return tree.map((node) => {
     const missing: TreeNodeStatus['missing'] = [
       ...node.requires
-        .filter((requirement) => rankOf(requirement.skillId) < requirement.rank)
+        .filter(
+          (requirement) => levelOf(requirement.skillId) < requirement.level,
+        )
         .map((requirement) => ({
           kind: 'requires' as const,
           skillId: requirement.skillId,
-          rank: requirement.rank,
+          level: requirement.level,
         })),
       ...(sheet.level < node.minLevel
         ? [{ kind: 'level' as const, minLevel: node.minLevel }]
         : []),
     ];
     const state =
-      rankOf(node.skillId) > 0
+      levelOf(node.skillId) > 0
         ? 'learned'
         : missing.length
           ? 'locked'
@@ -214,7 +216,7 @@ export function parseClassJson(
           (r) =>
             isRecord(r) &&
             typeof r['skillId'] === 'string' &&
-            typeof r['rank'] === 'number',
+            typeof r['level'] === 'number',
         ),
     ) &&
     (value['bonuses'] === undefined ||

@@ -43,8 +43,8 @@ export class SkillEditorBusiness {
     return parseSkillJson(text, base, this.names(world));
   }
 
-  preview(amount: string, world: World, maxRank: number): SkillAmountPreview {
-    return previewSkillAmount(amount, this.names(world), maxRank);
+  preview(amount: string, world: World, maxLevel: number): SkillAmountPreview {
+    return previewSkillAmount(amount, this.names(world), maxLevel);
   }
 
   private names(world: World): string[] {

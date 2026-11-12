@@ -13,9 +13,9 @@ export const SKILL_TARGETS = [
 ] as const;
 export type SkillTarget = (typeof SKILL_TARGETS)[number];
 
-export const SKILL_MAX_RANK = 10;
+export const SKILL_MAX_LEVEL = 10;
 
-/** What a skill does, on an attribute of the target (by name). Amounts are formulas on `rank`, `level` and attribute maxima. */
+/** What a skill does, on an attribute of the target (by name). Amounts are formulas on `level`, `level` and attribute maxima. */
 export type SkillEffect =
   | { kind: 'damage' | 'heal'; attribute: string; amount: string }
   | { kind: 'modify'; attribute: string; amount: string; duration: number };
@@ -46,8 +46,8 @@ export interface Skill {
   /** Display only. */
   rarity: ItemRarity;
   type: SkillType;
-  maxRank: number;
-  /** Skill points per rank. */
+  maxLevel: number;
+  /** Skill points per level. */
   pointCost: number;
   /** Active only. */
   target?: SkillTarget;

@@ -26,7 +26,7 @@ import { SkillIssue } from '../../helpers/skill.rules';
 import {
   Skill,
   DEFAULT_SKILL_ROLL,
-  SKILL_MAX_RANK,
+  SKILL_MAX_LEVEL,
   SKILL_ROLL_COUNT_MAX,
   SKILL_ROLL_FACES_MAX,
   SKILL_SUCCESS_MODES,
@@ -117,17 +117,17 @@ import {
                 />
               </div>
               <div class="field">
-                <label for="skill-max-rank">{{
-                  'skill.editor.fields.maxRank' | transloco
+                <label for="skill-max-level">{{
+                  'skill.editor.fields.maxLevel' | transloco
                 }}</label>
                 <p-inputnumber
-                  inputId="skill-max-rank"
-                  data-field="max-rank"
+                  inputId="skill-max-level"
+                  data-field="max-level"
                   [min]="1"
-                  [max]="maxRankLimit"
+                  [max]="maxLevelLimit"
                   [showButtons]="true"
-                  [ngModel]="draft().maxRank"
-                  (ngModelChange)="patch({ maxRank: $event ?? 0 })"
+                  [ngModel]="draft().maxLevel"
+                  (ngModelChange)="patch({ maxLevel: $event ?? 0 })"
                 />
               </div>
               <div class="field">
@@ -376,9 +376,9 @@ import {
                         'skill.editor.preview'
                           | transloco
                             : {
-                                max: draft().maxRank,
-                                rank1: preview.rank1,
-                                maxRank: preview.maxRank,
+                                max: draft().maxLevel,
+                                level1: preview.level1,
+                                maxLevel: preview.maxLevel,
                               }
                       }}</span>
                     }
@@ -518,7 +518,7 @@ export class SkillEditorComponent {
   /** The skill to save; for a new skill it has no id yet. */
   readonly save = output<Skill>();
 
-  protected readonly maxRankLimit = SKILL_MAX_RANK;
+  protected readonly maxLevelLimit = SKILL_MAX_LEVEL;
   protected readonly rollCountLimit = SKILL_ROLL_COUNT_MAX;
   protected readonly rollFacesLimit = SKILL_ROLL_FACES_MAX;
 
@@ -542,13 +542,13 @@ export class SkillEditorComponent {
       const result = this.editor.preview(
         effect.amount,
         this.world(),
-        this.draft().maxRank,
+        this.draft().maxLevel,
       );
       return result.ok
-        ? { rank1: result.rank1, maxRank: result.maxRank, error: undefined }
+        ? { level1: result.level1, maxLevel: result.maxLevel, error: undefined }
         : {
-            rank1: 0,
-            maxRank: 0,
+            level1: 0,
+            maxLevel: 0,
             error: this.language.t(result.error.key, {
               position: result.error.position,
             }),
@@ -658,8 +658,8 @@ export class SkillEditorComponent {
     const attribute = this.world().attributes[0]?.name ?? '';
     const effect: SkillEffect =
       this.draft().type === 'passive'
-        ? { kind: 'modify', attribute, amount: 'rank', duration: 0 }
-        : { kind: 'damage', attribute, amount: 'rank' };
+        ? { kind: 'modify', attribute, amount: 'skillLevel', duration: 0 }
+        : { kind: 'damage', attribute, amount: 'skillLevel' };
     this.patch({ effects: [...this.draft().effects, effect] });
   }
 

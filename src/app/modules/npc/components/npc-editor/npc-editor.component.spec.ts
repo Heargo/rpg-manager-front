@@ -17,8 +17,8 @@ import { NpcEditorComponent } from './npc-editor.component';
  * entry `[data-field="inventory-entry"]`: `[data-action="toggle-equipped"]`, `[data-action="toggle-loot"]` (enemy only),
  * `[data-action="remove-item"]`. Buttons `[data-action]`: `generate-seed` (from the visible seed), `random` (fresh seed), `save`. Class and skills (new hooks):
  * `p-select[data-field="class"]` (ngModelChange with a class id, or null to clear), `[data-action="learn-from-class"]`,
- * `p-select[data-field="add-skill"]` (ngModelChange with a skill id adds it at rank 1), per skill `[data-field="skill-entry"]`
- * holding `[data-field="skill-rank"]` (p-inputnumber) and `[data-action="remove-skill"]`, and in the Generate tab
+ * `p-select[data-field="add-skill"]` (ngModelChange with a skill id adds it at level 1), per skill `[data-field="skill-entry"]`
+ * holding `[data-field="skill-level"]` (p-inputnumber) and `[data-action="remove-skill"]`, and in the Generate tab
  * `p-select[data-field="generate-class"]` (class id, or null for a random one).
  */
 describe('NpcEditorComponent', () => {
@@ -30,14 +30,14 @@ describe('NpcEditorComponent', () => {
     id: 'sword', name: 'Iron Sword', description: '', rarity: 'common', type: 'equipment', slot: 'weapon1', price: 5,
     modifiers: [{ attribute: 'Wit', value: 1 }],
   };
-  const mkSkill = (id: string, maxRank: number): Skill => ({
-    id, name: `Skill ${id}`, description: '', rarity: 'common', type: 'passive', maxRank, pointCost: 1, effects: [],
+  const mkSkill = (id: string, maxLevel: number): Skill => ({
+    id, name: `Skill ${id}`, description: '', rarity: 'common', type: 'passive', maxLevel, pointCost: 1, effects: [],
   });
   const warrior: CharacterClass = {
     id: 'warrior', name: 'Warrior', description: '',
     tree: [
       { skillId: 'a', requires: [], minLevel: 1, column: 0, row: 0 },
-      { skillId: 'b', requires: [{ skillId: 'a', rank: 1 }], minLevel: 1, column: 0, row: 1 },
+      { skillId: 'b', requires: [{ skillId: 'a', level: 1 }], minLevel: 1, column: 0, row: 1 },
     ],
   };
   const brute: CharacterClass = {
@@ -145,28 +145,28 @@ describe('NpcEditorComponent', () => {
 
     expect(saved[0].classId).toBe('warrior');
     expect(saved[0].skills).toEqual([
-      { skillId: 'a', rank: 2 },
-      { skillId: 'b', rank: 1 },
+      { skillId: 'a', level: 2 },
+      { skillId: 'b', level: 1 },
     ]);
     expect(saved[0].skillPoints).toBe(0);
     expect(JSON.parse(field('json').value).skills).toEqual(saved[0].skills);
   });
 
-  it('adds any catalogue skill, re-ranks it and removes it', async () => {
+  it('adds any catalogue skill, re-levels it and removes it', async () => {
     const { el, type, click, emit, saved } = await setup(goblin);
     await emit('p-select[data-field="add-skill"]', 'free');
     expect(el.querySelectorAll('[data-field="skill-entry"]')).toHaveLength(1);
     await click('[data-action="save"]');
-    expect(saved[0].skills).toEqual([{ skillId: 'free', rank: 1 }]);
+    expect(saved[0].skills).toEqual([{ skillId: 'free', level: 1 }]);
 
-    const rank = el.querySelector<HTMLInputElement>('[data-field="skill-rank"] input')!;
-    rank.focus();
-    rank.value = '3';
-    rank.dispatchEvent(new Event('input'));
-    rank.dispatchEvent(new Event('blur'));
+    const level = el.querySelector<HTMLInputElement>('[data-field="skill-level"] input')!;
+    level.focus();
+    level.value = '3';
+    level.dispatchEvent(new Event('input'));
+    level.dispatchEvent(new Event('blur'));
     await type('name', 'Goblin');
     await click('[data-action="save"]');
-    expect(saved[1].skills).toEqual([{ skillId: 'free', rank: 3 }]);
+    expect(saved[1].skills).toEqual([{ skillId: 'free', level: 3 }]);
 
     await click('[data-action="remove-skill"]');
     expect(el.querySelectorAll('[data-field="skill-entry"]')).toHaveLength(0);
@@ -176,7 +176,7 @@ describe('NpcEditorComponent', () => {
 
   it('reads classId and skills from valid JSON', async () => {
     const { el, field, type } = await setup(goblin);
-    await type('json', JSON.stringify({ ...JSON.parse(field('json').value), classId: 'brute', skills: [{ skillId: 'free', rank: 2 }] }));
+    await type('json', JSON.stringify({ ...JSON.parse(field('json').value), classId: 'brute', skills: [{ skillId: 'free', level: 2 }] }));
     expect(el.querySelectorAll('[data-field="skill-entry"]')).toHaveLength(1);
   });
 

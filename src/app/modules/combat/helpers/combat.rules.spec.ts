@@ -49,7 +49,7 @@ const fireball: Skill = {
   description: '',
   rarity: 'common',
   type: 'active',
-  maxRank: 3,
+  maxLevel: 3,
   pointCost: 1,
   target: 'one-enemy',
   cost: { attribute: 'Mana', amount: 3 },
@@ -64,7 +64,7 @@ const bless: Skill = {
   description: '',
   rarity: 'common',
   type: 'active',
-  maxRank: 1,
+  maxLevel: 1,
   pointCost: 1,
   target: 'one-ally',
   effects: [{ kind: 'modify', attribute: 'Armor', amount: '2', duration: 2 }],
@@ -75,7 +75,7 @@ const mend: Skill = {
   description: '',
   rarity: 'common',
   type: 'active',
-  maxRank: 1,
+  maxLevel: 1,
   pointCost: 1,
   target: 'one-ally',
   effects: [{ kind: 'heal', attribute: 'Life', amount: '10' }],
@@ -86,13 +86,13 @@ const smite: Skill = {
   description: '',
   rarity: 'common',
   type: 'active',
-  maxRank: 5,
+  maxLevel: 5,
   pointCost: 1,
   target: 'one-enemy',
   cost: { attribute: 'Mana', amount: 10 },
   cooldown: 2,
   roll: { count: 2, faces: 6 },
-  effects: [{ kind: 'damage', attribute: 'Life', amount: 'rank * 4 + roll' }],
+  effects: [{ kind: 'damage', attribute: 'Life', amount: 'skillLevel * 4 + roll' }],
 };
 const skills = [fireball, bless, mend, smite];
 
@@ -138,7 +138,7 @@ function build(): { world: World; characters: Character[]; goblin: Npc } {
     ],
     inventory: [],
     updatedAt: 1,
-    skills: owned.map((skillId) => ({ skillId, rank: 1 })),
+    skills: owned.map((skillId) => ({ skillId, level: 1 })),
   });
   const characters = [sheet('aria', 2, 8, 3, ['fireball', 'smite']), sheet('bram', 2, 8, 5, ['mend', 'bless'])];
   const goblin: Npc = {
@@ -213,8 +213,8 @@ describe('startEncounter', () => {
     expect(attr(by(enc, 'Goblin 3'), 'Life')).toEqual({ name: 'Life', current: 13, max: 13 });
     expect(attr(by(enc, 'Goblin 3'), 'Armor')).toEqual({ name: 'Armor', current: 3, max: 3 });
     expect(by(enc, 'Aria').skills).toEqual([
-      { skillId: 'fireball', rank: 1 },
-      { skillId: 'smite', rank: 1 },
+      { skillId: 'fireball', level: 1 },
+      { skillId: 'smite', level: 1 },
     ]);
     expect(by(enc, 'Aria').level).toBe(1);
     expect(by(enc, 'Goblin 1').level).toBe(2);
@@ -346,7 +346,7 @@ describe('turns and rounds', () => {
 describe('skillPreview', () => {
   const caster = { level: 1, maxima: { Life: 12, Mana: 5 } };
 
-  it('shows the effects at a rank with the dice, the cost and the cooldown', () => {
+  it('shows the effects at a level with the dice, the cost and the cooldown', () => {
     expect(skillPreview(smite, 3, caster, true)).toEqual({
       effects: [{ kind: 'damage', attribute: 'Life', amount: '12 + 2d6' }],
       cost: { attribute: 'Mana', amount: 10 },

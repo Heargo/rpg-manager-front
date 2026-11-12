@@ -14,9 +14,9 @@ import { Skill } from '../models/skill';
 import { SkillCatalogueBusiness } from './skill-catalogue.business';
 
 const skill = (id: string, name: string, type: Skill['type'] = 'active'): Skill => ({
-  id, name, description: '', rarity: 'common', type, maxRank: 3, pointCost: 1,
+  id, name, description: '', rarity: 'common', type, maxLevel: 3, pointCost: 1,
   ...(type === 'active' ? { target: 'one-enemy' as const, cooldown: 0 } : {}),
-  effects: [{ kind: 'damage', attribute: 'Life', amount: 'rank * 2' }],
+  effects: [{ kind: 'damage', attribute: 'Life', amount: 'skillLevel * 2' }],
 });
 
 describe('SkillCatalogueBusiness (GM)', () => {
@@ -73,7 +73,7 @@ describe('SkillCatalogueBusiness (GM)', () => {
       ...w,
       npcs: [{
         id: 'n1', name: 'Goblin', statPoints: 0, xp: 0, level: 1, money: 0, updatedAt: 1, skillPoints: 0,
-        skills: [{ skillId: 's1', rank: 1 }], attributes: [], inventory: [], roles: ['enemy'], description: '',
+        skills: [{ skillId: 's1', level: 1 }], attributes: [], inventory: [], roles: ['enemy'], description: '',
         xpReward: 0, loot: [],
       }],
     }));

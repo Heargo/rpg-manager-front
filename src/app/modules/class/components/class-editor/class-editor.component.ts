@@ -231,13 +231,13 @@ const never = (): boolean => false;
                           <div class="requirement">
                             <span class="req-name">{{ requirement.name }}</span>
                             <p-inputnumber
-                              data-field="requirement-rank"
+                              data-field="requirement-level"
                               [min]="1"
-                              [max]="requirement.maxRank"
+                              [max]="requirement.maxLevel"
                               [showButtons]="true"
-                              [ngModel]="requirement.rank"
+                              [ngModel]="requirement.level"
                               (ngModelChange)="
-                                setRank(
+                                setLevel(
                                   target.node.skillId,
                                   requirement.skillId,
                                   $event ?? 0
@@ -285,11 +285,11 @@ const never = (): boolean => false;
                               "
                             />
                             <p-inputnumber
-                              data-field="new-requirement-rank"
+                              data-field="new-requirement-level"
                               [min]="1"
                               [showButtons]="true"
-                              [ngModel]="newRank()"
-                              (ngModelChange)="newRank.set($event ?? 1)"
+                              [ngModel]="newLevel()"
+                              (ngModelChange)="newLevel.set($event ?? 1)"
                             />
                           </div>
                         }
@@ -316,16 +316,16 @@ const never = (): boolean => false;
                         </p>
                         <div class="field">
                           <label>{{
-                            'class.editor.fields.rank' | transloco
+                            'class.editor.fields.level' | transloco
                           }}</label>
                           <p-inputnumber
-                            data-field="requirement-rank"
+                            data-field="requirement-level"
                             [min]="1"
-                            [max]="target.maxRank"
+                            [max]="target.maxLevel"
                             [showButtons]="true"
-                            [ngModel]="target.rank"
+                            [ngModel]="target.level"
                             (ngModelChange)="
-                              setRank(target.to, target.from, $event ?? 0)
+                              setLevel(target.to, target.from, $event ?? 0)
                             "
                           />
                         </div>
@@ -445,7 +445,7 @@ export class ClassEditorComponent {
     return null;
   });
   protected readonly paletteSearch = signal('');
-  protected readonly newRank = signal(1);
+  protected readonly newLevel = signal(1);
 
   protected readonly issues = computed(() =>
     this.editor.validate(this.draft(), this.world()),
@@ -503,7 +503,7 @@ export class ClassEditorComponent {
         requirements: node.requires.map((requirement) => ({
           ...requirement,
           name: this.nameOf(requirement.skillId),
-          maxRank: this.skillOf(requirement.skillId)?.maxRank ?? 99,
+          maxLevel: this.skillOf(requirement.skillId)?.maxLevel ?? 99,
         })),
       };
     }
@@ -518,8 +518,8 @@ export class ClassEditorComponent {
         to: selection.to,
         fromName: this.nameOf(selection.from),
         toName: this.nameOf(selection.to),
-        rank: requirement.rank,
-        maxRank: this.skillOf(selection.from)?.maxRank ?? 99,
+        level: requirement.level,
+        maxLevel: this.skillOf(selection.from)?.maxLevel ?? 99,
       };
     }
     return null;
@@ -569,10 +569,10 @@ export class ClassEditorComponent {
 
   protected addRequirement(prerequisiteId: string, skillId: string): void {
     this.onLinkDrop(prerequisiteId, skillId);
-    const rank = this.newRank();
-    if (rank > 1) this.setRank(skillId, prerequisiteId, rank);
+    const level = this.newLevel();
+    if (level > 1) this.setLevel(skillId, prerequisiteId, level);
     this.selection.set({ kind: 'node', skillId });
-    this.newRank.set(1);
+    this.newLevel.set(1);
   }
 
   /** Adds a palette skill at the first free cell (button, keyboard and touch alternative to dragging). */
@@ -607,10 +607,10 @@ export class ClassEditorComponent {
     );
   }
 
-  protected setRank(
+  protected setLevel(
     skillId: string,
     prerequisiteId: string,
-    rank: number,
+    level: number,
   ): void {
     this.setTree(
       this.draft().tree.map((node) =>
@@ -618,7 +618,7 @@ export class ClassEditorComponent {
           ? {
               ...node,
               requires: node.requires.map((r) =>
-                r.skillId === prerequisiteId ? { ...r, rank } : r,
+                r.skillId === prerequisiteId ? { ...r, level } : r,
               ),
             }
           : node,

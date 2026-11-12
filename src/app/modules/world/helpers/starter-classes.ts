@@ -25,7 +25,7 @@ interface SkillSpec {
   name: Text;
   description: Text;
   rarity: ItemRarity;
-  maxRank: number;
+  maxLevel: number;
   /** Left out of a world with no mana bar. */
   needsMana?: true;
   /** Absent for a passive skill. */
@@ -43,7 +43,7 @@ interface SkillSpec {
 
 interface NodeSpec {
   key: string;
-  requires?: [key: string, rank: number][];
+  requires?: [key: string, level: number][];
   minLevel: number;
   column: number;
   row: number;
@@ -78,13 +78,13 @@ const CLASSES: ClassSpec[] = [
           'Un coup lourd sur un ennemi. Progresse avec la force.',
         ],
         rarity: 'common',
-        maxRank: 5,
+        maxLevel: 5,
         active: { target: 'one-enemy', cost: 0, cooldown: 0, success: { mode: 'threshold', value: 6 } },
         effects: (c) => [
           {
             kind: 'damage',
             attribute: c.life,
-            amount: `${ref(c.main)} * 0.5 + rank * 3`,
+            amount: `${ref(c.main)} * 0.5 + skillLevel * 3`,
           },
         ],
       },
@@ -96,12 +96,12 @@ const CLASSES: ClassSpec[] = [
           "Endurci par d'innombrables combats : augmente durablement la vie maximale.",
         ],
         rarity: 'common',
-        maxRank: 5,
+        maxLevel: 5,
         effects: (c) => [
           {
             kind: 'modify',
             attribute: c.life,
-            amount: 'rank * 5',
+            amount: 'skillLevel * 5',
             duration: 0,
           },
         ],
@@ -114,13 +114,13 @@ const CLASSES: ClassSpec[] = [
           'Un grand coup circulaire qui touche tous les ennemis.',
         ],
         rarity: 'uncommon',
-        maxRank: 5,
+        maxLevel: 5,
         active: { target: 'all-enemies', cost: 3, cooldown: 2, success: { mode: 'threshold', value: 8 } },
         effects: (c) => [
           {
             kind: 'damage',
             attribute: c.life,
-            amount: `${ref(c.main)} * 0.3 + rank * 2`,
+            amount: `${ref(c.main)} * 0.3 + skillLevel * 2`,
           },
         ],
       },
@@ -132,13 +132,13 @@ const CLASSES: ClassSpec[] = [
           'Galvanise les alliés : leur attribut principal augmente pendant trois tours.',
         ],
         rarity: 'uncommon',
-        maxRank: 3,
+        maxLevel: 3,
         active: { target: 'all-allies', cost: 4, cooldown: 3 },
         effects: (c) => [
           {
             kind: 'modify',
             attribute: c.main,
-            amount: 'rank + 1',
+            amount: 'skillLevel + 1',
             duration: 3,
           },
         ],
@@ -151,10 +151,10 @@ const CLASSES: ClassSpec[] = [
           'Reprend son souffle et récupère de la vie.',
         ],
         rarity: 'uncommon',
-        maxRank: 5,
+        maxLevel: 5,
         active: { target: 'self', cost: 0, cooldown: 4 },
         effects: (c) => [
-          { kind: 'heal', attribute: c.life, amount: 'level * 2 + rank * 5' },
+          { kind: 'heal', attribute: c.life, amount: 'level * 2 + skillLevel * 5' },
         ],
       },
       {
@@ -165,13 +165,13 @@ const CLASSES: ClassSpec[] = [
           'Toute la force du guerrier dans une frappe écrasante.',
         ],
         rarity: 'rare',
-        maxRank: 3,
+        maxLevel: 3,
         active: { target: 'one-enemy', cost: 6, cooldown: 3, success: { mode: 'threshold', value: 10 } },
         effects: (c) => [
           {
             kind: 'damage',
             attribute: c.life,
-            amount: `${ref(c.main)} * 1.2 + rank * 6`,
+            amount: `${ref(c.main)} * 1.2 + skillLevel * 6`,
           },
         ],
       },
@@ -225,13 +225,13 @@ const CLASSES: ClassSpec[] = [
           'Un trait de magie pure sur un ennemi.',
         ],
         rarity: 'common',
-        maxRank: 5,
+        maxLevel: 5,
         active: { target: 'one-enemy', cost: 2, cooldown: 0, success: { mode: 'threshold', value: 5 } },
         effects: (c) => [
           {
             kind: 'damage',
             attribute: c.life,
-            amount: `${ref(c.main)} * 0.6 + rank * 3`,
+            amount: `${ref(c.main)} * 0.6 + skillLevel * 3`,
           },
         ],
       },
@@ -243,13 +243,13 @@ const CLASSES: ClassSpec[] = [
           "Une lumière douce qui referme les blessures d'un allié.",
         ],
         rarity: 'common',
-        maxRank: 5,
+        maxLevel: 5,
         active: { target: 'one-ally', cost: 3, cooldown: 1 },
         effects: (c) => [
           {
             kind: 'heal',
             attribute: c.life,
-            amount: `${ref(c.main)} * 0.5 + rank * 4`,
+            amount: `${ref(c.main)} * 0.5 + skillLevel * 4`,
           },
         ],
       },
@@ -262,12 +262,12 @@ const CLASSES: ClassSpec[] = [
           'Une étude rigoureuse : augmente durablement le mana maximal.',
         ],
         rarity: 'common',
-        maxRank: 5,
+        maxLevel: 5,
         effects: (c) => [
           {
             kind: 'modify',
             attribute: c.mana!,
-            amount: 'rank * 4',
+            amount: 'skillLevel * 4',
             duration: 0,
           },
         ],
@@ -280,13 +280,13 @@ const CLASSES: ClassSpec[] = [
           'Une explosion de flammes qui embrase une zone.',
         ],
         rarity: 'uncommon',
-        maxRank: 5,
+        maxLevel: 5,
         active: { target: 'area', cost: 5, cooldown: 2, roll: { count: 2, faces: 6 }, success: { mode: 'threshold', value: 6 } },
         effects: (c) => [
           {
             kind: 'damage',
             attribute: c.life,
-            amount: `${ref(c.main)} * 0.8 + rank * 4`,
+            amount: `${ref(c.main)} * 0.8 + skillLevel * 4`,
           },
         ],
       },
@@ -298,13 +298,13 @@ const CLASSES: ClassSpec[] = [
           "Une barrière scintillante : votre vie maximale augmente pendant trois tours, davantage avec l'intelligence.",
         ],
         rarity: 'uncommon',
-        maxRank: 3,
+        maxLevel: 3,
         active: { target: 'self', cost: 4, cooldown: 4 },
         effects: (c) => [
           {
             kind: 'modify',
             attribute: c.life,
-            amount: `${ref(c.main)} * 0.5 + rank * 3`,
+            amount: `${ref(c.main)} * 0.5 + skillLevel * 3`,
             duration: 3,
           },
         ],
@@ -317,13 +317,13 @@ const CLASSES: ClassSpec[] = [
           'Fait tomber une pluie de roche enflammée sur tous les ennemis.',
         ],
         rarity: 'mythic',
-        maxRank: 3,
+        maxLevel: 3,
         active: { target: 'all-enemies', cost: 10, cooldown: 4, roll: { count: 3, faces: 6 }, success: { mode: 'threshold', value: 10 } },
         effects: (c) => [
           {
             kind: 'damage',
             attribute: c.life,
-            amount: `${ref(c.main)} * 1.2 + rank * 6`,
+            amount: `${ref(c.main)} * 1.2 + skillLevel * 6`,
           },
         ],
       },
@@ -371,13 +371,13 @@ const CLASSES: ClassSpec[] = [
           'Un coup de dague rapide et précis sur un ennemi.',
         ],
         rarity: 'common',
-        maxRank: 5,
+        maxLevel: 5,
         active: { target: 'one-enemy', cost: 1, cooldown: 0, success: { mode: 'threshold', value: 5 } },
         effects: (c) => [
           {
             kind: 'damage',
             attribute: c.life,
-            amount: `${ref(c.main)} * 0.4 + rank * 2`,
+            amount: `${ref(c.main)} * 0.4 + skillLevel * 2`,
           },
         ],
       },
@@ -389,9 +389,9 @@ const CLASSES: ClassSpec[] = [
           'Léger sur ses appuis : augmente durablement votre attribut principal.',
         ],
         rarity: 'common',
-        maxRank: 5,
+        maxLevel: 5,
         effects: (c) => [
-          { kind: 'modify', attribute: c.main, amount: 'rank', duration: 0 },
+          { kind: 'modify', attribute: c.main, amount: 'skillLevel', duration: 0 },
         ],
       },
       {
@@ -402,13 +402,13 @@ const CLASSES: ClassSpec[] = [
           "Une lame enduite de poison qui mord plus profond que l'acier seul.",
         ],
         rarity: 'uncommon',
-        maxRank: 5,
+        maxLevel: 5,
         active: { target: 'one-enemy', cost: 2, cooldown: 2, success: { mode: 'threshold', value: 8 } },
         effects: (c) => [
           {
             kind: 'damage',
             attribute: c.life,
-            amount: `${ref(c.main)} * 0.3 + rank * 2`,
+            amount: `${ref(c.main)} * 0.3 + skillLevel * 2`,
           },
         ],
       },
@@ -420,13 +420,13 @@ const CLASSES: ClassSpec[] = [
           "Se glisse dans l'ombre : votre attribut principal augmente pendant deux tours.",
         ],
         rarity: 'uncommon',
-        maxRank: 3,
+        maxLevel: 3,
         active: { target: 'self', cost: 3, cooldown: 3 },
         effects: (c) => [
           {
             kind: 'modify',
             attribute: c.main,
-            amount: 'rank * 2',
+            amount: 'skillLevel * 2',
             duration: 2,
           },
         ],
@@ -439,13 +439,13 @@ const CLASSES: ClassSpec[] = [
           'Une frappe mortelle sur un ennemi qui ne vous a pas vu venir.',
         ],
         rarity: 'rare',
-        maxRank: 3,
+        maxLevel: 3,
         active: { target: 'one-enemy', cost: 6, cooldown: 4, success: { mode: 'threshold', value: 12 } },
         effects: (c) => [
           {
             kind: 'damage',
             attribute: c.life,
-            amount: `${ref(c.main)} * 1.5 + rank * 5`,
+            amount: `${ref(c.main)} * 1.5 + skillLevel * 5`,
           },
         ],
       },
@@ -522,7 +522,7 @@ export function buildStarterClasses(
         description: entry.description[at],
         rarity: entry.rarity,
         type: entry.active ? 'active' : 'passive',
-        maxRank: entry.maxRank,
+        maxLevel: entry.maxLevel,
         pointCost: 1,
         ...(entry.active
           ? {
@@ -542,9 +542,9 @@ export function buildStarterClasses(
       .filter((node) => idByKey.has(node.key))
       .map((node) => ({
         skillId: idByKey.get(node.key)!,
-        requires: (node.requires ?? []).map(([key, rank]) => ({
+        requires: (node.requires ?? []).map(([key, level]) => ({
           skillId: idByKey.get(key)!,
-          rank,
+          level,
         })),
         minLevel: node.minLevel,
         column: node.column,

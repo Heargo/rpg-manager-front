@@ -12,9 +12,9 @@ const skills: Skill[] = ['a', 'b', 'c', 'd', 'e', 'f'].map((id, index) => ({
   description: '',
   rarity: 'common',
   type: 'passive',
-  maxRank: 1 + (index % 3),
+  maxLevel: 1 + (index % 3),
   pointCost: 1,
-  effects: [{ kind: 'modify', attribute: 'Life', amount: 'rank', duration: 0 }],
+  effects: [{ kind: 'modify', attribute: 'Life', amount: 'skillLevel', duration: 0 }],
 }));
 
 /** `generateClass(source, attributes, skills, words)`: words come from `public/i18n/generators/<lang>/classes.json`. */

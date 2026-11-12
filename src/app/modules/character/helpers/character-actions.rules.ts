@@ -31,7 +31,7 @@ export type CharacterAction =
   | { kind: 'learn-skill'; skillId: string }
   | { kind: 'refund-skill'; skillId: string }
   | { kind: 'grant-skill-points'; amount: number }
-  | { kind: 'set-skill'; skillId: string; rank: number }
+  | { kind: 'set-skill'; skillId: string; level: number }
   | { kind: 'set-class'; classId: string };
 
 export type CharacterActionKind = CharacterAction['kind'];
@@ -121,8 +121,8 @@ export function parseCharacterAction(
     case 'refund-skill':
       return text(p['skillId']) ? { kind, skillId: p['skillId'] } : null;
     case 'set-skill':
-      return text(p['skillId']) && Number.isInteger(p['rank'])
-        ? { kind, skillId: p['skillId'], rank: p['rank'] as number }
+      return text(p['skillId']) && Number.isInteger(p['level'])
+        ? { kind, skillId: p['skillId'], level: p['level'] as number }
         : null;
     case 'set-class':
       return text(p['classId']) ? { kind, classId: p['classId'] } : null;
@@ -289,31 +289,31 @@ export function applyCharacterAction<T extends Sheet = Character>(
       const status = treeNodeStates(tree, character).find(
         (entry) => entry.skillId === action.skillId,
       )!;
-      const rank = rankOf(character, action.skillId);
+      const level = levelOf(character, action.skillId);
       if (status.state === 'locked')
         return fail('character.errors.skillLocked');
-      if (rank >= skill.maxRank) return fail('character.errors.skillMaxRank');
+      if (level >= skill.maxLevel) return fail('character.errors.skillMaxLevel');
       if (character.skillPoints < skill.pointCost)
         return fail('character.errors.noSkillPoints');
       return {
         ok: true,
         character: {
-          ...withRank(character, action.skillId, rank + 1),
+          ...withLevel(character, action.skillId, level + 1),
           skillPoints: character.skillPoints - skill.pointCost,
         },
       };
     }
     case 'refund-skill': {
-      const rank = rankOf(character, action.skillId);
-      if (rank < 1) return fail('character.errors.skillNotLearned');
+      const level = levelOf(character, action.skillId);
+      if (level < 1) return fail('character.errors.skillNotLearned');
       const tree =
         catalogue.classes.find((entry) => entry.id === character.classId)
           ?.tree ?? [];
       const needed = tree.some(
         (node) =>
-          rankOf(character, node.skillId) > 0 &&
+          levelOf(character, node.skillId) > 0 &&
           node.requires.some(
-            (req) => req.skillId === action.skillId && req.rank > rank - 1,
+            (req) => req.skillId === action.skillId && req.level > level - 1,
           ),
       );
       if (needed) return fail('character.errors.skillNeeded');
@@ -324,7 +324,7 @@ export function applyCharacterAction<T extends Sheet = Character>(
       return {
         ok: true,
         character: {
-          ...withRank(character, action.skillId, rank - 1),
+          ...withLevel(character, action.skillId, level - 1),
           skillPoints: character.skillPoints + back,
         },
       };
@@ -334,11 +334,11 @@ export function applyCharacterAction<T extends Sheet = Character>(
         (entry) => entry.id === action.skillId,
       );
       if (!skill) return fail('character.errors.unknownSkill');
-      if (action.rank < 0 || action.rank > skill.maxRank)
-        return fail('character.errors.invalidRank');
+      if (action.level < 0 || action.level > skill.maxLevel)
+        return fail('character.errors.invalidLevel');
       return {
         ok: true,
-        character: withRank(character, action.skillId, action.rank),
+        character: withLevel(character, action.skillId, action.level),
       };
     }
     case 'set-class': {
@@ -354,7 +354,7 @@ export function applyCharacterAction<T extends Sheet = Character>(
       for (const entry of character.skills)
         if (treeIds.has(entry.skillId))
           refunded +=
-            entry.rank *
+            entry.level *
             (catalogue.skills.find((s) => s.id === entry.skillId)?.pointCost ??
               0);
       return {
@@ -482,20 +482,20 @@ function setAttribute<T extends Sheet>(
   return { ...character, attributes };
 }
 
-function rankOf(sheet: Sheet, skillId: string): number {
-  return sheet.skills.find((entry) => entry.skillId === skillId)?.rank ?? 0;
+function levelOf(sheet: Sheet, skillId: string): number {
+  return sheet.skills.find((entry) => entry.skillId === skillId)?.level ?? 0;
 }
 
-/** The sheet with one skill at a rank (added at the end, replaced in place, or removed at 0). */
-function withRank<T extends Sheet>(sheet: T, skillId: string, rank: number): T {
+/** The sheet with one skill at a level (added at the end, replaced in place, or removed at 0). */
+function withLevel<T extends Sheet>(sheet: T, skillId: string, level: number): T {
   const exists = sheet.skills.some((entry) => entry.skillId === skillId);
   const skills =
-    rank < 1
+    level < 1
       ? sheet.skills.filter((entry) => entry.skillId !== skillId)
       : exists
         ? sheet.skills.map((entry) =>
-            entry.skillId === skillId ? { ...entry, rank } : entry,
+            entry.skillId === skillId ? { ...entry, level } : entry,
           )
-        : [...sheet.skills, { skillId, rank }];
+        : [...sheet.skills, { skillId, level }];
   return { ...sheet, skills };
 }

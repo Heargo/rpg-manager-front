@@ -267,12 +267,12 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 <div class="entry" data-field="skill-entry">
                   <span class="name">{{ skillName(entry.skillId) }}</span>
                   <p-inputnumber
-                    data-field="skill-rank"
+                    data-field="skill-level"
                     [min]="0"
-                    [max]="skillMaxRank(entry.skillId)"
+                    [max]="skillMaxLevel(entry.skillId)"
                     [showButtons]="true"
-                    [ngModel]="entry.rank"
-                    (ngModelChange)="setSkillRank(entry.skillId, $event)"
+                    [ngModel]="entry.level"
+                    (ngModelChange)="setSkillLevel(entry.skillId, $event)"
                   />
                   <button
                     pButton
@@ -283,7 +283,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                     severity="danger"
                     [text]="true"
                     [attr.aria-label]="'npc.editor.removeSkill' | transloco"
-                    (click)="setSkillRank(entry.skillId, 0)"
+                    (click)="setSkillLevel(entry.skillId, 0)"
                   ></button>
                 </div>
               }
@@ -634,12 +634,12 @@ export class NpcEditorComponent {
       );
   }
 
-  protected setSkillRank(skillId: string, rank: number | null): void {
+  protected setSkillLevel(skillId: string, level: number | null): void {
     this.setDraft(
       this.editor.setSkill(
         this.draft(),
         skillId,
-        Math.trunc(rank ?? 0),
+        Math.trunc(level ?? 0),
         this.world(),
       ),
     );
@@ -649,8 +649,8 @@ export class NpcEditorComponent {
     return this.world().skills.find((s) => s.id === skillId)?.name ?? skillId;
   }
 
-  protected skillMaxRank(skillId: string): number {
-    return this.world().skills.find((s) => s.id === skillId)?.maxRank ?? 1;
+  protected skillMaxLevel(skillId: string): number {
+    return this.world().skills.find((s) => s.id === skillId)?.maxLevel ?? 1;
   }
 
   protected addItem(itemId: string | null): void {

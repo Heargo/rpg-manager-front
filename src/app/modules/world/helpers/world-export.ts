@@ -192,8 +192,8 @@ function validateWorld(world: unknown, errors: string[]): void {
     list(character['skills'], `${path}.skills`, errors, (skill, skillPath) => {
       if (typeof skill['skillId'] !== 'string')
         errors.push(`${skillPath}.skillId must be a string`);
-      if (!Number.isInteger(skill['rank']) || (skill['rank'] as number) < 1)
-        errors.push(`${skillPath}.rank must be an integer of 1 or more`);
+      if (!Number.isInteger(skill['level']) || (skill['level'] as number) < 1)
+        errors.push(`${skillPath}.level must be an integer of 1 or more`);
     });
     list(
       character['attributes'],
@@ -264,8 +264,8 @@ function validateWorld(world: unknown, errors: string[]): void {
     list(npc['skills'], `${path}.skills`, errors, (skill, skillPath) => {
       if (typeof skill['skillId'] !== 'string')
         errors.push(`${skillPath}.skillId must be a string`);
-      if (!Number.isInteger(skill['rank']) || (skill['rank'] as number) < 1)
-        errors.push(`${skillPath}.rank must be an integer of 1 or more`);
+      if (!Number.isInteger(skill['level']) || (skill['level'] as number) < 1)
+        errors.push(`${skillPath}.level must be an integer of 1 or more`);
     });
     list(npc['attributes'], `${path}.attributes`, errors, () => undefined);
     list(npc['inventory'], `${path}.inventory`, errors, (entry, entryPath) => {

@@ -10,8 +10,8 @@ import { ClassEditorComponent } from './class-editor.component';
 /** `WordListService.loadClassWords(lang)` is mocked. `[data-action="random"]` fills the form, the JSON and the tree. */
 describe('ClassEditorComponent Random', () => {
   const skill = (id: string): Skill => ({
-    id, name: id, description: '', rarity: 'common', type: 'passive', maxRank: 3, pointCost: 1,
-    effects: [{ kind: 'modify', attribute: 'Life', amount: 'rank', duration: 0 }],
+    id, name: id, description: '', rarity: 'common', type: 'passive', maxLevel: 3, pointCost: 1,
+    effects: [{ kind: 'modify', attribute: 'Life', amount: 'skillLevel', duration: 0 }],
   });
   const world: World = {
     ...createSandboxWorld((key) => key),

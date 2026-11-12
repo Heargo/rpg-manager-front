@@ -6,13 +6,13 @@ import { SkillCatalogueComponent } from './skill-catalogue.component';
 
 const fireball: Skill = {
   id: 'fb', name: 'Fireball', description: 'Burns everything in a small area.', rarity: 'rare',
-  type: 'active', maxRank: 3, pointCost: 2, target: 'area', cost: { attribute: 'Mana', amount: 7 }, cooldown: 4,
-  effects: [{ kind: 'damage', attribute: 'Life', amount: 'rank * 5' }],
+  type: 'active', maxLevel: 3, pointCost: 2, target: 'area', cost: { attribute: 'Mana', amount: 7 }, cooldown: 4,
+  effects: [{ kind: 'damage', attribute: 'Life', amount: 'skillLevel * 5' }],
 };
 const toughness: Skill = {
   id: 'tg', name: 'Toughness', description: 'Harder to hurt.', rarity: 'common',
-  type: 'passive', maxRank: 5, pointCost: 1,
-  effects: [{ kind: 'modify', attribute: 'Life', amount: 'rank', duration: 0 }],
+  type: 'passive', maxLevel: 5, pointCost: 1,
+  effects: [{ kind: 'modify', attribute: 'Life', amount: 'skillLevel', duration: 0 }],
 };
 
 /**

@@ -12,15 +12,15 @@ import { ClassEditorComponent } from './class-editor.component';
  * a node per tree skill `[data-node="<skillId>"]` with `data-column` / `data-row`, `data-invalid="true"` when a
  * validation issue involves it, a link per prerequisite `[data-link="<prereqId>><nodeId>"]` (clickable to select it).
  * Palette: `[data-palette-item="<skillId>"]` for skills not in the tree. Clicking a node opens `[data-inspector]` with
- * `[data-field="node-min-level"]` (p-inputnumber), per prerequisite `[data-field="requirement-rank"]` (p-inputnumber) and
+ * `[data-field="node-min-level"]` (p-inputnumber), per prerequisite `[data-field="requirement-level"]` (p-inputnumber) and
  * `[data-action="remove-requirement"]`, plus `[data-action="remove-node"]`; a selected link shows
  * `[data-action="delete-link"]`. Public drop handlers: `onPaletteDrop(skillId, cell)`, `onNodeDrop(skillId, cell)`,
  * `onLinkDrop(fromSkillId, toSkillId)`. `[data-action="save"]` emits the class, ignored while issues remain.
  */
 describe('ClassEditorComponent', () => {
   const skill = (id: string): Skill => ({
-    id, name: id, description: '', rarity: 'common', type: 'passive', maxRank: 3, pointCost: 1,
-    effects: [{ kind: 'modify', attribute: 'Life', amount: 'rank', duration: 0 }],
+    id, name: id, description: '', rarity: 'common', type: 'passive', maxLevel: 3, pointCost: 1,
+    effects: [{ kind: 'modify', attribute: 'Life', amount: 'skillLevel', duration: 0 }],
   });
   const world: World = {
     ...createSandboxWorld((key) => key),
@@ -31,7 +31,7 @@ describe('ClassEditorComponent', () => {
     id: 'c1', name: 'Warrior', description: 'Fights.',
     tree: [
       { skillId: 's1', requires: [], minLevel: 1, column: 0, row: 0 },
-      { skillId: 's2', requires: [{ skillId: 's1', rank: 1 }], minLevel: 2, column: 1, row: 0 },
+      { skillId: 's2', requires: [{ skillId: 's1', level: 1 }], minLevel: 2, column: 1, row: 0 },
     ],
   };
 
@@ -119,14 +119,14 @@ describe('ClassEditorComponent', () => {
     expect(saved[0].tree[1]).toMatchObject({ skillId: 's2', column: 0, row: 0 });
   });
 
-  it('makes a prerequisite of rank 1 when a node is dropped on another, and draws the link', async () => {
+  it('makes a prerequisite of level 1 when a node is dropped on another, and draws the link', async () => {
     const { fixture, el, save, saved } = await setup(warrior);
     drops(fixture).onPaletteDrop('s3', cell(2, 0));
     drops(fixture).onLinkDrop('s2', 's3');
     await fixture.whenStable();
     expect(el.querySelector('[data-link="s2>s3"]')).not.toBeNull();
     await save();
-    expect(saved[0].tree[2].requires).toEqual([{ skillId: 's2', rank: 1 }]);
+    expect(saved[0].tree[2].requires).toEqual([{ skillId: 's2', level: 1 }]);
   });
 
   it('refuses a drop link that would make a cycle', async () => {
@@ -137,16 +137,16 @@ describe('ClassEditorComponent', () => {
     expect(el.querySelector('[data-field="error"]')).toBeNull();
   });
 
-  it('opens the inspector on a selected node and edits its min level and prerequisite rank', async () => {
+  it('opens the inspector on a selected node and edits its min level and prerequisite level', async () => {
     const { el, node, click, type, save, saved } = await setup(warrior);
     expect(el.querySelector('[data-inspector]')).toBeNull();
     await click('', node('s2'));
     const inspector = el.querySelector<HTMLElement>('[data-inspector]')!;
     expect(inspector.querySelector<HTMLInputElement>('[data-field="node-min-level"] input')!.value).toBe('2');
     await type('node-min-level', '4', inspector);
-    await type('requirement-rank', '3', inspector);
+    await type('requirement-level', '3', inspector);
     await save();
-    expect(saved[0].tree[1]).toMatchObject({ skillId: 's2', requires: [{ skillId: 's1', rank: 3 }], minLevel: 4 });
+    expect(saved[0].tree[1]).toMatchObject({ skillId: 's2', requires: [{ skillId: 's1', level: 3 }], minLevel: 4 });
   });
 
   it('removes a prerequisite from the inspector', async () => {
@@ -181,7 +181,7 @@ describe('ClassEditorComponent', () => {
   it('highlights the nodes involved in a validation error and does not save', async () => {
     const outside: CharacterClass = {
       ...warrior,
-      tree: [warrior.tree[0], { ...warrior.tree[1], requires: [{ skillId: 's3', rank: 1 }] }],
+      tree: [warrior.tree[0], { ...warrior.tree[1], requires: [{ skillId: 's3', level: 1 }] }],
     };
     const { el, node, save, saved } = await setup(outside);
     expect(el.querySelector('[data-field="error"]')).not.toBeNull();
@@ -196,8 +196,8 @@ describe('ClassEditorComponent', () => {
       ...warrior,
       tree: [
         { skillId: 's1', requires: [], minLevel: 1, column: 0, row: 0 },
-        { skillId: 's2', requires: [{ skillId: 's3', rank: 1 }], minLevel: 1, column: 1, row: 0 },
-        { skillId: 's3', requires: [{ skillId: 's2', rank: 1 }], minLevel: 1, column: 2, row: 0 },
+        { skillId: 's2', requires: [{ skillId: 's3', level: 1 }], minLevel: 1, column: 1, row: 0 },
+        { skillId: 's3', requires: [{ skillId: 's2', level: 1 }], minLevel: 1, column: 2, row: 0 },
       ],
     };
     const { el, save, saved } = await setup(cycle);

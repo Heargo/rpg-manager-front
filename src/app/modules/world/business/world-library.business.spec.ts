@@ -126,6 +126,10 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
     expect(world.classes.every((c) => c.tree.every((n) => world.skills.some((s) => s.id === n.skillId)))).toBe(true);
     expect(new Set(world.skills.map((s) => s.id)).size).toBe(world.skills.length);
     expect(world.items).toEqual([]);
+    expect(world.skills.every((s) => typeof s.maxLevel === 'number' && !('maxRank' in s))).toBe(true);
+    expect(world.skills.every((s) => s.effects.every((e) => !/\brank\b/.test(e.amount)))).toBe(true);
+    expect(world.skills.some((s) => s.effects.some((e) => /\bskillLevel\b/.test(e.amount)))).toBe(true);
+    expect(world.classes.every((c) => c.tree.every((n) => n.requires.every((r) => typeof r.level === 'number' && !('rank' in r))))).toBe(true);
     const stored = await library.get(world.id);
     expect(stored?.classes).toHaveLength(3);
     expect(stored?.skills).toHaveLength(world.skills.length);

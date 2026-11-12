@@ -18,4 +18,12 @@ describe('buildClassPrompt', () => {
     expect(prompt).not.toContain('JSON only');
     for (const word of ['JSON', 'tree', 'Vie']) expect(prompt).toContain(word);
   });
+
+  it('describes a prerequisite as { skillId, level } and never mentions rank', () => {
+    for (const language of ['en', 'fr'] as const) {
+      const prompt = buildClassPrompt(['Life'], language);
+      expect(prompt).toContain('"requires": [{ "skillId": string, "level": number }]');
+      expect(prompt).not.toContain('rank');
+    }
+  });
 });

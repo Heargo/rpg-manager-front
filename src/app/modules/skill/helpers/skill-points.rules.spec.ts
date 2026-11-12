@@ -12,9 +12,9 @@ import { createWorld } from '../../world/helpers/world.factory';
 import { Character } from '../../world/models/world';
 import { Skill } from '../models/skill';
 
-const skill = (id: string, maxRank: number, pointCost: number, type: Skill['type'] = 'active'): Skill => ({
-  id, name: id, description: '', rarity: 'common', type, maxRank, pointCost,
-  effects: [{ kind: 'damage', attribute: 'Life', amount: 'rank' }],
+const skill = (id: string, maxLevel: number, pointCost: number, type: Skill['type'] = 'active'): Skill => ({
+  id, name: id, description: '', rarity: 'common', type, maxLevel, pointCost,
+  effects: [{ kind: 'damage', attribute: 'Life', amount: 'skillLevel' }],
 });
 
 const skills = [skill('bolt', 3, 2), skill('strike', 2, 1), skill('aura', 1, 1, 'passive'), skill('taught', 5, 4), skill('other', 1, 1)];
@@ -25,8 +25,8 @@ const mage: CharacterClass = {
   description: '',
   tree: [
     { skillId: 'bolt', requires: [], minLevel: 1, column: 0, row: 0 },
-    { skillId: 'strike', requires: [{ skillId: 'bolt', rank: 2 }], minLevel: 2, column: 1, row: 0 },
-    { skillId: 'aura', requires: [{ skillId: 'strike', rank: 1 }], minLevel: 1, column: 2, row: 0 },
+    { skillId: 'strike', requires: [{ skillId: 'bolt', level: 2 }], minLevel: 2, column: 1, row: 0 },
+    { skillId: 'aura', requires: [{ skillId: 'strike', level: 1 }], minLevel: 1, column: 2, row: 0 },
   ],
 };
 const warrior: CharacterClass = {
@@ -86,10 +86,10 @@ describe('skill action kinds', () => {
     expect(parse('learn-skill', { characterId: 'c', skillId: 'bolt' })).toEqual({ kind: 'learn-skill', skillId: 'bolt' });
     expect(parse('refund-skill', { skillId: 'bolt' })).toEqual({ kind: 'refund-skill', skillId: 'bolt' });
     expect(parse('grant-skill-points', { amount: 3 })).toEqual({ kind: 'grant-skill-points', amount: 3 });
-    expect(parse('set-skill', { skillId: 'bolt', rank: 2 })).toEqual({ kind: 'set-skill', skillId: 'bolt', rank: 2 });
+    expect(parse('set-skill', { skillId: 'bolt', level: 2 })).toEqual({ kind: 'set-skill', skillId: 'bolt', level: 2 });
     expect(parse('set-class', { classId: 'mage' })).toEqual({ kind: 'set-class', classId: 'mage' });
     expect(parse('learn-skill', { skillId: 3 })).toBeNull();
-    expect(parse('set-skill', { skillId: 'bolt', rank: 1.5 })).toBeNull();
+    expect(parse('set-skill', { skillId: 'bolt', level: 1.5 })).toBeNull();
     expect(parse('set-class', {})).toBeNull();
   });
 
@@ -116,13 +116,13 @@ describe('level-up skill points', () => {
 });
 
 describe('learn-skill', () => {
-  it('raises the rank by 1 and spends pointCost', () => {
+  it('raises the level by 1 and spends pointCost', () => {
     expect(act(sheet(), { kind: 'learn-skill', skillId: 'bolt' })).toMatchObject({
       ok: true,
-      character: { skillPoints: 2, skills: [{ skillId: 'bolt', rank: 1 }] },
+      character: { skillPoints: 2, skills: [{ skillId: 'bolt', level: 1 }] },
     });
-    const second = act(sheet({ skills: [{ skillId: 'bolt', rank: 1 }] }), { kind: 'learn-skill', skillId: 'bolt' });
-    expect(second).toMatchObject({ ok: true, character: { skillPoints: 2, skills: [{ skillId: 'bolt', rank: 2 }] } });
+    const second = act(sheet({ skills: [{ skillId: 'bolt', level: 1 }] }), { kind: 'learn-skill', skillId: 'bolt' });
+    expect(second).toMatchObject({ ok: true, character: { skillPoints: 2, skills: [{ skillId: 'bolt', level: 2 }] } });
   });
 
   it('is refused without a class or for a skill outside the class tree', () => {
@@ -132,42 +132,42 @@ describe('learn-skill', () => {
   });
 
   it('is refused while a prerequisite or the min level is missing', () => {
-    const level2 = sheet({ level: 2, skillPoints: 9, skills: [{ skillId: 'bolt', rank: 1 }] });
+    const level2 = sheet({ level: 2, skillPoints: 9, skills: [{ skillId: 'bolt', level: 1 }] });
     expect(act(level2, { kind: 'learn-skill', skillId: 'strike' })).toEqual({ ok: false, error: 'character.errors.skillLocked' });
-    const level1 = sheet({ level: 1, skillPoints: 9, skills: [{ skillId: 'bolt', rank: 2 }] });
+    const level1 = sheet({ level: 1, skillPoints: 9, skills: [{ skillId: 'bolt', level: 2 }] });
     expect(act(level1, { kind: 'learn-skill', skillId: 'strike' })).toEqual({ ok: false, error: 'character.errors.skillLocked' });
-    const ready = sheet({ level: 2, skillPoints: 9, skills: [{ skillId: 'bolt', rank: 2 }] });
+    const ready = sheet({ level: 2, skillPoints: 9, skills: [{ skillId: 'bolt', level: 2 }] });
     expect(act(ready, { kind: 'learn-skill', skillId: 'strike' })).toMatchObject({ ok: true });
   });
 
-  it('is refused at max rank and without enough points', () => {
-    const maxed = sheet({ skillPoints: 9, skills: [{ skillId: 'bolt', rank: 3 }] });
-    expect(act(maxed, { kind: 'learn-skill', skillId: 'bolt' })).toEqual({ ok: false, error: 'character.errors.skillMaxRank' });
+  it('is refused at max level and without enough points', () => {
+    const maxed = sheet({ skillPoints: 9, skills: [{ skillId: 'bolt', level: 3 }] });
+    expect(act(maxed, { kind: 'learn-skill', skillId: 'bolt' })).toEqual({ ok: false, error: 'character.errors.skillMaxLevel' });
     expect(act(sheet({ skillPoints: 1 }), { kind: 'learn-skill', skillId: 'bolt' })).toEqual({ ok: false, error: 'character.errors.noSkillPoints' });
   });
 });
 
 describe('refund-skill', () => {
-  it('lowers the rank and gives pointCost back; the last rank removes the skill', () => {
-    const two = sheet({ skillPoints: 0, skills: [{ skillId: 'bolt', rank: 2 }] });
+  it('lowers the level and gives pointCost back; the last level removes the skill', () => {
+    const two = sheet({ skillPoints: 0, skills: [{ skillId: 'bolt', level: 2 }] });
     const once = act(two, { kind: 'refund-skill', skillId: 'bolt' });
-    expect(once).toMatchObject({ ok: true, character: { skillPoints: 2, skills: [{ skillId: 'bolt', rank: 1 }] } });
-    const last = act(sheet({ skillPoints: 0, skills: [{ skillId: 'bolt', rank: 1 }] }), { kind: 'refund-skill', skillId: 'bolt' });
+    expect(once).toMatchObject({ ok: true, character: { skillPoints: 2, skills: [{ skillId: 'bolt', level: 1 }] } });
+    const last = act(sheet({ skillPoints: 0, skills: [{ skillId: 'bolt', level: 1 }] }), { kind: 'refund-skill', skillId: 'bolt' });
     expect(last).toMatchObject({ ok: true, character: { skillPoints: 2, skills: [] } });
   });
 
-  it('is refused while another learned node needs that rank', () => {
-    const learned = sheet({ level: 2, skills: [{ skillId: 'bolt', rank: 2 }, { skillId: 'strike', rank: 1 }] });
+  it('is refused while another learned node needs that level', () => {
+    const learned = sheet({ level: 2, skills: [{ skillId: 'bolt', level: 2 }, { skillId: 'strike', level: 1 }] });
     expect(act(learned, { kind: 'refund-skill', skillId: 'bolt' })).toEqual({ ok: false, error: 'character.errors.skillNeeded' });
-    const higher = sheet({ level: 2, skills: [{ skillId: 'bolt', rank: 3 }, { skillId: 'strike', rank: 1 }] });
+    const higher = sheet({ level: 2, skills: [{ skillId: 'bolt', level: 3 }, { skillId: 'strike', level: 1 }] });
     expect(act(higher, { kind: 'refund-skill', skillId: 'bolt' })).toMatchObject({ ok: true });
   });
 
   it('gives no points back for a skill taught outside the tree, and refuses an unlearned one', () => {
-    const taught = sheet({ skillPoints: 0, skills: [{ skillId: 'taught', rank: 2 }] });
+    const taught = sheet({ skillPoints: 0, skills: [{ skillId: 'taught', level: 2 }] });
     expect(act(taught, { kind: 'refund-skill', skillId: 'taught' })).toMatchObject({
       ok: true,
-      character: { skillPoints: 0, skills: [{ skillId: 'taught', rank: 1 }] },
+      character: { skillPoints: 0, skills: [{ skillId: 'taught', level: 1 }] },
     });
     expect(act(sheet(), { kind: 'refund-skill', skillId: 'bolt' })).toEqual({ ok: false, error: 'character.errors.skillNotLearned' });
   });
@@ -182,19 +182,19 @@ describe('grant-skill-points', () => {
 });
 
 describe('set-skill', () => {
-  it('gives any catalogue skill at any rank for free; 0 removes it', () => {
-    const given = act(sheet(), { kind: 'set-skill', skillId: 'taught', rank: 4 });
-    expect(given).toMatchObject({ ok: true, character: { skillPoints: 4, skills: [{ skillId: 'taught', rank: 4 }] } });
-    const other = act(sheet({ classId: undefined }), { kind: 'set-skill', skillId: 'strike', rank: 2 });
-    expect(other).toMatchObject({ ok: true, character: { skills: [{ skillId: 'strike', rank: 2 }] } });
-    const removed = act(sheet({ skills: [{ skillId: 'taught', rank: 4 }] }), { kind: 'set-skill', skillId: 'taught', rank: 0 });
+  it('gives any catalogue skill at any level for free; 0 removes it', () => {
+    const given = act(sheet(), { kind: 'set-skill', skillId: 'taught', level: 4 });
+    expect(given).toMatchObject({ ok: true, character: { skillPoints: 4, skills: [{ skillId: 'taught', level: 4 }] } });
+    const other = act(sheet({ classId: undefined }), { kind: 'set-skill', skillId: 'strike', level: 2 });
+    expect(other).toMatchObject({ ok: true, character: { skills: [{ skillId: 'strike', level: 2 }] } });
+    const removed = act(sheet({ skills: [{ skillId: 'taught', level: 4 }] }), { kind: 'set-skill', skillId: 'taught', level: 0 });
     expect(removed).toMatchObject({ ok: true, character: { skills: [], skillPoints: 4 } });
   });
 
-  it('is refused for an unknown skill or a rank above max or below 0', () => {
-    expect(act(sheet(), { kind: 'set-skill', skillId: 'nope', rank: 1 })).toEqual({ ok: false, error: 'character.errors.unknownSkill' });
-    expect(act(sheet(), { kind: 'set-skill', skillId: 'bolt', rank: 4 })).toEqual({ ok: false, error: 'character.errors.invalidRank' });
-    expect(act(sheet(), { kind: 'set-skill', skillId: 'bolt', rank: -1 })).toEqual({ ok: false, error: 'character.errors.invalidRank' });
+  it('is refused for an unknown skill or a level above max or below 0', () => {
+    expect(act(sheet(), { kind: 'set-skill', skillId: 'nope', level: 1 })).toEqual({ ok: false, error: 'character.errors.unknownSkill' });
+    expect(act(sheet(), { kind: 'set-skill', skillId: 'bolt', level: 4 })).toEqual({ ok: false, error: 'character.errors.invalidLevel' });
+    expect(act(sheet(), { kind: 'set-skill', skillId: 'bolt', level: -1 })).toEqual({ ok: false, error: 'character.errors.invalidLevel' });
   });
 });
 
@@ -203,11 +203,11 @@ describe('set-class', () => {
     const learned = sheet({
       level: 2,
       skillPoints: 1,
-      skills: [{ skillId: 'bolt', rank: 2 }, { skillId: 'strike', rank: 1 }, { skillId: 'taught', rank: 3 }],
+      skills: [{ skillId: 'bolt', level: 2 }, { skillId: 'strike', level: 1 }, { skillId: 'taught', level: 3 }],
     });
     expect(act(learned, { kind: 'set-class', classId: 'warrior' })).toMatchObject({
       ok: true,
-      character: { classId: 'warrior', skillPoints: 1 + 2 * 2 + 1 * 1, skills: [{ skillId: 'taught', rank: 3 }] },
+      character: { classId: 'warrior', skillPoints: 1 + 2 * 2 + 1 * 1, skills: [{ skillId: 'taught', level: 3 }] },
     });
   });
 

@@ -320,12 +320,12 @@
       "levelZero": "Cet attribut est déjà au niveau 0.",
       "notInTree": "Cette compétence n'est pas dans l'arbre de la classe.",
       "skillLocked": "Cette compétence est encore verrouillée.",
-      "skillMaxRank": "Cette compétence est déjà au niveau maximum.",
+      "skillMaxLevel": "Cette compétence est déjà au niveau maximum.",
       "noSkillPoints": "Pas assez de points de compétence.",
       "skillNeeded": "Une autre compétence apprise a besoin de ce niveau.",
       "skillNotLearned": "Cette compétence n'est pas apprise.",
       "unknownSkill": "Cette compétence n'existe pas dans ce monde.",
-      "invalidRank": "Ce niveau n'est pas valide pour cette compétence."
+      "invalidLevel": "Ce niveau n'est pas valide pour cette compétence."
     },
     "sheet": {
       "playedBy": "Joué par {{ name }}",
@@ -1026,7 +1026,7 @@
       "deleteMessage": "{{ name }} sera retirée du monde.",
       "empty": "Aucune compétence trouvée.",
       "copySuffix": "(copie)",
-      "ranks": "Jusqu'au niveau {{ max }}, {{ cost }} point(s) par niveau",
+      "levels": "Jusqu'au niveau {{ max }}, {{ cost }} point(s) par niveau",
       "cooldown": "Recharge {{ turns }} tour(s)",
       "inUse": "{{ name }} est utilisée par {{ usages }} : retirez-la d'abord.",
       "failed": "La compétence n'a pas pu être enregistrée."
@@ -1044,15 +1044,15 @@
         "threshold": "Total d'au moins",
         "formula": "Formule"
       },
-      "successHint": "Variables : roll, rank, level, vos attributs par leur nom, et ceux de la cible en target_<nom>.",
-      "formulaHint": "Les montants sont des formules : rank, level et noms d'attributs (les maxima du lanceur).",
-      "preview": "Niveau 1 : {{ rank1 }} · Niveau {{ max }} : {{ maxRank }}",
+      "successHint": "Variables : roll, skillLevel, level, vos attributs par leur nom, et ceux de la cible en target_<nom>.",
+      "formulaHint": "Les montants sont des formules : skillLevel, level et noms d'attributs (les maxima du lanceur).",
+      "preview": "Niveau 1 : {{ level1 }} · Niveau {{ max }} : {{ maxLevel }}",
       "fields": {
         "name": "Nom",
         "description": "Description",
         "type": "Type",
         "rarity": "Rareté",
-        "maxRank": "Niveau max de la compétence (1 à 10)",
+        "maxLevel": "Niveau max de la compétence (1 à 10)",
         "pointCost": "Points de compétence par niveau",
         "target": "Cible",
         "cooldown": "Récupération (tours)",
@@ -1069,7 +1069,7 @@
       },
       "issue": {
         "name": "Donnez un nom à la compétence.",
-        "maxRank": "Le niveau max va de 1 à 10.",
+        "maxLevel": "Le niveau max va de 1 à 10.",
         "pointCost": "Un niveau coûte au moins 1 point de compétence.",
         "target": "Une compétence active a une cible ; une passive n'en a pas.",
         "effects_amount": "Le montant d'un effet n'est pas une formule valide.",
@@ -1077,7 +1077,7 @@
         "roll_count": "Lancez de 1 à 100 dés.",
         "roll_faces": "Un dé a de 2 à 1000 faces.",
         "success_value": "Le seuil est un nombre entier.",
-        "success_formula": "La formule de réussite n'est pas valide (roll, rank, level, noms d'attributs, target_<attribut>)."
+        "success_formula": "La formule de réussite n'est pas valide (roll, skillLevel, level, noms d'attributs, target_<attribut>)."
       }
     }
   },
@@ -1105,12 +1105,12 @@
       "startingItems": "Objets de départ",
       "tree": "Arbre de compétences",
       "skillList": "Compétences",
-      "maxRank": "Niveau max {{ count }}"
+      "maxLevel": "Niveau max {{ count }}"
     },
     "tree": {
-      "rank": "{{ rank }}/{{ max }}",
+      "level": "{{ level }}/{{ max }}",
       "missingLevel": "Niveau {{ level }}",
-      "missingRequires": "{{ name }} niveau {{ rank }}"
+      "missingRequires": "{{ name }} niveau {{ level }}"
     },
     "editor": {
       "tabForm": "Formulaire",
@@ -1133,7 +1133,7 @@
         "noMatch": "Aucune compétence ne correspond."
       },
       "node": {
-        "maxRank": "Max {{ count }}",
+        "maxLevel": "Max {{ count }}",
         "level": "Niv. {{ count }}"
       },
       "inspector": {
@@ -1147,7 +1147,7 @@
         "tree": "Arbre de compétences",
         "minLevel": "Niveau minimum",
         "requires": "Nécessite",
-        "rank": "Niveau de compétence requis"
+        "level": "Niveau de compétence requis"
       },
       "issue": {
         "required": "Donnez un nom à la classe.",
