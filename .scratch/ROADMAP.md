@@ -148,3 +148,21 @@ Tickets in `ui-feedback-2/` (F), developed on the `feedback` branch. Bugs and ch
 | 63 | **F14** Sprite colorizer (P0, P1) | none |
 | 64 | **F15** Sprite colorizer advanced (P2) | F14 |
 | 65 | **F16** P2P and encryption learning doc | none |
+
+## Phase 10: UI feedback round 3 (2026-11-12)
+
+Tickets in `ui-feedback-3/` (G). Bugs and small visual fixes first, then the shared image picker and the sheet preview, the skill editor last.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 66 | **G01** Landing: footer below the fold | none |
+| 67 | **G02** Wording: credits AI note, "niveau de compétence" | none |
+| 68 | **G03** Item catalogue: wider price slider | none |
+| 69 | **G04** Skill and class lists: one card per entry | none |
+| 70 | **G05** Tools menu per state, bordeaux Close button | none |
+| 71 | **G06** World rules: paired fields on one line | none |
+| 72 | **G07** Empty image picker | none |
+| 73 | **G08** Sheet preview: Mage by default, grant skill points | none |
+| 73b | **G11** Rank becomes skill level in the code | G02 |
+| 74 | **G09** Skill editor: readable form, variables help | G11 |
+| 75 | **G10** Formula presets for skills | G09 |
