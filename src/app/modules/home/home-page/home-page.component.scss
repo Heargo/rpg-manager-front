@@ -1,15 +1,14 @@
 .below {
-  display: flex;
-  flex-direction: column;
-  /* content fills the viewport under the nav bar; the footer is below the fold */
-  min-height: calc(100vh - 60px - 1rem);
-  min-height: calc(100svh - 60px - 1rem);
   /* cancel the global body margin so the footer touches the bottom edge */
   margin-bottom: -0.5rem;
 }
 
 .content {
-  flex: 1;
+  /* the content alone fills the viewport under the nav bar (about 3.5rem with the body
+     margin), so the footer always starts below the fold */
+  box-sizing: border-box;
+  min-height: calc(100vh - 2.5rem);
+  min-height: calc(100svh - 2.5rem);
   width: 100%;
   max-width: 64rem;
   margin-inline: auto;
