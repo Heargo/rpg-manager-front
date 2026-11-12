@@ -166,3 +166,4 @@ Tickets in `ui-feedback-3/` (G). Bugs and small visual fixes first, then the sha
 | 73b | **G11** Rank becomes skill level in the code | G02 |
 | 74 | **G09** Skill editor: readable form, variables help | G11 |
 | 75 | **G10** Formula presets for skills | G09 |
+| 76 | **G12** Skill form: modern layout | G09 |

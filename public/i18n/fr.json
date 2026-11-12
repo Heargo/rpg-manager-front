@@ -1065,7 +1065,9 @@
         "rollFaces": "Faces des dés",
         "successMode": "Réussite",
         "successValue": "Réussit quand le total atteint",
-        "successFormula": "Réussit quand ceci vaut 0 ou plus"
+        "successFormula": "Réussit quand ceci vaut 0 ou plus",
+        "kind": "Type d'effet",
+        "attribute": "Attribut visé"
       },
       "issue": {
         "name": "Donnez un nom à la compétence.",
@@ -1099,8 +1101,11 @@
         "identity": "Identité",
         "cost": "Coût et niveaux",
         "roll": "Jet et réussite",
-        "effects": "Effets"
-      }
+        "effects": "Effets",
+        "identityHint": "Le nom, le texte affiché et le type de la compétence.",
+        "costHint": "Combien de niveaux, ce qu'ils coûtent, et ce que coûte un usage."
+      },
+      "effectTitle": "Effet {{ n }}"
     },
     "variables": {
       "title": "Variables et formules",

@@ -1065,7 +1065,9 @@
         "rollFaces": "Dice faces",
         "successMode": "Success",
         "successValue": "Succeeds when the total reaches",
-        "successFormula": "Succeeds when this is 0 or more"
+        "successFormula": "Succeeds when this is 0 or more",
+        "kind": "Effect type",
+        "attribute": "Target attribute"
       },
       "issue": {
         "name": "Give the skill a name.",
@@ -1099,8 +1101,11 @@
         "identity": "Identity",
         "cost": "Cost and levels",
         "roll": "Roll and success",
-        "effects": "Effects"
-      }
+        "effects": "Effects",
+        "identityHint": "The skill's name, shown text and type.",
+        "costHint": "How many levels, what they cost, and what one use costs."
+      },
+      "effectTitle": "Effect {{ n }}"
     },
     "variables": {
       "title": "Variables and formulas",

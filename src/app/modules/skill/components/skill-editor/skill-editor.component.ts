@@ -73,7 +73,7 @@ type PresetTarget = 'success' | number;
       <p-tabpanels>
         <p-tabpanel value="form">
           <div class="form">
-            <div>
+            <div class="toolbar">
               <button
                 pButton
                 type="button"
@@ -117,7 +117,7 @@ type PresetTarget = 'success' | number;
                   {{ 'skill.variables.exampleLabel' | transloco }}
                   <code data-example="amount">{{ amountExample() }}</code>
                 </p>
-                <ul>
+                <ul class="chips">
                   @for (variable of variables(); track variable.name) {
                     <li [attr.data-variable]="variable.name">
                       <code>{{ variable.name }}</code>
@@ -128,419 +128,506 @@ type PresetTarget = 'success' | number;
               </div>
             }
 
-            <section data-section="identity">
-              <h3>{{ 'skill.editor.sections.identity' | transloco }}</h3>
-              <div class="field">
-                <label for="skill-name">{{
-                  'skill.editor.fields.name' | transloco
-                }}</label>
-                <input
-                  pInputText
-                  id="skill-name"
-                  data-field="name"
-                  autocomplete="off"
-                  [value]="draft().name"
-                  (input)="patch({ name: $any($event.target).value })"
-                />
-              </div>
-              <div class="field">
-                <label for="skill-description">{{
-                  'skill.editor.fields.description' | transloco
-                }}</label>
-                <textarea
-                  pTextarea
-                  id="skill-description"
-                  data-field="description"
-                  rows="3"
-                  [value]="draft().description"
-                  (input)="patch({ description: $any($event.target).value })"
-                ></textarea>
-                <small class="hint">{{
-                  'skill.editor.help.description' | transloco
-                }}</small>
-              </div>
-              <div class="row">
+            <section class="card" data-section="identity">
+              <header class="card-head">
+                <span class="card-icon"
+                  ><i class="pi pi-id-card" aria-hidden="true"></i
+                ></span>
+                <div>
+                  <h3>{{ 'skill.editor.sections.identity' | transloco }}</h3>
+                  <p class="hint">
+                    {{ 'skill.editor.sections.identityHint' | transloco }}
+                  </p>
+                </div>
+              </header>
+              <div class="card-body">
                 <div class="field">
-                  <label for="skill-type">{{
-                    'skill.editor.fields.type' | transloco
+                  <label for="skill-name">{{
+                    'skill.editor.fields.name' | transloco
                   }}</label>
-                  <p-select
-                    inputId="skill-type"
-                    data-field="type"
-                    [options]="typeOptions()"
-                    optionLabel="label"
-                    optionValue="value"
-                    [ngModel]="draft().type"
-                    (ngModelChange)="setType($event)"
+                  <input
+                    pInputText
+                    id="skill-name"
+                    data-field="name"
+                    autocomplete="off"
+                    [value]="draft().name"
+                    (input)="patch({ name: $any($event.target).value })"
                   />
-                  <small class="hint">{{
-                    'skill.editor.help.type' | transloco
-                  }}</small>
                 </div>
                 <div class="field">
-                  <label for="skill-rarity">{{
-                    'skill.editor.fields.rarity' | transloco
+                  <label for="skill-description">{{
+                    'skill.editor.fields.description' | transloco
                   }}</label>
-                  <p-select
-                    inputId="skill-rarity"
-                    data-field="rarity"
-                    [options]="rarityOptions()"
-                    optionLabel="label"
-                    optionValue="value"
-                    [ngModel]="draft().rarity"
-                    (ngModelChange)="patch({ rarity: $event })"
-                  />
+                  <textarea
+                    pTextarea
+                    id="skill-description"
+                    data-field="description"
+                    rows="3"
+                    [value]="draft().description"
+                    (input)="patch({ description: $any($event.target).value })"
+                  ></textarea>
                   <small class="hint">{{
-                    'skill.editor.help.rarity' | transloco
+                    'skill.editor.help.description' | transloco
                   }}</small>
+                </div>
+                <div class="row">
+                  <div class="field">
+                    <label for="skill-type">{{
+                      'skill.editor.fields.type' | transloco
+                    }}</label>
+                    <p-select
+                      inputId="skill-type"
+                      data-field="type"
+                      [options]="typeOptions()"
+                      optionLabel="label"
+                      optionValue="value"
+                      [ngModel]="draft().type"
+                      (ngModelChange)="setType($event)"
+                    />
+                    <small class="hint">{{
+                      'skill.editor.help.type' | transloco
+                    }}</small>
+                  </div>
+                  <div class="field">
+                    <label for="skill-rarity">{{
+                      'skill.editor.fields.rarity' | transloco
+                    }}</label>
+                    <p-select
+                      inputId="skill-rarity"
+                      data-field="rarity"
+                      [options]="rarityOptions()"
+                      optionLabel="label"
+                      optionValue="value"
+                      [ngModel]="draft().rarity"
+                      (ngModelChange)="patch({ rarity: $event })"
+                    />
+                    <small class="hint">{{
+                      'skill.editor.help.rarity' | transloco
+                    }}</small>
+                  </div>
                 </div>
               </div>
             </section>
 
-            <section data-section="cost">
-              <h3>{{ 'skill.editor.sections.cost' | transloco }}</h3>
-              <div class="row">
-                <div class="field">
-                  <label for="skill-max-level">{{
-                    'skill.editor.fields.maxLevel' | transloco
-                  }}</label>
-                  <p-inputnumber
-                    inputId="skill-max-level"
-                    data-field="max-level"
-                    [min]="1"
-                    [max]="maxLevelLimit"
-                    [showButtons]="true"
-                    [ngModel]="draft().maxLevel"
-                    (ngModelChange)="patch({ maxLevel: $event ?? 0 })"
-                  />
-                  <small class="hint">{{
-                    'skill.editor.help.maxLevel' | transloco
-                  }}</small>
+            <section class="card" data-section="cost">
+              <header class="card-head">
+                <span class="card-icon"
+                  ><i class="pi pi-sliders-h" aria-hidden="true"></i
+                ></span>
+                <div>
+                  <h3>{{ 'skill.editor.sections.cost' | transloco }}</h3>
+                  <p class="hint">
+                    {{ 'skill.editor.sections.costHint' | transloco }}
+                  </p>
                 </div>
-                <div class="field">
-                  <label for="skill-point-cost">{{
-                    'skill.editor.fields.pointCost' | transloco
-                  }}</label>
-                  <p-inputnumber
-                    inputId="skill-point-cost"
-                    data-field="point-cost"
-                    [min]="1"
-                    [showButtons]="true"
-                    [ngModel]="draft().pointCost"
-                    (ngModelChange)="patch({ pointCost: $event ?? 0 })"
-                  />
-                  <small class="hint">{{
-                    'skill.editor.help.pointCost' | transloco
-                  }}</small>
-                </div>
-              </div>
-              @if (draft().type === 'active') {
+              </header>
+              <div class="card-body">
                 <div class="row">
                   <div class="field">
-                    <label for="skill-target">{{
-                      'skill.editor.fields.target' | transloco
-                    }}</label>
-                    <p-select
-                      inputId="skill-target"
-                      data-field="target"
-                      [options]="targetOptions()"
-                      optionLabel="label"
-                      optionValue="value"
-                      [ngModel]="draft().target"
-                      (ngModelChange)="patch({ target: $event })"
-                    />
-                    <small class="hint">{{
-                      'skill.editor.help.target' | transloco
-                    }}</small>
-                  </div>
-                  <div class="field">
-                    <label for="skill-cooldown">{{
-                      'skill.editor.fields.cooldown' | transloco
+                    <label for="skill-max-level">{{
+                      'skill.editor.fields.maxLevel' | transloco
                     }}</label>
                     <p-inputnumber
-                      inputId="skill-cooldown"
-                      data-field="cooldown"
-                      [min]="0"
+                      inputId="skill-max-level"
+                      data-field="max-level"
+                      [min]="1"
+                      [max]="maxLevelLimit"
                       [showButtons]="true"
-                      [ngModel]="draft().cooldown ?? 0"
-                      (ngModelChange)="patch({ cooldown: $event ?? 0 })"
+                      [ngModel]="draft().maxLevel"
+                      (ngModelChange)="patch({ maxLevel: $event ?? 0 })"
                     />
                     <small class="hint">{{
-                      'skill.editor.help.cooldown' | transloco
+                      'skill.editor.help.maxLevel' | transloco
+                    }}</small>
+                  </div>
+                  <div class="field">
+                    <label for="skill-point-cost">{{
+                      'skill.editor.fields.pointCost' | transloco
+                    }}</label>
+                    <p-inputnumber
+                      inputId="skill-point-cost"
+                      data-field="point-cost"
+                      [min]="1"
+                      [showButtons]="true"
+                      [ngModel]="draft().pointCost"
+                      (ngModelChange)="patch({ pointCost: $event ?? 0 })"
+                    />
+                    <small class="hint">{{
+                      'skill.editor.help.pointCost' | transloco
                     }}</small>
                   </div>
                 </div>
-                <div class="row">
-                  <div class="field">
-                    <label for="skill-cost-attribute">{{
-                      'skill.editor.fields.costAttribute' | transloco
-                    }}</label>
-                    <p-select
-                      inputId="skill-cost-attribute"
-                      data-field="cost-attribute"
-                      [options]="attributeOptions()"
-                      optionLabel="label"
-                      optionValue="value"
-                      [showClear]="true"
-                      [ngModel]="draft().cost?.attribute ?? null"
-                      (ngModelChange)="setCostAttribute($event)"
-                    />
-                    <small class="hint">{{
-                      'skill.editor.help.costAttribute' | transloco
-                    }}</small>
-                  </div>
-                  @if (draft().cost; as cost) {
+                @if (draft().type === 'active') {
+                  <div class="row">
                     <div class="field">
-                      <label for="skill-cost-amount">{{
-                        'skill.editor.fields.costAmount' | transloco
+                      <label for="skill-target">{{
+                        'skill.editor.fields.target' | transloco
+                      }}</label>
+                      <p-select
+                        inputId="skill-target"
+                        data-field="target"
+                        [options]="targetOptions()"
+                        optionLabel="label"
+                        optionValue="value"
+                        [ngModel]="draft().target"
+                        (ngModelChange)="patch({ target: $event })"
+                      />
+                      <small class="hint">{{
+                        'skill.editor.help.target' | transloco
+                      }}</small>
+                    </div>
+                    <div class="field">
+                      <label for="skill-cooldown">{{
+                        'skill.editor.fields.cooldown' | transloco
                       }}</label>
                       <p-inputnumber
-                        inputId="skill-cost-amount"
-                        data-field="cost-amount"
+                        inputId="skill-cooldown"
+                        data-field="cooldown"
                         [min]="0"
                         [showButtons]="true"
-                        [ngModel]="cost.amount"
-                        (ngModelChange)="
-                          patch({
-                            cost: {
-                              attribute: cost.attribute,
-                              amount: $event ?? 0,
-                            },
-                          })
-                        "
+                        [ngModel]="draft().cooldown ?? 0"
+                        (ngModelChange)="patch({ cooldown: $event ?? 0 })"
                       />
                       <small class="hint">{{
-                        'skill.editor.help.costAmount' | transloco
+                        'skill.editor.help.cooldown' | transloco
                       }}</small>
                     </div>
-                  }
-                </div>
-              }
-            </section>
-
-            @if (draft().type === 'active') {
-              <section data-section="roll">
-                <h3>{{ 'skill.editor.sections.roll' | transloco }}</h3>
-                <p class="hint">{{ 'skill.editor.help.roll' | transloco }}</p>
-                <div class="row">
-                  <div class="field">
-                    <label for="skill-roll-count">{{
-                      'skill.editor.fields.rollCount' | transloco
-                    }}</label>
-                    <p-inputnumber
-                      inputId="skill-roll-count"
-                      data-field="roll-count"
-                      [min]="1"
-                      [max]="rollCountLimit"
-                      [showButtons]="true"
-                      [ngModel]="roll().count"
-                      (ngModelChange)="
-                        patch({
-                          roll: { count: $event ?? 0, faces: roll().faces },
-                        })
-                      "
-                    />
                   </div>
-                  <div class="field">
-                    <label for="skill-roll-faces">{{
-                      'skill.editor.fields.rollFaces' | transloco
-                    }}</label>
-                    <p-inputnumber
-                      inputId="skill-roll-faces"
-                      data-field="roll-faces"
-                      [min]="2"
-                      [max]="rollFacesLimit"
-                      [showButtons]="true"
-                      [ngModel]="roll().faces"
-                      (ngModelChange)="
-                        patch({
-                          roll: { count: roll().count, faces: $event ?? 0 },
-                        })
-                      "
-                    />
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="field">
-                    <label for="skill-success-mode">{{
-                      'skill.editor.fields.successMode' | transloco
-                    }}</label>
-                    <p-select
-                      inputId="skill-success-mode"
-                      data-field="success-mode"
-                      [options]="successOptions()"
-                      optionLabel="label"
-                      optionValue="value"
-                      [ngModel]="success().mode"
-                      (ngModelChange)="setSuccessMode($event)"
-                    />
-                    <small class="hint">{{
-                      'skill.editor.help.successMode' | transloco
-                    }}</small>
-                  </div>
-                  @if (thresholdSuccess(); as threshold) {
+                  <div class="row">
                     <div class="field">
-                      <label for="skill-success-value">{{
-                        'skill.editor.fields.successValue' | transloco
+                      <label for="skill-cost-attribute">{{
+                        'skill.editor.fields.costAttribute' | transloco
                       }}</label>
-                      <p-inputnumber
-                        inputId="skill-success-value"
-                        data-field="success-value"
-                        [showButtons]="true"
-                        [ngModel]="threshold.value"
-                        (ngModelChange)="
-                          patch({
-                            success: { mode: 'threshold', value: $event ?? 0 },
-                          })
-                        "
+                      <p-select
+                        inputId="skill-cost-attribute"
+                        data-field="cost-attribute"
+                        [options]="attributeOptions()"
+                        optionLabel="label"
+                        optionValue="value"
+                        [showClear]="true"
+                        [ngModel]="draft().cost?.attribute ?? null"
+                        (ngModelChange)="setCostAttribute($event)"
                       />
                       <small class="hint">{{
-                        'skill.editor.help.successValue' | transloco
+                        'skill.editor.help.costAttribute' | transloco
                       }}</small>
                     </div>
-                  }
-                  @if (formulaSuccess(); as formula) {
-                    <div class="field grow">
-                      <label for="skill-success-formula">{{
-                        'skill.editor.fields.successFormula' | transloco
-                      }}</label>
-                      <div class="control">
-                        <input
-                          pInputText
-                          id="skill-success-formula"
-                          data-field="success-formula"
-                          autocomplete="off"
-                          spellcheck="false"
-                          [value]="formula.formula"
-                          (input)="
+                    @if (draft().cost; as cost) {
+                      <div class="field">
+                        <label for="skill-cost-amount">{{
+                          'skill.editor.fields.costAmount' | transloco
+                        }}</label>
+                        <p-inputnumber
+                          inputId="skill-cost-amount"
+                          data-field="cost-amount"
+                          [min]="0"
+                          [showButtons]="true"
+                          [ngModel]="cost.amount"
+                          (ngModelChange)="
                             patch({
-                              success: {
-                                mode: 'formula',
-                                formula: $any($event.target).value,
+                              cost: {
+                                attribute: cost.attribute,
+                                amount: $event ?? 0,
                               },
                             })
                           "
                         />
-                        <ng-container
-                          [ngTemplateOutlet]="presetTools"
-                          [ngTemplateOutletContext]="{ target: 'success' }"
-                        />
+                        <small class="hint">{{
+                          'skill.editor.help.costAmount' | transloco
+                        }}</small>
                       </div>
-                      <ng-container
-                        [ngTemplateOutlet]="presetPanels"
-                        [ngTemplateOutletContext]="{ target: 'success' }"
+                    }
+                  </div>
+                }
+              </div>
+            </section>
+
+            @if (draft().type === 'active') {
+              <section class="card" data-section="roll">
+                <header class="card-head">
+                  <span class="card-icon"
+                    ><i class="pi pi-box" aria-hidden="true"></i
+                  ></span>
+                  <div>
+                    <h3>{{ 'skill.editor.sections.roll' | transloco }}</h3>
+                    <p class="hint">
+                      {{ 'skill.editor.help.roll' | transloco }}
+                    </p>
+                  </div>
+                </header>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="field">
+                      <label for="skill-roll-count">{{
+                        'skill.editor.fields.rollCount' | transloco
+                      }}</label>
+                      <p-inputnumber
+                        inputId="skill-roll-count"
+                        data-field="roll-count"
+                        [min]="1"
+                        [max]="rollCountLimit"
+                        [showButtons]="true"
+                        [ngModel]="roll().count"
+                        (ngModelChange)="
+                          patch({
+                            roll: { count: $event ?? 0, faces: roll().faces },
+                          })
+                        "
+                      />
+                    </div>
+                    <div class="field">
+                      <label for="skill-roll-faces">{{
+                        'skill.editor.fields.rollFaces' | transloco
+                      }}</label>
+                      <p-inputnumber
+                        inputId="skill-roll-faces"
+                        data-field="roll-faces"
+                        [min]="2"
+                        [max]="rollFacesLimit"
+                        [showButtons]="true"
+                        [ngModel]="roll().faces"
+                        (ngModelChange)="
+                          patch({
+                            roll: { count: roll().count, faces: $event ?? 0 },
+                          })
+                        "
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="field">
+                      <label for="skill-success-mode">{{
+                        'skill.editor.fields.successMode' | transloco
+                      }}</label>
+                      <p-select
+                        inputId="skill-success-mode"
+                        data-field="success-mode"
+                        [options]="successOptions()"
+                        optionLabel="label"
+                        optionValue="value"
+                        [ngModel]="success().mode"
+                        (ngModelChange)="setSuccessMode($event)"
                       />
                       <small class="hint">{{
-                        'skill.editor.help.successFormula' | transloco
+                        'skill.editor.help.successMode' | transloco
                       }}</small>
                     </div>
+                    @if (thresholdSuccess(); as threshold) {
+                      <div class="field">
+                        <label for="skill-success-value">{{
+                          'skill.editor.fields.successValue' | transloco
+                        }}</label>
+                        <p-inputnumber
+                          inputId="skill-success-value"
+                          data-field="success-value"
+                          [showButtons]="true"
+                          [ngModel]="threshold.value"
+                          (ngModelChange)="
+                            patch({
+                              success: {
+                                mode: 'threshold',
+                                value: $event ?? 0,
+                              },
+                            })
+                          "
+                        />
+                        <small class="hint">{{
+                          'skill.editor.help.successValue' | transloco
+                        }}</small>
+                      </div>
+                    }
+                    @if (formulaSuccess(); as formula) {
+                      <div class="field grow">
+                        <label for="skill-success-formula">{{
+                          'skill.editor.fields.successFormula' | transloco
+                        }}</label>
+                        <div class="control">
+                          <input
+                            pInputText
+                            id="skill-success-formula"
+                            data-field="success-formula"
+                            autocomplete="off"
+                            spellcheck="false"
+                            [value]="formula.formula"
+                            (input)="
+                              patch({
+                                success: {
+                                  mode: 'formula',
+                                  formula: $any($event.target).value,
+                                },
+                              })
+                            "
+                          />
+                          <ng-container
+                            [ngTemplateOutlet]="presetTools"
+                            [ngTemplateOutletContext]="{ target: 'success' }"
+                          />
+                        </div>
+                        <ng-container
+                          [ngTemplateOutlet]="presetPanels"
+                          [ngTemplateOutletContext]="{ target: 'success' }"
+                        />
+                        <small class="hint">{{
+                          'skill.editor.help.successFormula' | transloco
+                        }}</small>
+                      </div>
+                    }
+                  </div>
+                  @if (successFormulaError(); as message) {
+                    <p-message severity="error" data-field="success-error">{{
+                      message
+                    }}</p-message>
                   }
                 </div>
-                @if (successFormulaError(); as message) {
-                  <p-message severity="error" data-field="success-error">{{
-                    message
-                  }}</p-message>
-                }
               </section>
             }
 
-            <section data-section="effects">
-              <h3>{{ 'skill.editor.sections.effects' | transloco }}</h3>
-              <p class="hint">{{ 'skill.editor.help.effects' | transloco }}</p>
-              @for (effect of draft().effects; track $index) {
-                <div class="effect" data-field="effect">
-                  <p-select
-                    data-field="effect-kind"
-                    [options]="kindOptions()"
-                    optionLabel="label"
-                    optionValue="value"
-                    [ngModel]="effect.kind"
-                    (ngModelChange)="setEffectKind($index, $event)"
-                  />
-                  <p-select
-                    data-field="effect-attribute"
-                    [options]="attributeOptions()"
-                    optionLabel="label"
-                    optionValue="value"
-                    [ngModel]="effect.attribute"
-                    (ngModelChange)="patchEffect($index, { attribute: $event })"
-                  />
-                  <div class="control">
-                    <input
-                      pInputText
-                      data-field="effect-amount"
-                      autocomplete="off"
-                      spellcheck="false"
-                      [attr.aria-label]="
-                        'skill.editor.fields.amount' | transloco
-                      "
-                      [value]="effect.amount"
-                      (input)="
-                        patchEffect($index, {
-                          amount: $any($event.target).value,
-                        })
-                      "
-                    />
+            <section class="card" data-section="effects">
+              <header class="card-head">
+                <span class="card-icon"
+                  ><i class="pi pi-bolt" aria-hidden="true"></i
+                ></span>
+                <div>
+                  <h3>{{ 'skill.editor.sections.effects' | transloco }}</h3>
+                  <p class="hint">
+                    {{ 'skill.editor.help.effects' | transloco }}
+                  </p>
+                </div>
+              </header>
+              <div class="card-body">
+                @for (effect of draft().effects; track $index) {
+                  <div class="effect" data-field="effect">
+                    <div class="effect-head">
+                      <span class="effect-title">{{
+                        'skill.editor.effectTitle'
+                          | transloco: { n: $index + 1 }
+                      }}</span>
+                      <button
+                        pButton
+                        type="button"
+                        data-action="remove-effect"
+                        icon="pi pi-trash"
+                        severity="danger"
+                        size="small"
+                        [text]="true"
+                        [attr.aria-label]="
+                          'skill.editor.removeEffect' | transloco
+                        "
+                        (click)="removeEffect($index)"
+                      ></button>
+                    </div>
+                    <div class="effect-grid">
+                      <div class="field">
+                        <label>{{
+                          'skill.editor.fields.kind' | transloco
+                        }}</label>
+                        <p-select
+                          data-field="effect-kind"
+                          [options]="kindOptions()"
+                          optionLabel="label"
+                          optionValue="value"
+                          [ngModel]="effect.kind"
+                          (ngModelChange)="setEffectKind($index, $event)"
+                        />
+                      </div>
+                      <div class="field">
+                        <label>{{
+                          'skill.editor.fields.attribute' | transloco
+                        }}</label>
+                        <p-select
+                          data-field="effect-attribute"
+                          [options]="attributeOptions()"
+                          optionLabel="label"
+                          optionValue="value"
+                          [ngModel]="effect.attribute"
+                          (ngModelChange)="
+                            patchEffect($index, { attribute: $event })
+                          "
+                        />
+                      </div>
+                      @if (effect.kind === 'modify') {
+                        <div class="field">
+                          <label>{{
+                            'skill.editor.fields.duration' | transloco
+                          }}</label>
+                          <p-inputnumber
+                            data-field="effect-duration"
+                            [min]="0"
+                            [showButtons]="true"
+                            [ariaLabel]="
+                              'skill.editor.fields.duration' | transloco
+                            "
+                            [ngModel]="effect.duration"
+                            (ngModelChange)="
+                              patchEffect($index, { duration: $event ?? 0 })
+                            "
+                          />
+                        </div>
+                      }
+                      <div class="field wide">
+                        <label>{{
+                          'skill.editor.fields.amount' | transloco
+                        }}</label>
+                        <div class="control">
+                          <input
+                            pInputText
+                            data-field="effect-amount"
+                            autocomplete="off"
+                            spellcheck="false"
+                            [attr.aria-label]="
+                              'skill.editor.fields.amount' | transloco
+                            "
+                            [value]="effect.amount"
+                            (input)="
+                              patchEffect($index, {
+                                amount: $any($event.target).value,
+                              })
+                            "
+                          />
+                          <ng-container
+                            [ngTemplateOutlet]="presetTools"
+                            [ngTemplateOutletContext]="{ target: $index }"
+                          />
+                        </div>
+                      </div>
+                    </div>
                     <ng-container
-                      [ngTemplateOutlet]="presetTools"
+                      [ngTemplateOutlet]="presetPanels"
                       [ngTemplateOutletContext]="{ target: $index }"
                     />
+                    @if (previews()[$index]; as preview) {
+                      @if (preview.error) {
+                        <p-message severity="error" data-field="effect-error">{{
+                          preview.error
+                        }}</p-message>
+                      } @else {
+                        <span class="hint preview" data-field="effect-preview"
+                          ><i class="pi pi-chart-line" aria-hidden="true"></i>
+                          {{
+                            'skill.editor.preview'
+                              | transloco
+                                : {
+                                    max: draft().maxLevel,
+                                    level1: preview.level1,
+                                    maxLevel: preview.maxLevel,
+                                  }
+                          }}</span
+                        >
+                      }
+                    }
                   </div>
-                  @if (effect.kind === 'modify') {
-                    <p-inputnumber
-                      data-field="effect-duration"
-                      [min]="0"
-                      [showButtons]="true"
-                      [ariaLabel]="'skill.editor.fields.duration' | transloco"
-                      [ngModel]="effect.duration"
-                      (ngModelChange)="
-                        patchEffect($index, { duration: $event ?? 0 })
-                      "
-                    />
-                  }
+                }
+                <div>
                   <button
                     pButton
                     type="button"
-                    data-action="remove-effect"
-                    icon="pi pi-trash"
-                    severity="danger"
-                    [text]="true"
-                    [attr.aria-label]="'skill.editor.removeEffect' | transloco"
-                    (click)="removeEffect($index)"
+                    data-action="add-effect"
+                    icon="pi pi-plus"
+                    severity="secondary"
+                    [label]="'skill.editor.addEffect' | transloco"
+                    (click)="addEffect()"
                   ></button>
-                  <ng-container
-                    [ngTemplateOutlet]="presetPanels"
-                    [ngTemplateOutletContext]="{ target: $index }"
-                  />
-                  @if (previews()[$index]; as preview) {
-                    @if (preview.error) {
-                      <p-message severity="error" data-field="effect-error">{{
-                        preview.error
-                      }}</p-message>
-                    } @else {
-                      <span class="hint" data-field="effect-preview">{{
-                        'skill.editor.preview'
-                          | transloco
-                            : {
-                                max: draft().maxLevel,
-                                level1: preview.level1,
-                                maxLevel: preview.maxLevel,
-                              }
-                      }}</span>
-                    }
-                  }
                 </div>
-              }
-              <div>
-                <button
-                  pButton
-                  type="button"
-                  data-action="add-effect"
-                  icon="pi pi-plus"
-                  severity="secondary"
-                  [label]="'skill.editor.addEffect' | transloco"
-                  (click)="addEffect()"
-                ></button>
               </div>
             </section>
           </div>
@@ -727,42 +814,134 @@ type PresetTarget = 'success' | number;
     .form {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 1rem;
     }
-    .row,
-    .effect {
+    .toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: flex-end;
+      justify-content: flex-end;
+      gap: 0.25rem;
     }
-    section {
+
+    /* one card per section: icon, title and subtitle, then the fields */
+    .card {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 1rem;
+      padding: 1rem 1.25rem 1.25rem;
+      border: 1px solid var(--p-content-border-color);
+      border-radius: 0.75rem;
+      background: var(--p-content-background);
+      box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--p-content-border-color);
+    }
+    .card-icon {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--p-primary-color) 14%, transparent);
+      color: var(--p-primary-color);
     }
     h3 {
       margin: 0;
-      color: var(--p-text-muted-color);
+      font-size: 1.05rem;
       font-weight: 600;
+    }
+    .card-head .hint {
+      font-size: 0.85rem;
+    }
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* fields on a grid: two or three per line, one on a phone */
+    .row,
+    .effect-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(13rem, 100%), 1fr));
+      gap: 1rem;
+      align-items: start;
+    }
+    .grow,
+    .wide {
+      grid-column: 1 / -1;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+    label,
+    .field > label {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .field p-select,
+    .field p-inputnumber,
+    .field > input,
+    .field > textarea {
+      width: 100%;
+    }
+    .field ::ng-deep .p-inputnumber {
+      width: 100%;
+    }
+    .field ::ng-deep .p-inputnumber-input {
+      width: 100%;
+      min-width: 0;
+    }
+    .hint {
+      margin: 0;
+      color: var(--p-text-muted-color);
       font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
     }
-    .grow {
-      flex: 1 1 14rem;
+
+    /* each effect is its own block */
+    .effect {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem 1rem;
+      border: 1px solid var(--p-content-border-color);
+      border-left: 3px solid var(--p-primary-color);
+      border-radius: 0.5rem;
     }
+    .effect-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .effect-title {
+      font-weight: 600;
+    }
+    .preview {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
     .control {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 0.5rem;
-      flex: 1 1 12rem;
       min-width: 0;
     }
     .control > input {
       flex: 1 1 10rem;
       min-width: 10rem;
+      font-family: monospace;
     }
     .preset {
       flex: 0 1 11rem;
@@ -777,7 +956,7 @@ type PresetTarget = 'success' | number;
       align-items: center;
       gap: 0.5rem;
       padding: 0.5rem 0.75rem;
-      border: 1px solid var(--p-content-border-color);
+      border: 1px dashed var(--p-content-border-color);
       border-radius: 0.5rem;
     }
     .panel > input {
@@ -794,34 +973,40 @@ type PresetTarget = 'success' | number;
       display: flex;
       gap: 0.25rem;
     }
+
+    /* variables help: a card with the variables as chips */
     .help {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
-      padding: 0.75rem;
+      gap: 0.6rem;
+      padding: 1rem 1.25rem;
       border: 1px solid var(--p-content-border-color);
-      border-radius: 0.5rem;
+      border-radius: 0.75rem;
+      background: var(--p-content-background);
     }
     .help h4,
     .help p {
       margin: 0;
     }
-    .help ul {
+    .chips {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
+      gap: 0.4rem 1rem;
       margin: 0;
-      padding-left: 1.25rem;
+      padding: 0;
+      list-style: none;
+      font-size: 0.85rem;
+      color: var(--p-text-muted-color);
     }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      min-width: 0;
+    code {
+      padding: 0.05rem 0.4rem;
+      border-radius: 0.3rem;
+      background: color-mix(in srgb, var(--p-primary-color) 10%, transparent);
+      color: var(--p-primary-color);
+      font-size: 0.85em;
     }
     .json {
       font-family: monospace;
-    }
-    .hint {
-      margin: 0;
-      color: var(--p-text-muted-color);
     }
     .actions {
       display: flex;
