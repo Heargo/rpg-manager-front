@@ -690,7 +690,6 @@
     "footerCredits": "Crédits",
     "footerContact": "Contact",
     "footerPrivacy": "Politique de confidentialité",
-    "scrollDown": "Défiler vers le contenu",
     "heading": "Votre table, dans le navigateur",
     "highlightsLabel": "Points forts",
     "buildTitle": "Construisez votre monde",
@@ -709,6 +708,9 @@
     "librariesTitle": "Bibliothèques",
     "toolsTitle": "Outils externes",
     "tools": "La page des outils renvoie vers des générateurs gratuits créés par d'autres : Procgen Arcana de Watabou, Fantasy Map Generator d'Azgaar et Squoosh. Ils ne font pas partie de cette application.",
+    "aiTitle": "Utilisation de l'IA",
+    "ai": "L'IA a été utilisée pour le code, la documentation, le logo et les icônes SVG personnalisées. L'auteur serait ravi de collaborer avec des artistes pour retirer le « slop » d'IA et donner plus de vie aux interfaces.",
+    "aiContact": "Me contacter",
     "illustrationsTitle": "Illustrations",
     "sampleHeroPrefix": "Portrait du héros d'exemple : illustration de",
     "sampleHeroSuffix": "."

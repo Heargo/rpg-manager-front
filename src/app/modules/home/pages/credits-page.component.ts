@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { SiteFooterComponent } from '../components/site-footer/site-footer.component';
@@ -43,7 +44,7 @@ export const CREDIT_LIBRARIES = [
 @Component({
   selector: 'app-credits-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, TagModule, SiteFooterComponent],
+  imports: [RouterLink, TranslocoPipe, TagModule, SiteFooterComponent],
   template: `
     <main class="page">
       <header class="page-header">
@@ -68,6 +69,13 @@ export const CREDIT_LIBRARIES = [
           <a [href]="yuumeiUrl" target="_blank" rel="noopener noreferrer"
             >Yuumei</a
           >{{ 'credits.sampleHeroSuffix' | transloco }}
+        </p>
+      </div>
+      <h2>{{ 'credits.aiTitle' | transloco }}</h2>
+      <div class="card" data-test="ai">
+        <p>{{ 'credits.ai' | transloco }}</p>
+        <p>
+          <a routerLink="/contact">{{ 'credits.aiContact' | transloco }}</a>
         </p>
       </div>
       <h2>{{ 'credits.toolsTitle' | transloco }}</h2>

@@ -690,7 +690,6 @@
     "footerCredits": "Credits",
     "footerContact": "Contact",
     "footerPrivacy": "Privacy policy",
-    "scrollDown": "Scroll down to the content",
     "heading": "Your table, in the browser",
     "highlightsLabel": "Highlights",
     "buildTitle": "Build your world",
@@ -709,6 +708,9 @@
     "librariesTitle": "Libraries",
     "toolsTitle": "External tools",
     "tools": "The tools page links to free generators by others: Watabou's Procgen Arcana, Azgaar's Fantasy Map Generator and Squoosh. They are not part of this app.",
+    "aiTitle": "Use of AI",
+    "ai": "AI was used to write the code and the documentation, and to create the logo and the custom SVG icons. The author would be glad to work with artists to remove the AI \"slop\" and give the interfaces more life.",
+    "aiContact": "Get in touch",
     "illustrationsTitle": "Illustrations",
     "sampleHeroPrefix": "Sample hero portrait: art by",
     "sampleHeroSuffix": "."
