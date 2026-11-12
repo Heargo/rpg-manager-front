@@ -1,3 +1,4 @@
+import { sellAnywherePrice } from '../../npc/helpers/merchant.rules';
 import {
   Character,
   Sheet,
@@ -80,6 +81,9 @@ export interface LevelRules {
 export interface SkillCatalogue {
   skills: Skill[];
   classes: CharacterClass[];
+  /** Selling anywhere (default allowed, at full price). */
+  sellAnywhere?: boolean;
+  sellAnywhereRatio?: number;
 }
 
 export type ActionResult<T extends Sheet = Character> =
@@ -441,11 +445,17 @@ export function applyCharacterAction<T extends Sheet = Character>(
         (candidate) => candidate.id === action.inventoryId,
       );
       if (!entry) return fail('character.errors.unknownItem');
+      if (catalogue.sellAnywhere === false)
+        return fail('character.errors.sellDisabled');
       return {
         ok: true,
         character: {
           ...character,
-          money: character.money + entry.item.price,
+          money:
+            character.money +
+            sellAnywherePrice(entry.item.price, {
+              sellAnywhereRatio: catalogue.sellAnywhereRatio ?? 1,
+            }),
           inventory: character.inventory.filter(
             (candidate) => candidate.id !== entry.id,
           ),

@@ -4,6 +4,7 @@ import { CharacterBusiness } from '../../character/business/character.business';
 import { CharacterHostBusiness } from '../../character/business/character-host.business';
 import { DiceHostBusiness } from '../../dice/business/dice-host.business';
 import { ItemHostBusiness } from '../../item/business/item-host.business';
+import { MerchantHostBusiness } from '../../npc/business/merchant-host.business';
 import { TableHostBusiness } from '../../table/business/table-host.business';
 import { JoinedWorldsBusiness } from './joined-worlds.business';
 import { RoomBusiness } from '../../room/business/room.business';
@@ -24,6 +25,7 @@ export class GameSessionBusiness {
   private readonly table = inject(TableHostBusiness);
   private readonly dice = inject(DiceHostBusiness);
   private readonly items = inject(ItemHostBusiness);
+  private readonly merchants = inject(MerchantHostBusiness);
   private readonly joined = inject(JoinedWorldsBusiness);
   private readonly info = inject(WorldInfoBusiness).$info;
   private readonly myCharacter = inject(CharacterBusiness).$myCharacter;
@@ -86,7 +88,14 @@ export class GameSessionBusiness {
     const key = this.joinedKey();
     if (!key) return;
     const { info } = key;
-    const { attributes, barAttributes, levelCurve, maxLevel } = info;
+    const {
+      attributes,
+      barAttributes,
+      levelCurve,
+      maxLevel,
+      sellAnywhere,
+      sellAnywhereRatio,
+    } = info;
     void this.joined
       .record({
         worldId: info.id,
@@ -94,7 +103,14 @@ export class GameSessionBusiness {
         name: info.name,
         hostName: key.hostName,
         invite: key.invite,
-        sheetWorld: { attributes, barAttributes, levelCurve, maxLevel },
+        sheetWorld: {
+          attributes,
+          barAttributes,
+          levelCurve,
+          maxLevel,
+          sellAnywhere,
+          sellAnywhereRatio,
+        },
       })
       .catch((error: unknown) =>
         console.warn('Could not save the joined world', error),
@@ -116,6 +132,7 @@ export class GameSessionBusiness {
       this.table.start(),
       this.dice.start(),
       this.items.start(),
+      this.merchants.start(),
       this.images.serveToPlayers(),
     ];
   }

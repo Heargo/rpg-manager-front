@@ -32,7 +32,13 @@ import { CharacterService } from '../services/character.service';
 /** What a character sheet needs from its world (the room's, or the sandbox's). */
 export type SheetWorld = Pick<
   WorldInfo,
-  'attributes' | 'barAttributes' | 'levelCurve' | 'maxLevel' | 'skillRollsEnabled'
+  | 'attributes'
+  | 'barAttributes'
+  | 'levelCurve'
+  | 'maxLevel'
+  | 'skillRollsEnabled'
+  | 'sellAnywhere'
+  | 'sellAnywhereRatio'
 >;
 
 /** Characters of the room this device is in, and creating one's own. */

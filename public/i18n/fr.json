@@ -154,6 +154,7 @@
       "attributeNameTooLong": "Un nom d'attribut est trop long.",
       "attributeNamesUnique": "Deux attributs ont le même nom.",
       "baseValueInteger": "Les valeurs de base doivent être des nombres entiers.",
+      "ratioInvalid": "Utilisez un ratio de 0 à 10.",
       "nonNegativeInteger": "Utilisez un nombre entier, 0 ou plus.",
       "image": "Cette image n'a pas pu être utilisée.",
       "capInvalid": "Le plafond doit être un nombre entier, 1 ou plus.",
@@ -199,6 +200,13 @@
       "attributes": "Attributs",
       "tabs": { "attributes": "Attributs", "rules": "Règles", "offline": "Hors ligne" },
       "progression": "Progression",
+      "selling": {
+        "sellAnywhere": "Autoriser la vente partout",
+        "hint": "Les joueurs peuvent vendre des objets depuis leur fiche, sans marchand. Les ratios ci-dessous multiplient le prix de l'objet.",
+        "sellAnywhereRatio": "La vente partout paie (x prix)",
+        "merchantBuyRatio": "Les marchands font payer (x prix)",
+        "merchantSellRatio": "Les marchands paient (x prix)"
+      },
       "economy": "Économie",
       "save": "Enregistrer les règles",
       "saved": "Règles enregistrées",
@@ -245,6 +253,7 @@
       "later": "Plus tard"
     },
     "errors": {
+      "sellDisabled": "La vente depuis la fiche est désactivée dans ce monde.",
       "invalid": "Ce personnage ne peut pas être créé.",
       "nameRequired": "Donnez un nom à votre personnage.",
       "classRequired": "Choisissez une classe pour votre personnage.",
@@ -832,6 +841,34 @@
       "cap": "Plafond {{ cap }}",
       "maxLabel": "Maximum par niveau",
       "xpLabel": "Coût en XP par niveau"
+    }
+  },
+  "merchant": {
+    "errors": {
+      "closed": "Cette boutique est fermée.",
+      "notInStock": "Cet objet n'est plus en stock.",
+      "cantAfford": "Vous n'avez pas assez d'argent.",
+      "unknownItem": "Vous n'avez pas cet objet.",
+      "invalid": "Cette demande de boutique est invalide.",
+      "gameMasterOnly": "Seul le maître du jeu ouvre ou ferme une boutique.",
+      "playerOnly": "Seul un joueur achète ou vend."
+    },
+    "shop": {
+      "title": "Boutique",
+      "money": "Votre argent",
+      "buy": "En vente",
+      "buyAction": "Acheter",
+      "sell": "Vendre au marchand",
+      "sellAction": "Vendre",
+      "noStock": "Rien à vendre.",
+      "nothingToSell": "Rien à vendre."
+    },
+    "table": {
+      "open": "Ouvrir la boutique",
+      "close": "Fermer la boutique",
+      "visit": "Visiter la boutique",
+      "target": "Ouvrir ou fermer la boutique pour",
+      "everyone": "Tous les joueurs"
     }
   },
   "npc": {

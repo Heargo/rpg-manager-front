@@ -59,6 +59,7 @@ export function toPublicNpc(
     id: npc.id,
     name: npc.name,
     portraitId: npc.portraitId,
+    ...(npc.roles.includes('merchant') && { merchant: true }),
     description: when('description', npc.description),
     level: when('level', npc.level),
     lifeBar: life && when('lifeBar', { percent: life.percent }),

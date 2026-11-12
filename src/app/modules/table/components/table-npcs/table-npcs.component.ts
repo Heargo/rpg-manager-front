@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { ButtonModule } from '@openng/optimus-ui/button';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { PublicNpc } from '../../../npc/models/npc';
 
@@ -7,7 +13,7 @@ import { PublicNpc } from '../../../npc/models/npc';
 @Component({
   selector: 'app-table-npcs',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, StoredImageComponent],
+  imports: [TranslocoPipe, ButtonModule, StoredImageComponent],
   template: `
     @for (npc of npcs(); track npc.id) {
       <article class="npc" data-testid="table-npc">
@@ -47,6 +53,33 @@ import { PublicNpc } from '../../../npc/models/npc';
               >{{ attribute.name }} {{ attribute.current }} /
               {{ attribute.max }}</span
             >
+          }
+          @if (npc.merchant) {
+            @if (gameMaster()) {
+              <button
+                pButton
+                type="button"
+                data-action="toggle-shop"
+                size="small"
+                severity="secondary"
+                [icon]="isOpen(npc.id) ? 'pi pi-lock' : 'pi pi-lock-open'"
+                [label]="
+                  (isOpen(npc.id) ? 'merchant.table.close' : 'merchant.table.open')
+                    | transloco
+                "
+                (click)="setShop.emit({ npcId: npc.id, open: !isOpen(npc.id) })"
+              ></button>
+            } @else if (isOpen(npc.id)) {
+              <button
+                pButton
+                type="button"
+                data-action="visit-shop"
+                size="small"
+                icon="pi pi-shop"
+                [label]="'merchant.table.visit' | transloco"
+                (click)="visitShop.emit(npc.id)"
+              ></button>
+            }
           }
           @if (npc.equipment; as items) {
             <ul data-field="equipment">
@@ -114,4 +147,15 @@ import { PublicNpc } from '../../../npc/models/npc';
 })
 export class TableNpcsComponent {
   readonly npcs = input<PublicNpc[]>([]);
+  /** Merchants whose shop is open: for the player, open for them; for the game master, open for anyone. */
+  readonly shopsOpen = input<string[]>([]);
+  readonly gameMaster = input(false);
+  /** A player goes to an open shop. */
+  readonly visitShop = output<string>();
+  /** The game master opens (open: true) or closes a shop. */
+  readonly setShop = output<{ npcId: string; open: boolean }>();
+
+  protected isOpen(npcId: string): boolean {
+    return this.shopsOpen().includes(npcId);
+  }
 }

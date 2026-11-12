@@ -507,18 +507,20 @@
             (onClick)="use(entry)"
           />
         }
-        <p-button
-          icon="pi pi-wallet"
-          [label]="
-            'character.items.sellFor'
-              | transloco: { price: money(entry.item.price) }
-          "
-          severity="secondary"
-          [disabled]="busy() || isLocked('sell')"
-          [pTooltip]="'character.sheet.lockedOffline' | transloco"
-          [tooltipDisabled]="!isLocked('sell')"
-          (onClick)="sell(entry)"
-        />
+        @if (canSell()) {
+          <p-button
+            icon="pi pi-wallet"
+            [label]="
+              'character.items.sellFor'
+                | transloco: { price: money(sellPriceOf(entry)) }
+            "
+            severity="secondary"
+            [disabled]="busy() || isLocked('sell')"
+            [pTooltip]="'character.sheet.lockedOffline' | transloco"
+            [tooltipDisabled]="!isLocked('sell')"
+            (onClick)="sell(entry)"
+          />
+        }
       </div>
     }
   }

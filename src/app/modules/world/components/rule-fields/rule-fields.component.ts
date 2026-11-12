@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   model,
   signal,
@@ -13,6 +14,7 @@ import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
+import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
 import { FormulaChartComponent } from '../../../../core/components/formula-chart/formula-chart.component';
 import {
@@ -58,6 +60,7 @@ const OFFLINE_FEATURES = Object.keys(
   styleUrl: './rule-fields.component.scss',
 })
 export class RuleFieldsComponent {
+  protected readonly language = inject(LanguageBusiness);
   readonly draft = model.required<WorldDraft>();
   readonly errors = input<WorldDraftErrors>({});
   /** Which sections to show: all, the rules (progression, economy, NPCs) or only the offline features. */
@@ -97,6 +100,19 @@ export class RuleFieldsComponent {
 
   protected readonly skillRollsEnabled = computed(
     () => this.draft().skillRollsEnabled ?? true,
+  );
+
+  protected readonly sellAnywhere = computed(
+    () => this.draft().sellAnywhere ?? true,
+  );
+  protected readonly sellAnywhereRatio = computed(
+    () => this.draft().sellAnywhereRatio ?? 1,
+  );
+  protected readonly merchantBuyRatio = computed(
+    () => this.draft().merchantBuyRatio ?? 1,
+  );
+  protected readonly merchantSellRatio = computed(
+    () => this.draft().merchantSellRatio ?? 0.5,
   );
 
   protected readonly npcVisibility = computed(

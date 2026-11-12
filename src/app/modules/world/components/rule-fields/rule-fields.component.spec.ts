@@ -106,3 +106,33 @@ describe('RuleFieldsComponent', () => {
     });
   });
 });
+
+/**
+ * Economy selling settings (draft fields `sellAnywhere`, `sellAnywhereRatio`, `merchantBuyRatio`, `merchantSellRatio`; defaults
+ * on / 1 / 1 / 0.5 when omitted): `#sell-anywhere` (toggle switch), `#sell-anywhere-ratio`, `#merchant-buy-ratio`,
+ * `#merchant-sell-ratio` (p-inputnumber inputIds), all inside the Economy section.
+ */
+describe('RuleFieldsComponent economy selling settings', () => {
+  it('shows the four settings with their defaults', async () => {
+    const { el } = await open();
+    const economy = el.querySelector('[data-testid="rules-section-economy"]')!;
+    expect((economy.querySelector('#sell-anywhere') as HTMLInputElement).checked).toBe(true);
+    expect((economy.querySelector('#sell-anywhere-ratio') as HTMLInputElement).value).toBe('1');
+    expect((economy.querySelector('#merchant-buy-ratio') as HTMLInputElement).value).toBe('1');
+    expect((economy.querySelector('#merchant-sell-ratio') as HTMLInputElement).value).toBe('0.5');
+  });
+
+  it('emits the draft with the changed settings', async () => {
+    const { el, emitted, settle } = await open();
+    (el.querySelector('#sell-anywhere') as HTMLInputElement).click();
+    await settle();
+    expect(emitted.at(-1)!.sellAnywhere).toBe(false);
+
+    const sell = el.querySelector('#merchant-sell-ratio') as HTMLInputElement;
+    sell.value = '0.75';
+    sell.dispatchEvent(new Event('input'));
+    sell.dispatchEvent(new Event('blur'));
+    await settle();
+    expect(emitted.at(-1)!.merchantSellRatio).toBe(0.75);
+  });
+});

@@ -24,6 +24,7 @@ import { StoredImageComponent } from '../../../../core/components/stored-image/s
 import { EQUIPMENT_SLOTS, EquipmentSlot } from '../../../../core/models/item';
 import { ItemCardComponent } from '../../../item/components/item-card/item-card.component';
 import { RARITY_SEVERITY } from '../../../item/helpers/item-display';
+import { sellAnywherePrice } from '../../../npc/helpers/merchant.rules';
 import { CharacterCardComponent } from '../character-card/character-card.component';
 import { SlotSilhouetteComponent } from '../../../../core/components/slot-silhouette/slot-silhouette.component';
 import { SkillTreeComponent } from '../../../class/components/skill-tree/skill-tree.component';
@@ -242,6 +243,18 @@ export class CharacterSheetComponent {
     return this.lockedActions().includes(kind);
   }
 
+  /** Selling anywhere is allowed by the world (default on). */
+  protected readonly canSell = computed(
+    () => this.world().sellAnywhere !== false,
+  );
+
+  /** What selling anywhere pays for the item. */
+  protected sellPriceOf(entry: InventoryItem): number {
+    return sellAnywherePrice(entry.item.price, {
+      sellAnywhereRatio: this.world().sellAnywhereRatio ?? 1,
+    });
+  }
+
   protected money(amount: number): string {
     return this.characters.money(amount);
   }
@@ -359,7 +372,7 @@ export class CharacterSheetComponent {
   }
 
   protected sell(entry: InventoryItem): void {
-    const price = this.money(entry.item.price);
+    const price = this.money(this.sellPriceOf(entry));
     this.confirm.confirm({
       header: this.language.t('character.items.sellTitle'),
       message: this.language.t('character.items.sellMessage', {
@@ -412,15 +425,16 @@ export class CharacterSheetComponent {
         command: () => this.use(entry),
       });
     }
-    items.push(
-      { separator: true },
-      {
-        ...locked('sell'),
-        label: t('character.items.sell'),
-        icon: 'pi pi-wallet',
-        command: () => this.sell(entry),
-      },
-    );
+    if (this.canSell())
+      items.push(
+        { separator: true },
+        {
+          ...locked('sell'),
+          label: t('character.items.sell'),
+          icon: 'pi pi-wallet',
+          command: () => this.sell(entry),
+        },
+      );
     return items;
   }
 }

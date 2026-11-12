@@ -95,6 +95,10 @@ export class WorldRulesPageComponent {
       skillPointsPerLevel: world?.skillPointsPerLevel,
       offlineFeatures: world?.offlineFeatures,
       skillRollsEnabled: world?.skillRollsEnabled,
+      sellAnywhere: world?.sellAnywhere,
+      sellAnywhereRatio: world?.sellAnywhereRatio,
+      merchantBuyRatio: world?.merchantBuyRatio,
+      merchantSellRatio: world?.merchantSellRatio,
       npcVisibility: world?.npcVisibility,
     }),
   });
@@ -134,6 +138,12 @@ export class WorldRulesPageComponent {
       offlineFeatures: { ...world!.offlineFeatures, ...fields.offlineFeatures },
       skillRollsEnabled:
         fields.skillRollsEnabled ?? world!.skillRollsEnabled ?? true,
+      sellAnywhere: fields.sellAnywhere ?? world!.sellAnywhere ?? true,
+      sellAnywhereRatio:
+        fields.sellAnywhereRatio ?? world!.sellAnywhereRatio ?? 1,
+      merchantBuyRatio: fields.merchantBuyRatio ?? world!.merchantBuyRatio ?? 1,
+      merchantSellRatio:
+        fields.merchantSellRatio ?? world!.merchantSellRatio ?? 0.5,
       npcVisibility: fields.npcVisibility ?? world!.npcVisibility,
     };
   });

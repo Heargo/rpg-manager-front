@@ -23,7 +23,10 @@ export type WorldDraftErrors = Partial<
     | 'maxLevel'
     | 'statPointsPerLevel'
     | 'startingSkillPoints'
-    | 'skillPointsPerLevel',
+    | 'skillPointsPerLevel'
+    | 'sellAnywhereRatio'
+    | 'merchantBuyRatio'
+    | 'merchantSellRatio',
     string
   >
 >;
@@ -74,6 +77,15 @@ export function validateWorldDraft(draft: WorldDraft): WorldDraftErrors {
     errors.startingSkillPoints = 'world.errors.nonNegativeInteger';
   if (!isNonNegativeInteger(draft.skillPointsPerLevel ?? 1))
     errors.skillPointsPerLevel = 'world.errors.nonNegativeInteger';
+  for (const field of [
+    'sellAnywhereRatio',
+    'merchantBuyRatio',
+    'merchantSellRatio',
+  ] as const) {
+    const ratio = draft[field];
+    if (ratio !== undefined && !(ratio >= 0 && ratio <= 10))
+      errors[field] = 'world.errors.ratioInvalid';
+  }
   return errors;
 }
 

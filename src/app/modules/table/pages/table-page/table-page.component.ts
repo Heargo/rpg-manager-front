@@ -14,6 +14,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
+import { DialogModule } from '@openng/optimus-ui/dialog';
 import { DrawerModule } from '@openng/optimus-ui/drawer';
 import {
   FileUpload,
@@ -21,6 +22,7 @@ import {
   FileUploadModule,
 } from '@openng/optimus-ui/fileupload';
 import { MessageModule } from '@openng/optimus-ui/message';
+import { SelectModule } from '@openng/optimus-ui/select';
 import { SplitterModule } from '@openng/optimus-ui/splitter';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
@@ -29,6 +31,7 @@ import { StoredImageComponent } from '../../../../core/components/stored-image/s
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterBusiness } from '../../../character/business/character.business';
 import { CharacterSummaryComponent } from '../../../character/components/character-summary/character-summary.component';
+import { MerchantShopComponent } from '../../../npc/components/merchant-shop/merchant-shop.component';
 import { DiceOverlayComponent } from '../../../dice/components/dice-overlay/dice-overlay.component';
 import { DiceRollerComponent } from '../../../dice/components/dice-roller/dice-roller.component';
 import { RoomBusiness } from '../../../room/business/room.business';
@@ -52,6 +55,9 @@ const NARROW_QUERY = '(max-width: 960px)';
     ButtonModule,
     CardModule,
     DrawerModule,
+    DialogModule,
+    SelectModule,
+    MerchantShopComponent,
     FileUploadModule,
     MessageModule,
     SplitterModule,
@@ -92,6 +98,21 @@ export class TablePageComponent {
   });
   private readonly ready = signal(false);
 
+  /** Game master: who opening or closing a shop is for (null: every player). */
+  protected readonly shopTarget = signal<string | null>(null);
+  protected readonly shopTargets = computed(() => [
+    { name: null as string | null, playerId: null as string | null },
+    ...(this.characters.$characters() ?? []).map(({ name, playerId }) => ({
+      name,
+      playerId,
+    })),
+  ]);
+  private readonly visitedNpcId = signal<string | null>(null);
+  /** The shop the player is in; closes itself when the game master closes the shop. */
+  protected readonly visitedShop = computed(() =>
+    this.table.$shops().find((shop) => shop.npcId === this.visitedNpcId()),
+  );
+
   constructor() {
     const media = window.matchMedia(NARROW_QUERY);
     const onMedia = () => this.narrow.set(media.matches);
@@ -108,6 +129,33 @@ export class TablePageComponent {
       if (this.ready() && this.room.$status() === 'idle')
         void this.router.navigate(['/play']);
     });
+  }
+
+  protected visitShop(npcId: string): void {
+    this.visitedNpcId.set(npcId);
+  }
+
+  protected leaveShop(): void {
+    this.visitedNpcId.set(null);
+  }
+
+  protected setShop(change: { npcId: string; open: boolean }): void {
+    const target = this.shopTarget();
+    this.table
+      .setShop(change.npcId, change.open, target ? [target] : undefined)
+      .catch((error) => this.toastError(error));
+  }
+
+  protected buy(inventoryId: string): void {
+    this.trade(this.table.buyFrom(this.visitedNpcId()!, inventoryId));
+  }
+
+  protected sell(inventoryId: string): void {
+    this.trade(this.table.sellTo(this.visitedNpcId()!, inventoryId));
+  }
+
+  private trade(request: Promise<unknown>): void {
+    request.catch((error) => this.toastError(error));
   }
 
   protected select(characterId: string): void {

@@ -81,7 +81,11 @@
     <div class="player-layout">
       <section class="illustration-area">
         <ng-container [ngTemplateOutlet]="illustration" />
-        <app-table-npcs [npcs]="table.$npcs()" />
+        <app-table-npcs
+          [npcs]="table.$npcs()"
+          [shopsOpen]="table.$shopsOpen()"
+          (visitShop)="visitShop($event)"
+        />
       </section>
       <aside class="player-side">
         <p-card>
@@ -209,7 +213,29 @@
 <ng-template #scenePanel>
   <div class="scene">
     <ng-container [ngTemplateOutlet]="illustration" />
-    <app-table-npcs [npcs]="table.$npcs()" />
+    <p-select
+      class="shop-target"
+      data-testid="shop-target"
+      [options]="shopTargets()"
+      optionValue="playerId"
+      [ngModel]="shopTarget()"
+      (ngModelChange)="shopTarget.set($event)"
+      appendTo="body"
+      [ariaLabel]="'merchant.table.target' | transloco"
+    >
+      <ng-template #selectedItem let-target>
+        {{ target.name ?? ('merchant.table.everyone' | transloco) }}
+      </ng-template>
+      <ng-template #item let-target>
+        {{ target.name ?? ('merchant.table.everyone' | transloco) }}
+      </ng-template>
+    </p-select>
+    <app-table-npcs
+      [npcs]="table.$npcs()"
+      [shopsOpen]="table.$shopsOpen()"
+      [gameMaster]="true"
+      (setShop)="setShop($event)"
+    />
     <div class="scene-actions">
       <p-fileupload
         #uploader
@@ -300,3 +326,24 @@
     </section>
   </div>
 </ng-template>
+
+<p-dialog
+  [visible]="!!visitedShop()"
+  (visibleChange)="!$event && leaveShop()"
+  [modal]="true"
+  [dismissableMask]="true"
+  [header]="'merchant.shop.title' | transloco"
+  [style]="{ width: 'min(36rem, calc(100vw - 2rem))' }"
+>
+  @if (visitedShop(); as shop) {
+    @if (characters.$myCharacter(); as mine) {
+      <app-merchant-shop
+        [shop]="shop"
+        [money]="mine.money"
+        [inventory]="mine.inventory"
+        (buy)="buy($event)"
+        (sell)="sell($event)"
+      />
+    }
+  }
+</p-dialog>

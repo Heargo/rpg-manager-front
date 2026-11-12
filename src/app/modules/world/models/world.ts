@@ -35,6 +35,14 @@ export interface WorldRules {
   offlineFeatures: OfflineFeatures;
   /** Active skills roll dice when used (default on when omitted). */
   skillRollsEnabled?: boolean;
+  /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
+  sellAnywhere?: boolean;
+  /** What Sell anywhere pays, times the item price (0 to 10, default 1). */
+  sellAnywhereRatio?: number;
+  /** What merchants charge, times the item price (0 to 10, default 1). */
+  merchantBuyRatio?: number;
+  /** What merchants pay, times the item price (0 to 10, default 0.5). */
+  merchantSellRatio?: number;
   /** Kept as is when omitted. */
   npcVisibility?: NpcVisibilityRules;
 }
@@ -132,6 +140,14 @@ export interface World {
   offlineFeatures: OfflineFeatures;
   /** Active skills roll dice when used (default on when omitted). */
   skillRollsEnabled?: boolean;
+  /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
+  sellAnywhere?: boolean;
+  /** What Sell anywhere pays, times the item price (0 to 10, default 1). */
+  sellAnywhereRatio?: number;
+  /** What merchants charge, times the item price (0 to 10, default 1). */
+  merchantBuyRatio?: number;
+  /** What merchants pay, times the item price (0 to 10, default 0.5). */
+  merchantSellRatio?: number;
   /** Per NPC role, what the players see of an NPC shown on the table. */
   npcVisibility: NpcVisibilityRules;
   items: Item[];
@@ -182,6 +198,14 @@ export interface WorldDraft {
   startingMoney?: number;
   offlineFeatures?: Partial<OfflineFeatures>;
   skillRollsEnabled?: boolean;
+  /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
+  sellAnywhere?: boolean;
+  /** What Sell anywhere pays, times the item price (0 to 10, default 1). */
+  sellAnywhereRatio?: number;
+  /** What merchants charge, times the item price (0 to 10, default 1). */
+  merchantBuyRatio?: number;
+  /** What merchants pay, times the item price (0 to 10, default 0.5). */
+  merchantSellRatio?: number;
   npcVisibility?: NpcVisibilityRules;
 }
 
@@ -202,6 +226,8 @@ export interface WorldInfo {
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
   skillRollsEnabled?: boolean;
+  sellAnywhere?: boolean;
+  sellAnywhereRatio?: number;
 }
 
 export const WORLD_TOPICS = {

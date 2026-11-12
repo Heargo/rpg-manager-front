@@ -61,6 +61,10 @@ export function createWorld(
     startingMoney: draft.startingMoney ?? 0,
     offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures },
     skillRollsEnabled: draft.skillRollsEnabled ?? true,
+    sellAnywhere: draft.sellAnywhere ?? true,
+    sellAnywhereRatio: draft.sellAnywhereRatio ?? 1,
+    merchantBuyRatio: draft.merchantBuyRatio ?? 1,
+    merchantSellRatio: draft.merchantSellRatio ?? 0.5,
     npcVisibility: draft.npcVisibility ?? DEFAULT_NPC_VISIBILITY,
     items: [],
     characters: [],
@@ -144,5 +148,7 @@ export function toWorldInfo(world: World): WorldInfo {
     startingMoney: world.startingMoney,
     offlineFeatures: world.offlineFeatures,
     skillRollsEnabled: world.skillRollsEnabled,
+    sellAnywhere: world.sellAnywhere,
+    sellAnywhereRatio: world.sellAnywhereRatio,
   };
 }

@@ -37,6 +37,8 @@ export interface PublicNpc {
   id: string;
   name: string;
   portraitId?: string;
+  /** The NPC is a merchant: the table can offer its shop. */
+  merchant?: boolean;
   description?: string;
   level?: number;
   lifeBar?: { percent: number };

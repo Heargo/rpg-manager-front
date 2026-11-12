@@ -57,3 +57,51 @@ describe('TableNpcsComponent', () => {
     expect(cards().map((c) => c.textContent)).toEqual([expect.stringContaining('Grok'), expect.stringContaining('Mira')]);
   });
 });
+
+/**
+ * Merchant cards: a PublicNpc with `merchant: true`; inputs `shopsOpen` (npc ids whose shop is open: for the player, open for
+ * them; for the GM, open) and `gameMaster` (boolean). A player gets `[data-action="visit-shop"]` on an open merchant card only,
+ * which emits `visitShop` with the npc id. The GM gets `[data-action="toggle-shop"]` on every merchant card, which emits
+ * `setShop` with `{ npcId, open }` (the opposite of the current state).
+ */
+describe('TableNpcsComponent merchants', () => {
+  const npcs: PublicNpc[] = [
+    { id: 'm1', name: 'Mira', merchant: true },
+    { id: 'm2', name: 'Orin', merchant: true },
+    { id: 'n3', name: 'Grok' },
+  ];
+
+  async function renderShops(gameMaster: boolean, shopsOpen: string[]) {
+    TestBed.configureTestingModule({ imports: [TableNpcsComponent], providers: TEST_PROVIDERS });
+    const fixture = TestBed.createComponent(TableNpcsComponent);
+    fixture.componentRef.setInput('npcs', npcs);
+    fixture.componentRef.setInput('shopsOpen', shopsOpen);
+    fixture.componentRef.setInput('gameMaster', gameMaster);
+    const visited: string[] = [];
+    const set: { npcId: string; open: boolean }[] = [];
+    fixture.componentInstance.visitShop.subscribe((id: string) => visited.push(id));
+    fixture.componentInstance.setShop.subscribe((change: { npcId: string; open: boolean }) => set.push(change));
+    await fixture.whenStable();
+    const cards = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('[data-testid="table-npc"]'));
+    return { cards, visited, set };
+  }
+
+  it('lets a player visit a merchant only while the shop is open for them', async () => {
+    const { cards, visited } = await renderShops(false, ['m1']);
+    expect(cards[0].querySelector('[data-action="visit-shop"]')).not.toBeNull();
+    expect(cards[1].querySelector('[data-action="visit-shop"]')).toBeNull();
+    expect(cards[2].querySelector('[data-action="visit-shop"]')).toBeNull();
+    expect(cards[0].querySelector('[data-action="toggle-shop"]')).toBeNull();
+    (cards[0].querySelector('[data-action="visit-shop"]') as HTMLElement).click();
+    expect(visited).toEqual(['m1']);
+  });
+
+  it('gives the GM an open / close control on every merchant card', async () => {
+    const { cards, set } = await renderShops(true, ['m1']);
+    expect(cards[2].querySelector('[data-action="toggle-shop"]')).toBeNull();
+    expect(cards[0].querySelector('[data-action="visit-shop"]')).toBeNull();
+    (cards[0].querySelector('[data-action="toggle-shop"]') as HTMLElement).click();
+    (cards[1].querySelector('[data-action="toggle-shop"]') as HTMLElement).click();
+    expect(set).toEqual([{ npcId: 'm1', open: false }, { npcId: 'm2', open: true }]);
+  });
+});

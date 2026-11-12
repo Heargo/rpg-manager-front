@@ -172,6 +172,77 @@
           <small class="error">{{ key | transloco }}</small>
         }
       </div>
+      <div class="toggle">
+        <p-toggleswitch
+          inputId="sell-anywhere"
+          [ngModel]="sellAnywhere()"
+          (ngModelChange)="patch({ sellAnywhere: $event })"
+        />
+        <label for="sell-anywhere">{{
+          "world.rules.selling.sellAnywhere" | transloco
+        }}</label>
+      </div>
+      <p class="hint">{{ "world.rules.selling.hint" | transloco }}</p>
+      <div class="field">
+        <label for="sell-anywhere-ratio">{{
+          "world.rules.selling.sellAnywhereRatio" | transloco
+        }}</label>
+        <p-inputnumber
+          inputId="sell-anywhere-ratio"
+          [min]="0"
+          [max]="10"
+          [locale]="language.$language()"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="2"
+          [showButtons]="true"
+          [step]="0.05"
+          [ngModel]="sellAnywhereRatio()"
+          (ngModelChange)="patch({ sellAnywhereRatio: $event ?? 0 })"
+        />
+        @if (errors().sellAnywhereRatio; as key) {
+          <small class="error">{{ key | transloco }}</small>
+        }
+      </div>
+      <div class="field">
+        <label for="merchant-buy-ratio">{{
+          "world.rules.selling.merchantBuyRatio" | transloco
+        }}</label>
+        <p-inputnumber
+          inputId="merchant-buy-ratio"
+          [min]="0"
+          [max]="10"
+          [locale]="language.$language()"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="2"
+          [showButtons]="true"
+          [step]="0.05"
+          [ngModel]="merchantBuyRatio()"
+          (ngModelChange)="patch({ merchantBuyRatio: $event ?? 0 })"
+        />
+        @if (errors().merchantBuyRatio; as key) {
+          <small class="error">{{ key | transloco }}</small>
+        }
+      </div>
+      <div class="field">
+        <label for="merchant-sell-ratio">{{
+          "world.rules.selling.merchantSellRatio" | transloco
+        }}</label>
+        <p-inputnumber
+          inputId="merchant-sell-ratio"
+          [min]="0"
+          [max]="10"
+          [locale]="language.$language()"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="2"
+          [showButtons]="true"
+          [step]="0.05"
+          [ngModel]="merchantSellRatio()"
+          (ngModelChange)="patch({ merchantSellRatio: $event ?? 0 })"
+        />
+        @if (errors().merchantSellRatio; as key) {
+          <small class="error">{{ key | transloco }}</small>
+        }
+      </div>
     </fieldset>
   </section>
 }

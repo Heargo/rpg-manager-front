@@ -138,6 +138,10 @@ export class WorldNewPageComponent {
     DEFAULT_NPC_VISIBILITY,
   );
   protected readonly skillRollsEnabled = signal(true);
+  protected readonly sellAnywhere = signal(true);
+  protected readonly sellAnywhereRatio = signal(1);
+  protected readonly merchantBuyRatio = signal(1);
+  protected readonly merchantSellRatio = signal(0.5);
   protected readonly offline = signal<OfflineFeatures>({
     ...DEFAULT_OFFLINE_FEATURES,
   });
@@ -172,6 +176,10 @@ export class WorldNewPageComponent {
     startingMoney: this.startingMoney(),
     offlineFeatures: this.offline(),
     skillRollsEnabled: this.skillRollsEnabled(),
+    sellAnywhere: this.sellAnywhere(),
+    sellAnywhereRatio: this.sellAnywhereRatio(),
+    merchantBuyRatio: this.merchantBuyRatio(),
+    merchantSellRatio: this.merchantSellRatio(),
     npcVisibility: this.npcVisibility(),
   }));
   /** Per row, the problem of its cap (null when none or valid). */
@@ -374,6 +382,10 @@ export class WorldNewPageComponent {
     this.skillPointsPerLevel.set(draft.skillPointsPerLevel ?? 1);
     this.offline.set({ ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures });
     this.skillRollsEnabled.set(draft.skillRollsEnabled ?? true);
+    this.sellAnywhere.set(draft.sellAnywhere ?? true);
+    this.sellAnywhereRatio.set(draft.sellAnywhereRatio ?? 1);
+    this.merchantBuyRatio.set(draft.merchantBuyRatio ?? 1);
+    this.merchantSellRatio.set(draft.merchantSellRatio ?? 0.5);
     this.npcVisibility.set(draft.npcVisibility ?? DEFAULT_NPC_VISIBILITY);
   }
 

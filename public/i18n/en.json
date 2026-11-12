@@ -154,6 +154,7 @@
       "attributeNameTooLong": "An attribute name is too long.",
       "attributeNamesUnique": "Two attributes have the same name.",
       "baseValueInteger": "Base values must be whole numbers.",
+      "ratioInvalid": "Use a ratio from 0 to 10.",
       "nonNegativeInteger": "Use a whole number, 0 or more.",
       "image": "This picture couldn't be used.",
       "capInvalid": "The cap must be a whole number, 1 or more.",
@@ -199,6 +200,13 @@
       "attributes": "Attributes",
       "tabs": { "attributes": "Attributes", "rules": "Rules", "offline": "Offline" },
       "progression": "Progression",
+      "selling": {
+        "sellAnywhere": "Allow Sell anywhere",
+        "hint": "Players may sell items from their sheet, without a merchant. The ratios below multiply the item price.",
+        "sellAnywhereRatio": "Sell anywhere pays (x price)",
+        "merchantBuyRatio": "Merchants charge (x price)",
+        "merchantSellRatio": "Merchants pay (x price)"
+      },
       "economy": "Economy",
       "save": "Save rules",
       "saved": "Rules saved",
@@ -245,6 +253,7 @@
       "later": "Later"
     },
     "errors": {
+      "sellDisabled": "Selling from the sheet is turned off in this world.",
       "invalid": "This character can't be created.",
       "nameRequired": "Give your character a name.",
       "classRequired": "Choose a class for your character.",
@@ -832,6 +841,34 @@
       "cap": "Cap {{ cap }}",
       "maxLabel": "Max per level",
       "xpLabel": "XP cost per level"
+    }
+  },
+  "merchant": {
+    "errors": {
+      "closed": "This shop is closed.",
+      "notInStock": "This item isn't in stock anymore.",
+      "cantAfford": "You can't afford this.",
+      "unknownItem": "You don't have this item.",
+      "invalid": "This shop request is invalid.",
+      "gameMasterOnly": "Only the game master opens or closes a shop.",
+      "playerOnly": "Only a player buys or sells."
+    },
+    "shop": {
+      "title": "Shop",
+      "money": "Your money",
+      "buy": "For sale",
+      "buyAction": "Buy",
+      "sell": "Sell to the merchant",
+      "sellAction": "Sell",
+      "noStock": "Nothing for sale.",
+      "nothingToSell": "Nothing to sell."
+    },
+    "table": {
+      "open": "Open shop",
+      "close": "Close shop",
+      "visit": "Visit shop",
+      "target": "Open or close the shop for",
+      "everyone": "All players"
     }
   },
   "npc": {

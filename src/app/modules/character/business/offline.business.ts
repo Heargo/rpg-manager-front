@@ -71,18 +71,23 @@ export class OfflineBusiness {
             action,
             this.$features(),
             world.barAttributes,
-            this.catalogue(),
+            this.catalogue(world),
           )
         : { ok: false, error: 'character.errors.invalid' },
     );
   }
 
   /** Offline, a player only knows their own class and its skills. */
-  private catalogue(): SkillCatalogue {
+  private catalogue(world: {
+    sellAnywhere?: boolean;
+    sellAnywhereRatio?: number;
+  }): SkillCatalogue {
     const view = this.characters.$classView();
     return {
       skills: view?.skills ?? [],
       classes: view?.characterClass ? [view.characterClass] : [],
+      sellAnywhere: world.sellAnywhere,
+      sellAnywhereRatio: world.sellAnywhereRatio,
     };
   }
 
