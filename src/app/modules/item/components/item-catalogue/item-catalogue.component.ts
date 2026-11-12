@@ -77,13 +77,8 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         [showToggleAll]="false"
         display="chip"
       />
-      <div class="price">
-        <span class="price-label">
-          {{ 'item.catalogue.price' | transloco }}
-          <app-coin-display [copper]="range()[0]" />
-          {{ 'item.catalogue.priceTo' | transloco }}
-          <app-coin-display [copper]="range()[1]" />
-        </span>
+      <div class="price-filter">
+        <span class="price-label">{{ 'item.catalogue.price' | transloco }}</span>
         <p-slider
           [range]="true"
           [min]="bounds().min"
@@ -91,7 +86,13 @@ import { ItemCardComponent } from '../item-card/item-card.component';
           [step]="100"
           [ngModel]="range()"
           (ngModelChange)="priceRange.set($event)"
+          [attr.aria-label]="'item.catalogue.price' | transloco"
         />
+        <span class="price-ends">
+          <app-coin-display [copper]="range()[0]" />
+          <span class="price-to">{{ 'item.catalogue.priceTo' | transloco }}</span>
+          <app-coin-display [copper]="range()[1]" />
+        </span>
       </div>
       <button
         pButton
@@ -218,17 +219,28 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       gap: 0.75rem;
       align-items: center;
     }
-    .price {
+    /* the price filter takes a full row cell: a wide slider, min and max at each end */
+    .price-filter {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      min-width: 12rem;
+      flex: 1 1 18rem;
+      min-width: min(16rem, 100%);
+      padding-inline: 0.5rem;
     }
     .price-label {
+      font-size: 0.875rem;
+      color: var(--p-text-muted-color);
+    }
+    .price-ends {
       display: flex;
-      flex-wrap: wrap;
+      justify-content: space-between;
       align-items: center;
-      gap: 0.4rem;
+      gap: 1rem;
+    }
+    .price-to {
+      color: var(--p-text-muted-color);
+      font-size: 0.875rem;
     }
     .inventory {
       display: flex;
