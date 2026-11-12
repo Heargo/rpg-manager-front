@@ -9,6 +9,15 @@
     "offlineBanner": "Vous êtes hors ligne. Les données enregistrées restent disponibles ; rejoindre une salle demande un réseau."
   },
   "nav": {
+    "worlds": "Mondes",
+    "catalogues": "Catalogues",
+    "table": "Table",
+    "roomRules": "Règles du monde",
+    "closeWorld": "Fermer le monde",
+    "closeWorldHostTitle": "Fermer le monde ?",
+    "closeWorldHostMessage": "La salle se ferme pour tout le monde et les joueurs sont déconnectés.",
+    "closeWorldPlayerTitle": "Quitter le monde ?",
+    "closeWorldPlayerMessage": "Vous quittez la salle. Vous pourrez la rejoindre plus tard avec une invitation.",
     "play": "Jouer",
     "profile": "Profil",
     "language": "Langue",

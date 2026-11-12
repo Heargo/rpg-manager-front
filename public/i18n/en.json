@@ -9,6 +9,15 @@
     "offlineBanner": "You're offline. Saved data still works; connecting to a room needs a network."
   },
   "nav": {
+    "worlds": "Worlds",
+    "catalogues": "Catalogues",
+    "table": "Table",
+    "roomRules": "World rules",
+    "closeWorld": "Close the world",
+    "closeWorldHostTitle": "Close the world?",
+    "closeWorldHostMessage": "The room closes for everyone and the players are disconnected.",
+    "closeWorldPlayerTitle": "Leave the world?",
+    "closeWorldPlayerMessage": "You leave the room. You can rejoin later with an invite.",
     "play": "Play",
     "profile": "Profile",
     "language": "Language",
