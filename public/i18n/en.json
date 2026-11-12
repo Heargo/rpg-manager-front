@@ -11,7 +11,7 @@
       "change": "Change",
       "remove": "Remove"
     },
-    "imageWarning": "Prefer images made by human artists. AI text is handy, but AI images are lifeless.",
+    "imageWarning": "Prefer images made by human artists.",
     "offlineBanner": "You're offline. Saved data still works; connecting to a room needs a network.",
     "random": "Random",
     "generateFromSeed": "Generate from this seed"
