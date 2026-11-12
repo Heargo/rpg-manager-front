@@ -22,8 +22,7 @@ import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { ImageBusiness } from '../../../../core/business/image.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
-import { ImageWarningComponent } from '../../../../core/components/image-warning/image-warning.component';
-import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
+import { ImagePickerComponent } from '../../../../core/components/image-picker/image-picker.component';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { World } from '../../../world/models/world';
 import { NpcEditorBusiness } from '../../business/npc-editor.business';
@@ -46,8 +45,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
     TabsModule,
     TextareaModule,
     CoinInputComponent,
-    ImageWarningComponent,
-    StoredImageComponent,
+    ImagePickerComponent,
   ],
   template: `
     <p-tabs value="form">
@@ -66,29 +64,16 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 'npc.editor.fields.portrait' | transloco
               }}</label>
               <span data-testid="portrait-preview" class="preview">
-                <app-stored-image [imageId]="draft().portraitId">
-                  <span class="pi pi-image"></span>
-                </app-stored-image>
+                <app-image-picker
+                  inputId="npc-portrait"
+                  field="portrait"
+                  removeAction="remove-portrait"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  [imageId]="draft().portraitId"
+                  (picked)="upload($event)"
+                  (removed)="patch({ portraitId: undefined })"
+                />
               </span>
-              <input
-                id="npc-portrait"
-                data-field="portrait"
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                (change)="upload($any($event.target))"
-              />
-              @if (draft().portraitId) {
-                <button
-                  pButton
-                  type="button"
-                  data-action="remove-portrait"
-                  icon="pi pi-trash"
-                  severity="secondary"
-                  [label]="'npc.editor.removePortrait' | transloco"
-                  (click)="patch({ portraitId: undefined })"
-                ></button>
-              }
-              <app-image-warning />
             </div>
             <div class="field">
               <label for="npc-name">{{
@@ -482,18 +467,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
       gap: 1rem;
     }
     .preview {
-      width: 6rem;
-      height: 6rem;
-      border-radius: 0.5rem;
-      background: var(--p-content-hover-background);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .preview app-stored-image {
-      width: 100%;
-      height: 100%;
+      display: block;
     }
     .form {
       display: flex;
@@ -597,9 +571,7 @@ export class NpcEditorComponent {
     this.setDraft({ ...this.draft(), ...change });
   }
 
-  protected async upload(input: HTMLInputElement): Promise<void> {
-    const file = input.files?.[0];
-    if (!file) return;
+  protected async upload(file: File): Promise<void> {
     try {
       this.patch({ portraitId: await this.images.storeUpload(file) });
     } catch {

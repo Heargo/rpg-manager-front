@@ -21,8 +21,7 @@ import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { ImageBusiness } from '../../../../core/business/image.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
-import { ImageWarningComponent } from '../../../../core/components/image-warning/image-warning.component';
-import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
+import { ImagePickerComponent } from '../../../../core/components/image-picker/image-picker.component';
 import {
   EQUIPMENT_SLOTS,
   ITEM_RARITIES,
@@ -76,8 +75,7 @@ function toDraft(item: Item | undefined): ItemDraft {
     TabsModule,
     TextareaModule,
     CoinInputComponent,
-    StoredImageComponent,
-    ImageWarningComponent,
+    ImagePickerComponent,
   ],
   template: `
     <p-tabs value="form">
@@ -95,17 +93,14 @@ function toDraft(item: Item | undefined): ItemDraft {
               <label for="item-image">{{
                 'item.fields.image' | transloco
               }}</label>
-              <app-stored-image class="preview" [imageId]="imageId()">
-                <span class="pi pi-image"></span>
-              </app-stored-image>
-              <input
-                id="item-image"
-                data-field="image"
-                type="file"
+              <app-image-picker
+                inputId="item-image"
+                field="image"
                 accept="image/*"
-                (change)="upload($any($event.target))"
+                [imageId]="imageId()"
+                (picked)="upload($event)"
+                (removed)="imageId.set(undefined)"
               />
-              <app-image-warning />
             </div>
             <div class="field">
               <label for="item-name">{{
@@ -331,15 +326,6 @@ function toDraft(item: Item | undefined): ItemDraft {
       gap: 0.25rem;
       min-width: 0;
     }
-    .preview {
-      width: 6rem;
-      height: 6rem;
-      border-radius: 0.5rem;
-      background: var(--p-content-hover-background);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
     .json {
       font-family: monospace;
     }
@@ -477,9 +463,7 @@ export class ItemEditorComponent {
     }
   }
 
-  protected async upload(input: HTMLInputElement): Promise<void> {
-    const file = input.files?.[0];
-    if (!file) return;
+  protected async upload(file: File): Promise<void> {
     try {
       this.imageId.set(await this.images.storeUpload(file));
     } catch {

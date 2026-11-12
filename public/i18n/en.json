@@ -6,6 +6,11 @@
   },
   "common": {
     "cancel": "Cancel",
+    "image": {
+      "choose": "Choose an image",
+      "change": "Change",
+      "remove": "Remove"
+    },
     "imageWarning": "Prefer images made by human artists. AI text is handy, but AI images are lifeless.",
     "offlineBanner": "You're offline. Saved data still works; connecting to a room needs a network.",
     "random": "Random",
@@ -946,7 +951,6 @@
       "equipped": "Equipped",
       "loot": "Loot",
       "removeItem": "Remove",
-      "removePortrait": "Remove portrait",
       "fields": {
         "portrait": "Portrait",
         "name": "Name",
