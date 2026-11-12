@@ -234,21 +234,31 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
       gap: 0.75rem;
       align-items: center;
     }
+    /* one card per entry, so a long list keeps some relief */
     .list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
       margin: 0;
       padding: 0;
       list-style: none;
-      border: 1px solid var(--p-content-border-color);
-      border-radius: 0.5rem;
     }
     .row {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 0.4rem 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--p-content-border-color);
+      border-radius: 0.75rem;
+      background: var(--p-content-background);
+      box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+      transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
     }
-    .row + .row {
-      border-top: 1px solid var(--p-content-border-color);
+    .row:hover {
+      border-color: var(--p-primary-color);
+      box-shadow: 0 3px 10px rgb(0 0 0 / 0.12);
     }
     .thumb {
       flex: none;
