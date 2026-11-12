@@ -219,13 +219,13 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       gap: 0.75rem;
       align-items: center;
     }
-    /* the price filter takes a full row cell: a wide slider, min and max at each end */
+    /* a compact slider; min and max sit at each end, clearly apart */
     .price-filter {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-      flex: 1 1 18rem;
-      min-width: min(16rem, 100%);
+      gap: 0.6rem;
+      flex: 0 1 15rem;
+      min-width: min(13rem, 100%);
       padding-inline: 0.5rem;
     }
     .price-label {

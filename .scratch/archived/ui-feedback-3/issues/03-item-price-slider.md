@@ -11,3 +11,7 @@ Spec: `../spec.md` (Bugs and layout)
 ## Answer
 
 Layout only (no seam: widths are not measured by jsdom). The price filter (renamed `.price-filter`, it shared `.price` with the slot price) grows to fill the toolbar row (min 16rem), label on top, slider, then min and max at each end with "à"/"to" between. Checked in the browser: wide slider on desktop, 311px on a 375px phone, no horizontal scroll. Suite unchanged: 173 files, 1417 tests.
+
+## Follow-up (user feedback)
+
+Full width was far too wide. The filter is now compact (15rem, min 13rem); only the spacing between min and max is kept (each at one end of the slider).
