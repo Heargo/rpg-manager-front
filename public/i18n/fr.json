@@ -1078,7 +1078,43 @@
         "roll_faces": "Un dé a de 2 à 1000 faces.",
         "success_value": "Le seuil est un nombre entier.",
         "success_formula": "La formule de réussite n'est pas valide (roll, skillLevel, level, noms d'attributs, target_<attribut>)."
+      },
+      "help": {
+        "description": "Affichée dans le catalogue et sur la fiche.",
+        "type": "Une compétence active s'utilise en combat ; une passive s'applique toujours.",
+        "rarity": "La rareté de la compétence.",
+        "maxLevel": "Combien de fois la compétence peut monter de niveau.",
+        "pointCost": "Points de compétence dépensés à chaque niveau.",
+        "target": "Qui la compétence vise.",
+        "cooldown": "Tours à attendre avant de la réutiliser.",
+        "costAttribute": "L'attribut dépensé à l'usage ; vide pour aucun coût.",
+        "costAmount": "Ce que coûte chaque usage.",
+        "roll": "Les dés lancés quand la compétence est utilisée.",
+        "successMode": "Quand la compétence fonctionne : toujours, au-dessus d'un total, ou par formule.",
+        "successValue": "Le total des dés nécessaire pour réussir.",
+        "successFormula": "Une formule ; la compétence réussit quand elle donne 0 ou plus.",
+        "effects": "Ce que fait la compétence quand elle fonctionne. Chaque montant est une formule."
+      },
+      "sections": {
+        "identity": "Identité",
+        "cost": "Coût et niveaux",
+        "roll": "Jet et réussite",
+        "effects": "Effets"
       }
+    },
+    "variables": {
+      "title": "Variables et formules",
+      "toggle": "Aide sur les variables",
+      "successTitle": "Formule de réussite",
+      "successBody": "Décide si la compétence fonctionne. Elle réussit quand le résultat vaut 0 ou plus (vrai).",
+      "amountTitle": "Formule de montant",
+      "amountBody": "Un nombre de points : les dégâts, les soins ou le bonus d'un effet.",
+      "exampleLabel": "Exemple :",
+      "roll": "Le total des dés lancés pour cet usage.",
+      "skillLevel": "Le niveau de compétence que le personnage a investi.",
+      "level": "Le niveau du personnage.",
+      "caster": "Le maximum du lanceur pour cet attribut.",
+      "target": "Le maximum de la cible pour cet attribut."
     }
   },
   "class": {
