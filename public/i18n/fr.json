@@ -401,7 +401,9 @@
       "notHosting": "Hébergez un monde pour gérer son catalogue d'objets.",
       "toolIntro": "Un catalogue d'exemple sur les attributs par défaut. Rien n'est enregistré.",
       "create": "Nouvel objet",
-      "edit": "Modifier"
+      "edit": "Modifier",
+      "view": "Voir",
+      "selected": "Objet sélectionné"
     },
     "errors": {
       "invalid": "Cet objet ne peut pas être donné.",
@@ -929,6 +931,7 @@
       "empty": "Aucune compétence trouvée.",
       "copySuffix": "(copie)",
       "ranks": "Jusqu'au rang {{ max }}, {{ cost }} point(s) par rang",
+      "cooldown": "Recharge {{ turns }} tour(s)",
       "inUse": "{{ name }} est utilisée par {{ usages }} : retirez-la d'abord.",
       "failed": "La compétence n'a pas pu être enregistrée."
     },

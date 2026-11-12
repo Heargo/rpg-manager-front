@@ -401,7 +401,9 @@
       "notHosting": "Host a world to manage its item catalogue.",
       "toolIntro": "A sample catalogue on the default attributes. Nothing is saved.",
       "create": "New item",
-      "edit": "Edit"
+      "edit": "Edit",
+      "view": "View",
+      "selected": "Selected item"
     },
     "errors": {
       "invalid": "This item can't be given.",
@@ -929,6 +931,7 @@
       "empty": "No skill found.",
       "copySuffix": "(copy)",
       "ranks": "Up to rank {{ max }}, {{ cost }} point(s) per rank",
+      "cooldown": "Cooldown {{ turns }} turn(s)",
       "inUse": "{{ name }} is used by {{ usages }}: remove it from them first.",
       "failed": "The skill could not be saved."
     },

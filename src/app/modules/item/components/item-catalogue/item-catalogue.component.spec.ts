@@ -15,12 +15,17 @@ const item = (id: string, name: string, rarity: Item['rarity']): Item => ({
   price: 5,
   modifiers: [],
 });
-const sword = item('sword', 'Iron Sword', 'common');
+const sword: Item = { ...item('sword', 'Iron Sword', 'common'), imageId: 'img-sword' };
 const potion = item('potion', 'Healing Potion', 'rare');
 
 /**
- * Hooks the template must expose: `[data-action]` on the buttons of a card (`give`, `edit`, `delete`) and of the
- * toolbar (`add-defaults`), and `[data-field="search"]` on the search input.
+ * Hooks the template must expose: an inventory grid of `[data-field="slot"]` buttons, one per item, each with
+ * `[data-rarity="<rarity>"]`, the name, `[data-field="slot-price"]`, and either an `app-stored-image` (item has an
+ * imageId) or a `[data-field="slot-kind-icon"]`. Selecting (clicking) a slot shows one `[data-field="slot-actions"]`
+ * panel with `[data-action]` buttons `view` (shows an `app-item-card` of the item), `give` (only when `canGive`),
+ * `edit` and `delete`; none are shown before a selection. The toolbar keeps `add-defaults` and
+ * `[data-field="search"]`.
+ * Adapted from the card contract: the per-card `app-item-card` list and per-card action buttons are replaced.
  */
 describe('ItemCatalogueComponent', () => {
   const world: World = {
@@ -42,11 +47,33 @@ describe('ItemCatalogueComponent', () => {
     return { fixture, el, q, component: fixture.componentInstance };
   }
 
-  it('shows one card per catalogue item', async () => {
+  async function select(ctx: Awaited<ReturnType<typeof setup>>, index: number) {
+    ctx.q('[data-field="slot"]')[index].click();
+    await ctx.fixture.whenStable();
+  }
+
+  it('shows one inventory slot per catalogue item, with name and price', async () => {
     const { q, el } = await setup(true);
-    expect(q('app-item-card')).toHaveLength(2);
+    expect(q('[data-field="slot"]')).toHaveLength(2);
+    expect(q('[data-field="slot-price"]')).toHaveLength(2);
+    expect(q('app-item-card')).toHaveLength(0);
     expect(el.textContent).toContain('Iron Sword');
     expect(el.textContent).toContain('Healing Potion');
+  });
+
+  it('marks the rarity of each slot', async () => {
+    const { q } = await setup(true);
+    const slots = q('[data-field="slot"]');
+    expect(slots[0].getAttribute('data-rarity')).toBe('common');
+    expect(slots[1].getAttribute('data-rarity')).toBe('rare');
+  });
+
+  it('shows the image when the item has one, the kind icon otherwise', async () => {
+    const { q } = await setup(true);
+    const slots = q('[data-field="slot"]');
+    expect(slots[0].querySelector('app-stored-image')).not.toBeNull();
+    expect(slots[0].querySelector('[data-field="slot-kind-icon"]')).toBeNull();
+    expect(slots[1].querySelector('[data-field="slot-kind-icon"]')).not.toBeNull();
   });
 
   it('narrows the grid with the search box', async () => {
@@ -56,46 +83,68 @@ describe('ItemCatalogueComponent', () => {
     search.dispatchEvent(new Event('input'));
     await fixture.whenStable();
 
-    expect(q('app-item-card')).toHaveLength(1);
+    expect(q('[data-field="slot"]')).toHaveLength(1);
     expect(fixture.nativeElement.textContent).toContain('Healing Potion');
     expect(fixture.nativeElement.textContent).not.toContain('Iron Sword');
   });
 
+  it('shows no actions until a slot is selected', async () => {
+    const ctx = await setup(true);
+    expect(ctx.q('[data-field="slot-actions"]')).toHaveLength(0);
+    expect(ctx.q('[data-action="edit"]')).toHaveLength(0);
+    await select(ctx, 0);
+    expect(ctx.q('[data-field="slot-actions"]')).toHaveLength(1);
+    expect(ctx.q('[data-action="view"]')).toHaveLength(1);
+    expect(ctx.q('[data-action="edit"]')).toHaveLength(1);
+  });
+
+  it('view shows the item card of the selected item', async () => {
+    const ctx = await setup(true);
+    await select(ctx, 1);
+    ctx.q('[data-action="view"]')[0].click();
+    await ctx.fixture.whenStable();
+    expect(ctx.q('app-item-card')).toHaveLength(1);
+    expect(ctx.q('app-item-card')[0].textContent).toContain('Healing Potion');
+  });
+
   it('emits the item to give when the GM can give', async () => {
-    const { fixture, q, component } = await setup(true);
+    const ctx = await setup(true);
     const given: Item[] = [];
-    component.give.subscribe((i: Item) => given.push(i));
-    q('[data-action="give"]')[0].click();
-    await fixture.whenStable();
+    ctx.component.give.subscribe((i: Item) => given.push(i));
+    await select(ctx, 0);
+    ctx.q('[data-action="give"]')[0].click();
+    await ctx.fixture.whenStable();
     expect(given).toEqual([sword]);
   });
 
   it('hides give on a world nobody plays in (sandbox)', async () => {
-    const { q } = await setup(false);
-    expect(q('[data-action="give"]')).toHaveLength(0);
-    expect(q('[data-action="delete"]')).toHaveLength(2);
+    const ctx = await setup(false);
+    await select(ctx, 0);
+    expect(ctx.q('[data-action="give"]')).toHaveLength(0);
+    expect(ctx.q('[data-action="delete"]')).toHaveLength(1);
   });
 
   it('emits the item to edit', async () => {
-    const { fixture, q, component } = await setup(true);
-    expect(q('[data-action="edit"]')).toHaveLength(2);
+    const ctx = await setup(true);
     const edited: Item[] = [];
-    component.edit.subscribe((i: Item) => edited.push(i));
-    q('[data-action="edit"]')[0].click();
-    await fixture.whenStable();
+    ctx.component.edit.subscribe((i: Item) => edited.push(i));
+    await select(ctx, 0);
+    ctx.q('[data-action="edit"]')[0].click();
+    await ctx.fixture.whenStable();
     expect(edited).toEqual([sword]);
   });
 
   it('asks for confirmation before emitting delete', async () => {
-    const { fixture, q, component } = await setup(true);
+    const ctx = await setup(true);
     const confirm = vi
       .spyOn(TestBed.inject(ConfirmationService), 'confirm')
       .mockImplementation(() => TestBed.inject(ConfirmationService));
     const removed: Item[] = [];
-    component.remove.subscribe((i: Item) => removed.push(i));
+    ctx.component.remove.subscribe((i: Item) => removed.push(i));
 
-    q('[data-action="delete"]')[1].click();
-    await fixture.whenStable();
+    await select(ctx, 1);
+    ctx.q('[data-action="delete"]')[0].click();
+    await ctx.fixture.whenStable();
     expect(confirm).toHaveBeenCalledTimes(1);
     expect(removed).toEqual([]);
 
