@@ -8,6 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
@@ -22,7 +23,11 @@ import { LanguageBusiness } from '../../../../core/business/language.business';
 import { ITEM_RARITIES } from '../../../../core/models/item';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { World } from '../../../world/models/world';
+import { FormulaPresetBusiness } from '../../business/formula-preset.business';
 import { SkillEditorBusiness } from '../../business/skill-editor.business';
+import { applyPreset, placeholders } from '../../helpers/formula-preset.rules';
+import { FormulaPreset, FormulaPresetKind } from '../../models/formula-preset';
+import { FormulaPresetsDialogComponent } from '../formula-presets-dialog/formula-presets-dialog.component';
 import { formulaVariables } from '../../helpers/skill-formula-variables';
 import { SkillIssue } from '../../helpers/skill.rules';
 import {
@@ -39,12 +44,17 @@ import {
   SkillEffect,
 } from '../../models/skill';
 
+/** Where a preset goes: the success formula or the amount of the effect at that index. */
+type PresetTarget = 'success' | number;
+
 /** Creates or edits a skill on a world: a form and its JSON (kept in sync), with a live preview of every amount. */
 @Component({
   selector: 'app-skill-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    NgTemplateOutlet,
     FormsModule,
+    FormulaPresetsDialogComponent,
     TranslocoPipe,
     ButtonModule,
     InputNumberModule,
@@ -76,18 +86,33 @@ import {
                 [label]="'skill.variables.toggle' | transloco"
                 (click)="helpOpen.set(!helpOpen())"
               ></button>
+              <button
+                pButton
+                type="button"
+                data-action="manage-presets"
+                icon="pi pi-bookmark"
+                severity="secondary"
+                size="small"
+                [text]="true"
+                [label]="'skill.presets.manage' | transloco"
+                (click)="managing.set(true)"
+              ></button>
             </div>
             @if (helpOpen()) {
               <div class="help" data-field="variables-help">
                 <h4>{{ 'skill.variables.title' | transloco }}</h4>
                 <p>
-                  <strong>{{ 'skill.variables.successTitle' | transloco }}</strong>
+                  <strong>{{
+                    'skill.variables.successTitle' | transloco
+                  }}</strong>
                   {{ 'skill.variables.successBody' | transloco }}
                   {{ 'skill.variables.exampleLabel' | transloco }}
                   <code data-example="success">{{ successExample() }}</code>
                 </p>
                 <p>
-                  <strong>{{ 'skill.variables.amountTitle' | transloco }}</strong>
+                  <strong>{{
+                    'skill.variables.amountTitle' | transloco
+                  }}</strong>
                   {{ 'skill.variables.amountBody' | transloco }}
                   {{ 'skill.variables.exampleLabel' | transloco }}
                   <code data-example="amount">{{ amountExample() }}</code>
@@ -130,7 +155,9 @@ import {
                   [value]="draft().description"
                   (input)="patch({ description: $any($event.target).value })"
                 ></textarea>
-                <small class="hint">{{ 'skill.editor.help.description' | transloco }}</small>
+                <small class="hint">{{
+                  'skill.editor.help.description' | transloco
+                }}</small>
               </div>
               <div class="row">
                 <div class="field">
@@ -146,7 +173,9 @@ import {
                     [ngModel]="draft().type"
                     (ngModelChange)="setType($event)"
                   />
-                  <small class="hint">{{ 'skill.editor.help.type' | transloco }}</small>
+                  <small class="hint">{{
+                    'skill.editor.help.type' | transloco
+                  }}</small>
                 </div>
                 <div class="field">
                   <label for="skill-rarity">{{
@@ -161,7 +190,9 @@ import {
                     [ngModel]="draft().rarity"
                     (ngModelChange)="patch({ rarity: $event })"
                   />
-                  <small class="hint">{{ 'skill.editor.help.rarity' | transloco }}</small>
+                  <small class="hint">{{
+                    'skill.editor.help.rarity' | transloco
+                  }}</small>
                 </div>
               </div>
             </section>
@@ -182,7 +213,9 @@ import {
                     [ngModel]="draft().maxLevel"
                     (ngModelChange)="patch({ maxLevel: $event ?? 0 })"
                   />
-                  <small class="hint">{{ 'skill.editor.help.maxLevel' | transloco }}</small>
+                  <small class="hint">{{
+                    'skill.editor.help.maxLevel' | transloco
+                  }}</small>
                 </div>
                 <div class="field">
                   <label for="skill-point-cost">{{
@@ -196,7 +229,9 @@ import {
                     [ngModel]="draft().pointCost"
                     (ngModelChange)="patch({ pointCost: $event ?? 0 })"
                   />
-                  <small class="hint">{{ 'skill.editor.help.pointCost' | transloco }}</small>
+                  <small class="hint">{{
+                    'skill.editor.help.pointCost' | transloco
+                  }}</small>
                 </div>
               </div>
               @if (draft().type === 'active') {
@@ -214,7 +249,9 @@ import {
                       [ngModel]="draft().target"
                       (ngModelChange)="patch({ target: $event })"
                     />
-                    <small class="hint">{{ 'skill.editor.help.target' | transloco }}</small>
+                    <small class="hint">{{
+                      'skill.editor.help.target' | transloco
+                    }}</small>
                   </div>
                   <div class="field">
                     <label for="skill-cooldown">{{
@@ -228,7 +265,9 @@ import {
                       [ngModel]="draft().cooldown ?? 0"
                       (ngModelChange)="patch({ cooldown: $event ?? 0 })"
                     />
-                    <small class="hint">{{ 'skill.editor.help.cooldown' | transloco }}</small>
+                    <small class="hint">{{
+                      'skill.editor.help.cooldown' | transloco
+                    }}</small>
                   </div>
                 </div>
                 <div class="row">
@@ -246,7 +285,9 @@ import {
                       [ngModel]="draft().cost?.attribute ?? null"
                       (ngModelChange)="setCostAttribute($event)"
                     />
-                    <small class="hint">{{ 'skill.editor.help.costAttribute' | transloco }}</small>
+                    <small class="hint">{{
+                      'skill.editor.help.costAttribute' | transloco
+                    }}</small>
                   </div>
                   @if (draft().cost; as cost) {
                     <div class="field">
@@ -268,7 +309,9 @@ import {
                           })
                         "
                       />
-                      <small class="hint">{{ 'skill.editor.help.costAmount' | transloco }}</small>
+                      <small class="hint">{{
+                        'skill.editor.help.costAmount' | transloco
+                      }}</small>
                     </div>
                   }
                 </div>
@@ -292,7 +335,9 @@ import {
                       [showButtons]="true"
                       [ngModel]="roll().count"
                       (ngModelChange)="
-                        patch({ roll: { count: $event ?? 0, faces: roll().faces } })
+                        patch({
+                          roll: { count: $event ?? 0, faces: roll().faces },
+                        })
                       "
                     />
                   </div>
@@ -308,7 +353,9 @@ import {
                       [showButtons]="true"
                       [ngModel]="roll().faces"
                       (ngModelChange)="
-                        patch({ roll: { count: roll().count, faces: $event ?? 0 } })
+                        patch({
+                          roll: { count: roll().count, faces: $event ?? 0 },
+                        })
                       "
                     />
                   </div>
@@ -327,7 +374,9 @@ import {
                       [ngModel]="success().mode"
                       (ngModelChange)="setSuccessMode($event)"
                     />
-                    <small class="hint">{{ 'skill.editor.help.successMode' | transloco }}</small>
+                    <small class="hint">{{
+                      'skill.editor.help.successMode' | transloco
+                    }}</small>
                   </div>
                   @if (thresholdSuccess(); as threshold) {
                     <div class="field">
@@ -345,7 +394,9 @@ import {
                           })
                         "
                       />
-                      <small class="hint">{{ 'skill.editor.help.successValue' | transloco }}</small>
+                      <small class="hint">{{
+                        'skill.editor.help.successValue' | transloco
+                      }}</small>
                     </div>
                   }
                   @if (formulaSuccess(); as formula) {
@@ -370,8 +421,18 @@ import {
                             })
                           "
                         />
+                        <ng-container
+                          [ngTemplateOutlet]="presetTools"
+                          [ngTemplateOutletContext]="{ target: 'success' }"
+                        />
                       </div>
-                      <small class="hint">{{ 'skill.editor.help.successFormula' | transloco }}</small>
+                      <ng-container
+                        [ngTemplateOutlet]="presetPanels"
+                        [ngTemplateOutletContext]="{ target: 'success' }"
+                      />
+                      <small class="hint">{{
+                        'skill.editor.help.successFormula' | transloco
+                      }}</small>
                     </div>
                   }
                 </div>
@@ -410,11 +471,19 @@ import {
                       data-field="effect-amount"
                       autocomplete="off"
                       spellcheck="false"
-                      [attr.aria-label]="'skill.editor.fields.amount' | transloco"
+                      [attr.aria-label]="
+                        'skill.editor.fields.amount' | transloco
+                      "
                       [value]="effect.amount"
                       (input)="
-                        patchEffect($index, { amount: $any($event.target).value })
+                        patchEffect($index, {
+                          amount: $any($event.target).value,
+                        })
                       "
+                    />
+                    <ng-container
+                      [ngTemplateOutlet]="presetTools"
+                      [ngTemplateOutletContext]="{ target: $index }"
                     />
                   </div>
                   @if (effect.kind === 'modify') {
@@ -439,6 +508,10 @@ import {
                     [attr.aria-label]="'skill.editor.removeEffect' | transloco"
                     (click)="removeEffect($index)"
                   ></button>
+                  <ng-container
+                    [ngTemplateOutlet]="presetPanels"
+                    [ngTemplateOutletContext]="{ target: $index }"
+                  />
                   @if (previews()[$index]; as preview) {
                     @if (preview.error) {
                       <p-message severity="error" data-field="effect-error">{{
@@ -508,6 +581,120 @@ import {
       </p-tabpanels>
     </p-tabs>
 
+    <ng-template #presetTools let-target="target">
+      <p-select
+        class="preset"
+        [attr.data-field]="
+          target === 'success' ? 'success-preset' : 'effect-preset'
+        "
+        [options]="presetOptions(target === 'success' ? 'success' : 'effect')"
+        optionLabel="name"
+        optionValue="id"
+        [filter]="false"
+        [ariaLabel]="'skill.presets.choose' | transloco"
+        [placeholder]="'skill.presets.choose' | transloco"
+        [ngModel]="null"
+        (ngModelChange)="pickPreset(target, $event); picker.writeValue(null)"
+        #picker
+      />
+      <button
+        pButton
+        type="button"
+        data-action="save-preset"
+        [attr.data-kind]="target === 'success' ? 'success' : 'effect'"
+        icon="pi pi-bookmark"
+        severity="secondary"
+        [text]="true"
+        [attr.aria-label]="'skill.presets.saveAs' | transloco"
+        (click)="startSave(target)"
+      ></button>
+    </ng-template>
+
+    <ng-template #presetPanels let-target="target">
+      @if (pending(); as current) {
+        @if (current.target === target) {
+          <div class="block panel" data-field="preset-mapping">
+            <strong>{{
+              'skill.presets.mappingTitle'
+                | transloco: { name: presets.label(current.preset) }
+            }}</strong>
+            @for (token of tokens(); track token) {
+              <div class="map">
+                <span>{{ tokenLabel(token) }}</span>
+                <p-select
+                  [attr.data-placeholder]="token"
+                  [options]="attributeOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  [ariaLabel]="tokenLabel(token)"
+                  [ngModel]="current.mapping[token]"
+                  (ngModelChange)="setMapping(token, $event)"
+                />
+              </div>
+            }
+            <div class="buttons">
+              <button
+                pButton
+                type="button"
+                data-action="apply-preset"
+                icon="pi pi-check"
+                [disabled]="!mappingComplete()"
+                [label]="'skill.presets.apply' | transloco"
+                (click)="applyPending()"
+              ></button>
+              <button
+                pButton
+                type="button"
+                data-action="cancel-preset"
+                severity="secondary"
+                [text]="true"
+                [label]="'common.cancel' | transloco"
+                (click)="pending.set(null)"
+              ></button>
+            </div>
+          </div>
+        }
+      }
+      @if (saving(); as current) {
+        @if (current.target === target) {
+          <div class="block panel" data-field="preset-form">
+            <input
+              pInputText
+              data-field="preset-name"
+              autocomplete="off"
+              [attr.aria-label]="'skill.presets.name' | transloco"
+              [placeholder]="'skill.presets.name' | transloco"
+              [value]="current.name"
+              (input)="
+                saving.set({ ...current, name: $any($event.target).value })
+              "
+            />
+            <div class="buttons">
+              <button
+                pButton
+                type="button"
+                data-action="confirm-save-preset"
+                icon="pi pi-check"
+                [label]="'skill.presets.save' | transloco"
+                (click)="confirmSave()"
+              ></button>
+              <button
+                pButton
+                type="button"
+                data-action="cancel-save-preset"
+                severity="secondary"
+                [text]="true"
+                [label]="'common.cancel' | transloco"
+                (click)="saving.set(null)"
+              ></button>
+            </div>
+          </div>
+        }
+      }
+    </ng-template>
+
+    <app-formula-presets-dialog [(visible)]="managing" />
+
     @if (issues().length) {
       <p-message severity="warn">{{ issueText(issues()) }}</p-message>
     }
@@ -567,13 +754,45 @@ import {
     }
     .control {
       display: flex;
+      flex-wrap: wrap;
+      align-items: center;
       gap: 0.5rem;
       flex: 1 1 12rem;
       min-width: 0;
     }
     .control > input {
-      flex: 1;
+      flex: 1 1 10rem;
+      min-width: 10rem;
+    }
+    .preset {
+      flex: 0 1 11rem;
+      min-width: 11rem;
+    }
+    .block {
+      flex: 1 1 100%;
+    }
+    .panel {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--p-content-border-color);
+      border-radius: 0.5rem;
+    }
+    .panel > input {
+      flex: 1 1 10rem;
       min-width: 0;
+    }
+    .map {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .buttons {
+      display: flex;
+      gap: 0.25rem;
     }
     .help {
       display: flex;
@@ -615,6 +834,7 @@ export class SkillEditorComponent {
   private readonly messages = inject(MessageService);
   private readonly editor = inject(SkillEditorBusiness);
   private readonly language = inject(LanguageBusiness);
+  protected readonly presets = inject(FormulaPresetBusiness);
 
   /** The world whose attributes the amounts read. */
   readonly world = input.required<World>();
@@ -663,6 +883,39 @@ export class SkillEditorComponent {
   );
 
   protected readonly helpOpen = signal(false);
+  protected readonly managing = signal(false);
+  /** A preset waiting for the attribute each of its placeholders stands for. */
+  protected readonly pending = signal<{
+    target: PresetTarget;
+    preset: FormulaPreset;
+    mapping: Record<string, string>;
+  } | null>(null);
+  /** The formula being saved as a preset. */
+  protected readonly saving = signal<{
+    target: PresetTarget;
+    name: string;
+  } | null>(null);
+  protected readonly tokens = computed(() => {
+    const current = this.pending();
+    return current ? placeholders(current.preset.formula) : [];
+  });
+  protected readonly mappingComplete = computed(() => {
+    const current = this.pending();
+    return (
+      !!current && this.tokens().every((token) => !!current.mapping[token])
+    );
+  });
+  private readonly presetOptionsByKind = computed(() => {
+    const options = (kind: FormulaPresetKind) =>
+      this.presets
+        .$presets()
+        .filter((preset) => preset.kind === kind)
+        .map((preset) => ({
+          id: preset.id,
+          name: this.presets.label(preset),
+        }));
+    return { success: options('success'), effect: options('effect') };
+  });
   protected readonly variables = computed(() => formulaVariables(this.world()));
   protected readonly successExample = computed(() => {
     const first = this.world().attributes[0]?.name;
@@ -732,6 +985,97 @@ export class SkillEditorComponent {
     })),
   );
 
+  protected presetOptions(kind: FormulaPresetKind) {
+    return this.presetOptionsByKind()[kind];
+  }
+
+  protected tokenLabel(token: string): string {
+    return this.language.t(
+      token.startsWith('{target.')
+        ? 'skill.presets.targetAttribute'
+        : 'skill.presets.casterAttribute',
+      { token },
+    );
+  }
+
+  protected pickPreset(target: PresetTarget, id: string | null): void {
+    const preset = this.presets.$presets().find((entry) => entry.id === id);
+    if (!preset) return;
+    this.saving.set(null);
+    const tokens = placeholders(preset.formula);
+    if (!tokens.length) {
+      this.pending.set(null);
+      this.writeFormula(target, preset.formula);
+      return;
+    }
+    const first = this.world().attributes[0]?.name ?? '';
+    this.pending.set({
+      target,
+      preset,
+      mapping: Object.fromEntries(tokens.map((token) => [token, first])),
+    });
+  }
+
+  protected setMapping(token: string, name: string): void {
+    this.pending.update((current) =>
+      current
+        ? { ...current, mapping: { ...current.mapping, [token]: name } }
+        : null,
+    );
+  }
+
+  protected applyPending(): void {
+    const current = this.pending();
+    if (!current || !this.mappingComplete()) return;
+    this.writeFormula(
+      current.target,
+      applyPreset(current.preset, current.mapping),
+    );
+    this.pending.set(null);
+  }
+
+  protected startSave(target: PresetTarget): void {
+    this.pending.set(null);
+    this.saving.set({ target, name: '' });
+  }
+
+  protected confirmSave(): void {
+    const current = this.saving();
+    if (!current) return;
+    const formula =
+      current.target === 'success'
+        ? (this.formulaSuccess()?.formula ?? '')
+        : (this.draft().effects[current.target]?.amount ?? '');
+    const result = this.presets.saveFromFormula(
+      current.name,
+      current.target === 'success' ? 'success' : 'effect',
+      formula,
+      this.world().attributes.map((attribute) => attribute.name),
+    );
+    this.messages.add(
+      result.ok
+        ? {
+            severity: MessageLevel.Success,
+            summary: this.language.t('skill.presets.saved'),
+            life: 2500,
+          }
+        : {
+            severity: MessageLevel.Error,
+            summary: this.language.t(result.errorKey),
+            life: 2500,
+          },
+    );
+    if (result.ok) this.saving.set(null);
+  }
+
+  private writeFormula(target: PresetTarget, formula: string): void {
+    if (target === 'success') {
+      this.patch({ success: { mode: 'formula', formula } });
+    } else {
+      this.patchEffect(target, { amount: formula });
+    }
+  }
+
   protected patch(change: Partial<SkillDraft>): void {
     this.setDraft({ ...this.draft(), ...change });
   }
@@ -781,6 +1125,8 @@ export class SkillEditorComponent {
   }
 
   protected removeEffect(index: number): void {
+    this.pending.set(null);
+    this.saving.set(null);
     this.patch({ effects: this.draft().effects.filter((_, i) => i !== index) });
   }
 

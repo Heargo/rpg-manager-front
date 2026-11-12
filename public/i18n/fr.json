@@ -1115,6 +1115,68 @@
       "level": "Le niveau du personnage.",
       "caster": "Le maximum du lanceur pour cet attribut.",
       "target": "Le maximum de la cible pour cet attribut."
+    },
+    "presets": {
+      "manage": "Gérer les préréglages",
+      "manageTitle": "Préréglages de formules",
+      "hint": "Utilisez {A}, {B}… pour les attributs du lanceur et {target.A}… pour ceux de la cible. Vous choisissez les vrais attributs en appliquant un préréglage.",
+      "choose": "Préréglage",
+      "saveAs": "Enregistrer comme préréglage",
+      "saved": "Préréglage enregistré.",
+      "mappingTitle": "{{ name }} : à quel attribut correspond chaque lettre ?",
+      "casterAttribute": "{{ token }} : attribut du lanceur",
+      "targetAttribute": "{{ token }} : attribut de la cible",
+      "apply": "Appliquer",
+      "save": "Enregistrer",
+      "new": "Nouveau préréglage",
+      "name": "Nom",
+      "formula": "Formule",
+      "description": "Description",
+      "duplicate": "Dupliquer",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "copyName": "{{ name }} (copie)",
+      "kind": {
+        "success": "Réussite",
+        "effect": "Effet"
+      },
+      "errors": {
+        "invalid": "Cette formule n'est pas valide (roll, skillLevel, level, {A}, {target.A}).",
+        "builtIn": "Les préréglages intégrés ne se modifient pas ; dupliquez-les.",
+        "name": "Donnez un nom au préréglage."
+      },
+      "builtIn": {
+        "rollPlusAttribute": {
+          "name": "Jet + attribut",
+          "description": "Réussit quand le jet plus votre attribut atteint 10."
+        },
+        "rollAgainstTarget": {
+          "name": "Jet contre la cible",
+          "description": "Votre attribut plus le jet contre l'attribut de la cible."
+        },
+        "rollPlusLevel": {
+          "name": "Jet + niveau de compétence",
+          "description": "Un niveau de compétence plus élevé facilite la réussite."
+        },
+        "perLevel": {
+          "name": "Par niveau de compétence",
+          "description": "5 par niveau de compétence."
+        },
+        "attributeScaled": {
+          "name": "Selon un attribut",
+          "description": "La moitié de votre attribut plus 3 par niveau de compétence."
+        },
+        "rollScaled": {
+          "name": "Selon le jet",
+          "description": "Le jet multiplié par le niveau de compétence."
+        },
+        "overTarget": {
+          "name": "Au-delà de la défense de la cible",
+          "description": "Votre attribut moins celui de la cible, au moins 1, plus le niveau de compétence."
+        }
+      },
+      "deleteTitle": "Supprimer ce préréglage ?",
+      "deleteMessage": "« {{ name }} » sera supprimé de cet appareil."
     }
   },
   "class": {

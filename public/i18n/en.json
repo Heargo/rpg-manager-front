@@ -1115,6 +1115,68 @@
       "level": "The character's level.",
       "caster": "The caster's maximum of this attribute.",
       "target": "The target's maximum of this attribute."
+    },
+    "presets": {
+      "manage": "Manage presets",
+      "manageTitle": "Formula presets",
+      "hint": "Use {A}, {B}… for the caster's attributes and {target.A}… for the target's. You pick the real attributes when you apply a preset.",
+      "choose": "Preset",
+      "saveAs": "Save as preset",
+      "saved": "Preset saved.",
+      "mappingTitle": "{{ name }}: which attribute does each letter stand for?",
+      "casterAttribute": "{{ token }}: caster attribute",
+      "targetAttribute": "{{ token }}: target attribute",
+      "apply": "Apply",
+      "save": "Save",
+      "new": "New preset",
+      "name": "Name",
+      "formula": "Formula",
+      "description": "Description",
+      "duplicate": "Duplicate",
+      "edit": "Edit",
+      "delete": "Delete",
+      "copyName": "{{ name }} (copy)",
+      "kind": {
+        "success": "Success",
+        "effect": "Effect"
+      },
+      "errors": {
+        "invalid": "This formula is not valid (roll, skillLevel, level, {A}, {target.A}).",
+        "builtIn": "Built-in presets cannot be changed; duplicate them instead.",
+        "name": "Give the preset a name."
+      },
+      "builtIn": {
+        "rollPlusAttribute": {
+          "name": "Roll + attribute",
+          "description": "Succeeds when the roll plus your attribute reaches 10."
+        },
+        "rollAgainstTarget": {
+          "name": "Roll against the target",
+          "description": "Your attribute plus the roll against the target's attribute."
+        },
+        "rollPlusLevel": {
+          "name": "Roll + skill level",
+          "description": "Higher skill levels make success easier."
+        },
+        "perLevel": {
+          "name": "Per skill level",
+          "description": "5 for each skill level."
+        },
+        "attributeScaled": {
+          "name": "Scaled on an attribute",
+          "description": "Half of your attribute plus 3 per skill level."
+        },
+        "rollScaled": {
+          "name": "Scaled on the roll",
+          "description": "The roll times the skill level."
+        },
+        "overTarget": {
+          "name": "Beyond the target's defence",
+          "description": "Your attribute minus the target's, at least 1, plus the skill level."
+        }
+      },
+      "deleteTitle": "Delete this preset?",
+      "deleteMessage": "“{{ name }}” will be deleted from this device."
     }
   },
   "class": {
