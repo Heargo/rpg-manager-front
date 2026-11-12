@@ -177,6 +177,7 @@
       "intro": "Edit the attributes and rules of the world. Changes reach the players right away; sheets are updated to match.",
       "open": "World rules",
       "attributes": "Attributes",
+      "tabs": { "attributes": "Attributes", "rules": "Rules", "offline": "Offline" },
       "progression": "Progression",
       "economy": "Economy",
       "save": "Save rules",

@@ -60,6 +60,8 @@ const OFFLINE_FEATURES = Object.keys(
 export class RuleFieldsComponent {
   readonly draft = model.required<WorldDraft>();
   readonly errors = input<WorldDraftErrors>({});
+  /** Which sections to show: all, the rules (progression, economy, NPCs) or only the offline features. */
+  readonly sections = input<'all' | 'rules' | 'offline'>('all');
 
   protected readonly offlineFeatures = OFFLINE_FEATURES;
   protected readonly npcRoles = NPC_ROLES;

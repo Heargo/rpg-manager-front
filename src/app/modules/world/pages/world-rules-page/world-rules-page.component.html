@@ -5,180 +5,235 @@
   </header>
 
   @if (world()) {
-    <section class="attributes-section">
-      <h2>{{ "world.rules.attributes" | transloco }}</h2>
-      <div class="attributes" role="table">
-        <div class="row head" aria-hidden="true">
-          <span>{{ "world.fields.attributeName" | transloco }}</span>
-          <span>{{ "world.new.columns.base" | transloco }}</span>
-          <span>{{ "world.new.columns.progression" | transloco }}</span>
-          <span>{{ "world.fields.step" | transloco }}</span>
-          <span>{{ "world.new.columns.cap" | transloco }}</span>
-          <span class="remove"></span>
-        </div>
-        @for (attribute of attributes(); track attribute.key; let i = $index) {
-          <div class="attribute" role="rowgroup">
-            <div
-              class="row"
-              role="row"
-              [attr.data-testid]="'attribute-row-' + i"
-            >
-              <input
-                pInputText
-                class="name"
-                [attr.data-testid]="'attribute-name-' + i"
-                [maxlength]="attributeMax"
-                [placeholder]="'world.fields.attributeName' | transloco"
-                [ariaLabel]="
-                  ('world.fields.attributeName' | transloco) + ' ' + (i + 1)
-                "
-                [ngModel]="attribute.name"
-                (ngModelChange)="update(attribute.key, { name: $event })"
-              />
-              <p-inputnumber
-                class="base"
-                [attr.data-testid]="'attribute-base-' + i"
-                [ngModel]="attribute.baseValue"
-                (ngModelChange)="
-                  update(attribute.key, { baseValue: $event ?? 0 })
-                "
-                [step]="1"
-                inputStyleClass="number"
-                [ariaLabel]="
-                  ('world.fields.baseValue' | transloco) + ' ' + (i + 1)
-                "
-              />
-              <p-select
-                class="preset"
-                [attr.data-testid]="'formula-preset-' + i"
-                [options]="presets"
-                [ngModel]="attribute.formula.preset"
-                (ngModelChange)="setPreset(attribute.key, $event)"
-                [ariaLabel]="
-                  ('world.fields.formula' | transloco) + ' ' + (i + 1)
-                "
-                appendTo="body"
-              >
-                <ng-template #selectedItem let-preset>{{
-                  "world.formula.presets." + preset | transloco
-                }}</ng-template>
-                <ng-template #item let-preset>{{
-                  "world.formula.presets." + preset | transloco
-                }}</ng-template>
-              </p-select>
-              @if (stepOf(attribute.formula) !== null) {
-                <p-inputnumber
-                  class="step"
-                  [attr.data-testid]="'formula-step-' + i"
-                  [ngModel]="stepOf(attribute.formula)"
-                  (ngModelChange)="setStep(attribute.key, $event)"
-                  [minFractionDigits]="0"
-                  [maxFractionDigits]="2"
-                  inputStyleClass="number"
-                  [ariaLabel]="
-                    ('world.fields.step' | transloco) + ' ' + (i + 1)
-                  "
-                />
-              } @else {
-                <span class="step"></span>
-              }
-              <p-inputnumber
-                class="cap"
-                inputStyleClass="number"
-                [min]="1"
-                [step]="1"
-                placeholder="∞"
-                [attr.data-testid]="'formula-cap-' + i"
-                [attr.aria-invalid]="capErrors()[i] ? 'true' : null"
-                [ariaLabel]="('world.fields.cap' | transloco) + ' ' + (i + 1)"
-                [ngModel]="attribute.cap ?? null"
-                [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="setCap(attribute.key, $event)"
-              />
-              <p-button
-                class="remove"
-                [attr.data-testid]="'attribute-remove-' + i"
-                icon="pi pi-trash"
-                severity="secondary"
-                [text]="true"
-                [rounded]="true"
-                [ariaLabel]="'world.new.removeAttribute' | transloco"
-                (onClick)="askRemove(attribute)"
-              />
-              @if (capErrors()[i]; as capError) {
-                <small
-                  class="formula-error"
-                  role="alert"
-                  [attr.data-testid]="'formula-cap-error-' + i"
-                  >{{
-                    capError | transloco: { base: attribute.baseValue }
-                  }}</small
-                >
+    <p-tabs [value]="tab()" (valueChange)="openTab($event)">
+      <p-tablist>
+        <p-tab
+          value="attributes"
+          data-testid="rules-tab-attributes"
+          [attr.data-invalid]="invalidTabs().attributes ? 'true' : null"
+          ><button type="button">
+            {{ "world.rules.tabs.attributes" | transloco }}
+          </button></p-tab
+        >
+        <p-tab
+          value="rules"
+          data-testid="rules-tab-rules"
+          [attr.data-invalid]="invalidTabs().rules ? 'true' : null"
+          ><button type="button">
+            {{ "world.rules.tabs.rules" | transloco }}
+          </button></p-tab
+        >
+        <p-tab value="offline" data-testid="rules-tab-offline"
+          ><button type="button">
+            {{ "world.rules.tabs.offline" | transloco }}
+          </button></p-tab
+        >
+      </p-tablist>
+      <p-tabpanels>
+        <p-tabpanel value="attributes">
+          <section class="attributes-section">
+            <h2>{{ "world.rules.attributes" | transloco }}</h2>
+            <div class="attributes" role="table">
+              <div class="row head" aria-hidden="true">
+                <span>{{ "world.fields.attributeName" | transloco }}</span>
+                <span>{{ "world.new.columns.base" | transloco }}</span>
+                <span>{{ "world.new.columns.progression" | transloco }}</span>
+                <span>{{ "world.fields.step" | transloco }}</span>
+                <span>{{ "world.new.columns.cap" | transloco }}</span>
+                <span class="remove"></span>
+              </div>
+              @for (
+                attribute of attributes();
+                track attribute.key;
+                let i = $index
+              ) {
+                <div class="attribute" role="rowgroup">
+                  <div
+                    class="row"
+                    role="row"
+                    [attr.data-testid]="'attribute-row-' + i"
+                  >
+                    <input
+                      pInputText
+                      class="name"
+                      [attr.data-testid]="'attribute-name-' + i"
+                      [maxlength]="attributeMax"
+                      [placeholder]="'world.fields.attributeName' | transloco"
+                      [ariaLabel]="
+                        ('world.fields.attributeName' | transloco) +
+                        ' ' +
+                        (i + 1)
+                      "
+                      [ngModel]="attribute.name"
+                      (ngModelChange)="update(attribute.key, { name: $event })"
+                    />
+                    <p-inputnumber
+                      class="base"
+                      [attr.data-testid]="'attribute-base-' + i"
+                      [ngModel]="attribute.baseValue"
+                      (ngModelChange)="
+                        update(attribute.key, { baseValue: $event ?? 0 })
+                      "
+                      [step]="1"
+                      inputStyleClass="number"
+                      [ariaLabel]="
+                        ('world.fields.baseValue' | transloco) + ' ' + (i + 1)
+                      "
+                    />
+                    <p-select
+                      class="preset"
+                      [attr.data-testid]="'formula-preset-' + i"
+                      [options]="presets"
+                      [ngModel]="attribute.formula.preset"
+                      (ngModelChange)="setPreset(attribute.key, $event)"
+                      [ariaLabel]="
+                        ('world.fields.formula' | transloco) + ' ' + (i + 1)
+                      "
+                      appendTo="body"
+                    >
+                      <ng-template #selectedItem let-preset>{{
+                        "world.formula.presets." + preset | transloco
+                      }}</ng-template>
+                      <ng-template #item let-preset>{{
+                        "world.formula.presets." + preset | transloco
+                      }}</ng-template>
+                    </p-select>
+                    @if (stepOf(attribute.formula) !== null) {
+                      <p-inputnumber
+                        class="step"
+                        [attr.data-testid]="'formula-step-' + i"
+                        [ngModel]="stepOf(attribute.formula)"
+                        (ngModelChange)="setStep(attribute.key, $event)"
+                        [minFractionDigits]="0"
+                        [maxFractionDigits]="2"
+                        inputStyleClass="number"
+                        [ariaLabel]="
+                          ('world.fields.step' | transloco) + ' ' + (i + 1)
+                        "
+                      />
+                    } @else {
+                      <span class="step"></span>
+                    }
+                    <p-inputnumber
+                      class="cap"
+                      inputStyleClass="number"
+                      [min]="1"
+                      [step]="1"
+                      placeholder="∞"
+                      [attr.data-testid]="'formula-cap-' + i"
+                      [attr.aria-invalid]="capErrors()[i] ? 'true' : null"
+                      [ariaLabel]="
+                        ('world.fields.cap' | transloco) + ' ' + (i + 1)
+                      "
+                      [ngModel]="attribute.cap ?? null"
+                      [ngModelOptions]="{ standalone: true }"
+                      (ngModelChange)="setCap(attribute.key, $event)"
+                    />
+                    <p-button
+                      class="remove"
+                      [attr.data-testid]="'attribute-remove-' + i"
+                      icon="pi pi-trash"
+                      severity="secondary"
+                      [text]="true"
+                      [rounded]="true"
+                      [ariaLabel]="'world.new.removeAttribute' | transloco"
+                      (onClick)="askRemove(attribute)"
+                    />
+                    @if (capErrors()[i]; as capError) {
+                      <small
+                        class="formula-error"
+                        role="alert"
+                        [attr.data-testid]="'formula-cap-error-' + i"
+                        >{{
+                          capError | transloco: { base: attribute.baseValue }
+                        }}</small
+                      >
+                    }
+                  </div>
+                  @if (attribute.formula.preset === "custom") {
+                    <div
+                      class="custom"
+                      [attr.data-testid]="'formula-custom-' + i"
+                    >
+                      <input
+                        pInputText
+                        type="text"
+                        autocomplete="off"
+                        spellcheck="false"
+                        [attr.data-testid]="'formula-expression-' + i"
+                        [attr.aria-label]="
+                          'world.fields.expression' | transloco
+                        "
+                        [placeholder]="'world.fields.expression' | transloco"
+                        [value]="expressionText(attribute.formula)"
+                        (input)="
+                          setExpression(
+                            attribute.key,
+                            $any($event.target).value
+                          )
+                        "
+                      />
+                      <small class="hint">{{
+                        "world.formula.helpShort" | transloco
+                      }}</small>
+                      @if (formulaErrors()[i]; as formulaError) {
+                        <small
+                          class="formula-error"
+                          role="alert"
+                          [attr.data-testid]="'formula-error-' + i"
+                        >
+                          {{
+                            formulaErrorKey(formulaError)
+                              | transloco
+                                : {
+                                    position: formulaError.position + 1,
+                                    level: formulaError.level,
+                                  }
+                          }}
+                        </small>
+                      }
+                    </div>
+                  }
+                </div>
               }
             </div>
-            @if (attribute.formula.preset === "custom") {
-              <div class="custom" [attr.data-testid]="'formula-custom-' + i">
-                <input
-                  pInputText
-                  type="text"
-                  autocomplete="off"
-                  spellcheck="false"
-                  [attr.data-testid]="'formula-expression-' + i"
-                  [attr.aria-label]="'world.fields.expression' | transloco"
-                  [placeholder]="'world.fields.expression' | transloco"
-                  [value]="expressionText(attribute.formula)"
-                  (input)="
-                    setExpression(attribute.key, $any($event.target).value)
-                  "
-                />
-                <small class="hint">{{
-                  "world.formula.helpShort" | transloco
-                }}</small>
-                @if (formulaErrors()[i]; as formulaError) {
-                  <small
-                    class="formula-error"
-                    role="alert"
-                    [attr.data-testid]="'formula-error-' + i"
-                  >
-                    {{
-                      formulaErrorKey(formulaError)
-                        | transloco
-                          : {
-                              position: formulaError.position + 1,
-                              level: formulaError.level,
-                            }
-                    }}
-                  </small>
-                }
-              </div>
+            <p-button
+              data-testid="attribute-add"
+              icon="pi pi-plus"
+              [label]="'world.new.addAttribute' | transloco"
+              severity="secondary"
+              [text]="true"
+              (onClick)="addAttribute()"
+            />
+            @if (errors().attributes; as error) {
+              <p-message
+                data-testid="rules-error-attributes"
+                severity="error"
+                size="small"
+                variant="simple"
+                >{{ error | transloco }}</p-message
+              >
             }
-          </div>
-        }
-      </div>
-      <p-button
-        data-testid="attribute-add"
-        icon="pi pi-plus"
-        [label]="'world.new.addAttribute' | transloco"
-        severity="secondary"
-        [text]="true"
-        (onClick)="addAttribute()"
-      />
-      @if (errors().attributes; as error) {
-        <p-message
-          data-testid="rules-error-attributes"
-          severity="error"
-          size="small"
-          variant="simple"
-          >{{ error | transloco }}</p-message
-        >
-      }
-    </section>
-
-    <app-rule-fields
-      [draft]="fields()"
-      (draftChange)="applyFields($event)"
-      [errors]="errors()"
-    />
+          </section>
+        </p-tabpanel>
+        <p-tabpanel value="rules">
+          <app-rule-fields
+            [draft]="fields()"
+            (draftChange)="applyFields($event)"
+            [errors]="errors()"
+            sections="rules"
+          />
+        </p-tabpanel>
+        <p-tabpanel value="offline">
+          <app-rule-fields
+            [draft]="fields()"
+            (draftChange)="applyFields($event)"
+            [errors]="errors()"
+            sections="offline"
+          />
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
 
     <div class="actions">
       <p-button

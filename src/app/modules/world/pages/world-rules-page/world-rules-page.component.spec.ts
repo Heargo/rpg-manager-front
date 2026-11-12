@@ -69,13 +69,15 @@ async function open() {
 
 describe('WorldRulesPageComponent', () => {
   it('shows the wizard rule fields with the world values, and one row per attribute', async () => {
-    const { el, byId, inputOf } = await open();
-    expect(el.querySelectorAll('app-rule-fields').length).toBe(1);
+    const { el, byId, inputOf, click } = await open();
+    expect(inputOf('attribute-name-0').value).toBe('Life');
+    await click('rules-tab-rules');
     expect(el.querySelector('[data-testid="rules-section-progression"]')).not.toBeNull();
     expect(el.querySelector('[data-testid="rules-section-economy"]')).not.toBeNull();
-    expect(el.querySelector('[data-testid="rules-section-offline"]')).not.toBeNull();
     expect((el.querySelector('#stat-points') as HTMLInputElement).value).toBe('5');
-    expect(inputOf('attribute-name-0').value).toBe('Life');
+    await click('rules-tab-offline');
+    expect(el.querySelector('[data-testid="rules-section-offline"]')).not.toBeNull();
+    await click('rules-tab-attributes');
     expect(inputOf('attribute-base-1').value).toBe('5');
     expect(byId('attribute-row-2')).toBeNull();
   });
@@ -123,6 +125,7 @@ describe('WorldRulesPageComponent', () => {
 
   it('saves the offline features toggled in its offline section with the other rules', async () => {
     const { el, saveRules, click, settle } = await open();
+    await click('rules-tab-offline');
     const toggle = el.querySelector('#offline-equip') as HTMLInputElement;
     toggle.click();
     await settle();
@@ -131,5 +134,72 @@ describe('WorldRulesPageComponent', () => {
     expect(saveRules).toHaveBeenCalledTimes(1);
     const saved = (saveRules.mock.calls as unknown as [any][])[0][0];
     expect(saved.offlineFeatures.equip).toBe(true);
+  });
+
+  describe('tabs', () => {
+    const tabIds = ['rules-tab-attributes', 'rules-tab-rules', 'rules-tab-offline'];
+
+    it('has one tab per step (attributes, rules, offline) and starts on attributes', async () => {
+      const { byId } = await open();
+      for (const id of tabIds) expect(byId(id), id).not.toBeNull();
+      expect(byId('rules-tab-attributes')!.getAttribute('aria-selected')).toBe('true');
+      expect(byId('rules-tab-rules')!.getAttribute('aria-selected')).toBe('false');
+      expect(byId('rules-tab-offline')!.getAttribute('aria-selected')).toBe('false');
+    });
+
+    it('opens any tab in any order and marks only the active one', async () => {
+      const { el, byId, click } = await open();
+      await click('rules-tab-offline');
+      expect(byId('rules-tab-offline')!.getAttribute('aria-selected')).toBe('true');
+      expect(byId('rules-tab-attributes')!.getAttribute('aria-selected')).toBe('false');
+      expect(el.querySelector('[data-testid="rules-section-offline"]')).not.toBeNull();
+
+      await click('rules-tab-rules');
+      expect(byId('rules-tab-rules')!.getAttribute('aria-selected')).toBe('true');
+      expect(byId('rules-tab-offline')!.getAttribute('aria-selected')).toBe('false');
+      expect(el.querySelector('[data-testid="rules-section-progression"]')).not.toBeNull();
+
+      await click('rules-tab-attributes');
+      expect(byId('attribute-row-0')).not.toBeNull();
+    });
+
+    it('keeps Save available on every tab', async () => {
+      const { byId, click } = await open();
+      for (const id of tabIds) {
+        await click(id);
+        expect(byId('rules-save'), id).not.toBeNull();
+      }
+    });
+
+    it('saves edits made across several tabs in one go', async () => {
+      const { el, saveRules, click, inputOf, type, settle } = await open();
+      await type(inputOf('attribute-name-0'), 'Vitality');
+      await click('rules-tab-offline');
+      (el.querySelector('#offline-equip') as HTMLInputElement).click();
+      await settle();
+      await click('rules-tab-rules');
+      await click('rules-save');
+      const saved = (saveRules.mock.calls as unknown as [any][])[0][0];
+      expect(saved.attributes[0].name).toBe('Vitality');
+      expect(saved.offlineFeatures.equip).toBe(true);
+    });
+
+    it('marks the tab that has a validation error and blocks save from another tab', async () => {
+      const { byId, saveRules, inputOf, type, click } = await open();
+      await type(inputOf('attribute-name-1'), 'life');
+      expect(byId('rules-tab-attributes')!.getAttribute('data-invalid')).toBe('true');
+      expect(byId('rules-tab-rules')!.getAttribute('data-invalid')).not.toBe('true');
+      expect(byId('rules-tab-offline')!.getAttribute('data-invalid')).not.toBe('true');
+
+      await click('rules-tab-offline');
+      expect(byId('rules-tab-attributes')!.getAttribute('data-invalid')).toBe('true');
+      await click('rules-save');
+      expect(saveRules).not.toHaveBeenCalled();
+    });
+
+    it('does not mark any tab while the rules are valid', async () => {
+      const { byId } = await open();
+      for (const id of tabIds) expect(byId(id)!.getAttribute('data-invalid')).not.toBe('true');
+    });
   });
 });

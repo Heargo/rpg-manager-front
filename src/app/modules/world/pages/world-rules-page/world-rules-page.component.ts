@@ -14,6 +14,7 @@ import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
+import { TabsModule } from '@openng/optimus-ui/tabs';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import {
   AttributeFormula,
@@ -61,6 +62,7 @@ const PRESETS: readonly (FormulaPreset | 'custom')[] = [
     InputTextModule,
     MessageModule,
     SelectModule,
+    TabsModule,
     RuleFieldsComponent,
   ],
   templateUrl: './world-rules-page.component.html',
@@ -144,6 +146,21 @@ export class WorldRulesPageComponent {
       attributes: this.rules().attributes,
     }),
   );
+  protected readonly tab = signal<'attributes' | 'rules' | 'offline'>(
+    'attributes',
+  );
+  /** The tab that holds each validation error: attributes, or the other rule fields. */
+  protected readonly invalidTabs = computed(() => {
+    const keys = Object.keys(this.errors());
+    return {
+      attributes:
+        keys.includes('attributes') ||
+        this.capErrors().some(Boolean) ||
+        this.formulaErrors().some(Boolean),
+      rules: keys.some((key) => key !== 'attributes'),
+      offline: false,
+    };
+  });
   protected readonly canSave = computed(
     () => Object.keys(this.errors()).length === 0,
   );
@@ -243,6 +260,11 @@ export class WorldRulesPageComponent {
         error.key === 'formula.errors.notFinite')
       ? `${error.key}AtLevel`
       : error.key;
+  }
+
+  protected openTab(value: string | number | undefined): void {
+    if (value === 'attributes' || value === 'rules' || value === 'offline')
+      this.tab.set(value);
   }
 
   protected applyFields(draft: WorldDraft): void {

@@ -177,6 +177,7 @@
       "intro": "Modifiez les attributs et les règles du monde. Les changements arrivent aussitôt chez les joueurs; les fiches sont mises à jour.",
       "open": "Règles du monde",
       "attributes": "Attributs",
+      "tabs": { "attributes": "Attributs", "rules": "Règles", "offline": "Hors ligne" },
       "progression": "Progression",
       "economy": "Économie",
       "save": "Enregistrer les règles",
