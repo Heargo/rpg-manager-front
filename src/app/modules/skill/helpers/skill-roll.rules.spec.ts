@@ -108,3 +108,24 @@ describe('validateSkill roll config', () => {
     expect(validateSkill(fireball, names)).toEqual([]);
   });
 });
+
+describe('resolveSkillUse amounts reading the target', () => {
+  const overTarget: Skill = {
+    ...fireball,
+    effects: [{ kind: 'damage', attribute: 'Life', amount: 'max(1, Strength - target_Defense) + skillLevel' }],
+  };
+
+  it('uses the target maxima in the amounts', () => {
+    const result = resolveSkillUse(overTarget, 2, caster, { maxima: { Defense: 3 } }, [3, 4], true);
+    expect(result.error).toBeUndefined();
+    expect(result.amounts).toEqual([3]);
+  });
+
+  it('reads the target variables as 0 without a target', () => {
+    const result = resolveSkillUse(
+      overTarget, 2, { ...caster, maxima: { ...caster.maxima, Defense: 5 } }, undefined, [3, 4], true,
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.amounts).toEqual([6]);
+  });
+});

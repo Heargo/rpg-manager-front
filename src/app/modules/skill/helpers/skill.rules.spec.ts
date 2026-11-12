@@ -1,7 +1,8 @@
 import { Character, Sheet } from '../../world/models/world';
 import { Npc } from '../../npc/models/npc';
 import { Skill } from '../models/skill';
-import { evaluateSkillAmount, filterSkills, parseSkillJson, previewSkillAmount, skillUsages, validateSkill } from './skill.rules';
+import { BUILT_IN_PRESETS, applyPreset, placeholders } from './formula-preset.rules';
+import { SkillAmountScope, evaluateSkillAmount, filterSkills, parseSkillJson, previewSkillAmount, skillUsages, validateSkill } from './skill.rules';
 
 const fireball: Skill = {
   id: 's1', name: 'Fireball', description: 'Boom.', rarity: 'rare', type: 'active', maxLevel: 3, pointCost: 2,
@@ -123,5 +124,57 @@ describe('success formula without a formula', () => {
   it('is refused when parsing JSON', () => {
     const text = JSON.stringify({ ...base, success: { mode: 'formula' } });
     expect(parseSkillJson(text, base as never, ['Life']).skill).toBeUndefined();
+  });
+});
+
+describe('effect amounts reading the target', () => {
+  const withAmount = (amount: string): Skill => ({
+    ...fireball,
+    effects: [{ kind: 'damage', attribute: 'Life', amount }],
+  });
+
+  it('validateSkill accepts target_<name> and the bracketed form, and rejects an unknown target name', () => {
+    expect(validateSkill(withAmount('Strength - target_Life'), names)).toEqual([]);
+    expect(validateSkill(withAmount('[target_Life]'), names)).toEqual([]);
+    expect(validateSkill(withAmount('target_Luck'), names)).toEqual([{ field: 'effects.0.amount', code: 'formula' }]);
+  });
+
+  it('evaluateSkillAmount reads the target maxima', () => {
+    expect(
+      evaluateSkillAmount('max(1, Strength - target_Life) + skillLevel', {
+        skillLevel: 2,
+        level: 1,
+        maxima: { Strength: 10 },
+        targetMaxima: { Life: 4 },
+      } as SkillAmountScope),
+    ).toEqual({ ok: true, value: 8 });
+  });
+
+  it('previewSkillAmount treats target maxima as 1', () => {
+    expect(previewSkillAmount('target_Life * 5 + skillLevel', ['Life'], 3)).toEqual({ ok: true, level1: 6, maxLevel: 8 });
+  });
+
+  it('every built-in effect preset, applied with the first attribute, validates as an effect amount', () => {
+    const effects = BUILT_IN_PRESETS.filter((p) => p.kind === 'effect');
+    expect(effects.length).toBeGreaterThan(0);
+    for (const preset of effects) {
+      const mapping = Object.fromEntries(placeholders(preset.formula).map((t) => [t, 'Strength']));
+      const amount = applyPreset(preset, mapping);
+      expect(validateSkill(withAmount(amount), names), amount).toEqual([]);
+    }
+  });
+});
+
+describe('evaluateSkillAmount with a bracketed target name', () => {
+  const scope = { skillLevel: 1, level: 1, maxima: { 'Points de vie': 10 } };
+
+  it('reads the target maximum', () => {
+    expect(
+      evaluateSkillAmount('[target_Points de vie] + 1', { ...scope, targetMaxima: { 'Points de vie': 7 } }),
+    ).toEqual({ ok: true, value: 8 });
+  });
+
+  it('reads 0 without a target', () => {
+    expect(evaluateSkillAmount('[target_Points de vie] + 1', scope)).toEqual({ ok: true, value: 1 });
   });
 });

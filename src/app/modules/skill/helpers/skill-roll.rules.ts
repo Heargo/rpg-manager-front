@@ -5,9 +5,13 @@ import {
   SkillRoll,
   SkillSuccess,
 } from '../models/skill';
-import { evaluateSkillAmount } from './skill.rules';
+import {
+  TARGET_PREFIX,
+  evaluateSkillAmount,
+  targetVariables,
+} from './skill.rules';
 
-export const TARGET_PREFIX = 'target_';
+export { TARGET_PREFIX };
 
 export interface SkillCaster {
   level: number;
@@ -55,6 +59,7 @@ export function resolveSkillUse(
       skillLevel,
       level: caster.level,
       maxima: caster.maxima,
+      targetMaxima: target?.maxima,
       roll: total,
     });
     if (result.ok) return result.value;
@@ -66,19 +71,19 @@ export function resolveSkillUse(
   const mode = successOf(skill);
   if (enabled && mode.mode === 'threshold') success = total >= mode.value;
   if (enabled && mode.mode === 'formula') {
-    const targetMaxima = Object.fromEntries(
-      Object.entries(target?.maxima ?? {}).map(([name, value]) => [
-        TARGET_PREFIX + name,
-        value,
-      ]),
-    );
     const result = evaluateFormula(
       { preset: 'custom', expression: mode.formula },
       {
         level: caster.level,
         base: 0,
         playerLevel: caster.level,
-        levels: { ...caster.maxima, ...targetMaxima, skillLevel, roll: total },
+        levels: {
+          ...caster.maxima,
+          // the target's names only: a target name without a target stays an error
+          ...targetVariables({}, target?.maxima),
+          skillLevel,
+          roll: total,
+        },
       },
     );
     if (result.ok) success = result.value >= 0;

@@ -30,8 +30,29 @@ export interface SkillAmountScope {
   level: number;
   /** The caster's attribute maxima, by name. */
   maxima: Record<string, number>;
+  /** The target's attribute maxima, by name; absent reads 0. */
+  targetMaxima?: Record<string, number>;
   /** The dice total of the use (0 when none). */
   roll?: number;
+}
+
+export const TARGET_PREFIX = 'target_';
+
+/**
+ * The `target_<name>` variables for a formula: one per attribute of the caster or the target (the caster and the target
+ * share the world's attributes), valued at the target's maximum, or 0 without a target.
+ */
+export function targetVariables(
+  maxima: Record<string, number>,
+  targetMaxima?: Record<string, number>,
+): Record<string, number> {
+  const names = new Set([
+    ...Object.keys(maxima),
+    ...Object.keys(targetMaxima ?? {}),
+  ]);
+  return Object.fromEntries(
+    [...names].map((name) => [TARGET_PREFIX + name, targetMaxima?.[name] ?? 0]),
+  );
 }
 
 const amountFormula = (amount: string) => ({
@@ -63,7 +84,12 @@ export function validateSkill(
     if (
       validateFormula(
         amountFormula(effect.amount),
-        [...attributeNames, 'skillLevel', 'roll'],
+        [
+          ...attributeNames,
+          ...attributeNames.map((name) => TARGET_PREFIX + name),
+          'skillLevel',
+          'roll',
+        ],
         ['level'],
       )
     ) {
@@ -96,7 +122,7 @@ export function validateSkill(
           amountFormula(success.formula),
           [
             ...attributeNames,
-            ...attributeNames.map((name) => 'target_' + name),
+            ...attributeNames.map((name) => TARGET_PREFIX + name),
             'skillLevel',
             'roll',
           ],
@@ -119,6 +145,7 @@ export function evaluateSkillAmount(
     playerLevel: scope.level,
     levels: {
       ...scope.maxima,
+      ...targetVariables(scope.maxima, scope.targetMaxima),
       skillLevel: scope.skillLevel,
       roll: scope.roll ?? 0,
     },
@@ -137,7 +164,12 @@ export function previewSkillAmount(
 ): SkillAmountPreview {
   const maxima = Object.fromEntries(attributeNames.map((name) => [name, 1]));
   const at = (skillLevel: number) =>
-    evaluateSkillAmount(amount, { skillLevel, level: 1, maxima });
+    evaluateSkillAmount(amount, {
+      skillLevel,
+      level: 1,
+      maxima,
+      targetMaxima: maxima,
+    });
   const first = at(1);
   if (!first.ok) return { ok: false, error: first.error };
   const last = at(maxLevel);

@@ -633,3 +633,34 @@ describe('proposeRewards', () => {
     expect(proposeRewards(down)).toMatchObject({ xp: { total: 0 }, money: 0, loot: [] });
   });
 });
+
+describe('a skill effect reading the target', () => {
+  it('computes the amount against the actual target of the encounter', () => {
+    const exploit: Skill = {
+      ...fireball,
+      id: 'exploit',
+      cost: undefined,
+      cooldown: 0,
+      roll: undefined,
+      effects: [{ kind: 'damage', attribute: 'Life', amount: 'target_Life + 1' }],
+    };
+    const { enc } = start();
+    const aria = by(enc, 'Aria');
+    const armed = {
+      ...enc,
+      combatants: enc.combatants.map((c) =>
+        c.id === aria.id ? { ...c, skills: [...c.skills, { skillId: 'exploit', level: 1 }] } : c,
+      ),
+    };
+    const result = ok(
+      useSkill(
+        armed,
+        { casterId: aria.id, skillId: 'exploit', targetIds: [by(armed, 'Goblin 2').id] },
+        [...skills, exploit],
+        false,
+        forbidden,
+      ),
+    );
+    expect(result.encounter.pending[0]).toMatchObject({ effects: [{ kind: 'damage', attribute: 'Life', amount: 14 }] });
+  });
+});
