@@ -224,4 +224,134 @@ describe('SpriteColorizerBusiness', () => {
     business.loadImage(gray(2, 2, [1, 2, 3, 4]));
     expect(() => business.importJson(json)).toThrow();
   });
+
+  describe('polygon tool', () => {
+    const square = [
+      { x: 0, y: 0 },
+      { x: 2, y: 0 },
+      { x: 2, y: 4 },
+      { x: 0, y: 4 },
+    ];
+
+    it('collects vertices and selects the enclosed pixels on close, as one history entry', () => {
+      const { business } = setup();
+      business.setTool('polygon');
+      square.forEach((v) => business.addPolygonVertex(v.x, v.y));
+      expect(business.$polygonVertices()).toEqual(square);
+      expect(business.$canUndo()).toBe(false);
+
+      business.closePolygon('replace');
+      expect(business.$polygonVertices()).toEqual([]);
+      expect(Array.from(business.$selection())).toEqual([
+        1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0,
+      ]);
+      business.undo();
+      expect(business.$selection().every((v) => v === 0)).toBe(true);
+      expect(business.$canUndo()).toBe(false);
+    });
+
+    it('adds to and removes from the current selection', () => {
+      const { business } = setup();
+      business.setTool('polygon');
+      business.wandAt(3, 0, 'replace');
+      square.forEach((v) => business.addPolygonVertex(v.x, v.y));
+      business.closePolygon('add');
+      expect(Array.from(business.$selection())).toEqual([
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+      ]);
+      business.setTool('polygon');
+      square.forEach((v) => business.addPolygonVertex(v.x, v.y));
+      business.closePolygon('remove');
+      expect(Array.from(business.$selection())).toEqual([
+        0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1,
+      ]);
+    });
+
+    it('cancel drops the vertices without touching selection or history', () => {
+      const { business } = setup();
+      business.setTool('polygon');
+      square.forEach((v) => business.addPolygonVertex(v.x, v.y));
+      business.cancelPolygon();
+      expect(business.$polygonVertices()).toEqual([]);
+      expect(business.$canUndo()).toBe(false);
+      expect(business.$selection().every((v) => v === 0)).toBe(true);
+    });
+
+    it('ignores a close with fewer than three vertices', () => {
+      const { business } = setup();
+      business.addPolygonVertex(0, 0);
+      business.addPolygonVertex(3, 3);
+      business.closePolygon('replace');
+      expect(business.$canUndo()).toBe(false);
+      expect(business.$polygonVertices()).toEqual([]);
+    });
+
+    it('snaps a vertex to the nearby edge only when snapping is on', () => {
+      const { business } = setup();
+      business.setSnap({ enabled: false, radius: 2 });
+      business.addPolygonVertex(0, 1);
+      expect(business.$polygonVertices()).toEqual([{ x: 0, y: 1 }]);
+      business.cancelPolygon();
+
+      business.setSnap({ enabled: true, radius: 2 });
+      expect(business.$snap()).toEqual({ enabled: true, radius: 2 });
+      business.addPolygonVertex(0, 1);
+      const x = business.$polygonVertices()[0].x;
+      expect(x).toBeGreaterThanOrEqual(1);
+      expect(x).toBeLessThanOrEqual(2);
+    });
+  });
+
+  describe('shape detection', () => {
+    it('proposes candidate regions without changing the document or the history', () => {
+      const { business } = setup();
+      const before = business.$document();
+      business.detectShapes();
+      expect(business.$candidates().map((c) => c.size)).toEqual([8, 8]);
+      expect(business.$document()).toBe(before);
+      expect(business.$canUndo()).toBe(false);
+    });
+
+    it('selects candidates and applies them to the active material in one history entry', () => {
+      const { business } = setup();
+      const id = addMaterial(business, 'Blade');
+      business.detectShapes();
+      const left = business.$candidates().find((c) => c.mask[0] === 1)!;
+      business.toggleCandidate(left.id);
+      expect(business.$selectedCandidates()).toEqual([left.id]);
+
+      business.applyCandidates('active');
+      expect(maskOf(business, id)).toEqual([
+        1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0,
+      ]);
+      business.undo();
+      expect(maskOf(business, id).every((v) => v === 0)).toBe(true);
+    });
+
+    it('toggling a selected candidate deselects it', () => {
+      const { business } = setup();
+      business.detectShapes();
+      const c = business.$candidates()[0];
+      business.toggleCandidate(c.id);
+      business.toggleCandidate(c.id);
+      expect(business.$selectedCandidates()).toEqual([]);
+    });
+
+    it('applies the selected candidates to a new material, undone together with its creation', () => {
+      const { business } = setup();
+      business.detectShapes();
+      business.$candidates().forEach((c) => business.toggleCandidate(c.id));
+      business.applyCandidates('new', 'Detected');
+
+      const doc = business.$document()!;
+      expect(doc.layers).toHaveLength(2);
+      const created = doc.layers.find((l) => l.name === 'Detected')!;
+      expect(business.$activeLayerId()).toBe(created.id);
+      expect(Array.from(created.mask).every((v) => v === 1)).toBe(true);
+
+      business.undo();
+      expect(business.$document()!.layers).toHaveLength(1);
+      expect(business.$canUndo()).toBe(false);
+    });
+  });
 });

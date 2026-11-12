@@ -40,6 +40,6 @@ export interface SpritePreset {
   stops: GradientStop[];
 }
 
-export type SpriteTool = 'brush' | 'eraser' | 'bucket' | 'wand';
+export type SpriteTool = 'brush' | 'eraser' | 'bucket' | 'wand' | 'polygon';
 export type SelectionMode = 'replace' | 'add' | 'remove';
 export type WandMode = 'contiguous' | 'global';

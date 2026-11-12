@@ -100,4 +100,67 @@ describe('SpriteColorizerPageComponent', () => {
   it('is routed at /tools/sprite-colorizer', () => {
     expect(routesTools.some((r) => r.path === 'tools/sprite-colorizer')).toBe(true);
   });
+
+  describe('polygon and shape detection', () => {
+    const square = [
+      [0, 0],
+      [2, 0],
+      [2, 2],
+      [0, 2],
+    ];
+
+    it('has a Polygon tool button that selects the polygon tool', async () => {
+      const { fixture, button, business } = await render();
+      button('Polygon')!.click();
+      await fixture.whenStable();
+      expect(business.$tool()).toBe('polygon');
+    });
+
+    it('shows the snap option for the polygon tool', async () => {
+      const { fixture, button, el } = await render();
+      button('Polygon')!.click();
+      await fixture.whenStable();
+      expect(el.textContent).toContain('Snap to edges');
+    });
+
+    it('closes the polygon with Enter and cancels it with Escape', async () => {
+      const { fixture, button, business } = await render();
+      button('Polygon')!.click();
+      await fixture.whenStable();
+
+      square.forEach(([x, y]) => business.addPolygonVertex(x, y));
+      key({ key: 'Escape' });
+      await fixture.whenStable();
+      expect(business.$polygonVertices()).toEqual([]);
+      expect(business.$selection().every((v) => v === 0)).toBe(true);
+
+      square.forEach(([x, y]) => business.addPolygonVertex(x, y));
+      key({ key: 'Enter' });
+      await fixture.whenStable();
+      expect(Array.from(business.$selection())).toEqual([1, 1, 1, 1]);
+    });
+
+    it('detects shapes, lists the candidates and applies the chosen one to a new material', async () => {
+      const { fixture, el, button, materials } = await render();
+      button('Detect shapes')!.click();
+      await fixture.whenStable();
+      const candidates = el.querySelectorAll<HTMLElement>('.candidate');
+      expect(candidates.length).toBeGreaterThan(0);
+
+      candidates[0].click();
+      await fixture.whenStable();
+      button('Apply to new layer')!.click();
+      await fixture.whenStable();
+      expect(materials()).toBe(2);
+    });
+
+    it('has an Apply to layer button for the active material', async () => {
+      const { fixture, el, button } = await render();
+      button('Detect shapes')!.click();
+      await fixture.whenStable();
+      el.querySelector<HTMLElement>('.candidate')!.click();
+      await fixture.whenStable();
+      expect(button('Apply to layer')).not.toBeNull();
+    });
+  });
 });

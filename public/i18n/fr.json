@@ -1112,7 +1112,11 @@
       "applySelection": "Appliquer la sélection",
       "invertSelection": "Inverser la sélection",
       "clearSelection": "Effacer la sélection",
-      "wandHint": "Maj ajoute à la sélection, Alt en retire."
+      "wandHint": "Maj ajoute à la sélection, Alt en retire.",
+      "polygon": "Polygone",
+      "snap": "Aimanter aux contours",
+      "snapRadius": "Rayon d'aimantation",
+      "polygonHint": "Cliquez pour ajouter des sommets. Entrée ou double-clic ferme (Maj ajoute, Alt retire), Échap annule."
     },
     "view": {
       "zoomIn": "Zoom avant",
@@ -1143,6 +1147,16 @@
       "stopPosition": "Position du point (%)",
       "addStop": "Ajouter un point",
       "removeStop": "Retirer le point"
+    },
+    "shapes": {
+      "title": "Formes",
+      "detect": "Détecter les formes",
+      "hint": "Cliquez sur des formes pour les sélectionner, puis appliquez-les à un matériau.",
+      "pixels": "{{n}} px",
+      "apply": "Appliquer au calque",
+      "applyNew": "Appliquer à un nouveau calque",
+      "newName": "Forme",
+      "none": "Aucune forme trouvée."
     },
     "presets": {
       "title": "Préréglages",

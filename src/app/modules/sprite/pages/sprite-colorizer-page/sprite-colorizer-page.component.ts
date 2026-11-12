@@ -25,6 +25,7 @@ import { MessageLevel } from '../../../../core/models/toast-level';
 import { SpriteColorizerBusiness } from '../../business/sprite-colorizer.business';
 import { gradientColor } from '../../helpers/gradient-mapping';
 import { isBuiltInPreset } from '../../helpers/presets';
+import { shapeColor, shapeCss } from '../../helpers/shape-colors';
 import {
   GradientStop,
   MaterialLayer,
@@ -41,6 +42,7 @@ interface Frame {
   pixels: Uint8ClampedArray;
   overlay: Uint8Array | null;
   selection: Uint8Array;
+  shapes: { mask: Uint8Array; color: number[]; selected: boolean }[];
 }
 
 const toHex = (rgb: number[]) =>
@@ -89,6 +91,7 @@ export class SpriteColorizerPageComponent {
   protected readonly panMode = signal(false);
   protected readonly editingId = signal<string | null>(null);
   protected readonly presetName = signal('');
+  protected readonly pointer = signal<{ x: number; y: number } | null>(null);
 
   protected readonly tools: { id: SpriteTool; icon: string; label: string }[] =
     [
@@ -96,6 +99,7 @@ export class SpriteColorizerPageComponent {
       { id: 'eraser', icon: 'pi pi-eraser', label: 'sprite.tools.eraser' },
       { id: 'bucket', icon: 'pi pi-palette', label: 'sprite.tools.bucket' },
       { id: 'wand', icon: 'pi pi-bolt', label: 'sprite.tools.wand' },
+      { id: 'polygon', icon: 'pi pi-slack', label: 'sprite.tools.polygon' },
     ];
   protected readonly wandModes = computed(() => [
     { value: 'contiguous', label: this.language.t('sprite.tools.contiguous') },
@@ -113,6 +117,24 @@ export class SpriteColorizerPageComponent {
   protected readonly layers = computed(
     () => this.business.$document()?.layers ?? [],
   );
+
+  protected readonly shapeCss = shapeCss;
+  protected readonly handleRadius = computed(() => 4 / this.zoom());
+  protected readonly polygonLine = computed(() =>
+    this.business
+      .$polygonVertices()
+      .map((p) => `${p.x},${p.y}`)
+      .join(' '),
+  );
+  /** Last vertex, pointer, first vertex: where the polygon would close. */
+  protected readonly polygonPreview = computed(() => {
+    const vertices = this.business.$polygonVertices();
+    const at = this.pointer();
+    if (!vertices.length || !at) return '';
+    const first = vertices[0];
+    const last = vertices[vertices.length - 1];
+    return `${last.x},${last.y} ${at.x},${at.y} ${first.x},${first.y}`;
+  });
 
   private drag: { kind: 'pan' | 'paint'; x: number; y: number } | null = null;
   private spaceHeld = false;
@@ -138,6 +160,7 @@ export class SpriteColorizerPageComponent {
       const pixels = (this.showOriginal() ? image : this.business.$recolored())
         ?.data;
       const layer = this.business.$activeLayer();
+      const selected = new Set(this.business.$selectedCandidates());
       if (!pixels) return;
       this.pending = {
         width: image.width,
@@ -145,6 +168,11 @@ export class SpriteColorizerPageComponent {
         pixels,
         overlay: this.showMask() && layer ? layer.mask : null,
         selection: this.business.$selection(),
+        shapes: this.business.$candidates().map((c) => ({
+          mask: c.mask,
+          color: shapeColor(c.id),
+          selected: selected.has(c.id),
+        })),
       };
       this.mainCanvas();
       this.overlayCanvas();
@@ -194,11 +222,19 @@ export class SpriteColorizerPageComponent {
     const buffer = this.overlayBuffer;
     for (let p = 0; p < frame.width * frame.height; p++) {
       const i = p * 4;
+      const shape = frame.selection[p]
+        ? undefined
+        : frame.shapes.find((c) => c.mask[p]);
       if (frame.selection[p]) {
         buffer[i] = 250;
         buffer[i + 1] = 204;
         buffer[i + 2] = 21;
         buffer[i + 3] = 150;
+      } else if (shape) {
+        buffer[i] = shape.color[0];
+        buffer[i + 1] = shape.color[1];
+        buffer[i + 2] = shape.color[2];
+        buffer[i + 3] = shape.selected ? 220 : 100;
       } else if (frame.overlay?.[p] && frame.pixels[i + 3] > 0) {
         buffer[i] = 236;
         buffer[i + 1] = 72;
@@ -302,19 +338,45 @@ export class SpriteColorizerPageComponent {
       case 'bucket':
         this.business.bucketAt(at.x, at.y);
         break;
-      case 'wand': {
-        const mode: SelectionMode = event.shiftKey
-          ? 'add'
-          : event.altKey
-            ? 'remove'
-            : 'replace';
-        this.business.wandAt(at.x, at.y, mode);
+      case 'wand':
+        this.business.wandAt(at.x, at.y, this.modeOf(event));
+        break;
+      case 'polygon': {
+        const corner = this.cornerAt(event) ?? at;
+        this.business.addPolygonVertex(corner.x, corner.y);
         break;
       }
     }
   }
 
+  /** Shift adds to the selection, Alt removes from it. */
+  private modeOf(event: { shiftKey: boolean; altKey: boolean }): SelectionMode {
+    return event.shiftKey ? 'add' : event.altKey ? 'remove' : 'replace';
+  }
+
+  /** The nearest pixel corner: where a polygon vertex goes. */
+  private cornerAt(event: PointerEvent): { x: number; y: number } | null {
+    const canvas = this.overlayCanvas()?.nativeElement;
+    const image = this.business.$image();
+    const rect = canvas?.getBoundingClientRect();
+    if (!image || !rect?.width) return null;
+    return {
+      x: Math.round(((event.clientX - rect.left) / rect.width) * image.width),
+      y: Math.round(((event.clientY - rect.top) / rect.height) * image.height),
+    };
+  }
+
+  protected onDoubleClick(event: MouseEvent): void {
+    if (this.business.$tool() === 'polygon')
+      this.business.closePolygon(this.modeOf(event));
+  }
+
   protected onPointerMove(event: PointerEvent): void {
+    if (
+      this.business.$tool() === 'polygon' &&
+      this.business.$polygonVertices().length
+    )
+      this.pointer.set(this.cornerAt(event));
     const drag = this.drag;
     if (!drag) return;
     if (drag.kind === 'pan') {
@@ -340,6 +402,19 @@ export class SpriteColorizerPageComponent {
     const target = event.target as HTMLElement | null;
     if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA') return;
     this.spaceHeld = event.key === ' ' ? true : this.spaceHeld;
+    const polygonOpen =
+      this.business.$tool() === 'polygon' &&
+      this.business.$polygonVertices().length > 0;
+    if (polygonOpen && event.key === 'Enter') {
+      event.preventDefault();
+      this.business.closePolygon(this.modeOf(event));
+      return;
+    }
+    if (polygonOpen && event.key === 'Escape') {
+      event.preventDefault();
+      this.business.cancelPolygon();
+      return;
+    }
     const mod = event.ctrlKey || event.metaKey;
     const key = event.key.toLowerCase();
     if (mod && key === 'z') {
@@ -349,8 +424,13 @@ export class SpriteColorizerPageComponent {
       event.preventDefault();
       this.business.redo();
     } else if (!mod && !event.altKey) {
-      const tool = { b: 'brush', e: 'eraser', g: 'bucket', w: 'wand' }[key] as
-        SpriteTool | undefined;
+      const tool = {
+        b: 'brush',
+        e: 'eraser',
+        g: 'bucket',
+        w: 'wand',
+        p: 'polygon',
+      }[key] as SpriteTool | undefined;
       if (tool) this.business.setTool(tool);
     }
   }
@@ -385,6 +465,21 @@ export class SpriteColorizerPageComponent {
 
   private toast(severity: MessageLevel, key: string): void {
     this.messages.add({ severity, detail: this.language.t(key) });
+  }
+
+  // Shapes
+
+  protected applyShapes(target: 'active' | 'new'): void {
+    this.business.applyCandidates(
+      target,
+      this.language.t('sprite.shapes.newName'),
+    );
+  }
+
+  protected setSnap(
+    patch: Partial<{ enabled: boolean; radius: number }>,
+  ): void {
+    this.business.setSnap({ ...this.business.$snap(), ...patch });
   }
 
   // Materials

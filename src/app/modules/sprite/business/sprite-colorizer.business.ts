@@ -1,4 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { snapToEdge } from '../helpers/edges';
 import { exportConfig, importConfig } from '../helpers/config-export';
 import { floodFill, magicWand } from '../helpers/flood-select';
 import { mapGradientInto } from '../helpers/gradient-mapping';
@@ -19,6 +20,8 @@ import {
   stampBrushInPlace,
   stampLineInPlace,
 } from '../helpers/mask-ops';
+import { Point, rasterizePolygon } from '../helpers/polygon';
+import { defaultMinSize, detectShapes, DetectedShape } from '../helpers/shape-detection';
 import { PRESETS } from '../helpers/presets';
 import { demoSprite } from '../helpers/demo-sprite';
 import {
@@ -31,6 +34,7 @@ import {
   WandMode,
 } from '../models/sprite';
 import { SpriteFileService } from '../services/sprite-file.service';
+import { SpriteShapeService } from '../services/sprite-shape.service';
 import { SpritePresetStorageService } from '../services/sprite-preset-storage.service';
 
 interface Snapshot {
@@ -50,11 +54,18 @@ interface Stroke {
 /** A gradient edit within this delay on the same material joins the previous history entry. */
 const GRADIENT_MERGE_MS = 1000;
 
+export interface ShapeCandidate {
+  id: number;
+  mask: Uint8Array;
+  size: number;
+}
+
 /** The sprite colorizer: the document, the selection, the tools and the history. */
 @Injectable({ providedIn: 'root' })
 export class SpriteColorizerBusiness {
   private readonly presetStorage = inject(SpritePresetStorageService);
   private readonly files = inject(SpriteFileService);
+  private readonly shapes = inject(SpriteShapeService);
   private readonly history = new History();
 
   private readonly image = signal<SpriteImage | null>(null);
@@ -70,6 +81,12 @@ export class SpriteColorizerBusiness {
   private readonly tolerance = signal(24);
   private readonly wandMode = signal<WandMode>('contiguous');
   private readonly name = signal('sprite');
+  private readonly polygon = signal<Point[]>([]);
+  private readonly snap = signal({ enabled: false, radius: 6 });
+  private readonly candidates = signal<ShapeCandidate[]>([]);
+  private readonly selectedCandidates = signal<number[]>([]);
+  private readonly detecting = signal(false);
+  private readonly detected = signal(false);
 
   private stroke: Stroke | null = null;
   private gradientEdit: {
@@ -86,6 +103,13 @@ export class SpriteColorizerBusiness {
   readonly $tolerance = this.tolerance.asReadonly();
   readonly $wandMode = this.wandMode.asReadonly();
   readonly $fileName = this.name.asReadonly();
+  readonly $polygonVertices = this.polygon.asReadonly();
+  readonly $snap = this.snap.asReadonly();
+  readonly $candidates = this.candidates.asReadonly();
+  readonly $selectedCandidates = this.selectedCandidates.asReadonly();
+  readonly $detecting = this.detecting.asReadonly();
+  /** True once a detection ran on the current image, even when it found nothing. */
+  readonly $detected = this.detected.asReadonly();
   readonly $activeLayerId = computed(() => {
     const doc = this.document();
     const id = this.activeId();
@@ -126,6 +150,10 @@ export class SpriteColorizerBusiness {
     this.selection.set(new Uint8Array(image.width * image.height));
     this.activeId.set(null);
     this.name.set(name);
+    this.polygon.set([]);
+    this.candidates.set([]);
+    this.detected.set(false);
+    this.selectedCandidates.set([]);
     this.stroke = null;
     this.gradientEdit = null;
     this.history.clear();
@@ -146,6 +174,7 @@ export class SpriteColorizerBusiness {
   // Tools
 
   setTool(tool: SpriteTool): void {
+    if (tool !== 'polygon') this.polygon.set([]);
     this.tool.set(tool);
   }
   setBrush(brush: { size: number; hardness: number }): void {
@@ -156,6 +185,10 @@ export class SpriteColorizerBusiness {
   }
   setWandMode(mode: WandMode): void {
     this.wandMode.set(mode);
+  }
+
+  setSnap(snap: { enabled: boolean; radius: number }): void {
+    this.snap.set({ enabled: snap.enabled, radius: Math.max(0, snap.radius) });
   }
 
   // History
@@ -359,6 +392,92 @@ export class SpriteColorizerBusiness {
 
   clearSelection(): void {
     this.commit(undefined, new Uint8Array(this.selection().length));
+  }
+
+  // Polygon: vertices are collected, then closing selects the inside as one history entry
+
+  addPolygonVertex(x: number, y: number): void {
+    const image = this.image();
+    if (!image) return;
+    const { enabled, radius } = this.snap();
+    const point = enabled ? snapToEdge(image, x, y, radius) : { x, y };
+    const last = this.polygon().at(-1);
+    if (last && last.x === point.x && last.y === point.y) return;
+    this.polygon.update((list) => [...list, point]);
+  }
+
+  closePolygon(mode: SelectionMode): void {
+    const doc = this.document();
+    const vertices = this.polygon();
+    this.polygon.set([]);
+    if (!doc || vertices.length < 3) return;
+    const region = rasterizePolygon(doc.width, doc.height, vertices);
+    this.commit(undefined, combineSelection(this.selection(), region, mode));
+  }
+
+  cancelPolygon(): void {
+    this.polygon.set([]);
+  }
+
+  // Shape detection: candidates are only proposals until applied
+
+  /** Detects on the calling thread. */
+  detectShapes(): void {
+    const image = this.image();
+    if (image) this.setCandidates(detectShapes(image, this.detectOptions(image)));
+  }
+
+  /** Detects in a Web Worker (inline where there is none), so a large image does not freeze the page. */
+  async detectShapesAsync(): Promise<void> {
+    const image = this.image();
+    if (!image || this.detecting()) return;
+    this.detecting.set(true);
+    try {
+      const found = await this.shapes.detect(image, this.detectOptions(image));
+      if (this.image() === image) this.setCandidates(found);
+    } finally {
+      this.detecting.set(false);
+    }
+  }
+
+  toggleCandidate(id: number): void {
+    this.selectedCandidates.update((ids) =>
+      ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id],
+    );
+  }
+
+  /** Gives the pixels of the selected candidates to the active material or to a new one: one history entry. */
+  applyCandidates(target: 'active' | 'new', name = 'Shape'): void {
+    const doc = this.document();
+    const ids = this.selectedCandidates();
+    if (!doc || !ids.length) return;
+    const union = new Uint8Array(doc.width * doc.height);
+    for (const c of this.candidates()) {
+      if (ids.includes(c.id))
+        for (let p = 0; p < union.length; p++) if (c.mask[p]) union[p] = 1;
+    }
+    let base = doc;
+    let layerId = this.$activeLayerId()!;
+    if (target === 'new') {
+      base = addLayer(doc, name);
+      layerId = base.layers[base.layers.length - 1].id;
+    }
+    const next = assignPixels(base, layerId, union);
+    if (next === doc) return;
+    this.commit(next);
+    this.activeId.set(layerId);
+    this.selectedCandidates.set([]);
+  }
+
+  /** Regions smaller than a share of the opaque area are merged into a neighbour. */
+  private detectOptions(image: SpriteImage) {
+    return { tolerance: this.tolerance(), minSize: defaultMinSize(image) };
+  }
+
+  private setCandidates(shapes: DetectedShape[]): void {
+    this.detected.set(true);
+    this.candidates.set(shapes.map((s, id) => ({ id, ...s })));
+    this.selectedCandidates.set([]);
   }
 
   // Configuration and export

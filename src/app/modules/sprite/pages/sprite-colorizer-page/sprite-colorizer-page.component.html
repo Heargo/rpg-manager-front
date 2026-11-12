@@ -133,6 +133,8 @@
         (pointermove)="onPointerMove($event)"
         (pointerup)="onPointerUp()"
         (pointercancel)="onPointerUp()"
+        (pointerleave)="pointer.set(null)"
+        (dblclick)="onDoubleClick($event)"
         (contextmenu)="$event.preventDefault()"
       >
         @if (business.$image(); as image) {
@@ -144,6 +146,23 @@
           >
             <canvas #main></canvas>
             <canvas #overlay class="overlay"></canvas>
+            <svg
+              class="polygon"
+              [attr.viewBox]="'0 0 ' + image.width + ' ' + image.height"
+            >
+              @if (business.$polygonVertices().length) {
+                <polyline [attr.points]="polygonLine()" />
+                <polyline class="preview" [attr.points]="polygonPreview()" />
+                @for (v of business.$polygonVertices(); track $index) {
+                  <circle
+                    [attr.cx]="v.x"
+                    [attr.cy]="v.y"
+                    [attr.r]="handleRadius() * ($first ? 1.6 : 1)"
+                    [class.first]="$first"
+                  />
+                }
+              }
+            </svg>
           </div>
         } @else {
           <p class="empty">{{ "sprite.empty" | transloco }}</p>
@@ -195,6 +214,30 @@
             />
           </div>
         }
+        @if (business.$tool() === "polygon") {
+          <label class="switch">
+            <p-toggleswitch
+              [ngModel]="business.$snap().enabled"
+              (ngModelChange)="setSnap({ enabled: $event })"
+            />
+            {{ "sprite.tools.snap" | transloco }}
+          </label>
+          @if (business.$snap().enabled) {
+            <div class="field">
+              <label
+                >{{ "sprite.tools.snapRadius" | transloco }}:
+                {{ business.$snap().radius }}</label
+              >
+              <p-slider
+                [min]="1"
+                [max]="30"
+                [ngModel]="business.$snap().radius"
+                (ngModelChange)="setSnap({ radius: $event })"
+              />
+            </div>
+          }
+          <p class="hint">{{ "sprite.tools.polygonHint" | transloco }}</p>
+        }
         @if (business.$tool() === "bucket" || business.$tool() === "wand") {
           <div class="field">
             <label
@@ -219,6 +262,8 @@
             (ngModelChange)="business.setWandMode($event)"
           />
           <p class="hint">{{ "sprite.tools.wandHint" | transloco }}</p>
+        }
+        @if (business.$tool() === "wand" || business.$tool() === "polygon") {
           <div class="row">
             <p-button
               icon="pi pi-check"
@@ -241,6 +286,67 @@
               (onClick)="business.clearSelection()"
             />
           </div>
+        }
+      </section>
+
+      <section>
+        <h2>{{ "sprite.shapes.title" | transloco }}</h2>
+        <div class="field">
+          <label
+            >{{ "sprite.tools.tolerance" | transloco }}:
+            {{ business.$tolerance() }}</label
+          >
+          <p-slider
+            [min]="0"
+            [max]="255"
+            [ngModel]="business.$tolerance()"
+            (ngModelChange)="business.setTolerance($event)"
+          />
+        </div>
+        <div class="row">
+          <p-button
+            icon="pi pi-search"
+            [label]="'sprite.shapes.detect' | transloco"
+            [ariaLabel]="'sprite.shapes.detect' | transloco"
+            [loading]="business.$detecting()"
+            [disabled]="!business.$image()"
+            (onClick)="business.detectShapesAsync()"
+          />
+        </div>
+        @if (business.$candidates().length) {
+          <p class="hint">{{ "sprite.shapes.hint" | transloco }}</p>
+          <ul class="candidates">
+            @for (c of business.$candidates(); track c.id) {
+              <li
+                class="candidate"
+                role="button"
+                tabindex="0"
+                [class.selected]="business.$selectedCandidates().includes(c.id)"
+                (click)="business.toggleCandidate(c.id)"
+                (keydown.enter)="business.toggleCandidate(c.id)"
+              >
+                <span class="chip" [style.background]="shapeCss(c.id)"></span>
+                {{ "sprite.shapes.pixels" | transloco: { n: c.size } }}
+              </li>
+            }
+          </ul>
+          <div class="row">
+            <p-button
+              [label]="'sprite.shapes.apply' | transloco"
+              [ariaLabel]="'sprite.shapes.apply' | transloco"
+              [disabled]="!business.$selectedCandidates().length"
+              (onClick)="applyShapes('active')"
+            />
+            <p-button
+              severity="secondary"
+              [label]="'sprite.shapes.applyNew' | transloco"
+              [ariaLabel]="'sprite.shapes.applyNew' | transloco"
+              [disabled]="!business.$selectedCandidates().length"
+              (onClick)="applyShapes('new')"
+            />
+          </div>
+        } @else if (business.$detected()) {
+          <p class="hint">{{ "sprite.shapes.none" | transloco }}</p>
         }
       </section>
 

@@ -1112,7 +1112,11 @@
       "applySelection": "Apply selection",
       "invertSelection": "Invert selection",
       "clearSelection": "Clear selection",
-      "wandHint": "Shift adds to the selection, Alt removes from it."
+      "wandHint": "Shift adds to the selection, Alt removes from it.",
+      "polygon": "Polygon",
+      "snap": "Snap to edges",
+      "snapRadius": "Snap radius",
+      "polygonHint": "Click to add vertices. Enter or double-click closes (Shift adds, Alt removes), Escape cancels."
     },
     "view": {
       "zoomIn": "Zoom in",
@@ -1143,6 +1147,16 @@
       "stopPosition": "Stop position (%)",
       "addStop": "Add stop",
       "removeStop": "Remove stop"
+    },
+    "shapes": {
+      "title": "Shapes",
+      "detect": "Detect shapes",
+      "hint": "Click shapes to select them, then apply them to a material.",
+      "pixels": "{{n}} px",
+      "apply": "Apply to layer",
+      "applyNew": "Apply to new layer",
+      "newName": "Shape",
+      "none": "No shape found."
     },
     "presets": {
       "title": "Presets",
