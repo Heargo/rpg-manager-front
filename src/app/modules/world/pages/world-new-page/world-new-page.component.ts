@@ -52,7 +52,7 @@ import {
   WORLD_NAME_MAX_LENGTH,
 } from '../../helpers/world-draft.rules';
 import { RuleFieldsComponent } from '../../components/rule-fields/rule-fields.component';
-import { OfflineFeatures, WorldDraft } from '../../models/world';
+import { CombatRules, OfflineFeatures, WorldDraft } from '../../models/world';
 
 interface AttributeRow {
   key: number;
@@ -138,6 +138,10 @@ export class WorldNewPageComponent {
     DEFAULT_NPC_VISIBILITY,
   );
   protected readonly skillRollsEnabled = signal(true);
+  /** Combat settings; the defaults until the player edits them. */
+  protected readonly combat = signal<CombatRules | undefined>(undefined);
+  /** Row key of the combat life attribute (not its name, so renaming the row keeps it). */
+  private readonly combatLifeKey = signal<number | null>(null);
   protected readonly sellAnywhere = signal(true);
   protected readonly sellAnywhereRatio = signal(1);
   protected readonly merchantBuyRatio = signal(1);
@@ -181,6 +185,7 @@ export class WorldNewPageComponent {
     merchantBuyRatio: this.merchantBuyRatio(),
     merchantSellRatio: this.merchantSellRatio(),
     npcVisibility: this.npcVisibility(),
+    combat: this.combatWithLife(),
   }));
   /** Per row, the problem of its cap (null when none or valid). */
   protected readonly capErrors = computed(() =>
@@ -387,6 +392,11 @@ export class WorldNewPageComponent {
     this.merchantBuyRatio.set(draft.merchantBuyRatio ?? 1);
     this.merchantSellRatio.set(draft.merchantSellRatio ?? 0.5);
     this.npcVisibility.set(draft.npcVisibility ?? DEFAULT_NPC_VISIBILITY);
+    this.combat.set(draft.combat);
+    const life = draft.combat?.lifeAttribute?.trim();
+    this.combatLifeKey.set(
+      this.attributes().find((row) => row.name.trim() === life)?.key ?? null,
+    );
   }
 
   protected async create(): Promise<void> {
@@ -413,6 +423,16 @@ export class WorldNewPageComponent {
     } finally {
       this.creating.set(false);
     }
+  }
+
+  /** The edited combat rules, their life attribute following its row (cleared when the row is deleted). */
+  private combatWithLife(): CombatRules | undefined {
+    const combat = this.combat();
+    if (!combat) return undefined;
+    const row = this.attributes().find(
+      (entry) => entry.key === this.combatLifeKey(),
+    );
+    return { ...combat, lifeAttribute: row?.name.trim() || undefined };
   }
 
   private barName(key: number | null): string | undefined {

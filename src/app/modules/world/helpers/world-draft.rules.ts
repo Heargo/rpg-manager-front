@@ -8,6 +8,7 @@ import {
   validateLevelCurve,
 } from '../../character/helpers/level.rules';
 import { WorldDraft } from '../models/world';
+import { CombatErrorField, validateCombatRules } from './world-combat.rules';
 
 export const WORLD_NAME_MAX_LENGTH = 48;
 export const ATTRIBUTE_NAME_MAX_LENGTH = 24;
@@ -26,7 +27,8 @@ export type WorldDraftErrors = Partial<
     | 'skillPointsPerLevel'
     | 'sellAnywhereRatio'
     | 'merchantBuyRatio'
-    | 'merchantSellRatio',
+    | 'merchantSellRatio'
+    | CombatErrorField,
     string
   >
 >;
@@ -86,6 +88,14 @@ export function validateWorldDraft(draft: WorldDraft): WorldDraftErrors {
     if (ratio !== undefined && !(ratio >= 0 && ratio <= 10))
       errors[field] = 'world.errors.ratioInvalid';
   }
+  if (draft.combat)
+    Object.assign(
+      errors,
+      validateCombatRules(
+        draft.combat,
+        draft.attributes.map((attribute) => attribute.name),
+      ),
+    );
   return errors;
 }
 

@@ -12,6 +12,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { CheckboxModule } from '@openng/optimus-ui/checkbox';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { ButtonModule } from '@openng/optimus-ui/button';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 import { LanguageBusiness } from '../../../../core/business/language.business';
@@ -35,7 +36,16 @@ import {
 } from '../../../npc/helpers/npc-visibility.rules';
 import { NPC_ROLES, NpcRole, NpcVisibility } from '../../../npc/models/npc';
 import { createPointerKind } from '../../../../core/helpers/pointer-kind';
-import { OfflineFeatures, WorldDraft } from '../../models/world';
+import {
+  CombatRules,
+  INITIATIVE_MODES,
+  OfflineFeatures,
+  WorldDraft,
+} from '../../models/world';
+import {
+  defaultCombatRules,
+  isCombatFormulaValid,
+} from '../../helpers/world-combat.rules';
 
 const OFFLINE_FEATURES = Object.keys(
   DEFAULT_OFFLINE_FEATURES,
@@ -51,6 +61,7 @@ const OFFLINE_FEATURES = Object.keys(
     InputNumberModule,
     InputTextModule,
     SelectModule,
+    ButtonModule,
     ToggleSwitchModule,
     CheckboxModule,
     CoinInputComponent,
@@ -66,6 +77,12 @@ export class RuleFieldsComponent {
   /** Which sections to show: all, the rules (progression, economy, NPCs) or only the offline features. */
   readonly sections = input<'all' | 'rules' | 'offline'>('all');
 
+  /** The combat section is a closed `<details>` (the wizard). */
+  readonly collapsed = input(false);
+  /** Attribute names the combat formulas may read when the draft carries none (the rules page edits them apart). */
+  readonly attributeNames = input<string[] | null>(null);
+
+  protected readonly initiativeModes = [...INITIATIVE_MODES];
   protected readonly offlineFeatures = OFFLINE_FEATURES;
   protected readonly npcRoles = NPC_ROLES;
   protected readonly npcFields = NPC_VISIBILITY_FIELDS;
@@ -140,6 +157,76 @@ export class RuleFieldsComponent {
   );
 
   protected readonly chartOpen = signal(false);
+
+  protected readonly combat = computed<CombatRules>(
+    () =>
+      this.draft().combat ??
+      defaultCombatRules(this.draft().barAttributes?.life),
+  );
+  protected readonly names = computed(
+    () =>
+      this.attributeNames() ??
+      this.draft().attributes.map((attribute) => attribute.name.trim()),
+  );
+  /** Live problems of the combat formulas, by field. */
+  protected readonly combatErrors = computed(() => {
+    const combat = this.combat();
+    const names = this.names();
+    const bad = (expression: string | undefined) =>
+      !!expression && !isCombatFormulaValid(expression, names);
+    return {
+      initiative: bad(combat.initiative.formula),
+      movement: bad(combat.movement) || !combat.movement,
+      'basic-attack': bad(combat.basicAttack),
+      defence: bad(combat.defence),
+    };
+  });
+
+  protected patchCombat(change: Partial<CombatRules>): void {
+    this.patch({ combat: { ...this.combat(), ...change } });
+  }
+
+  protected setDice(change: Partial<CombatRules['initiative']['dice']>): void {
+    const { initiative } = this.combat();
+    this.patchCombat({
+      initiative: { ...initiative, dice: { ...initiative.dice, ...change } },
+    });
+  }
+
+  protected setGrid(change: Partial<CombatRules['grid']>): void {
+    this.patchCombat({ grid: { ...this.combat().grid, ...change } });
+  }
+
+  protected setAction(
+    index: number,
+    change: Partial<CombatRules['actionTypes'][number]>,
+  ): void {
+    this.patchCombat({
+      actionTypes: this.combat().actionTypes.map((action, i) =>
+        i === index ? { ...action, ...change } : action,
+      ),
+    });
+  }
+
+  protected addAction(): void {
+    this.patchCombat({
+      actionTypes: [...this.combat().actionTypes, { name: '', count: 1 }],
+    });
+  }
+
+  protected removeAction(index: number): void {
+    this.patchCombat({
+      actionTypes: this.combat().actionTypes.filter((_, i) => i !== index),
+    });
+  }
+
+  /** An optional formula: empty means none. */
+  protected setOptionalFormula(
+    field: 'basicAttack' | 'defence',
+    text: string,
+  ): void {
+    this.patchCombat({ [field]: text.trim() ? text : undefined });
+  }
 
   protected patch(change: Partial<WorldDraft>): void {
     this.draft.update((draft) => ({ ...draft, ...change }));

@@ -136,3 +136,126 @@ describe('RuleFieldsComponent economy selling settings', () => {
     expect(emitted.at(-1)!.merchantSellRatio).toBe(0.75);
   });
 });
+
+/**
+ * Combat section (draft field `combat`: a CombatRules, defaulting to `defaultCombatRules(draft.barAttributes.life)` when
+ * omitted), `[data-testid="rules-section-combat"]`, in `sections` 'all' and 'rules'. Input `collapsed` (default false): the
+ * section is a `<details>` that is closed when true (the wizard). Controls: `#combat-life-attribute` (p-select inputId),
+ * `#combat-initiative-mode` (p-select), `#combat-initiative-count`, `#combat-initiative-faces` (p-inputnumber),
+ * `#combat-initiative-formula`, `#combat-movement`, `#combat-basic-attack`, `#combat-defence` (pInputText), `#combat-grid`
+ * (toggle), `#combat-grid-columns`, `#combat-grid-rows` (p-inputnumber), action types as rows `[data-testid="combat-action"]`
+ * with `input[name="combat-action-name"]` and `input[name="combat-action-count"]`, and `[data-testid="combat-action-add"]`.
+ * Live formula validation (from the draft's attribute names, not the `errors` input): `[data-testid="combat-error-<field>"]`
+ * for field `initiative`, `movement`, `basic-attack`, `defence`.
+ */
+describe('RuleFieldsComponent combat settings', () => {
+  const withAttributes: WorldDraft = {
+    ...base,
+    attributes: [
+      { name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+      { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } },
+    ],
+    barAttributes: { life: 'Life' },
+  };
+
+  async function openCombat(collapsed = false) {
+    TestBed.configureTestingModule({ imports: [RuleFieldsComponent], providers: TEST_PROVIDERS });
+    const fixture = TestBed.createComponent(RuleFieldsComponent);
+    fixture.componentRef.setInput('draft', withAttributes);
+    fixture.componentRef.setInput('collapsed', collapsed);
+    const emitted: WorldDraft[] = [];
+    fixture.componentInstance.draft.subscribe((value: WorldDraft) => emitted.push(value));
+    const settle = async () => {
+      await fixture.whenStable();
+      await new Promise((resolve) => setTimeout(resolve));
+      await fixture.whenStable();
+    };
+    await settle();
+    const el = fixture.nativeElement as HTMLElement;
+    const section = el.querySelector('[data-testid="rules-section-combat"]') as HTMLElement;
+    const type = async (selector: string, text: string) => {
+      const input = section.querySelector(selector) as HTMLInputElement;
+      input.value = text;
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new Event('blur'));
+      await settle();
+    };
+    return { el, section, emitted, settle, type };
+  }
+
+  it('shows the defaults from the spec table', async () => {
+    const { section } = await openCombat();
+    expect((section.querySelector('#combat-initiative-count') as HTMLInputElement).value).toBe('1');
+    expect((section.querySelector('#combat-initiative-faces') as HTMLInputElement).value).toBe('20');
+    expect((section.querySelector('#combat-initiative-formula') as HTMLInputElement).value).toBe('0');
+    expect((section.querySelector('#combat-movement') as HTMLInputElement).value).toBe('6');
+    expect((section.querySelector('#combat-grid') as HTMLInputElement).checked).toBe(false);
+    expect((section.querySelector('#combat-basic-attack') as HTMLInputElement).value).toBe('');
+    expect((section.querySelector('#combat-defence') as HTMLInputElement).value).toBe('');
+    const rows = Array.from(section.querySelectorAll('[data-testid="combat-action"]'));
+    expect(rows.map((row) => (row.querySelector('input[name="combat-action-name"]') as HTMLInputElement).value)).toEqual([
+      'Action',
+      'Movement',
+    ]);
+    expect(section.querySelector('#combat-life-attribute')).not.toBeNull();
+  });
+
+  it('is open on the rules page', async () => {
+    expect((await openCombat(false)).section.matches('details[open]')).toBe(true);
+  });
+
+  it('is collapsed in the wizard', async () => {
+    const collapsed = (await openCombat(true)).section;
+    expect(collapsed.tagName).toBe('DETAILS');
+    expect(collapsed.hasAttribute('open')).toBe(false);
+  });
+
+  it('emits the movement, basic attack and defence formulas', async () => {
+    const { emitted, type } = await openCombat();
+    await type('#combat-movement', 'Mana / 2');
+    await type('#combat-basic-attack', 'Life / 2');
+    await type('#combat-defence', 'Mana');
+    expect(emitted.at(-1)!.combat).toMatchObject({ movement: 'Mana / 2', basicAttack: 'Life / 2', defence: 'Mana' });
+  });
+
+  it('emits the initiative dice and formula', async () => {
+    const { emitted, type } = await openCombat();
+    await type('#combat-initiative-count', '2');
+    await type('#combat-initiative-faces', '6');
+    await type('#combat-initiative-formula', 'level');
+    expect(emitted.at(-1)!.combat!.initiative).toMatchObject({ dice: { count: 2, faces: 6 }, formula: 'level' });
+  });
+
+  it('emits the grid switch and size', async () => {
+    const { section, emitted, settle, type } = await openCombat();
+    (section.querySelector('#combat-grid') as HTMLInputElement).click();
+    await settle();
+    expect(emitted.at(-1)!.combat!.grid.enabled).toBe(true);
+    await type('#combat-grid-columns', '12');
+    await type('#combat-grid-rows', '9');
+    expect(emitted.at(-1)!.combat!.grid).toMatchObject({ enabled: true, columns: 12, rows: 9 });
+  });
+
+  it('adds an action type and edits the existing ones', async () => {
+    const { section, emitted, settle } = await openCombat();
+    (section.querySelector('[data-testid="combat-action-add"]') as HTMLElement).click();
+    await settle();
+    expect(emitted.at(-1)!.combat!.actionTypes).toHaveLength(3);
+    const first = section.querySelector('[data-testid="combat-action"] input[name="combat-action-name"]') as HTMLInputElement;
+    first.value = 'Strike';
+    first.dispatchEvent(new Event('input'));
+    await settle();
+    expect(emitted.at(-1)!.combat!.actionTypes[0]).toEqual({ name: 'Strike', count: 1 });
+  });
+
+  it('shows a live error for a broken or unknown-name formula, and none for a good one', async () => {
+    const { section, type } = await openCombat();
+    expect(section.querySelector('[data-testid="combat-error-defence"]')).toBeNull();
+    await type('#combat-defence', 'Armor * 2');
+    expect(section.querySelector('[data-testid="combat-error-defence"]')).not.toBeNull();
+    await type('#combat-defence', 'Mana * 2');
+    expect(section.querySelector('[data-testid="combat-error-defence"]')).toBeNull();
+    await type('#combat-movement', '4 +');
+    expect(section.querySelector('[data-testid="combat-error-movement"]')).not.toBeNull();
+  });
+});

@@ -67,7 +67,10 @@
       "empty": "Les salles que vous rejoignez comme joueur apparaissent ici.",
       "forgetMessage": "Oublier « {{ name }} » ? Il quitte cette liste. Vous pourrez le rejoindre avec une nouvelle invitation."
     },
-    "badge": { "gm": "MJ", "player": "Joueur" },
+    "badge": {
+      "gm": "MJ",
+      "player": "Joueur"
+    },
     "joined": {
       "title": "Mondes rejoints",
       "hostedBy": "Hôte : {{ name }}",
@@ -159,6 +162,11 @@
       "image": "Cette image n'a pas pu être utilisée.",
       "capInvalid": "Le plafond doit être un nombre entier, 1 ou plus.",
       "capTooLow": "Le plafond ne peut pas être sous la valeur de base ({{ base }}).",
+      "combatLifeUnknown": "L'attribut de vie doit être un attribut du monde.",
+      "combatDiceInvalid": "Dés d'initiative : 1 à 100 dés de 2 à 1000 faces.",
+      "combatActionTypes": "Les types d'action ont un nom unique et un nombre d'au moins 1.",
+      "combatGrid": "La grille demande des colonnes et des lignes entières d'au moins 1.",
+      "combatFormula": "Cette formule est invalide ou lit un attribut inconnu.",
       "formulaInvalid": "Corrigez les formules des attributs en rouge.",
       "maxLevelInvalid": "Le niveau max doit être un entier de 2 à 100.",
       "levelCurveInvalid": "Courbe invalide : utilisez uniquement level, et chaque niveau doit coûter au moins 1 XP.",
@@ -198,7 +206,11 @@
       "intro": "Modifiez les attributs et les règles du monde. Les changements arrivent aussitôt chez les joueurs; les fiches sont mises à jour.",
       "open": "Règles du monde",
       "attributes": "Attributs",
-      "tabs": { "attributes": "Attributs", "rules": "Règles", "offline": "Hors ligne" },
+      "tabs": {
+        "attributes": "Attributs",
+        "rules": "Règles",
+        "offline": "Hors ligne"
+      },
       "progression": "Progression",
       "selling": {
         "sellAnywhere": "Autoriser la vente partout",
@@ -230,6 +242,28 @@
           "attributes": "Tous les attributs",
           "equipment": "Objets équipés"
         }
+      },
+      "combat": {
+        "title": "Combat",
+        "hint": "Le déroulement des combats : vie, initiative, actions, grille, déplacement et formules d'attaque et de défense. Les formules peuvent lire le niveau et les maxima des attributs.",
+        "lifeAttribute": "Attribut de vie (0 = à terre)",
+        "initiativeMode": "Initiative",
+        "modes": {
+          "rolled": "Lancée",
+          "typed": "Saisie par le MJ",
+          "free": "Ordre libre"
+        },
+        "initiativeDice": "Dés d'initiative",
+        "initiativeFormula": "Bonus d'initiative (formule)",
+        "actionTypes": "Actions par tour",
+        "actionName": "Nom de l'action",
+        "addAction": "Ajouter un type d'action",
+        "removeAction": "Retirer ce type d'action",
+        "grid": "Utiliser une grille",
+        "gridSize": "Taille de la grille (colonnes × lignes)",
+        "movement": "Déplacement par tour (formule)",
+        "basicAttack": "Dégâts de l'attaque de base (formule, facultatif)",
+        "defence": "Défense (formule, facultatif)"
       }
     }
   },
@@ -286,8 +320,7 @@
       "skillNeeded": "Une autre compétence apprise a besoin de ce rang.",
       "skillNotLearned": "Cette compétence n'est pas apprise.",
       "unknownSkill": "Cette compétence n'existe pas dans ce monde.",
-      "invalidRank": "Ce rang n'est pas valide pour cette compétence.",
-      "unknownClass": "Cette classe n'existe pas dans ce monde."
+      "invalidRank": "Ce rang n'est pas valide pour cette compétence."
     },
     "sheet": {
       "playedBy": "Joué par {{ name }}",

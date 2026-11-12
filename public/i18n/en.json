@@ -67,7 +67,10 @@
       "empty": "Rooms you join as a player appear here.",
       "forgetMessage": "Forget \"{{ name }}\"? It leaves this list. You can join again with a new invite."
     },
-    "badge": { "gm": "GM", "player": "Player" },
+    "badge": {
+      "gm": "GM",
+      "player": "Player"
+    },
     "joined": {
       "title": "Joined worlds",
       "hostedBy": "Host: {{ name }}",
@@ -159,6 +162,11 @@
       "image": "This picture couldn't be used.",
       "capInvalid": "The cap must be a whole number, 1 or more.",
       "capTooLow": "The cap can't be below the base value ({{ base }}).",
+      "combatLifeUnknown": "The life attribute must be one of the world's attributes.",
+      "combatDiceInvalid": "Initiative dice: 1 to 100 dice with 2 to 1000 faces.",
+      "combatActionTypes": "Action types need a unique name and a count of 1 or more.",
+      "combatGrid": "The grid needs whole columns and rows of 1 or more.",
+      "combatFormula": "This formula is invalid or reads an unknown attribute.",
       "formulaInvalid": "Fix the formulas of the attributes marked in red.",
       "maxLevelInvalid": "Max level must be a whole number from 2 to 100.",
       "levelCurveInvalid": "Invalid level curve: use only level, and every level must cost at least 1 XP.",
@@ -198,7 +206,11 @@
       "intro": "Edit the attributes and rules of the world. Changes reach the players right away; sheets are updated to match.",
       "open": "World rules",
       "attributes": "Attributes",
-      "tabs": { "attributes": "Attributes", "rules": "Rules", "offline": "Offline" },
+      "tabs": {
+        "attributes": "Attributes",
+        "rules": "Rules",
+        "offline": "Offline"
+      },
       "progression": "Progression",
       "selling": {
         "sellAnywhere": "Allow Sell anywhere",
@@ -230,6 +242,28 @@
           "attributes": "Every attribute",
           "equipment": "Equipped items"
         }
+      },
+      "combat": {
+        "title": "Combat",
+        "hint": "How encounters run: life, initiative, actions, grid, movement and the attack and defence formulas. Formulas can read level and the attributes' maxima.",
+        "lifeAttribute": "Life attribute (0 means down)",
+        "initiativeMode": "Initiative",
+        "modes": {
+          "rolled": "Rolled",
+          "typed": "Typed by the GM",
+          "free": "Free order"
+        },
+        "initiativeDice": "Initiative dice",
+        "initiativeFormula": "Initiative bonus (formula)",
+        "actionTypes": "Actions per turn",
+        "actionName": "Action name",
+        "addAction": "Add an action type",
+        "removeAction": "Remove this action type",
+        "grid": "Use a grid",
+        "gridSize": "Grid size (columns × rows)",
+        "movement": "Movement per turn (formula)",
+        "basicAttack": "Basic attack damage (formula, optional)",
+        "defence": "Defence (formula, optional)"
       }
     }
   },
@@ -286,8 +320,7 @@
       "skillNeeded": "Another learned skill needs this rank.",
       "skillNotLearned": "This skill isn't learned.",
       "unknownSkill": "This skill doesn't exist in this world.",
-      "invalidRank": "This rank is not valid for this skill.",
-      "unknownClass": "This class doesn't exist in this world."
+      "invalidRank": "This rank is not valid for this skill."
     },
     "sheet": {
       "playedBy": "Played by {{ name }}",

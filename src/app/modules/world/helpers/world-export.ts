@@ -11,6 +11,7 @@ import { emptyClass, parseClassJson } from '../../class/helpers/class.rules';
 import { NPC_ROLES } from '../../npc/models/npc';
 import { Skill } from '../../skill/models/skill';
 import { World } from '../models/world';
+import { combatImportProblems } from './world-combat.rules';
 
 export const WORLD_EXPORT_FORMAT = 'rpg-manager-world';
 export const WORLD_EXPORT_VERSION = 1;
@@ -131,6 +132,7 @@ function validateWorld(world: unknown, errors: string[]): void {
           : '',
       )
     : [];
+  errors.push(...combatImportProblems(world['combat'], attributeNames));
   list(world['attributes'], 'world.attributes', errors, (attribute, path) => {
     if (
       typeof attribute['id'] !== 'string' ||

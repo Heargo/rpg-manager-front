@@ -80,6 +80,16 @@ export function applyWorldRules<T extends World>(
       : sheet.level,
   });
 
+  const combat = rules.combat ?? world.combat;
+  const lifeKey =
+    combat.lifeAttribute === undefined
+      ? undefined
+      : normalizeName(combat.lifeAttribute);
+  const life =
+    lifeKey === undefined || removed.has(lifeKey)
+      ? undefined
+      : (renamed.get(lifeKey) ?? combat.lifeAttribute);
+
   return {
     ...world,
     attributes,
@@ -107,6 +117,7 @@ export function applyWorldRules<T extends World>(
     merchantBuyRatio: rules.merchantBuyRatio ?? world.merchantBuyRatio,
     merchantSellRatio: rules.merchantSellRatio ?? world.merchantSellRatio,
     npcVisibility: rules.npcVisibility ?? world.npcVisibility,
+    combat: { ...combat, lifeAttribute: life },
     items: world.items.map(fixItem),
     characters: world.characters.map(fixSheet),
   };

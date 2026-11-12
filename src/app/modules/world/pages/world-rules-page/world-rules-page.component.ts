@@ -100,6 +100,7 @@ export class WorldRulesPageComponent {
       merchantBuyRatio: world?.merchantBuyRatio,
       merchantSellRatio: world?.merchantSellRatio,
       npcVisibility: world?.npcVisibility,
+      combat: world?.combat,
     }),
   });
   protected readonly attributes = linkedSignal<World | null, AttributeRow[]>({
@@ -113,6 +114,25 @@ export class WorldRulesPageComponent {
         formula: attribute.formula,
         cap: attribute.cap,
       })),
+  });
+
+  protected readonly attributeNames = computed(() =>
+    this.attributes().map((row) => row.name.trim()),
+  );
+
+  /** The edited combat settings, the life attribute following its row when that is renamed. */
+  private readonly combatRules = computed(() => {
+    const combat = this.fields().combat ?? this.world()!.combat;
+    const life = combat.lifeAttribute;
+    const original = this.world()!.attributes.find(
+      (attribute) => life !== undefined && attribute.name === life,
+    );
+    const row = this.attributes().find((entry) => entry.id === original?.id);
+    if (!original) return combat;
+    return {
+      ...combat,
+      lifeAttribute: row ? row.name.trim() : undefined,
+    };
   });
 
   private readonly rules = computed<WorldRules>(() => {
@@ -145,6 +165,7 @@ export class WorldRulesPageComponent {
       merchantSellRatio:
         fields.merchantSellRatio ?? world!.merchantSellRatio ?? 0.5,
       npcVisibility: fields.npcVisibility ?? world!.npcVisibility,
+      combat: this.combatRules(),
     };
   });
   protected readonly errors = computed(() =>

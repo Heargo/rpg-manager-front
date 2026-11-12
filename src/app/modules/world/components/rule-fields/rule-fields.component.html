@@ -286,6 +286,251 @@
     </fieldset>
   </section>
 
+  <details
+    class="section combat"
+    data-testid="rules-section-combat"
+    [attr.open]="collapsed() ? null : ''"
+  >
+    <summary>{{ "world.rules.combat.title" | transloco }}</summary>
+    <fieldset class="level-curve">
+      <p class="hint">{{ "world.rules.combat.hint" | transloco }}</p>
+      <div class="field">
+        <label for="combat-life-attribute">{{
+          "world.rules.combat.lifeAttribute" | transloco
+        }}</label>
+        <p-select
+          inputId="combat-life-attribute"
+          [options]="names()"
+          [showClear]="true"
+          appendTo="body"
+          [ngModel]="combat().lifeAttribute"
+          (ngModelChange)="patchCombat({ lifeAttribute: $event ?? undefined })"
+        />
+        @if (errors()["combatLifeAttribute"]; as key) {
+          <small class="error">{{ key | transloco }}</small>
+        }
+      </div>
+      <div class="field">
+        <label for="combat-initiative-mode">{{
+          "world.rules.combat.initiativeMode" | transloco
+        }}</label>
+        <p-select
+          inputId="combat-initiative-mode"
+          [options]="initiativeModes"
+          appendTo="body"
+          [ngModel]="combat().initiative.mode"
+          (ngModelChange)="
+            patchCombat({
+              initiative: { ...combat().initiative, mode: $event },
+            })
+          "
+        >
+          <ng-template #selectedItem let-mode>{{
+            "world.rules.combat.modes." + mode | transloco
+          }}</ng-template>
+          <ng-template #item let-mode>{{
+            "world.rules.combat.modes." + mode | transloco
+          }}</ng-template>
+        </p-select>
+      </div>
+      <div class="field">
+        <label for="combat-initiative-count">{{
+          "world.rules.combat.initiativeDice" | transloco
+        }}</label>
+        <div class="row">
+          <p-inputnumber
+            inputId="combat-initiative-count"
+            [min]="1"
+            [max]="100"
+            [showButtons]="true"
+            [ngModel]="combat().initiative.dice.count"
+            (ngModelChange)="setDice({ count: $event ?? 0 })"
+          />
+          <span>d</span>
+          <p-inputnumber
+            inputId="combat-initiative-faces"
+            [min]="2"
+            [max]="1000"
+            [showButtons]="true"
+            [ngModel]="combat().initiative.dice.faces"
+            (ngModelChange)="setDice({ faces: $event ?? 0 })"
+          />
+        </div>
+        @if (
+          !combatErrors().initiative && errors()["combatInitiative"];
+          as key
+        ) {
+          <small class="error">{{ key | transloco }}</small>
+        }
+      </div>
+      <div class="field">
+        <label for="combat-initiative-formula">{{
+          "world.rules.combat.initiativeFormula" | transloco
+        }}</label>
+        <input
+          pInputText
+          type="text"
+          id="combat-initiative-formula"
+          autocomplete="off"
+          spellcheck="false"
+          [value]="combat().initiative.formula"
+          (input)="
+            patchCombat({
+              initiative: {
+                ...combat().initiative,
+                formula: $any($event.target).value,
+              },
+            })
+          "
+        />
+        @if (combatErrors().initiative) {
+          <small class="error" data-testid="combat-error-initiative">{{
+            "world.errors.combatFormula" | transloco
+          }}</small>
+        }
+      </div>
+      <div class="field">
+        <span class="label">{{
+          "world.rules.combat.actionTypes" | transloco
+        }}</span>
+        @for (action of combat().actionTypes; track $index) {
+          <div class="row" data-testid="combat-action">
+            <input
+              pInputText
+              type="text"
+              name="combat-action-name"
+              autocomplete="off"
+              [attr.aria-label]="'world.rules.combat.actionName' | transloco"
+              [value]="action.name"
+              (input)="setAction($index, { name: $any($event.target).value })"
+            />
+            <p-inputnumber
+              name="combat-action-count"
+              [min]="1"
+              [showButtons]="true"
+              [ngModel]="action.count"
+              (ngModelChange)="setAction($index, { count: $event ?? 0 })"
+            />
+            <p-button
+              icon="pi pi-trash"
+              severity="secondary"
+              [text]="true"
+              [ariaLabel]="'world.rules.combat.removeAction' | transloco"
+              (onClick)="removeAction($index)"
+            />
+          </div>
+        }
+        <button
+          pButton
+          type="button"
+          data-testid="combat-action-add"
+          class="p-button-text p-button-secondary"
+          (click)="addAction()"
+        >
+          <span class="pi pi-plus"></span>
+          {{ "world.rules.combat.addAction" | transloco }}
+        </button>
+        @if (errors()["combatActionTypes"]; as key) {
+          <small class="error">{{ key | transloco }}</small>
+        }
+      </div>
+      <div class="toggle">
+        <p-toggleswitch
+          inputId="combat-grid"
+          [ngModel]="combat().grid.enabled"
+          (ngModelChange)="setGrid({ enabled: $event })"
+        />
+        <label for="combat-grid">{{
+          "world.rules.combat.grid" | transloco
+        }}</label>
+      </div>
+      @if (combat().grid.enabled) {
+        <div class="field">
+          <label for="combat-grid-columns">{{
+            "world.rules.combat.gridSize" | transloco
+          }}</label>
+          <div class="row">
+            <p-inputnumber
+              inputId="combat-grid-columns"
+              [min]="1"
+              [showButtons]="true"
+              [ngModel]="combat().grid.columns"
+              (ngModelChange)="setGrid({ columns: $event ?? 0 })"
+            />
+            <span>×</span>
+            <p-inputnumber
+              inputId="combat-grid-rows"
+              [min]="1"
+              [showButtons]="true"
+              [ngModel]="combat().grid.rows"
+              (ngModelChange)="setGrid({ rows: $event ?? 0 })"
+            />
+          </div>
+          @if (errors()["combatGrid"]; as key) {
+            <small class="error">{{ key | transloco }}</small>
+          }
+        </div>
+      }
+      <div class="field">
+        <label for="combat-movement">{{
+          "world.rules.combat.movement" | transloco
+        }}</label>
+        <input
+          pInputText
+          type="text"
+          id="combat-movement"
+          autocomplete="off"
+          spellcheck="false"
+          [value]="combat().movement"
+          (input)="patchCombat({ movement: $any($event.target).value })"
+        />
+        @if (combatErrors().movement) {
+          <small class="error" data-testid="combat-error-movement">{{
+            "world.errors.combatFormula" | transloco
+          }}</small>
+        }
+      </div>
+      <div class="field">
+        <label for="combat-basic-attack">{{
+          "world.rules.combat.basicAttack" | transloco
+        }}</label>
+        <input
+          pInputText
+          type="text"
+          id="combat-basic-attack"
+          autocomplete="off"
+          spellcheck="false"
+          [value]="combat().basicAttack ?? ''"
+          (input)="setOptionalFormula('basicAttack', $any($event.target).value)"
+        />
+        @if (combatErrors()["basic-attack"]) {
+          <small class="error" data-testid="combat-error-basic-attack">{{
+            "world.errors.combatFormula" | transloco
+          }}</small>
+        }
+      </div>
+      <div class="field">
+        <label for="combat-defence">{{
+          "world.rules.combat.defence" | transloco
+        }}</label>
+        <input
+          pInputText
+          type="text"
+          id="combat-defence"
+          autocomplete="off"
+          spellcheck="false"
+          [value]="combat().defence ?? ''"
+          (input)="setOptionalFormula('defence', $any($event.target).value)"
+        />
+        @if (combatErrors().defence) {
+          <small class="error" data-testid="combat-error-defence">{{
+            "world.errors.combatFormula" | transloco
+          }}</small>
+        }
+      </div>
+    </fieldset>
+  </details>
+
   <section class="section" data-testid="rules-section-npcs">
     <fieldset class="level-curve">
       <legend>{{ "world.rules.npcs.title" | transloco }}</legend>

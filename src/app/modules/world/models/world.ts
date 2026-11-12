@@ -16,6 +16,31 @@ export interface WorldAttribute {
   cap?: number;
 }
 
+export const INITIATIVE_MODES = ['rolled', 'typed', 'free'] as const;
+export type InitiativeMode = (typeof INITIATIVE_MODES)[number];
+
+/** How a world runs combat (the rules page's Combat section, the wizard). Formulas read `level` and attribute maxima by name. */
+export interface CombatRules {
+  /** Name of the attribute that is the life (0 = down); combat cannot start without one. */
+  lifeAttribute?: string;
+  initiative: {
+    mode: InitiativeMode;
+    /** Dice rolled for each combatant in `rolled` mode. */
+    dice: { count: number; faces: number };
+    /** Added to the dice total. */
+    formula: string;
+  };
+  /** What a combatant can do on its turn, each with how many per turn. */
+  actionTypes: { name: string; count: number }[];
+  grid: { enabled: boolean; columns: number; rows: number };
+  /** Movement per turn (formula). */
+  movement: string;
+  /** Damage of a basic attack (formula), none when omitted. */
+  basicAttack?: string;
+  /** What a hit loses to defence (formula), none when omitted. */
+  defence?: string;
+}
+
 /** The editable rules of a world (the rules page, the wizard's Rules step); attributes without an id are new. */
 export interface WorldRules {
   attributes: {
@@ -45,6 +70,8 @@ export interface WorldRules {
   merchantSellRatio?: number;
   /** Kept as is when omitted. */
   npcVisibility?: NpcVisibilityRules;
+  /** Kept as is when omitted. */
+  combat?: CombatRules;
 }
 
 /** What players can still do while the host is offline (p2p-rooms spec, Host offline). */
@@ -150,6 +177,7 @@ export interface World {
   merchantSellRatio?: number;
   /** Per NPC role, what the players see of an NPC shown on the table. */
   npcVisibility: NpcVisibilityRules;
+  combat: CombatRules;
   items: Item[];
   characters: Character[];
   /** The GM's NPC catalogue; host-only, never sent in WorldInfo. */
@@ -207,6 +235,8 @@ export interface WorldDraft {
   /** What merchants pay, times the item price (0 to 10, default 0.5). */
   merchantSellRatio?: number;
   npcVisibility?: NpcVisibilityRules;
+  /** The wizard's combat settings; the defaults when omitted. */
+  combat?: CombatRules;
 }
 
 /** What players receive about the hosted world (no catalogue, characters or GM notes). */

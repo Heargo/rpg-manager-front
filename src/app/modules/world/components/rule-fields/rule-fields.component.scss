@@ -111,3 +111,19 @@ label {
     justify-self: center;
   }
 }
+
+.combat > summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.25rem 0;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.label {
+  font-weight: 600;
+}
