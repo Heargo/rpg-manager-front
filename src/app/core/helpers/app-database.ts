@@ -1,8 +1,8 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
 
 export const APP_DATABASE_NAME = 'rpg-manager';
-/** v1: worlds, images. v2: hostedRoom, joinedRooms. v3: playerCopies. */
-const APP_DATABASE_VERSION = 3;
+/** v1: worlds, images. v2: hostedRoom, joinedRooms. v3: playerCopies. v4: joinedWorlds (replaces joinedRooms). */
+const APP_DATABASE_VERSION = 4;
 
 export interface StoredImage {
   /** SHA-256 of the bytes, hex. */
@@ -21,8 +21,8 @@ export interface AppDatabaseSchema extends DBSchema {
   images: { key: string; value: StoredImage };
   /** The room this device is hosting, one record under the key `current`. Typed by the room feature. */
   hostedRoom: { key: string; value: Record<string, unknown> };
-  /** Rooms this device joined as a player, by room id. Typed by the room feature. */
-  joinedRooms: { key: string; value: { id: string } & Record<string, unknown> };
+  /** Worlds this device joined as a player, by world id. Typed by the play feature. */
+  joinedWorlds: { key: string; value: { worldId: string } & Record<string, unknown> };
   /** The player's own copy of their character, by room id. Typed by the character feature. */
   playerCopies: { key: string; value: { roomId: string; character: Record<string, unknown>; queue?: unknown[] } };
 }
@@ -36,7 +36,10 @@ export function openAppDatabase(name = APP_DATABASE_NAME): Promise<AppDatabase> 
       if (!db.objectStoreNames.contains('worlds')) db.createObjectStore('worlds', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('images')) db.createObjectStore('images', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('hostedRoom')) db.createObjectStore('hostedRoom');
-      if (!db.objectStoreNames.contains('joinedRooms')) db.createObjectStore('joinedRooms', { keyPath: 'id' });
+      // v4: the recent-rooms store is replaced by joinedWorlds. It is no longer in the schema, hence the cast.
+      const stores = db.objectStoreNames as unknown as DOMStringList;
+      if (stores.contains('joinedRooms')) (db as unknown as IDBDatabase).deleteObjectStore('joinedRooms');
+      if (!db.objectStoreNames.contains('joinedWorlds')) db.createObjectStore('joinedWorlds', { keyPath: 'worldId' });
       if (!db.objectStoreNames.contains('playerCopies')) db.createObjectStore('playerCopies', { keyPath: 'roomId' });
     },
   });

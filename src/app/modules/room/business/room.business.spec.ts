@@ -185,24 +185,6 @@ describe('RoomBusiness (host and two players)', () => {
     });
   });
 
-  it('remembers the rooms a player joined, and forgets them on request', async () => {
-    await join(ada);
-    await new Promise((resolve) => setTimeout(resolve, 20));
-
-    // A fresh device for Ada on the same storage.
-    devices[1].destroy();
-    devices[1] = net.device([profile('ada', 'Ada')]);
-    ada = devices[1].get(RoomBusiness);
-    await ada.whenReady();
-
-    expect(ada.$recentRooms().map((room) => [room.name, room.hostName, room.members.length])).toEqual([
-      ['Friday table', 'Gm', 2],
-    ]);
-
-    await ada.forgetRecentRoom(ada.$recentRooms()[0].id);
-    expect(ada.$recentRooms()).toEqual([]);
-  });
-
   it("refuses to host or reopen a room while another tab holds the host lock", async () => {
     await new Promise((resolve) => setTimeout(resolve, 20));
     const busyLock = { provide: HostLockService, useValue: { acquire: async () => false, releaseLock: () => undefined } };

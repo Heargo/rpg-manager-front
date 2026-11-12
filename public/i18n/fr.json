@@ -44,7 +44,7 @@
     "classCatalogue": "Catalogue de classes"
   },
   "play": {
-    "title": "Jouer",
+    "title": "Mondes",
     "activeRoom": "Salle ouverte : {{ name }}.",
     "backToRoom": "Retour à la salle",
     "worlds": {
@@ -64,7 +64,17 @@
     },
     "rooms": {
       "empty": "Les salles que vous rejoignez comme joueur apparaissent ici.",
-      "forgetMessage": "Oublier « {{ name }} » ? Vous pourrez revenir avec une nouvelle invitation."
+      "forgetMessage": "Oublier « {{ name }} » ? Il quitte cette liste. Vous pourrez le rejoindre avec une nouvelle invitation."
+    },
+    "badge": { "gm": "MJ", "player": "Joueur" },
+    "joined": {
+      "title": "Mondes rejoints",
+      "hostedBy": "Hôte : {{ name }}",
+      "lastSeen": "vu pour la dernière fois {{ date }}",
+      "rejoin": "Rejoindre",
+      "openSheet": "Ouvrir le personnage",
+      "remove": "Retirer de la liste",
+      "readOnly": "Ceci est votre copie enregistrée du personnage dans « {{ name }} ». Elle est en lecture seule jusqu'à ce que vous rejoigniez."
     }
   },
   "world": {
@@ -593,13 +603,6 @@
       "seatTaken": "Vous êtes déjà dans cette salle sur un autre appareil.",
       "generic": "Une erreur est survenue.",
       "otherTab": "Une salle est déjà ouverte dans un autre onglet de l'application. Utilisez cet onglet, ou fermez-le d'abord."
-    },
-    "recent": {
-      "title": "Salles rejointes",
-      "hint": "Pour revenir, demandez un nouveau lien d'invitation à l'hôte.",
-      "hostedBy": "Hôte : {{ name }}",
-      "lastSeen": "vue {{ date }}",
-      "forget": "Oublier cette salle"
     },
     "hostOfflineTooltip": "Hôte hors ligne : certaines fonctions restent disponibles ; demandez un nouveau lien d'invitation à l'hôte pour vous reconnecter",
     "size": {

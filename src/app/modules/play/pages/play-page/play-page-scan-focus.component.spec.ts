@@ -10,7 +10,7 @@ describe('PlayPageComponent scanner focus', () => {
     const play = {
       load: async () => undefined,
       $worlds: signal([]),
-      $joinedRooms: signal([]),
+      $joinedWorlds: signal([]),
       $roomStatus: signal('idle'),
       $roomName: signal(undefined),
       $hostedWorldId: signal(undefined),

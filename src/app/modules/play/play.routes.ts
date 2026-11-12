@@ -7,4 +7,12 @@ export const routesPlay: Routes = [
     canActivate: [NavigationGuard],
     loadComponent: () => import('./pages/play-page/play-page.component').then((m) => m.PlayPageComponent),
   },
+  {
+    path: 'play/joined/:worldId',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('../character/pages/joined-world-sheet-page/joined-world-sheet-page.component').then(
+        (m) => m.JoinedWorldSheetPageComponent,
+      ),
+  },
 ];

@@ -44,7 +44,7 @@
     "classCatalogue": "Class catalogue"
   },
   "play": {
-    "title": "Play",
+    "title": "Worlds",
     "activeRoom": "Room open: {{ name }}.",
     "backToRoom": "Back to the room",
     "worlds": {
@@ -64,7 +64,17 @@
     },
     "rooms": {
       "empty": "Rooms you join as a player appear here.",
-      "forgetMessage": "Forget \"{{ name }}\"? You can join again with a new invite."
+      "forgetMessage": "Forget \"{{ name }}\"? It leaves this list. You can join again with a new invite."
+    },
+    "badge": { "gm": "GM", "player": "Player" },
+    "joined": {
+      "title": "Joined worlds",
+      "hostedBy": "Host: {{ name }}",
+      "lastSeen": "last seen {{ date }}",
+      "rejoin": "Rejoin",
+      "openSheet": "Open character",
+      "remove": "Remove from the list",
+      "readOnly": "This is your saved copy of the character in \"{{ name }}\". It is read-only until you rejoin."
     }
   },
   "world": {
@@ -593,13 +603,6 @@
       "seatTaken": "You're already in this room on another device.",
       "generic": "Something went wrong.",
       "otherTab": "This app is already hosting a room in another tab. Use that tab, or close it first."
-    },
-    "recent": {
-      "title": "Rooms you joined",
-      "hint": "To rejoin, ask the host for a new invite link.",
-      "hostedBy": "Host: {{ name }}",
-      "lastSeen": "last seen {{ date }}",
-      "forget": "Forget this room"
     },
     "hostOfflineTooltip": "Host offline: some features still work; ask the host for a new invite to reconnect",
     "size": {
