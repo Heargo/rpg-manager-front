@@ -7,7 +7,15 @@
   "common": {
     "cancel": "Cancel",
     "imageWarning": "Prefer images made by human artists. AI text is handy, but AI images are lifeless.",
-    "offlineBanner": "You're offline. Saved data still works; connecting to a room needs a network."
+    "offlineBanner": "You're offline. Saved data still works; connecting to a room needs a network.",
+    "random": "Random",
+    "generateFromSeed": "Generate from this seed"
+  },
+  "ai": {
+    "copyPrompt": "Copy AI prompt",
+    "copyPromptHint": "Paste it in any AI chat, then paste the JSON it answers with in this tab.",
+    "promptCopied": "Prompt copied",
+    "copyFailed": "The prompt could not be copied"
   },
   "nav": {
     "worlds": "Worlds",
@@ -422,11 +430,6 @@
       "tabGenerate": "Generate",
       "jsonHint": "Edit the item as JSON. The form follows as soon as the JSON is valid.",
       "generateHint": "Draws a random item on this world's attributes and fills the form. The same seed gives the same item.",
-      "generate": "Generate",
-      "copyPrompt": "Copy the AI prompt",
-      "copyPromptHint": "Paste it in any AI chat, then paste the JSON it gives back in the JSON tab.",
-      "promptCopied": "Prompt copied",
-      "copyFailed": "The prompt could not be copied",
       "imageFailed": "This image could not be used",
       "save": "Save",
       "saved": "{{ name }} saved",
@@ -854,7 +857,6 @@
       "tabGenerate": "Generate",
       "jsonHint": "Edit the NPC as JSON; it is applied to the form while it is valid.",
       "generateHint": "Draw a random NPC (name, level, attributes, equipment) from a seed; the form is replaced.",
-      "generate": "Generate",
       "save": "Save",
       "equipped": "Equipped",
       "loot": "Loot",

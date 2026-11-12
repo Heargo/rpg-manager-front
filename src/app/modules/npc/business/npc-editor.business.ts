@@ -26,6 +26,8 @@ import {
 import { validateNpc } from '../helpers/npc.rules';
 import { Npc, NpcRole } from '../models/npc';
 
+import { buildNpcPrompt } from '../helpers/npc-ai-prompt';
+
 /** What the NPC editor needs: checks, JSON, form edits and the random Generate. */
 @Injectable({ providedIn: 'root' })
 export class NpcEditorBusiness {
@@ -107,5 +109,9 @@ export class NpcEditorBusiness {
       await this.names.names(),
       classId,
     );
+  }
+
+  prompt(attributeNames: readonly string[], language: 'en' | 'fr'): string {
+    return buildNpcPrompt(attributeNames, language);
   }
 }

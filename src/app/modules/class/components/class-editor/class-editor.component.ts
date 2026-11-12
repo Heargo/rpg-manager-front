@@ -19,6 +19,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
@@ -26,7 +27,9 @@ import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
+import { LanguageBusiness } from '../../../../core/business/language.business';
 import { Skill } from '../../../skill/models/skill';
+import { MessageLevel } from '../../../../core/models/toast-level';
 import { World } from '../../../world/models/world';
 import { ClassEditorBusiness } from '../../business/class-editor.business';
 import { ClassIssue } from '../../helpers/class.rules';
@@ -365,6 +368,19 @@ const never = (): boolean => false;
               [value]="jsonText()"
               (input)="editJson($any($event.target).value)"
             ></textarea>
+            <div>
+              <button
+                pButton
+                type="button"
+                data-action="copy-ai-prompt"
+                icon="pi pi-copy"
+                severity="secondary"
+                [text]="true"
+                [label]="'ai.copyPrompt' | transloco"
+                (click)="copyAiPrompt()"
+              ></button>
+              <small class="hint">{{ 'ai.copyPromptHint' | transloco }}</small>
+            </div>
           </div>
         </p-tabpanel>
       </p-tabpanels>
@@ -388,7 +404,9 @@ const never = (): boolean => false;
   `,
 })
 export class ClassEditorComponent {
+  private readonly messages = inject(MessageService);
   private readonly editor = inject(ClassEditorBusiness);
+  private readonly language = inject(LanguageBusiness);
 
   /** The world whose skills and attributes the class uses. */
   readonly world = input.required<World>();
@@ -604,6 +622,28 @@ export class ClassEditorComponent {
     const result = this.editor.parse(text, this.draft(), this.world());
     this.jsonIssues.set(result.issues);
     if (result.characterClass) this.draft.set(result.characterClass);
+  }
+
+  protected async copyAiPrompt(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(
+        this.editor.prompt(
+          this.world().attributes.map((attribute) => attribute.name),
+          this.language.$language() as 'en' | 'fr',
+        ),
+      );
+      this.messages.add({
+        severity: MessageLevel.Success,
+        summary: this.language.t('ai.promptCopied'),
+        life: 2500,
+      });
+    } catch {
+      this.messages.add({
+        severity: MessageLevel.Error,
+        summary: this.language.t('ai.copyFailed'),
+        life: 2500,
+      });
+    }
   }
 
   protected submit(): void {

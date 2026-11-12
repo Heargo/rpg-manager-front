@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
@@ -18,6 +19,7 @@ import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { ITEM_RARITIES } from '../../../../core/models/item';
+import { MessageLevel } from '../../../../core/models/toast-level';
 import { World } from '../../../world/models/world';
 import { SkillEditorBusiness } from '../../business/skill-editor.business';
 import { SkillIssue } from '../../helpers/skill.rules';
@@ -312,6 +314,19 @@ import {
                 issueText(jsonIssues())
               }}</p-message>
             }
+            <div>
+              <button
+                pButton
+                type="button"
+                data-action="copy-ai-prompt"
+                icon="pi pi-copy"
+                severity="secondary"
+                [text]="true"
+                [label]="'ai.copyPrompt' | transloco"
+                (click)="copyAiPrompt()"
+              ></button>
+              <small class="hint">{{ 'ai.copyPromptHint' | transloco }}</small>
+            </div>
           </div>
         </p-tabpanel>
       </p-tabpanels>
@@ -378,6 +393,7 @@ import {
   `,
 })
 export class SkillEditorComponent {
+  private readonly messages = inject(MessageService);
   private readonly editor = inject(SkillEditorBusiness);
   private readonly language = inject(LanguageBusiness);
 
@@ -528,6 +544,28 @@ export class SkillEditorComponent {
     const result = this.editor.parse(text, this.draft(), this.world());
     this.jsonIssues.set(result.issues);
     if (result.skill) this.draft.set(result.skill);
+  }
+
+  protected async copyAiPrompt(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(
+        this.editor.prompt(
+          this.world().attributes.map((attribute) => attribute.name),
+          this.language.$language() as 'en' | 'fr',
+        ),
+      );
+      this.messages.add({
+        severity: MessageLevel.Success,
+        summary: this.language.t('ai.promptCopied'),
+        life: 2500,
+      });
+    } catch {
+      this.messages.add({
+        severity: MessageLevel.Error,
+        summary: this.language.t('ai.copyFailed'),
+        life: 2500,
+      });
+    }
   }
 
   protected submit(): void {

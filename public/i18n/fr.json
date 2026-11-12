@@ -7,7 +7,15 @@
   "common": {
     "cancel": "Annuler",
     "imageWarning": "Privilégiez les images faites par des artistes humains. Le texte IA est pratique, mais les images IA sont sans vie.",
-    "offlineBanner": "Vous êtes hors ligne. Les données enregistrées restent disponibles ; rejoindre une salle demande un réseau."
+    "offlineBanner": "Vous êtes hors ligne. Les données enregistrées restent disponibles ; rejoindre une salle demande un réseau.",
+    "random": "Aléatoire",
+    "generateFromSeed": "Générer depuis cette graine"
+  },
+  "ai": {
+    "copyPrompt": "Copier le prompt IA",
+    "copyPromptHint": "Collez-le dans n'importe quelle IA, puis collez ici le JSON qu'elle renvoie.",
+    "promptCopied": "Prompt copié",
+    "copyFailed": "Le prompt n'a pas pu être copié"
   },
   "nav": {
     "worlds": "Mondes",
@@ -422,11 +430,6 @@
       "tabGenerate": "Générer",
       "jsonHint": "Modifiez l'objet en JSON. Le formulaire suit dès que le JSON est valide.",
       "generateHint": "Tire un objet au hasard sur les attributs de ce monde et remplit le formulaire. La même graine donne le même objet.",
-      "generate": "Générer",
-      "copyPrompt": "Copier le prompt IA",
-      "copyPromptHint": "Collez-le dans n'importe quelle IA, puis collez le JSON obtenu dans l'onglet JSON.",
-      "promptCopied": "Prompt copié",
-      "copyFailed": "Le prompt n'a pas pu être copié",
       "imageFailed": "Cette image n'a pas pu être utilisée",
       "save": "Enregistrer",
       "saved": "{{ name }} enregistré",
@@ -854,7 +857,6 @@
       "tabGenerate": "Générer",
       "jsonHint": "Modifiez le PNJ en JSON ; il est appliqué au formulaire tant qu'il est valide.",
       "generateHint": "Tire un PNJ au hasard (nom, niveau, attributs, équipement) depuis une graine ; le formulaire est remplacé.",
-      "generate": "Générer",
       "save": "Enregistrer",
       "equipped": "Équipé",
       "loot": "Butin",

@@ -222,6 +222,19 @@ function toDraft(item: Item | undefined): ItemDraft {
                 issueText(jsonIssues())
               }}</p-message>
             }
+            <div>
+              <button
+                pButton
+                type="button"
+                data-action="copy-ai-prompt"
+                icon="pi pi-copy"
+                severity="secondary"
+                [text]="true"
+                [label]="'ai.copyPrompt' | transloco"
+                (click)="copyAiPrompt()"
+              ></button>
+              <small class="hint">{{ 'ai.copyPromptHint' | transloco }}</small>
+            </div>
           </div>
         </p-tabpanel>
 
@@ -246,9 +259,9 @@ function toDraft(item: Item | undefined): ItemDraft {
               <button
                 pButton
                 type="button"
-                data-action="generate"
+                data-action="generate-seed"
                 icon="pi pi-sparkles"
-                [label]="'item.editor.generate' | transloco"
+                [label]="'common.generateFromSeed' | transloco"
                 (click)="generate()"
               ></button>
               <button
@@ -261,21 +274,6 @@ function toDraft(item: Item | undefined): ItemDraft {
                 (click)="reroll()"
               ></button>
             </div>
-            <div>
-              <button
-                pButton
-                type="button"
-                data-action="copy-prompt"
-                icon="pi pi-copy"
-                severity="secondary"
-                [text]="true"
-                [label]="'item.editor.copyPrompt' | transloco"
-                (click)="copyPrompt()"
-              ></button>
-              <small class="hint">{{
-                'item.editor.copyPromptHint' | transloco
-              }}</small>
-            </div>
           </div>
         </p-tabpanel>
       </p-tabpanels>
@@ -285,6 +283,15 @@ function toDraft(item: Item | undefined): ItemDraft {
       <p-message severity="warn">{{ issueText(issues()) }}</p-message>
     }
     <div class="actions">
+      <button
+        pButton
+        type="button"
+        data-action="random"
+        icon="pi pi-sparkles"
+        severity="secondary"
+        [label]="'common.random' | transloco"
+        (click)="reroll()"
+      ></button>
       <button
         pButton
         type="button"
@@ -343,6 +350,7 @@ function toDraft(item: Item | undefined): ItemDraft {
     .actions {
       display: flex;
       justify-content: flex-end;
+      gap: 0.5rem;
     }
   `,
 })
@@ -447,14 +455,25 @@ export class ItemEditorComponent {
     return this.generate();
   }
 
-  protected async copyPrompt(): Promise<void> {
+  protected async copyAiPrompt(): Promise<void> {
     try {
       await navigator.clipboard.writeText(
-        this.editor.prompt(this.attributeNames()),
+        this.editor.prompt(
+          this.attributeNames(),
+          this.language.$language() as 'en' | 'fr',
+        ),
       );
-      this.toast(MessageLevel.Success, 'item.editor.promptCopied');
+      this.messages.add({
+        severity: MessageLevel.Success,
+        summary: this.language.t('ai.promptCopied'),
+        life: 2500,
+      });
     } catch {
-      this.toast(MessageLevel.Error, 'item.editor.copyFailed');
+      this.messages.add({
+        severity: MessageLevel.Error,
+        summary: this.language.t('ai.copyFailed'),
+        life: 2500,
+      });
     }
   }
 

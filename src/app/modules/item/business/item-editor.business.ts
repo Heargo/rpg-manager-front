@@ -27,8 +27,8 @@ export class ItemEditorBusiness {
     return parseItemJson(text, attributeNames);
   }
 
-  prompt(attributeNames: readonly string[]): string {
-    return buildItemPrompt(attributeNames);
+  prompt(attributeNames: readonly string[], language: 'en' | 'fr'): string {
+    return buildItemPrompt(attributeNames, language);
   }
 
   newSeed(): string {

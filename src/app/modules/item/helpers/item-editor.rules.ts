@@ -87,7 +87,8 @@ export function parseItemJson(
   if (raw['slot'] !== undefined && !SLOTS.includes(raw['slot'] as string)) {
     bad('slot');
   }
-  if (!Number.isInteger(raw['price']) || (raw['price'] as number) < 0) bad('price');
+  if (!Number.isInteger(raw['price']) || (raw['price'] as number) < 0)
+    bad('price');
   const modifiers = raw['modifiers'] ?? [];
   if (!Array.isArray(modifiers) || !modifiers.every(isModifier))
     bad('modifiers');
@@ -117,10 +118,26 @@ function isModifier(value: unknown): value is ItemModifier {
 }
 
 /** A prompt to paste in any AI chat to get an item as JSON for this world. */
-export function buildItemPrompt(attributeNames: readonly string[]): string {
+export function buildItemPrompt(
+  attributeNames: readonly string[],
+  language: 'en' | 'fr',
+): string {
+  const shape =
+    '{ "name": string, "description": string, "rarity": string, "type": string, "slot": string, "price": number, "modifiers": [{ "attribute": string, "value": number }] }';
+  if (language === 'fr') {
+    return [
+      'Crée un objet pour un jeu de rôle sur table. Réponds uniquement avec du JSON, sans autre texte ni bloc de code, dans cette forme :',
+      shape,
+      `- rarity : parmi ${ITEM_RARITIES.join(', ')}.`,
+      `- type : parmi ${ITEM_TYPES.join(', ')}.`,
+      `- slot : parmi ${EQUIPMENT_SLOTS.join(', ')} quand le type est equipment, sinon "none".`,
+      '- price : un entier de pièces de cuivre (100 cuivre = 1 argent, 100 argent = 1 or), 0 ou plus.',
+      `- modifiers : bonus ou malus (entiers positifs ou négatifs) uniquement sur ces attributs : ${attributeNames.join(', ')}.`,
+    ].join('\n');
+  }
   return [
-    'Create one item for a tabletop role-playing game. Answer with JSON only, no other text, in this shape:',
-    '{ "name": string, "description": string, "rarity": string, "type": string, "slot": string, "price": number, "modifiers": [{ "attribute": string, "value": number }] }',
+    'Create one item for a tabletop role-playing game. Answer with JSON only, no other text and no code block, in this shape:',
+    shape,
     `- rarity: one of ${ITEM_RARITIES.join(', ')}.`,
     `- type: one of ${ITEM_TYPES.join(', ')}.`,
     `- slot: one of ${EQUIPMENT_SLOTS.join(', ')} when the type is equipment, otherwise "none".`,

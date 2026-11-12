@@ -12,6 +12,8 @@ import {
 } from '../helpers/skill.rules';
 import { SkillDraft } from '../models/skill';
 
+import { buildSkillPrompt } from '../helpers/skill-ai-prompt';
+
 /** What the skill editor needs: checks, JSON and the live preview of an amount formula. */
 @Injectable({ providedIn: 'root' })
 export class SkillEditorBusiness {
@@ -37,5 +39,9 @@ export class SkillEditorBusiness {
 
   private names(world: World): string[] {
     return world.attributes.map((attribute) => attribute.name);
+  }
+
+  prompt(attributeNames: readonly string[], language: 'en' | 'fr'): string {
+    return buildSkillPrompt(attributeNames, language);
   }
 }

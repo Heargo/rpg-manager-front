@@ -9,7 +9,7 @@ import { ItemEditorComponent } from './item-editor.component';
 /**
  * Hooks the template must expose (all tab panels rendered, hidden or not): form fields `[data-field]` =
  * `name`, `description`, `price` (the coin input: gold, silver and copper fields inside), `json` (textarea), `seed` (input); buttons `[data-action]` =
- * `generate`, `reroll`, `copy-prompt`, `save`; `[data-field="json-error"]` shown only while the JSON is invalid.
+ * `generate-seed`, `random`, `reroll`, `copy-ai-prompt`, `save`; `[data-field="json-error"]` shown only while the JSON is invalid.
  */
 describe('ItemEditorComponent', () => {
   const world: World = {
@@ -137,7 +137,7 @@ describe('ItemEditorComponent', () => {
   it('generates an item from the visible seed on the world attributes', async () => {
     const { field, type, click } = await setup();
     await type('seed', 'fixed-seed');
-    await click('generate');
+    await click('generate-seed');
     const first = field('name').value;
     expect(first).not.toBe('');
     const json = JSON.parse(field('json').value);
@@ -146,14 +146,14 @@ describe('ItemEditorComponent', () => {
     ).toBe(true);
 
     await type('name', 'changed');
-    await click('generate');
+    await click('generate-seed');
     expect(field('name').value).toBe(first);
   });
 
   it('rerolls to a new visible seed and another item', async () => {
     const { field, type, click } = await setup();
     await type('seed', 'fixed-seed');
-    await click('generate');
+    await click('generate-seed');
     const first = field('name').value;
 
     await click('reroll');
@@ -166,7 +166,7 @@ describe('ItemEditorComponent', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
     const { click } = await setup();
-    await click('copy-prompt');
+    await click('copy-ai-prompt');
     expect(writeText).toHaveBeenCalledTimes(1);
     expect(writeText.mock.calls[0][0]).toContain('Wit');
     expect(writeText.mock.calls[0][0]).toContain('Grit');

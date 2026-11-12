@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
@@ -23,6 +24,7 @@ import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
 import { ImageWarningComponent } from '../../../../core/components/image-warning/image-warning.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
+import { MessageLevel } from '../../../../core/models/toast-level';
 import { World } from '../../../world/models/world';
 import { NpcEditorBusiness } from '../../business/npc-editor.business';
 import { NpcEditorIssue } from '../../helpers/npc-editor.rules';
@@ -377,6 +379,19 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 issueText(jsonIssues())
               }}</p-message>
             }
+            <div>
+              <button
+                pButton
+                type="button"
+                data-action="copy-ai-prompt"
+                icon="pi pi-copy"
+                severity="secondary"
+                [text]="true"
+                [label]="'ai.copyPrompt' | transloco"
+                (click)="copyAiPrompt()"
+              ></button>
+              <small class="hint">{{ 'ai.copyPromptHint' | transloco }}</small>
+            </div>
           </div>
         </p-tabpanel>
 
@@ -417,9 +432,9 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
               <button
                 pButton
                 type="button"
-                data-action="generate"
+                data-action="generate-seed"
                 icon="pi pi-sparkles"
-                [label]="'npc.editor.generate' | transloco"
+                [label]="'common.generateFromSeed' | transloco"
                 (click)="generate()"
               ></button>
               <button
@@ -441,6 +456,15 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
       <p-message severity="warn">{{ issueText(issues()) }}</p-message>
     }
     <div class="actions">
+      <button
+        pButton
+        type="button"
+        data-action="random"
+        icon="pi pi-sparkles"
+        severity="secondary"
+        [label]="'common.random' | transloco"
+        (click)="reroll()"
+      ></button>
       <button
         pButton
         type="button"
@@ -467,7 +491,10 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
       justify-content: center;
       overflow: hidden;
     }
-    .preview app-stored-image { width: 100%; height: 100%; }
+    .preview app-stored-image {
+      width: 100%;
+      height: 100%;
+    }
     .form {
       display: flex;
       flex-direction: column;
@@ -515,6 +542,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
     .actions {
       display: flex;
       justify-content: flex-end;
+      gap: 0.5rem;
     }
   `,
 })
@@ -522,6 +550,7 @@ export class NpcEditorComponent {
   private readonly editor = inject(NpcEditorBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly images = inject(ImageBusiness);
+  private readonly messages = inject(MessageService);
 
   /** The world whose attributes, level rules and item catalogue the NPC is built on. */
   readonly world = input.required<World>();
@@ -545,6 +574,9 @@ export class NpcEditorComponent {
   protected readonly seed = signal(this.editor.newSeed());
   protected readonly generateClassId = signal<string | null>(null);
 
+  private readonly attributeNames = computed(() =>
+    this.world().attributes.map((attribute) => attribute.name),
+  );
   protected readonly issues = computed(() =>
     this.editor.validate(this.draft()),
   );
@@ -689,6 +721,28 @@ export class NpcEditorComponent {
   protected reroll(): Promise<void> {
     this.seed.set(this.editor.newSeed());
     return this.generate();
+  }
+
+  protected async copyAiPrompt(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(
+        this.editor.prompt(
+          this.attributeNames(),
+          this.language.$language() as 'en' | 'fr',
+        ),
+      );
+      this.messages.add({
+        severity: MessageLevel.Success,
+        summary: this.language.t('ai.promptCopied'),
+        life: 2500,
+      });
+    } catch {
+      this.messages.add({
+        severity: MessageLevel.Error,
+        summary: this.language.t('ai.copyFailed'),
+        life: 2500,
+      });
+    }
   }
 
   protected submit(): void {

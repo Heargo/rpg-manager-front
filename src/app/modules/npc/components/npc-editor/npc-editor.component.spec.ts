@@ -15,7 +15,7 @@ import { NpcEditorComponent } from './npc-editor.component';
  * `json` (textarea), `seed`, `json-error` (only while invalid). `p-multiselect[data-field="roles"]` and
  * `p-select[data-field="add-item"]` (ngModelChange with an item id adds a copy to the inventory). Per inventory
  * entry `[data-field="inventory-entry"]`: `[data-action="toggle-equipped"]`, `[data-action="toggle-loot"]` (enemy only),
- * `[data-action="remove-item"]`. Buttons `[data-action]`: `generate`, `save`. Class and skills (new hooks):
+ * `[data-action="remove-item"]`. Buttons `[data-action]`: `generate-seed` (from the visible seed), `random` (fresh seed), `save`. Class and skills (new hooks):
  * `p-select[data-field="class"]` (ngModelChange with a class id, or null to clear), `[data-action="learn-from-class"]`,
  * `p-select[data-field="add-skill"]` (ngModelChange with a skill id adds it at rank 1), per skill `[data-field="skill-entry"]`
  * holding `[data-field="skill-rank"]` (p-inputnumber) and `[data-action="remove-skill"]`, and in the Generate tab
@@ -184,7 +184,7 @@ describe('NpcEditorComponent', () => {
     const { field, type, click, emit, saved } = await setup();
     await type('seed', 'fixed-seed');
     await emit('p-select[data-field="generate-class"]', 'brute');
-    await click('[data-action="generate"]');
+    await click('[data-action="generate-seed"]');
     const json = JSON.parse(field('json').value);
     expect(json.classId).toBe('brute');
     expect(json.skills.every((s: { skillId: string }) => s.skillId === 'free')).toBe(true);
@@ -312,7 +312,7 @@ describe('NpcEditorComponent', () => {
   it('generates an NPC from the visible seed and fills the form', async () => {
     const { field, type, click, saved } = await setup();
     await type('seed', 'fixed-seed');
-    await click('[data-action="generate"]');
+    await click('[data-action="generate-seed"]');
     const first = field('name').value;
     expect(first).not.toBe('');
     const json = JSON.parse(field('json').value);
@@ -322,7 +322,7 @@ describe('NpcEditorComponent', () => {
     expect(json.xp).toBe((json.level - 1) * 100);
 
     await type('name', 'changed');
-    await click('[data-action="generate"]');
+    await click('[data-action="generate-seed"]');
     expect(field('name').value).toBe(first);
 
     await click('[data-action="save"]');

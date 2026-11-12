@@ -10,6 +10,8 @@ import {
 } from '../helpers/class.rules';
 import { ClassDraft } from '../models/class';
 
+import { buildClassPrompt } from '../helpers/class-ai-prompt';
+
 /** What the class editor needs: checks and JSON. */
 @Injectable({ providedIn: 'root' })
 export class ClassEditorBusiness {
@@ -31,5 +33,9 @@ export class ClassEditorBusiness {
 
   private names(world: World): string[] {
     return world.attributes.map((attribute) => attribute.name);
+  }
+
+  prompt(attributeNames: readonly string[], language: 'en' | 'fr'): string {
+    return buildClassPrompt(attributeNames, language);
   }
 }
