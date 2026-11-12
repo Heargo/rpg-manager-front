@@ -382,3 +382,10 @@ p-tab p-badge {
     flex: 1;
   }
 }
+
+// Icon-only tabs: compact padding so the four fit at 320px without scrolling.
+p-tab {
+  padding-inline: 0.75rem;
+  flex: 1 1 0;
+  justify-content: center;
+}

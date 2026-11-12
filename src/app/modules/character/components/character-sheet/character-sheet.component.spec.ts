@@ -253,9 +253,7 @@ describe('CharacterSheetComponent', () => {
 
     async function openEquipment() {
       const rendered = await render({ canPlay: false, gameMaster: false });
-      const tab = Array.from(rendered.el.querySelectorAll('p-tab')).find((t) =>
-        t.textContent?.includes('Equipment'),
-      ) as HTMLElement;
+      const tab = rendered.el.querySelector('p-tab[aria-label="Equipment"]') as HTMLElement;
       tab.click();
       rendered.fixture.detectChanges();
       await rendered.fixture.whenStable();

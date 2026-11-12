@@ -57,7 +57,7 @@ async function render(inputs: { gameMaster: boolean; character?: Character }) {
   fixture.componentInstance.act.subscribe((action) => actions.push(action));
   await fixture.whenStable();
   const el = fixture.nativeElement as HTMLElement;
-  const tab = Array.from(el.querySelectorAll('p-tab')).find((t) => t.textContent?.includes('Skills')) as HTMLElement;
+  const tab = el.querySelector('p-tab[aria-label="Skills"]') as HTMLElement;
   tab.click();
   fixture.detectChanges();
   await fixture.whenStable();

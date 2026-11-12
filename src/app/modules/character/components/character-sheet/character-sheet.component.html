@@ -9,21 +9,41 @@
     }
     <p-tabs value="stats">
       <p-tablist>
-        <p-tab value="stats">
-          {{ "character.sheet.tabs.stats" | transloco }}
+        <p-tab
+          value="stats"
+          [attr.aria-label]="'character.sheet.tabs.stats' | transloco"
+          [pTooltip]="'character.sheet.tabs.stats' | transloco"
+          tooltipPosition="top"
+        >
+          <i class="pi pi-chart-bar" aria-hidden="true"></i>
           @if (c.statPoints > 0) {
             <p-badge [value]="c.statPoints" severity="info" />
           }
         </p-tab>
-        <p-tab value="equipment">{{
-          "character.sheet.tabs.equipment" | transloco
-        }}</p-tab>
-        <p-tab value="inventory">
-          {{ "character.sheet.tabs.inventory" | transloco }}
+        <p-tab
+          value="equipment"
+          [attr.aria-label]="'character.sheet.tabs.equipment' | transloco"
+          [pTooltip]="'character.sheet.tabs.equipment' | transloco"
+          tooltipPosition="top"
+        >
+          <i class="pi pi-shield" aria-hidden="true"></i>
+        </p-tab>
+        <p-tab
+          value="inventory"
+          [attr.aria-label]="'character.sheet.tabs.inventory' | transloco"
+          [pTooltip]="'character.sheet.tabs.inventory' | transloco"
+          tooltipPosition="top"
+        >
+          <i class="pi pi-briefcase" aria-hidden="true"></i>
           <p-badge [value]="c.inventory.length" severity="secondary" />
         </p-tab>
-        <p-tab value="skills">
-          {{ "character.sheet.tabs.skills" | transloco }}
+        <p-tab
+          value="skills"
+          [attr.aria-label]="'character.sheet.tabs.skills' | transloco"
+          [pTooltip]="'character.sheet.tabs.skills' | transloco"
+          tooltipPosition="top"
+        >
+          <i class="pi pi-bolt" aria-hidden="true"></i>
           @if (c.skillPoints > 0) {
             <p-badge [value]="c.skillPoints" severity="info" />
           }
