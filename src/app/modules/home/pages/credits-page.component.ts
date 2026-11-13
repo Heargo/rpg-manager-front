@@ -71,6 +71,14 @@ export const CREDIT_LIBRARIES = [
           >{{ 'credits.sampleHeroSuffix' | transloco }}
         </p>
       </div>
+      <div class="card" data-test="sprites">
+        <p>
+          {{ 'credits.spritesPrefix' | transloco }}
+          <a [href]="ccByUrl" target="_blank" rel="noopener noreferrer"
+            >CC BY 4.0</a
+          >{{ 'credits.spritesSuffix' | transloco }}
+        </p>
+      </div>
       <h2>{{ 'credits.aiTitle' | transloco }}</h2>
       <div class="card" data-test="ai">
         <p>{{ 'credits.ai' | transloco }}</p>
@@ -107,4 +115,5 @@ export const CREDIT_LIBRARIES = [
 export class CreditsPageComponent {
   protected readonly libraries = CREDIT_LIBRARIES;
   protected readonly yuumeiUrl = 'https://www.yuumeiart.com/';
+  protected readonly ccByUrl = 'https://creativecommons.org/licenses/by/4.0/';
 }

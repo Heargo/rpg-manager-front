@@ -800,7 +800,9 @@
     "aiContact": "Me contacter",
     "illustrationsTitle": "Illustrations",
     "sampleHeroPrefix": "Portrait du héros d'exemple : illustration de",
-    "sampleHeroSuffix": "."
+    "sampleHeroSuffix": ".",
+    "spritesPrefix": "Sprites d’objets du coloriseur : « Fantasy items pack » de Florian Sciberras, sous licence",
+    "spritesSuffix": ". L’application les recolore ; les originaux sont en niveaux de gris."
   },
   "contact": {
     "title": "Contact",
@@ -1366,6 +1368,13 @@
       "name": "Nom du préréglage",
       "save": "Enregistrer comme préréglage",
       "delete": "Supprimer le préréglage"
+    },
+    "library": {
+      "open": "Bibliothèque de sprites",
+      "title": "Bibliothèque de sprites",
+      "search": "Chercher un sprite",
+      "empty": "Aucun sprite ne correspond.",
+      "credit": "Fantasy items pack de Florian Sciberras (CC BY 4.0)."
     }
   },
   "combat": {

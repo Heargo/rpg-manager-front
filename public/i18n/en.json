@@ -800,7 +800,9 @@
     "aiContact": "Get in touch",
     "illustrationsTitle": "Illustrations",
     "sampleHeroPrefix": "Sample hero portrait: art by",
-    "sampleHeroSuffix": "."
+    "sampleHeroSuffix": ".",
+    "spritesPrefix": "Item sprites of the sprite colorizer: \"Fantasy items pack\" by Florian Sciberras, licensed under",
+    "spritesSuffix": ". The app recolours them; the originals are grayscale."
   },
   "contact": {
     "title": "Contact",
@@ -1366,6 +1368,13 @@
       "name": "Preset name",
       "save": "Save as preset",
       "delete": "Delete preset"
+    },
+    "library": {
+      "open": "Sprite library",
+      "title": "Sprite library",
+      "search": "Search a sprite",
+      "empty": "No sprite matches.",
+      "credit": "Fantasy items pack by Florian Sciberras (CC BY 4.0)."
     }
   },
   "combat": {

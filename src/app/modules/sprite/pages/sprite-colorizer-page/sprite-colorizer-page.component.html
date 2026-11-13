@@ -26,10 +26,17 @@
         (onClick)="imageInput.click()"
       />
       <p-button
+        icon="pi pi-th-large"
+        [label]="'sprite.library.open' | transloco"
+        [ariaLabel]="'sprite.library.open' | transloco"
+        severity="secondary"
+        (onClick)="openLibrary()"
+      />
+      <p-button
         icon="pi pi-sparkles"
         [label]="'sprite.demo' | transloco"
         severity="secondary"
-        (onClick)="business.loadDemo()"
+        (onClick)="loadDemo()"
       />
       <p-button
         icon="pi pi-undo"
@@ -600,3 +607,44 @@
     </aside>
   </div>
 </div>
+<p-dialog
+  [header]="'sprite.library.title' | transloco"
+  [visible]="libraryOpen()"
+  (visibleChange)="libraryOpen.set($event)"
+  [modal]="true"
+  [dismissableMask]="true"
+  [style]="{ width: 'min(48rem, calc(100vw - 2rem))' }"
+>
+  @if (libraryOpen()) {
+    <div class="library">
+      <input
+        pInputText
+        type="search"
+        data-test="library-search"
+        class="library-search"
+        [placeholder]="'sprite.library.search' | transloco"
+        [attr.aria-label]="'sprite.library.search' | transloco"
+        [value]="libraryQuery()"
+        (input)="libraryQuery.set($any($event.target).value)"
+      />
+      <ul class="library-grid">
+        @for (sprite of librarySprites(); track sprite.id) {
+          <li>
+            <button
+              type="button"
+              class="library-sprite"
+              data-test="library-sprite"
+              (click)="pickSprite(sprite.id)"
+            >
+              <img [src]="sprite.url" alt="" loading="lazy" width="64" height="64" />
+              <span>{{ sprite.label }}</span>
+            </button>
+          </li>
+        } @empty {
+          <li class="library-empty">{{ "sprite.library.empty" | transloco }}</li>
+        }
+      </ul>
+      <p class="library-credit">{{ "sprite.library.credit" | transloco }}</p>
+    </div>
+  }
+</p-dialog>

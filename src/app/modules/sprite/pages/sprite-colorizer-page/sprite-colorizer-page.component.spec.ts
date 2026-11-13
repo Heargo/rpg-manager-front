@@ -163,4 +163,33 @@ describe('SpriteColorizerPageComponent', () => {
       expect(button('Apply to layer')).not.toBeNull();
     });
   });
+
+  describe('sprite library', () => {
+    const tiles = () => [...document.body.querySelectorAll<HTMLElement>('[data-test="library-sprite"]')];
+
+    it('opens the library from its button and lists the bundled sprites', async () => {
+      const { fixture, button } = await render();
+      expect(tiles()).toHaveLength(0);
+      button('Sprite library')!.click();
+      await fixture.whenStable();
+      expect(tiles()).toHaveLength(101);
+      expect(tiles()[0].querySelector('img')!.getAttribute('src')).toMatch(/^assets\/sprites\/.+\.png$/);
+    });
+
+    it('filters by name and loads the picked sprite', async () => {
+      const { fixture, button, business } = await render();
+      const load = vi.spyOn(business, 'loadLibrary').mockResolvedValue();
+      button('Sprite library')!.click();
+      await fixture.whenStable();
+      const search = document.body.querySelector<HTMLInputElement>('[data-test="library-search"]')!;
+      search.value = 'war axe';
+      search.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+      expect(tiles().map((t) => t.textContent!.trim())).toEqual(['War axe']);
+      tiles()[0].click();
+      await fixture.whenStable();
+      expect(load).toHaveBeenCalledWith('waraxe');
+      expect(tiles()).toHaveLength(0);
+    });
+  });
 });

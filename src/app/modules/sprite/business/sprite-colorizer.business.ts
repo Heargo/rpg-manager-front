@@ -23,7 +23,7 @@ import {
 import { Point, rasterizePolygon } from '../helpers/polygon';
 import { defaultMinSize, detectShapes, DetectedShape } from '../helpers/shape-detection';
 import { PRESETS } from '../helpers/presets';
-import { demoSprite } from '../helpers/demo-sprite';
+import { DEMO_SPRITE_ID, spriteUrl } from '../helpers/sprite-library';
 import {
   GradientStop,
   SelectionMode,
@@ -167,8 +167,13 @@ export class SpriteColorizerBusiness {
     );
   }
 
-  loadDemo(): void {
-    this.loadImage(demoSprite(), 'axe');
+  /** Loads a bundled sprite (`SPRITE_LIBRARY`) by id. */
+  async loadLibrary(id: string): Promise<void> {
+    this.loadImage(await this.files.fetchImage(spriteUrl(id)), id);
+  }
+
+  loadDemo(): Promise<void> {
+    return this.loadLibrary(DEMO_SPRITE_ID);
   }
 
   // Tools

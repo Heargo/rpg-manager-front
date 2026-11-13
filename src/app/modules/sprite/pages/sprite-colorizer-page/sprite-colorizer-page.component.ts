@@ -14,6 +14,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { ColorPickerModule } from '@openng/optimus-ui/colorpicker';
+import { DialogModule } from '@openng/optimus-ui/dialog';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { SelectButtonModule } from '@openng/optimus-ui/selectbutton';
@@ -24,6 +25,7 @@ import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { SpriteColorizerBusiness } from '../../business/sprite-colorizer.business';
 import { brushCursor } from '../../helpers/brush-cursor';
+import { searchSprites, spriteUrl } from '../../helpers/sprite-library';
 import { gradientColor } from '../../helpers/gradient-mapping';
 import { isBuiltInPreset } from '../../helpers/presets';
 import { shapeColor, shapeCss } from '../../helpers/shape-colors';
@@ -59,6 +61,7 @@ const toHex = (rgb: number[]) =>
     TranslocoPipe,
     ButtonModule,
     ColorPickerModule,
+    DialogModule,
     InputNumberModule,
     InputTextModule,
     SelectButtonModule,
@@ -93,6 +96,16 @@ export class SpriteColorizerPageComponent {
   protected readonly editingId = signal<string | null>(null);
   protected readonly presetName = signal('');
   protected readonly pointer = signal<{ x: number; y: number } | null>(null);
+  protected readonly libraryOpen = signal(false);
+  protected readonly libraryQuery = signal('');
+  protected readonly librarySprites = computed(() => {
+    const lang = this.language.$language() ?? 'fr';
+    return searchSprites(this.libraryQuery(), lang).map((sprite) => ({
+      id: sprite.id,
+      label: lang === 'fr' ? sprite.fr : sprite.en,
+      url: spriteUrl(sprite.id),
+    }));
+  });
   /** The pixel under a mouse or pen, for the brush outline. */
   private readonly hovered = signal<{ x: number; y: number } | null>(null);
   protected readonly brushCursor = computed(() =>
@@ -467,6 +480,28 @@ export class SpriteColorizerPageComponent {
     if (!file) return;
     try {
       await this.business.loadFile(file);
+    } catch {
+      this.toast(MessageLevel.Error, 'sprite.loadFailed');
+    }
+  }
+
+  protected openLibrary(): void {
+    this.libraryQuery.set('');
+    this.libraryOpen.set(true);
+  }
+
+  protected async pickSprite(id: string): Promise<void> {
+    this.libraryOpen.set(false);
+    await this.loadSprite(() => this.business.loadLibrary(id));
+  }
+
+  protected loadDemo(): Promise<void> {
+    return this.loadSprite(() => this.business.loadDemo());
+  }
+
+  private async loadSprite(load: () => Promise<void>): Promise<void> {
+    try {
+      await load();
     } catch {
       this.toast(MessageLevel.Error, 'sprite.loadFailed');
     }

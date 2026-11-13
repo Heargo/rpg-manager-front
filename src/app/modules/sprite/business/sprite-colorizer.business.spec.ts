@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { gray } from '../helpers/sprite-test-images';
+import { SpriteFileService } from '../services/sprite-file.service';
 import { SpritePresetStorageService } from '../services/sprite-preset-storage.service';
 import { SpriteColorizerBusiness } from './sprite-colorizer.business';
 
@@ -352,6 +353,34 @@ describe('SpriteColorizerBusiness', () => {
       business.undo();
       expect(business.$document()!.layers).toHaveLength(1);
       expect(business.$canUndo()).toBe(false);
+    });
+  });
+
+  describe('sprite library', () => {
+    function setupFiles() {
+      const files = { fetchImage: vi.fn(async () => gray(2, 1, [50, 60])) };
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
+          { provide: SpriteFileService, useValue: files },
+        ],
+      });
+      return { business: TestBed.inject(SpriteColorizerBusiness), files };
+    }
+
+    it('loads a bundled sprite by id, named after it', async () => {
+      const { business, files } = setupFiles();
+      await business.loadLibrary('sword');
+      expect(files.fetchImage).toHaveBeenCalledWith('assets/sprites/sword.png');
+      expect(business.$document()!.width).toBe(2);
+      expect(business.$fileName()).toBe('sword');
+    });
+
+    it('loads the axe as the demo sprite', async () => {
+      const { business, files } = setupFiles();
+      await business.loadDemo();
+      expect(files.fetchImage).toHaveBeenCalledWith('assets/sprites/axe.png');
+      expect(business.$fileName()).toBe('axe');
     });
   });
 });
