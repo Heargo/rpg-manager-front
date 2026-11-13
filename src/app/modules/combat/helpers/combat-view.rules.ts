@@ -9,7 +9,8 @@ import {
   Encounter,
 } from '../models/combat';
 
-type WorldRules = Pick<World, 'npcs' | 'characters' | 'npcVisibility'>;
+type WorldRules = Pick<World, 'npcs' | 'characters' | 'npcVisibility'> &
+  Partial<Pick<World, 'combat'>>;
 
 /** The roles whose visibility ticks apply to an NPC combatant whose catalogue entry is gone. */
 const ROLE_OF_SIDE: Record<string, NpcRole> = { enemy: 'enemy', ally: 'story' };
@@ -27,6 +28,7 @@ export function projectEncounter(
   full = false,
 ): CombatView {
   return {
+    initiativeMode: world.combat?.initiative.mode,
     round: encounter.round,
     activeId: encounter.combatants[encounter.turn]?.id,
     combatants: encounter.combatants.map((c) =>
@@ -50,6 +52,7 @@ function projectCombatant(
     id: c.id,
     name: c.name,
     side: c.side,
+    characterId: c.characterId,
     statuses: c.statuses,
     down: c.down,
     initiative: c.initiative,

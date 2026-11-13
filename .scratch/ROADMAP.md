@@ -115,6 +115,7 @@ Tickets in `npcs-skills-combat/` (N). Status: validated (2026-11-08), every tick
 | 46 | **N12** Combat rules (pure) and world combat settings | Pure rules first. | N05, N15 |
 | 47 | **N13** Combat protocol and host persistence | | N12, N02, N10 |
 | 48 | **N14** Combat UI and sandbox tool (list mode) | | N13, N07 |
+| 48b | **N20** Combat protocol follow-ups | N13 review notes: player view leaks, typed initiative in rolled mode, error keys. | N13 |
 | 49 | **N16** Combat grid | Optional per world; after list mode works. | N14 |
 
 ## How each ticket is developed

@@ -1,4 +1,8 @@
-import { InventoryItem, SheetSkill } from '../../world/models/world';
+import {
+  InitiativeMode,
+  InventoryItem,
+  SheetSkill,
+} from '../../world/models/world';
 
 export type CombatSide = 'party' | 'ally' | 'enemy';
 
@@ -55,6 +59,8 @@ export interface PendingResult {
   casterId: string;
   targetId: string;
   skillId: string;
+  /** The skill's name when it was used, so every device can name it. */
+  skillName?: string;
   rolls: number[];
   total: number;
   success: boolean;
@@ -68,6 +74,7 @@ export type CombatLogEntry =
       round: number;
       casterId: string;
       skillId: string;
+      skillName?: string;
       rolls: number[];
       total: number;
       success: boolean;
@@ -98,6 +105,8 @@ export interface CombatantView {
   id: string;
   name: string;
   side: CombatSide;
+  /** The character this combatant plays (a player finds their own combatant with it). */
+  characterId?: string;
   portraitId?: string;
   statuses: string[];
   down: boolean;
@@ -114,6 +123,8 @@ export interface CombatantView {
 
 /** The `combat/state` topic: the encounter as one viewer sees it. */
 export interface CombatView {
+  /** How the world sets initiative, so a player knows whether to type theirs. */
+  initiativeMode?: InitiativeMode;
   round: number;
   activeId?: string;
   combatants: CombatantView[];

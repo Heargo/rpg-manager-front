@@ -47,7 +47,8 @@
     "npcEditor": "NPC editor",
     "skillCatalogue": "Skill catalogue",
     "classCatalogue": "Class catalogue",
-    "spriteColorizer": "Sprite colorizer"
+    "spriteColorizer": "Sprite colorizer",
+    "combat": "Combat"
   },
   "play": {
     "title": "Worlds",
@@ -756,6 +757,14 @@
       "title": "Character sheet",
       "intro": "A sample character on the default attributes, with the default items in the bag. Everything follows the game rules and stays on this page.",
       "reset": "Start over"
+    },
+    "combat": {
+      "title": "Combat",
+      "intro": "The sample character against a catalogue enemy, with the game master's panel and the player's view on one screen. Nothing is saved.",
+      "start": "Fight the cave goblin",
+      "gm": "Game master",
+      "player": "Player",
+      "noEncounter": "Start an encounter to see the player's view."
     }
   },
   "home": {
@@ -1353,6 +1362,7 @@
     }
   },
   "combat": {
+    "title": "Combat",
     "errors": {
       "invalid": "This request isn't valid.",
       "gameMasterOnly": "Only the game master can do that.",
@@ -1367,6 +1377,77 @@
       "skill-not-known": "This combatant doesn't know that skill.",
       "skill-not-active": "Only active skills can be used in combat.",
       "target-not-found": "This target isn't in the encounter."
+    },
+    "order": "Turn order",
+    "round": "Round {{round}}",
+    "yourTurn": "Your turn",
+    "endTurn": "End my turn",
+    "nextTurn": "Next turn",
+    "undo": "Undo",
+    "down": "Down",
+    "drag": "Drag to reorder",
+    "details": "Details",
+    "roll": "{{caster}} rolled {{rolls}} (total {{total}}) for {{skill}}",
+    "waitingGm": "Waiting for the GM…",
+    "start": {
+      "title": "Start an encounter",
+      "characters": "Characters",
+      "npcs": "NPCs",
+      "pick": "Add",
+      "picked": "In",
+      "fewer": "One fewer",
+      "more": "One more",
+      "action": "Start the encounter",
+      "noCharacters": "No character in this world yet.",
+      "noNpcs": "No NPC in the catalogue yet."
+    },
+    "initiative": {
+      "label": "Initiative",
+      "yours": "Your initiative",
+      "set": "Set"
+    },
+    "skill": {
+      "damage": "{{amount}} damage",
+      "heal": "{{amount}} healing",
+      "modify": "{{amount}} {{attribute}} for {{duration}} turns",
+      "cooldown": "cooldown {{turns}}"
+    },
+    "actions": {
+      "use": "Use",
+      "skills": "Skills",
+      "useSkill": "Use",
+      "items": "Items",
+      "useItem": "Use",
+      "pickTargets": "Pick the targets of {{skill}}",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "pending": {
+      "title": "Results to apply",
+      "line": "{{caster}}: {{skill}} on {{target}}",
+      "rolled": "rolled {{rolls}} = {{total}}",
+      "failed": "failed",
+      "apply": "Apply",
+      "edit": "Edit",
+      "dismiss": "Dismiss"
+    },
+    "manual": {
+      "damage": "Damage",
+      "heal": "Heal"
+    },
+    "status": {
+      "placeholder": "Status (Stunned…)",
+      "add": "Add status",
+      "remove": "Remove status"
+    },
+    "end": {
+      "action": "End",
+      "title": "End the encounter",
+      "xp": "Experience per character",
+      "money": "Money from the defeated enemies: {{amount}}",
+      "loot": "Loot",
+      "confirm": "End the encounter",
+      "hint": "The money and the loot are for you to hand out at the table."
     }
   }
 }

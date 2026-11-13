@@ -66,6 +66,11 @@ const TOOLS: MenuItem = {
       icon: 'pi pi-id-card',
       routerLink: '/tools/character-sheet',
     },
+    {
+      label: 'nav.combat',
+      icon: 'pi pi-shield',
+      routerLink: '/tools/combat',
+    },
     EXTERNAL_TOOLS,
   ],
 };

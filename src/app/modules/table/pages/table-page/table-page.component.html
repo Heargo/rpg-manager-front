@@ -111,6 +111,14 @@
             <p class="hint">{{ "table.waiting" | transloco }}</p>
           }
         </p-card>
+        @if (myCombatant(); as own) {
+          <p-card [header]="'combat.title' | transloco">
+            <app-combat-player-view
+              [combatantId]="own.combatantId"
+              [characterId]="own.characterId"
+            />
+          </p-card>
+        }
         <p-card [header]="'dice.title' | transloco">
           <app-dice-roller />
         </p-card>
@@ -212,6 +220,10 @@
 <!-- Game master: the illustration and the quick images. -->
 <ng-template #scenePanel>
   <div class="scene">
+    <section class="combat">
+      <h2>{{ "combat.title" | transloco }}</h2>
+      <app-combat-gm-panel />
+    </section>
     <ng-container [ngTemplateOutlet]="illustration" />
     <p-select
       class="shop-target"
@@ -224,10 +236,10 @@
       [ariaLabel]="'merchant.table.target' | transloco"
     >
       <ng-template #selectedItem let-target>
-        {{ target.name ?? ('merchant.table.everyone' | transloco) }}
+        {{ target.name ?? ("merchant.table.everyone" | transloco) }}
       </ng-template>
       <ng-template #item let-target>
-        {{ target.name ?? ('merchant.table.everyone' | transloco) }}
+        {{ target.name ?? ("merchant.table.everyone" | transloco) }}
       </ng-template>
     </p-select>
     <app-table-npcs

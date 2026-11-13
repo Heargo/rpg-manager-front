@@ -81,6 +81,7 @@ describe('NavBarComponent out of a room', () => {
       'Sprite colorizer',
       'Item generator',
       'Character sheet',
+      'Combat',
       'External tools',
     ]);
   });

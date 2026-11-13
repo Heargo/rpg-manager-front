@@ -162,13 +162,11 @@ describe('combat (GM + players)', () => {
         effects: [{ kind: 'damage', attribute: 'Life', amount: '5' }],
       })
     ).id;
-    await gm.injector
-      .get(CharacterBusiness)
-      .act(record('ada').id, {
-        kind: 'set-skill',
-        skillId: fireballId,
-        level: 1,
-      });
+    await gm.injector.get(CharacterBusiness).act(record('ada').id, {
+      kind: 'set-skill',
+      skillId: fireballId,
+      level: 1,
+    });
     await gm.injector.get(WorldSessionBusiness).update((w) => ({
       ...w,
       characters: w.characters.map((c) =>

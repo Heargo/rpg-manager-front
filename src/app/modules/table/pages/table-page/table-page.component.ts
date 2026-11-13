@@ -30,6 +30,9 @@ import { HostOfflineIconComponent } from '../../../../core/components/host-offli
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterBusiness } from '../../../character/business/character.business';
+import { CombatBusiness } from '../../../combat/business/combat.business';
+import { CombatGmPanelComponent } from '../../../combat/components/combat-gm-panel/combat-gm-panel.component';
+import { CombatPlayerViewComponent } from '../../../combat/components/combat-player-view/combat-player-view.component';
 import { CharacterSummaryComponent } from '../../../character/components/character-summary/character-summary.component';
 import { MerchantShopComponent } from '../../../npc/components/merchant-shop/merchant-shop.component';
 import { DiceOverlayComponent } from '../../../dice/components/dice-overlay/dice-overlay.component';
@@ -66,6 +69,8 @@ const NARROW_QUERY = '(max-width: 960px)';
     StoredImageComponent,
     HostOfflineIconComponent,
     CharacterSummaryComponent,
+    CombatGmPanelComponent,
+    CombatPlayerViewComponent,
     DiceRollerComponent,
     DiceOverlayComponent,
   ],
@@ -76,8 +81,20 @@ export class TablePageComponent {
   protected readonly room = inject(RoomBusiness);
   protected readonly table = inject(TableBusiness);
   protected readonly characters = inject(CharacterBusiness);
+  protected readonly combat = inject(CombatBusiness);
   private readonly messages = inject(MessageService);
   private readonly router = inject(Router);
+
+  /** The player's own combatant while an encounter runs. */
+  protected readonly myCombatant = computed(() => {
+    const mine = this.characters.$myCharacter();
+    const combatant = this.combat
+      .$state()
+      ?.combatants.find((c) => c.characterId === mine?.id);
+    return mine && combatant
+      ? { characterId: mine.id, combatantId: combatant.id }
+      : null;
+  });
 
   protected readonly notesMaxLength = NOTES_MAX_LENGTH;
   protected readonly narrow = signal(false);

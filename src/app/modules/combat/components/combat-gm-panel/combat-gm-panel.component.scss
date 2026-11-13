@@ -1,0 +1,173 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+h3,
+h4 {
+  margin: 0;
+}
+h4 {
+  font-size: 0.9rem;
+  color: var(--p-text-muted-color);
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.spacer {
+  flex: 1;
+}
+.start-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.pick {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.pending {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--p-primary-color);
+  border-radius: var(--p-content-border-radius);
+}
+.pending .text {
+  display: flex;
+  flex-direction: column;
+}
+.pending small {
+  color: var(--p-text-muted-color);
+}
+.buttons,
+.edit,
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.order {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.combatant {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: var(--p-content-border-radius);
+  background: var(--p-content-background);
+}
+.combatant.active {
+  border-color: var(--p-primary-color);
+  box-shadow: 0 0 0 1px var(--p-primary-color);
+}
+.combatant.enemy .name {
+  color: var(--p-red-400);
+}
+.combatant.down {
+  opacity: 0.6;
+}
+.combatant.down .name {
+  text-decoration: line-through;
+}
+.head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.handle {
+  cursor: grab;
+  color: var(--p-text-muted-color);
+}
+.name {
+  min-width: 6rem;
+}
+.initiative {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: var(--p-text-muted-color);
+}
+.life {
+  flex: 1;
+  min-width: 5rem;
+}
+.life-text {
+  color: var(--p-text-muted-color);
+}
+.down-tag {
+  color: var(--p-red-400);
+  font-weight: 600;
+}
+.statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--p-surface-200);
+  color: var(--p-surface-900);
+  font-size: 0.85rem;
+}
+.remove-status {
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.end-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.reward {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.hint {
+  color: var(--p-text-muted-color);
+  margin: 0;
+}
+.initiative-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: 10rem;
+}

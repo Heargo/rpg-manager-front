@@ -47,7 +47,8 @@
     "npcEditor": "Éditeur de PNJ",
     "skillCatalogue": "Catalogue de compétences",
     "classCatalogue": "Catalogue de classes",
-    "spriteColorizer": "Colorisation de sprites"
+    "spriteColorizer": "Colorisation de sprites",
+    "combat": "Combat"
   },
   "play": {
     "title": "Mondes",
@@ -756,6 +757,14 @@
       "title": "Fiche de personnage",
       "intro": "Un personnage d'exemple sur les attributs par défaut, avec les objets par défaut dans son sac. Tout suit les règles du jeu et reste sur cette page.",
       "reset": "Recommencer"
+    },
+    "combat": {
+      "title": "Combat",
+      "intro": "Le personnage d'exemple contre un ennemi du catalogue, avec le panneau du MJ et la vue du joueur sur le même écran. Rien n'est enregistré.",
+      "start": "Affronter le gobelin des cavernes",
+      "gm": "Maître du jeu",
+      "player": "Joueur",
+      "noEncounter": "Lancez une rencontre pour voir la vue du joueur."
     }
   },
   "home": {
@@ -1353,6 +1362,7 @@
     }
   },
   "combat": {
+    "title": "Combat",
     "errors": {
       "invalid": "Cette demande n'est pas valide.",
       "gameMasterOnly": "Seul le maître du jeu peut faire cela.",
@@ -1367,6 +1377,77 @@
       "skill-not-known": "Ce combattant ne connaît pas cette compétence.",
       "skill-not-active": "Seules les compétences actives s'utilisent en combat.",
       "target-not-found": "Cette cible n'est pas dans le combat."
+    },
+    "order": "Ordre des tours",
+    "round": "Round {{round}}",
+    "yourTurn": "À vous de jouer",
+    "endTurn": "Finir mon tour",
+    "nextTurn": "Tour suivant",
+    "undo": "Annuler",
+    "down": "À terre",
+    "drag": "Glisser pour réordonner",
+    "details": "Détails",
+    "roll": "{{caster}} a lancé {{rolls}} (total {{total}}) pour {{skill}}",
+    "waitingGm": "En attente du MJ…",
+    "start": {
+      "title": "Lancer une rencontre",
+      "characters": "Personnages",
+      "npcs": "PNJ",
+      "pick": "Ajouter",
+      "picked": "Inclus",
+      "fewer": "Un de moins",
+      "more": "Un de plus",
+      "action": "Lancer la rencontre",
+      "noCharacters": "Aucun personnage dans ce monde pour l'instant.",
+      "noNpcs": "Aucun PNJ dans le catalogue pour l'instant."
+    },
+    "initiative": {
+      "label": "Initiative",
+      "yours": "Votre initiative",
+      "set": "Valider"
+    },
+    "skill": {
+      "damage": "{{amount}} dégâts",
+      "heal": "{{amount}} soins",
+      "modify": "{{amount}} {{attribute}} pendant {{duration}} tours",
+      "cooldown": "récupération {{turns}}"
+    },
+    "actions": {
+      "use": "Utiliser",
+      "skills": "Compétences",
+      "useSkill": "Utiliser",
+      "items": "Objets",
+      "useItem": "Utiliser",
+      "pickTargets": "Choisissez les cibles de {{skill}}",
+      "confirm": "Confirmer",
+      "cancel": "Annuler"
+    },
+    "pending": {
+      "title": "Résultats à appliquer",
+      "line": "{{caster}} : {{skill}} sur {{target}}",
+      "rolled": "lancer {{rolls}} = {{total}}",
+      "failed": "raté",
+      "apply": "Appliquer",
+      "edit": "Modifier",
+      "dismiss": "Écarter"
+    },
+    "manual": {
+      "damage": "Dégâts",
+      "heal": "Soins"
+    },
+    "status": {
+      "placeholder": "Statut (Étourdi…)",
+      "add": "Ajouter le statut",
+      "remove": "Retirer le statut"
+    },
+    "end": {
+      "action": "Terminer",
+      "title": "Terminer la rencontre",
+      "xp": "Expérience par personnage",
+      "money": "Argent des ennemis vaincus : {{amount}}",
+      "loot": "Butin",
+      "confirm": "Terminer la rencontre",
+      "hint": "L'argent et le butin sont à distribuer à la table."
     }
   }
 }
