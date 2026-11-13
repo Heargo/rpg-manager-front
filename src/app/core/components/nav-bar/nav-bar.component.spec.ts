@@ -176,3 +176,21 @@ describe('NavBarComponent French labels', () => {
     expect(rootLabels(el)).toEqual(['Mondes', 'Dés', 'Catalogues', 'Outils']);
   });
 });
+
+describe('NavBarComponent help', () => {
+  for (const status of ['idle', 'connected'] as RoomStatus[]) {
+    it(`puts Help in the avatar menu, opening the documentation in the app language in a new tab (${status})`, async () => {
+      const { el, fixture } = await render(status);
+      TestBed.inject(LanguageBusiness).setLanguage('en');
+      await fixture.whenStable();
+      (el.querySelector('p-avatar') as HTMLElement).click();
+      await fixture.whenStable();
+      const help = Array.from(document.body.querySelectorAll<HTMLAnchorElement>('a')).find(
+        (a) => text(a) === 'Help',
+      );
+      expect(help).toBeDefined();
+      expect(help!.getAttribute('href')).toBe('/docs/en/');
+      expect(help!.getAttribute('target')).toBe('_blank');
+    });
+  }
+});

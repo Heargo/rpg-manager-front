@@ -1,0 +1,59 @@
+/*
+ * The app's look (src/app/ui.preset.ts and src/styles.scss): the bordeaux primary, the paper surfaces and the
+ * Recursive font, mapped onto Starlight's variables. Dark is Starlight's default, light is `data-theme='light'`.
+ */
+
+:root {
+  --sl-font: 'Recursive', system-ui, sans-serif;
+  --sl-font-mono: 'Recursive', ui-monospace, monospace;
+  font-variation-settings: 'MONO' 0, 'CASL' 0;
+
+  /* dark: the app's surface scale inverted, primary lightened for contrast */
+  --sl-color-accent-low: #2d0404;
+  --sl-color-accent: #ef5252;
+  --sl-color-accent-high: #f8cdcd;
+  --sl-color-white: #f9f6ef;
+  --sl-color-gray-1: #f1ecda;
+  --sl-color-gray-2: #cbc4aa;
+  --sl-color-gray-3: #938e7b;
+  --sl-color-gray-4: #5f5c4f;
+  --sl-color-gray-5: #47443a;
+  --sl-color-gray-6: #1d1c16;
+  --sl-color-black: #12110d;
+
+  /* notes ("blue" asides) in paper tones, like the app's secondary surfaces */
+  --sl-color-blue-low: #323029;
+  --sl-color-blue: #cbc4aa;
+  --sl-color-blue-high: #f1ecda;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #fbe6e6;
+  --sl-color-accent: #7f1919;
+  --sl-color-accent-high: #400808;
+  --sl-color-white: #12110d;
+  --sl-color-gray-1: #1d1c16;
+  --sl-color-gray-2: #323029;
+  --sl-color-gray-3: #5f5c4f;
+  --sl-color-gray-4: #938e7b;
+  --sl-color-gray-5: #cbc4aa;
+  --sl-color-gray-6: #e5ddc0;
+  --sl-color-gray-7: #f9f6ef;
+  /* the app's page background (surface 50) */
+  --sl-color-black: #f1ecda;
+
+  --sl-color-blue-low: #e5ddc0;
+  --sl-color-blue: #5f5c4f;
+  --sl-color-blue-high: #1d1c16;
+}
+
+/* code samples keep a real monospace */
+code,
+pre {
+  font-variation-settings: 'MONO' 1;
+}
+
+/* buttons like the app's: rounded, the primary filled */
+.sl-link-button {
+  border-radius: 6px;
+}

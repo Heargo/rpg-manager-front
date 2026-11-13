@@ -48,7 +48,8 @@
     "skillCatalogue": "Catalogue de compétences",
     "classCatalogue": "Catalogue de classes",
     "spriteColorizer": "Colorisation de sprites",
-    "combat": "Combat"
+    "combat": "Combat",
+    "help": "Aide"
   },
   "play": {
     "title": "Mondes",
@@ -794,7 +795,8 @@
     "toolsText": "Dés, générateur d'objets et fiche de personnage, toujours prêts.",
     "footerBrand": "RPG Manager",
     "footerTagline": "Pas de compte, pas de serveur : vos données restent dans votre navigateur.",
-    "footerNav": "Liens du site"
+    "footerNav": "Liens du site",
+    "footerHelp": "Aide"
   },
   "credits": {
     "title": "Crédits",

@@ -89,11 +89,11 @@ describe('static pages', () => {
   });
 
   for (const url of ['/', '/credits', '/contact', '/privacy-policy']) {
-    it(`renders the shared footer with its 3 links on ${url}`, async () => {
+    it(`renders the shared footer with its 4 links on ${url}`, async () => {
       const el = await visit(url);
       const footer = el.querySelector('app-site-footer');
       expect(footer).not.toBeNull();
-      expect(footer!.querySelectorAll('a').length).toBe(3);
+      expect(footer!.querySelectorAll('a').length).toBe(4);
     });
   }
 

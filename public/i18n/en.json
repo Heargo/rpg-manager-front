@@ -48,7 +48,8 @@
     "skillCatalogue": "Skill catalogue",
     "classCatalogue": "Class catalogue",
     "spriteColorizer": "Sprite colorizer",
-    "combat": "Combat"
+    "combat": "Combat",
+    "help": "Help"
   },
   "play": {
     "title": "Worlds",
@@ -794,7 +795,8 @@
     "toolsText": "Dice, item generator and character sheet, ready any time.",
     "footerBrand": "RPG Manager",
     "footerTagline": "No account, no server: your data stays in your browser.",
-    "footerNav": "Site links"
+    "footerNav": "Site links",
+    "footerHelp": "Help"
   },
   "credits": {
     "title": "Credits",

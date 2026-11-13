@@ -27,9 +27,27 @@
     {
       "name": "front-lan",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["ng", "serve", "--host", "0.0.0.0", "--port", "4201", "--ssl"],
+      "runtimeArgs": [
+        "ng",
+        "serve",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "4201",
+        "--ssl"
+      ],
       "url": "https://localhost:4201",
       "port": 4201
+    },
+    {
+      "name": "docs",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "docs:dev"
+      ],
+      "port": 4321,
+      "url": "http://localhost:4321"
     }
   ]
 }
