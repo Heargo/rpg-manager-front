@@ -2,14 +2,18 @@ import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { unzipSync } from 'fflate';
+import basePack from '../../../../public/packs/base/pack.json';
 import glowMaterials from '../../../../public/packs/base/sprites/axe.json';
 import { EXTRA_ITEMS } from '../../../testing/extra-pack';
 import { NEON_LINK, neonProviders, neonWorld } from '../../../testing/unofficial-pack';
 import { SpriteSet } from '../../modules/sprite/models/sprite-set';
 import { SpriteSetStorageService } from '../../modules/sprite/services/sprite-set-storage.service';
+import { TranslocoService } from '@jsverse/transloco';
+import { provideTestTranslations } from '../../../testing/test-providers';
 import { openAppDatabase } from '../helpers/app-database';
-import { PackDraft } from '../packs/pack-draft';
+import { buildPack, PackDraft } from '../packs/pack-draft';
 import { ImageProcessingService } from '../services/image-processing.service';
+import { validatePack } from '../packs/pack';
 import { PackStorageService } from '../services/pack-storage.service';
 import { PackCreatorBusiness } from './pack-creator.business';
 import { PackBusiness } from './pack.business';
@@ -35,7 +39,7 @@ function setup() {
   };
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
-    providers: [...fakes.providers, { provide: ImageProcessingService, useValue: images }],
+    providers: [...fakes.providers, provideTestTranslations(), { provide: ImageProcessingService, useValue: images }],
   });
   return {
     dims,
@@ -349,6 +353,125 @@ describe('PackCreatorBusiness', () => {
 
       await expect(s.creator.draftFromInstalled('base')).rejects.toBeDefined();
       await expect(s.creator.draftFromInstalled('extra')).rejects.toBeDefined();
+      expect(await s.creator.listDrafts()).toEqual([]);
+    });
+  });
+
+  describe('duplicate', () => {
+    const ids = (d: PackDraft) => d.sprites.map((x) => x.id);
+
+    it('copies a pack added from a link under a new id and names, keeping version, author, license and links', async () => {
+      const s = setup();
+      await s.packs.install(await s.packs.prepare(NEON_LINK));
+
+      const draft = await s.creator.duplicate('neon');
+
+      expect(draft.details).toMatchObject({
+        id: 'neon-copy',
+        name: { en: 'Neon (copy)', fr: 'Neon (copie)' },
+        description: { en: 'Glowing things', fr: 'Des choses brillantes' },
+        version: '1.0.0',
+        author: 'Ann Author',
+        license: 'CC-BY-4.0',
+        licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+        homepage: 'https://example.com/neon',
+      });
+      expect(draft.generators.fr?.items).toEqual(EXTRA_ITEMS);
+      expect(draft.sprites.map((x) => [x.id, x.kind])).toEqual([['spark', 'grayscale'], ['glow', 'masked'], ['tint', 'colored']]);
+      expect(JSON.parse(draft.sprites[1].materials!)).toEqual(glowMaterials);
+      expect(draft.sprites[0].image).toBeInstanceOf(Blob);
+      expect((await s.creator.listDrafts()).map((d) => d.id)).toEqual([draft.id]);
+      expect(buildPack(draft).manifest.id).toBe('neon-copy');
+      expect(validatePack(buildPack(draft).manifest).ok).toBe(true);
+    });
+
+    it('uses -copie and (copie) when the language is French', async () => {
+      const s = setup();
+      TestBed.inject(TranslocoService).setActiveLang('fr');
+      await s.packs.install(await s.packs.prepare(NEON_LINK));
+
+      const draft = await s.creator.duplicate('neon');
+
+      expect(draft.details.id).toBe('neon-copie');
+      expect(draft.details.name).toEqual({ en: 'Neon (copie)', fr: 'Neon (copie)' });
+    });
+
+    it('skips taken ids: -copy, then -copy-2, -copy-3', async () => {
+      const s = setup();
+      await s.packs.install(await s.packs.prepare(NEON_LINK));
+
+      const first = await s.creator.duplicate('neon');
+      const second = await s.creator.duplicate('neon');
+      const third = await s.creator.duplicate('neon');
+
+      expect([first, second, third].map((d) => d.details.id)).toEqual(['neon-copy', 'neon-copy-2', 'neon-copy-3']);
+    });
+
+    it('skips an id taken by an installed pack', async () => {
+      const s = setup();
+      await s.packs.install(await s.packs.prepare(NEON_LINK));
+      const first = await s.creator.duplicate('neon');
+      await s.creator.install(first.id);
+      await s.creator.deleteDraft(first.id);
+
+      const second = await s.creator.duplicate('neon');
+
+      expect(second.details.id).toBe('neon-copy-2');
+    });
+
+    it('copies a pack created on this device with its sprites', async () => {
+      const s = setup();
+      const mine = await validDraft(s);
+      await s.creator.addPng(mine.id, png(), spark);
+      await s.creator.install(mine.id);
+
+      const copy = await s.creator.duplicate('mine');
+
+      expect(copy.id).not.toBe(mine.id);
+      expect(copy.details).toMatchObject({ id: 'mine-copy', name: { en: 'Mine (copy)', fr: 'Mien (copie)' }, author: 'Ann Author' });
+      expect(copy.generators.fr?.items).toEqual(EXTRA_ITEMS);
+      expect(ids(copy)).toEqual(['spark']);
+      expect(await text(copy.sprites[0].image)).toBe('png-bytes');
+      expect(validatePack(buildPack(copy).manifest).ok).toBe(true);
+    });
+
+    it('copies a downloaded official pack', async () => {
+      const s = setup();
+      await s.packs.enable('extra');
+
+      const draft = await s.creator.duplicate('extra');
+
+      expect(draft.details).toMatchObject({ id: 'extra-copy', name: { en: 'Extra (copy)', fr: 'Extra (copie)' }, author: 'Jane Doe', license: 'CC0-1.0' });
+      expect(draft.generators.fr?.items).toEqual(EXTRA_ITEMS);
+      expect(ids(draft)).toEqual(['gem']);
+      expect(draft.sprites[0].image).toBeInstanceOf(Blob);
+    });
+
+    it('copies Base: every word list and every sprite, read from the app', async () => {
+      const s = setup();
+
+      const draft = await s.creator.duplicate('base');
+
+      expect(draft.details).toMatchObject({ id: 'base-copy', name: { en: 'Base (copy)', fr: 'Base (copie)' }, version: '1.0.0', license: 'CC-BY-4.0' });
+      expect(draft.generators.fr?.items).toEqual({ url: 'packs/base/generators/fr/items.json' });
+      expect(draft.generators.en?.classes).toEqual({ url: 'packs/base/generators/en/classes.json' });
+      expect(Object.keys(draft.generators.en!).sort()).toEqual(['classes', 'items', 'npcs', 'skills']);
+      expect(Object.keys(draft.generators.fr!).sort()).toEqual(['classes', 'items', 'npcs', 'skills']);
+      expect(draft.sprites.length).toBe(basePack.sprites.length);
+      expect(draft.sprites.length).toBe(101);
+      expect(draft.sprites.every((x) => x.image instanceof Blob)).toBe(true);
+      const masked = draft.sprites.filter((x) => x.kind === 'masked');
+      expect(masked.length).toBe(basePack.sprites.filter((x) => x.kind === 'masked').length);
+      expect(masked.length).toBeGreaterThan(0);
+      expect(masked.every((x) => !!x.materials)).toBe(true);
+      expect(validatePack(buildPack(draft).manifest).ok).toBe(true);
+    });
+
+    it('refuses an official pack that is not downloaded and an unknown id, saving nothing', async () => {
+      const s = setup();
+
+      await expect(s.creator.duplicate('extra')).rejects.toBeDefined();
+      await expect(s.creator.duplicate('nope')).rejects.toBeDefined();
       expect(await s.creator.listDrafts()).toEqual([]);
     });
   });

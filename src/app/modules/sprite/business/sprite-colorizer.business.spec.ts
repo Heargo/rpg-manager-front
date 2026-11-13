@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideTestTranslations } from '../../../../testing/test-providers';
 import { provideBasePack } from '../../../../testing/base-pack';
 import { provideKindsPack } from '../../../../testing/kinds-pack';
 import en from '../../../../../public/i18n/en.json';
@@ -20,7 +21,7 @@ const image = () =>
 function setup(stored: unknown[] = []) {
   const storage = { load: vi.fn(() => stored), save: vi.fn() };
   TestBed.configureTestingModule({
-    providers: [{ provide: SpritePresetStorageService, useValue: storage }],
+    providers: [provideTestTranslations(), { provide: SpritePresetStorageService, useValue: storage }],
   });
   const business = TestBed.inject(SpriteColorizerBusiness);
   business.loadImage(image());
@@ -374,7 +375,7 @@ describe('SpriteColorizerBusiness', () => {
         }),
       };
       TestBed.configureTestingModule({
-        providers: [
+        providers: [provideTestTranslations(), 
           { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
           { provide: SpriteFileService, useValue: files },
           provideBasePack(),
@@ -428,7 +429,7 @@ describe('SpriteColorizerBusiness', () => {
         decode: vi.fn(async () => sprite()),
       };
       TestBed.configureTestingModule({
-        providers: [
+        providers: [provideTestTranslations(), 
           { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
           { provide: SpriteSetStorageService, useValue: setStorage },
           { provide: ImageStorageService, useValue: images },
@@ -544,7 +545,7 @@ describe('SpriteColorizerBusiness', () => {
         delete: vi.fn(),
       };
       TestBed.configureTestingModule({
-        providers: [
+        providers: [provideTestTranslations(), 
           { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
           provideBasePack(),
           { provide: SpriteSetStorageService, useValue: setStorage },
@@ -581,7 +582,7 @@ describe('SpriteColorizerBusiness', () => {
         fetchText: vi.fn(async () => exportConfig(autoMaterials(twoParts()))),
       };
       TestBed.configureTestingModule({
-        providers: [
+        providers: [provideTestTranslations(), 
           { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
           { provide: SpriteFileService, useValue: files },
           provideKindsPack(),

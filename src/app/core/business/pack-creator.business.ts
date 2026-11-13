@@ -9,6 +9,7 @@ import {
   PACK_LANGUAGES,
   PackGenerator,
   PackLanguage,
+  packFileUrl,
   SpriteKind,
   validatePack,
 } from '../packs/pack';
@@ -30,7 +31,9 @@ import { ImageProcessingService } from '../services/image-processing.service';
 import { PackDraftStorageService } from '../services/pack-draft-storage.service';
 import { PackService } from '../services/pack.service';
 import { StoredPackFile } from '../services/pack-storage.service';
+import { runLimited } from '../helpers/pool';
 import { ImageBusiness } from './image.business';
+import { LanguageBusiness } from './language.business';
 import { BASE_PACK_ID, PackBusiness, PackError } from './pack.business';
 
 /** What a sprite needs besides its image. */
@@ -44,6 +47,12 @@ interface BuiltPack {
   raw: Map<string, Blob | unknown>;
   size: number;
 }
+
+/** Sprite files read at once when copying Base. */
+const MAX_FETCHES = 4;
+
+/** The word added to a copy's id and names: `[english, french]`. */
+const COPY_WORDS = ['copy', 'copie'] as const;
 
 const uniqueId = (wanted: string, taken: Set<string>): string => {
   const base = wanted || 'sprite';
@@ -61,6 +70,7 @@ export class PackCreatorBusiness {
   private readonly images = inject(ImageProcessingService);
   private readonly imageStore = inject(ImageBusiness);
   private readonly sets = inject(SpriteSetBusiness);
+  private readonly language = inject(LanguageBusiness);
 
   private readonly drafts = signal<PackDraft[]>([]);
   /** Bumped by every write, so a list read before a write is not shown after it. */
@@ -370,27 +380,7 @@ export class PackCreatorBusiness {
         generators[lang] = { ...generators[lang], [generator]: value };
       }
 
-    const sprites: DraftSprite[] = [];
-    for (const sprite of pack.sprites) {
-      const file = await this.packs.readFile(packId, sprite.image);
-      if (file?.kind !== 'blob')
-        throw new PackError([`${sprite.image}: file is missing`]);
-      const materials = sprite.materials
-        ? await this.packs.readFile(packId, sprite.materials)
-        : undefined;
-      sprites.push({
-        id: sprite.id,
-        en: sprite.en,
-        fr: sprite.fr,
-        type: sprite.type as ItemType,
-        slot: sprite.slot as ItemSlot,
-        kind: sprite.kind as SpriteKind,
-        image: new Blob([file.bytes], { type: file.type }),
-        ...(materials?.kind === 'json'
-          ? { materials: JSON.stringify(materials.value) }
-          : {}),
-      });
-    }
+    const sprites = await this.copySprites(pack.id, pack.sprites);
 
     const draft: PackDraft = {
       id: crypto.randomUUID(),
@@ -398,6 +388,101 @@ export class PackCreatorBusiness {
       details: {
         id: pack.id,
         name: { ...pack.name },
+        description: { ...pack.description },
+        version: pack.version,
+        author: pack.author,
+        license: pack.license,
+        licenseUrl: pack.licenseUrl,
+        ...(pack.homepage ? { homepage: pack.homepage } : {}),
+      },
+      generators,
+      sprites,
+    };
+    await this.storage.save(draft);
+    this.wrote(draft);
+    return draft;
+  }
+
+  private async copySprites(
+    packId: string,
+    list: Pack['sprites'],
+  ): Promise<DraftSprite[]> {
+    const base = packId === BASE_PACK_ID;
+    const manifestUrl = `packs/${BASE_PACK_ID}/pack.json`;
+    const sprites: DraftSprite[] = new Array(list.length);
+    const indexes = list.map((_, i) => i);
+    await runLimited(indexes, MAX_FETCHES, async (i) => {
+      const sprite = list[i];
+      let image: Blob;
+      let materials: string | undefined;
+      if (base) {
+        image = await this.service.loadBlob(
+          packFileUrl(manifestUrl, sprite.image),
+        );
+        if (sprite.materials)
+          materials = JSON.stringify(
+            await this.service.loadJson(
+              packFileUrl(manifestUrl, sprite.materials),
+            ),
+          );
+      } else {
+        const file = await this.packs.readFile(packId, sprite.image);
+        if (file?.kind !== 'blob')
+          throw new PackError([`${sprite.image}: file is missing`]);
+        image = new Blob([file.bytes], { type: file.type });
+        const json = sprite.materials
+          ? await this.packs.readFile(packId, sprite.materials)
+          : undefined;
+        if (json?.kind === 'json') materials = JSON.stringify(json.value);
+      }
+      sprites[i] = {
+        id: sprite.id,
+        en: sprite.en,
+        fr: sprite.fr,
+        type: sprite.type as ItemType,
+        slot: sprite.slot as ItemSlot,
+        kind: sprite.kind as SpriteKind,
+        image,
+        ...(materials ? { materials } : {}),
+      };
+    });
+    return sprites;
+  }
+
+  /** Copies an available pack (Base, downloaded official, link or local) into a new saved draft with a free id. */
+  async duplicate(packId: string): Promise<PackDraft> {
+    await this.packs.load();
+    const pack = this.packs.$installed().find((p) => p.id === packId);
+    if (!pack) throw new PackError([`"${packId}" cannot be duplicated`]);
+
+    const generators: PackDraft['generators'] = {};
+    for (const lang of PACK_LANGUAGES)
+      for (const generator of PACK_GENERATORS) {
+        if (!pack.generators[lang]?.[generator]) continue;
+        const value = await this.packs.wordList(generator, lang, packId);
+        generators[lang] = { ...generators[lang], [generator]: value };
+      }
+    const sprites = await this.copySprites(pack.id, pack.sprites);
+
+    const [english, french] = COPY_WORDS;
+    const suffix = this.language.$language() === 'fr' ? french : english;
+    const taken = new Set<string>([
+      ...(await this.packs.registry().catch(() => [])).map((p) => p.id),
+      ...this.packs.$installed().map((p) => p.id),
+      ...(await this.storage.list()).map((d) => d.details.id),
+    ]);
+    const id = uniqueId(`${pack.id}-${suffix}`, taken);
+    const name = (value: string, word: string) => `${value} (${word})`;
+
+    const draft: PackDraft = {
+      id: crypto.randomUUID(),
+      updatedAt: Date.now(),
+      details: {
+        id,
+        name: {
+          en: name(pack.name.en, suffix),
+          fr: name(pack.name.fr, french),
+        },
         description: { ...pack.description },
         version: pack.version,
         author: pack.author,

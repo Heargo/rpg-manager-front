@@ -62,184 +62,226 @@ export function formatSize(bytes: number): string {
       <header>
         <h1>{{ 'packs.title' | transloco }}</h1>
         <p class="hint">{{ 'packs.intro' | transloco }}</p>
-        <p-button
-          icon="pi pi-plus"
-          [label]="'packs.add' | transloco"
-          (onClick)="openAdd()"
-        />
-        <p-button
-          severity="secondary"
-          icon="pi pi-pencil"
-          [label]="'packs.creator.create' | transloco"
-          (onClick)="openCreator()"
-        />
+        <div class="header-actions">
+          <p-button
+            icon="pi pi-plus"
+            [label]="'packs.add' | transloco"
+            (onClick)="openAdd()"
+          />
+          <p-button
+            severity="secondary"
+            icon="pi pi-pencil"
+            [label]="'packs.creator.create' | transloco"
+            (onClick)="openCreator()"
+          />
+        </div>
       </header>
-      <ul class="grid">
-        @for (entry of registry(); track entry.id) {
-          <li data-test="pack-card" [attr.data-pack]="entry.id">
-            <p-card>
-              <div class="head">
-                <h2>{{ text(entry.name) }}</h2>
-                @if (entry.builtIn) {
-                  <p-tag
-                    severity="info"
-                    [value]="'packs.alwaysOn' | transloco"
-                  />
-                } @else {
-                  @if (isDownloaded(entry.id)) {
-                    <p-tag
-                      severity="success"
-                      [value]="'packs.downloaded' | transloco"
-                    />
-                  }
-                  @if (busy().has(entry.id)) {
-                    <p-progressspinner
-                      strokeWidth="6"
-                      [style]="{ width: '1.5rem', height: '1.5rem' }"
-                      [ariaLabel]="'packs.downloading' | transloco"
-                    />
-                  }
-                  @for (key of [toggleKey(entry.id)]; track key) {
-                    <p-toggleswitch
-                      [ngModel]="isEnabled(entry.id)"
-                      [disabled]="busy().has(entry.id)"
-                      [ariaLabel]="
-                        'packs.toggle' | transloco: { name: text(entry.name) }
-                      "
-                      (ngModelChange)="toggle(entry, $event)"
-                    />
-                  }
-                }
-              </div>
-              <p>{{ text(entry.description) }}</p>
-              <dl>
-                <dt>{{ 'packs.author' | transloco }}</dt>
-                <dd>{{ entry.author }}</dd>
-                <dt>{{ 'packs.license' | transloco }}</dt>
-                <dd>
-                  <a
-                    [href]="entry.licenseUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >{{ entry.license }}</a
-                  >
-                </dd>
-                @if (!entry.builtIn) {
-                  <dt>{{ 'packs.size' | transloco }}</dt>
-                  <dd>{{ size(entry.size) }}</dd>
-                }
-                <dt>{{ 'packs.detailsSprites' | transloco }}</dt>
-                <dd>{{ entry.sprites }}</dd>
-                <dt>{{ 'packs.languages' | transloco }}</dt>
-                <dd>{{ languages(entry) }}</dd>
-              </dl>
-              <div class="actions">
-                @if (isInstalled(entry.id)) {
-                  <p-button
-                    severity="secondary"
-                    icon="pi pi-info-circle"
-                    [label]="'packs.details' | transloco"
-                    (onClick)="openDetails(entry)"
-                  />
-                }
-                @if (isDownloaded(entry.id)) {
-                  <p-button
-                    severity="danger"
-                    icon="pi pi-trash"
-                    [label]="'packs.remove' | transloco"
-                    [disabled]="busy().has(entry.id)"
-                    (onClick)="confirmRemove(entry.id, text(entry.name))"
-                  />
-                }
-              </div>
-            </p-card>
-          </li>
-        }
-      </ul>
-      @if (unofficial().length) {
-        <h2>{{ 'packs.unofficialTitle' | transloco }}</h2>
-        <ul class="grid">
-          @for (pack of unofficial(); track pack.id) {
-            <li data-test="unofficial-pack-card" [attr.data-pack]="pack.id">
-              <p-card>
-                <div class="head">
-                  <h2>{{ text(pack.name) }}</h2>
-                  @if (busy().has(pack.id)) {
-                    <p-progressspinner
-                      strokeWidth="6"
-                      [style]="{ width: '1.5rem', height: '1.5rem' }"
-                      [ariaLabel]="'packs.downloading' | transloco"
-                    />
-                  }
-                  @for (key of [toggleKey(pack.id)]; track key) {
-                    <p-toggleswitch
-                      [ngModel]="pack.enabled"
-                      [disabled]="busy().has(pack.id)"
-                      [ariaLabel]="
-                        'packs.toggle' | transloco: { name: text(pack.name) }
-                      "
-                      (ngModelChange)="toggleUnofficial(pack, $event)"
-                    />
-                  }
-                </div>
-                <p>{{ text(pack.description) }}</p>
-                <dl>
-                  <dt>{{ 'packs.author' | transloco }}</dt>
-                  <dd>{{ pack.author }}</dd>
-                  <dt>{{ 'packs.license' | transloco }}</dt>
-                  <dd>
-                    <a
-                      [href]="pack.licenseUrl"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >{{ pack.license }}</a
-                    >
-                  </dd>
-                  <dt>{{ 'packs.version' | transloco }}</dt>
-                  <dd>{{ pack.version }}</dd>
-                  <dt>{{ 'packs.source' | transloco }}</dt>
-                  <dd>
-                    @if (pack.link) {
+      @if (registry().length) {
+        <section>
+          <h2 class="section-title">{{ 'packs.officialTitle' | transloco }}</h2>
+          <ul class="grid">
+            @for (entry of registry(); track entry.id) {
+              <li data-test="pack-card" [attr.data-pack]="entry.id">
+                <p-card>
+                  <div class="head">
+                    <h3>{{ text(entry.name) }}</h3>
+                    @if (entry.builtIn) {
+                      <p-tag
+                        severity="info"
+                        [value]="'packs.alwaysOn' | transloco"
+                      />
+                    } @else {
+                      @if (isDownloaded(entry.id)) {
+                        <p-tag
+                          severity="success"
+                          [value]="'packs.downloaded' | transloco"
+                        />
+                      }
+                      @if (busy().has(entry.id)) {
+                        <p-progressspinner
+                          strokeWidth="6"
+                          [style]="{ width: '1.5rem', height: '1.5rem' }"
+                          [ariaLabel]="'packs.downloading' | transloco"
+                        />
+                      }
+                      @for (key of [toggleKey(entry.id)]; track key) {
+                        <p-toggleswitch
+                          [ngModel]="isEnabled(entry.id)"
+                          [disabled]="busy().has(entry.id)"
+                          [ariaLabel]="
+                            'packs.toggle'
+                              | transloco: { name: text(entry.name) }
+                          "
+                          (ngModelChange)="toggle(entry, $event)"
+                        />
+                      }
+                    }
+                  </div>
+                  <p class="desc">{{ text(entry.description) }}</p>
+                  <dl>
+                    <dt>{{ 'packs.author' | transloco }}</dt>
+                    <dd>{{ entry.author }}</dd>
+                    <dt>{{ 'packs.license' | transloco }}</dt>
+                    <dd>
                       <a
-                        [href]="pack.link"
+                        [href]="entry.licenseUrl"
                         target="_blank"
                         rel="noopener noreferrer"
-                        >{{ pack.link }}</a
+                        >{{ entry.license }}</a
                       >
-                    } @else {
-                      {{ 'packs.createdHere' | transloco }}
+                    </dd>
+                    @if (!entry.builtIn) {
+                      <dt>{{ 'packs.size' | transloco }}</dt>
+                      <dd>{{ size(entry.size) }}</dd>
                     }
-                  </dd>
-                </dl>
-                <div class="actions">
-                  @if (pack.link) {
-                    <p-button
-                      severity="secondary"
-                      icon="pi pi-refresh"
-                      [label]="'packs.update' | transloco"
-                      [disabled]="busy().has(pack.id)"
-                      (onClick)="checkUpdate(pack)"
-                    />
-                  }
-                  <p-button
-                    severity="secondary"
-                    icon="pi pi-pencil"
-                    [label]="'packs.editAsDraft' | transloco"
-                    [disabled]="busy().has(pack.id)"
-                    (onClick)="editAsDraft(pack)"
-                  />
-                  <p-button
-                    severity="danger"
-                    icon="pi pi-trash"
-                    [label]="'packs.remove' | transloco"
-                    [disabled]="busy().has(pack.id)"
-                    (onClick)="confirmRemove(pack.id, text(pack.name))"
-                  />
-                </div>
-              </p-card>
-            </li>
-          }
-        </ul>
+                    <dt>{{ 'packs.detailsSprites' | transloco }}</dt>
+                    <dd>{{ entry.sprites }}</dd>
+                    <dt>{{ 'packs.languages' | transloco }}</dt>
+                    <dd>{{ languages(entry) }}</dd>
+                  </dl>
+                  <ng-template #footer>
+                    <div class="actions">
+                      @if (isInstalled(entry.id)) {
+                        <p-button
+                          severity="secondary"
+                          icon="pi pi-info-circle"
+                          [label]="'packs.details' | transloco"
+                          (onClick)="openDetails(entry)"
+                        />
+                        <p-button
+                          severity="secondary"
+                          icon="pi pi-copy"
+                          [label]="'packs.duplicate' | transloco"
+                          [loading]="busy().has(entry.id)"
+                          [disabled]="busy().has(entry.id)"
+                          (onClick)="duplicate(entry.id)"
+                        />
+                      }
+                      @if (isDownloaded(entry.id)) {
+                        <p-button
+                          severity="danger"
+                          variant="text"
+                          icon="pi pi-trash"
+                          [label]="'packs.remove' | transloco"
+                          [disabled]="busy().has(entry.id)"
+                          (onClick)="confirmRemove(entry.id, text(entry.name))"
+                        />
+                      }
+                    </div>
+                  </ng-template>
+                </p-card>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+      @if (unofficial().length) {
+        <section>
+          <h2 class="section-title">
+            {{ 'packs.unofficialTitle' | transloco }}
+          </h2>
+          <ul class="grid">
+            @for (pack of unofficial(); track pack.id) {
+              <li data-test="unofficial-pack-card" [attr.data-pack]="pack.id">
+                <p-card>
+                  <div class="head">
+                    <h3>{{ text(pack.name) }}</h3>
+                    @if (!pack.link) {
+                      <p-tag
+                        severity="secondary"
+                        [value]="'packs.createdHere' | transloco"
+                      />
+                    }
+                    @if (busy().has(pack.id)) {
+                      <p-progressspinner
+                        strokeWidth="6"
+                        [style]="{ width: '1.5rem', height: '1.5rem' }"
+                        [ariaLabel]="'packs.downloading' | transloco"
+                      />
+                    }
+                    @for (key of [toggleKey(pack.id)]; track key) {
+                      <p-toggleswitch
+                        [ngModel]="pack.enabled"
+                        [disabled]="busy().has(pack.id)"
+                        [ariaLabel]="
+                          'packs.toggle' | transloco: { name: text(pack.name) }
+                        "
+                        (ngModelChange)="toggleUnofficial(pack, $event)"
+                      />
+                    }
+                  </div>
+                  <p class="desc">{{ text(pack.description) }}</p>
+                  <dl>
+                    <dt>{{ 'packs.author' | transloco }}</dt>
+                    <dd>{{ pack.author }}</dd>
+                    <dt>{{ 'packs.license' | transloco }}</dt>
+                    <dd>
+                      <a
+                        [href]="pack.licenseUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >{{ pack.license }}</a
+                      >
+                    </dd>
+                    <dt>{{ 'packs.version' | transloco }}</dt>
+                    <dd>{{ pack.version }}</dd>
+                    <dt>{{ 'packs.source' | transloco }}</dt>
+                    <dd>
+                      @if (pack.link) {
+                        <a
+                          [href]="pack.link"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          >{{ pack.link }}</a
+                        >
+                      } @else {
+                        {{ 'packs.createdHere' | transloco }}
+                      }
+                    </dd>
+                  </dl>
+                  <ng-template #footer>
+                    <div class="actions">
+                      @if (pack.link) {
+                        <p-button
+                          severity="secondary"
+                          icon="pi pi-refresh"
+                          [label]="'packs.update' | transloco"
+                          [disabled]="busy().has(pack.id)"
+                          (onClick)="checkUpdate(pack)"
+                        />
+                      }
+                      <p-button
+                        severity="secondary"
+                        icon="pi pi-copy"
+                        [label]="'packs.duplicate' | transloco"
+                        [loading]="busy().has(pack.id)"
+                        [disabled]="busy().has(pack.id)"
+                        (onClick)="duplicate(pack.id)"
+                      />
+                      @if (!pack.link) {
+                        <p-button
+                          severity="secondary"
+                          icon="pi pi-pencil"
+                          [label]="'packs.editAsDraft' | transloco"
+                          [disabled]="busy().has(pack.id)"
+                          (onClick)="editAsDraft(pack)"
+                        />
+                      }
+                      <p-button
+                        severity="danger"
+                        variant="text"
+                        icon="pi pi-trash"
+                        [label]="'packs.remove' | transloco"
+                        [disabled]="busy().has(pack.id)"
+                        (onClick)="confirmRemove(pack.id, text(pack.name))"
+                      />
+                    </div>
+                  </ng-template>
+                </p-card>
+              </li>
+            }
+          </ul>
+        </section>
       }
     </div>
     <p-dialog
@@ -425,37 +467,84 @@ export function formatSize(bytes: number): string {
   `,
   styles: `
     .packs {
-      max-width: 64rem;
+      max-width: 72rem;
+      margin-inline: auto;
+      padding: 1.5rem 1rem;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    header h1 {
+      margin: 0 0 0.5rem;
+    }
+    header .hint {
+      margin: 0 0 1.25rem;
+      color: var(--p-text-muted-color);
+    }
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .section-title {
+      margin: 0 0 1rem;
+      font-size: 1.25rem;
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr));
       gap: 1rem;
       margin: 0;
       padding: 0;
       list-style: none;
     }
+    .grid > li {
+      display: flex;
+      min-width: 0;
+    }
+    .grid p-card {
+      display: flex;
+      flex: 1;
+      min-width: 0;
+    }
     .head {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      margin-bottom: 0.75rem;
     }
-    .head h2 {
+    .head h3 {
       flex: 1;
       margin: 0;
+      font-size: 1.125rem;
+      overflow-wrap: anywhere;
+    }
+    .desc {
+      margin: 0 0 1rem;
+      color: var(--p-text-muted-color);
     }
     dl {
       display: grid;
       grid-template-columns: auto 1fr;
-      gap: 0.25rem 0.75rem;
+      gap: 0.5rem 1rem;
+      margin: 0;
+    }
+    dt {
+      color: var(--p-text-muted-color);
     }
     dd {
       margin: 0;
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
     .actions {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
+      width: 100%;
+      padding-top: 1rem;
+      border-top: 1px solid var(--p-content-border-color);
     }
     .add-link {
       display: flex;
@@ -614,6 +703,26 @@ export class PacksToolPageComponent {
 
   protected openCreator(): void {
     void this.router.navigate(['/tools/pack-creator']);
+  }
+
+  protected duplicate(id: string): Promise<void> {
+    return this.track(() => this.doDuplicate(id));
+  }
+
+  private async doDuplicate(id: string): Promise<void> {
+    this.setBusy(id, true);
+    try {
+      const draft = await this.creator.duplicate(id);
+      await this.router.navigate(['/tools/pack-creator', draft.id]);
+    } catch (error) {
+      this.fail(
+        this.errorList(error)
+          .map((e) => this.errorText(e))
+          .join('\n'),
+      );
+    } finally {
+      this.setBusy(id, false);
+    }
   }
 
   protected editAsDraft(pack: InstalledPack): Promise<void> {

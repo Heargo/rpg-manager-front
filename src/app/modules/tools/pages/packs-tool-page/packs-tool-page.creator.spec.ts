@@ -54,15 +54,38 @@ describe('PacksToolPageComponent pack creator', () => {
     await settle(() => expect(router.url).toBe('/tools/pack-creator'));
   });
 
-  it('an unofficial pack card has Edit as a draft, which copies it into a new draft and opens it', async () => {
+  it('a link pack card has Duplicate, which copies it into a new draft and opens it, and no Edit as a draft', async () => {
     const { settle, button, card, creator, router } = await render();
+    expect(button('Edit as a draft', card('neon'))).toBeUndefined();
 
-    button('Edit as a draft', card('neon'))!.click();
+    button('Duplicate', card('neon'))!.click();
 
     await settle(async () => expect((await creator.listDrafts()).length).toBe(1));
     const [draft] = await creator.listDrafts();
-    expect(draft.details.id).toBe('neon');
+    expect(draft.details.id).toBe('neon-copy');
     await settle(() => expect(router.url).toBe(`/tools/pack-creator/${draft.id}`));
+  });
+
+  it('the Base card has Duplicate, which opens a draft of Base', async () => {
+    const { el, settle, button, creator, router } = await render();
+    const base = el.querySelector<HTMLElement>('[data-test="pack-card"][data-pack="base"]')!;
+
+    button('Duplicate', base)!.click();
+
+    await settle(async () => expect((await creator.listDrafts()).length).toBe(1));
+    const [draft] = await creator.listDrafts();
+    expect(draft.details.id).toBe('base-copy');
+    await settle(() => expect(router.url).toBe(`/tools/pack-creator/${draft.id}`));
+  });
+
+  it('an official card has Duplicate once downloaded, not before', async () => {
+    const { el, settle, button, packs } = await render();
+    const extra = () => el.querySelector<HTMLElement>('[data-test="pack-card"][data-pack="extra"]')!;
+    expect(button('Duplicate', extra())).toBeUndefined();
+
+    await packs.enable('extra');
+
+    await settle(() => expect(button('Duplicate', extra())).toBeDefined());
   });
 
   it('a pack created on this device is in the unofficial section as created on this device, and can be edited as a draft', async () => {
@@ -87,6 +110,7 @@ describe('PacksToolPageComponent pack creator', () => {
 
     expect(card('mine').textContent).toContain('Created on this device');
     expect(button('Edit as a draft', card('mine'))).toBeDefined();
+    expect(button('Duplicate', card('mine'))).toBeDefined();
   });
 
   it('official packs have no Edit as a draft button', async () => {

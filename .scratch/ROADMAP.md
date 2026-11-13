@@ -199,3 +199,4 @@ Tickets in `content-packs/` (K). Status: validated (2026-11-13), every ticket re
 | 92 | **K07** Pack creator (done) | K02, K05 |
 | 92b | **K08** Pack creator: the colorizer link (split from K07) (done) | K07 |
 | 93 | **K06** Documentation: using and creating packs (done) | K04, K05, K07, K08 |
+| 94 | **K09** Duplicate a pack and Packs page redesign (user request) (done) | none |

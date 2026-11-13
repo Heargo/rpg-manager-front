@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
+import { provideTestTranslations } from '../../../testing/test-providers';
 import glowMaterials from '../../../../public/packs/base/sprites/axe.json';
 import { neonProviders, neonWorld } from '../../../testing/unofficial-pack';
 import { ImageProcessingService } from '../services/image-processing.service';
@@ -21,7 +22,7 @@ function setup() {
   const images = { dimensions: vi.fn(async (blob: Blob) => dims.get(blob) ?? { width: 128, height: 128 }) };
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
-    providers: [...fakes.providers, { provide: ImageProcessingService, useValue: images }],
+    providers: [provideTestTranslations(), ...fakes.providers, { provide: ImageProcessingService, useValue: images }],
   });
   return { dims, creator: TestBed.inject(PackCreatorBusiness) };
 }

@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
+import { provideTestTranslations } from '../../../../testing/test-providers';
 import { neonProviders, neonWorld } from '../../../../testing/unofficial-pack';
 import { PackCreatorBusiness } from '../../../core/business/pack-creator.business';
 import { ImageProcessingService } from '../../../core/services/image-processing.service';
@@ -29,7 +30,7 @@ function setup() {
   };
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
-    providers: [
+    providers: [provideTestTranslations(), 
       ...neonProviders(neonWorld()).providers,
       { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
       { provide: SpriteFileService, useValue: files },
