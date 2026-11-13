@@ -1581,7 +1581,7 @@
     "source": "Source",
     "unofficialTitle": "Packs ajoutés depuis un lien",
     "warning": "Contenu non vérifié par les auteurs de l'application",
-    "wordLists": "{{ count }} listes de mots",
+    "wordLists": "Listes de mots : {{ count }}",
     "updateVersions": "Remplacer {{ name }} version {{ from }} par la version {{ to }} ?",
     "link": {
       "empty": "Saisissez un lien.",
@@ -1652,7 +1652,7 @@
       "installDevice": "Installer sur cet appareil",
       "export": "Exporter",
       "installed": "Pack installé sur cet appareil",
-      "editInColorizer": "Modifier dans le colorizer"
+      "editInColorizer": "Modifier dans le coloriseur"
     },
     "createdHere": "Créé sur cet appareil",
     "editAsDraft": "Modifier comme brouillon"

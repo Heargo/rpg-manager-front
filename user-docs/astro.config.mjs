@@ -52,7 +52,7 @@ export default defineConfig({
         {
           label: 'Plus',
           translations: { en: 'More' },
-          items: [{ slug: 'tools' }, { slug: 'about' }],
+          items: [{ slug: 'tools' }, { slug: 'packs' }, { slug: 'create-pack' }, { slug: 'about' }],
         },
       ],
     }),

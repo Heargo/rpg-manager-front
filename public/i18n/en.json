@@ -1581,7 +1581,7 @@
     "source": "Source",
     "unofficialTitle": "Packs added from a link",
     "warning": "Content not checked by the app's authors",
-    "wordLists": "{{ count }} word lists",
+    "wordLists": "Word lists: {{ count }}",
     "updateVersions": "Replace {{ name }} version {{ from }} with version {{ to }}?",
     "link": {
       "empty": "Enter a link.",

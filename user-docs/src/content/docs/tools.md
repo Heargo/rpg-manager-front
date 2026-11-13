@@ -16,7 +16,7 @@ Le coloriseur recolore un sprite en niveaux de gris, **matériau par matériau**
 - **Matériaux** : chacun a son masque et son dégradé, modifiable, ou pris dans les **préréglages** (acier, bois, or, glace…).
 - **Enregistrer** garde le sprite et ses matériaux sur cet appareil ; **PNG** et **JSON** les exportent.
 
-La bibliothèque propose les 101 sprites du « Fantasy items pack » (Florian Sciberras, CC BY 4.0), déjà découpés en matériaux, et vos sprites enregistrés (**Mes sprites**). Donnez un **type d'objet** à un sprite enregistré pour qu'il serve aux images aléatoires des objets.
+La bibliothèque propose les 101 sprites du « Fantasy items pack » (Florian Sciberras, CC BY 4.0), déjà découpés en matériaux, et vos sprites enregistrés (**Mes sprites**). Donnez un **type d'objet** à un sprite enregistré pour qu'il serve aux images aléatoires des objets. D'autres sprites peuvent venir des [packs de contenu](/docs/packs/).
 
 ![La bibliothèque de sprites](../../assets/screens/fr/tools-sprite-library.png)
 
