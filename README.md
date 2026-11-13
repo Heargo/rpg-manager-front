@@ -55,6 +55,7 @@ Then open http://localhost:4200. The dev server has no TURN relay (it uses publi
 | `npm run build` | Production build in `dist/panel` (with the service worker), the user documentation in `dist/panel/browser/docs` |
 | `npm run docs:dev` | The user documentation (Starlight, `user-docs/`) at http://localhost:4321/docs/ |
 | `npm run docs:build` | Builds only the user documentation |
+| `npm run docs:screenshots` | Retakes every screenshot of the documentation with Playwright (starts the dev server on port 4200, or reuses one) |
 
 To try the installed, offline app, build and serve `dist/panel/browser` with any static server (for example `npx http-server dist/panel/browser`).
 

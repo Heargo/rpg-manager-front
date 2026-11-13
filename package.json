@@ -10,7 +10,8 @@
     "test:watch": "ng test",
     "sprites:sets": "esbuild scripts/generate-sprite-sets.ts --bundle --platform=node --format=esm --log-level=warning --outfile=node_modules/.cache/generate-sprite-sets.mjs && node node_modules/.cache/generate-sprite-sets.mjs",
     "docs:dev": "npm --prefix user-docs install --no-audit --no-fund && npm --prefix user-docs run dev",
-    "docs:build": "npm --prefix user-docs install --no-audit --no-fund && npm --prefix user-docs run build"
+    "docs:build": "npm --prefix user-docs install --no-audit --no-fund && npm --prefix user-docs run build",
+    "docs:screenshots": "npm --prefix user-docs install --no-audit --no-fund && npm --prefix user-docs run screenshots"
   },
   "prettier": {
     "overrides": [
