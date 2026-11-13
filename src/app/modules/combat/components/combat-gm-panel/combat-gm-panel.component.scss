@@ -186,3 +186,25 @@ h4 {
     flex-shrink: 0;
   }
 }
+.start-select {
+  width: 100%;
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.portrait {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  overflow: hidden;
+  flex: none;
+}
+.initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--p-content-border-color);
+}

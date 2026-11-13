@@ -1479,10 +1479,8 @@
       "title": "Start an encounter",
       "characters": "Characters",
       "npcs": "NPCs",
-      "pick": "Add",
-      "picked": "In",
-      "fewer": "One fewer",
-      "more": "One more",
+      "placeholder": "Pick…",
+      "count": "Number of copies",
       "action": "Start the encounter",
       "noCharacters": "No character in this world yet.",
       "noNpcs": "No NPC in the catalogue yet."

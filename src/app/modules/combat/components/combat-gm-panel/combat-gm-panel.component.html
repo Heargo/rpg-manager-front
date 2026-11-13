@@ -380,65 +380,95 @@
   <div class="start-form" data-testid="start-form">
     <h3>{{ "combat.start.title" | transloco }}</h3>
     <h4>{{ "combat.start.characters" | transloco }}</h4>
-    @for (character of combat.$characters(); track character.id) {
-      <div
-        class="pick"
-        data-testid="start-character"
-        [attr.data-name]="character.name"
+    @if (combat.$characters().length) {
+      <p-multiselect
+        class="start-select"
+        data-testid="start-characters"
+        [options]="combat.$characters()"
+        optionLabel="name"
+        optionValue="id"
+        display="chip"
+        [filter]="true"
+        [showToggleAll]="false"
+        [ngModel]="chosen()"
+        (ngModelChange)="chosen.set($event ?? [])"
+        [placeholder]="'combat.start.placeholder' | transloco"
       >
-        <span>{{ character.name }}</span>
-        <button
-          pButton
-          type="button"
-          data-action="toggle-character"
-          size="small"
-          [outlined]="!chosen().includes(character.id)"
-          [icon]="
-            chosen().includes(character.id) ? 'pi pi-check' : 'pi pi-plus'
-          "
-          [label]="
-            (chosen().includes(character.id)
-              ? 'combat.start.picked'
-              : 'combat.start.pick'
-            ) | transloco
-          "
-          [attr.aria-pressed]="chosen().includes(character.id)"
-          (click)="toggleCharacter(character.id)"
-        ></button>
-      </div>
-    } @empty {
+        <ng-template #item let-option>
+          <div
+            class="option"
+            data-testid="start-option"
+            [attr.data-name]="option.name"
+          >
+            @if (option.portraitId; as portraitId) {
+              <app-stored-image
+                class="portrait"
+                [imageId]="portraitId"
+                [alt]="option.name"
+              >
+                <span class="initial">{{ initial(option.name) }}</span>
+              </app-stored-image>
+            } @else {
+              <span class="initial portrait">{{ initial(option.name) }}</span>
+            }
+            <span>{{ option.name }}</span>
+          </div>
+        </ng-template>
+      </p-multiselect>
+    } @else {
       <p class="hint">{{ "combat.start.noCharacters" | transloco }}</p>
     }
     <h4>{{ "combat.start.npcs" | transloco }}</h4>
-    @for (npc of combat.$npcs(); track npc.id) {
-      <div class="pick" data-testid="start-npc" [attr.data-name]="npc.name">
-        <span>{{ npc.name }}</span>
-        <span class="count">
-          <button
-            pButton
-            type="button"
-            data-action="npc-minus"
-            size="small"
-            severity="secondary"
-            icon="pi pi-minus"
-            [ariaLabel]="'combat.start.fewer' | transloco"
-            [disabled]="countOf(npc.id) === 0"
-            (click)="changeCount(npc.id, -1)"
-          ></button>
-          <strong data-field="npc-count">{{ countOf(npc.id) }}</strong>
-          <button
-            pButton
-            type="button"
-            data-action="npc-plus"
-            size="small"
-            severity="secondary"
-            icon="pi pi-plus"
-            [ariaLabel]="'combat.start.more' | transloco"
-            (click)="changeCount(npc.id, 1)"
-          ></button>
-        </span>
-      </div>
-    } @empty {
+    @if (combat.$npcs().length) {
+      <p-multiselect
+        class="start-select"
+        data-testid="start-npcs"
+        [options]="combat.$npcs()"
+        optionLabel="name"
+        optionValue="id"
+        display="chip"
+        [filter]="true"
+        [showToggleAll]="false"
+        [ngModel]="chosenNpcs()"
+        (ngModelChange)="pickNpcs($event)"
+        [placeholder]="'combat.start.placeholder' | transloco"
+      >
+        <ng-template #item let-option>
+          <div
+            class="option"
+            data-testid="start-option"
+            [attr.data-name]="option.name"
+          >
+            @if (option.portraitId; as portraitId) {
+              <app-stored-image
+                class="portrait"
+                [imageId]="portraitId"
+                [alt]="option.name"
+              >
+                <span class="initial">{{ initial(option.name) }}</span>
+              </app-stored-image>
+            } @else {
+              <span class="initial portrait">{{ initial(option.name) }}</span>
+            }
+            <span>{{ option.name }}</span>
+          </div>
+        </ng-template>
+      </p-multiselect>
+      @for (npc of pickedNpcs(); track npc.id) {
+        <div class="pick" data-testid="start-npc" [attr.data-name]="npc.name">
+          <span>{{ npc.name }}</span>
+          <p-inputnumber
+            data-testid="npc-count"
+            [showButtons]="true"
+            [min]="1"
+            [max]="20"
+            [ngModel]="countOf(npc.id)"
+            (ngModelChange)="setCount(npc.id, $event)"
+            [ariaLabel]="'combat.start.count' | transloco"
+          />
+        </div>
+      }
+    } @else {
       <p class="hint">{{ "combat.start.noNpcs" | transloco }}</p>
     }
     <button

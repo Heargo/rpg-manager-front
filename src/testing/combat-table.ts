@@ -258,3 +258,13 @@ export async function pickTarget(host: Element, name: string) {
     document.querySelector(`[data-testid="target"][data-name="${name}"]`),
   );
 }
+
+/** Opens the start-form multi-select `testid` (`start-characters` or `start-npcs`) under `host` and clicks the option named `name` (the overlay is in the document). */
+export async function pickStart(host: Element, testid: string, name: string) {
+  await click(host.querySelector(`[data-testid="${testid}"]`));
+  await click(
+    document.querySelector(
+      `[data-testid="start-option"][data-name="${name}"]`,
+    ),
+  );
+}

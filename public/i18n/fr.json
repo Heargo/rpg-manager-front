@@ -1479,10 +1479,8 @@
       "title": "Lancer une rencontre",
       "characters": "Personnages",
       "npcs": "PNJ",
-      "pick": "Ajouter",
-      "picked": "Inclus",
-      "fewer": "Un de moins",
-      "more": "Un de plus",
+      "placeholder": "Choisir…",
+      "count": "Nombre d’exemplaires",
       "action": "Lancer la rencontre",
       "noCharacters": "Aucun personnage dans ce monde pour l'instant.",
       "noNpcs": "Aucun PNJ dans le catalogue pour l'instant."

@@ -19,9 +19,12 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
+import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CombatBusiness } from '../../business/combat.business';
+import { startPicks } from '../../helpers/combat-start.rules';
 import { PendingResultView } from '../../models/combat';
 import { CombatActionsComponent } from '../combat-actions/combat-actions.component';
 
@@ -39,6 +42,8 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
     DialogModule,
     InputNumberModule,
     InputTextModule,
+    MultiSelectModule,
+    StoredImageComponent,
     ProgressBarModule,
     CombatActionsComponent,
   ],
@@ -54,11 +59,13 @@ export class CombatGmPanelComponent {
 
   // Start form
   protected readonly chosen = signal<string[]>([]);
+  protected readonly chosenNpcs = signal<string[]>([]);
   protected readonly counts = signal<Record<string, number>>({});
   protected readonly canStart = computed(
-    () =>
-      this.chosen().length > 0 ||
-      Object.values(this.counts()).some((count) => count > 0),
+    () => this.chosen().length > 0 || this.chosenNpcs().length > 0,
+  );
+  protected readonly pickedNpcs = computed(() =>
+    this.combat.$npcs().filter((npc) => this.chosenNpcs().includes(npc.id)),
   );
 
   // Running encounter
@@ -87,39 +94,39 @@ export class CombatGmPanelComponent {
     return this.combat.rewards();
   });
 
-  protected toggleCharacter(id: string): void {
-    this.chosen.update((ids) =>
-      ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id],
+  protected pickNpcs(ids: string[] | null): void {
+    const picked = ids ?? [];
+    this.chosenNpcs.set(picked);
+    this.counts.update((counts) =>
+      Object.fromEntries(
+        Object.entries(counts).filter(([id]) => picked.includes(id)),
+      ),
     );
   }
 
   protected countOf(npcId: string): number {
-    return this.counts()[npcId] ?? 0;
+    return this.counts()[npcId] ?? 1;
   }
 
-  protected changeCount(npcId: string, by: number): void {
-    this.counts.update((counts) => ({
-      ...counts,
-      [npcId]: Math.max(0, Math.min(20, (counts[npcId] ?? 0) + by)),
-    }));
+  protected setCount(npcId: string, value: number | null): void {
+    this.counts.update((counts) => ({ ...counts, [npcId]: value ?? 1 }));
+  }
+
+  protected initial(name: string): string {
+    return name.charAt(0).toUpperCase();
   }
 
   protected async start(): Promise<void> {
-    const npcs = this.combat
-      .$npcs()
-      .filter((npc) => this.countOf(npc.id) > 0)
-      .map((npc) => ({
-        npcId: npc.id,
-        count: this.countOf(npc.id),
-        side: npc.roles.includes('enemy')
-          ? ('enemy' as const)
-          : ('ally' as const),
-      }));
-    const started = await this.run(() =>
-      this.combat.start({ characterIds: this.chosen(), npcs }),
+    const picks = startPicks(
+      this.chosen(),
+      this.chosenNpcs(),
+      this.counts(),
+      this.combat.$npcs(),
     );
+    const started = await this.run(() => this.combat.start(picks));
     if (started) {
       this.chosen.set([]);
+      this.chosenNpcs.set([]);
       this.counts.set({});
     }
   }

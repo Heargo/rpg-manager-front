@@ -2,19 +2,22 @@ import {
   click,
   combatTable,
   mount,
+  pickStart,
   pickTarget,
   typeNumber,
 } from '../../../../../testing/combat-table';
 import { settle } from '../../../../../testing/game-device';
+import { NpcCatalogueBusiness } from '../../../npc/business/npc-catalogue.business';
 import { CombatGmPanelComponent } from './combat-gm-panel.component';
 
 /**
  * Contract: `app-combat-gm-panel` (no inputs) runs on the GM's device (host) against the real `CombatBusiness`. Elements are found by
  * `data-testid` / `data-action`; buttons are clicked, p-inputNumber fields are typed into (their wrapper carries the testid).
  *
- * - No encounter: `[data-testid="start-form"]` with one `[data-testid="start-character"]` per world character (`data-name`, toggled by clicking its
- *   `[data-action="toggle-character"]`), one `[data-testid="start-npc"]` per catalogue NPC (`data-name`, `[data-action="npc-plus"]` adds one to the count,
- *   `[data-action="npc-minus"]` removes one, `[data-field="npc-count"]` shows it) and `[data-action="start"]`.
+ * - No encounter: `[data-testid="start-form"]` with two multi-selects, `[data-testid="start-characters"]` (the room's characters) and `[data-testid="start-npcs"]`
+ *   (catalogue NPCs); click opens one, its options `[data-testid="start-option"]` (`data-name`) are in the document, see `pickStart`. Each picked NPC gets a
+ *   `[data-testid="start-npc"]` row (`data-name`) with a count number input `[data-testid="npc-count"]` (default 1). `[data-action="start"]` is disabled
+ *   while nothing is picked. An empty catalogue shows its hint (`combat.start.noCharacters`, `combat.start.noNpcs`) instead of the multi-select.
  * - Encounter: `[data-testid="combatant"]` rows in turn order (`data-name`, `data-active="true"` on the active one, `data-down="true"` when down) with
  *   `[data-field="life-bar"]` (`data-percent`), `[data-field="initiative"]`, `[data-field="status"]` (one per status), and a round label `[data-field="round"]`.
  * - The active row also carries `[data-testid="active-row"]`: `[role="tab"]` per action type labelled `Name (left/count)` (click `[data-action="tick"]` to use one), `[data-testid="skill"]` (`data-name`, `data-available="false"` when on cooldown or unaffordable; text = the preview
@@ -63,27 +66,58 @@ describe('CombatGmPanelComponent', () => {
     expect(el.querySelector('[data-testid="start-form"]')).not.toBeNull();
     expect(el.querySelector('[data-testid="combatant"]')).toBeNull();
 
-    await click(
-      el.querySelector(
-        '[data-testid="start-character"][data-name="Ada"] [data-action="toggle-character"]',
-      ),
-    );
-    await click(
-      el.querySelector(
-        '[data-testid="start-character"][data-name="Bob"] [data-action="toggle-character"]',
-      ),
-    );
+    await pickStart(el, 'start-characters', 'Ada');
+    await pickStart(el, 'start-characters', 'Bob');
+    await pickStart(el, 'start-npcs', 'Goblin');
     const goblin = '[data-testid="start-npc"][data-name="Goblin"]';
-    await click(el.querySelector(`${goblin} [data-action="npc-plus"]`));
-    await click(el.querySelector(`${goblin} [data-action="npc-plus"]`));
-    expect(clean(el.querySelector(`${goblin} [data-field="npc-count"]`))).toBe(
-      '2',
-    );
+    expect(el.querySelector(goblin)).not.toBeNull();
+    expect(
+      el.querySelector<HTMLInputElement>(
+        `${goblin} [data-testid="npc-count"] input`,
+      )!.value,
+    ).toBe('1');
+    await typeNumber(el.querySelector(`${goblin} [data-testid="npc-count"]`)!, 2);
     await click(el.querySelector('[data-action="start"]'));
 
     expect(names(el)).toEqual(['Ada', 'Bob', 'Goblin 1', 'Goblin 2']);
     expect(table.state(table.ada).combatants).toHaveLength(4);
     expect(el.querySelector('[data-testid="start-form"]')).toBeNull();
+  });
+
+  it('starts with the default count of one copy per picked NPC', async () => {
+    await open();
+    await pickStart(el, 'start-npcs', 'Goblin');
+    await click(el.querySelector('[data-action="start"]'));
+    expect(names(el)).toEqual(['Goblin']);
+  });
+
+  it('drops the count row of an NPC that is unpicked', async () => {
+    await open();
+    await pickStart(el, 'start-npcs', 'Goblin');
+    expect(el.querySelector('[data-testid="start-npc"]')).not.toBeNull();
+    await pickStart(el, 'start-npcs', 'Goblin');
+    expect(el.querySelector('[data-testid="start-npc"]')).toBeNull();
+  });
+
+  it('disables Start while nothing is picked', async () => {
+    await open();
+    const start = () => el.querySelector<HTMLButtonElement>('[data-action="start"]')!;
+    expect(start().disabled).toBe(true);
+    await pickStart(el, 'start-characters', 'Ada');
+    expect(start().disabled).toBe(false);
+    await pickStart(el, 'start-characters', 'Ada');
+    expect(start().disabled).toBe(true);
+  });
+
+  it('shows the hint instead of the NPC multi-select when the catalogue is empty', async () => {
+    await table.gm.injector
+      .get(NpcCatalogueBusiness)
+      .remove(table.goblinNpc.id);
+    await settle();
+    await open();
+    expect(el.querySelector('[data-testid="start-npcs"]')).toBeNull();
+    expect(el.querySelector('[data-testid="start-characters"]')).not.toBeNull();
+    expect(clean(el.querySelector('.hint'))).toContain('No NPC in the catalogue yet.');
   });
 
   it('shows the turn order with the active row, life bar, initiative, statuses and round', async () => {
