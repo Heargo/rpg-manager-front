@@ -317,6 +317,22 @@ type PresetTarget = 'success' | number;
                         'skill.editor.help.actionType' | transloco
                       }}</small>
                     </div>
+                    <div class="field">
+                      <label for="skill-range">{{
+                        'skill.editor.fields.range' | transloco
+                      }}</label>
+                      <p-inputnumber
+                        inputId="skill-range"
+                        data-field="range"
+                        [min]="1"
+                        [showButtons]="true"
+                        [ngModel]="draft().range ?? null"
+                        (ngModelChange)="setRange($event)"
+                      />
+                      <small class="hint">{{
+                        'skill.editor.help.range' | transloco
+                      }}</small>
+                    </div>
                   </div>
                   <div class="row">
                     <div class="field">
@@ -1320,9 +1336,10 @@ export class SkillEditorComponent {
 
   /** A passive skill has no target, cost nor cooldown; an active one starts with a target. */
   protected setType(type: Skill['type']): void {
-    const { target, cost, cooldown, roll, success, actionType, ...rest } =
+    const { target, cost, cooldown, roll, success, actionType, range, ...rest } =
       this.draft();
     void actionType;
+    void range;
     void roll;
     void success;
     void target;
@@ -1350,6 +1367,12 @@ export class SkillEditorComponent {
     const { actionType, ...rest } = this.draft();
     void actionType;
     this.setDraft(name ? { ...rest, actionType: name } : rest);
+  }
+
+  protected setRange(range: number | null): void {
+    const { range: previous, ...rest } = this.draft();
+    void previous;
+    this.setDraft(range ? { ...rest, range } : rest);
   }
 
   protected setCostAttribute(attribute: string | null): void {

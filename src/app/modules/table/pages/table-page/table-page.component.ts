@@ -31,6 +31,8 @@ import { StoredImageComponent } from '../../../../core/components/stored-image/s
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterBusiness } from '../../../character/business/character.business';
 import { CombatBusiness } from '../../../combat/business/combat.business';
+import { CombatTargetingBusiness } from '../../../combat/business/combat-targeting.business';
+import { CombatGridComponent } from '../../../combat/components/combat-grid/combat-grid.component';
 import { CombatGmPanelComponent } from '../../../combat/components/combat-gm-panel/combat-gm-panel.component';
 import { CombatPlayerViewComponent } from '../../../combat/components/combat-player-view/combat-player-view.component';
 import { CharacterSummaryComponent } from '../../../character/components/character-summary/character-summary.component';
@@ -70,6 +72,7 @@ const NARROW_QUERY = '(max-width: 960px)';
     HostOfflineIconComponent,
     CharacterSummaryComponent,
     CombatGmPanelComponent,
+    CombatGridComponent,
     CombatPlayerViewComponent,
     DiceRollerComponent,
     DiceOverlayComponent,
@@ -82,6 +85,16 @@ export class TablePageComponent {
   protected readonly table = inject(TableBusiness);
   protected readonly characters = inject(CharacterBusiness);
   protected readonly combat = inject(CombatBusiness);
+  protected readonly targeting = inject(CombatTargetingBusiness);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** An aimed skill never outlives the encounter nor the page. */
+  private readonly clearTargeting = (() => {
+    this.destroyRef.onDestroy(() => this.targeting.clear());
+    effect(() => {
+      if (!this.combat.$state()) this.targeting.clear();
+    });
+  })();
   private readonly messages = inject(MessageService);
   private readonly router = inject(Router);
 

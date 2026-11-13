@@ -269,7 +269,8 @@
         "gridSize": "Grid size (columns × rows)",
         "movement": "Movement per turn (formula)",
         "basicAttack": "Basic attack damage (formula, optional)",
-        "defence": "Defence (formula, optional)"
+        "defence": "Defence (formula, optional)",
+        "gridMap": "Grid map image"
       }
     }
   },
@@ -1077,7 +1078,8 @@
         "successValue": "Succeeds when the total reaches",
         "successFormula": "Succeeds when this is 0 or more",
         "kind": "Effect type",
-        "attribute": "Target attribute"
+        "attribute": "Target attribute",
+        "range": "Range (cells)"
       },
       "issue": {
         "name": "Give the skill a name.",
@@ -1090,7 +1092,8 @@
         "roll_count": "Roll 1 to 100 dice.",
         "roll_faces": "Dice have 2 to 1000 faces.",
         "success_value": "The threshold is a whole number.",
-        "success_formula": "The success formula is not valid (roll, skillLevel, level, attribute names, target_<attribute>)."
+        "success_formula": "The success formula is not valid (roll, skillLevel, level, attribute names, target_<attribute>).",
+        "range": "The range is a whole number of cells, 1 or more, on an active skill."
       },
       "help": {
         "description": "Shown in the catalogue and on the sheet.",
@@ -1107,7 +1110,8 @@
         "successMode": "When the skill works: always, above a total, or by formula.",
         "successValue": "The dice total needed to succeed.",
         "successFormula": "A formula; the skill succeeds when it gives 0 or more.",
-        "effects": "What the skill does when it works. Each amount is a formula."
+        "effects": "What the skill does when it works. Each amount is a formula.",
+        "range": "How far it reaches on the combat grid; empty shows no range."
       },
       "sections": {
         "identity": "Identity",
@@ -1417,7 +1421,8 @@
       "damage": "{{amount}} damage",
       "heal": "{{amount}} healing",
       "modify": "{{amount}} {{attribute}} for {{duration}} turns",
-      "cooldown": "cooldown {{turns}}"
+      "cooldown": "cooldown {{turns}}",
+      "range": "range {{ cells }}"
     },
     "actions": {
       "use": "Use",
@@ -1455,6 +1460,9 @@
       "loot": "Loot",
       "confirm": "End the encounter",
       "hint": "The money and the loot are for you to hand out at the table."
+    },
+    "grid": {
+      "label": "Combat grid"
     }
   }
 }

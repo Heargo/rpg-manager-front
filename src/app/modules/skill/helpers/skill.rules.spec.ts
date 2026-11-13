@@ -2,7 +2,7 @@ import { Character, Sheet } from '../../world/models/world';
 import { Npc } from '../../npc/models/npc';
 import { Skill } from '../models/skill';
 import { BUILT_IN_PRESETS, applyPreset, placeholders } from './formula-preset.rules';
-import { SkillAmountScope, evaluateSkillAmount, filterSkills, parseSkillJson, previewSkillAmount, skillUsages, validateSkill } from './skill.rules';
+import { SkillAmountScope, evaluateSkillAmount, filterSkills, parseSkillJson, previewSkillAmount, skillToJson, skillUsages, validateSkill } from './skill.rules';
 
 const fireball: Skill = {
   id: 's1', name: 'Fireball', description: 'Boom.', rarity: 'rare', type: 'active', maxLevel: 3, pointCost: 2,
@@ -209,5 +209,35 @@ describe('the optional action type of a skill', () => {
   it('is refused in JSON when it is not a string', () => {
     const text = JSON.stringify({ ...jab, actionType: 3 });
     expect(parseSkillJson(text, jab, names).skill).toBeUndefined();
+  });
+});
+
+describe('skill range', () => {
+  const bolt: Skill = { ...fireball, range: 4 };
+
+  it('is optional and accepted as a positive whole number on an active skill', () => {
+    expect(validateSkill(fireball, names)).toEqual([]);
+    expect(validateSkill(bolt, names)).toEqual([]);
+    expect(validateSkill({ ...bolt, range: 1 }, names)).toEqual([]);
+  });
+
+  it('is refused when it is zero, negative or fractional', () => {
+    for (const range of [0, -2, 2.5]) {
+      expect(validateSkill({ ...bolt, range }, names)).toEqual([{ field: 'range', code: 'invalid' }]);
+    }
+  });
+
+  it('is refused on a passive skill', () => {
+    expect(validateSkill({ ...toughness, range: 3 }, names)).toEqual([{ field: 'range', code: 'invalid' }]);
+  });
+
+  it('round-trips through the JSON tab', () => {
+    const text = skillToJson(bolt);
+    expect(parseSkillJson(text, bolt, names).skill?.range).toBe(4);
+  });
+
+  it('is refused in JSON when it is not a number', () => {
+    const text = JSON.stringify({ ...bolt, range: 'far' });
+    expect(parseSkillJson(text, bolt, names).skill).toBeUndefined();
   });
 });

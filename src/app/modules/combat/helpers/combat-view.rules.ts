@@ -1,4 +1,5 @@
 import { normalizeName } from '../../../core/helpers/formula';
+import { movementAllowance, placeUnplaced } from './combat-grid.rules';
 import { Npc, NpcRole, NpcVisibility } from '../../npc/models/npc';
 import { World } from '../../world/models/world';
 import {
@@ -29,11 +30,25 @@ export function projectEncounter(
   world: WorldRules,
   full = false,
 ): CombatView {
+  const grid = world.combat?.grid;
+  /** Combatants without a cell (the grid came on mid-fight, or they were just added) stand at their default place. */
+  const placed = grid?.enabled
+    ? placeUnplaced(encounter.combatants, grid)
+    : encounter.combatants;
   return {
     initiativeMode: world.combat?.initiative.mode,
+    ...(world.combat?.grid.enabled && {
+      grid: {
+        columns: world.combat.grid.columns,
+        rows: world.combat.grid.rows,
+        ...(world.combat.grid.imageId !== undefined && {
+          imageId: world.combat.grid.imageId,
+        }),
+      },
+    }),
     round: encounter.round,
     activeId: encounter.combatants[encounter.turn]?.id,
-    combatants: encounter.combatants.map((c) =>
+    combatants: placed.map((c) =>
       projectCombatant(c, encounter.lifeAttribute, world, full),
     ),
     pending: encounter.pending.map((result) =>
@@ -61,6 +76,9 @@ function projectCombatant(
     down: c.down,
     initiative: c.initiative,
     position: c.position,
+    ...(world.combat?.grid.enabled && {
+      movement: movementAllowance(world.combat.movement, c),
+    }),
     actions: c.actions,
   };
   const npc: Npc | undefined = c.npcId

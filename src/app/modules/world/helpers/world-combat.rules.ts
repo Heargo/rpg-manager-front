@@ -134,6 +134,8 @@ export function combatImportProblems(
     typeof grid['rows'] !== 'number'
   )
     problems.push('world.combat.grid is invalid');
+  else if (grid['imageId'] !== undefined && typeof grid['imageId'] !== 'string')
+    problems.push('world.combat.grid is invalid');
   if (typeof value['movement'] !== 'string')
     problems.push('world.combat.movement must be a string');
   for (const key of ['lifeAttribute', 'basicAttack', 'defence'] as const) {

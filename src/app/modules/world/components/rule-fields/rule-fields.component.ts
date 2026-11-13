@@ -16,6 +16,8 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 import { LanguageBusiness } from '../../../../core/business/language.business';
+import { ImagePickerComponent } from '../../../../core/components/image-picker/image-picker.component';
+import { ImageBusiness } from '../../../../core/business/image.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
 import { FormulaChartComponent } from '../../../../core/components/formula-chart/formula-chart.component';
 import {
@@ -66,12 +68,14 @@ const OFFLINE_FEATURES = Object.keys(
     CheckboxModule,
     CoinInputComponent,
     FormulaChartComponent,
+    ImagePickerComponent,
   ],
   templateUrl: './rule-fields.component.html',
   styleUrl: './rule-fields.component.scss',
 })
 export class RuleFieldsComponent {
   protected readonly language = inject(LanguageBusiness);
+  private readonly images = inject(ImageBusiness);
   readonly draft = model.required<WorldDraft>();
   readonly errors = input<WorldDraftErrors>({});
   /** Which sections to show: all, the rules (progression, economy, NPCs) or only the offline features. */
@@ -195,6 +199,20 @@ export class RuleFieldsComponent {
 
   protected setGrid(change: Partial<CombatRules['grid']>): void {
     this.patchCombat({ grid: { ...this.combat().grid, ...change } });
+  }
+
+  protected async pickGridMap(file: File): Promise<void> {
+    try {
+      this.setGrid({ imageId: await this.images.storeUpload(file) });
+    } catch {
+      // Not an image: the grid keeps the map it had.
+    }
+  }
+
+  protected removeGridMap(): void {
+    const { imageId, ...grid } = this.combat().grid;
+    void imageId;
+    this.patchCombat({ grid });
   }
 
   protected setAction(

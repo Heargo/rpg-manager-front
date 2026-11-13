@@ -269,7 +269,8 @@
         "gridSize": "Taille de la grille (colonnes × lignes)",
         "movement": "Déplacement par tour (formule)",
         "basicAttack": "Dégâts de l'attaque de base (formule, facultatif)",
-        "defence": "Défense (formule, facultatif)"
+        "defence": "Défense (formule, facultatif)",
+        "gridMap": "Image de la carte de la grille"
       }
     }
   },
@@ -1077,7 +1078,8 @@
         "successValue": "Réussit quand le total atteint",
         "successFormula": "Réussit quand ceci vaut 0 ou plus",
         "kind": "Type d'effet",
-        "attribute": "Attribut visé"
+        "attribute": "Attribut visé",
+        "range": "Portée (cases)"
       },
       "issue": {
         "name": "Donnez un nom à la compétence.",
@@ -1090,7 +1092,8 @@
         "roll_count": "Lancez de 1 à 100 dés.",
         "roll_faces": "Un dé a de 2 à 1000 faces.",
         "success_value": "Le seuil est un nombre entier.",
-        "success_formula": "La formule de réussite n'est pas valide (roll, skillLevel, level, noms d'attributs, target_<attribut>)."
+        "success_formula": "La formule de réussite n'est pas valide (roll, skillLevel, level, noms d'attributs, target_<attribut>).",
+        "range": "La portée est un nombre entier de cases, 1 ou plus, sur une compétence active."
       },
       "help": {
         "description": "Affichée dans le catalogue et sur la fiche.",
@@ -1107,7 +1110,8 @@
         "successMode": "Quand la compétence fonctionne : toujours, au-dessus d'un total, ou par formule.",
         "successValue": "Le total des dés nécessaire pour réussir.",
         "successFormula": "Une formule ; la compétence réussit quand elle donne 0 ou plus.",
-        "effects": "Ce que fait la compétence quand elle fonctionne. Chaque montant est une formule."
+        "effects": "Ce que fait la compétence quand elle fonctionne. Chaque montant est une formule.",
+        "range": "Jusqu'où elle porte sur la grille de combat ; vide, aucune portée n'est affichée."
       },
       "sections": {
         "identity": "Identité",
@@ -1417,7 +1421,8 @@
       "damage": "{{amount}} dégâts",
       "heal": "{{amount}} soins",
       "modify": "{{amount}} {{attribute}} pendant {{duration}} tours",
-      "cooldown": "récupération {{turns}}"
+      "cooldown": "récupération {{turns}}",
+      "range": "portée {{ cells }}"
     },
     "actions": {
       "use": "Utiliser",
@@ -1455,6 +1460,9 @@
       "loot": "Butin",
       "confirm": "Terminer la rencontre",
       "hint": "L'argent et le butin sont à distribuer à la table."
+    },
+    "grid": {
+      "label": "Grille de combat"
     }
   }
 }

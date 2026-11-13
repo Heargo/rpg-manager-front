@@ -120,6 +120,8 @@ export interface CombatantView {
   down: boolean;
   initiative?: number;
   position?: { x: number; y: number };
+  /** Cells it can move per turn, when the world has a grid. */
+  movement?: number;
   actions: { name: string; count: number; used: number }[];
   level?: number;
   description?: string;
@@ -133,6 +135,8 @@ export interface CombatantView {
 export interface CombatView {
   /** How the world sets initiative, so a player knows whether to type theirs. */
   initiativeMode?: InitiativeMode;
+  /** The world's grid, when it is on. */
+  grid?: { columns: number; rows: number; imageId?: string };
   round: number;
   activeId?: string;
   combatants: CombatantView[];

@@ -1,5 +1,5 @@
 import { CombatRules, WorldDraft, WorldRules } from '../models/world';
-import { createWorld } from './world.factory';
+import { createWorld, remapWorldImages, worldImageIds } from './world.factory';
 import { defaultCombatRules } from './world-combat.rules';
 import { buildWorldExport, parseWorldExport } from './world-export';
 import { validateWorldDraft } from './world-draft.rules';
@@ -192,5 +192,55 @@ describe('world export with combat settings', () => {
       expect(parsed.ok).toBe(false);
       if (!parsed.ok) expect(parsed.errors.some((error) => error.includes('world.combat'))).toBe(true);
     }
+  });
+});
+
+describe('combat grid map image', () => {
+  it('has none by default', () => {
+    expect(defaultCombatRules('Life').grid.imageId).toBeUndefined();
+  });
+
+  it('is saved with the combat settings', () => {
+    const world = createWorld(draft(), () => 'id', 1);
+    const combat: CombatRules = { ...world.combat, grid: { enabled: true, columns: 8, rows: 6, imageId: 'map-1' } };
+    expect(applyWorldRules(world, {
+      attributes: world.attributes,
+      startingStatPoints: 0,
+      startingMoney: 0,
+      levelCurve: world.levelCurve,
+      maxLevel: world.maxLevel,
+      statPointsPerLevel: 1,
+      skillPointsPerLevel: 1,
+      offlineFeatures: world.offlineFeatures,
+      skillRollsEnabled: true,
+      sellAnywhere: false,
+      sellAnywhereRatio: 0.5,
+      combat,
+    } as WorldRules, () => 'new').combat.grid.imageId).toBe('map-1');
+  });
+
+  it('round-trips through the world export', () => {
+    const world = createWorld(draft(), () => 'id', 1);
+    const withMap = { ...world, combat: { ...world.combat, grid: { enabled: true, columns: 8, rows: 6, imageId: 'map-1' } } };
+    const file = buildWorldExport(withMap, { 'map-1': { type: 'image/webp', data: 'AAAA' } }, 9);
+    const parsed = parseWorldExport(JSON.stringify(file));
+    expect(parsed).toEqual({ ok: true, value: file });
+    if (parsed.ok) expect(parsed.value.world.combat.grid.imageId).toBe('map-1');
+  });
+
+  it('refuses an image id that is not a string in an import', () => {
+    const world = createWorld(draft(), () => 'id', 1);
+    const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
+    file.world.combat.grid.imageId = 12;
+    const parsed = parseWorldExport(JSON.stringify(file));
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) expect(parsed.errors.some((error) => error.includes('world.combat'))).toBe(true);
+  });
+
+  it('is one of the images a world points to, and is remapped with them', () => {
+    const world = createWorld(draft(), () => 'id', 1);
+    const withMap = { ...world, combat: { ...world.combat, grid: { enabled: true, columns: 8, rows: 6, imageId: 'map-1' } } };
+    expect(worldImageIds(withMap)).toContain('map-1');
+    expect(remapWorldImages(withMap, new Map([['map-1', 'map-2']])).combat.grid.imageId).toBe('map-2');
   });
 });

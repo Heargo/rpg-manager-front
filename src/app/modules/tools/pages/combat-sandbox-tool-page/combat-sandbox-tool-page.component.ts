@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  effect,
   inject,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -10,6 +12,8 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CombatBusiness } from '../../../combat/business/combat.business';
+import { CombatTargetingBusiness } from '../../../combat/business/combat-targeting.business';
+import { CombatGridComponent } from '../../../combat/components/combat-grid/combat-grid.component';
 import { CombatGmPanelComponent } from '../../../combat/components/combat-gm-panel/combat-gm-panel.component';
 import { CombatPlayerViewComponent } from '../../../combat/components/combat-player-view/combat-player-view.component';
 import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
@@ -23,6 +27,7 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
     ButtonModule,
     CardModule,
     CombatGmPanelComponent,
+    CombatGridComponent,
     CombatPlayerViewComponent,
   ],
   providers: [{ provide: CombatBusiness, useClass: SandboxCombatBusiness }],
@@ -43,6 +48,11 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
           ></button>
         }
       </header>
+      <app-combat-grid
+        data-testid="sandbox-grid"
+        [skillId]="targeting.$skillId()"
+        (targetPicked)="targeting.toggle($event)"
+      />
       <div class="views">
         <p-card [header]="'tools.combat.gm' | transloco">
           <div data-testid="sandbox-gm">
@@ -94,6 +104,16 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
 })
 export class CombatSandboxToolPageComponent {
   protected readonly combat = inject(CombatBusiness);
+  protected readonly targeting = inject(CombatTargetingBusiness);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** An aimed skill never outlives the encounter nor the page. */
+  private readonly clearTargeting = (() => {
+    this.destroyRef.onDestroy(() => this.targeting.clear());
+    effect(() => {
+      if (!this.combat.$state()) this.targeting.clear();
+    });
+  })();
   private readonly messages = inject(MessageService);
 
   /** The sample character and the first enemy of the sandbox catalogue. */

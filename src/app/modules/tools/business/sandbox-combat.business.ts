@@ -84,6 +84,11 @@ export class SandboxCombatBusiness implements CombatTable {
     const sheet = this.sheet();
     return {
       ...world,
+      // The sandbox always shows the encounter on a grid, so the tool lets you try it.
+      combat: {
+        ...world.combat,
+        grid: { ...world.combat.grid, enabled: true },
+      },
       characters: sheet ? [sheet] : [],
       encounter: this.encounter() ?? undefined,
     };

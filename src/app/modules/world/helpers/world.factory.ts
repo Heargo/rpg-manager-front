@@ -116,6 +116,7 @@ export function worldImageIds(world: World): string[] {
   const ids = [
     world.imageId,
     world.illustrationId,
+    world.combat.grid.imageId,
     ...world.quickImageIds,
     ...world.items.map((item) => item.imageId),
     ...world.characters.flatMap((character) => [
@@ -137,6 +138,15 @@ export function remapWorldImages(
     ...world,
     imageId: swap(world.imageId),
     illustrationId: swap(world.illustrationId),
+    combat: {
+      ...world.combat,
+      grid: {
+        ...world.combat.grid,
+        ...(world.combat.grid.imageId !== undefined && {
+          imageId: swap(world.combat.grid.imageId),
+        }),
+      },
+    },
     quickImageIds: world.quickImageIds.map((id) => swap(id)!),
     items: world.items.map((item) => ({
       ...item,

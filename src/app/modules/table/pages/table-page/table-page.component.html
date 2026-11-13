@@ -130,7 +130,13 @@
 
 <!-- What everyone sees in the middle of the table. -->
 <ng-template #illustration>
-  @if (table.$scene()?.illustrationId; as imageId) {
+  @if (combat.$state()?.grid) {
+    <app-combat-grid
+      [combatantId]="myCombatant()?.combatantId"
+      [skillId]="targeting.$skillId()"
+      (targetPicked)="targeting.toggle($event)"
+    />
+  } @else if (table.$scene()?.illustrationId; as imageId) {
     <app-stored-image
       class="illustration"
       [imageId]="imageId"

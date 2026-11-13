@@ -12,17 +12,12 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { Skill } from '../../../skill/models/skill';
 import { CombatBusiness } from '../../business/combat.business';
+import { CombatTargetingBusiness } from '../../business/combat-targeting.business';
 import {
   defaultTargets,
   targetsArePicked,
-  toggleTarget,
 } from '../../helpers/combat-targeting.rules';
 import { CombatAttribute } from '../../models/combat';
-
-interface Casting {
-  skill: Skill;
-  targets: string[];
-}
 
 /** What one combatant can do on its turn: tick the action counters, use a skill (pick its targets) or an item. */
 @Component({
@@ -136,7 +131,7 @@ interface Casting {
             severity="secondary"
             [text]="true"
             [label]="'combat.actions.cancel' | transloco"
-            (click)="casting.set(null)"
+            (click)="targeting.clear()"
           ></button>
         </div>
       </div>
@@ -227,6 +222,7 @@ interface Casting {
 export class CombatActionsComponent {
   private readonly combat = inject(CombatBusiness);
   private readonly messages = inject(MessageService);
+  private readonly targeting = inject(CombatTargetingBusiness);
 
   readonly combatantId = input.required<string>();
   /** The character whose bag the items come from (none for an NPC). */
@@ -236,7 +232,11 @@ export class CombatActionsComponent {
   readonly attributes = input<CombatAttribute[]>([]);
   readonly actions = input<{ name: string; count: number; used: number }[]>([]);
 
-  protected readonly casting = signal<Casting | null>(null);
+  /** The skill this combatant is aiming, if any. */
+  protected readonly casting = computed(() => {
+    const cast = this.targeting.$casting();
+    return cast?.casterId === this.combatantId() ? cast : null;
+  });
   protected readonly busy = signal(false);
   protected readonly combatants = computed(
     () => this.combat.$state()?.combatants ?? [],
@@ -275,10 +275,11 @@ export class CombatActionsComponent {
   }
 
   protected pick(skill: Skill): void {
-    this.casting.set({
+    this.targeting.start(
+      this.combatantId(),
       skill,
-      targets: defaultTargets(skill, this.combatantId(), this.combatants()),
-    });
+      defaultTargets(skill, this.combatantId(), this.combatants()),
+    );
   }
 
   protected picking(skill: Skill): boolean {
@@ -286,12 +287,7 @@ export class CombatActionsComponent {
   }
 
   protected toggle(id: string): void {
-    const cast = this.casting();
-    if (cast)
-      this.casting.set({
-        ...cast,
-        targets: toggleTarget(cast.skill, cast.targets, id),
-      });
+    this.targeting.toggle(id);
   }
 
   protected async confirm(): Promise<void> {
@@ -305,7 +301,7 @@ export class CombatActionsComponent {
         targetIds: cast.targets,
       }),
     );
-    this.casting.set(null);
+    this.targeting.clear();
     this.busy.set(false);
   }
 

@@ -474,6 +474,19 @@
             <small class="error">{{ key | transloco }}</small>
           }
         </div>
+        <div class="field">
+          <label for="combat-grid-map">{{
+            "world.rules.combat.gridMap" | transloco
+          }}</label>
+          <app-image-picker
+            inputId="combat-grid-map"
+            field="grid-map"
+            accept="image/*"
+            [imageId]="combat().grid.imageId"
+            (picked)="pickGridMap($event)"
+            (removed)="removeGridMap()"
+          />
+        </div>
       }
       <div class="field">
         <label for="combat-movement">{{

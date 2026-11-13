@@ -33,7 +33,13 @@ export interface CombatRules {
   };
   /** What a combatant can do on its turn, each with how many per turn. */
   actionTypes: { name: string; count: number }[];
-  grid: { enabled: boolean; columns: number; rows: number };
+  grid: {
+    enabled: boolean;
+    columns: number;
+    rows: number;
+    /** The map drawn under the grid (an image id). */
+    imageId?: string;
+  };
   /** Movement per turn (formula). */
   movement: string;
   /** Damage of a basic attack (formula), none when omitted. */
