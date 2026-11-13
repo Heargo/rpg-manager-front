@@ -8,6 +8,7 @@ import {
   input,
   PendingTasks,
   signal,
+  untracked,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -20,6 +21,7 @@ import {
 } from '@openng/optimus-ui/fileupload';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
+import { PaginatorModule } from '@openng/optimus-ui/paginator';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
@@ -46,6 +48,8 @@ import { SpriteSet } from '../../../sprite/models/sprite-set';
 type Tab = 'details' | 'lists' | 'sprites' | 'publish';
 
 const SAVE_DELAY_MS = 500;
+/** Sprites shown per page: a row holds three selects, so all of them at once freezes the editor. */
+const SPRITES_PER_PAGE = 12;
 const slotKey = (lang: PackLanguage, generator: PackGenerator) =>
   `${lang}-${generator}`;
 
@@ -61,6 +65,7 @@ const slotKey = (lang: PackLanguage, generator: PackGenerator) =>
     FileUploadModule,
     InputTextModule,
     MessageModule,
+    PaginatorModule,
     SelectModule,
     TabsModule,
     TextareaModule,
@@ -215,194 +220,220 @@ const slotKey = (lang: PackLanguage, generator: PackGenerator) =>
               </div>
             </p-tabpanel>
             <p-tabpanel value="lists">
-              <p class="hint">{{ 'packs.creator.listsIntro' | transloco }}</p>
-              @for (lang of languages; track lang) {
-                @for (generator of generators; track generator) {
-                  <section class="list">
-                    <h3>
-                      {{ 'packs.lang.' + lang | transloco }} -
-                      {{ 'packs.generator.' + generator | transloco }}
-                    </h3>
-                    <textarea
-                      pTextarea
-                      class="json"
-                      rows="6"
-                      [attr.data-test]="'wordlist-' + lang + '-' + generator"
-                      [attr.aria-label]="'packs.lang.' + lang | transloco"
-                      [ngModel]="text(lang, generator)"
-                      (ngModelChange)="setText(lang, generator, $event)"
-                    ></textarea>
-                    @if (listErrors(lang, generator); as errors) {
-                      <ul
-                        class="errors"
-                        [attr.data-test]="
-                          'wordlist-error-' + lang + '-' + generator
-                        "
-                      >
-                        @for (error of errors; track error) {
-                          <li>{{ error }}</li>
-                        }
-                      </ul>
-                    }
-                    <div class="actions">
-                      <p-fileupload
-                        mode="basic"
-                        accept=".json,application/json"
-                        [auto]="true"
-                        [customUpload]="true"
-                        chooseIcon="pi pi-upload"
-                        [chooseLabel]="'packs.creator.importFile' | transloco"
-                        (uploadHandler)="importFile(lang, generator, $event)"
-                      />
-                      <p-button
-                        severity="secondary"
-                        icon="pi pi-copy"
-                        [label]="'packs.creator.copyBase' | transloco"
-                        (onClick)="copyBase(lang, generator)"
-                      />
-                      <p-button
-                        severity="secondary"
-                        outlined
-                        icon="pi pi-times"
-                        [label]="'packs.creator.clear' | transloco"
-                        (onClick)="setText(lang, generator, '')"
-                      />
-                    </div>
-                  </section>
+              @if (tab() === 'lists') {
+                <p class="hint">{{ 'packs.creator.listsIntro' | transloco }}</p>
+                @for (lang of languages; track lang) {
+                  @for (generator of generators; track generator) {
+                    <section class="list">
+                      <h3>
+                        {{ 'packs.lang.' + lang | transloco }} -
+                        {{ 'packs.generator.' + generator | transloco }}
+                      </h3>
+                      <textarea
+                        pTextarea
+                        class="json"
+                        rows="6"
+                        [attr.data-test]="'wordlist-' + lang + '-' + generator"
+                        [attr.aria-label]="'packs.lang.' + lang | transloco"
+                        [ngModel]="text(lang, generator)"
+                        (ngModelChange)="setText(lang, generator, $event)"
+                      ></textarea>
+                      @if (listErrors(lang, generator); as errors) {
+                        <ul
+                          class="errors"
+                          [attr.data-test]="
+                            'wordlist-error-' + lang + '-' + generator
+                          "
+                        >
+                          @for (error of errors; track error) {
+                            <li>{{ error }}</li>
+                          }
+                        </ul>
+                      }
+                      <div class="actions">
+                        <p-fileupload
+                          mode="basic"
+                          accept=".json,application/json"
+                          [auto]="true"
+                          [customUpload]="true"
+                          chooseIcon="pi pi-upload"
+                          [chooseLabel]="'packs.creator.importFile' | transloco"
+                          (uploadHandler)="importFile(lang, generator, $event)"
+                        />
+                        <p-button
+                          severity="secondary"
+                          icon="pi pi-copy"
+                          [label]="'packs.creator.copyBase' | transloco"
+                          (onClick)="copyBase(lang, generator)"
+                        />
+                        <p-button
+                          severity="secondary"
+                          outlined
+                          icon="pi pi-times"
+                          [label]="'packs.creator.clear' | transloco"
+                          (onClick)="setText(lang, generator, '')"
+                        />
+                      </div>
+                    </section>
+                  }
                 }
               }
             </p-tabpanel>
             <p-tabpanel value="sprites">
-              <p class="hint">{{ 'packs.creator.spritesIntro' | transloco }}</p>
-              <div class="actions">
-                <p-fileupload
-                  mode="basic"
-                  accept="image/png"
-                  [auto]="true"
-                  [customUpload]="true"
-                  chooseIcon="pi pi-image"
-                  [chooseLabel]="'packs.creator.addPng' | transloco"
-                  (uploadHandler)="addPng($event)"
-                />
-                <p-select
-                  [options]="spriteSets()"
-                  optionLabel="name"
-                  optionValue="id"
-                  [ngModel]="chosenSet()"
-                  (ngModelChange)="chosenSet.set($event)"
-                  [placeholder]="'packs.creator.fromMine' | transloco"
-                  [emptyMessage]="'packs.creator.noSets' | transloco"
-                  [ariaLabel]="'packs.creator.fromMine' | transloco"
-                />
-                <p-button
-                  severity="secondary"
-                  icon="pi pi-plus"
-                  [label]="'packs.creator.addSet' | transloco"
-                  [disabled]="!chosenSet()"
-                  (onClick)="addSet()"
-                />
-              </div>
-              @if (spriteErrors().length) {
-                <ul class="errors" data-test="sprite-errors">
-                  @for (error of spriteErrors(); track error) {
-                    <li>{{ error }}</li>
+              @if (tab() === 'sprites') {
+                <p class="hint">
+                  {{ 'packs.creator.spritesIntro' | transloco }}
+                </p>
+                <div class="actions">
+                  <p-fileupload
+                    mode="basic"
+                    accept="image/png"
+                    [auto]="true"
+                    [customUpload]="true"
+                    chooseIcon="pi pi-image"
+                    [chooseLabel]="'packs.creator.addPng' | transloco"
+                    (uploadHandler)="addPng($event)"
+                  />
+                  <p-select
+                    [options]="spriteSets()"
+                    optionLabel="name"
+                    optionValue="id"
+                    [ngModel]="chosenSet()"
+                    (ngModelChange)="chosenSet.set($event)"
+                    [placeholder]="'packs.creator.fromMine' | transloco"
+                    [emptyMessage]="'packs.creator.noSets' | transloco"
+                    [ariaLabel]="'packs.creator.fromMine' | transloco"
+                  />
+                  <p-button
+                    severity="secondary"
+                    icon="pi pi-plus"
+                    [label]="'packs.creator.addSet' | transloco"
+                    [disabled]="!chosenSet()"
+                    (onClick)="addSet()"
+                  />
+                </div>
+                @if (spriteErrors().length) {
+                  <ul class="errors" data-test="sprite-errors">
+                    @for (error of spriteErrors(); track error) {
+                      <li>{{ error }}</li>
+                    }
+                  </ul>
+                }
+                @if (current.sprites.length > perPage) {
+                  <p-paginator
+                    [rows]="perPage"
+                    [first]="firstSprite()"
+                    [totalRecords]="current.sprites.length"
+                    (onPageChange)="spriteFirst.set($event.first ?? 0)"
+                  />
+                }
+                <ul class="sprites">
+                  @for (entry of pageSprites(); track entry.index) {
+                    <li class="sprite" data-test="sprite-row">
+                      <img
+                        [src]="preview(entry.sprite.image)"
+                        alt=""
+                        width="64"
+                        height="64"
+                      />
+                      <div class="sprite-form">
+                        <label>
+                          {{ 'packs.creator.spriteId' | transloco }}
+                          <input
+                            pInputText
+                            type="text"
+                            [ngModel]="entry.sprite.id"
+                            (ngModelChange)="
+                              patchSprite(entry.index, { id: $event })
+                            "
+                          />
+                        </label>
+                        @if (duplicateId(entry.sprite.id)) {
+                          <small class="error">{{
+                            'packs.creator.duplicateId' | transloco
+                          }}</small>
+                        }
+                        <label>
+                          {{ 'packs.creator.labelEn' | transloco }}
+                          <input
+                            pInputText
+                            type="text"
+                            [ngModel]="entry.sprite.en"
+                            (ngModelChange)="
+                              patchSprite(entry.index, { en: $event })
+                            "
+                          />
+                        </label>
+                        <label>
+                          {{ 'packs.creator.labelFr' | transloco }}
+                          <input
+                            pInputText
+                            type="text"
+                            [ngModel]="entry.sprite.fr"
+                            (ngModelChange)="
+                              patchSprite(entry.index, { fr: $event })
+                            "
+                          />
+                        </label>
+                        <label>
+                          {{ 'packs.creator.spriteType' | transloco }}
+                          <p-select
+                            [options]="typeOptions()"
+                            optionLabel="label"
+                            optionValue="value"
+                            [ngModel]="entry.sprite.type"
+                            (ngModelChange)="
+                              patchSprite(entry.index, { type: $event })
+                            "
+                          />
+                        </label>
+                        <label>
+                          {{ 'packs.creator.spriteSlot' | transloco }}
+                          <p-select
+                            [options]="slotOptions()"
+                            optionLabel="label"
+                            optionValue="value"
+                            [ngModel]="entry.sprite.slot"
+                            (ngModelChange)="
+                              patchSprite(entry.index, { slot: $event })
+                            "
+                          />
+                        </label>
+                        <label>
+                          {{ 'packs.creator.spriteKind' | transloco }}
+                          <p-select
+                            [options]="kindOptions(entry.sprite)"
+                            optionLabel="label"
+                            optionValue="value"
+                            [ngModel]="entry.sprite.kind"
+                            (ngModelChange)="
+                              patchSprite(entry.index, { kind: $event })
+                            "
+                          />
+                        </label>
+                      </div>
+                      @if (entry.sprite.kind !== 'colored') {
+                        <p-button
+                          severity="secondary"
+                          icon="pi pi-palette"
+                          [label]="'packs.creator.editInColorizer' | transloco"
+                          (onClick)="editInColorizer(entry.sprite.id)"
+                        />
+                      }
+                      <p-button
+                        severity="danger"
+                        icon="pi pi-trash"
+                        [label]="'packs.creator.removeSprite' | transloco"
+                        (onClick)="removeSprite(entry.index)"
+                      />
+                    </li>
+                  } @empty {
+                    <li class="hint">
+                      {{ 'packs.creator.noSprites' | transloco }}
+                    </li>
                   }
                 </ul>
               }
-              <ul class="sprites">
-                @for (sprite of current.sprites; track $index; let i = $index) {
-                  <li class="sprite" data-test="sprite-row">
-                    <img
-                      [src]="preview(sprite.image)"
-                      alt=""
-                      width="64"
-                      height="64"
-                    />
-                    <div class="sprite-form">
-                      <label>
-                        {{ 'packs.creator.spriteId' | transloco }}
-                        <input
-                          pInputText
-                          type="text"
-                          [ngModel]="sprite.id"
-                          (ngModelChange)="patchSprite(i, { id: $event })"
-                        />
-                      </label>
-                      @if (duplicateId(sprite.id)) {
-                        <small class="error">{{
-                          'packs.creator.duplicateId' | transloco
-                        }}</small>
-                      }
-                      <label>
-                        {{ 'packs.creator.labelEn' | transloco }}
-                        <input
-                          pInputText
-                          type="text"
-                          [ngModel]="sprite.en"
-                          (ngModelChange)="patchSprite(i, { en: $event })"
-                        />
-                      </label>
-                      <label>
-                        {{ 'packs.creator.labelFr' | transloco }}
-                        <input
-                          pInputText
-                          type="text"
-                          [ngModel]="sprite.fr"
-                          (ngModelChange)="patchSprite(i, { fr: $event })"
-                        />
-                      </label>
-                      <label>
-                        {{ 'packs.creator.spriteType' | transloco }}
-                        <p-select
-                          [options]="typeOptions()"
-                          optionLabel="label"
-                          optionValue="value"
-                          [ngModel]="sprite.type"
-                          (ngModelChange)="patchSprite(i, { type: $event })"
-                        />
-                      </label>
-                      <label>
-                        {{ 'packs.creator.spriteSlot' | transloco }}
-                        <p-select
-                          [options]="slotOptions()"
-                          optionLabel="label"
-                          optionValue="value"
-                          [ngModel]="sprite.slot"
-                          (ngModelChange)="patchSprite(i, { slot: $event })"
-                        />
-                      </label>
-                      <label>
-                        {{ 'packs.creator.spriteKind' | transloco }}
-                        <p-select
-                          [options]="kindOptions(sprite)"
-                          optionLabel="label"
-                          optionValue="value"
-                          [ngModel]="sprite.kind"
-                          (ngModelChange)="patchSprite(i, { kind: $event })"
-                        />
-                      </label>
-                    </div>
-                    @if (sprite.kind !== 'colored') {
-                      <p-button
-                        severity="secondary"
-                        icon="pi pi-palette"
-                        [label]="'packs.creator.editInColorizer' | transloco"
-                        (onClick)="editInColorizer(sprite.id)"
-                      />
-                    }
-                    <p-button
-                      severity="danger"
-                      icon="pi pi-trash"
-                      [label]="'packs.creator.removeSprite' | transloco"
-                      (onClick)="removeSprite(i)"
-                    />
-                  </li>
-                } @empty {
-                  <li class="hint">
-                    {{ 'packs.creator.noSprites' | transloco }}
-                  </li>
-                }
-              </ul>
             </p-tabpanel>
             <p-tabpanel value="publish">
               <p class="hint">{{ 'packs.creator.publishIntro' | transloco }}</p>
@@ -555,6 +586,21 @@ export class PackDraftPageComponent {
   protected readonly publishing = signal<'install' | 'export' | null>(null);
   /** The word list text of each language and generator, as typed. */
   private readonly texts = signal<Record<string, string>>({});
+  protected readonly perPage = SPRITES_PER_PAGE;
+  protected readonly spriteFirst = signal(0);
+  /** Index of the first sprite shown, kept inside the draft when sprites are removed. */
+  protected readonly firstSprite = computed(() => {
+    const count = this.draft()?.sprites.length ?? 0;
+    const last = Math.max(0, Math.ceil(count / SPRITES_PER_PAGE) - 1);
+    return Math.min(this.spriteFirst(), last * SPRITES_PER_PAGE);
+  });
+  /** The sprites of the current page, with their index in the draft. */
+  protected readonly pageSprites = computed(() => {
+    const first = this.firstSprite();
+    return (this.draft()?.sprites ?? [])
+      .slice(first, first + SPRITES_PER_PAGE)
+      .map((sprite, i) => ({ sprite, index: first + i }));
+  });
 
   private saveTimer: ReturnType<typeof setTimeout> | undefined;
   private queue: Promise<unknown> = Promise.resolve();
@@ -582,7 +628,8 @@ export class PackDraftPageComponent {
     effect(() => {
       const id = this.draftId();
       // Save the previous draft's pending edits before another one replaces it.
-      void this.flush().then(() => this.load(id));
+      // Untracked: the draft changing must not reload it.
+      void untracked(() => this.flush()).then(() => this.load(id));
     });
     effect(() => {
       const id = this.draft()?.details.id ?? '';
@@ -601,6 +648,7 @@ export class PackDraftPageComponent {
 
   private async load(id: string): Promise<void> {
     this.missing.set(false);
+    this.spriteFirst.set(0);
     try {
       const draft = await this.creator.getDraft(id);
       if (!draft) {
@@ -818,6 +866,10 @@ export class PackDraftPageComponent {
 
   private adopt(sprite: DraftSprite): void {
     this.change((d) => ({ ...d, sprites: [...d.sprites, sprite] }));
+    const count = this.draft()?.sprites.length ?? 0;
+    this.spriteFirst.set(
+      Math.floor((count - 1) / SPRITES_PER_PAGE) * SPRITES_PER_PAGE,
+    );
   }
 
   protected async addPng(event: FileUploadHandlerEvent): Promise<void> {
