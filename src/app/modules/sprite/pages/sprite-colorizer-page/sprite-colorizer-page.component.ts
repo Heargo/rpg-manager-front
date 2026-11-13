@@ -23,6 +23,7 @@ import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { SpriteColorizerBusiness } from '../../business/sprite-colorizer.business';
+import { brushCursor } from '../../helpers/brush-cursor';
 import { gradientColor } from '../../helpers/gradient-mapping';
 import { isBuiltInPreset } from '../../helpers/presets';
 import { shapeColor, shapeCss } from '../../helpers/shape-colors';
@@ -92,6 +93,17 @@ export class SpriteColorizerPageComponent {
   protected readonly editingId = signal<string | null>(null);
   protected readonly presetName = signal('');
   protected readonly pointer = signal<{ x: number; y: number } | null>(null);
+  /** The pixel under a mouse or pen, for the brush outline. */
+  private readonly hovered = signal<{ x: number; y: number } | null>(null);
+  protected readonly brushCursor = computed(() =>
+    this.panMode()
+      ? null
+      : brushCursor(
+          this.business.$tool(),
+          this.business.$brush(),
+          this.hovered(),
+        ),
+  );
 
   protected readonly tools: { id: SpriteTool; icon: string; label: string }[] =
     [
@@ -135,6 +147,11 @@ export class SpriteColorizerPageComponent {
     const last = vertices[vertices.length - 1];
     return `${last.x},${last.y} ${at.x},${at.y} ${first.x},${first.y}`;
   });
+
+  protected onPointerLeave(): void {
+    this.pointer.set(null);
+    this.hovered.set(null);
+  }
 
   private drag: { kind: 'pan' | 'paint'; x: number; y: number } | null = null;
   private spaceHeld = false;
@@ -319,6 +336,7 @@ export class SpriteColorizerPageComponent {
   }
 
   protected onPointerDown(event: PointerEvent): void {
+    this.hovered.set(this.pixelAt(event));
     const target = event.currentTarget as HTMLElement;
     if (event.button === 1 || this.panMode() || this.spaceHeld) {
       this.drag = { kind: 'pan', x: event.clientX, y: event.clientY };
@@ -372,6 +390,7 @@ export class SpriteColorizerPageComponent {
   }
 
   protected onPointerMove(event: PointerEvent): void {
+    this.hovered.set(this.pixelAt(event));
     if (
       this.business.$tool() === 'polygon' &&
       this.business.$polygonVertices().length
@@ -391,7 +410,8 @@ export class SpriteColorizerPageComponent {
     if (at) this.business.strokeTo(at.x, at.y);
   }
 
-  protected onPointerUp(): void {
+  protected onPointerUp(event?: PointerEvent): void {
+    if (event?.pointerType === 'touch') this.hovered.set(null);
     if (this.drag?.kind === 'paint') this.business.endStroke();
     this.drag = null;
   }

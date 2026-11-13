@@ -131,9 +131,9 @@
         (wheel)="onWheel($event)"
         (pointerdown)="onPointerDown($event)"
         (pointermove)="onPointerMove($event)"
-        (pointerup)="onPointerUp()"
-        (pointercancel)="onPointerUp()"
-        (pointerleave)="pointer.set(null)"
+        (pointerup)="onPointerUp($event)"
+        (pointercancel)="onPointerUp($event)"
+        (pointerleave)="onPointerLeave()"
         (dblclick)="onDoubleClick($event)"
         (contextmenu)="$event.preventDefault()"
       >
@@ -161,6 +161,22 @@
                     [class.first]="$first"
                   />
                 }
+              }
+              @if (brushCursor(); as cursor) {
+                @if (cursor.outer) {
+                  <circle
+                    class="brush-outer"
+                    [attr.cx]="cursor.cx"
+                    [attr.cy]="cursor.cy"
+                    [attr.r]="cursor.outer"
+                  />
+                }
+                <circle
+                  class="brush"
+                  [attr.cx]="cursor.cx"
+                  [attr.cy]="cursor.cy"
+                  [attr.r]="cursor.radius"
+                />
               }
             </svg>
           </div>

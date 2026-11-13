@@ -1,5 +1,12 @@
 import { SelectionMode } from '../models/sprite';
 
+/** Radius of the disc a brush paints, from pixel centre to pixel centre: hardness 0..1 shrinks it to half the size. */
+export function brushRadius(size: number, hardness: number): number {
+  return (
+    (Math.max(1, size) / 2) * (0.5 + 0.5 * Math.min(1, Math.max(0, hardness)))
+  );
+}
+
 /** Stamps a round brush into `mask` (in place). Size is the diameter in pixels; hardness 0..1 shrinks the disc. */
 export function stampBrushInPlace(
   mask: Uint8Array,
@@ -10,8 +17,7 @@ export function stampBrushInPlace(
   size: number,
   hardness: number,
 ): void {
-  const radius =
-    (Math.max(1, size) / 2) * (0.5 + 0.5 * Math.min(1, Math.max(0, hardness)));
+  const radius = brushRadius(size, hardness);
   const reach = Math.ceil(radius);
   const limit = radius * radius;
   for (let dy = -reach; dy <= reach; dy++) {

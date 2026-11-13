@@ -269,7 +269,18 @@ h2 {
     stroke-dasharray: 6 4;
     opacity: 0.8;
   }
-  circle {
+  .brush,
+  .brush-outer {
+    fill: none;
+    stroke: var(--p-content-background);
+    stroke-width: 1;
+    filter: drop-shadow(0 0 1px rgb(0 0 0 / 0.9));
+  }
+  .brush-outer {
+    stroke-dasharray: 3 3;
+    opacity: 0.8;
+  }
+  circle:not(.brush, .brush-outer) {
     fill: var(--p-content-background);
     &.first {
       fill: var(--p-primary-color);
