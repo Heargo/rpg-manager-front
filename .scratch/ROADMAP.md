@@ -167,3 +167,20 @@ Tickets in `ui-feedback-3/` (G). Bugs and small visual fixes first, then the sha
 | 74 | **G09** Skill editor: readable form, variables help | G11 |
 | 75 | **G10** Formula presets for skills | G09 |
 | 76 | **G12** Skill form: modern layout | G09 |
+
+## Phase 11: UI feedback round 4 (2026-11-13)
+
+Tickets in `ui-feedback-4/` (H). Colorizer bugs first, then the bundled sprites and what builds on them, the catalogue and combat changes, the user documentation last (screenshots need the finished features).
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 77 | **H01** Sprite colorizer: no page scroll while working | none |
+| 78 | **H02** Sprite colorizer: brush size on the canvas | none |
+| 79 | **H03** Bundled grayscale sprites, demo axe, credits | none |
+| 80 | **H04** Saved sprites and masks (sprite sets) | H03 |
+| 81 | **H05** Random item images from sprite sets | H04 |
+| 82 | **H06** Item catalogue: context menu on the clicked item | none |
+| 83 | **H07** Optional combat steps in World rules | none |
+| 84 | **H08** User documentation: Starlight site, theme, /docs | none |
+| 85 | **H09** Doc screenshots with Playwright | H08 |
+| 86 | **H10** Documentation content per module | H08, H09 |
