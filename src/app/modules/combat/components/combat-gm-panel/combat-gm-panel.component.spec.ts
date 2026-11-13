@@ -87,6 +87,8 @@ describe('CombatGmPanelComponent', () => {
   });
 
   it('shows the turn order with the active row, life bar, initiative, statuses and round', async () => {
+    table.destroy();
+    table = await combatTable('typed');
     await table.start();
     await table
       .combat(table.gm)
@@ -120,6 +122,8 @@ describe('CombatGmPanelComponent', () => {
   });
 
   it('types an initiative for a combatant', async () => {
+    table.destroy();
+    table = await combatTable('typed');
     await table.start();
     await open();
     const goblin = row(el, 'Goblin');
@@ -363,6 +367,71 @@ describe('CombatGmPanelComponent', () => {
     expect(table.combat(table.bob).$state()).toBeNull();
     expect(table.record('ada').xp).toBe(20);
     expect(table.record('bob').xp).toBe(20);
+  });
+
+  describe('initiative input by mode', () => {
+    const inputs = () => ({
+      input: el.querySelector('[data-testid="initiative-input"]'),
+      set: el.querySelector('[data-action="initiative-set"]'),
+      value: el.querySelector('[data-field="initiative"]'),
+    });
+    const base = {
+      initiative: true,
+      actionCounters: true,
+      gmValidation: true,
+      defence: true,
+      rewards: true,
+    };
+
+    it('shows the initiative input and set button on every row in typed mode', async () => {
+      table.destroy();
+      table = await combatTable('typed');
+      await table.start();
+      await open();
+
+      expect(
+        el.querySelectorAll('[data-testid="initiative-input"]'),
+      ).toHaveLength(3);
+      expect(
+        el.querySelectorAll('[data-action="initiative-set"]'),
+      ).toHaveLength(3);
+    });
+
+    it('shows the rolled value but no input in rolled mode', async () => {
+      table.destroy();
+      table = await combatTable('rolled');
+      await table.start();
+      await open();
+
+      const { input, set, value } = inputs();
+      expect(input).toBeNull();
+      expect(set).toBeNull();
+      expect(value).not.toBeNull();
+    });
+
+    it('shows neither value nor input in free mode', async () => {
+      await table.start();
+      await open();
+
+      const { input, set, value } = inputs();
+      expect(input).toBeNull();
+      expect(set).toBeNull();
+      expect(value).toBeNull();
+    });
+
+    it('shows neither value nor input when the initiative step is off, even in typed mode', async () => {
+      table.destroy();
+      table = await combatTable('typed', {
+        steps: { ...base, initiative: false },
+      });
+      await table.start();
+      await open();
+
+      const { input, set, value } = inputs();
+      expect(input).toBeNull();
+      expect(set).toBeNull();
+      expect(value).toBeNull();
+    });
   });
 
   describe('optional steps', () => {

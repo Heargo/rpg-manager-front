@@ -170,28 +170,32 @@
             [attr.aria-label]="'combat.drag' | transloco"
           ></i>
           <strong class="name">{{ combatant.name }}</strong>
-          <span class="initiative" data-field="initiative">
-            <i class="pi pi-bolt"></i>{{ combatant.initiative ?? "—" }}
-          </span>
-          <span class="initiative-edit">
-            <p-inputnumber
-              data-testid="initiative-input"
-              size="small"
-              [ngModel]="initiativeOf(combatant.id)"
-              (ngModelChange)="setInitiativeDraft(combatant.id, $event)"
-              [placeholder]="'combat.initiative.label' | transloco"
-            />
-            <button
-              pButton
-              type="button"
-              data-action="initiative-set"
-              size="small"
-              severity="secondary"
-              icon="pi pi-check"
-              [ariaLabel]="'combat.initiative.set' | transloco"
-              (click)="setInitiative(combatant.id)"
-            ></button>
-          </span>
+          @if (combat.$initiativeMode() !== "free") {
+            <span class="initiative" data-field="initiative">
+              <i class="pi pi-bolt"></i>{{ combatant.initiative ?? "—" }}
+            </span>
+          }
+          @if (combat.$initiativeMode() === "typed") {
+            <span class="initiative-edit">
+              <p-inputnumber
+                data-testid="initiative-input"
+                size="small"
+                [ngModel]="initiativeOf(combatant.id)"
+                (ngModelChange)="setInitiativeDraft(combatant.id, $event)"
+                [placeholder]="'combat.initiative.label' | transloco"
+              />
+              <button
+                pButton
+                type="button"
+                data-action="initiative-set"
+                size="small"
+                severity="secondary"
+                icon="pi pi-check"
+                [ariaLabel]="'combat.initiative.set' | transloco"
+                (click)="setInitiative(combatant.id)"
+              ></button>
+            </span>
+          }
           <p-progressbar
             class="life"
             data-field="life-bar"

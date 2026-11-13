@@ -200,3 +200,19 @@ Tickets in `content-packs/` (K). Status: validated (2026-11-13), every ticket re
 | 92b | **K08** Pack creator: the colorizer link (split from K07) (done) | K07 |
 | 93 | **K06** Documentation: using and creating packs (done) | K04, K05, K07, K08 |
 | 94 | **K09** Duplicate a pack and Packs page redesign (user request) (done) | none |
+
+## Phase 13: combat made easy (2026-11-13)
+
+Tickets in `combat-ux/` (C). Status: proposed (2026-11-13); the user's answers are in the spec (Decisions), the rest is marked "assumed". Small rule fixes first, then the turn actions, the start form and the GM layout, grid moves and placement, the shared rolls last (they sit on the new layout).
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 95 | **C01** Initiative input only when it can be typed (done) | none |
+| 96 | **C02** Player actions only on their own turn | none |
+| 97 | **C03** Action tabs replace the counters | C02 |
+| 98 | **C04** Target picking as a multi-select | none |
+| 99 | **C05** Start form: characters and NPCs multi-selects | none |
+| 100 | **C06** GM table: collapsible Dice, Combat, Notes | C05 |
+| 101 | **C07** Grid moves: GM anywhere, players on their turn | C02 |
+| 102 | **C08** Place tokens before starting | C05, C07 |
+| 103 | **C09** Shared combat rolls and recap banner | C06 |
