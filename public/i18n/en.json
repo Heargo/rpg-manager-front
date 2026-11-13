@@ -484,8 +484,7 @@
       "toolIntro": "A sample catalogue on the default attributes. Nothing is saved.",
       "create": "New item",
       "edit": "Edit",
-      "view": "View",
-      "selected": "Selected item"
+      "view": "View"
     },
     "errors": {
       "invalid": "This item can't be given.",

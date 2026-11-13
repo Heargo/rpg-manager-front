@@ -484,8 +484,7 @@
       "toolIntro": "Un catalogue d'exemple sur les attributs par défaut. Rien n'est enregistré.",
       "create": "Nouvel objet",
       "edit": "Modifier",
-      "view": "Voir",
-      "selected": "Objet sélectionné"
+      "view": "Voir"
     },
     "errors": {
       "invalid": "Cet objet ne peut pas être donné.",
