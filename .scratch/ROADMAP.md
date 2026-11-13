@@ -187,7 +187,7 @@ Tickets in `ui-feedback-4/` (H). Colorizer bugs first, then the bundled sprites 
 
 ## Phase 12: content packs (2026-11-13)
 
-Tickets in `content-packs/` (K). Status: draft, needs triage (open questions in the spec). Model and Base pack first (no visible change), then sprite kinds and the official lazy path, the pack choice in generators, unofficial packs from a link, docs last.
+Tickets in `content-packs/` (K). Status: validated (2026-11-13), every ticket ready-for-agent; answers in the spec (Decisions). Model and Base pack first (no visible change), then sprite kinds and the official lazy path, the pack choice in generators, unofficial packs from a link, the pack creator (reuses their validation), docs last.
 
 | # | Ticket | Blocked by |
 | - | --- | --- |
@@ -196,4 +196,5 @@ Tickets in `content-packs/` (K). Status: draft, needs triage (open questions in 
 | 89 | **K03** Official packs: registry and lazy loading | K01 |
 | 90 | **K04** Pack choice next to the seed | K01, K02 |
 | 91 | **K05** Unofficial packs from a link or GitHub repository | K03 |
-| 92 | **K06** Documentation: using and creating packs | K04, K05 |
+| 92 | **K07** Pack creator | K02, K05 |
+| 93 | **K06** Documentation: using and creating packs | K04, K05, K07 |
