@@ -216,3 +216,15 @@ Tickets in `combat-ux/` (C). Status: proposed (2026-11-13); the user's answers a
 | 101 | **C07** Grid moves: GM anywhere, players on their turn | C02 |
 | 102 | **C08** Place tokens before starting | C05, C07 |
 | 103 | **C09** Shared combat rolls and recap banner | C06 |
+
+## Phase 14: one language per pack (2026-11-13)
+
+Tickets in `pack-languages/` (PL). Decisions from the user on 2026-11-13 are in the spec. Format first, then the creator and the world's choice side by side, then the generators and the docs.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 104 | **PL01** Pack format: one language, Base split in two | none |
+| 105 | **PL02** Pack creator and duplicate in one language | PL01 |
+| 106 | **PL03** Active packs in the world rules | PL01 |
+| 107 | **PL04** Generators and sprites use the world's packs | PL03 |
+| 108 | **PL05** User docs: one language per pack, packs per world | PL02, PL04 |
