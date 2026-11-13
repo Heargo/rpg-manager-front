@@ -45,6 +45,11 @@ const SPRITE_COLORIZER: MenuItem = {
   icon: 'pi pi-palette',
   routerLink: '/tools/sprite-colorizer',
 };
+const PACKS: MenuItem = {
+  label: 'nav.packs',
+  icon: 'pi pi-th-large',
+  routerLink: '/tools/packs',
+};
 const ITEM_GENERATOR: MenuItem = {
   label: 'nav.itemGenerator',
   icon: 'pi pi-sparkles',
@@ -62,6 +67,7 @@ const TOOLS: MenuItem = {
   icon: 'pi pi-wrench',
   items: [
     SPRITE_COLORIZER,
+    PACKS,
     ITEM_GENERATOR,
     {
       label: 'nav.characterSheet',
@@ -81,7 +87,7 @@ const TOOLS: MenuItem = {
 const ROOM_TOOLS: MenuItem = {
   label: 'nav.tools',
   icon: 'pi pi-wrench',
-  items: [SPRITE_COLORIZER, ITEM_GENERATOR, EXTERNAL_TOOLS],
+  items: [SPRITE_COLORIZER, PACKS, ITEM_GENERATOR, EXTERNAL_TOOLS],
 };
 
 const OUT_OF_ROOM_ITEMS: MenuItem[] = [

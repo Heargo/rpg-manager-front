@@ -1,0 +1,20 @@
+{
+  "format": 1,
+  "packs": [
+    {
+      "id": "base",
+      "name": { "en": "Base", "fr": "Base" },
+      "description": {
+        "en": "The word lists and the 101 item sprites bundled with the app.",
+        "fr": "Les listes de mots et les 101 sprites d'objets fournis avec l'application."
+      },
+      "author": "RPG Manager (sprites: Florian Sciberras)",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "size": 0,
+      "sprites": 101,
+      "languages": ["en", "fr"],
+      "builtIn": true
+    }
+  ]
+}

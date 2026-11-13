@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { TagModule } from '@openng/optimus-ui/tag';
+import { PackBusiness } from '../../../core/business/pack.business';
+import { LanguageBusiness } from '../../../core/business/language.business';
 import { SiteFooterComponent } from '../components/site-footer/site-footer.component';
 
 /** Libraries actually listed in package.json, with their licences. */
@@ -79,6 +81,26 @@ export const CREDIT_LIBRARIES = [
           >{{ 'credits.spritesSuffix' | transloco }}
         </p>
       </div>
+      @if (packs().length) {
+        <h2>{{ 'credits.packsTitle' | transloco }}</h2>
+        <div class="card" data-test="packs">
+          <p>{{ 'credits.packsIntro' | transloco }}</p>
+          <ul>
+            @for (pack of packs(); track pack.id) {
+              <li>
+                {{ pack.name }} {{ 'credits.packBy' | transloco }}
+                {{ pack.author }},
+                <a
+                  [href]="pack.licenseUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >{{ pack.license }}</a
+                >
+              </li>
+            }
+          </ul>
+        </div>
+      }
       <h2>{{ 'credits.aiTitle' | transloco }}</h2>
       <div class="card" data-test="ai">
         <p>{{ 'credits.ai' | transloco }}</p>
@@ -113,7 +135,21 @@ export const CREDIT_LIBRARIES = [
   `,
 })
 export class CreditsPageComponent {
+  private readonly packBusiness = inject(PackBusiness);
+  private readonly language = inject(LanguageBusiness);
+  /** Installed packs other than Base, with their name in the active language. */
+  protected readonly packs = computed(() => {
+    const lang = this.language.$language() === 'fr' ? 'fr' : 'en';
+    return this.packBusiness
+      .$installed()
+      .filter((p) => !p.builtIn)
+      .map((p) => ({ ...p, name: p.name[lang] }));
+  });
   protected readonly libraries = CREDIT_LIBRARIES;
+  constructor() {
+    void this.packBusiness.load().catch(() => undefined);
+  }
+
   protected readonly yuumeiUrl = 'https://www.yuumeiart.com/';
   protected readonly ccByUrl = 'https://creativecommons.org/licenses/by/4.0/';
 }

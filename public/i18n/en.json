@@ -49,7 +49,8 @@
     "classCatalogue": "Class catalogue",
     "spriteColorizer": "Sprite colorizer",
     "combat": "Combat",
-    "help": "Help"
+    "help": "Help",
+    "packs": "Content packs"
   },
   "play": {
     "title": "Worlds",
@@ -811,7 +812,10 @@
     "sampleHeroPrefix": "Sample hero portrait: art by",
     "sampleHeroSuffix": ".",
     "spritesPrefix": "Item sprites of the sprite colorizer: \"Fantasy items pack\" by Florian Sciberras, licensed under",
-    "spritesSuffix": ". The app recolours them; the originals are grayscale."
+    "spritesSuffix": ". The app recolours them; the originals are grayscale.",
+    "packsTitle": "Content packs",
+    "packsIntro": "Packs installed on this device.",
+    "packBy": "by"
   },
   "contact": {
     "title": "Contact",
@@ -1506,6 +1510,41 @@
     },
     "grid": {
       "label": "Combat grid"
+    }
+  },
+  "packs": {
+    "title": "Content packs",
+    "intro": "Sprites and word lists you can add to the app. A pack is downloaded when you turn it on, then works offline.",
+    "alwaysOn": "Always on",
+    "downloaded": "Downloaded",
+    "downloading": "Downloading...",
+    "toggle": "Use the pack {{ name }}",
+    "author": "Author",
+    "license": "License",
+    "size": "Size",
+    "languages": "Languages",
+    "remove": "Remove from device",
+    "details": "Details",
+    "removeTitle": "Remove this pack?",
+    "removeMessage": "The files of {{ name }} will be deleted from this device. You can download it again later.",
+    "removeAccept": "Remove",
+    "removeReject": "Keep",
+    "errorTitle": "Pack error",
+    "loadFailed": "The list of packs could not be loaded.",
+    "detailsSprites": "Sprites",
+    "detailsNoSprites": "Turn the pack on to see its sprites.",
+    "detailsGenerators": "Word lists",
+    "detailsNoGenerators": "No word list.",
+    "licenseLink": "Read the license",
+    "generator": {
+      "items": "Items",
+      "npcs": "NPCs",
+      "skills": "Skills",
+      "classes": "Classes"
+    },
+    "lang": {
+      "en": "English",
+      "fr": "French"
     }
   }
 }

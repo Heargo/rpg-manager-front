@@ -1,5 +1,6 @@
 import { Provider } from '@angular/core';
 import base from '../../public/packs/base/pack.json';
+import { BASE_ONLY_REGISTRY } from './extra-pack';
 import { PackService } from '../app/core/services/pack.service';
 
 /** A pack with one sprite of each kind (the grayscale one even ships a materials file, which must be ignored). */
@@ -44,6 +45,8 @@ export function provideKindsPack(): Provider {
     provide: PackService,
     useValue: {
       loadManifest: async () => KINDS_MANIFEST,
+      loadRegistry: async () => BASE_ONLY_REGISTRY,
+      loadBlob: async () => new Blob(['x']),
       loadJson: async (url: string) => ({ url }),
     },
   };

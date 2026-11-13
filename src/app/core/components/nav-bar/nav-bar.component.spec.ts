@@ -79,6 +79,7 @@ describe('NavBarComponent out of a room', () => {
     const { el } = await render('idle');
     expect(subLabels(el, 'Tools')).toEqual([
       'Sprite colorizer',
+      'Content packs',
       'Item generator',
       'Character sheet',
       'Combat',
@@ -100,7 +101,7 @@ describe.each([
 
   it('keeps the character sheet and world rules sandboxes out of the Tools submenu', async () => {
     const { el } = await render(status, isHost);
-    expect(subLabels(el, 'Tools')).toEqual(['Sprite colorizer', 'Item generator', 'External tools']);
+    expect(subLabels(el, 'Tools')).toEqual(['Sprite colorizer', 'Content packs', 'Item generator', 'External tools']);
   });
 
   it('shows the Close the world button after the menu and before the avatar', async () => {

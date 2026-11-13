@@ -11,6 +11,15 @@ export class PackService {
     return this.loadJson(`packs/${packId}/pack.json`);
   }
 
+  /** The registry of official packs. */
+  loadRegistry(): Promise<unknown> {
+    return this.loadJson('packs/index.json');
+  }
+
+  loadBlob(url: string): Promise<Blob> {
+    return firstValueFrom(this.http.get(url, { responseType: 'blob' }));
+  }
+
   loadJson(url: string): Promise<unknown> {
     return firstValueFrom(this.http.get<unknown>(url));
   }

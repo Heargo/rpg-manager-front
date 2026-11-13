@@ -10,3 +10,4 @@ Spec: `../spec.md` (Unofficial packs)
 - "Add a pack" dialog: fetch the manifest, show name, author, license, source, counts per generator and sprite kind, size and the third-party warning; install downloads and validates every file (word-list validators, PNG decode and limits, colorizer config import), stores it, or lists errors and installs nothing.
 - Update (shows old and new version, replaces on confirm) and Remove on the Packs page.
 - Data only: nothing from a pack is executed or rendered as HTML.
+- From the K03 review, fix before installing more packs: `PackBusiness` caches the per-pack object URL map before filling it (cache a `Promise<Map>`, revoke after it settles), shares no in-flight `enable(id)` promise, and fetches every file in parallel without a cap.

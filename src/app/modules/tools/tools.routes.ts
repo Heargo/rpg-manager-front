@@ -105,6 +105,14 @@ export const routesTools: Routes = [
       ),
   },
   {
+    path: 'tools/packs',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/packs-tool-page/packs-tool-page.component').then(
+        (m) => m.PacksToolPageComponent,
+      ),
+  },
+  {
     path: 'tools/links',
     canActivate: [NavigationGuard],
     loadComponent: () =>
