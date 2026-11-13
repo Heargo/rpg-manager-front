@@ -1501,6 +1501,7 @@
     },
     "actions": {
       "use": "Use",
+      "giveBack": "Give one back",
       "skills": "Skills",
       "useSkill": "Use",
       "items": "Items",

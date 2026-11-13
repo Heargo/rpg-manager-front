@@ -1501,6 +1501,7 @@
     },
     "actions": {
       "use": "Utiliser",
+      "giveBack": "Rendre une action",
       "skills": "Compétences",
       "useSkill": "Utiliser",
       "items": "Objets",

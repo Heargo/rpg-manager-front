@@ -16,8 +16,7 @@ import { CombatGmPanelComponent } from './combat-gm-panel.component';
  *   `[data-action="npc-minus"]` removes one, `[data-field="npc-count"]` shows it) and `[data-action="start"]`.
  * - Encounter: `[data-testid="combatant"]` rows in turn order (`data-name`, `data-active="true"` on the active one, `data-down="true"` when down) with
  *   `[data-field="life-bar"]` (`data-percent`), `[data-field="initiative"]`, `[data-field="status"]` (one per status), and a round label `[data-field="round"]`.
- * - The active row also carries `[data-testid="active-row"]`: `[data-testid="action-counter"]` (`data-action-name`, `data-used`, `data-count`; click its
- *   `[data-action="tick"]` to use one), `[data-testid="skill"]` (`data-name`, `data-available="false"` when on cooldown or unaffordable; text = the preview
+ * - The active row also carries `[data-testid="active-row"]`: `[role="tab"]` per action type labelled `Name (left/count)` (click `[data-action="tick"]` to use one), `[data-testid="skill"]` (`data-name`, `data-available="false"` when on cooldown or unaffordable; text = the preview
  *   "5 damage, 3 Mana, cooldown 2"; `[data-action="use-skill"]`) and `[data-testid="item"]` (`data-name`, `[data-action="use-item"]`).
  * - Targeting: after `use-skill`, `[data-testid="target"]` per combatant (`data-name`, click to pick) and `[data-action="confirm-skill"]`.
  * - `[data-testid="pending"]` per pending result (text names the caster, the skill and the target) with `[data-action="apply"]`, `[data-action="dismiss"]`,
@@ -162,17 +161,10 @@ describe('CombatGmPanelComponent', () => {
     const active = el.querySelector<HTMLElement>('[data-testid="active-row"]')!;
 
     expect(active.dataset['name']).toBe('Ada');
-    const counters = Array.from(
-      active.querySelectorAll<HTMLElement>('[data-testid="action-counter"]'),
-    ).map((c) => [
-      c.dataset['actionName'],
-      c.dataset['used'],
-      c.dataset['count'],
-    ]);
-    expect(counters).toEqual([
-      ['Action', '0', '1'],
-      ['Movement', '0', '1'],
-    ]);
+    const tabs = Array.from(
+      active.querySelectorAll<HTMLElement>('[role="tab"]'),
+    ).map((t) => clean(t));
+    expect(tabs).toEqual(['Action (1/1)', 'Movement (1/1)']);
     const skill = active.querySelector<HTMLElement>('[data-testid="skill"]')!;
     expect(skill.dataset['name']).toBe('Fireball');
     expect(clean(skill)).toContain('5 damage, 3 Mana, cooldown 2');
@@ -181,9 +173,7 @@ describe('CombatGmPanelComponent', () => {
     ).toBe('Potion');
 
     await click(
-      active.querySelector(
-        '[data-testid="action-counter"][data-action-name="Action"] [data-action="tick"]',
-      ),
+      active.querySelector('[data-action="tick"]'),
     );
     expect(
       table.named(table.ada, 'Ada').actions.find((a) => a.name === 'Action')!
@@ -449,7 +439,7 @@ describe('CombatGmPanelComponent', () => {
       await table.start();
       await open();
 
-      expect(el.querySelector('[data-testid="action-counter"]')).toBeNull();
+      expect(el.querySelector('[role="tab"]')).toBeNull();
       expect(el.querySelector('[data-testid="active-row"]')).not.toBeNull();
     });
 

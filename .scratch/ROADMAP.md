@@ -209,7 +209,7 @@ Tickets in `combat-ux/` (C). Status: proposed (2026-11-13); the user's answers a
 | - | --- | --- |
 | 95 | **C01** Initiative input only when it can be typed (done) | none |
 | 96 | **C02** Player actions only on their own turn (done) | none |
-| 97 | **C03** Action tabs replace the counters | C02 |
+| 97 | **C03** Action tabs replace the counters (done) | C02 |
 | 98 | **C04** Target picking as a multi-select | none |
 | 99 | **C05** Start form: characters and NPCs multi-selects | none |
 | 100 | **C06** GM table: collapsible Dice, Combat, Notes | C05 |

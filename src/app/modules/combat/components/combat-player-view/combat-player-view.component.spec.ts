@@ -95,9 +95,7 @@ describe('CombatPlayerViewComponent', () => {
       expect(
         el.querySelector('[data-testid="item"]')!.getAttribute('data-name'),
       ).toBe('Potion');
-      expect(
-        el.querySelectorAll('[data-testid="action-counter"]'),
-      ).toHaveLength(2);
+      expect(el.querySelectorAll('[role="tab"]')).toHaveLength(2);
       mounted.destroy();
 
       await open(table.bob, 'Bob', 'bob');
@@ -162,13 +160,10 @@ describe('CombatPlayerViewComponent', () => {
       await open(table.ada, 'Ada', 'ada');
 
       await click(
-        el.querySelector(
-          '[data-testid="action-counter"][data-action-name="Movement"] [data-action="tick"]',
-        ),
-      );
-      await click(
         el.querySelector('[data-testid="item"] [data-action="use-item"]'),
       );
+      await click(el.querySelectorAll('[role="tab"]')[1]);
+      await click(el.querySelector('[data-action="tick"]'));
 
       expect(
         table.named(table.gm, 'Ada').actions.find((a) => a.name === 'Movement')!
@@ -266,7 +261,7 @@ describe('CombatPlayerViewComponent', () => {
       await table.start();
       await open(table.ada, 'Ada', 'ada');
 
-      expect(el.querySelector('[data-testid="action-counter"]')).toBeNull();
+      expect(el.querySelector('[role="tab"]')).toBeNull();
     });
   });
 });

@@ -6,9 +6,11 @@ import {
   input,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
+import { TabsModule } from '@openng/optimus-ui/tabs';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { Skill } from '../../../skill/models/skill';
 import { CombatBusiness } from '../../business/combat.business';
@@ -17,78 +19,133 @@ import {
   defaultTargets,
   targetsArePicked,
 } from '../../helpers/combat-targeting.rules';
+import { actionTabs } from '../../helpers/combat-actions.rules';
 import { CombatAttribute } from '../../models/combat';
 
 /** What one combatant can do on its turn: tick the action counters, use a skill (pick its targets) or an item. */
 @Component({
   selector: 'app-combat-actions',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, ButtonModule],
+  imports: [TranslocoPipe, ButtonModule, TabsModule, NgTemplateOutlet],
   template: `
-    <div class="counters">
-      @for (action of actions(); track action.name) {
-        <div
-          class="counter"
-          data-testid="action-counter"
-          [attr.data-action-name]="action.name"
-          [attr.data-used]="action.used"
-          [attr.data-count]="action.count"
-        >
-          <span class="name">{{ action.name }}</span>
-          <span class="dots" aria-hidden="true">
-            @for (dot of dots(action.count); track dot) {
-              <i
-                class="pi"
-                [class.pi-circle-fill]="dot >= action.used"
-                [class.pi-circle]="dot < action.used"
-              ></i>
-            }
-          </span>
-          <span class="left"
-            >{{ action.count - action.used }} / {{ action.count }}</span
-          >
-          <button
-            pButton
-            type="button"
-            data-action="tick"
-            size="small"
-            severity="secondary"
-            icon="pi pi-check"
-            [label]="'combat.actions.use' | transloco"
-            (click)="tick(action)"
-          ></button>
-        </div>
-      }
-    </div>
-
-    @if (skills().length) {
-      <h4>{{ 'combat.actions.skills' | transloco }}</h4>
-      <ul class="skills">
-        @for (entry of skills(); track entry.skill.id) {
-          <li
-            class="skill"
-            data-testid="skill"
-            [attr.data-name]="entry.skill.name"
-            [attr.data-available]="entry.available"
-          >
-            <div class="text">
-              <strong>{{ entry.skill.name }}</strong>
-              <small>{{ entry.summary }}</small>
-            </div>
-            <button
-              pButton
-              type="button"
-              data-action="use-skill"
-              size="small"
-              icon="pi pi-bolt"
-              [label]="'combat.actions.useSkill' | transloco"
-              [severity]="entry.available ? 'primary' : 'secondary'"
-              (click)="pick(entry.skill)"
-            ></button>
-          </li>
-        }
-      </ul>
+    @if (tabs().length) {
+      <p-tabs [value]="selected()" (valueChange)="select($event)">
+        <p-tablist>
+          @for (tab of tabs(); track tab.name) {
+            <p-tab [value]="tab.name"
+              >{{ tab.name }} ({{ tab.left }}/{{ tab.count }})</p-tab
+            >
+          }
+        </p-tablist>
+        <p-tabpanels>
+          @if (currentTab(); as tab) {
+            <p-tabpanel [value]="tab.name">
+              <ng-container
+                *ngTemplateOutlet="
+                  lists;
+                  context: {
+                    skills: tab.skills,
+                    items: tab === tabs()[0],
+                    off: tab.left === 0,
+                  }
+                "
+              />
+              <div class="buttons">
+                @if (isGameMaster()) {
+                  <button
+                    pButton
+                    type="button"
+                    data-action="untick"
+                    size="small"
+                    severity="secondary"
+                    icon="pi pi-minus"
+                    [attr.aria-label]="'combat.actions.giveBack' | transloco"
+                    [disabled]="tab.used === 0"
+                    (click)="untick(tab)"
+                  ></button>
+                }
+                <button
+                  pButton
+                  type="button"
+                  data-action="tick"
+                  size="small"
+                  severity="secondary"
+                  icon="pi pi-check"
+                  [label]="'combat.actions.use' | transloco"
+                  [disabled]="tab.left === 0"
+                  (click)="tick(tab)"
+                ></button>
+              </div>
+            </p-tabpanel>
+          }
+        </p-tabpanels>
+      </p-tabs>
+    } @else {
+      <ng-container
+        *ngTemplateOutlet="
+          lists;
+          context: { skills: skillEntries(), items: true, off: false }
+        "
+      />
     }
+
+    <ng-template #lists let-skills="skills" let-showItems="items" let-off="off">
+      @if (skills.length) {
+        <h4>{{ 'combat.actions.skills' | transloco }}</h4>
+        <ul class="skills">
+          @for (entry of skills; track entry.skill.id) {
+            <li
+              class="skill"
+              data-testid="skill"
+              [attr.data-name]="entry.skill.name"
+              [attr.data-available]="entry.available"
+            >
+              <div class="text">
+                <strong>{{ entry.skill.name }}</strong>
+                <small>{{ entry.summary }}</small>
+              </div>
+              <button
+                pButton
+                type="button"
+                data-action="use-skill"
+                size="small"
+                icon="pi pi-bolt"
+                [label]="'combat.actions.useSkill' | transloco"
+                [disabled]="off"
+                [severity]="entry.available ? 'primary' : 'secondary'"
+                (click)="pick(entry.skill)"
+              ></button>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (showItems && items().length) {
+        <h4>{{ 'combat.actions.items' | transloco }}</h4>
+        <ul class="items">
+          @for (entry of items(); track entry.id) {
+            <li
+              class="item"
+              data-testid="item"
+              [attr.data-name]="entry.item.name"
+            >
+              <strong>{{ entry.item.name }}</strong>
+              <button
+                pButton
+                type="button"
+                data-action="use-item"
+                size="small"
+                severity="secondary"
+                icon="pi pi-heart"
+                [label]="'combat.actions.useItem' | transloco"
+                [disabled]="off"
+                (click)="useItem(entry.id)"
+              ></button>
+            </li>
+          }
+        </ul>
+      }
+    </ng-template>
 
     @if (casting(); as cast) {
       <div class="targeting">
@@ -135,31 +192,6 @@ import { CombatAttribute } from '../../models/combat';
           ></button>
         </div>
       </div>
-    }
-
-    @if (items().length) {
-      <h4>{{ 'combat.actions.items' | transloco }}</h4>
-      <ul class="items">
-        @for (entry of items(); track entry.id) {
-          <li
-            class="item"
-            data-testid="item"
-            [attr.data-name]="entry.item.name"
-          >
-            <strong>{{ entry.item.name }}</strong>
-            <button
-              pButton
-              type="button"
-              data-action="use-item"
-              size="small"
-              severity="secondary"
-              icon="pi pi-heart"
-              [label]="'combat.actions.useItem' | transloco"
-              (click)="useItem(entry.id)"
-            ></button>
-          </li>
-        }
-      </ul>
     }
   `,
   styles: `
@@ -242,7 +274,7 @@ export class CombatActionsComponent {
     () => this.combat.$state()?.combatants ?? [],
   );
 
-  protected readonly skills = computed(() =>
+  protected readonly skillEntries = computed(() =>
     this.sheetSkills().flatMap(({ skillId, level }) => {
       const skill = this.combat.$skills().find((s) => s.id === skillId);
       if (skill?.type !== 'active') return [];
@@ -250,6 +282,7 @@ export class CombatActionsComponent {
       return [
         {
           skill,
+          actionType: skill.actionType,
           summary: this.combat.skillSummary(skill, level, {
             level: this.level(),
             attributes: this.attributes(),
@@ -263,14 +296,36 @@ export class CombatActionsComponent {
     this.combat.itemsOf(this.characterId()),
   );
 
-  protected dots(count: number): number[] {
-    return Array.from({ length: count }, (_, i) => i);
+  /** The counters as the combat state has them now, else the input. */
+  private readonly liveActions = computed(
+    () =>
+      this.combatants().find((c) => c.id === this.combatantId())?.actions ??
+      this.actions(),
+  );
+  protected readonly isGameMaster = this.combat.$isGameMaster;
+  protected readonly tabs = computed(() =>
+    actionTabs(this.liveActions(), this.skillEntries()),
+  );
+  private readonly chosen = signal<string | undefined>(undefined);
+  protected readonly currentTab = computed(() => {
+    const tabs = this.tabs();
+    return tabs.find((t) => t.name === this.chosen()) ?? tabs[0];
+  });
+  protected readonly selected = computed(() => this.currentTab()?.name);
+
+  protected select(value: string | number | undefined): void {
+    this.chosen.set(value === undefined ? undefined : String(value));
   }
 
-  protected tick(action: { name: string; count: number; used: number }): void {
-    const used = action.used >= action.count ? 0 : action.used + 1;
+  protected tick(action: { name: string; used: number }): void {
     void this.run(() =>
-      this.combat.tickAction(this.combatantId(), action.name, used),
+      this.combat.tickAction(this.combatantId(), action.name, action.used + 1),
+    );
+  }
+
+  protected untick(action: { name: string; used: number }): void {
+    void this.run(() =>
+      this.combat.tickAction(this.combatantId(), action.name, action.used - 1),
     );
   }
 
