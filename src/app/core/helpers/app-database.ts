@@ -1,8 +1,8 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
 
 export const APP_DATABASE_NAME = 'rpg-manager';
-/** v1: worlds, images. v2: hostedRoom, joinedRooms. v3: playerCopies. v4: joinedWorlds (replaces joinedRooms). */
-const APP_DATABASE_VERSION = 4;
+/** v1: worlds, images. v2: hostedRoom, joinedRooms. v3: playerCopies. v4: joinedWorlds (replaces joinedRooms). v5: spriteSets. */
+const APP_DATABASE_VERSION = 5;
 
 export interface StoredImage {
   /** SHA-256 of the bytes, hex. */
@@ -25,6 +25,8 @@ export interface AppDatabaseSchema extends DBSchema {
   joinedWorlds: { key: string; value: { worldId: string } & Record<string, unknown> };
   /** The player's own copy of their character, by room id. Typed by the character feature. */
   playerCopies: { key: string; value: { roomId: string; character: Record<string, unknown>; queue?: unknown[] } };
+  /** Sprites and materials saved in the sprite colorizer, by id. Typed by the sprite feature. */
+  spriteSets: { key: string; value: { id: string } & Record<string, unknown> };
 }
 
 export type AppDatabase = IDBPDatabase<AppDatabaseSchema>;
@@ -41,6 +43,7 @@ export function openAppDatabase(name = APP_DATABASE_NAME): Promise<AppDatabase> 
       if (stores.contains('joinedRooms')) (db as unknown as IDBDatabase).deleteObjectStore('joinedRooms');
       if (!db.objectStoreNames.contains('joinedWorlds')) db.createObjectStore('joinedWorlds', { keyPath: 'worldId' });
       if (!db.objectStoreNames.contains('playerCopies')) db.createObjectStore('playerCopies', { keyPath: 'roomId' });
+      if (!db.objectStoreNames.contains('spriteSets')) db.createObjectStore('spriteSets', { keyPath: 'id' });
     },
   });
 }

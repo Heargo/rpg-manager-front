@@ -120,6 +120,11 @@ export function spriteUrl(id: string): string {
   return `assets/sprites/${id}.png`;
 }
 
+/** The ready-made materials of a bundled sprite (colorizer JSON configuration). */
+export function spriteSetUrl(id: string): string {
+  return `assets/sprites/${id}.json`;
+}
+
 /** The library sprites whose label (in `lang`) or id contains every word of `query`, accents and case ignored, by label. */
 export function searchSprites(query: string, lang: string): LibrarySprite[] {
   const fr = lang === 'fr';

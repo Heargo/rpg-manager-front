@@ -23,7 +23,10 @@ import {
 import { Point, rasterizePolygon } from '../helpers/polygon';
 import { defaultMinSize, detectShapes, DetectedShape } from '../helpers/shape-detection';
 import { PRESETS } from '../helpers/presets';
-import { DEMO_SPRITE_ID, spriteUrl } from '../helpers/sprite-library';
+import { DEMO_SPRITE_ID, spriteSetUrl, spriteUrl } from '../helpers/sprite-library';
+import { SpriteSet, SpriteSetSource } from '../models/sprite-set';
+import { SpriteSetStorageService } from '../services/sprite-set-storage.service';
+import { ImageStorageService } from '../../../core/services/image-storage.service';
 import {
   GradientStop,
   SelectionMode,
@@ -66,6 +69,8 @@ export class SpriteColorizerBusiness {
   private readonly presetStorage = inject(SpritePresetStorageService);
   private readonly files = inject(SpriteFileService);
   private readonly shapes = inject(SpriteShapeService);
+  private readonly setStorage = inject(SpriteSetStorageService);
+  private readonly imageStorage = inject(ImageStorageService);
   private readonly history = new History();
 
   private readonly image = signal<SpriteImage | null>(null);
@@ -87,6 +92,10 @@ export class SpriteColorizerBusiness {
   private readonly selectedCandidates = signal<number[]>([]);
   private readonly detecting = signal(false);
   private readonly detected = signal(false);
+  private readonly savedSets = signal<SpriteSet[]>([]);
+  private readonly currentSetId = signal<string | null>(null);
+  /** Where the open image comes from, to save it with a set; a file is kept as is until it is stored. */
+  private source: SpriteSetSource | { kind: 'file'; blob: Blob } | null = null;
 
   private stroke: Stroke | null = null;
   private gradientEdit: {
@@ -110,6 +119,10 @@ export class SpriteColorizerBusiness {
   readonly $detecting = this.detecting.asReadonly();
   /** True once a detection ran on the current image, even when it found nothing. */
   readonly $detected = this.detected.asReadonly();
+  /** The sets saved on this device, the latest changed first (after `refreshSets`). */
+  readonly $savedSets = this.savedSets.asReadonly();
+  /** The saved set the open document came from or was saved as; saving writes over it. */
+  readonly $currentSetId = this.currentSetId.asReadonly();
   readonly $activeLayerId = computed(() => {
     const doc = this.document();
     const id = this.activeId();
@@ -157,6 +170,8 @@ export class SpriteColorizerBusiness {
     this.stroke = null;
     this.gradientEdit = null;
     this.history.clear();
+    this.source = null;
+    this.currentSetId.set(null);
     this.version.update((v) => v + 1);
   }
 
@@ -165,11 +180,94 @@ export class SpriteColorizerBusiness {
       await this.files.decode(file),
       file.name.replace(/\.[^.]+$/, '') || 'sprite',
     );
+    this.source = { kind: 'file', blob: file };
   }
 
-  /** Loads a bundled sprite (`SPRITE_LIBRARY`) by id. */
+  /** Loads a bundled sprite (`SPRITE_LIBRARY`) by id, with its ready-made materials when it has some. */
   async loadLibrary(id: string): Promise<void> {
-    this.loadImage(await this.files.fetchImage(spriteUrl(id)), id);
+    const [image, config] = await Promise.all([
+      this.files.fetchImage(spriteUrl(id)),
+      this.files.fetchText(spriteSetUrl(id)).catch(() => null),
+    ]);
+    this.loadImage(image, id);
+    this.source = { kind: 'library', spriteId: id };
+    if (config) this.replaceDocument(config);
+  }
+
+  // Saved sets
+
+  async refreshSets(): Promise<void> {
+    this.savedSets.set(await this.setStorage.list());
+  }
+
+  /** Saves the open sprite and its materials: over the set it came from, or as a new set (bundled ones are copied). */
+  async saveSet(name: string): Promise<void> {
+    const doc = this.document();
+    const image = this.image();
+    if (!doc || !image) return;
+    let source = this.source;
+    if (source?.kind !== 'library' && source?.kind !== 'image') {
+      const blob =
+        source?.kind === 'file' ? source.blob : await this.files.encodePng(image);
+      source = { kind: 'image', imageId: await this.imageStorage.put(blob) };
+    }
+    const set: SpriteSet = {
+      id: this.currentSetId() ?? crypto.randomUUID(),
+      name: name.trim() || this.name(),
+      source,
+      config: exportConfig(doc),
+      updatedAt: Date.now(),
+    };
+    await this.setStorage.save(set);
+    this.source = source;
+    this.currentSetId.set(set.id);
+    this.name.set(set.name);
+    await this.refreshSets();
+  }
+
+  /** Opens a saved set: its image and its materials, with a fresh history. */
+  async openSet(id: string): Promise<void> {
+    const set =
+      this.savedSets().find((s) => s.id === id) ??
+      (await this.setStorage.list()).find((s) => s.id === id);
+    if (!set) throw new Error('Unknown sprite set');
+    let image: SpriteImage;
+    if (set.source.kind === 'library') {
+      image = await this.files.fetchImage(spriteUrl(set.source.spriteId));
+    } else {
+      const blob = await this.imageStorage.get(set.source.imageId);
+      if (!blob) throw new Error('Missing sprite image');
+      image = await this.files.decode(blob);
+    }
+    this.loadImage(image, set.name);
+    this.replaceDocument(set.config);
+    this.source = set.source;
+    this.currentSetId.set(set.id);
+  }
+
+  async renameSet(id: string, name: string): Promise<void> {
+    const set = this.savedSets().find((s) => s.id === id);
+    if (!set || !name.trim()) return;
+    await this.setStorage.save({ ...set, name: name.trim(), updatedAt: Date.now() });
+    if (this.currentSetId() === id) this.name.set(name.trim());
+    await this.refreshSets();
+  }
+
+  /** Deletes a saved set; its stored image stays (images are shared by content with the rest of the app). */
+  async deleteSet(id: string): Promise<void> {
+    await this.setStorage.delete(id);
+    if (this.currentSetId() === id) this.currentSetId.set(null);
+    await this.refreshSets();
+  }
+
+  /** Swaps the materials of the open image without an undo entry (a freshly opened sprite). */
+  private replaceDocument(config: string): void {
+    const image = this.image();
+    if (!image) return;
+    this.document.set(
+      importConfig(config, { width: image.width, height: image.height }),
+    );
+    this.version.update((v) => v + 1);
   }
 
   loadDemo(): Promise<void> {

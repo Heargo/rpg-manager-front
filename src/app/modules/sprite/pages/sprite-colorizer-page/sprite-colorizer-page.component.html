@@ -63,6 +63,15 @@
         (onClick)="business.downloadPng()"
       />
       <p-button
+        icon="pi pi-save"
+        [ariaLabel]="'sprite.sets.save' | transloco"
+        [pTooltip]="'sprite.sets.saveHint' | transloco"
+        [label]="'sprite.sets.save' | transloco"
+        severity="secondary"
+        [disabled]="!business.$document()"
+        (onClick)="saveSet()"
+      />
+      <p-button
         icon="pi pi-file-export"
         [ariaLabel]="'sprite.exportJson' | transloco"
         [pTooltip]="'sprite.exportJson' | transloco"
@@ -617,34 +626,96 @@
 >
   @if (libraryOpen()) {
     <div class="library">
-      <input
-        pInputText
-        type="search"
-        data-test="library-search"
-        class="library-search"
-        [placeholder]="'sprite.library.search' | transloco"
-        [attr.aria-label]="'sprite.library.search' | transloco"
-        [value]="libraryQuery()"
-        (input)="libraryQuery.set($any($event.target).value)"
+      <p-selectbutton
+        class="library-tabs"
+        [options]="libraryViews()"
+        optionLabel="label"
+        optionValue="value"
+        [allowEmpty]="false"
+        [ngModel]="libraryView()"
+        (ngModelChange)="libraryView.set($event)"
       />
-      <ul class="library-grid">
-        @for (sprite of librarySprites(); track sprite.id) {
-          <li>
-            <button
-              type="button"
-              class="library-sprite"
-              data-test="library-sprite"
-              (click)="pickSprite(sprite.id)"
-            >
-              <img [src]="sprite.url" alt="" loading="lazy" width="64" height="64" />
-              <span>{{ sprite.label }}</span>
-            </button>
-          </li>
-        } @empty {
-          <li class="library-empty">{{ "sprite.library.empty" | transloco }}</li>
-        }
-      </ul>
-      <p class="library-credit">{{ "sprite.library.credit" | transloco }}</p>
+      @if (libraryView() === 'mine') {
+        <ul class="saved-sets">
+          @for (set of savedSets(); track set.id) {
+            <li class="saved-set" data-test="saved-set">
+              @if (renamingSetId() === set.id) {
+                <input
+                  pInputText
+                  class="saved-name-input"
+                  [value]="set.name"
+                  [attr.aria-label]="'sprite.sets.rename' | transloco"
+                  (keydown.enter)="renameSet(set.id, $any($event.target).value)"
+                  (keydown.escape)="renamingSetId.set(null)"
+                  (blur)="renameSet(set.id, $any($event.target).value)"
+                />
+              } @else {
+                <span class="saved-name">{{ set.name }}</span>
+              }
+              <span class="saved-date">{{ set.date }}</span>
+              <span class="row tight">
+                <p-button
+                  icon="pi pi-folder-open"
+                  size="small"
+                  [text]="true"
+                  [ariaLabel]="'sprite.sets.open' | transloco"
+                  [pTooltip]="'sprite.sets.open' | transloco"
+                  (onClick)="openSet(set.id)"
+                />
+                <p-button
+                  icon="pi pi-pencil"
+                  size="small"
+                  [text]="true"
+                  severity="secondary"
+                  [ariaLabel]="'sprite.sets.rename' | transloco"
+                  [pTooltip]="'sprite.sets.rename' | transloco"
+                  (onClick)="startRenameSet(set.id)"
+                />
+                <p-button
+                  icon="pi pi-trash"
+                  size="small"
+                  [text]="true"
+                  severity="danger"
+                  [ariaLabel]="'sprite.sets.delete' | transloco"
+                  [pTooltip]="'sprite.sets.delete' | transloco"
+                  (onClick)="deleteSet(set)"
+                />
+              </span>
+            </li>
+          } @empty {
+            <li class="library-empty">{{ "sprite.sets.empty" | transloco }}</li>
+          }
+        </ul>
+      } @else {
+        <input
+          pInputText
+          type="search"
+          data-test="library-search"
+          class="library-search"
+          [placeholder]="'sprite.library.search' | transloco"
+          [attr.aria-label]="'sprite.library.search' | transloco"
+          [value]="libraryQuery()"
+          (input)="libraryQuery.set($any($event.target).value)"
+        />
+        <ul class="library-grid">
+          @for (sprite of librarySprites(); track sprite.id) {
+            <li>
+              <button
+                type="button"
+                class="library-sprite"
+                data-test="library-sprite"
+                (click)="pickSprite(sprite.id)"
+              >
+                <img [src]="sprite.url" alt="" loading="lazy" width="64" height="64" />
+                <span>{{ sprite.label }}</span>
+              </button>
+            </li>
+          } @empty {
+            <li class="library-empty">{{ "sprite.library.empty" | transloco }}</li>
+          }
+        </ul>
+        <p class="library-credit">{{ "sprite.library.credit" | transloco }}</p>
+      }
     </div>
   }
 </p-dialog>

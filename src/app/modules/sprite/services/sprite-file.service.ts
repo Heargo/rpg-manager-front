@@ -11,6 +11,13 @@ export class SpriteFileService {
     return this.decode(await response.blob());
   }
 
+  /** Downloads a text file of the app (a bundled sprite set). */
+  async fetchText(url: string): Promise<string> {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Cannot load ${url}`);
+    return response.text();
+  }
+
   async decode(file: Blob): Promise<SpriteImage> {
     const bitmap = await createImageBitmap(file, { premultiplyAlpha: 'none' });
     const canvas = document.createElement('canvas');

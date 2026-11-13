@@ -1,6 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { gray } from '../helpers/sprite-test-images';
+import { ImageStorageService } from '../../../core/services/image-storage.service';
+import { autoMaterials } from '../helpers/auto-materials';
+import { exportConfig } from '../helpers/config-export';
+import { SpriteSet } from '../models/sprite-set';
 import { SpriteFileService } from '../services/sprite-file.service';
+import { SpriteSetStorageService } from '../services/sprite-set-storage.service';
 import { SpritePresetStorageService } from '../services/sprite-preset-storage.service';
 import { SpriteColorizerBusiness } from './sprite-colorizer.business';
 
@@ -358,7 +363,12 @@ describe('SpriteColorizerBusiness', () => {
 
   describe('sprite library', () => {
     function setupFiles() {
-      const files = { fetchImage: vi.fn(async () => gray(2, 1, [50, 60])) };
+      const files = {
+        fetchImage: vi.fn(async () => gray(2, 1, [50, 60])),
+        fetchText: vi.fn(async () => {
+          throw new Error('404');
+        }),
+      };
       TestBed.configureTestingModule({
         providers: [
           { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
@@ -381,6 +391,139 @@ describe('SpriteColorizerBusiness', () => {
       await business.loadDemo();
       expect(files.fetchImage).toHaveBeenCalledWith('assets/sprites/axe.png');
       expect(business.$fileName()).toBe('axe');
+    });
+  });
+
+  describe('sprite sets', () => {
+    /** 4 x 1: two dark, two light pixels; too small to split, its bundled set is Base + Part 1. */
+    const sprite = () => gray(4, 1, [10, 10, 220, 220]);
+
+    function setupSets(saved: SpriteSet[] = []) {
+      let sets = [...saved];
+      const setStorage = {
+        list: vi.fn(async () => [...sets].sort((a, b) => b.updatedAt - a.updatedAt)),
+        save: vi.fn(async (s: SpriteSet) => {
+          sets = [...sets.filter((x) => x.id !== s.id), s];
+        }),
+        delete: vi.fn(async (id: string) => {
+          sets = sets.filter((x) => x.id !== id);
+        }),
+      };
+      const stored = new Map<string, Blob>();
+      const images = {
+        put: vi.fn(async (blob: Blob) => {
+          stored.set('img-1', blob);
+          return 'img-1';
+        }),
+        get: vi.fn(async (id: string) => stored.get(id)),
+      };
+      const files = {
+        fetchImage: vi.fn(async () => sprite()),
+        fetchText: vi.fn(async () => exportConfig(autoMaterials(sprite()))),
+        decode: vi.fn(async () => sprite()),
+      };
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
+          { provide: SpriteSetStorageService, useValue: setStorage },
+          { provide: ImageStorageService, useValue: images },
+          { provide: SpriteFileService, useValue: files },
+        ],
+      });
+      return { business: TestBed.inject(SpriteColorizerBusiness), setStorage, images, files, sets: () => sets };
+    }
+
+    const names = (business: SpriteColorizerBusiness) =>
+      business.$document()!.layers.map((l) => l.name);
+
+    it('opens a bundled sprite with its ready-made materials', async () => {
+      const { business, files } = setupSets();
+      await business.loadLibrary('axe');
+      expect(files.fetchText).toHaveBeenCalledWith('assets/sprites/axe.json');
+      expect(names(business)).toEqual(['Base', 'Part 1']);
+      expect(business.$canUndo()).toBe(false);
+    });
+
+    it('opens a bundled sprite with the base only when it has no set', async () => {
+      const { business, files } = setupSets();
+      files.fetchText.mockRejectedValueOnce(new Error('404'));
+      await business.loadLibrary('axe');
+      expect(names(business)).toEqual(['Base']);
+    });
+
+    it('saves a bundled sprite as a new set of the user, never over the built-in one', async () => {
+      const { business, sets } = setupSets();
+      await business.loadLibrary('axe');
+      business.renameMaterial(business.$document()!.layers[1].id, "Blade");
+      await business.saveSet('My axe');
+
+      expect(sets()).toHaveLength(1);
+      const saved = sets()[0];
+      expect(saved.name).toBe('My axe');
+      expect(saved.source).toEqual({ kind: 'library', spriteId: 'axe' });
+      expect(saved.config).toContain('Blade');
+      expect(business.$savedSets().map((s) => s.name)).toEqual(['My axe']);
+      expect(business.$currentSetId()).toBe(saved.id);
+    });
+
+    it('saves over the set it opened, and as a copy otherwise', async () => {
+      const { business, sets } = setupSets();
+      await business.loadLibrary('axe');
+      await business.saveSet('My axe');
+      const id = sets()[0].id;
+      business.addMaterial('Gem');
+      await business.saveSet('My axe');
+      expect(sets()).toHaveLength(1);
+      expect(sets()[0].id).toBe(id);
+      expect(sets()[0].config).toContain('Gem');
+
+      await business.loadLibrary('axe');
+      await business.saveSet('Another axe');
+      expect(sets()).toHaveLength(2);
+    });
+
+    it('stores the image of an opened file with the set, and opens it back', async () => {
+      const { business, images, sets, files } = setupSets();
+      await business.loadFile(new File(['png'], 'shield.png', { type: 'image/png' }));
+      business.addMaterial('Rim');
+      await business.saveSet('Shield');
+      expect(images.put).toHaveBeenCalled();
+      expect(sets()[0].source).toEqual({ kind: 'image', imageId: 'img-1' });
+
+      await business.loadLibrary('axe');
+      await business.openSet(sets()[0].id);
+      expect(files.decode).toHaveBeenCalledTimes(2);
+      expect(names(business)).toEqual(['Base', 'Rim']);
+      expect(business.$fileName()).toBe('Shield');
+      expect(business.$currentSetId()).toBe(sets()[0].id);
+      expect(business.$canUndo()).toBe(false);
+    });
+
+    it('renames and deletes saved sets', async () => {
+      const { business, sets } = setupSets();
+      await business.loadLibrary('axe');
+      await business.saveSet('My axe');
+      const id = sets()[0].id;
+
+      await business.renameSet(id, 'Old axe');
+      expect(business.$savedSets()[0].name).toBe('Old axe');
+
+      await business.deleteSet(id);
+      expect(business.$savedSets()).toEqual([]);
+      expect(business.$currentSetId()).toBeNull();
+    });
+
+    it('lists the saved sets on refresh', async () => {
+      const set: SpriteSet = {
+        id: 'x',
+        name: 'Saved',
+        source: { kind: 'library', spriteId: 'axe' },
+        config: exportConfig(autoMaterials(sprite())),
+        updatedAt: 1,
+      };
+      const { business } = setupSets([set]);
+      await business.refreshSets();
+      expect(business.$savedSets().map((s) => s.name)).toEqual(['Saved']);
     });
   });
 });

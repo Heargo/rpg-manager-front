@@ -1,17 +1,19 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   effect,
   ElementRef,
   inject,
+  Injector,
   signal,
   viewChild,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { MessageService } from '@openng/optimus-ui/api';
+import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { ColorPickerModule } from '@openng/optimus-ui/colorpicker';
 import { DialogModule } from '@openng/optimus-ui/dialog';
@@ -25,7 +27,11 @@ import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { SpriteColorizerBusiness } from '../../business/sprite-colorizer.business';
 import { brushCursor } from '../../helpers/brush-cursor';
-import { searchSprites, spriteUrl } from '../../helpers/sprite-library';
+import {
+  searchSprites,
+  SPRITE_LIBRARY,
+  spriteUrl,
+} from '../../helpers/sprite-library';
 import { gradientColor } from '../../helpers/gradient-mapping';
 import { isBuiltInPreset } from '../../helpers/presets';
 import { shapeColor, shapeCss } from '../../helpers/shape-colors';
@@ -81,6 +87,8 @@ export class SpriteColorizerPageComponent {
   protected readonly business = inject(SpriteColorizerBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly messages = inject(MessageService);
+  private readonly confirmation = inject(ConfirmationService);
+  private readonly injector = inject(Injector);
 
   private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
   private readonly mainCanvas =
@@ -98,6 +106,22 @@ export class SpriteColorizerPageComponent {
   protected readonly pointer = signal<{ x: number; y: number } | null>(null);
   protected readonly libraryOpen = signal(false);
   protected readonly libraryQuery = signal('');
+  protected readonly libraryView = signal<'bundled' | 'mine'>('bundled');
+  protected readonly libraryViews = computed(() => [
+    { value: 'bundled', label: this.language.t('sprite.library.bundled') },
+    { value: 'mine', label: this.language.t('sprite.library.mine') },
+  ]);
+  protected readonly renamingSetId = signal<string | null>(null);
+  /** The saved sets, with their date in the page's language. */
+  protected readonly savedSets = computed(() => {
+    const format = new Intl.DateTimeFormat(this.language.$language() ?? 'fr', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
+    return this.business
+      .$savedSets()
+      .map((set) => ({ ...set, date: format.format(set.updatedAt) }));
+  });
   protected readonly librarySprites = computed(() => {
     const lang = this.language.$language() ?? 'fr';
     return searchSprites(this.libraryQuery(), lang).map((sprite) => ({
@@ -488,6 +512,65 @@ export class SpriteColorizerPageComponent {
   protected openLibrary(): void {
     this.libraryQuery.set('');
     this.libraryOpen.set(true);
+    this.business.refreshSets().catch(() => undefined);
+  }
+
+  protected async saveSet(): Promise<void> {
+    try {
+      await this.business.saveSet(this.defaultSetName());
+      this.toast(MessageLevel.Success, 'sprite.sets.saved');
+    } catch {
+      this.toast(MessageLevel.Error, 'sprite.sets.saveFailed');
+    }
+  }
+
+  /** A saved set keeps its name; a bundled sprite is named after its label in the page's language. */
+  private defaultSetName(): string {
+    const name = this.business.$fileName();
+    if (this.business.$currentSetId()) return name;
+    const sprite = SPRITE_LIBRARY.find((s) => s.id === name);
+    if (!sprite) return name;
+    return this.language.$language() === 'en' ? sprite.en : sprite.fr;
+  }
+
+  protected async openSet(id: string): Promise<void> {
+    this.libraryOpen.set(false);
+    await this.loadSprite(() => this.business.openSet(id));
+  }
+
+  protected startRenameSet(id: string): void {
+    this.renamingSetId.set(id);
+    afterNextRender(
+      () =>
+        document
+          .querySelector<HTMLInputElement>('.saved-name-input')
+          ?.select(),
+      { injector: this.injector },
+    );
+  }
+
+  protected async renameSet(id: string, name: string): Promise<void> {
+    if (this.renamingSetId() !== id) return;
+    this.renamingSetId.set(null);
+    await this.business.renameSet(id, name);
+  }
+
+  protected deleteSet(set: { id: string; name: string }): void {
+    this.confirmation.confirm({
+      header: this.language.t('sprite.sets.deleteTitle'),
+      message: this.language.t('sprite.sets.deleteMessage', { name: set.name }),
+      icon: 'pi pi-trash',
+      acceptButtonProps: {
+        label: this.language.t('sprite.sets.delete'),
+        severity: 'danger',
+      },
+      rejectButtonProps: {
+        label: this.language.t('common.cancel'),
+        severity: 'secondary',
+        text: true,
+      },
+      accept: () => void this.business.deleteSet(set.id),
+    });
   }
 
   protected async pickSprite(id: string): Promise<void> {

@@ -7,7 +7,8 @@
     "build": "node scripts/ng-with-env.mjs build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
-    "test:watch": "ng test"
+    "test:watch": "ng test",
+    "sprites:sets": "esbuild scripts/generate-sprite-sets.ts --bundle --platform=node --format=esm --log-level=warning --outfile=node_modules/.cache/generate-sprite-sets.mjs && node node_modules/.cache/generate-sprite-sets.mjs"
   },
   "prettier": {
     "overrides": [

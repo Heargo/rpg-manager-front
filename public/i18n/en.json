@@ -1374,7 +1374,21 @@
       "title": "Sprite library",
       "search": "Search a sprite",
       "empty": "No sprite matches.",
-      "credit": "Fantasy items pack by Florian Sciberras (CC BY 4.0)."
+      "credit": "Fantasy items pack by Florian Sciberras (CC BY 4.0).",
+      "bundled": "Bundled",
+      "mine": "My sprites"
+    },
+    "sets": {
+      "save": "Save",
+      "saveHint": "Save the sprite and its materials on this device",
+      "saved": "Sprite saved on this device.",
+      "saveFailed": "The sprite could not be saved.",
+      "open": "Open",
+      "rename": "Rename",
+      "delete": "Delete",
+      "deleteTitle": "Delete this sprite?",
+      "deleteMessage": "\"{{name}}\" and its materials will be deleted from this device.",
+      "empty": "No saved sprite yet. Open one, set its materials and press Save."
     }
   },
   "combat": {

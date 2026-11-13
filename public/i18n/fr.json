@@ -1374,7 +1374,21 @@
       "title": "Bibliothèque de sprites",
       "search": "Chercher un sprite",
       "empty": "Aucun sprite ne correspond.",
-      "credit": "Fantasy items pack de Florian Sciberras (CC BY 4.0)."
+      "credit": "Fantasy items pack de Florian Sciberras (CC BY 4.0).",
+      "bundled": "Fournis",
+      "mine": "Mes sprites"
+    },
+    "sets": {
+      "save": "Enregistrer",
+      "saveHint": "Enregistrer le sprite et ses matériaux sur cet appareil",
+      "saved": "Sprite enregistré sur cet appareil.",
+      "saveFailed": "Le sprite n’a pas pu être enregistré.",
+      "open": "Ouvrir",
+      "rename": "Renommer",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer ce sprite ?",
+      "deleteMessage": "« {{name}} » et ses matériaux seront supprimés de cet appareil.",
+      "empty": "Aucun sprite enregistré. Ouvrez-en un, définissez ses matériaux et cliquez sur Enregistrer."
     }
   },
   "combat": {

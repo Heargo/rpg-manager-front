@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { ConfirmationService } from '@openng/optimus-ui/api';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { routesTools } from '../../../tools/tools.routes';
 import { gray } from '../../helpers/sprite-test-images';
@@ -190,6 +191,51 @@ describe('SpriteColorizerPageComponent', () => {
       await fixture.whenStable();
       expect(load).toHaveBeenCalledWith('waraxe');
       expect(tiles()).toHaveLength(0);
+    });
+  });
+
+  describe('saved sprite sets', () => {
+    const saved = {
+      id: 'set-1',
+      name: 'Blue axe',
+      source: { kind: 'library' as const, spriteId: 'axe' },
+      config: '{}',
+      updatedAt: 1,
+    };
+
+    it('saves the current sprite and materials from the Save button', async () => {
+      const { fixture, button, business } = await render();
+      const save = vi.spyOn(business, 'saveSet').mockResolvedValue();
+      button('Save')!.click();
+      await fixture.whenStable();
+      expect(save).toHaveBeenCalledWith('sprite');
+    });
+
+    it('lists the saved sets in the library, opens and deletes them', async () => {
+      const { fixture, button, business } = await render();
+      vi.spyOn(business, 'refreshSets').mockResolvedValue();
+      vi.spyOn(business, '$savedSets').mockReturnValue([saved]);
+      const open = vi.spyOn(business, 'openSet').mockResolvedValue();
+      const remove = vi.spyOn(business, 'deleteSet').mockResolvedValue();
+      vi.spyOn(TestBed.inject(ConfirmationService), 'confirm').mockImplementation((c) => {
+        c.accept?.();
+        return TestBed.inject(ConfirmationService);
+      });
+      button('Sprite library')!.click();
+      await fixture.whenStable();
+      [...document.body.querySelectorAll<HTMLElement>('.library-tabs [role="button"], .library-tabs button')]
+        .find((b) => b.textContent!.trim() === 'My sprites')!
+        .click();
+      await fixture.whenStable();
+
+      const rows = () => [...document.body.querySelectorAll<HTMLElement>('[data-test="saved-set"]')];
+      expect(rows().map((r) => r.querySelector('.saved-name')!.textContent!.trim())).toEqual(['Blue axe']);
+      rows()[0].querySelector<HTMLButtonElement>('button[aria-label="Delete"]')!.click();
+      await fixture.whenStable();
+      expect(remove).toHaveBeenCalledWith('set-1');
+      rows()[0].querySelector<HTMLButtonElement>('button[aria-label="Open"]')!.click();
+      await fixture.whenStable();
+      expect(open).toHaveBeenCalledWith('set-1');
     });
   });
 });
