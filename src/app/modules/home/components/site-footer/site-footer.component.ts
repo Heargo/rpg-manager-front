@@ -7,6 +7,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { LanguageBusiness } from '../../../../core/business/language.business';
+import { DOCS_ORIGIN } from '../../../../core/constants/docs-origin';
 import { docsUrl } from '../../../../core/helpers/docs-url';
 
 /** Full-width footer shared by the landing and the static pages. */
@@ -106,6 +107,9 @@ import { docsUrl } from '../../../../core/helpers/docs-url';
 })
 export class SiteFooterComponent {
   private readonly language = inject(LanguageBusiness);
+  private readonly docsOrigin = inject(DOCS_ORIGIN);
   /** The user documentation in the app language. */
-  protected readonly helpUrl = computed(() => docsUrl(this.language.$language()));
+  protected readonly helpUrl = computed(
+    () => this.docsOrigin + docsUrl(this.language.$language()),
+  );
 }

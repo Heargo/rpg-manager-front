@@ -46,6 +46,8 @@ export default defineConfig({
     cwd: '../..',
     url: baseURL,
     reuseExistingServer: true,
+    // the screenshots don't need the doc's own dev server
+    env: { SKIP_DOCS: '1' },
     timeout: 180_000,
   },
 });

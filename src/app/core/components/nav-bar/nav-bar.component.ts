@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { AvatarModule } from '@openng/optimus-ui/avatar';
+import { DOCS_ORIGIN } from '../../constants/docs-origin';
 import { docsUrl } from '../../helpers/docs-url';
 import { MenubarModule } from '@openng/optimus-ui/menubar';
 import { TieredMenu } from '@openng/optimus-ui/tieredmenu';
@@ -145,6 +146,7 @@ const ROOM_ITEMS: MenuItem[] = [
 })
 export class NavBarComponent {
   protected readonly profileBusiness = inject(ProfileBusiness);
+  private readonly docsOrigin = inject(DOCS_ORIGIN);
   private readonly languageBusiness = inject(LanguageBusiness);
   private readonly room = inject(RoomBusiness);
   private readonly confirmation = inject(ConfirmationService);
@@ -170,7 +172,7 @@ export class NavBarComponent {
       label: this.languageBusiness.t('nav.help'),
       icon: 'pi pi-question-circle',
       // A new tab: leaving the app would close a hosted room.
-      url: docsUrl(this.languageBusiness.$language()),
+      url: this.docsOrigin + docsUrl(this.languageBusiness.$language()),
       target: '_blank',
     },
     { separator: true },

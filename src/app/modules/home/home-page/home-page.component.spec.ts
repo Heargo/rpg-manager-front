@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { TEST_PROVIDERS } from '../../../../testing/test-providers';
+import { DOCS_ORIGIN } from '../../../core/constants/docs-origin';
 import { HomePageComponent } from './home-page.component';
 
 /**
@@ -60,6 +61,17 @@ describe('HomePageComponent (landing)', () => {
     expect(help.getAttribute('href')).toMatch(/^\/docs\/(en\/)?$/);
     expect(help.getAttribute('target')).toBe('_blank');
     expect(help.textContent!.trim()).not.toMatch(/^home\./);
+  });
+
+  it("points Help at the doc's own dev server when one is set (npm start)", async () => {
+    TestBed.configureTestingModule({
+      providers: [...TEST_PROVIDERS, { provide: DOCS_ORIGIN, useValue: 'http://localhost:4321' }],
+    });
+    const fixture = TestBed.createComponent(HomePageComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const help = hook(fixture.nativeElement as HTMLElement, 'footer-help')!;
+    expect(help.getAttribute('href')).toMatch(/^http:\/\/localhost:4321\/docs\/(en\/)?$/);
   });
 
   describe('single content section', () => {

@@ -49,7 +49,7 @@ Then open http://localhost:4200. The dev server has no TURN relay (it uses publi
 
 | Command | Does |
 | --- | --- |
-| `npm start` | Dev server with live reload |
+| `npm start` | Dev server with live reload, plus the user documentation's dev server on port 4321 that the app's Help links open (`SKIP_DOCS=1` to leave it out) |
 | `npm test` | Unit tests (Vitest), single run |
 | `npm run test:watch` | Unit tests in watch mode |
 | `npm run build` | Production build in `dist/panel` (with the service worker), the user documentation in `dist/panel/browser/docs` |
