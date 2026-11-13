@@ -28,6 +28,7 @@ import {
   setInitiative,
   startEncounter,
   syncCharacters,
+  tickedAction,
   undo,
   useSkill,
   withoutUndo,
@@ -39,6 +40,13 @@ import { CombatService } from '../services/combat.service';
 type Payload = Record<string, unknown>;
 
 const invalid = () => new PeerApiError('invalid', 'combat.errors.invalid');
+
+/** A character rule failure (`character.errors.x`) as the combat key (`combat.errors.x`). */
+const combatError = (code: string) =>
+  new PeerApiError(
+    'rejected',
+    code.replace(/^character\.errors\./, 'combat.errors.'),
+  );
 
 function body(payload: unknown): Payload {
   if (typeof payload !== 'object' || payload === null) throw invalid();
@@ -214,16 +222,21 @@ export class CombatHostBusiness {
         this.assertGameMaster(from);
         await this.finish(parseRewards(body(payload)['rewards']));
       }),
-      own('initiative', (p, world, enc) =>
-        this.with(
+      own('initiative', (p, world, enc) => {
+        if (world.combat.initiative.mode === 'rolled')
+          throw new PeerApiError(
+            'rejected',
+            'combat.errors.initiativeNotTyped',
+          );
+        return this.with(
           world,
           setInitiative(
             enc,
             text(p['combatantId']),
             whole(p['value'], -1000, 1000),
           ),
-        ),
-      ),
+        );
+      }),
       own('useSkill', (p, world, enc) => {
         const result = useSkill(
           enc,
@@ -324,7 +337,7 @@ export class CombatHostBusiness {
       world,
       world,
     );
-    if (!result.ok) throw new PeerApiError('rejected', result.error);
+    if (!result.ok) throw combatError(result.error);
     const changed = {
       ...result.character,
       rev: character.rev + 1,
@@ -342,7 +355,11 @@ export class CombatHostBusiness {
       characters: world.characters.map((c) =>
         c.id === changed.id ? changed : c,
       ),
-      encounter: setCombatantCurrents(enc, combatantId, currents),
+      encounter: tickedAction(
+        setCombatantCurrents(enc, combatantId, currents),
+        combatantId,
+        undefined,
+      ),
     };
   }
 
@@ -379,7 +396,7 @@ export class CombatHostBusiness {
           world,
           world,
         );
-        if (!result.ok) throw new PeerApiError('rejected', result.error);
+        if (!result.ok) throw combatError(result.error);
         const granted = {
           ...result.character,
           rev: character.rev + 1,

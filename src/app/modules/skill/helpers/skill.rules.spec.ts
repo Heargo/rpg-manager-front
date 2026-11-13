@@ -178,3 +178,36 @@ describe('evaluateSkillAmount with a bracketed target name', () => {
     expect(evaluateSkillAmount('[target_Points de vie] + 1', scope)).toEqual({ ok: true, value: 1 });
   });
 });
+
+describe('the optional action type of a skill', () => {
+  const jab: Skill = { ...fireball, actionType: 'Movement' };
+
+  it('is accepted on an active skill, whether or not the world still has it', () => {
+    expect(validateSkill(jab, names)).toEqual([]);
+    expect(validateSkill({ ...jab, actionType: 'Gone' }, names)).toEqual([]);
+  });
+
+  it('is optional', () => {
+    expect(validateSkill({ ...fireball, actionType: undefined }, names)).toEqual([]);
+  });
+
+  it('is refused when blank', () => {
+    expect(validateSkill({ ...jab, actionType: ' ' }, names)).toEqual([{ field: 'actionType', code: 'invalid' }]);
+  });
+
+  it('is refused on a passive skill', () => {
+    expect(validateSkill({ ...toughness, actionType: 'Action' }, names)).toEqual([
+      { field: 'actionType', code: 'invalid' },
+    ]);
+  });
+
+  it('survives the JSON round trip', () => {
+    const text = JSON.stringify(jab);
+    expect(parseSkillJson(text, jab, names).skill?.actionType).toBe('Movement');
+  });
+
+  it('is refused in JSON when it is not a string', () => {
+    const text = JSON.stringify({ ...jab, actionType: 3 });
+    expect(parseSkillJson(text, jab, names).skill).toBeUndefined();
+  });
+});

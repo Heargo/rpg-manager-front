@@ -59,6 +59,8 @@ export interface Skill {
   roll?: SkillRoll;
   /** Active only: when a use succeeds (default always). */
   success?: SkillSuccess;
+  /** Active only: the name of the world's combat action type its use ticks (none or unknown = the first one). */
+  actionType?: string;
   effects: SkillEffect[];
 }
 

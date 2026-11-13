@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { WordListBusiness } from '../../../core/business/word-list.business';
 import { generateSkill } from '../../../core/generators/skill-generator';
 import { createSeed, seededRandomSource } from '../../../core/generators/random-source';
@@ -20,11 +20,11 @@ import { buildSkillPrompt } from '../helpers/skill-ai-prompt';
 /** What the skill editor needs: checks, JSON and the live preview of an amount formula. */
 @Injectable({ providedIn: 'root' })
 export class SkillEditorBusiness {
-  private readonly words = inject(WordListBusiness);
+  private readonly injector = inject(Injector);
 
   /** A new random skill on the world's attributes, in the active language. */
   async random(world: World): Promise<SkillDraft> {
-    return generateSkill(seededRandomSource(createSeed()), this.names(world), await this.words.skillWords());
+    return generateSkill(seededRandomSource(createSeed()), this.names(world), await this.injector.get(WordListBusiness).skillWords());
   }
 
   empty(): SkillDraft {
@@ -45,6 +45,11 @@ export class SkillEditorBusiness {
 
   preview(amount: string, world: World, maxLevel: number): SkillAmountPreview {
     return previewSkillAmount(amount, this.names(world), maxLevel);
+  }
+
+  /** The names the action type select offers: the world's combat action types, in order. */
+  actionTypeOptions(world: World): string[] {
+    return world.combat.actionTypes.map((action) => action.name);
   }
 
   private names(world: World): string[] {

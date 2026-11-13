@@ -19,6 +19,8 @@ import {
   InitiativeMode,
   InventoryItem,
 } from '../../world/models/world';
+import en from '../../../../../public/i18n/en.json';
+import fr from '../../../../../public/i18n/fr.json';
 import { CombatBusiness } from './combat.business';
 
 /**
@@ -542,6 +544,120 @@ describe('combat (GM + players)', () => {
       });
     });
 
+    describe('action counters ticked by use', () => {
+      const used = (d: Device, name: string, action: string) =>
+        named(d, name).actions.find((a) => a.name === action)?.used;
+
+      async function learn(name: string, actionType?: string) {
+        const id = (
+          await gm.injector.get(SkillCatalogueBusiness).save({
+            name,
+            description: '',
+            rarity: 'common',
+            type: 'active',
+            maxLevel: 1,
+            pointCost: 1,
+            target: 'one-enemy',
+            cooldown: 0,
+            roll: { count: 1, faces: 1 },
+            effects: [{ kind: 'damage', attribute: 'Life', amount: '1' }],
+            ...(actionType === undefined ? {} : { actionType }),
+          })
+        ).id;
+        await gm.injector.get(CharacterBusiness).act(record('ada').id, {
+          kind: 'set-skill',
+          skillId: id,
+          level: 1,
+        });
+        return id;
+      }
+
+      const use = async (skillId: string) => {
+        await combat(ada).useSkill({
+          casterId: adaId(),
+          skillId,
+          targetIds: [goblinId()],
+        });
+        await settle();
+      };
+
+      it('a skill ticks the counter of its action type', async () => {
+        const dash = await learn('Dash', 'Movement');
+        await startAll();
+
+        await use(dash);
+
+        expect(used(bob, 'Ada', 'Movement')).toBe(1);
+        expect(used(bob, 'Ada', 'Action')).toBe(0);
+      });
+
+      it('a skill without an action type ticks the first action type of the world', async () => {
+        const jab = await learn('Jab');
+        await startAll();
+
+        await use(jab);
+
+        expect(used(bob, 'Ada', 'Action')).toBe(1);
+        expect(used(bob, 'Ada', 'Movement')).toBe(0);
+      });
+
+      it('a skill naming an action type the world no longer has ticks the first one', async () => {
+        const old = await learn('Old trick', 'Reaction');
+        await startAll();
+
+        await use(old);
+
+        expect(used(bob, 'Ada', 'Action')).toBe(1);
+        expect(used(bob, 'Ada', 'Movement')).toBe(0);
+      });
+
+      it('a consumable ticks the first action type', async () => {
+        await startAll();
+
+        await combat(ada).useItem(adaId(), 'inv-potion');
+        await settle();
+
+        expect(used(bob, 'Ada', 'Action')).toBe(1);
+        expect(used(bob, 'Ada', 'Movement')).toBe(0);
+      });
+    });
+
+    describe('errors reach the client as combat.errors keys', () => {
+      it('a character item error: not a consumable, not in the inventory', async () => {
+        await gm.injector.get(WorldSessionBusiness).update((w) => ({
+          ...w,
+          characters: w.characters.map((c) =>
+            c.playerId === 'ada' ? { ...c, inventory: [potion, ring] } : c,
+          ),
+        }));
+        await startAll();
+
+        await expect(
+          combat(ada).useItem(adaId(), 'inv-ring'),
+        ).rejects.toMatchObject({
+          code: 'rejected',
+          message: 'combat.errors.notConsumable',
+        });
+        await expect(
+          combat(ada).useItem(adaId(), 'inv-nothing'),
+        ).rejects.toMatchObject({
+          code: 'rejected',
+          message: 'combat.errors.unknownItem',
+        });
+      });
+
+      it('has the keys in English and French', () => {
+        const lookup = (json: unknown, key: string) =>
+          (json as Record<string, Record<string, Record<string, unknown>>>)[
+            'combat'
+          ]['errors'][key];
+        for (const key of ['notConsumable', 'unknownItem', 'initiativeNotTyped']) {
+          expect(typeof lookup(en, key), `en ${key}`).toBe('string');
+          expect(typeof lookup(fr, key), `fr ${key}`).toBe('string');
+        }
+      });
+    });
+
     describe('ending', () => {
       it('clears the encounter and grants the confirmed XP through grant-xp', async () => {
         await startAll();
@@ -615,6 +731,22 @@ describe('combat (GM + players)', () => {
       expect(named(gm, 'Ada').initiative).toBe(1 + record('ada').level);
       expect(state(ada).combatants[0].name).toBe('Goblin');
       expect(state(ada).activeId).toBe(goblinId());
+    });
+
+    it('refuses a typed initiative, from a player and from the GM', async () => {
+      await startAll();
+
+      await expect(combat(ada).initiative(adaId(), 15)).rejects.toMatchObject({
+        code: 'rejected',
+        message: 'combat.errors.initiativeNotTyped',
+      });
+      await expect(
+        combat(gm).initiative(goblinId(), 20),
+      ).rejects.toMatchObject({
+        code: 'rejected',
+        message: 'combat.errors.initiativeNotTyped',
+      });
+      expect(named(gm, 'Goblin').initiative).toBe(6);
     });
   });
 

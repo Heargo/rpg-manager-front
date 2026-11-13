@@ -22,7 +22,7 @@ import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CombatBusiness } from '../../business/combat.business';
-import { PendingResult } from '../../models/combat';
+import { PendingResultView } from '../../models/combat';
 import { CombatActionsComponent } from '../combat-actions/combat-actions.component';
 
 /** The game master's combat panel: start an encounter, run the turns, resolve skill results, end with the rewards. */
@@ -192,7 +192,7 @@ export class CombatGmPanelComponent {
     return this.state()?.combatants.find((c) => c.id === id)?.name ?? '';
   }
 
-  protected skillNameOf(pending: PendingResult): string {
+  protected skillNameOf(pending: PendingResultView): string {
     return (
       pending.skillName ??
       this.combat.$skills().find((s) => s.id === pending.skillId)?.name ??
@@ -208,7 +208,7 @@ export class CombatGmPanelComponent {
     void this.run(() => this.combat.dismiss(id));
   }
 
-  protected edit(pending: PendingResult): void {
+  protected edit(pending: PendingResultView): void {
     this.editing.set({
       id: pending.id,
       amounts: pending.effects.map((e) => e.amount),

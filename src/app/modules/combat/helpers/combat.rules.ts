@@ -383,6 +383,30 @@ export function setActionUsed(
   }));
 }
 
+/** Ticks one use on the combatant's counter of that name, or on its first one (no commit: part of the change that caused it). */
+export function tickedAction(
+  enc: Encounter,
+  id: string,
+  action: string | undefined,
+): Encounter {
+  return {
+    ...enc,
+    combatants: enc.combatants.map((c) => {
+      if (c.id !== id || !c.actions.length) return c;
+      const named = c.actions.findIndex(
+        (a) => action !== undefined && same(a.name, action),
+      );
+      const index = named < 0 ? 0 : named;
+      return {
+        ...c,
+        actions: c.actions.map((a, i) =>
+          i === index ? { ...a, used: Math.min(a.used + 1, a.count) } : a,
+        ),
+      };
+    }),
+  };
+}
+
 // --- skills -----------------------------------------------------------------
 
 export interface SkillPreview {
@@ -524,9 +548,17 @@ export function useSkill(
   return {
     ok: true,
     encounter: commit(enc, {
-      ...enc,
+      ...tickedAction(
+        {
+          ...enc,
+          combatants: enc.combatants.map((c) =>
+            c.id === caster.id ? paid(c) : c,
+          ),
+        },
+        caster.id,
+        skill.actionType,
+      ),
       seq,
-      combatants: enc.combatants.map((c) => (c.id === caster.id ? paid(c) : c)),
       pending: [...enc.pending, ...pending],
       log: [
         ...enc.log,

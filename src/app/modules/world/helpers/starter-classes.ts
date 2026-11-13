@@ -33,6 +33,8 @@ interface SkillSpec {
     target: SkillTarget;
     cost: number;
     cooldown: number;
+    /** Movement skills tick a movement counter when the world has one; the others tick the first action type. */
+    movement?: true;
     /** Default 1d20. */
     roll?: SkillRoll;
     /** Default always. */
@@ -421,7 +423,7 @@ const CLASSES: ClassSpec[] = [
         ],
         rarity: 'uncommon',
         maxLevel: 3,
-        active: { target: 'self', cost: 3, cooldown: 3 },
+        active: { target: 'self', cost: 3, cooldown: 3, movement: true },
         effects: (c) => [
           {
             kind: 'modify',
@@ -488,7 +490,7 @@ const CLASSES: ClassSpec[] = [
  * attribute gets nothing.
  */
 export function buildStarterClasses(
-  world: Pick<World, 'attributes' | 'barAttributes'>,
+  world: Pick<World, 'attributes' | 'barAttributes'> & Partial<Pick<World, 'combat'>>,
   language: string,
   newId: () => string,
 ): StarterClasses {
@@ -502,6 +504,11 @@ export function buildStarterClasses(
     .filter((name) => name !== life && name !== mana);
   const mains = others.length ? others : [life];
   const at = language === 'fr' ? 1 : 0;
+  const actionTypes = (world.combat?.actionTypes ?? []).map((a) => a.name);
+  const movementType =
+    actionTypes.find((name) =>
+      ['movement', 'déplacement', 'deplacement', 'mouvement'].includes(name.trim().toLocaleLowerCase()),
+    ) ?? actionTypes[0];
 
   const skills: Skill[] = [];
   const classes = CLASSES.map((spec): CharacterClass => {
@@ -528,6 +535,9 @@ export function buildStarterClasses(
           ? {
               target: entry.active.target,
               cooldown: entry.active.cooldown,
+              ...((entry.active.movement ? movementType : actionTypes[0])
+                ? { actionType: entry.active.movement ? movementType : actionTypes[0] }
+                : {}),
               ...(entry.active.roll ? { roll: entry.active.roll } : {}),
               ...(entry.active.success ? { success: entry.active.success } : {}),
               ...(mana && entry.active.cost > 0

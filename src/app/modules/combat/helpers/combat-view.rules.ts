@@ -7,6 +7,8 @@ import {
   CombatantView,
   CombatView,
   Encounter,
+  PendingResult,
+  PendingResultView,
 } from '../models/combat';
 
 type WorldRules = Pick<World, 'npcs' | 'characters' | 'npcVisibility'> &
@@ -34,7 +36,9 @@ export function projectEncounter(
     combatants: encounter.combatants.map((c) =>
       projectCombatant(c, encounter.lifeAttribute, world, full),
     ),
-    pending: encounter.pending,
+    pending: encounter.pending.map((result) =>
+      full ? result : projectPending(result, encounter, world),
+    ),
     log: encounter.log,
   };
 }
@@ -88,5 +92,35 @@ function projectCombatant(
             .filter((e) => e.equipped)
             .map((e) => ({ name: e.item.name }))
         : undefined,
+  };
+}
+
+/** A pending result for players: the attribute an effect names is dropped when they can't see it on the NPC target. */
+function projectPending(
+  result: PendingResult,
+  encounter: Encounter,
+  world: WorldRules,
+): PendingResultView {
+  const target = encounter.combatants.find((c) => c.id === result.targetId);
+  if (!target || target.characterId) return result;
+  const npc = target.npcId
+    ? world.npcs.find((n) => n.id === target.npcId)
+    : undefined;
+  const roles =
+    npc?.roles ??
+    (ROLE_OF_SIDE[target.side] ? [ROLE_OF_SIDE[target.side]] : []);
+  const shown = (field: keyof NpcVisibility) =>
+    roles.some((role) => world.npcVisibility[role]?.[field]);
+  const lifeShown = shown('lifeBar') || shown('lifeNumbers');
+  const canSee = (attribute: string | undefined) =>
+    shown('attributes') ||
+    (lifeShown &&
+      attribute !== undefined &&
+      normalizeName(attribute) === normalizeName(encounter.lifeAttribute));
+  return {
+    ...result,
+    effects: result.effects.map(({ attribute, ...effect }) =>
+      canSee(attribute) ? { ...effect, attribute } : effect,
+    ),
   };
 }

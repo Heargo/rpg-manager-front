@@ -312,4 +312,85 @@ describe('projectEncounter', () => {
 
     expect(shown.lifeBar).toEqual({ percent: 0 });
   });
+
+  describe('pending results and the log on a hidden NPC', () => {
+    const hit = (target: string, attribute = 'Life') => ({
+      ...encounter([]),
+      combatants: [
+        combatant({ id: 'e1', name: 'Goblin', npcId: 'npc-1' }),
+        combatant({ id: 'p', name: 'Ada', side: 'party', characterId: 'char-1' }),
+      ],
+      pending: [
+        {
+          id: 'pending-1',
+          casterId: 'p',
+          targetId: target,
+          skillId: 's',
+          skillName: 'Fireball',
+          rolls: [4, 5],
+          total: 9,
+          success: true,
+          effects: [
+            { kind: 'damage' as const, attribute, amount: 12 },
+            { kind: 'modify' as const, attribute: 'Mana', amount: -2, duration: 3 },
+          ],
+        },
+      ],
+    });
+    const project = (target: string, rules: NpcVisibilityRules, full = false) =>
+      projectEncounter(hit(target), world([npc({})], rules), full);
+
+    it('keeps the roll, the total, the success and the amounts, as they are public', () => {
+      const [pending] = project('e1', rulesOf({})).pending;
+
+      expect(pending).toMatchObject({
+        rolls: [4, 5],
+        total: 9,
+        success: true,
+        skillName: 'Fireball',
+      });
+      expect(pending.effects.map((e) => e.amount)).toEqual([12, -2]);
+      expect(pending.effects.map((e) => e.kind)).toEqual(['damage', 'modify']);
+      expect(pending.effects[1].duration).toBe(3);
+    });
+
+    it('names no attribute the viewer cannot see on the NPC: Mana is hidden, Life is shown by the life bar', () => {
+      const [pending] = project('e1', rulesOf({ lifeBar: true })).pending;
+
+      expect(pending.effects[0].attribute).toBe('Life');
+      expect(pending.effects[1].attribute).toBeUndefined();
+    });
+
+    it('names no attribute at all when the NPC shows neither its life nor its attributes', () => {
+      const [pending] = project('e1', rulesOf({})).pending;
+
+      expect(pending.effects.map((e) => e.attribute)).toEqual([
+        undefined,
+        undefined,
+      ]);
+    });
+
+    it('names every attribute when the NPC shows its attributes', () => {
+      const [pending] = project('e1', rulesOf({ attributes: true })).pending;
+
+      expect(pending.effects.map((e) => e.attribute)).toEqual(['Life', 'Mana']);
+    });
+
+    it('does not filter a result on a character combatant', () => {
+      const [pending] = project('p', rulesOf({})).pending;
+
+      expect(pending.effects.map((e) => e.attribute)).toEqual(['Life', 'Mana']);
+    });
+
+    it('does not filter anything for the GM', () => {
+      const [pending] = project('e1', rulesOf({}), true).pending;
+
+      expect(pending).toEqual(hit('e1').pending[0]);
+    });
+
+    it('keeps the log entries as they are', () => {
+      expect(project('e1', rulesOf({})).log).toEqual(encounter([]).log);
+    });
+  });
 });
+

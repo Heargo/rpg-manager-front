@@ -300,6 +300,26 @@ type PresetTarget = 'success' | number;
                   </div>
                   <div class="row">
                     <div class="field">
+                      <label for="skill-action-type">{{
+                        'skill.editor.fields.actionType' | transloco
+                      }}</label>
+                      <p-select
+                        inputId="skill-action-type"
+                        data-field="action-type"
+                        [options]="actionTypeOptions()"
+                        optionLabel="label"
+                        optionValue="value"
+                        [showClear]="true"
+                        [ngModel]="draft().actionType ?? null"
+                        (ngModelChange)="setActionType($event)"
+                      />
+                      <small class="hint">{{
+                        'skill.editor.help.actionType' | transloco
+                      }}</small>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="field">
                       <label for="skill-cost-attribute">{{
                         'skill.editor.fields.costAttribute' | transloco
                       }}</label>
@@ -1180,6 +1200,13 @@ export class SkillEditorComponent {
       label: this.language.t('skill.effectKind.' + value),
     })),
   );
+  protected readonly actionTypeOptions = computed(() => {
+    const names = this.editor.actionTypeOptions(this.world());
+    const current = this.draft().actionType;
+    return (
+      current && !names.includes(current) ? [...names, current] : names
+    ).map((name) => ({ value: name, label: name }));
+  });
   protected readonly attributeOptions = computed(() =>
     this.world().attributes.map((attribute) => ({
       value: attribute.name,
@@ -1293,7 +1320,9 @@ export class SkillEditorComponent {
 
   /** A passive skill has no target, cost nor cooldown; an active one starts with a target. */
   protected setType(type: Skill['type']): void {
-    const { target, cost, cooldown, roll, success, ...rest } = this.draft();
+    const { target, cost, cooldown, roll, success, actionType, ...rest } =
+      this.draft();
+    void actionType;
     void roll;
     void success;
     void target;
@@ -1315,6 +1344,12 @@ export class SkillEditorComponent {
             ? { mode, formula: 'roll - 10' }
             : { mode },
     });
+  }
+
+  protected setActionType(name: string | null): void {
+    const { actionType, ...rest } = this.draft();
+    void actionType;
+    this.setDraft(name ? { ...rest, actionType: name } : rest);
   }
 
   protected setCostAttribute(attribute: string | null): void {

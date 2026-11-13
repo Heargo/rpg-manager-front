@@ -80,6 +80,13 @@ export function validateSkill(
     issues.push({ field: 'target', code: 'required' });
   if (skill.type === 'passive' && skill.target)
     issues.push({ field: 'target', code: 'invalid' });
+  if (
+    skill.actionType !== undefined &&
+    (skill.type !== 'active' ||
+      typeof skill.actionType !== 'string' ||
+      !skill.actionType.trim())
+  )
+    issues.push({ field: 'actionType', code: 'invalid' });
   skill.effects.forEach((effect, index) => {
     if (
       validateFormula(
@@ -297,6 +304,8 @@ export function parseSkillJson(
         (SKILL_SUCCESS_MODES as readonly unknown[]).includes(
           (record['success'] as { mode?: unknown }).mode,
         ))) &&
+    (record['actionType'] === undefined ||
+      typeof record['actionType'] === 'string') &&
     Array.isArray(record['effects']) &&
     record['effects'].every(
       (effect) =>

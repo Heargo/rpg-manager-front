@@ -68,6 +68,14 @@ export interface PendingResult {
   error?: string;
 }
 
+/** An effect as a viewer sees it: the attribute is left out when they can't see it on a hidden NPC. */
+export type PendingEffectView = Omit<PendingEffect, 'attribute'> & {
+  attribute?: string;
+};
+export type PendingResultView = Omit<PendingResult, 'effects'> & {
+  effects: PendingEffectView[];
+};
+
 export type CombatLogEntry =
   | {
       kind: 'skill';
@@ -128,7 +136,7 @@ export interface CombatView {
   round: number;
   activeId?: string;
   combatants: CombatantView[];
-  pending: PendingResult[];
+  pending: PendingResultView[];
   log: CombatLogEntry[];
 }
 
