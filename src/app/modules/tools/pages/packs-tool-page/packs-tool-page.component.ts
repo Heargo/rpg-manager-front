@@ -3,9 +3,11 @@ import {
   Component,
   computed,
   inject,
+  PendingTasks,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
@@ -23,6 +25,7 @@ import {
   PackUpdate,
   PreparedPack,
 } from '../../../../core/business/pack.business';
+import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import {
   PACK_GENERATORS,
@@ -63,6 +66,12 @@ export function formatSize(bytes: number): string {
           icon="pi pi-plus"
           [label]="'packs.add' | transloco"
           (onClick)="openAdd()"
+        />
+        <p-button
+          severity="secondary"
+          icon="pi pi-pencil"
+          [label]="'packs.creator.create' | transloco"
+          (onClick)="openCreator()"
         />
       </header>
       <ul class="grid">
@@ -190,21 +199,34 @@ export function formatSize(bytes: number): string {
                   <dd>{{ pack.version }}</dd>
                   <dt>{{ 'packs.source' | transloco }}</dt>
                   <dd>
-                    <a
-                      [href]="pack.link"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >{{ pack.link }}</a
-                    >
+                    @if (pack.link) {
+                      <a
+                        [href]="pack.link"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >{{ pack.link }}</a
+                      >
+                    } @else {
+                      {{ 'packs.createdHere' | transloco }}
+                    }
                   </dd>
                 </dl>
                 <div class="actions">
+                  @if (pack.link) {
+                    <p-button
+                      severity="secondary"
+                      icon="pi pi-refresh"
+                      [label]="'packs.update' | transloco"
+                      [disabled]="busy().has(pack.id)"
+                      (onClick)="checkUpdate(pack)"
+                    />
+                  }
                   <p-button
                     severity="secondary"
-                    icon="pi pi-refresh"
-                    [label]="'packs.update' | transloco"
+                    icon="pi pi-pencil"
+                    [label]="'packs.editAsDraft' | transloco"
                     [disabled]="busy().has(pack.id)"
-                    (onClick)="checkUpdate(pack)"
+                    (onClick)="editAsDraft(pack)"
                   />
                   <p-button
                     severity="danger"
@@ -268,9 +290,12 @@ export function formatSize(bytes: number): string {
             </dd>
             <dt>{{ 'packs.source' | transloco }}</dt>
             <dd>
-              <a [href]="pack.source" target="_blank" rel="noopener noreferrer">{{
-                pack.source
-              }}</a>
+              <a
+                [href]="pack.source"
+                target="_blank"
+                rel="noopener noreferrer"
+                >{{ pack.source }}</a
+              >
             </dd>
             <dt>{{ 'packs.version' | transloco }}</dt>
             <dd>{{ pack.manifest.version }}</dd>
@@ -279,9 +304,7 @@ export function formatSize(bytes: number): string {
             @for (lang of countsGenerators(pack); track lang.lang) {
               <dt>{{ 'packs.lang.' + lang.lang | transloco }}</dt>
               <dd>
-                {{
-                  'packs.wordLists' | transloco: { count: lang.count }
-                }}
+                {{ 'packs.wordLists' | transloco: { count: lang.count } }}
               </dd>
             }
             @for (kind of countsSprites(pack); track kind.kind) {
@@ -289,7 +312,9 @@ export function formatSize(bytes: number): string {
               <dd>{{ kind.count }}</dd>
             }
           </dl>
-          <p-message severity="warn">{{ 'packs.warning' | transloco }}</p-message>
+          <p-message severity="warn">{{
+            'packs.warning' | transloco
+          }}</p-message>
         </div>
       }
       <ng-template #footer>
@@ -323,7 +348,9 @@ export function formatSize(bytes: number): string {
                     }
             }}
           </p>
-          <p-message severity="warn">{{ 'packs.warning' | transloco }}</p-message>
+          <p-message severity="warn">{{
+            'packs.warning' | transloco
+          }}</p-message>
         </div>
       }
       <ng-template #footer>
@@ -461,6 +488,9 @@ export class PacksToolPageComponent {
   private readonly language = inject(LanguageBusiness);
   private readonly confirmation = inject(ConfirmationService);
   private readonly messages = inject(MessageService);
+  private readonly creator = inject(PackCreatorBusiness);
+  private readonly router = inject(Router);
+  private readonly pending = inject(PendingTasks);
 
   protected readonly registry = signal<PackRegistryEntry[]>([]);
   protected readonly busy = signal<ReadonlySet<string>>(new Set());
@@ -473,7 +503,7 @@ export class PacksToolPageComponent {
   protected readonly errors = signal<string[]>([]);
   protected readonly update = signal<{ update: PackUpdate } | null>(null);
   protected readonly unofficial = computed(() =>
-    this.business.$installed().filter((p) => p.link),
+    this.business.$installed().filter((p) => p.link || p.local),
   );
   private readonly detailSprites = signal<BundledSprite[]>([]);
   private readonly resets = signal<Record<string, number>>({});
@@ -502,9 +532,11 @@ export class PacksToolPageComponent {
   });
 
   constructor() {
-    this.business.registry().then(
-      (entries) => this.registry.set(entries),
-      () => this.fail(this.language.t('packs.loadFailed')),
+    void this.track(() =>
+      this.business.registry().then(
+        (entries) => this.registry.set(entries),
+        () => this.fail(this.language.t('packs.loadFailed')),
+      ),
     );
   }
 
@@ -575,6 +607,30 @@ export class PacksToolPageComponent {
     } catch (error) {
       this.fail(error);
       this.resets.update((r) => ({ ...r, [pack.id]: (r[pack.id] ?? 0) + 1 }));
+    } finally {
+      this.setBusy(pack.id, false);
+    }
+  }
+
+  protected openCreator(): void {
+    void this.router.navigate(['/tools/pack-creator']);
+  }
+
+  protected editAsDraft(pack: InstalledPack): Promise<void> {
+    return this.track(() => this.doEditAsDraft(pack));
+  }
+
+  private async doEditAsDraft(pack: InstalledPack): Promise<void> {
+    this.setBusy(pack.id, true);
+    try {
+      const draft = await this.creator.draftFromInstalled(pack.id);
+      await this.router.navigate(['/tools/pack-creator', draft.id]);
+    } catch (error) {
+      this.fail(
+        this.errorList(error)
+          .map((e) => this.errorText(e))
+          .join('\n'),
+      );
     } finally {
       this.setBusy(pack.id, false);
     }
@@ -727,6 +783,16 @@ export class PacksToolPageComponent {
       else next.delete(id);
       return next;
     });
+  }
+
+  /** Keeps the app unstable while the work runs, so `whenStable` waits for it. */
+  private async track<T>(work: () => Promise<T>): Promise<T> {
+    const done = this.pending.add();
+    try {
+      return await work();
+    } finally {
+      done();
+    }
   }
 
   private fail(error: unknown): void {

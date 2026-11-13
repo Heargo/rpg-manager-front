@@ -8,11 +8,16 @@ import {
   SpriteKind,
   validatePack,
 } from '../packs/pack';
-import { isClassWordList, isSkillWordList } from '../generators/pack-word-lists';
-import { validateNpcNameList } from '../generators/npc-name-list';
-import { validateWordList } from '../generators/word-list';
 import { runLimited } from '../helpers/pool';
-import { importConfig } from '../../modules/sprite/helpers/config-export';
+import {
+  checkImageFile,
+  checkJsonFile,
+  checkMaterialsFile,
+  failureReason as reason,
+  ImageSize,
+  listChecker,
+  MAX_PACK_BYTES,
+} from '../packs/pack-files';
 import { resolvePackLink } from '../packs/pack-link';
 import { PackRegistryEntry, validateRegistry } from '../packs/pack-registry';
 import { ImageProcessingService } from '../services/image-processing.service';
@@ -28,9 +33,6 @@ export const BASE_PACK_ID = 'base';
 /** At most this many files are fetched at a time. */
 const MAX_FETCHES = 4;
 const MAX_MANIFEST_BYTES = 64 * 1024;
-const MAX_FILE_BYTES = 1024 * 1024;
-const MAX_PACK_BYTES = 20 * 1024 * 1024;
-const MAX_IMAGE_SIDE = 256;
 
 /** A pack that cannot be installed: `message` is the first problem, `errors` lists them all (file name and reason). */
 export class PackError extends Error {
@@ -79,6 +81,9 @@ export interface InstalledPack {
   builtIn: boolean;
   /** The link an unofficial pack was installed from. */
   link?: string;
+  /** Created with the pack creator on this device. */
+  local?: boolean;
+  homepage?: string;
   /** The pack's sprites, for the details view. */
   sprites: PackSprite[];
   generators: Pack['generators'];
@@ -89,6 +94,7 @@ const installedOf = (
   enabled: boolean,
   builtIn: boolean,
   link?: string,
+  local = false,
 ): InstalledPack => ({
   id: pack.id,
   name: pack.name,
@@ -102,6 +108,8 @@ const installedOf = (
   sprites: pack.sprites,
   generators: pack.generators,
   ...(link ? { link } : {}),
+  ...(local ? { local } : {}),
+  ...(pack.homepage ? { homepage: pack.homepage } : {}),
 });
 
 /**
@@ -135,7 +143,10 @@ export class PackBusiness {
           p.manifest,
           p.enabled,
           false,
-          p.source === 'official' ? undefined : p.source.link,
+          p.source !== 'official' && p.source.kind === 'unofficial'
+            ? p.source.link
+            : undefined,
+          p.source !== 'official' && p.source.kind === 'local',
         ),
       ),
     ];
@@ -440,7 +451,7 @@ export class PackBusiness {
     const fileUrl = (path: string) => new URL(path, manifestUrl).href;
     const files = new Map<string, StoredPackFile>();
     const errors: string[] = [];
-    const dimensions = new Map<string, { width: number; height: number }>();
+    const dimensions = new Map<string, ImageSize>();
     let size = 0;
 
     const images = new Set<string>();
@@ -458,16 +469,12 @@ export class PackBusiness {
       ...[...images].map((path) => async () => {
         try {
           const blob = await this.service.loadBlob(fileUrl(path));
-          if (blob.size > MAX_FILE_BYTES)
-            return void errors.push(`${path}: larger than 1 MB`);
           size += blob.size;
-          const dims = await this.images.dimensions(blob).catch(() => null);
-          if (!dims)
-            return void errors.push(`${path}: not a readable image`);
-          if (dims.width > MAX_IMAGE_SIDE || dims.height > MAX_IMAGE_SIDE)
-            return void errors.push(
-              `${path}: ${dims.width} x ${dims.height}, larger than ${MAX_IMAGE_SIDE} x ${MAX_IMAGE_SIDE}`,
-            );
+          const checked = await checkImageFile(path, blob, (b) =>
+            this.images.dimensions(b),
+          );
+          if ('error' in checked) return void errors.push(checked.error);
+          const dims = checked.dims;
           dimensions.set(path, dims);
           files.set(path, {
             kind: 'blob',
@@ -481,12 +488,8 @@ export class PackBusiness {
       ...[...new Set([...lists.keys(), ...materials])].map((path) => async () => {
         try {
           const value = await this.service.loadJson(fileUrl(path));
-          const length = JSON.stringify(value).length;
-          if (length > MAX_FILE_BYTES)
-            return void errors.push(`${path}: larger than 1 MB`);
-          size += length;
-          const problems = lists.get(path)?.(value) ?? [];
-          for (const problem of problems) errors.push(`${path}: ${problem}`);
+          size += JSON.stringify(value).length;
+          errors.push(...checkJsonFile(path, value, lists.get(path)));
           files.set(path, { kind: 'json', value });
         } catch (error) {
           errors.push(`${path}: ${reason(error)}`);
@@ -499,11 +502,8 @@ export class PackBusiness {
       const file = sprite.materials ? files.get(sprite.materials) : undefined;
       const dims = dimensions.get(sprite.image);
       if (!sprite.materials || file?.kind !== 'json' || !dims) continue;
-      try {
-        importConfig(JSON.stringify(file.value), dims);
-      } catch (error) {
-        errors.push(`${sprite.materials}: ${reason(error)}`);
-      }
+      const problem = checkMaterialsFile(sprite.materials, file.value, dims);
+      if (problem) errors.push(problem);
     }
     if (size > MAX_PACK_BYTES) errors.push('pack: larger than 20 MB in total');
     if (errors.length) throw new PackError([...new Set(errors)].sort());
@@ -520,8 +520,8 @@ export class PackBusiness {
     return { manifest, source, manifestUrl, size, counts, files };
   }
 
-  /** Refuses an id of an official pack, or already installed from another link. */
-  private async checkClash(id: string, source: string): Promise<void> {
+  /** Refuses an id of an official pack, or already installed from another link (`source` null: created here). */
+  private async checkClash(id: string, source: string | null): Promise<void> {
     // Fail closed: without the registry, an official id cannot be told apart.
     const entries = await this.registryEntries().catch(() => {
       throw new PackError([
@@ -533,10 +533,51 @@ export class PackBusiness {
     const storedSource = stored?.source;
     if (official || id === BASE_PACK_ID || storedSource === 'official')
       throw new PackError([`pack.json: id "${id}" is an official pack`]);
-    if (storedSource && storedSource.link !== source)
+    if (storedSource && storedSource.kind === 'unofficial') {
+      if (storedSource.link !== source)
+        throw new PackError([
+          `pack.json: id "${id}" is already installed from another link`,
+        ]);
+    } else if (storedSource && source !== null)
       throw new PackError([
-        `pack.json: id "${id}" is already installed from another link`,
+        `pack.json: id "${id}" is already installed from this device`,
       ]);
+  }
+
+  /** Refuses an id an official pack or a pack from a link already has; rejects with a `PackError`. */
+  async checkLocalId(id: string): Promise<void> {
+    await this.ensureLoaded();
+    await this.checkClash(id, null);
+  }
+
+  /** Stores a pack made on this device, enabled; the same id replaces the pack that is there. */
+  async installLocal(
+    manifest: Pack,
+    files: Map<string, StoredPackFile>,
+    size: number,
+  ): Promise<void> {
+    await this.checkLocalId(manifest.id);
+    await this.storage.install(
+      {
+        id: manifest.id,
+        manifest,
+        source: { kind: 'local' },
+        enabled: true,
+        installedAt: Date.now(),
+        size,
+      },
+      files,
+    );
+    await this.revokeUrls(manifest.id);
+    this.stored.set(await this.storage.list());
+  }
+
+  /** A file of an installed pack as stored. */
+  async readFile(
+    packId: string,
+    path: string,
+  ): Promise<StoredPackFile | undefined> {
+    return this.storage.getFile(packId, path);
   }
 
   /** Stores a prepared pack, enabled; the same link replaces the pack that is there. */
@@ -563,7 +604,11 @@ export class PackBusiness {
   async checkUpdate(id: string): Promise<PackUpdate> {
     await this.ensureLoaded();
     const record = this.stored().find((p) => p.id === id);
-    if (!record || record.source === 'official')
+    if (
+      !record ||
+      record.source === 'official' ||
+      record.source.kind !== 'unofficial'
+    )
       throw new Error(`"${id}" is not an unofficial pack`);
     const prepared = await this.prepare(record.source.link);
     if (prepared.manifest.id !== id)
@@ -621,28 +666,5 @@ export class PackBusiness {
     return this.service.loadJson(
       packFileUrl(`packs/${packId}/pack.json`, path),
     );
-  }
-}
-
-const reason = (error: unknown): string =>
-  error instanceof Error ? error.message : 'could not be fetched';
-
-/** The checks of a word list file, by generator; each returns its problems. */
-function listChecker(generator: PackGenerator): (json: unknown) => string[] {
-  switch (generator) {
-    case 'items':
-      return (json) => {
-        const r = validateWordList(json);
-        return r.ok ? [] : r.errors;
-      };
-    case 'npcs':
-      return (json) => {
-        const r = validateNpcNameList(json);
-        return r.ok ? [] : r.errors;
-      };
-    case 'skills':
-      return (json) => (isSkillWordList(json) ? [] : ['not a skill word list']);
-    case 'classes':
-      return (json) => (isClassWordList(json) ? [] : ['not a class word list']);
   }
 }

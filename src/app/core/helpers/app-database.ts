@@ -1,8 +1,8 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
 
 export const APP_DATABASE_NAME = 'rpg-manager';
-/** v1: worlds, images. v2: hostedRoom, joinedRooms. v3: playerCopies. v4: joinedWorlds (replaces joinedRooms). v5: spriteSets. v6: packs, packFiles. */
-const APP_DATABASE_VERSION = 6;
+/** v1: worlds, images. v2: hostedRoom, joinedRooms. v3: playerCopies. v4: joinedWorlds (replaces joinedRooms). v5: spriteSets. v6: packs, packFiles. v7: packDrafts. */
+const APP_DATABASE_VERSION = 7;
 
 export interface StoredImage {
   /** SHA-256 of the bytes, hex. */
@@ -31,6 +31,8 @@ export interface AppDatabaseSchema extends DBSchema {
   packs: { key: string; value: { id: string } & Record<string, unknown> };
   /** The files of downloaded packs, by `<packId>/<path>`. Typed by `PackStorageService`. */
   packFiles: { key: string; value: unknown };
+  /** The pack creator's drafts, by draft id. Typed by `PackDraftStorageService`. */
+  packDrafts: { key: string; value: { id: string } & Record<string, unknown> };
 }
 
 export type AppDatabase = IDBPDatabase<AppDatabaseSchema>;
@@ -50,6 +52,7 @@ export function openAppDatabase(name = APP_DATABASE_NAME): Promise<AppDatabase> 
       if (!db.objectStoreNames.contains('spriteSets')) db.createObjectStore('spriteSets', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('packs')) db.createObjectStore('packs', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('packFiles')) db.createObjectStore('packFiles');
+      if (!db.objectStoreNames.contains('packDrafts')) db.createObjectStore('packDrafts', { keyPath: 'id' });
     },
   });
 }

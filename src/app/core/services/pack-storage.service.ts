@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import { AppDatabase, openAppDatabase } from '../helpers/app-database';
 import { Pack } from '../packs/pack';
 
-/** Where a stored pack comes from: the official registry, or a link the user gave. */
+/** Where a stored pack comes from: the official registry, a link the user gave, or the pack creator on this device. */
 export type PackSource =
-  'official' | { kind: 'unofficial'; link: string; manifestUrl: string };
+  | 'official'
+  | { kind: 'unofficial'; link: string; manifestUrl: string }
+  | { kind: 'local' };
 
 /** A pack downloaded on this device. */
 export interface StoredPack {

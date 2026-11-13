@@ -113,6 +113,22 @@ export const routesTools: Routes = [
       ),
   },
   {
+    path: 'tools/pack-creator',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/pack-creator-page/pack-creator-page.component').then(
+        (m) => m.PackCreatorPageComponent,
+      ),
+  },
+  {
+    path: 'tools/pack-creator/:draftId',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/pack-draft-page/pack-draft-page.component').then(
+        (m) => m.PackDraftPageComponent,
+      ),
+  },
+  {
     path: 'tools/links',
     canActivate: [NavigationGuard],
     loadComponent: () =>

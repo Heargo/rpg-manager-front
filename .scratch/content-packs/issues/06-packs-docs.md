@@ -2,7 +2,7 @@
 
 Status: ready-for-agent
 Type: task
-Blocked by: 04, 05, 07
+Blocked by: 04, 05, 07, 08
 
 Spec: `../spec.md` (User documentation)
 

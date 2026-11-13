@@ -37,6 +37,11 @@ export class ImageBusiness {
     return url;
   }
 
+  /** The stored image itself, when this device has it. */
+  blob(id: string): Promise<Blob | undefined> {
+    return this.storage.get(id);
+  }
+
   /** True when the image is in this device's store. */
   has(id: string): Promise<boolean> {
     return this.storage.has(id);
