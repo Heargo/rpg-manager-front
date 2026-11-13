@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideBasePack } from '../../../../testing/base-pack';
+import { provideKindsPack } from '../../../../testing/kinds-pack';
 import { ImageBusiness } from '../../../core/business/image.business';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
 import { autoMaterials } from '../helpers/auto-materials';
@@ -70,5 +71,58 @@ describe('RandomItemImageBusiness', () => {
     await business.create({ name: 'Zorglub ancien', type: 'item', slot: 'none' }, 'k');
     expect(storage.get).toHaveBeenCalledWith('img-9');
     expect(files.fetchImage).not.toHaveBeenCalled();
+  });
+
+  describe('sprite kinds', () => {
+    const png = new Blob(['original-png'], { type: 'image/png' });
+
+    function setupKinds() {
+      const files = {
+        fetchImage: vi.fn(async () => sprite()),
+        fetchText: vi.fn(async () => exportConfig(autoMaterials(sprite()))),
+        fetchBlob: vi.fn(async () => png),
+        decode: vi.fn(async () => sprite()),
+        encodePng: vi.fn(async () => new Blob(['recolored'], { type: 'image/png' })),
+      };
+      const images = { storeUpload: vi.fn(async () => 'stored-1') };
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: SpriteFileService, useValue: files },
+          provideKindsPack(),
+          { provide: SpriteSetStorageService, useValue: { list: async () => [] } },
+          { provide: ImageBusiness, useValue: images },
+          { provide: ImageStorageService, useValue: { get: vi.fn() } },
+        ],
+      });
+      return { business: TestBed.inject(RandomItemImageBusiness), files, images };
+    }
+    const look = (name: string) => ({ name, type: 'item' as const, slot: 'none' as const });
+
+    it('recolours a masked sprite from its bundled materials', async () => {
+      const { business, files, images } = setupKinds();
+      await business.create(look('Bravo'), 's');
+      expect(files.fetchText).toHaveBeenCalledWith('packs/base/sprites/bravo.json');
+      expect(files.encodePng).toHaveBeenCalled();
+      expect(images.storeUpload).toHaveBeenCalled();
+    });
+
+    it('recolours a grayscale sprite through the automatic guess, ignoring any materials file', async () => {
+      const { business, files, images } = setupKinds();
+      await business.create(look('Alpha'), 's');
+      expect(files.fetchImage).toHaveBeenCalledWith('packs/base/sprites/alpha.png');
+      expect(files.fetchText).not.toHaveBeenCalled();
+      expect(files.encodePng).toHaveBeenCalled();
+      expect(images.storeUpload).toHaveBeenCalled();
+    });
+
+    it('stores a colored sprite as is, without decoding or recolouring', async () => {
+      const { business, files, images } = setupKinds();
+      const id = await business.create(look('Charlie'), 's');
+      expect(id).toBe('stored-1');
+      expect(files.fetchBlob).toHaveBeenCalledWith('packs/base/sprites/charlie.png');
+      expect(files.encodePng).not.toHaveBeenCalled();
+      expect(files.fetchText).not.toHaveBeenCalled();
+      expect(images.storeUpload).toHaveBeenCalledWith(png);
+    });
   });
 });

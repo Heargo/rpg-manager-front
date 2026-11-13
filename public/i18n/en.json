@@ -1378,7 +1378,15 @@
       "save": "Save as preset",
       "delete": "Delete preset"
     },
+    "kind": {
+      "grayscale": "Grayscale",
+      "masked": "Masked",
+      "colored": "Colored"
+    },
+    "coloredRefused": "Colored sprites cannot be opened in the colorizer.",
     "library": {
+      "allKinds": "All kinds",
+      "kindFilter": "Filter by kind",
       "open": "Sprite library",
       "title": "Sprite library",
       "search": "Search a sprite",

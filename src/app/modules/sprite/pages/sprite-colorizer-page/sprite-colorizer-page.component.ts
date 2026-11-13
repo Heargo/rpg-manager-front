@@ -1,4 +1,8 @@
-import { BundledSprite, PackBusiness } from '../../../../core/business/pack.business';
+import { Pack, SPRITE_KINDS, SpriteKind } from '../../../../core/packs/pack';
+import {
+  BundledSprite,
+  PackBusiness,
+} from '../../../../core/business/pack.business';
 import {
   afterNextRender,
   ChangeDetectionStrategy,
@@ -25,6 +29,7 @@ import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { SelectButtonModule } from '@openng/optimus-ui/selectbutton';
 import { SliderModule } from '@openng/optimus-ui/slider';
+import { TagModule } from '@openng/optimus-ui/tag';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { LanguageBusiness } from '../../../../core/business/language.business';
@@ -32,6 +37,7 @@ import { MessageLevel } from '../../../../core/models/toast-level';
 import { SpriteColorizerBusiness } from '../../business/sprite-colorizer.business';
 import { brushCursor } from '../../helpers/brush-cursor';
 import {
+  groupSpritesByPack,
   searchSprites,
 } from '../../helpers/sprite-library';
 import { gradientColor } from '../../helpers/gradient-mapping';
@@ -75,6 +81,7 @@ const toHex = (rgb: number[]) =>
     InputTextModule,
     SelectButtonModule,
     SliderModule,
+    TagModule,
     ToggleSwitchModule,
     TooltipModule,
   ],
@@ -91,6 +98,7 @@ export class SpriteColorizerPageComponent {
   private readonly language = inject(LanguageBusiness);
   private readonly packs = inject(PackBusiness);
   private readonly bundled = signal<BundledSprite[]>([]);
+  private readonly bundledPacks = signal<Pack[]>([]);
   private readonly messages = inject(MessageService);
   private readonly confirmation = inject(ConfirmationService);
   private readonly injector = inject(Injector);
@@ -111,6 +119,14 @@ export class SpriteColorizerPageComponent {
   protected readonly pointer = signal<{ x: number; y: number } | null>(null);
   protected readonly libraryOpen = signal(false);
   protected readonly libraryQuery = signal('');
+  protected readonly libraryKind = signal<SpriteKind | null>(null);
+  protected readonly libraryKinds = computed(() => [
+    { value: null, label: this.language.t('sprite.library.allKinds') },
+    ...SPRITE_KINDS.map((kind) => ({
+      value: kind,
+      label: this.language.t('sprite.kind.' + kind),
+    })),
+  ]);
   protected readonly libraryView = signal<'bundled' | 'mine'>('bundled');
   protected readonly libraryViews = computed(() => [
     { value: 'bundled', label: this.language.t('sprite.library.bundled') },
@@ -133,25 +149,36 @@ export class SpriteColorizerPageComponent {
       dateStyle: 'short',
       timeStyle: 'short',
     });
-    return this.business
-      .$savedSets()
-      .map((set) => ({
-        ...set,
-        date: format.format(set.updatedAt),
-        kind: !set.tags
-          ? ''
-          : set.tags.type === 'equipment'
-            ? `equipment:${set.tags.slot}`
-            : set.tags.type,
-      }));
-  });
-  protected readonly librarySprites = computed(() => {
-    const lang = this.language.$language() ?? 'fr';
-    return searchSprites(this.bundled(), this.libraryQuery(), lang).map((sprite) => ({
-      id: sprite.id,
-      label: lang === 'fr' ? sprite.fr : sprite.en,
-      url: sprite.imageUrl,
+    return this.business.$savedSets().map((set) => ({
+      ...set,
+      date: format.format(set.updatedAt),
+      kind: !set.tags
+        ? ''
+        : set.tags.type === 'equipment'
+          ? `equipment:${set.tags.slot}`
+          : set.tags.type,
     }));
+  });
+  protected readonly libraryGroups = computed(() => {
+    const lang = this.language.$language() ?? 'fr';
+    const found = searchSprites(
+      this.bundled(),
+      this.libraryQuery(),
+      lang,
+      this.libraryKind(),
+    );
+    return groupSpritesByPack(found, this.bundledPacks(), lang).map(
+      (group) => ({
+        packId: group.packId,
+        name: group.name,
+        sprites: group.sprites.map((sprite) => ({
+          id: sprite.id,
+          label: lang === 'fr' ? sprite.fr : sprite.en,
+          url: sprite.imageUrl,
+          kind: sprite.kind,
+        })),
+      }),
+    );
   });
   /** The pixel under a mouse or pen, for the brush outline. */
   private readonly hovered = signal<{ x: number; y: number } | null>(null);
@@ -221,7 +248,14 @@ export class SpriteColorizerPageComponent {
   private shownImage: unknown = null;
 
   constructor() {
-    this.packs.sprites().then((sprites) => this.bundled.set(sprites)).catch(() => undefined);
+    this.packs
+      .sprites()
+      .then((sprites) => this.bundled.set(sprites))
+      .catch(() => undefined);
+    this.packs
+      .manifest()
+      .then((pack) => this.bundledPacks.set([pack]))
+      .catch(() => undefined);
     // Fit the sprite in the viewport when a new image arrives.
     effect(() => {
       const image = this.business.$image();
@@ -535,6 +569,7 @@ export class SpriteColorizerPageComponent {
 
   protected openLibrary(): void {
     this.libraryQuery.set('');
+    this.libraryKind.set(null);
     this.libraryOpen.set(true);
     this.business.refreshSets().catch(() => undefined);
   }
@@ -566,9 +601,7 @@ export class SpriteColorizerPageComponent {
     this.renamingSetId.set(id);
     afterNextRender(
       () =>
-        document
-          .querySelector<HTMLInputElement>('.saved-name-input')
-          ?.select(),
+        document.querySelector<HTMLInputElement>('.saved-name-input')?.select(),
       { injector: this.injector },
     );
   }
@@ -619,8 +652,13 @@ export class SpriteColorizerPageComponent {
   private async loadSprite(load: () => Promise<void>): Promise<void> {
     try {
       await load();
-    } catch {
-      this.toast(MessageLevel.Error, 'sprite.loadFailed');
+    } catch (error) {
+      const refused =
+        error instanceof Error && error.message === 'sprite.coloredRefused';
+      this.toast(
+        MessageLevel.Error,
+        refused ? 'sprite.coloredRefused' : 'sprite.loadFailed',
+      );
     }
   }
 

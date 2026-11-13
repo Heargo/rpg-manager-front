@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideBasePack } from '../../../../testing/base-pack';
+import { provideKindsPack } from '../../../../testing/kinds-pack';
+import en from '../../../../../public/i18n/en.json';
+import fr from '../../../../../public/i18n/fr.json';
 import { gray } from '../helpers/sprite-test-images';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
 import { autoMaterials } from '../helpers/auto-materials';
@@ -565,6 +568,67 @@ describe('SpriteColorizerBusiness', () => {
       expect(business.$savedSets()[0].tags).toEqual({ type: 'equipment', slot: 'chest' });
       await business.setSetTags(sets[0].id, undefined);
       expect(business.$savedSets()[0].tags).toBeUndefined();
+    });
+  });
+
+  describe('sprite kinds', () => {
+    const PNG_KEY = 'sprite.coloredRefused';
+    const twoParts = () => gray(4, 1, [10, 10, 220, 220]);
+
+    function setupKinds() {
+      const files = {
+        fetchImage: vi.fn(async () => twoParts()),
+        fetchText: vi.fn(async () => exportConfig(autoMaterials(twoParts()))),
+      };
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
+          { provide: SpriteFileService, useValue: files },
+          provideKindsPack(),
+        ],
+      });
+      return { business: TestBed.inject(SpriteColorizerBusiness), files };
+    }
+
+    const names = (business: SpriteColorizerBusiness) =>
+      business.$document()!.layers.map((l) => l.name);
+
+    it('opens a grayscale sprite like a loaded image: Base material only, no materials file read', async () => {
+      const { business, files } = setupKinds();
+      await business.loadLibrary('alpha');
+      expect(files.fetchImage).toHaveBeenCalledWith('packs/base/sprites/alpha.png');
+      expect(files.fetchText).not.toHaveBeenCalled();
+      expect(names(business)).toEqual(['Base']);
+      expect(business.$fileName()).toBe('alpha');
+    });
+
+    it('opens a masked sprite with its materials', async () => {
+      const { business, files } = setupKinds();
+      await business.loadLibrary('bravo');
+      expect(files.fetchText).toHaveBeenCalledWith('packs/base/sprites/bravo.json');
+      expect(names(business)).toEqual(['Base', 'Part 1']);
+    });
+
+    it('refuses a colored sprite with the error key and leaves the open sprite untouched', async () => {
+      const { business, files } = setupKinds();
+      await business.loadLibrary('bravo');
+      const document = business.$document();
+      const image = business.$image();
+      files.fetchImage.mockClear();
+
+      await expect(business.loadLibrary('charlie')).rejects.toThrow(PNG_KEY);
+
+      expect(files.fetchImage).not.toHaveBeenCalled();
+      expect(business.$document()).toBe(document);
+      expect(business.$image()).toBe(image);
+      expect(business.$fileName()).toBe('bravo');
+    });
+
+    it('has the refusal message in English and French', () => {
+      const get = (json: unknown) =>
+        PNG_KEY.split('.').reduce<unknown>((o, k) => (o as Record<string, unknown>)?.[k], json);
+      expect(typeof get(en)).toBe('string');
+      expect(typeof get(fr)).toBe('string');
     });
   });
 });

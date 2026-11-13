@@ -178,9 +178,10 @@ export class SpriteColorizerBusiness {
   /** Loads a bundled sprite (from the Base pack) by id, with its ready-made materials when it has some. */
   async loadLibrary(id: string): Promise<void> {
     const sprite = await this.bundledSprite(id);
+    if (sprite.kind === 'colored') throw new Error('sprite.coloredRefused');
     const [image, config] = await Promise.all([
       this.files.fetchImage(sprite.imageUrl),
-      sprite.materialsUrl
+      sprite.materialsUrl && sprite.kind === 'masked'
         ? this.files.fetchText(sprite.materialsUrl).catch(() => null)
         : null,
     ]);

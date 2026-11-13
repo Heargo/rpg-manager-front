@@ -192,7 +192,7 @@ Tickets in `content-packs/` (K). Status: validated (2026-11-13), every ticket re
 | # | Ticket | Blocked by |
 | - | --- | --- |
 | 87 | **K01** Pack model, validation and the Base pack (done) | none |
-| 88 | **K02** Sprite kinds: grayscale, masked, colored | K01 |
+| 88 | **K02** Sprite kinds: grayscale, masked, colored (done) | K01 |
 | 89 | **K03** Official packs: registry and lazy loading | K01 |
 | 90 | **K04** Pack choice next to the seed | K01, K02 |
 | 91 | **K05** Unofficial packs from a link or GitHub repository | K03 |

@@ -627,7 +627,7 @@
         [ngModel]="libraryView()"
         (ngModelChange)="libraryView.set($event)"
       />
-      @if (libraryView() === 'mine') {
+      @if (libraryView() === "mine") {
         <ul class="saved-sets">
           @for (set of savedSets(); track set.id) {
             <li class="saved-set" data-test="saved-set">
@@ -701,23 +701,50 @@
           [value]="libraryQuery()"
           (input)="libraryQuery.set($any($event.target).value)"
         />
-        <ul class="library-grid">
-          @for (sprite of librarySprites(); track sprite.id) {
-            <li>
-              <button
-                type="button"
-                class="library-sprite"
-                data-test="library-sprite"
-                (click)="pickSprite(sprite.id)"
-              >
-                <img [src]="sprite.url" alt="" loading="lazy" width="64" height="64" />
-                <span>{{ sprite.label }}</span>
-              </button>
-            </li>
-          } @empty {
-            <li class="library-empty">{{ "sprite.library.empty" | transloco }}</li>
-          }
-        </ul>
+        <p-select
+          class="library-kind"
+          data-test="library-kind"
+          [options]="libraryKinds()"
+          optionLabel="label"
+          optionValue="value"
+          appendTo="body"
+          [ariaLabel]="'sprite.library.kindFilter' | transloco"
+          [ngModel]="libraryKind()"
+          (ngModelChange)="libraryKind.set($event)"
+        />
+        @for (group of libraryGroups(); track group.packId) {
+          <h3 class="library-pack" data-test="library-pack">
+            {{ group.name }}
+          </h3>
+          <ul class="library-grid">
+            @for (sprite of group.sprites; track sprite.id) {
+              <li>
+                <button
+                  type="button"
+                  class="library-sprite"
+                  data-test="library-sprite"
+                  (click)="pickSprite(sprite.id)"
+                >
+                  <img
+                    [src]="sprite.url"
+                    alt=""
+                    loading="lazy"
+                    width="64"
+                    height="64"
+                  />
+                  <span>{{ sprite.label }}</span>
+                </button>
+                <p-tag
+                  data-test="library-kind-badge"
+                  severity="secondary"
+                  [value]="'sprite.kind.' + sprite.kind | transloco"
+                />
+              </li>
+            }
+          </ul>
+        } @empty {
+          <p class="library-empty">{{ "sprite.library.empty" | transloco }}</p>
+        }
         <p class="library-credit">{{ "sprite.library.credit" | transloco }}</p>
       }
     </div>

@@ -49,6 +49,11 @@ export class RandomItemImageBusiness {
     ];
     const chosen = pickSprite(candidates, item, random);
     if (!chosen) throw new Error('No sprite');
+    if (chosen.key.startsWith('library:')) {
+      const sprite = await this.sprite(chosen.key.slice('library:'.length));
+      if (sprite.kind === 'colored')
+        return this.images.storeUpload(await this.files.fetchBlob(sprite.imageUrl));
+    }
     const { image, config } = await this.load(chosen.key, saved);
     const base = config
       ? importConfig(config, { width: image.width, height: image.height })
@@ -66,7 +71,7 @@ export class RandomItemImageBusiness {
       const sprite = await this.sprite(id);
       const [image, config] = await Promise.all([
         this.files.fetchImage(sprite.imageUrl),
-        sprite.materialsUrl
+        sprite.materialsUrl && sprite.kind === 'masked'
           ? this.files.fetchText(sprite.materialsUrl).catch(() => null)
           : null,
       ]);

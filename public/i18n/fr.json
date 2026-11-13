@@ -1378,7 +1378,15 @@
       "save": "Enregistrer comme préréglage",
       "delete": "Supprimer le préréglage"
     },
+    "kind": {
+      "grayscale": "Niveaux de gris",
+      "masked": "Avec masques",
+      "colored": "Coloré"
+    },
+    "coloredRefused": "Un sprite coloré ne peut pas être ouvert dans le colorisateur.",
     "library": {
+      "allKinds": "Tous les types",
+      "kindFilter": "Filtrer par type",
       "open": "Bibliothèque de sprites",
       "title": "Bibliothèque de sprites",
       "search": "Chercher un sprite",
