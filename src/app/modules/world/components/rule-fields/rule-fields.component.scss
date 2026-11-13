@@ -44,6 +44,10 @@ label {
   gap: 0.75rem;
   align-items: center;
 
+  p-toggleswitch {
+    flex-shrink: 0;
+  }
+
   label {
     margin: 0;
     font-weight: 400;
@@ -56,6 +60,8 @@ label {
   border-radius: 6px;
   padding: 0.75rem 1rem;
   margin: 0;
+  /* a fieldset defaults to min-content: let it shrink to a phone's width */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -138,6 +144,18 @@ label {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+
+  /* inputs share the row and shrink on a phone instead of widening the page */
+  > input,
+  > p-inputnumber {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  > p-inputnumber ::ng-deep .p-inputnumber,
+  > p-inputnumber ::ng-deep input {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 .label {
