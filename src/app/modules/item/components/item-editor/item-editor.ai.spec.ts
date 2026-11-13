@@ -29,7 +29,7 @@ describe('ItemEditorComponent AI prompt and Random', () => {
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
     TestBed.configureTestingModule({
       imports: [ItemEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en } }],
+      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } }],
     });
     const messages = TestBed.inject(MessageService);
     const toast = vi.spyOn(messages, 'add');

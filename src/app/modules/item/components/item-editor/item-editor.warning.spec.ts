@@ -12,7 +12,7 @@ describe('ItemEditorComponent image warning', () => {
   it('shows the human-artists warning in English and French', async () => {
     TestBed.configureTestingModule({
       imports: [ItemEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en } }],
+      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } }],
     });
     const fixture = TestBed.createComponent(ItemEditorComponent);
     fixture.componentRef.setInput('world', createSandboxWorld((key) => key));

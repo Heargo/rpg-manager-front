@@ -36,7 +36,7 @@ describe('ItemEditorComponent', () => {
       imports: [ItemEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: PackBusiness, useValue: { wordList: async () => en } },
+        { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } },
       ],
     });
     const fixture = TestBed.createComponent(ItemEditorComponent);

@@ -19,7 +19,7 @@ describe('CombatSandboxToolPageComponent', () => {
         ...TEST_PROVIDERS,
         {
           provide: PackBusiness,
-          useValue: { wordList: async () => en },
+          useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] },
         },
       ],
     });

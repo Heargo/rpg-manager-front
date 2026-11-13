@@ -1513,6 +1513,8 @@
     }
   },
   "packs": {
+    "choiceLabel": "Pack",
+    "choiceRandom": "Aléatoire",
     "title": "Packs de contenu",
     "intro": "Sprites et listes de mots à ajouter à l'application. Un pack se télécharge quand vous l'activez, puis fonctionne hors ligne.",
     "alwaysOn": "Toujours actif",

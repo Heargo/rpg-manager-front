@@ -20,7 +20,7 @@ describe('SandboxCharacterBusiness', () => {
         provideTestTranslations(),
         {
           provide: PackBusiness,
-          useValue: { wordList: async () => en },
+          useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] },
         },
       ],
     });

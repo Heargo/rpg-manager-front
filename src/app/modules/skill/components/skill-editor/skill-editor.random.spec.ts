@@ -19,7 +19,7 @@ describe('SkillEditorComponent Random', () => {
   async function setup() {
     TestBed.configureTestingModule({
       imports: [SkillEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en } }],
+      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } }],
     });
     const fixture = TestBed.createComponent(SkillEditorComponent);
     fixture.componentRef.setInput('world', world);

@@ -1513,6 +1513,8 @@
     }
   },
   "packs": {
+    "choiceLabel": "Pack",
+    "choiceRandom": "Random",
     "title": "Content packs",
     "intro": "Sprites and word lists you can add to the app. A pack is downloaded when you turn it on, then works offline.",
     "alwaysOn": "Always on",

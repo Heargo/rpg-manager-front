@@ -27,12 +27,18 @@ export class RandomItemImageBusiness {
   private readonly storage = inject(ImageStorageService);
 
   /** The same item and seed give the same sprite and colours. Returns the stored image id. */
-  async create(item: ItemLook, seed: string): Promise<string> {
+  async create(
+    item: ItemLook,
+    seed: string,
+    packId?: string,
+  ): Promise<string> {
     const random = seededRandomSource(`${seed}:image`);
     const saved = (await this.sets.list().catch(() => [] as SpriteSet[]))
       .filter((set) => set.tags)
       .sort((a, b) => a.id.localeCompare(b.id));
-    const library = await this.packs.sprites();
+    const all = await this.packs.sprites();
+    const chosenPack = packId ? all.filter((s) => s.packId === packId) : [];
+    const library = chosenPack.length ? chosenPack : all;
     const candidates: SpriteCandidate[] = [
       ...library.map((s) => ({
         key: `library:${s.id}`,

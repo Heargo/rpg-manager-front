@@ -14,7 +14,7 @@ describe('NpcEditorComponent image picker', () => {
       imports: [NpcEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: PackBusiness, useValue: { wordList: async () => npcNames } },
+        { provide: PackBusiness, useValue: { wordList: async () => npcNames, packsFor: async () => ['base'], $installed: () => [] } },
         { provide: ImageBusiness, useValue: { storeUpload: async () => 'img-new', url: async () => 'blob:p' } },
       ],
     });

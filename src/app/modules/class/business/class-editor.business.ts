@@ -1,4 +1,6 @@
 import { inject, Injectable } from '@angular/core';
+import { PackChoiceBusiness } from '../../../core/business/pack-choice.business';
+import { RANDOM_PACK } from '../../../core/packs/pack-choice';
 import { WordListBusiness } from '../../../core/business/word-list.business';
 import { generateClass } from '../../../core/generators/class-generator';
 import { createSeed, seededRandomSource } from '../../../core/generators/random-source';
@@ -19,14 +21,17 @@ import { buildClassPrompt } from '../helpers/class-ai-prompt';
 @Injectable({ providedIn: 'root' })
 export class ClassEditorBusiness {
   private readonly words = inject(WordListBusiness);
+  private readonly packChoice = inject(PackChoiceBusiness);
 
   /** A new random class on the world's attributes and skills, in the active language. */
   async random(world: World): Promise<ClassDraft> {
+    const seed = createSeed();
+    const pack = await this.packChoice.resolve('classes', RANDOM_PACK, seed);
     return generateClass(
-      seededRandomSource(createSeed()),
+      seededRandomSource(seed),
       this.names(world),
       world.skills,
-      await this.words.classWords(),
+      await this.words.classWords(undefined, pack),
     );
   }
 

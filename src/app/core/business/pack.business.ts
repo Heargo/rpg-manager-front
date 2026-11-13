@@ -329,6 +329,27 @@ export class PackBusiness {
     this.stored.set(await this.storage.list());
   }
 
+  /**
+   * The enabled packs (Base first) with content of that kind: word lists in the language for `items`, `npcs`,
+   * `skills` and `classes`, or sprites for `sprites`. Base is always listed.
+   */
+  async packsFor(
+    content: PackGenerator | 'sprites',
+    lang: string,
+  ): Promise<string[]> {
+    await this.ensureLoaded();
+    const result = [BASE_PACK_ID];
+    for (const record of this.sortedStored()) {
+      if (!record.enabled) continue;
+      const has =
+        content === 'sprites'
+          ? record.manifest.sprites.length > 0
+          : !!record.manifest.generators[lang as 'en' | 'fr']?.[content];
+      if (has) result.push(record.id);
+    }
+    return result;
+  }
+
   /** The raw word list of a generator in a language; rejects when the pack has none. */
   async wordList(
     generator: PackGenerator,

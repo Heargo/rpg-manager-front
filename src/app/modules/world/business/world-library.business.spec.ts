@@ -10,7 +10,7 @@ import { provideTestTranslations } from '../../../../testing/test-providers';
 
 const TEST_WORLD_PROVIDERS = [
   provideTestTranslations(),
-  { provide: PackBusiness, useValue: { wordList: async () => en } },
+  { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } },
 ];
 
 describe('WorldLibraryBusiness (IndexedDB)', () => {

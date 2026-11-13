@@ -68,7 +68,7 @@ describe('NpcEditorComponent', () => {
   async function setup(npc?: Npc) {
     TestBed.configureTestingModule({
       imports: [NpcEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => npcNames } }],
+      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => npcNames, packsFor: async () => ['base'], $installed: () => [] } }],
     });
     const fixture = TestBed.createComponent(NpcEditorComponent);
     fixture.componentRef.setInput('world', world);

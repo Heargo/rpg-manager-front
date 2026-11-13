@@ -16,7 +16,7 @@ describe('ItemEditorComponent image picker', () => {
       imports: [ItemEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: PackBusiness, useValue: { wordList: async () => en } },
+        { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } },
         { provide: ImageBusiness, useValue: { storeUpload, url: async () => 'blob:i' } },
       ],
     });

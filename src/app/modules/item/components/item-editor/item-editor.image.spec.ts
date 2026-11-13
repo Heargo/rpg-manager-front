@@ -32,7 +32,7 @@ describe('ItemEditorComponent random image', () => {
       imports: [ItemEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: PackBusiness, useValue: { wordList: async () => en } },
+        { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } },
         { provide: RandomItemImageBusiness, useValue: { create } },
       ],
     });

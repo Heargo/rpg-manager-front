@@ -32,7 +32,7 @@ describe('saving an item from the editor', () => {
     TestBed.configureTestingModule({
       providers: [
         provideTestTranslations(),
-        { provide: PackBusiness, useValue: { wordList: async () => en } },
+        { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } },
       ],
     });
   });

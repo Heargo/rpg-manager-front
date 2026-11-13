@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
-import { ExtraPackFake, extraPackService, provideExtraPack } from '../../../testing/extra-pack';
+import { EXTRA_ITEMS, ExtraPackFake, extraPackService, provideExtraPack } from '../../../testing/extra-pack';
 import { PackBusiness } from './pack.business';
 
 const BASE_SPRITES = 101;
@@ -77,7 +77,7 @@ describe('PackBusiness official packs', () => {
     await business.enable('extra');
     service.loadJson.mockClear();
 
-    expect(await business.wordList('items', 'fr', 'extra')).toEqual({ prefixes: ['Brillant'] });
+    expect(await business.wordList('items', 'fr', 'extra')).toEqual(EXTRA_ITEMS);
     expect(service.loadJson).not.toHaveBeenCalled();
   });
 
@@ -98,7 +98,7 @@ describe('PackBusiness official packs', () => {
 
     expect(await ids(second)).toContain('gem');
     expect(second.$installed().map((p) => p.id)).toEqual(['base', 'extra']);
-    expect(await second.wordList('items', 'fr', 'extra')).toEqual({ prefixes: ['Brillant'] });
+    expect(await second.wordList('items', 'fr', 'extra')).toEqual(EXTRA_ITEMS);
     expect(offline.loadBlob).not.toHaveBeenCalled();
   });
 

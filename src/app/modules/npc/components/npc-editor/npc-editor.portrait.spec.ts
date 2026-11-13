@@ -26,7 +26,7 @@ describe('NpcEditorComponent portrait', () => {
       imports: [NpcEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: PackBusiness, useValue: { wordList: async () => npcNames } },
+        { provide: PackBusiness, useValue: { wordList: async () => npcNames, packsFor: async () => ['base'], $installed: () => [] } },
         { provide: ImageBusiness, useValue: { storeUpload, url: async () => 'blob:portrait' } },
       ],
     });

@@ -48,7 +48,29 @@ export const EXTRA_MANIFEST = {
   ],
 };
 
-export const EXTRA_ITEMS = { prefixes: ['Brillant'] };
+const rarities = ['common', 'uncommon', 'rare', 'mythic', 'legendary'];
+const slots = [
+  'head', 'earring', 'necklace', 'ring', 'chest', 'hand', 'legs', 'foot', 'weapon1', 'weapon2', 'item', 'consumable',
+];
+const byRarity = <T>(value: T) => Object.fromEntries(rarities.map((r) => [r, [value]]));
+
+/** A valid French items word list whose every item is named "Zircon" (template `{base}` only). */
+export const EXTRA_ITEMS = {
+  version: 1,
+  templates: byRarity('{base}'),
+  bases: Object.fromEntries(slots.map((s) => [s, [{ text: 'Zircon', gender: 'm' }]])),
+  adjectives: byRarity('Brillant'),
+  suffixes: Object.fromEntries(rarities.map((r) => [r, []])),
+  descriptions: { equipment: ['Un zircon.'], item: ['Un zircon.'], consumable: ['Un zircon.'] },
+};
+
+/** A valid French NPC name list whose every NPC is named "Zorg". */
+export const EXTRA_NPCS = {
+  version: 1,
+  given: [{ text: 'Zorg', gender: 'm' }],
+  epithets: ['le Fou'],
+  templates: ['{given}'],
+};
 
 export interface ExtraPackFake {
   loadRegistry: ReturnType<typeof vi.fn>;
@@ -67,7 +89,11 @@ export function extraPackService(overrides: Partial<ExtraPackFake> = {}): ExtraP
     loadRegistry: vi.fn(async () => EXTRA_REGISTRY),
     loadManifest: vi.fn(async (id: string) => (id === 'extra' ? structuredClone(EXTRA_MANIFEST) : base)),
     loadJson: vi.fn(async (url: string) =>
-      url === 'packs/extra/generators/fr/items.json' ? EXTRA_ITEMS : { url },
+      url === 'packs/extra/generators/fr/items.json'
+        ? EXTRA_ITEMS
+        : url === 'packs/extra/generators/fr/npcs.json'
+          ? EXTRA_NPCS
+          : { url },
     ),
     loadBlob: vi.fn(async () => new Blob(['png-bytes'], { type: 'image/png' })),
     ...overrides,
