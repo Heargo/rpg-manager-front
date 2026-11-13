@@ -1,3 +1,4 @@
+import { openWorldWithPacks } from '../../../../../testing/active-packs';
 import { TestBed } from '@angular/core/testing';
 import { packChoiceProviders, packOptionValues, packSelect, packSelected } from '../../../../../testing/pack-choice-fixtures';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
@@ -7,13 +8,14 @@ import { ItemGeneratorPageComponent } from './item-generator-page.component';
 
 /** Hook: `p-select[data-field="pack"]` next to the seed; options are pack ids, `'random'` first. */
 describe('ItemGeneratorPageComponent pack choice', () => {
-  async function setup() {
+  async function setup(worldPacks?: string[]) {
     TestBed.configureTestingModule({
       imports: [ItemGeneratorPageComponent],
       providers: [...TEST_PROVIDERS, packChoiceProviders()],
     });
     TestBed.inject(LanguageBusiness).setLanguage('fr');
     await TestBed.inject(PackBusiness).enable('extra');
+    if (worldPacks) await openWorldWithPacks(worldPacks);
     const fixture = TestBed.createComponent(ItemGeneratorPageComponent);
     const settle = async () => {
       for (let i = 0; i < 5; i++) {
@@ -25,15 +27,21 @@ describe('ItemGeneratorPageComponent pack choice', () => {
     return { fixture, el: fixture.nativeElement as HTMLElement, settle };
   }
 
-  it('lists Random then the packs with items in the language, defaulting to Random', async () => {
-    const { fixture } = await setup();
+  it('lists Random then the world packs with items, defaulting to Random', async () => {
+    const { fixture } = await setup(['base-fr', 'extra']);
 
     expect(packOptionValues(fixture)).toEqual(['random', 'base-fr', 'extra']);
     expect(packSelected(fixture)).toBe('random');
   });
 
+  it('lists only Random and the Base of the app language without a world', async () => {
+    const { fixture } = await setup();
+
+    expect(packOptionValues(fixture)).toEqual(['random', 'base-fr']);
+  });
+
   it('shows an item made of the chosen pack words for the seed', async () => {
-    const { fixture, el, settle } = await setup();
+    const { fixture, el, settle } = await setup(['base-fr', 'extra']);
 
     packSelect(fixture).triggerEventHandler('ngModelChange', 'extra');
     await settle();
@@ -42,7 +50,7 @@ describe('ItemGeneratorPageComponent pack choice', () => {
   });
 
   it('shows Base words when Base is chosen', async () => {
-    const { fixture, el, settle } = await setup();
+    const { fixture, el, settle } = await setup(['base-fr', 'extra']);
 
     packSelect(fixture).triggerEventHandler('ngModelChange', 'base-fr');
     await settle();

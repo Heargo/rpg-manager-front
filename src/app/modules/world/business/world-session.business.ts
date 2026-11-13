@@ -1,4 +1,5 @@
 import { inject, Injectable, Injector, signal } from '@angular/core';
+import { ActivePacksBusiness } from '../../../core/business/active-packs.business';
 import { CharacterHostBusiness } from '../../character/business/character-host.business';
 import {
   applyWorldRules,
@@ -18,22 +19,30 @@ export class WorldSessionBusiness {
   private readonly library = inject(WorldLibraryBusiness);
   private readonly service = inject(WorldService);
   private readonly injector = inject(Injector);
+  private readonly activePacks = inject(ActivePacksBusiness);
 
   private readonly world = signal<World | null>(null);
+  private opening = 0;
   private queue: Promise<unknown> = Promise.resolve();
 
   readonly $world = this.world.asReadonly();
 
   async open(worldId: string): Promise<World> {
+    const attempt = ++this.opening;
     const world = await this.library.get(worldId);
     if (!world) throw new Error(`World ${worldId} not found`);
+    // Closed (or another world opened) while loading: this open is out of date.
+    if (attempt !== this.opening) return world;
     this.world.set(world);
+    this.activePacks.set(world.packs ?? []);
     this.service.publishInfo(toWorldInfo(world));
     return world;
   }
 
   close(): void {
+    this.opening++;
     this.world.set(null);
+    this.activePacks.set(null);
   }
 
   /** Applies a change to the open world and saves it. Runs after any change already in progress. */
@@ -45,6 +54,7 @@ export class WorldSessionBusiness {
       // The world may have been closed while saving.
       if (this.world()?.id === saved.id) {
         this.world.set(saved);
+        this.activePacks.set(saved.packs ?? []);
         this.service.publishInfo(toWorldInfo(saved));
       }
       return saved;

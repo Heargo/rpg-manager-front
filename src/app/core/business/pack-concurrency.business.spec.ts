@@ -8,6 +8,7 @@ import {
   extraPackService,
   provideExtraPack,
 } from '../../../testing/extra-pack';
+import { openWorldWithPacks } from '../../../testing/active-packs';
 import { provideTestTranslations } from '../../../testing/test-providers';
 import { LanguageBusiness } from './language.business';
 import { PackBusiness } from './pack.business';
@@ -32,6 +33,7 @@ describe('PackBusiness concurrency (K03 review fixes)', () => {
     const business = fresh(first);
     await business.enable('extra');
     const reloaded = fresh(extraPackService());
+    await openWorldWithPacks(['base-fr', 'extra']);
 
     const [a, b] = await Promise.all([reloaded.sprites(), reloaded.sprites()]);
 

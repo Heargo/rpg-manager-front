@@ -19,12 +19,14 @@ async function render(service = extraPackService()) {
     expect(el.querySelectorAll('[data-test="pack-card"]').length).toBe(3);
   });
   const card = (id: string) => el.querySelector<HTMLElement>(`[data-test="pack-card"][data-pack="${id}"]`)!;
+  const download = (id: string) =>
+    [...card(id).querySelectorAll('button')].find((b) => b.textContent!.trim().includes('Download'));
   const settle = (check: () => void) =>
     vi.waitFor(async () => {
       await fixture.whenStable();
       check();
     });
-  return { fixture, el, card, settle, service };
+  return { fixture, el, card, settle, service, download };
 }
 
 describe('PacksToolPageComponent', () => {
@@ -50,11 +52,11 @@ describe('PacksToolPageComponent', () => {
     expect(card('base-fr').textContent).toContain('Base');
   });
 
-  it('shows each Base as always on, with no toggle and no remove button', async () => {
+  it('shows each Base as always available, with no toggle and no remove button', async () => {
     const { card } = await render();
 
     for (const id of ['base-fr', 'base-en']) {
-      expect(card(id).textContent, id).toContain('Always on');
+      expect(card(id).textContent, id).toContain('Always available');
       expect(card(id).querySelector('p-toggleswitch'), id).toBeNull();
       expect(card(id).textContent, id).not.toContain('Remove from device');
     }
@@ -69,31 +71,39 @@ describe('PacksToolPageComponent', () => {
     expect(tag('extra')).toContain('Français');
   });
 
-  it('shows the other pack off, not downloaded, with a toggle and no remove button', async () => {
-    const { card } = await render();
+  it('shows no on/off toggle on any card', async () => {
+    const { el } = await render();
 
-    expect(card('extra').querySelector('p-toggleswitch')).not.toBeNull();
+    expect(el.querySelector('p-toggleswitch')).toBeNull();
+  });
+
+  it('shows the official pack not downloaded, with a Download button and no remove button', async () => {
+    const { card, download } = await render();
+
+    expect(download('extra')).toBeDefined();
     expect(card('extra').textContent).not.toContain('Downloaded');
     expect(card('extra').textContent).not.toContain('Remove from device');
   });
 
-  it('toggling a pack on downloads it and shows the Downloaded tag and Remove button', async () => {
-    const { card, settle, service } = await render();
+  it('Download fetches the pack and shows the Downloaded tag and Remove button instead of Download', async () => {
+    const { card, settle, service, download } = await render();
 
-    card('extra').querySelector<HTMLInputElement>('p-toggleswitch input')!.click();
+    download('extra')!.click();
 
     await settle(() => expect(card('extra').textContent).toContain('Downloaded'));
     expect(service.loadBlob).toHaveBeenCalledWith('packs/extra/sprites/gem.png');
     expect(card('extra').textContent).toContain('Remove from device');
+    expect(download('extra')).toBeUndefined();
+    expect(card('extra').querySelector('p-toggleswitch')).toBeNull();
   });
 
   it('Remove from device, once confirmed, clears the downloaded state', async () => {
-    const { card, settle } = await render();
+    const { card, settle, download } = await render();
     vi.spyOn(TestBed.inject(ConfirmationService), 'confirm').mockImplementation((c) => {
       c.accept?.();
       return TestBed.inject(ConfirmationService);
     });
-    card('extra').querySelector<HTMLInputElement>('p-toggleswitch input')!.click();
+    download('extra')!.click();
     await settle(() => expect(card('extra').textContent).toContain('Downloaded'));
 
     const remove = [...card('extra').querySelectorAll('button')].find((b) =>
@@ -102,6 +112,7 @@ describe('PacksToolPageComponent', () => {
     remove.click();
 
     await settle(() => expect(card('extra').textContent).not.toContain('Downloaded'));
+    expect(download('extra')).toBeDefined();
   });
 
   it('shows a toast when the download fails and stays not downloaded', async () => {
@@ -110,10 +121,10 @@ describe('PacksToolPageComponent', () => {
         throw new Error('network down');
       }),
     });
-    const { card, settle } = await render(failing);
+    const { card, settle, download } = await render(failing);
     const add = vi.spyOn(TestBed.inject(MessageService), 'add');
 
-    card('extra').querySelector<HTMLInputElement>('p-toggleswitch input')!.click();
+    download('extra')!.click();
 
     await settle(() => expect(add).toHaveBeenCalled());
     expect(add.mock.calls[0][0].severity).toBe('error');

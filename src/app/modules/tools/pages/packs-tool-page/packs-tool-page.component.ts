@@ -17,7 +17,6 @@ import { CardModule } from '@openng/optimus-ui/card';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { ProgressSpinnerModule } from '@openng/optimus-ui/progressspinner';
 import { TagModule } from '@openng/optimus-ui/tag';
-import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 import {
   BundledSprite,
   InstalledPack,
@@ -56,7 +55,6 @@ export function formatSize(bytes: number): string {
     MessageModule,
     ProgressSpinnerModule,
     TagModule,
-    ToggleSwitchModule,
   ],
   template: `
     <div class="main-container packs">
@@ -110,17 +108,6 @@ export function formatSize(bytes: number): string {
                           [ariaLabel]="'packs.downloading' | transloco"
                         />
                       }
-                      @for (key of [toggleKey(entry.id)]; track key) {
-                        <p-toggleswitch
-                          [ngModel]="isEnabled(entry.id)"
-                          [disabled]="busy().has(entry.id)"
-                          [ariaLabel]="
-                            'packs.toggle'
-                              | transloco: { name: entry.name }
-                          "
-                          (ngModelChange)="toggle(entry, $event)"
-                        />
-                      }
                     }
                   </div>
                   <p class="desc">{{ entry.description }}</p>
@@ -161,6 +148,14 @@ export function formatSize(bytes: number): string {
                           [loading]="busy().has(entry.id)"
                           [disabled]="busy().has(entry.id)"
                           (onClick)="duplicate(entry.id)"
+                        />
+                      }
+                      @if (!entry.builtIn && !isDownloaded(entry.id)) {
+                        <p-button
+                          icon="pi pi-download"
+                          [label]="'packs.download' | transloco"
+                          [disabled]="busy().has(entry.id)"
+                          (onClick)="download(entry)"
                         />
                       }
                       @if (isDownloaded(entry.id)) {
@@ -208,16 +203,6 @@ export function formatSize(bytes: number): string {
                         strokeWidth="6"
                         [style]="{ width: '1.5rem', height: '1.5rem' }"
                         [ariaLabel]="'packs.downloading' | transloco"
-                      />
-                    }
-                    @for (key of [toggleKey(pack.id)]; track key) {
-                      <p-toggleswitch
-                        [ngModel]="pack.enabled"
-                        [disabled]="busy().has(pack.id)"
-                        [ariaLabel]="
-                          'packs.toggle' | transloco: { name: pack.name }
-                        "
-                        (ngModelChange)="toggleUnofficial(pack, $event)"
                       />
                     }
                   </div>
@@ -612,7 +597,6 @@ export class PacksToolPageComponent {
     this.business.$installed().filter((p) => p.link || p.local),
   );
   private readonly detailSprites = signal<BundledSprite[]>([]);
-  private readonly resets = signal<Record<string, number>>({});
 
   protected readonly detailsTitle = computed(() => {
     const pack = this.details();
@@ -663,43 +647,14 @@ export class PacksToolPageComponent {
     return !!pack && !pack.builtIn;
   }
 
-  protected isEnabled(id: string): boolean {
-    return this.installed(id)?.enabled ?? false;
-  }
-
-  /** Changes after a failed toggle so the switch is drawn again in its real state. */
-  protected toggleKey(id: string): number {
-    return this.resets()[id] ?? 0;
-  }
-
-  protected async toggle(entry: PackRegistryEntry, on: boolean): Promise<void> {
-    if (on === this.isEnabled(entry.id)) return;
+  protected async download(entry: PackRegistryEntry): Promise<void> {
     this.setBusy(entry.id, true);
     try {
-      if (on) await this.business.enable(entry.id);
-      else await this.business.disable(entry.id);
+      await this.business.enable(entry.id);
     } catch (error) {
       this.fail(error);
-      this.resets.update((r) => ({ ...r, [entry.id]: (r[entry.id] ?? 0) + 1 }));
     } finally {
       this.setBusy(entry.id, false);
-    }
-  }
-
-  protected async toggleUnofficial(
-    pack: InstalledPack,
-    on: boolean,
-  ): Promise<void> {
-    if (on === pack.enabled) return;
-    this.setBusy(pack.id, true);
-    try {
-      if (on) await this.business.enable(pack.id);
-      else await this.business.disable(pack.id);
-    } catch (error) {
-      this.fail(error);
-      this.resets.update((r) => ({ ...r, [pack.id]: (r[pack.id] ?? 0) + 1 }));
-    } finally {
-      this.setBusy(pack.id, false);
     }
   }
 

@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { EXTRA_ITEMS, ExtraPackFake, extraPackService, provideExtraPack } from '../../../testing/extra-pack';
+import { openWorldWithPacks } from '../../../testing/active-packs';
 import { provideTestTranslations } from '../../../testing/test-providers';
 import { LanguageBusiness } from './language.business';
 import { PackBusiness } from './pack.business';
@@ -46,7 +47,7 @@ describe('PackBusiness official packs', () => {
     expect(registry[2]).toMatchObject({ size: 1234, sprites: 1, language: 'fr', author: 'Jane Doe' });
   });
 
-  it('has only the two Bases installed and enabled until a pack is turned on, and fetches nothing for it', async () => {
+  it('has only the two Bases installed and enabled until a pack is downloaded, and fetches nothing for it', async () => {
     const sprites = await business.sprites();
 
     expect(sprites).toHaveLength(BASE_SPRITES);
@@ -55,18 +56,18 @@ describe('PackBusiness official packs', () => {
     expect(service.loadManifest).not.toHaveBeenCalledWith('extra');
   });
 
-  it('enabling downloads the manifest and every listed file, then lists the pack as installed', async () => {
+  it('downloading downloads the manifest and every listed file, then lists the pack as installed', async () => {
     await business.enable('extra');
 
     expect(service.loadManifest).toHaveBeenCalledWith('extra');
     expect(service.loadBlob).toHaveBeenCalledWith('packs/extra/sprites/gem.png');
     expect(service.loadJson).toHaveBeenCalledWith('packs/extra/generators/items.json');
     expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'extra']);
-    expect(business.$installed().find((p) => p.id === 'extra')?.enabled).toBe(true);
   });
 
-  it('serves the enabled pack sprites after Base, with object URLs made from the stored blobs', async () => {
+  it('serves the sprites of the world packs, with object URLs made from the stored blobs', async () => {
     await business.enable('extra');
+    await openWorldWithPacks(['base-fr', 'extra']);
     const sprites = await business.sprites();
 
     expect(sprites).toHaveLength(BASE_SPRITES + 1);
@@ -100,15 +101,14 @@ describe('PackBusiness official packs', () => {
     });
     const second = fresh(offline);
 
-    expect(await ids(second)).toContain('gem');
+    expect((await second.spritesOf('extra')).map((x) => x.id)).toEqual(['gem']);
     expect(second.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'extra']);
     expect(await second.wordList('items', 'extra')).toEqual(EXTRA_ITEMS);
     expect(offline.loadBlob).not.toHaveBeenCalled();
   });
 
-  it('enabling an already downloaded pack does not hit the network again', async () => {
+  it('downloading an already downloaded pack does not hit the network again', async () => {
     await business.enable('extra');
-    await business.disable('extra');
     service.loadManifest.mockClear();
     service.loadBlob.mockClear();
 
@@ -116,21 +116,15 @@ describe('PackBusiness official packs', () => {
 
     expect(service.loadManifest).not.toHaveBeenCalled();
     expect(service.loadBlob).not.toHaveBeenCalled();
-    expect(await ids(business)).toContain('gem');
   });
 
-  it('disabling takes the sprites out, revokes the object URLs and keeps the files', async () => {
+  it('keeps a downloaded pack out of the sprites until a world has it active', async () => {
     await business.enable('extra');
-    await business.sprites();
-
-    await business.disable('extra');
-
     expect(await ids(business)).not.toContain('gem');
-    expect(revoked).toEqual(['blob:fake-1']);
-    const again = fresh(extraPackService());
-    expect(await installed(again)).toContain('extra');
-    expect(await ids(again)).not.toContain('gem');
-    expect(again.$installed().find((p) => p.id === 'extra')?.enabled).toBe(false);
+
+    await openWorldWithPacks(['base-fr', 'extra']);
+
+    expect(await ids(business)).toContain('gem');
   });
 
   it('removing deletes the pack and its files from the device', async () => {
@@ -173,28 +167,17 @@ describe('PackBusiness official packs', () => {
     expect(await installed(fresh(extraPackService()))).toEqual(['base-fr', 'base-en']);
   });
 
-  it('serves the sprites of a French pack in a French app only, and none in an English one', async () => {
+  it('gives the sprites of an active French pack their single label', async () => {
     await business.enable('extra');
-    TestBed.inject(LanguageBusiness).setLanguage('en');
-
-    const sprites = await business.sprites();
-
-    expect(sprites.map((s) => s.packId)).not.toContain('extra');
-    expect(new Set(sprites.map((s) => s.packId))).toEqual(new Set(['base-en']));
-    expect(sprites).toHaveLength(BASE_SPRITES);
-  });
-
-  it('gives the sprites of an enabled French pack their single label', async () => {
-    await business.enable('extra');
+    await openWorldWithPacks(['base-fr', 'extra']);
 
     const gem = (await business.sprites()).find((s) => s.id === 'gem');
 
     expect(gem?.label).toBe('Gemme');
   });
 
-  it('Neither Base can be disabled or removed', async () => {
+  it('Neither Base can be removed', async () => {
     for (const id of ['base-fr', 'base-en']) {
-      await expect(business.disable(id)).rejects.toThrow();
       await expect(business.remove(id)).rejects.toThrow();
     }
 

@@ -73,7 +73,7 @@ describe('PacksToolPageComponent unofficial packs', () => {
     expect(await storage.list()).toEqual([]);
   });
 
-  it('Install stores the pack and an unofficial card appears with its source, version, toggle, Update and Remove', async () => {
+  it('Install stores the pack and an unofficial card appears with its source, version, Update and Remove, and no toggle', async () => {
     const { check, settle, root, button, unofficial, storage } = await render();
     await check();
     await settle(() => expect(button('Install')).toBeDefined());
@@ -85,7 +85,7 @@ describe('PacksToolPageComponent unofficial packs', () => {
     expect(card.textContent).toContain('Neon');
     expect(card.textContent).toContain('1.0.0');
     expect(card.querySelector(`a[href="${NEON_LINK}"]`)).not.toBeNull();
-    expect(card.querySelector('p-toggleswitch')).not.toBeNull();
+    expect(card.querySelector('p-toggleswitch')).toBeNull();
     expect(card.textContent).toContain('Update');
     expect(card.textContent).toContain('Remove from device');
     expect((await storage.list()).map((p) => p.id)).toEqual(['neon']);

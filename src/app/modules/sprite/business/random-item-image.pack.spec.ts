@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { extraPackService, provideExtraPack } from '../../../../testing/extra-pack';
+import { openWorldWithPacks } from '../../../../testing/active-packs';
 import { provideTestTranslations } from '../../../../testing/test-providers';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { ImageBusiness } from '../../../core/business/image.business';
@@ -14,7 +15,7 @@ import { RandomItemImageBusiness } from './random-item-image.business';
 
 const sprite = () => gray(4, 1, [10, 10, 220, 220]);
 
-async function setup() {
+async function setup(worldPacks?: string[]) {
   globalThis.indexedDB = new IDBFactory();
   let created = 0;
   URL.createObjectURL = vi.fn(() => `blob:extra-${++created}`);
@@ -38,6 +39,7 @@ async function setup() {
   });
   TestBed.inject(LanguageBusiness).setLanguage('fr');
   await TestBed.inject(PackBusiness).enable('extra');
+  if (worldPacks) await openWorldWithPacks(worldPacks);
   return { business: TestBed.inject(RandomItemImageBusiness), files };
 }
 
@@ -45,7 +47,7 @@ describe('RandomItemImageBusiness with a chosen pack', () => {
   const item = { name: 'Machin', type: 'item' as const, slot: 'none' as const };
 
   it('draws only the chosen pack sprites', async () => {
-    const { business, files } = await setup();
+    const { business, files } = await setup(['base-fr', 'extra']);
 
     for (let i = 0; i < 10; i++) await business.create(item, `seed-${i}`, 'extra');
 
@@ -55,7 +57,7 @@ describe('RandomItemImageBusiness with a chosen pack', () => {
   });
 
   it('draws only Base sprites when the Base is chosen', async () => {
-    const { business, files } = await setup();
+    const { business, files } = await setup(['base-fr', 'extra']);
 
     for (let i = 0; i < 10; i++) await business.create(item, `seed-${i}`, 'base-fr');
 
@@ -63,15 +65,34 @@ describe('RandomItemImageBusiness with a chosen pack', () => {
     expect(urls.every((url) => url.startsWith('packs/base-fr/sprites/'))).toBe(true);
   });
 
-  it('never draws a sprite of the other Base or of a pack of another language', async () => {
-    const { business, files } = await setup();
+  it('draws a sprite of a pack in another language than the app when the world has it active', async () => {
+    const { business, files } = await setup(['base-fr', 'extra']);
     TestBed.inject(LanguageBusiness).setLanguage('en');
 
     for (let i = 0; i < 10; i++) await business.create(item, `seed-${i}`, 'extra');
 
     const urls = files.fetchImage.mock.calls.map((c) => String((c as unknown[])[0]));
     expect(urls).toHaveLength(10);
-    expect(urls.every((url) => url.startsWith('packs/base-en/sprites/'))).toBe(true);
+    expect(urls.every((url) => url.startsWith('blob:extra-'))).toBe(true);
+  });
+
+  it('draws only from the active packs when no pack is chosen', async () => {
+    const { business, files } = await setup(['base-en', 'extra']);
+
+    for (let i = 0; i < 20; i++) await business.create(item, `seed-${i}`);
+
+    const urls = files.fetchImage.mock.calls.map((c) => String((c as unknown[])[0]));
+    expect(urls.every((url) => url.startsWith('blob:extra-') || url.startsWith('packs/base-en/sprites/'))).toBe(true);
+  });
+
+  it('draws only Base sprites of the app language when there is no world, even for a downloaded pack', async () => {
+    const { business, files } = await setup();
+
+    for (let i = 0; i < 10; i++) await business.create(item, `seed-${i}`, 'extra');
+
+    const urls = files.fetchImage.mock.calls.map((c) => String((c as unknown[])[0]));
+    expect(urls).toHaveLength(10);
+    expect(urls.every((url) => url.startsWith('packs/base-fr/sprites/'))).toBe(true);
   });
 
   it('keeps the same result for the same seed and pack', async () => {

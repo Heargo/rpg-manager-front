@@ -3,18 +3,25 @@ import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import en from '../../../../public/packs/base-en/generators/items.json';
 import fr from '../../../../public/packs/base-fr/generators/items.json';
+import { openWorldWithPacks } from '../../../testing/active-packs';
 import { EXTRA_ITEMS, extraPackService, provideExtraPack } from '../../../testing/extra-pack';
 import { provideTestTranslations } from '../../../testing/test-providers';
+import { WorldRules } from '../../modules/world/models/world';
+import { WorldSessionBusiness } from '../../modules/world/business/world-session.business';
+import { PackChoiceContent, PackChoiceBusiness } from './pack-choice.business';
 import { LanguageBusiness } from './language.business';
 import { PackBusiness } from './pack.business';
 import { WordListBusiness } from './word-list.business';
 
-describe('pack choice: businesses over the Base and extra packs', () => {
+describe('generators use the packs of the open world', () => {
   let packs: PackBusiness;
   let words: WordListBusiness;
+  let choice: PackChoiceBusiness;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     globalThis.indexedDB = new IDBFactory();
+    URL.createObjectURL = vi.fn(() => 'blob:fake');
+    URL.revokeObjectURL = vi.fn();
     const service = extraPackService({
       loadJson: vi.fn(async (url: string) => {
         if (url === 'packs/base-en/generators/items.json') return en;
@@ -26,66 +33,109 @@ describe('pack choice: businesses over the Base and extra packs', () => {
     TestBed.configureTestingModule({ providers: [provideTestTranslations(), provideExtraPack(service)] });
     packs = TestBed.inject(PackBusiness);
     words = TestBed.inject(WordListBusiness);
+    choice = TestBed.inject(PackChoiceBusiness);
     TestBed.inject(LanguageBusiness).setLanguage('fr');
+    await packs.enable('extra');
   });
 
-  describe('PackBusiness.packsFor', () => {
-    it('lists the Base of the language alone while extra is not enabled', async () => {
-      expect(await packs.packsFor('items', 'fr')).toEqual(['base-fr']);
-      expect(await packs.packsFor('items', 'en')).toEqual(['base-en']);
+  /** The values of the Pack select of a generator, once they are loaded for the expected list. */
+  const selectValues = async (content: PackChoiceContent, expected: string[]) => {
+    const options = TestBed.runInInjectionContext(() => choice.options(content));
+    let values: string[] = [];
+    await vi.waitFor(() => {
+      TestBed.tick();
+      values = options().map((o) => o.value);
+      expect(values).toEqual(expected);
     });
+    return values;
+  };
+  const spritePacks = async () => [...new Set((await packs.sprites()).map((s) => s.packId))];
 
-    it('lists the enabled packs of that language that have content for the generator, its Base first', async () => {
-      await packs.enable('extra');
-
-      expect(await packs.packsFor('items', 'fr')).toEqual(['base-fr', 'extra']);
-      expect(await packs.packsFor('items', 'en')).toEqual(['base-en']);
-      expect(await packs.packsFor('npcs', 'fr')).toEqual(['base-fr']);
-    });
-
-    it('stops listing a pack that is turned off', async () => {
-      await packs.enable('extra');
-      await packs.disable('extra');
-
-      expect(await packs.packsFor('items', 'fr')).toEqual(['base-fr']);
-    });
-
-    it('lists a pack with sprites for the sprites content, in its language only', async () => {
-      await packs.enable('extra');
-
-      expect(await packs.packsFor('sprites', 'fr')).toEqual(['base-fr', 'extra']);
-      expect(await packs.packsFor('sprites', 'en')).toEqual(['base-en']);
-    });
+  it('without a world, gives the Base of the app language alone', async () => {
+    expect(await spritePacks()).toEqual(['base-fr']);
+    await selectValues('items', ['random', 'base-fr']);
+    expect((await words.itemWords()).bases.weapon1[0].text).toBe('Épée');
   });
 
-  describe('WordListBusiness.itemWords with a pack', () => {
-    it('defaults to the Base of the language', async () => {
-      await packs.enable('extra');
+  it('without a world, a downloaded pack stays out even in its own language', async () => {
+    expect(await spritePacks()).not.toContain('extra');
+    await selectValues('items', ['random', 'base-fr']);
+  });
 
-      expect((await words.itemWords('fr')).bases.weapon1[0].text).toBe('Épée');
-    });
+  it('with a world, gives the sprites and the Pack select of all its packs whatever their language', async () => {
+    await openWorldWithPacks(['base-en', 'extra']);
 
-    it('returns the chosen pack list', async () => {
-      await packs.enable('extra');
+    expect(await spritePacks()).toEqual(['base-en', 'extra']);
+    await selectValues('items', ['random', 'base-en', 'extra']);
+  });
 
-      expect((await words.itemWords('fr', 'extra')).bases.weapon1[0].text).toBe('Zircon');
-    });
+  it('with a world, gives the word list of a pack in another language than the app', async () => {
+    await openWorldWithPacks(['base-en', 'extra']);
 
-    it('falls back to the Base of the requested language when the pack is in another language', async () => {
-      await packs.enable('extra');
+    expect((await words.itemWords('en', 'extra')).bases.weapon1[0].text).toBe('Zircon');
+    expect((await words.itemWords('fr', 'base-en')).bases.weapon1[0].text).toBe('Sword');
+  });
 
-      expect((await words.itemWords('en', 'extra')).bases.weapon1[0].text).toBe('Sword');
-    });
+  it('skips an active pack that is not installed', async () => {
+    await openWorldWithPacks(['base-en', 'ghost', 'extra']);
 
-    it('caches per language and pack', async () => {
-      await packs.enable('extra');
+    expect(await spritePacks()).toEqual(['base-en', 'extra']);
+    await selectValues('items', ['random', 'base-en', 'extra']);
+  });
 
-      const base = await words.itemWords('fr', 'base-fr');
-      const extra = await words.itemWords('fr', 'extra');
+  it('lists only the active packs that have content for the generator', async () => {
+    await openWorldWithPacks(['base-en', 'extra']);
 
-      expect(extra).not.toBe(base);
-      expect(await words.itemWords('fr', 'extra')).toBe(extra);
-      expect(await words.itemWords('fr', 'base-fr')).toBe(base);
-    });
+    await selectValues('npcs', ['random', 'base-en']);
+  });
+
+  it('falls back to the Base of the app language when no active pack has a list for the generator', async () => {
+    await openWorldWithPacks(['extra']);
+
+    await selectValues('items', ['random', 'extra']);
+    await selectValues('npcs', ['random', 'base-fr']);
+    expect(await choice.resolve('npcs', 'random', 'any-seed')).toBe('base-fr');
+  });
+
+  it('falls back to the Base of the app language when the world has no pack at all', async () => {
+    await openWorldWithPacks([]);
+
+    expect(await spritePacks()).toEqual(['base-fr']);
+    await selectValues('items', ['random', 'base-fr']);
+  });
+
+  it('follows the world packs when its rules change', async () => {
+    const world = await openWorldWithPacks(['base-fr']);
+    expect(await spritePacks()).toEqual(['base-fr']);
+    const rules: WorldRules = {
+      attributes: world.attributes.map(({ id, name, baseValue, formula, cap }) => ({ id, name, baseValue, formula, cap })),
+      startingStatPoints: world.startingStatPoints,
+      startingMoney: world.startingMoney,
+      levelCurve: world.levelCurve,
+      maxLevel: world.maxLevel,
+      statPointsPerLevel: world.statPointsPerLevel,
+      startingSkillPoints: world.startingSkillPoints,
+      skillPointsPerLevel: world.skillPointsPerLevel,
+      offlineFeatures: world.offlineFeatures,
+      packs: ['base-fr', 'extra'],
+    };
+
+    await TestBed.inject(WorldSessionBusiness).saveRules(rules);
+
+    expect(await spritePacks()).toEqual(['base-fr', 'extra']);
+    await selectValues('items', ['random', 'base-fr', 'extra']);
+
+    await TestBed.inject(WorldSessionBusiness).saveRules({ ...rules, packs: ['base-fr'] });
+
+    expect(await spritePacks()).toEqual(['base-fr']);
+  });
+
+  it('goes back to the Base of the app language when the world is closed', async () => {
+    await openWorldWithPacks(['base-en', 'extra']);
+    expect(await spritePacks()).toEqual(['base-en', 'extra']);
+
+    TestBed.inject(WorldSessionBusiness).close();
+
+    expect(await spritePacks()).toEqual(['base-fr']);
   });
 });

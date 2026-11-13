@@ -1,3 +1,4 @@
+import { openWorldWithPacks } from '../../../../../testing/active-packs';
 import { TestBed } from '@angular/core/testing';
 import { packChoiceProviders, packOptionValues, packSelect, packSelected } from '../../../../../testing/pack-choice-fixtures';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
@@ -8,13 +9,14 @@ import { ItemEditorComponent } from './item-editor.component';
 
 /** Hook: `p-select[data-field="pack"]` next to the seed; options are pack ids, `'random'` first. */
 describe('ItemEditorComponent pack choice', () => {
-  async function setup(withExtra: boolean) {
+  async function setup(worldPacks?: string[]) {
     TestBed.configureTestingModule({
       imports: [ItemEditorComponent],
       providers: [...TEST_PROVIDERS, packChoiceProviders()],
     });
     TestBed.inject(LanguageBusiness).setLanguage('fr');
-    if (withExtra) await TestBed.inject(PackBusiness).enable('extra');
+    await TestBed.inject(PackBusiness).enable('extra');
+    if (worldPacks) await openWorldWithPacks(worldPacks);
     const fixture = TestBed.createComponent(ItemEditorComponent);
     fixture.componentRef.setInput('world', createSandboxWorld((key) => key));
     const settle = async () => {
@@ -28,29 +30,29 @@ describe('ItemEditorComponent pack choice', () => {
     return { fixture, el, settle };
   }
 
-  it('lists Random then the packs with items in the language, defaulting to Random', async () => {
-    const { fixture } = await setup(true);
+  it('lists Random then the world packs with items, defaulting to Random', async () => {
+    const { fixture } = await setup(['base-fr', 'extra']);
 
     expect(packOptionValues(fixture)).toEqual(['random', 'base-fr', 'extra']);
     expect(packSelected(fixture)).toBe('random');
   });
 
-  it('lists Random and Base when no other pack is enabled', async () => {
-    const { fixture } = await setup(false);
+  it('lists Random and the Base of the app language when no world is open, even with a pack downloaded', async () => {
+    const { fixture } = await setup();
 
     expect(packOptionValues(fixture)).toEqual(['random', 'base-fr']);
   });
 
-  it('lists only the Base of the language when the app is in English, even with a French pack enabled', async () => {
-    const { fixture, settle } = await setup(true);
+  it('lists the world packs whatever their language and the app language', async () => {
+    const { fixture, settle } = await setup(['base-en', 'extra']);
     TestBed.inject(LanguageBusiness).setLanguage('en');
     await settle();
 
-    expect(packOptionValues(fixture)).toEqual(['random', 'base-en']);
+    expect(packOptionValues(fixture)).toEqual(['random', 'base-en', 'extra']);
   });
 
   it('generates from the seed with the chosen pack words', async () => {
-    const { fixture, el, settle } = await setup(true);
+    const { fixture, el, settle } = await setup(['base-fr', 'extra']);
     packSelect(fixture).triggerEventHandler('ngModelChange', 'extra');
     const seed = el.querySelector<HTMLInputElement>('[data-field="seed"]')!;
     seed.value = 'fixed-seed';
@@ -64,7 +66,7 @@ describe('ItemEditorComponent pack choice', () => {
   });
 
   it('generates with Base words when Base is chosen', async () => {
-    const { fixture, el, settle } = await setup(true);
+    const { fixture, el, settle } = await setup(['base-fr', 'extra']);
     packSelect(fixture).triggerEventHandler('ngModelChange', 'base-fr');
     const seed = el.querySelector<HTMLInputElement>('[data-field="seed"]')!;
     seed.value = 'fixed-seed';

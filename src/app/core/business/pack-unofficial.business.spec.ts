@@ -3,6 +3,7 @@ import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { EXTRA_ITEMS } from '../../../testing/extra-pack';
 import { NEON_LINK, NEON_ROOT, NeonWorld, neonProviders, neonWorld } from '../../../testing/unofficial-pack';
+import { openWorldWithPacks } from '../../../testing/active-packs';
 import { provideTestTranslations } from '../../../testing/test-providers';
 import { PackStorageService } from '../services/pack-storage.service';
 import { LanguageBusiness } from './language.business';
@@ -225,16 +226,17 @@ describe('PackBusiness unofficial packs', () => {
   });
 
   describe('install', () => {
-    it('stores the pack enabled with its source, and serves its sprites and word lists', async () => {
+    it('stores the pack with its source, and serves its sprites and word lists once a world has it active', async () => {
       const { business, storage } = setup();
 
       await business.install(await business.prepare(NEON_LINK));
 
       const [stored] = await storage.list();
       expect(stored.id).toBe('neon');
-      expect(stored.enabled).toBe(true);
+      expect(stored).not.toHaveProperty('enabled');
       expect(stored.source).toEqual({ kind: 'unofficial', link: NEON_LINK, manifestUrl: NEON_LINK });
-      expect(business.$installed().find((p) => p.id === 'neon')).toMatchObject({ enabled: true, builtIn: false });
+      expect(business.$installed().find((p) => p.id === 'neon')).toMatchObject({ builtIn: false });
+      await openWorldWithPacks(['base-fr', 'neon']);
       const sprites = await business.sprites();
       expect(sprites).toHaveLength(BASE_SPRITES + 3);
       const glow = sprites.find((s) => s.id === 'glow')!;
@@ -242,7 +244,6 @@ describe('PackBusiness unofficial packs', () => {
       expect(glow.imageUrl).toMatch(/^blob:/);
       expect(glow.materialsUrl).toMatch(/^blob:/);
       expect(await business.wordList('items', 'neon')).toEqual(EXTRA_ITEMS);
-      expect(await business.packsFor('items', 'fr')).toEqual(['base-fr', 'neon']);
     });
 
     it('keeps the pack after a reload of the app', async () => {
@@ -255,7 +256,7 @@ describe('PackBusiness unofficial packs', () => {
 
       const reloaded = TestBed.inject(PackBusiness);
 
-      expect((await reloaded.sprites()).filter((s) => s.packId === 'neon')).toHaveLength(3);
+      expect(await reloaded.spritesOf('neon')).toHaveLength(3);
     });
 
     it('refuses an id already installed from another link, and keeps the first pack', async () => {
@@ -273,12 +274,10 @@ describe('PackBusiness unofficial packs', () => {
       expect(stored.source).toMatchObject({ link: NEON_LINK });
     });
 
-    it('the pack can be turned off and removed like an official one', async () => {
+    it('the pack can be removed like an official one', async () => {
       const { business, storage } = setup();
       await business.install(await business.prepare(NEON_LINK));
 
-      await business.disable('neon');
-      expect(await business.packsFor('items', 'fr')).toEqual(['base-fr']);
       await business.remove('neon');
 
       expect(await storage.list()).toEqual([]);
@@ -304,9 +303,9 @@ describe('PackBusiness unofficial packs', () => {
       const stored = await storage.list();
       expect(stored).toHaveLength(1);
       expect(stored[0].manifest.version).toBe('2.0.0');
-      expect(stored[0].enabled).toBe(true);
+      expect(stored[0]).not.toHaveProperty('enabled');
       expect(await storage.getFile('neon', 'sprites/tint.png')).toBeUndefined();
-      expect((await business.sprites()).filter((s) => s.packId === 'neon')).toHaveLength(2);
+      expect(await business.spritesOf('neon')).toHaveLength(2);
     });
 
     it('checkUpdate rejects for a pack that is not unofficial', async () => {

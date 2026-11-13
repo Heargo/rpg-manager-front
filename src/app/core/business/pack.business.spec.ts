@@ -70,13 +70,13 @@ describe('PackBusiness: the two Bases', () => {
     expect(basePackId('en')).toBe('base-en');
   });
 
-  it('installs base-fr and base-en, built in, enabled, each with its language', async () => {
+  it('installs base-fr and base-en, built in, each with its language', async () => {
     await business.load();
 
     const bases = business.$installed().filter((p) => p.builtIn);
-    expect(bases.map((p) => [p.id, p.language, p.enabled])).toEqual([
-      ['base-fr', 'fr', true],
-      ['base-en', 'en', true],
+    expect(bases.map((p) => [p.id, p.language])).toEqual([
+      ['base-fr', 'fr'],
+      ['base-en', 'en'],
     ]);
     expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en']);
   });
@@ -90,11 +90,9 @@ describe('PackBusiness: the two Bases', () => {
     expect(fr?.generators).toEqual({ items: 'generators/items.json' });
   });
 
-  it('refuses to remove or disable either Base', async () => {
+  it('refuses to remove either Base', async () => {
     await expect(business.remove('base-fr')).rejects.toThrow();
     await expect(business.remove('base-en')).rejects.toThrow();
-    await expect(business.disable('base-fr')).rejects.toThrow();
-    await expect(business.disable('base-en')).rejects.toThrow();
   });
 
   it('loads and validates a Base manifest once', async () => {

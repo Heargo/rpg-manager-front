@@ -13,7 +13,6 @@ export interface StoredPack {
   id: string;
   manifest: Pack;
   source: PackSource;
-  enabled: boolean;
   installedAt: number;
   size: number;
 }
@@ -56,12 +55,6 @@ export class PackStorageService {
       throw error;
     }
     await tx.done;
-  }
-
-  async setEnabled(id: string, enabled: boolean): Promise<void> {
-    const db = await this.db();
-    const stored = await db.get('packs', id);
-    if (stored) await db.put('packs', { ...stored, enabled });
   }
 
   async getFile(

@@ -1,6 +1,7 @@
 import { computed, inject, Injectable, resource, Signal } from '@angular/core';
 import { PackGenerator } from '../packs/pack';
 import { choosePack, RANDOM_PACK } from '../packs/pack-choice';
+import { ActivePacksBusiness } from './active-packs.business';
 import { LanguageBusiness } from './language.business';
 import { basePackId, PackBusiness } from './pack.business';
 
@@ -16,15 +17,17 @@ export interface PackChoiceOption {
 export class PackChoiceBusiness {
   private readonly packs = inject(PackBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly activePacks = inject(ActivePacksBusiness);
 
   /** Options of the select for a generator; call from an injection context (a component field). */
   options(content: PackChoiceContent): Signal<PackChoiceOption[]> {
     const candidates = resource({
       params: () => ({
         lang: this.language.$language(),
+        world: this.activePacks.$worldPacks(),
         installed: this.packs.$installed(),
       }),
-      loader: ({ params }) => this.packs.packsFor(content, params.lang),
+      loader: ({ params }) => this.packs.packsFor(content),
     });
     return computed(() => {
       const lang = this.language.$language();
@@ -46,7 +49,7 @@ export class PackChoiceBusiness {
     seed: string,
   ): Promise<string> {
     return choosePack(
-      await this.packs.packsFor(content, this.language.$language()),
+      await this.packs.packsFor(content),
       choice,
       seed,
     );

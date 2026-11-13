@@ -10,6 +10,7 @@ import { NEON_LINK, neonProviders, neonWorld } from '../../../testing/unofficial
 import { SpriteSet } from '../../modules/sprite/models/sprite-set';
 import { SpriteSetStorageService } from '../../modules/sprite/services/sprite-set-storage.service';
 import { TranslocoService } from '@jsverse/transloco';
+import { openWorldWithPacks } from '../../../testing/active-packs';
 import { provideTestTranslations } from '../../../testing/test-providers';
 import { openAppDatabase } from '../helpers/app-database';
 import { buildPack, PackDraft } from '../packs/pack-draft';
@@ -257,7 +258,7 @@ describe('PackCreatorBusiness', () => {
   });
 
   describe('install', () => {
-    it('stores the draft as a local pack, enabled, served as any installed pack', async () => {
+    it('stores the draft as a local pack, served as any installed pack', async () => {
       const s = setup();
       const draft = await validDraft(s);
       await s.creator.addPng(draft.id, png(), spark);
@@ -266,9 +267,11 @@ describe('PackCreatorBusiness', () => {
       await s.creator.install(draft.id);
 
       const [stored] = await s.storage.list();
-      expect(stored).toMatchObject({ id: 'mine', enabled: true, source: { kind: 'local' } });
+      expect(stored).toMatchObject({ id: 'mine', source: { kind: 'local' } });
+      expect(stored).not.toHaveProperty('enabled');
       expect(s.packs.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'mine']);
       s.language.setLanguage('fr');
+      await openWorldWithPacks(['base-fr', 'mine']);
       expect((await s.packs.sprites()).filter((x) => x.packId === 'mine').map((x) => [x.id, x.label])).toEqual([['spark', 'Etincelle']]);
       expect(await s.packs.wordList('items', 'mine')).toEqual(EXTRA_ITEMS);
     });

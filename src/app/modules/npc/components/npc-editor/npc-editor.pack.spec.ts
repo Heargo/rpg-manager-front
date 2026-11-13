@@ -1,3 +1,4 @@
+import { openWorldWithPacks } from '../../../../../testing/active-packs';
 import { TestBed } from '@angular/core/testing';
 import { packChoiceProviders, packOptionValues, packSelect, packSelected } from '../../../../../testing/pack-choice-fixtures';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
@@ -8,13 +9,14 @@ import { NpcEditorComponent } from './npc-editor.component';
 
 /** Hook: `p-select[data-field="pack"]` next to the seed; options are pack ids, `'random'` first. */
 describe('NpcEditorComponent pack choice', () => {
-  async function setup() {
+  async function setup(worldPacks: string[] = ['base-fr', 'extra']) {
     TestBed.configureTestingModule({
       imports: [NpcEditorComponent],
       providers: [...TEST_PROVIDERS, packChoiceProviders()],
     });
     TestBed.inject(LanguageBusiness).setLanguage('fr');
     await TestBed.inject(PackBusiness).enable('extra');
+    await openWorldWithPacks(worldPacks);
     const fixture = TestBed.createComponent(NpcEditorComponent);
     fixture.componentRef.setInput('world', createSandboxWorld((key) => key));
     const settle = async () => {
@@ -27,7 +29,7 @@ describe('NpcEditorComponent pack choice', () => {
     return { fixture, el: fixture.nativeElement as HTMLElement, settle };
   }
 
-  it('lists Random then the packs with NPC names in the language, defaulting to Random', async () => {
+  it('lists Random then the world packs with NPC names, defaulting to Random', async () => {
     const { fixture } = await setup();
 
     expect(packOptionValues(fixture)).toEqual(['random', 'base-fr', 'extra']);

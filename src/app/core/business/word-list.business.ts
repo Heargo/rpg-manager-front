@@ -33,7 +33,6 @@ export class WordListBusiness {
 
   private async load(lang: string, packId: string): Promise<WordList> {
     try {
-      await this.checkLanguage(lang, packId);
       const result = validateWordList(
         await this.service.wordList('items', packId),
       );
@@ -48,14 +47,6 @@ export class WordListBusiness {
     return this.itemWords('en', FALLBACK_BASE);
   }
 
-  /** A pack only gives word lists in its own language; throws otherwise so the caller falls back to the Base. */
-  private async checkLanguage(lang: string, packId: string): Promise<void> {
-    if (packId === basePackId(lang)) return;
-    const language = await this.service.languageOf(packId);
-    if (language !== lang)
-      throw new Error(`Pack "${packId}" is not in "${lang}"`);
-  }
-
   private readonly skillCache = new Map<string, Promise<SkillWordList>>();
   private readonly classCache = new Map<string, Promise<ClassWordList>>();
 
@@ -68,7 +59,7 @@ export class WordListBusiness {
       this.skillCache,
       lang,
       packId,
-      (_l, p) => this.service.wordList('skills', p),
+      (p) => this.service.wordList('skills', p),
       isSkillWordList,
       (l, p) => this.skillWords(l, p),
     );
@@ -83,7 +74,7 @@ export class WordListBusiness {
       this.classCache,
       lang,
       packId,
-      (_l, p) => this.service.wordList('classes', p),
+      (p) => this.service.wordList('classes', p),
       isClassWordList,
       (l, p) => this.classWords(l, p),
     );
@@ -93,7 +84,7 @@ export class WordListBusiness {
     cache: Map<string, Promise<T>>,
     lang: string,
     packId: string,
-    load: (lang: string, packId: string) => Promise<unknown>,
+    load: (packId: string) => Promise<unknown>,
     valid: (json: unknown) => json is T,
     fallback: (lang: string, packId: string) => Promise<T>,
   ): Promise<T> {
@@ -102,8 +93,7 @@ export class WordListBusiness {
     if (!words) {
       words = (async () => {
         try {
-          await this.checkLanguage(lang, packId);
-          const json = await load(lang, packId);
+          const json = await load(packId);
           if (valid(json)) return json;
           console.warn(`Word list "${lang}" is invalid`);
         } catch (error) {
