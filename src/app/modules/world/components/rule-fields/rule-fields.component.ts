@@ -12,6 +12,10 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { CheckboxModule } from '@openng/optimus-ui/checkbox';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { TagModule } from '@openng/optimus-ui/tag';
+import { MessageService } from '@openng/optimus-ui/api';
+import { PackBusiness } from '../../../../core/business/pack.business';
+import { MessageLevel } from '../../../../core/models/toast-level';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
@@ -66,6 +70,7 @@ const OFFLINE_FEATURES = Object.keys(
     ButtonModule,
     ToggleSwitchModule,
     CheckboxModule,
+    TagModule,
     CoinInputComponent,
     FormulaChartComponent,
     ImagePickerComponent,
@@ -76,6 +81,8 @@ const OFFLINE_FEATURES = Object.keys(
 export class RuleFieldsComponent {
   protected readonly language = inject(LanguageBusiness);
   private readonly images = inject(ImageBusiness);
+  private readonly packBusiness = inject(PackBusiness);
+  private readonly messages = inject(MessageService);
   readonly draft = model.required<WorldDraft>();
   readonly errors = input<WorldDraftErrors>({});
   /** Which sections to show: all, the rules (progression, economy, NPCs) or only the offline features. */
@@ -161,6 +168,54 @@ export class RuleFieldsComponent {
   );
 
   protected readonly chartOpen = signal(false);
+
+  private readonly officialIds = signal<string[] | null>(null);
+  protected readonly installing = signal<string | null>(null);
+  /** The ids of the packs the world uses. */
+  protected readonly packIds = computed(() => this.draft().packs ?? []);
+  protected readonly installedPacks = this.packBusiness.$installed;
+  /** Ids the world uses that are not installed, each with whether it can be downloaded. */
+  protected readonly missingPacks = computed(() => {
+    const official = this.officialIds();
+    // Nothing is missing until the installed packs and the registry are known.
+    if (official === null || !this.installedPacks().length) return [];
+    const installed = new Set(this.installedPacks().map((pack) => pack.id));
+    const officialIds = new Set(official);
+    return this.packIds()
+      .filter((id) => !installed.has(id))
+      .map((id) => ({ id, official: officialIds.has(id) }));
+  });
+
+  constructor() {
+    void this.packBusiness.load();
+    this.packBusiness
+      .registry()
+      .then((entries) => this.officialIds.set(entries.map((entry) => entry.id)))
+      .catch(() => this.officialIds.set([]));
+  }
+
+  protected setPack(id: string, on: boolean): void {
+    const rest = this.packIds().filter((pack) => pack !== id);
+    this.patch({ packs: on ? [...rest, id] : rest });
+  }
+
+  protected removePack(id: string): void {
+    this.setPack(id, false);
+  }
+
+  protected async installPack(id: string): Promise<void> {
+    this.installing.set(id);
+    try {
+      await this.packBusiness.enable(id);
+    } catch {
+      this.messages.add({
+        severity: MessageLevel.Error,
+        detail: this.language.t('world.fields.packInstallFailed'),
+      });
+    } finally {
+      this.installing.set(null);
+    }
+  }
 
   protected readonly combat = computed<CombatRules>(
     () =>

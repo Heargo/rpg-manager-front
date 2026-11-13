@@ -76,6 +76,8 @@ export interface WorldRules {
   startingSkillPoints: number;
   skillPointsPerLevel: number;
   offlineFeatures: OfflineFeatures;
+  /** Ids of the active packs (no validation: an empty list is allowed); kept as is when omitted. */
+  packs?: string[];
   /** Active skills roll dice when used (default on when omitted). */
   skillRollsEnabled?: boolean;
   /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
@@ -183,6 +185,8 @@ export interface World {
   skillPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
+  /** Ids of the active packs; a stored world without them reads as none. */
+  packs: string[];
   /** Active skills roll dice when used (default on when omitted). */
   skillRollsEnabled?: boolean;
   /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
@@ -245,6 +249,8 @@ export interface WorldDraft {
   skillPointsPerLevel?: number;
   startingMoney?: number;
   offlineFeatures?: Partial<OfflineFeatures>;
+  /** Ids of the active packs; the Base of the app language when the library creates the world without. */
+  packs?: string[];
   skillRollsEnabled?: boolean;
   /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
   sellAnywhere?: boolean;
@@ -275,6 +281,8 @@ export interface WorldInfo {
   skillPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
+  /** Ids of the world's active packs. */
+  packs: string[];
   skillRollsEnabled?: boolean;
   sellAnywhere?: boolean;
   sellAnywhereRatio?: number;

@@ -275,6 +275,56 @@
 }
 
 @if (sections() !== "offline") {
+  <section class="section" data-testid="rules-section-packs">
+    <fieldset class="offline">
+      <legend>{{ "world.fields.packsTitle" | transloco }}</legend>
+      <p class="hint">{{ "world.fields.packsHint" | transloco }}</p>
+      @for (pack of installedPacks(); track pack.id) {
+        <div class="toggle" data-testid="pack-row" [attr.data-pack]="pack.id">
+          <p-checkbox
+            [inputId]="'pack-' + pack.id"
+            [binary]="true"
+            [ngModel]="packIds().includes(pack.id)"
+            (ngModelChange)="setPack(pack.id, $event)"
+          />
+          <label [for]="'pack-' + pack.id">{{ pack.name }}</label>
+          <p-tag
+            data-testid="pack-language"
+            [value]="pack.language.toUpperCase()"
+            severity="secondary"
+          />
+        </div>
+      }
+      @for (pack of missingPacks(); track pack.id) {
+        <div class="toggle" data-testid="pack-row" [attr.data-pack]="pack.id">
+          <span>{{ pack.id }}</span>
+          <p-tag
+            data-testid="pack-missing"
+            [value]="'world.fields.packMissing' | transloco"
+            severity="warn"
+          />
+          @if (pack.official) {
+            <p-button
+              data-testid="pack-install"
+              size="small"
+              [label]="'world.fields.packInstall' | transloco"
+              [loading]="installing() === pack.id"
+              (click)="installPack(pack.id)"
+            />
+          } @else {
+            <p-button
+              data-testid="pack-remove"
+              size="small"
+              severity="secondary"
+              [label]="'world.fields.packRemove' | transloco"
+              (click)="removePack(pack.id)"
+            />
+          }
+        </div>
+      }
+    </fieldset>
+  </section>
+
   <section class="section" data-testid="rules-section-skills">
     <fieldset class="offline">
       <legend>{{ "world.rules.skillRolls.title" | transloco }}</legend>

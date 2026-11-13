@@ -1,5 +1,6 @@
 import { inject, Injectable, linkedSignal } from '@angular/core';
 import { LanguageBusiness } from '../../../core/business/language.business';
+import { basePackId } from '../../../core/business/pack.business';
 import { createSandboxWorld, SANDBOX_WORLD_ID } from '../helpers/default-world';
 // Static on purpose: the sandbox world only loads in the lazy Tools chunks, never in the initial bundle.
 import { buildStarterClasses } from '../helpers/starter-classes';
@@ -22,6 +23,7 @@ export class SandboxWorldBusiness {
     let next = 0;
     return {
       ...world,
+      packs: [basePackId(this.language.$language())],
       ...buildStarterClasses(
         world,
         this.language.$language(),
