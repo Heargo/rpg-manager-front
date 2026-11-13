@@ -2,6 +2,7 @@ import { computed, effect, inject, Injectable } from '@angular/core';
 import { ImageBusiness } from '../../../core/business/image.business';
 import { CharacterBusiness } from '../../character/business/character.business';
 import { CharacterHostBusiness } from '../../character/business/character-host.business';
+import { CombatHostBusiness } from '../../combat/business/combat-host.business';
 import { DiceHostBusiness } from '../../dice/business/dice-host.business';
 import { ItemHostBusiness } from '../../item/business/item-host.business';
 import { MerchantHostBusiness } from '../../npc/business/merchant-host.business';
@@ -26,6 +27,7 @@ export class GameSessionBusiness {
   private readonly dice = inject(DiceHostBusiness);
   private readonly items = inject(ItemHostBusiness);
   private readonly merchants = inject(MerchantHostBusiness);
+  private readonly combat = inject(CombatHostBusiness);
   private readonly joined = inject(JoinedWorldsBusiness);
   private readonly info = inject(WorldInfoBusiness).$info;
   private readonly myCharacter = inject(CharacterBusiness).$myCharacter;
@@ -133,6 +135,7 @@ export class GameSessionBusiness {
       this.dice.start(),
       this.items.start(),
       this.merchants.start(),
+      this.combat.start(),
       this.images.serveToPlayers(),
     ];
   }

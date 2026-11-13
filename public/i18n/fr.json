@@ -1351,5 +1351,22 @@
       "save": "Enregistrer comme préréglage",
       "delete": "Supprimer le préréglage"
     }
+  },
+  "combat": {
+    "errors": {
+      "invalid": "Cette demande n'est pas valide.",
+      "gameMasterOnly": "Seul le maître du jeu peut faire cela.",
+      "notYours": "Ce combattant n'est pas le vôtre.",
+      "noEncounter": "Aucun combat n'est en cours.",
+      "alreadyStarted": "Un combat est déjà en cours.",
+      "life-attribute-required": "Le combat demande un attribut de vie dans les règles de combat du monde.",
+      "no-combatants": "Choisissez au moins un combattant.",
+      "character-not-found": "Ce personnage n'existe pas.",
+      "npc-not-found": "Ce PNJ n'est pas dans le catalogue.",
+      "caster-not-found": "Ce combattant n'est pas dans le combat.",
+      "skill-not-known": "Ce combattant ne connaît pas cette compétence.",
+      "skill-not-active": "Seules les compétences actives s'utilisent en combat.",
+      "target-not-found": "Cette cible n'est pas dans le combat."
+    }
   }
 }

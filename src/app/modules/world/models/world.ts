@@ -4,6 +4,7 @@ import { LevelCurve } from '../../character/helpers/level.rules';
 import { Npc, NpcVisibilityRules } from '../../npc/models/npc';
 import { CharacterClass } from '../../class/models/class';
 import { Skill } from '../../skill/models/skill';
+import { Encounter } from '../../combat/models/combat';
 
 /** An attribute every character of the world has (Strength, Life…). */
 export interface WorldAttribute {
@@ -178,6 +179,8 @@ export interface World {
   /** Per NPC role, what the players see of an NPC shown on the table. */
   npcVisibility: NpcVisibilityRules;
   combat: CombatRules;
+  /** The encounter in progress, saved with the world so it survives a host reload. */
+  encounter?: Encounter;
   items: Item[];
   characters: Character[];
   /** The GM's NPC catalogue; host-only, never sent in WorldInfo. */

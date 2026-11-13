@@ -39,6 +39,10 @@ export interface EncounterPicks {
   npcs: { npcId: string; count: number; side: Exclude<CombatSide, 'party'> }[];
 }
 
+/** The dice of a roll; a one-sided die is not random, so it is just its only face. */
+const roll = (random: RandomSource, count: number, faces: number): number[] =>
+  faces === 1 ? Array<number>(count).fill(1) : rollDice(random, count, faces);
+
 const same = (a: string, b: string) => normalizeName(a) === normalizeName(b);
 
 /** Records the change as one undo step. */
@@ -268,7 +272,7 @@ export function rollInitiative(
 ): Encounter {
   const combatants = enc.combatants.map((c) => {
     if (ids && !ids.includes(c.id)) return c;
-    const dice = rollDice(
+    const dice = roll(
       random,
       rules.initiative.dice.count,
       rules.initiative.dice.faces,
@@ -473,7 +477,7 @@ export function useSkill(
   if (targets.some((t) => !t)) return { ok: false, error: 'target-not-found' };
 
   const dice = rollOf(skill);
-  const rolls = rollsEnabled ? rollDice(random, dice.count, dice.faces) : [];
+  const rolls = rollsEnabled ? roll(random, dice.count, dice.faces) : [];
   let seq = enc.seq;
   const pending = (targets as Combatant[]).map((target) => {
     const result = resolveSkillUse(
@@ -744,4 +748,87 @@ export function proposeRewards(enc: Encounter): RewardProposal {
       c.loot.map((entry) => ({ fromName: c.name, entry })),
     ),
   };
+}
+
+// --- host-side helpers ------------------------------------------------------
+
+/** Puts a token on a grid cell (not an undo step). Without a grid there is no position. */
+export function moveCombatant(
+  enc: Encounter,
+  id: string,
+  position: { x: number; y: number },
+): Encounter {
+  return {
+    ...enc,
+    combatants: enc.combatants.map((c) =>
+      c.id === id ? { ...c, position } : c,
+    ),
+  };
+}
+
+/** Sets the current value of the given attributes on a combatant (an undo step), e.g. after the character's record changed. */
+export function setCombatantCurrents(
+  enc: Encounter,
+  id: string,
+  currents: { name: string; current: number }[],
+): Encounter {
+  return updateCombatant(enc, id, (c) =>
+    currents.reduce(
+      (next, entry) =>
+        changeAttribute(next, entry.name, () => ({ current: entry.current })),
+      c,
+    ),
+  );
+}
+
+/** The encounter without its undo step (a fresh start). */
+export function withoutUndo(enc: Encounter): Encounter {
+  const { previous: _previous, ...rest } = enc;
+  return rest;
+}
+
+/**
+ * The character records follow their combatants: the current value of each bar attribute (life, mana) is written to the record.
+ * Records that did not change are returned as they are.
+ */
+export function syncCharacters(world: World, enc: Encounter): World {
+  const bars = world.attributes.filter((a) =>
+    [world.barAttributes.life, world.barAttributes.mana].includes(a.id),
+  );
+  let changed = false;
+  const characters = world.characters.map((character) => {
+    const combatant = enc.combatants.find(
+      (c) => c.characterId === character.id,
+    );
+    if (!combatant) return character;
+    let attributes = character.attributes;
+    for (const bar of bars) {
+      const value = combatant.attributes.find((a) => same(a.name, bar.name));
+      if (!value) continue;
+      const own = attributes.find((a) => a.attributeId === bar.id);
+      const stat = attributeStats(
+        world.attributes,
+        { ...character, attributes },
+        world.barAttributes,
+      ).find((s) => s.attributeId === bar.id);
+      if (stat && stat.current === value.current) continue;
+      attributes = own
+        ? attributes.map((a) =>
+            a.attributeId === bar.id ? { ...a, current: value.current } : a,
+          )
+        : [
+            ...attributes,
+            { attributeId: bar.id, level: 0, current: value.current },
+          ];
+    }
+    if (attributes === character.attributes) return character;
+    changed = true;
+    return {
+      ...character,
+      attributes,
+      rev: character.rev + 1,
+      updatedAt: Date.now(),
+    };
+  });
+  return changed ? { ...world, characters } : world;
 }

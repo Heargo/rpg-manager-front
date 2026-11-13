@@ -1351,5 +1351,22 @@
       "save": "Save as preset",
       "delete": "Delete preset"
     }
+  },
+  "combat": {
+    "errors": {
+      "invalid": "This request isn't valid.",
+      "gameMasterOnly": "Only the game master can do that.",
+      "notYours": "This isn't your combatant.",
+      "noEncounter": "There is no encounter in progress.",
+      "alreadyStarted": "An encounter is already in progress.",
+      "life-attribute-required": "Combat needs a life attribute in the world's combat rules.",
+      "no-combatants": "Pick at least one combatant.",
+      "character-not-found": "This character doesn't exist.",
+      "npc-not-found": "This NPC isn't in the catalogue.",
+      "caster-not-found": "This combatant isn't in the encounter.",
+      "skill-not-known": "This combatant doesn't know that skill.",
+      "skill-not-active": "Only active skills can be used in combat.",
+      "target-not-found": "This target isn't in the encounter."
+    }
   }
 }

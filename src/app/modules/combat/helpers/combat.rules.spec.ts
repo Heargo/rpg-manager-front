@@ -1,7 +1,12 @@
 import { RandomSource } from '../../../core/generators/random-source';
 import { Skill } from '../../skill/models/skill';
 import { Npc } from '../../npc/models/npc';
-import { Character, CombatRules, InventoryItem, World } from '../../world/models/world';
+import {
+  Character,
+  CombatRules,
+  InventoryItem,
+  World,
+} from '../../world/models/world';
 import { createWorld } from '../../world/helpers/world.factory';
 import { Combatant, Encounter } from '../models/combat';
 import {
@@ -92,7 +97,9 @@ const smite: Skill = {
   cost: { attribute: 'Mana', amount: 10 },
   cooldown: 2,
   roll: { count: 2, faces: 6 },
-  effects: [{ kind: 'damage', attribute: 'Life', amount: 'skillLevel * 4 + roll' }],
+  effects: [
+    { kind: 'damage', attribute: 'Life', amount: 'skillLevel * 4 + roll' },
+  ],
 };
 const skills = [fireball, bless, mend, smite];
 
@@ -100,7 +107,16 @@ const potion: InventoryItem = {
   id: 'inv1',
   equipped: false,
   position: 0,
-  item: { id: 'potion', name: 'Potion', description: '', rarity: 'common', type: 'consumable', slot: 'none', price: 5, modifiers: [] },
+  item: {
+    id: 'potion',
+    name: 'Potion',
+    description: '',
+    rarity: 'common',
+    type: 'consumable',
+    slot: 'none',
+    price: 5,
+    modifiers: [],
+  },
 };
 
 function build(): { world: World; characters: Character[]; goblin: Npc } {
@@ -121,7 +137,13 @@ function build(): { world: World; characters: Character[]; goblin: Npc } {
     1,
   );
   const [life, mana, armor] = base.attributes;
-  const sheet = (id: string, lifeLevel: number, lifeNow: number, manaNow: number, owned: string[]): Character => ({
+  const sheet = (
+    id: string,
+    lifeLevel: number,
+    lifeNow: number,
+    manaNow: number,
+    owned: string[],
+  ): Character => ({
     id,
     playerId: `p-${id}`,
     rev: 1,
@@ -140,7 +162,10 @@ function build(): { world: World; characters: Character[]; goblin: Npc } {
     updatedAt: 1,
     skills: owned.map((skillId) => ({ skillId, level: 1 })),
   });
-  const characters = [sheet('aria', 2, 8, 3, ['fireball', 'smite']), sheet('bram', 2, 8, 5, ['mend', 'bless'])];
+  const characters = [
+    sheet('aria', 2, 8, 3, ['fireball', 'smite']),
+    sheet('bram', 2, 8, 5, ['mend', 'bless']),
+  ];
   const goblin: Npc = {
     ...sheet('goblin', 3, 13, 5, []),
     name: 'Goblin',
@@ -157,7 +182,11 @@ function build(): { world: World; characters: Character[]; goblin: Npc } {
     xpReward: 30,
     loot: ['inv1'],
   };
-  return { world: { ...base, characters, npcs: [goblin], skills }, characters, goblin };
+  return {
+    world: { ...base, characters, npcs: [goblin], skills },
+    characters,
+    goblin,
+  };
 }
 
 const picks = {
@@ -165,7 +194,10 @@ const picks = {
   npcs: [{ npcId: 'goblin', count: 3, side: 'enemy' as const }],
 };
 
-function start(rules: Partial<CombatRules> = {}, world = build().world): { enc: Encounter; world: World } {
+function start(
+  rules: Partial<CombatRules> = {},
+  world = build().world,
+): { enc: Encounter; world: World } {
   const w = { ...world, combat: { ...world.combat, ...rules } };
   const result = startEncounter(w, picks, newId);
   if (!result.ok) throw new Error(`start failed: ${result.error}`);
@@ -177,18 +209,30 @@ const by = (enc: Encounter, name: string): Combatant => {
   if (!found) throw new Error(`no combatant ${name}`);
   return found;
 };
-const attr = (c: Combatant, name: string) => c.attributes.find((a) => a.name === name)!;
+const attr = (c: Combatant, name: string) =>
+  c.attributes.find((a) => a.name === name)!;
 const names = (enc: Encounter) => enc.combatants.map((c) => c.name);
 const active = (enc: Encounter) => enc.combatants[enc.turn].name;
 const ok = <T extends { ok: boolean }>(result: T): Extract<T, { ok: true }> => {
   expect(result.ok).toBe(true);
   return result as Extract<T, { ok: true }>;
 };
-const use = (enc: Encounter, caster: string, skillId: string, targets: string[], random: RandomSource, rolls = true) =>
+const use = (
+  enc: Encounter,
+  caster: string,
+  skillId: string,
+  targets: string[],
+  random: RandomSource,
+  rolls = true,
+) =>
   ok(
     useSkill(
       enc,
-      { casterId: by(enc, caster).id, skillId, targetIds: targets.map((t) => by(enc, t).id) },
+      {
+        casterId: by(enc, caster).id,
+        skillId,
+        targetIds: targets.map((t) => by(enc, t).id),
+      },
       skills,
       rolls,
       random,
@@ -198,7 +242,13 @@ const use = (enc: Encounter, caster: string, skillId: string, targets: string[],
 describe('startEncounter', () => {
   it('puts the picked characters and one copy per NPC count in an encounter at round 1', () => {
     const { enc } = start();
-    expect(names(enc)).toEqual(['Aria', 'Bram', 'Goblin 1', 'Goblin 2', 'Goblin 3']);
+    expect(names(enc)).toEqual([
+      'Aria',
+      'Bram',
+      'Goblin 1',
+      'Goblin 2',
+      'Goblin 3',
+    ]);
     expect(enc.round).toBe(1);
     expect(enc.turn).toBe(0);
     expect(by(enc, 'Aria').side).toBe('party');
@@ -208,10 +258,26 @@ describe('startEncounter', () => {
 
   it('copies the full current values and the skills of each combatant', () => {
     const { enc } = start();
-    expect(attr(by(enc, 'Aria'), 'Life')).toEqual({ name: 'Life', current: 8, max: 12 });
-    expect(attr(by(enc, 'Aria'), 'Mana')).toEqual({ name: 'Mana', current: 3, max: 5 });
-    expect(attr(by(enc, 'Goblin 3'), 'Life')).toEqual({ name: 'Life', current: 13, max: 13 });
-    expect(attr(by(enc, 'Goblin 3'), 'Armor')).toEqual({ name: 'Armor', current: 3, max: 3 });
+    expect(attr(by(enc, 'Aria'), 'Life')).toEqual({
+      name: 'Life',
+      current: 8,
+      max: 12,
+    });
+    expect(attr(by(enc, 'Aria'), 'Mana')).toEqual({
+      name: 'Mana',
+      current: 3,
+      max: 5,
+    });
+    expect(attr(by(enc, 'Goblin 3'), 'Life')).toEqual({
+      name: 'Life',
+      current: 13,
+      max: 13,
+    });
+    expect(attr(by(enc, 'Goblin 3'), 'Armor')).toEqual({
+      name: 'Armor',
+      current: 3,
+      max: 3,
+    });
     expect(by(enc, 'Aria').skills).toEqual([
       { skillId: 'fireball', level: 1 },
       { skillId: 'smite', level: 1 },
@@ -243,24 +309,50 @@ describe('startEncounter', () => {
 
   it('adds allies as their own side', () => {
     const { world } = start();
-    const result = ok(startEncounter(world, { characterIds: ['aria'], npcs: [{ npcId: 'goblin', count: 1, side: 'ally' }] }, newId));
-    expect(result.encounter.combatants.map((c) => c.side)).toEqual(['party', 'ally']);
+    const result = ok(
+      startEncounter(
+        world,
+        {
+          characterIds: ['aria'],
+          npcs: [{ npcId: 'goblin', count: 1, side: 'ally' }],
+        },
+        newId,
+      ),
+    );
+    expect(result.encounter.combatants.map((c) => c.side)).toEqual([
+      'party',
+      'ally',
+    ]);
   });
 
   it('refuses to start without a life attribute', () => {
     const { world } = build();
-    const result = startEncounter({ ...world, combat: { ...world.combat, lifeAttribute: undefined } }, picks, newId);
+    const result = startEncounter(
+      { ...world, combat: { ...world.combat, lifeAttribute: undefined } },
+      picks,
+      newId,
+    );
     expect(result).toEqual({ ok: false, error: 'life-attribute-required' });
   });
 });
 
 describe('initiative', () => {
-  const rolled = (formula: string) => ({ mode: 'rolled' as const, dice: { count: 1, faces: 20 }, formula });
+  const rolled = (formula: string) => ({
+    mode: 'rolled' as const,
+    dice: { count: 1, faces: 20 },
+    formula,
+  });
 
   it('rolls the dice plus the formula for everyone and orders by the total, highest first', () => {
     const { enc, world } = start({ initiative: rolled('level') });
     const next = rollInitiative(enc, world.combat, scripted(4, 14, 9, 0, 0));
-    expect(names(next)).toEqual(['Bram', 'Goblin 1', 'Aria', 'Goblin 2', 'Goblin 3']);
+    expect(names(next)).toEqual([
+      'Bram',
+      'Goblin 1',
+      'Aria',
+      'Goblin 2',
+      'Goblin 3',
+    ]);
     expect(by(next, 'Bram').initiative).toBe(16);
     expect(by(next, 'Goblin 1').initiative).toBe(12);
     expect(by(next, 'Aria').initiative).toBe(6);
@@ -270,10 +362,20 @@ describe('initiative', () => {
   });
 
   it('rolls only the asked combatants, keeping typed values', () => {
-    const { enc, world } = start({ initiative: { mode: 'typed', dice: { count: 1, faces: 20 }, formula: '0' } });
+    const { enc, world } = start({
+      initiative: {
+        mode: 'typed',
+        dice: { count: 1, faces: 20 },
+        formula: '0',
+      },
+    });
     let next = setInitiative(enc, by(enc, 'Aria').id, 18);
     next = setInitiative(next, by(next, 'Bram').id, 7);
-    next = rollInitiative(next, world.combat, scripted(9), [by(next, 'Goblin 1').id, by(next, 'Goblin 2').id, by(next, 'Goblin 3').id]);
+    next = rollInitiative(next, world.combat, scripted(9), [
+      by(next, 'Goblin 1').id,
+      by(next, 'Goblin 2').id,
+      by(next, 'Goblin 3').id,
+    ]);
     expect(by(next, 'Aria').initiative).toBe(18);
     expect(by(next, 'Goblin 1').initiative).toBe(10);
     expect(names(next).slice(0, 2)).toEqual(['Aria', 'Goblin 1']);
@@ -282,15 +384,27 @@ describe('initiative', () => {
 
   it('re-orders when a typed value is set', () => {
     const { enc } = start();
-    const next = setInitiative(setInitiative(enc, by(enc, 'Goblin 3').id, 20), by(enc, 'Bram').id, 12);
+    const next = setInitiative(
+      setInitiative(enc, by(enc, 'Goblin 3').id, 20),
+      by(enc, 'Bram').id,
+      12,
+    );
     expect(names(next).slice(0, 2)).toEqual(['Goblin 3', 'Bram']);
   });
 
   it('lets the GM reorder by hand, keeping the active combatant active', () => {
     const { enc } = start();
-    const ids = ['Goblin 3', 'Aria', 'Goblin 1', 'Bram', 'Goblin 2'].map((n) => by(enc, n).id);
+    const ids = ['Goblin 3', 'Aria', 'Goblin 1', 'Bram', 'Goblin 2'].map(
+      (n) => by(enc, n).id,
+    );
     const next = reorderCombatants(enc, ids);
-    expect(names(next)).toEqual(['Goblin 3', 'Aria', 'Goblin 1', 'Bram', 'Goblin 2']);
+    expect(names(next)).toEqual([
+      'Goblin 3',
+      'Aria',
+      'Goblin 1',
+      'Bram',
+      'Goblin 2',
+    ]);
     expect(active(next)).toBe('Aria');
   });
 });
@@ -330,7 +444,11 @@ describe('turns and rounds', () => {
   it('resets the action counters at the start of the combatant turn', () => {
     let { enc } = start();
     enc = setActionUsed(enc, by(enc, 'Bram').id, 'Action', 1);
-    expect(by(enc, 'Bram').actions[0]).toEqual({ name: 'Action', count: 1, used: 1 });
+    expect(by(enc, 'Bram').actions[0]).toEqual({
+      name: 'Action',
+      count: 1,
+      used: 1,
+    });
     enc = nextTurn(enc);
     expect(by(enc, 'Bram').actions[0].used).toBe(0);
   });
@@ -338,8 +456,12 @@ describe('turns and rounds', () => {
   it('keeps an action counter between 0 and its count', () => {
     const { enc } = start();
     const id = by(enc, 'Aria').id;
-    expect(by(setActionUsed(enc, id, 'Action', 5), 'Aria').actions[0].used).toBe(1);
-    expect(by(setActionUsed(enc, id, 'Action', -2), 'Aria').actions[0].used).toBe(0);
+    expect(
+      by(setActionUsed(enc, id, 'Action', 5), 'Aria').actions[0].used,
+    ).toBe(1);
+    expect(
+      by(setActionUsed(enc, id, 'Action', -2), 'Aria').actions[0].used,
+    ).toBe(0);
   });
 });
 
@@ -383,7 +505,12 @@ describe('using a skill', () => {
       success: true,
       effects: [{ kind: 'damage', attribute: 'Life', amount: 21 }],
     });
-    expect(next.log.at(-1)).toMatchObject({ kind: 'skill', skillId: 'fireball', rolls: [4, 5], total: 9 });
+    expect(next.log.at(-1)).toMatchObject({
+      kind: 'skill',
+      skillId: 'fireball',
+      rolls: [4, 5],
+      total: 9,
+    });
   });
 
   it('changes nothing on the targets until the GM applies', () => {
@@ -394,8 +521,17 @@ describe('using a skill', () => {
 
   it('rolls once and makes one pending result per target', () => {
     const { enc } = start();
-    const next = use(enc, 'Aria', 'fireball', ['Goblin 1', 'Goblin 2'], scripted(3, 4));
-    expect(next.pending.map((p) => p.targetId)).toEqual([by(next, 'Goblin 1').id, by(next, 'Goblin 2').id]);
+    const next = use(
+      enc,
+      'Aria',
+      'fireball',
+      ['Goblin 1', 'Goblin 2'],
+      scripted(3, 4),
+    );
+    expect(next.pending.map((p) => p.targetId)).toEqual([
+      by(next, 'Goblin 1').id,
+      by(next, 'Goblin 2').id,
+    ]);
     expect(next.pending.map((p) => p.total)).toEqual([9, 9]);
   });
 
@@ -416,22 +552,46 @@ describe('using a skill', () => {
   it('with skill rolls off: draws no dice, succeeds, and the roll reads 0', () => {
     const { enc } = start();
     const next = use(enc, 'Aria', 'fireball', ['Goblin 2'], forbidden, false);
-    expect(next.pending[0]).toMatchObject({ rolls: [], total: 0, success: true, effects: [{ amount: 12 }] });
+    expect(next.pending[0]).toMatchObject({
+      rolls: [],
+      total: 0,
+      success: true,
+      effects: [{ amount: 12 }],
+    });
   });
 
   it('refuses a skill the caster does not have', () => {
     const { enc } = start();
-    const result = useSkill(enc, { casterId: by(enc, 'Aria').id, skillId: 'mend', targetIds: [by(enc, 'Bram').id] }, skills, true, scripted(0));
+    const result = useSkill(
+      enc,
+      {
+        casterId: by(enc, 'Aria').id,
+        skillId: 'mend',
+        targetIds: [by(enc, 'Bram').id],
+      },
+      skills,
+      true,
+      scripted(0),
+    );
     expect(result).toEqual({ ok: false, error: 'skill-not-known' });
   });
 
   it('tells what a skill can do now: on cooldown, or not affordable', () => {
     const { enc } = start();
     const aria = by(enc, 'Aria').id;
-    expect(skillAvailability(enc, aria, fireball)).toEqual({ affordable: true, onCooldown: false });
-    expect(skillAvailability(enc, aria, smite)).toEqual({ affordable: false, onCooldown: false });
+    expect(skillAvailability(enc, aria, fireball)).toEqual({
+      affordable: true,
+      onCooldown: false,
+    });
+    expect(skillAvailability(enc, aria, smite)).toEqual({
+      affordable: false,
+      onCooldown: false,
+    });
     const used = use(enc, 'Aria', 'fireball', ['Goblin 2'], scripted(3, 4));
-    expect(skillAvailability(used, aria, fireball)).toEqual({ affordable: false, onCooldown: true });
+    expect(skillAvailability(used, aria, fireball)).toEqual({
+      affordable: false,
+      onCooldown: true,
+    });
   });
 
   it('ticks the cooldown at the start of the caster turn', () => {
@@ -442,14 +602,19 @@ describe('using a skill', () => {
     expect(by(enc, 'Aria').cooldowns['fireball']).toBe(1);
     for (let i = 0; i < 5; i++) enc = nextTurn(enc);
     expect(by(enc, 'Aria').cooldowns['fireball'] ?? 0).toBe(0);
-    expect(skillAvailability(enc, by(enc, 'Aria').id, fireball).onCooldown).toBe(false);
+    expect(
+      skillAvailability(enc, by(enc, 'Aria').id, fireball).onCooldown,
+    ).toBe(false);
   });
 });
 
 describe('the GM resolves a pending result', () => {
   const hit = () => {
     const { enc, world } = start({ defence: 'Armor' });
-    return { enc: use(enc, 'Aria', 'fireball', ['Goblin 2'], scripted(3, 4)), world };
+    return {
+      enc: use(enc, 'Aria', 'fireball', ['Goblin 2'], scripted(3, 4)),
+      world,
+    };
   };
 
   it('applies damage to the target life and clears the pending result', () => {
@@ -463,17 +628,31 @@ describe('the GM resolves a pending result', () => {
   it('suggests the defence from the world formula and takes it off when asked', () => {
     const { enc, world } = hit();
     expect(suggestDefence(enc, enc.pending[0].id, world.combat)).toBe(3);
-    const next = applyPending(enc, enc.pending[0].id, { defence: true, rules: world.combat });
+    const next = applyPending(enc, enc.pending[0].id, {
+      defence: true,
+      rules: world.combat,
+    });
     expect(attr(by(next, 'Goblin 2'), 'Life').current).toBe(0);
-    const small = use(start({ defence: 'Armor' }).enc, 'Aria', 'fireball', ['Goblin 2'], scripted(0, 0));
-    const reduced = applyPending(small, small.pending[0].id, { defence: true, rules: start({ defence: 'Armor' }).world.combat });
+    const small = use(
+      start({ defence: 'Armor' }).enc,
+      'Aria',
+      'fireball',
+      ['Goblin 2'],
+      scripted(0, 0),
+    );
+    const reduced = applyPending(small, small.pending[0].id, {
+      defence: true,
+      rules: start({ defence: 'Armor' }).world.combat,
+    });
     expect(attr(by(reduced, 'Goblin 2'), 'Life').current).toBe(13 - (14 - 3));
   });
 
   it('suggests no defence when the world has none', () => {
     const { enc, world } = start();
     const pending = use(enc, 'Aria', 'fireball', ['Goblin 2'], scripted(3, 4));
-    expect(suggestDefence(pending, pending.pending[0].id, world.combat)).toBe(0);
+    expect(suggestDefence(pending, pending.pending[0].id, world.combat)).toBe(
+      0,
+    );
   });
 
   it('edits the amount then applies', () => {
@@ -484,7 +663,10 @@ describe('the GM resolves a pending result', () => {
 
   it('edits the target then applies', () => {
     const { enc } = hit();
-    const next = applyPending(enc, enc.pending[0].id, { targetId: by(enc, 'Goblin 3').id, amounts: [4] });
+    const next = applyPending(enc, enc.pending[0].id, {
+      targetId: by(enc, 'Goblin 3').id,
+      amounts: [4],
+    });
     expect(attr(by(next, 'Goblin 3'), 'Life').current).toBe(9);
     expect(attr(by(next, 'Goblin 2'), 'Life').current).toBe(13);
   });
@@ -494,7 +676,11 @@ describe('the GM resolves a pending result', () => {
     const next = dismissPending(enc, enc.pending[0].id);
     expect(next.pending).toEqual([]);
     expect(attr(by(next, 'Goblin 2'), 'Life').current).toBe(13);
-    expect(next.log.at(-1)).toMatchObject({ kind: 'skill', rolls: [4, 5], total: 9 });
+    expect(next.log.at(-1)).toMatchObject({
+      kind: 'skill',
+      rolls: [4, 5],
+      total: 9,
+    });
   });
 
   it('keeps several pending results in order and resolves them one by one', () => {
@@ -517,7 +703,9 @@ describe('the GM resolves a pending result', () => {
     const { enc } = start();
     let next = use(enc, 'Bram', 'bless', ['Aria'], scripted(0));
     next = applyPending(next, next.pending[0].id);
-    expect(by(next, 'Aria').effects).toEqual([expect.objectContaining({ attribute: 'Armor', amount: 2, duration: 2 })]);
+    expect(by(next, 'Aria').effects).toEqual([
+      expect.objectContaining({ attribute: 'Armor', amount: 2, duration: 2 }),
+    ]);
     expect(attr(by(next, 'Aria'), 'Armor').max).toBe(4);
   });
 
@@ -539,7 +727,10 @@ describe('free changes', () => {
     const { enc } = start();
     const hurt = damageCombatant(enc, by(enc, 'Aria').id, 3);
     expect(attr(by(hurt, 'Aria'), 'Life').current).toBe(5);
-    expect(attr(by(healCombatant(hurt, by(hurt, 'Aria').id, 99), 'Aria'), 'Life').current).toBe(12);
+    expect(
+      attr(by(healCombatant(hurt, by(hurt, 'Aria').id, 99), 'Aria'), 'Life')
+        .current,
+    ).toBe(12);
   });
 
   it('adds and removes a status note', () => {
@@ -547,21 +738,41 @@ describe('free changes', () => {
     const id = by(enc, 'Bram').id;
     const poisoned = addStatus(enc, id, 'Poisoned');
     expect(by(poisoned, 'Bram').statuses).toEqual(['Poisoned']);
-    expect(by(removeStatus(poisoned, id, 'Poisoned'), 'Bram').statuses).toEqual([]);
+    expect(by(removeStatus(poisoned, id, 'Poisoned'), 'Bram').statuses).toEqual(
+      [],
+    );
   });
 
   it('edits any value of a combatant', () => {
     const { enc } = start();
-    const next = editAttribute(enc, by(enc, 'Aria').id, 'Life', { current: 2, max: 20 });
-    expect(attr(by(next, 'Aria'), 'Life')).toEqual({ name: 'Life', current: 2, max: 20 });
+    const next = editAttribute(enc, by(enc, 'Aria').id, 'Life', {
+      current: 2,
+      max: 20,
+    });
+    expect(attr(by(next, 'Aria'), 'Life')).toEqual({
+      name: 'Life',
+      current: 2,
+      max: 20,
+    });
   });
 
   it('adds a copy of an NPC with the next number, and removes a combatant', () => {
     const { enc, world } = start();
-    const added = addCombatant(enc, world, { npcId: 'goblin', side: 'enemy' }, newId);
+    const added = addCombatant(
+      enc,
+      world,
+      { npcId: 'goblin', side: 'enemy' },
+      newId,
+    );
     expect(names(added).at(-1)).toBe('Goblin 4');
     const removed = removeCombatant(added, by(added, 'Goblin 1').id);
-    expect(names(removed)).toEqual(['Aria', 'Bram', 'Goblin 2', 'Goblin 3', 'Goblin 4']);
+    expect(names(removed)).toEqual([
+      'Aria',
+      'Bram',
+      'Goblin 2',
+      'Goblin 3',
+      'Goblin 4',
+    ]);
   });
 });
 
@@ -619,18 +830,47 @@ describe('proposeRewards', () => {
     expect(rewards.loot).toHaveLength(1);
     const { world } = start();
     const three = ok(
-      startEncounter({ ...world, characters: [...world.characters, { ...world.characters[0], id: 'cleo', name: 'Cleo' }] }, { ...picks, characterIds: ['aria', 'bram', 'cleo'] }, newId),
+      startEncounter(
+        {
+          ...world,
+          characters: [
+            ...world.characters,
+            { ...world.characters[0], id: 'cleo', name: 'Cleo' },
+          ],
+        },
+        { ...picks, characterIds: ['aria', 'bram', 'cleo'] },
+        newId,
+      ),
     ).encounter;
-    const hit = damageCombatant(three, three.combatants.find((c) => c.name === 'Goblin 1')!.id, 13);
-    expect(proposeRewards(hit).xp.perCharacter.map((p) => p.amount)).toEqual([10, 10, 10]);
+    const hit = damageCombatant(
+      three,
+      three.combatants.find((c) => c.name === 'Goblin 1')!.id,
+      13,
+    );
+    expect(proposeRewards(hit).xp.perCharacter.map((p) => p.amount)).toEqual([
+      10, 10, 10,
+    ]);
   });
 
   it('counts nothing for no defeated enemy, and never for allies', () => {
     expect(proposeRewards(beaten()).xp.total).toBe(0);
     const { world } = start();
-    const ally = ok(startEncounter(world, { characterIds: ['aria'], npcs: [{ npcId: 'goblin', count: 1, side: 'ally' }] }, newId)).encounter;
+    const ally = ok(
+      startEncounter(
+        world,
+        {
+          characterIds: ['aria'],
+          npcs: [{ npcId: 'goblin', count: 1, side: 'ally' }],
+        },
+        newId,
+      ),
+    ).encounter;
     const down = damageCombatant(ally, ally.combatants[1].id, 13);
-    expect(proposeRewards(down)).toMatchObject({ xp: { total: 0 }, money: 0, loot: [] });
+    expect(proposeRewards(down)).toMatchObject({
+      xp: { total: 0 },
+      money: 0,
+      loot: [],
+    });
   });
 });
 
@@ -642,25 +882,35 @@ describe('a skill effect reading the target', () => {
       cost: undefined,
       cooldown: 0,
       roll: undefined,
-      effects: [{ kind: 'damage', attribute: 'Life', amount: 'target_Life + 1' }],
+      effects: [
+        { kind: 'damage', attribute: 'Life', amount: 'target_Life + 1' },
+      ],
     };
     const { enc } = start();
     const aria = by(enc, 'Aria');
     const armed = {
       ...enc,
       combatants: enc.combatants.map((c) =>
-        c.id === aria.id ? { ...c, skills: [...c.skills, { skillId: 'exploit', level: 1 }] } : c,
+        c.id === aria.id
+          ? { ...c, skills: [...c.skills, { skillId: 'exploit', level: 1 }] }
+          : c,
       ),
     };
     const result = ok(
       useSkill(
         armed,
-        { casterId: aria.id, skillId: 'exploit', targetIds: [by(armed, 'Goblin 2').id] },
+        {
+          casterId: aria.id,
+          skillId: 'exploit',
+          targetIds: [by(armed, 'Goblin 2').id],
+        },
         [...skills, exploit],
         false,
         forbidden,
       ),
     );
-    expect(result.encounter.pending[0]).toMatchObject({ effects: [{ kind: 'damage', attribute: 'Life', amount: 14 }] });
+    expect(result.encounter.pending[0]).toMatchObject({
+      effects: [{ kind: 'damage', attribute: 'Life', amount: 14 }],
+    });
   });
 });
