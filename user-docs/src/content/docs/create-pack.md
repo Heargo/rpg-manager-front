@@ -11,22 +11,24 @@ Un pack, ce sont des **données** : un fichier `pack.json` qui décrit le pack, 
 
 ### Détails
 
-Le nom et la description en anglais et en français, la version, l'auteur, la licence et son lien, et une page d'accueil facultative. L'**identifiant du pack** se déduit du nom (minuscules, chiffres et tirets) tant que vous ne le modifiez pas. Il ne peut pas reprendre celui d'un pack officiel ni d'un pack ajouté depuis un lien.
+La **langue du pack** (français ou anglais, par défaut celle de l'application), le nom, la description, la version, l'auteur, la licence et son lien, et une page d'accueil facultative. L'**identifiant du pack** se déduit du nom (minuscules, chiffres et tirets) tant que vous ne le modifiez pas. Il ne peut pas reprendre celui d'un pack officiel ni d'un pack ajouté depuis un lien.
 
 ![Les détails d'un brouillon de pack](../../assets/screens/fr/packs-creator-details.png)
 
 ### Listes de mots
 
-Une case par langue et par générateur (objets, PNJ, compétences, classes), qui contient la liste en JSON. Les erreurs s'affichent pendant que vous écrivez. **Copier la liste de Base** part de la liste fournie avec l'application, le plus simple pour voir le format ; **Importer un fichier** charge un `.json`. Une case vide est laissée de côté.
+Une case par générateur (objets, PNJ, compétences, classes), qui contient la liste en JSON, dans la langue du pack. Les erreurs s'affichent pendant que vous écrivez. **Copier la liste de Base** part de la liste du Base de la langue du pack, le plus simple pour voir le format ; **Importer un fichier** charge un `.json`. Une case vide est laissée de côté.
 
 ![Les listes de mots d'un brouillon](../../assets/screens/fr/packs-creator-lists.png)
 
 ### Sprites
 
+Les sprites s'affichent 12 par page.
+
 - **Ajouter une image PNG** : au plus 1 Mo et 256 × 256 pixels. Une image ajoutée ainsi est **en niveaux de gris** ou **colorée**.
 - **Depuis mes sprites** : un sprite enregistré dans le [coloriseur](/docs/tools/), ajouté **avec ses masques**, son type et son emplacement.
 
-Pour chaque sprite : un identifiant, un libellé en anglais et en français, le type et l'emplacement d'objet (qui servent aux images aléatoires des objets), et la sorte. **Modifier dans le coloriseur** ouvre un sprite en niveaux de gris ou avec masques dans le coloriseur ; **Enregistrer dans le brouillon** y renvoie ses matériaux.
+Pour chaque sprite : un identifiant, un libellé dans la langue du pack, le type et l'emplacement d'objet (qui servent aux images aléatoires des objets), et la sorte. **Modifier dans le coloriseur** ouvre un sprite en niveaux de gris ou avec masques dans le coloriseur ; **Enregistrer dans le brouillon** y renvoie ses matériaux.
 
 Depuis le coloriseur, **Ajouter à un brouillon de pack** ajoute directement le sprite en cours, avec ses masques.
 
@@ -34,12 +36,16 @@ Depuis le coloriseur, **Ajouter à un brouillon de pack** ajoute directement le 
 
 ![L'onglet Publier](../../assets/screens/fr/packs-creator-publish.png)
 
-- **Installer sur cet appareil** installe le pack pour l'essayer tout de suite dans les générateurs. Il apparaît sur la page des packs comme **Créé sur cet appareil**. Réinstaller le remplace.
+- **Installer sur cet appareil** installe le pack ; cochez-le dans les règles d'un monde (ou dans **Outils › Règles du monde**) pour l'essayer dans les générateurs. Il apparaît sur la page des packs comme **Créé sur cet appareil**. Réinstaller le remplace.
 - **Exporter** télécharge un `.zip` (`<identifiant>-<version>.zip`) avec `pack.json` et les fichiers, prêt à publier.
 
 Les deux font les **mêmes contrôles** qu'**Ajouter un pack** : un brouillon qui s'exporte est un pack qui s'installe.
 
-Pour modifier un pack déjà installé depuis un lien ou créé ici, utilisez **Modifier comme brouillon** sur sa carte : son contenu est copié dans un nouveau brouillon.
+Pour modifier un pack créé ici, utilisez **Modifier comme brouillon** sur sa carte : son contenu est copié dans un nouveau brouillon qui garde son identifiant. Pour partir d'un autre pack (Base, un pack ajouté depuis un lien…), utilisez **Dupliquer** : la copie reçoit un nouvel identifiant.
+
+### Traduire un pack
+
+Un pack n'a qu'une langue. Pour proposer votre pack en anglais et en français, **dupliquez**-le, changez la langue dans **Détails** et traduisez le nom, la description, les listes et les libellés. Publiez les deux packs ; chaque monde coche celui de sa langue.
 
 ## Publier sur GitHub
 
@@ -59,8 +65,7 @@ Un dépôt minimal :
 mon-pack/
 ├── pack.json
 ├── generators/
-│   └── fr/
-│       └── items.json
+│   └── items.json
 └── sprites/
     ├── epee.png
     └── epee.json
@@ -72,20 +77,20 @@ Et son `pack.json` :
 {
   "format": 1,
   "id": "mon-pack",
-  "name": { "en": "My pack", "fr": "Mon pack" },
-  "description": { "en": "Swords from the north.", "fr": "Des épées du nord." },
+  "language": "fr",
+  "name": "Mon pack",
+  "description": "Des épées du nord.",
   "version": "1.0.0",
   "author": "Votre nom",
   "license": "CC-BY-4.0",
   "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
   "generators": {
-    "fr": { "items": "generators/fr/items.json" }
+    "items": "generators/items.json"
   },
   "sprites": [
     {
       "id": "epee",
-      "en": "Sword",
-      "fr": "Épée",
+      "label": "Épée",
       "type": "equipment",
       "slot": "weapon1",
       "kind": "masked",
@@ -100,13 +105,14 @@ Et son `pack.json` :
 | --- | --- |
 | `format` | Toujours `1`. |
 | `id` | Minuscules, chiffres et tirets ; unique. |
-| `name`, `description` | Un texte en `en` et en `fr`. |
+| `language` | La langue du pack : `fr` ou `en`. |
+| `name`, `description` | Des textes, dans la langue du pack. |
 | `version`, `author`, `license` | Des textes. |
 | `licenseUrl`, `homepage` | Des liens **https** (`homepage` est facultatif). |
-| `generators` | Par langue (`en`, `fr`), les fichiers `items`, `npcs`, `skills`, `classes` ; chacun est facultatif. |
+| `generators` | Les fichiers `items`, `npcs`, `skills`, `classes` ; chacun est facultatif. |
 | `sprites` | La liste des sprites (voir ci-dessous). |
 
-Pour chaque sprite : `id`, les libellés `en` et `fr`, `type` (`item`, `consumable` ou `equipment`), `slot` (`none` hors équipement, sinon `head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` ou `weapon2`), `kind` (`grayscale`, `masked` ou `colored`), `image`, et `materials` pour un sprite `masked` (le JSON exporté par le coloriseur).
+Pour chaque sprite : `id`, `label` (le libellé, dans la langue du pack), `type` (`item`, `consumable` ou `equipment`), `slot` (`none` hors équipement, sinon `head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` ou `weapon2`), `kind` (`grayscale`, `masked` ou `colored`), `image`, et `materials` pour un sprite `masked` (le JSON exporté par le coloriseur).
 
 Les chemins sont **relatifs** à `pack.json` : pas de `/` au début, pas de `..`, pas de lien.
 

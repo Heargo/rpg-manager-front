@@ -11,22 +11,24 @@ A pack is **data**: a `pack.json` file that describes the pack, plus the files i
 
 ### Details
 
-The name and description in English and French, the version, the author, the license and its link, and an optional home page. The **pack id** is made from the name (lowercase letters, digits and dashes) until you change it. It cannot reuse the id of an official pack or of a pack added from a link.
+The **pack language** (English or French, by default the app's), the name, the description, the version, the author, the license and its link, and an optional home page. The **pack id** is made from the name (lowercase letters, digits and dashes) until you change it. It cannot reuse the id of an official pack or of a pack added from a link.
 
 ![A pack draft's details](../../../assets/screens/en/packs-creator-details.png)
 
 ### Word lists
 
-One box per language and generator (items, NPCs, skills, classes), holding the list as JSON. Errors are shown as you type. **Copy Base's list** starts from the list bundled with the app, the easiest way to see the format; **Import a file** loads a `.json`. An empty box is left out.
+One box per generator (items, NPCs, skills, classes), holding the list as JSON, in the pack's language. Errors are shown as you type. **Copy Base's list** starts from the list of the Base in the pack's language, the easiest way to see the format; **Import a file** loads a `.json`. An empty box is left out.
 
 ![A draft's word lists](../../../assets/screens/en/packs-creator-lists.png)
 
 ### Sprites
 
+Sprites are shown 12 per page.
+
 - **Add a PNG image**: at most 1 MB and 256 × 256 pixels. An image added this way is **grayscale** or **colored**.
 - **From my sprites**: a sprite saved in the [colorizer](/docs/en/tools/), added **with its masks**, its type and its slot.
 
-For each sprite: an id, an English and a French label, the item type and slot (used for the items' random images), and the kind. **Edit in the colorizer** opens a grayscale or masked sprite in the colorizer; **Save to the draft** sends its materials back.
+For each sprite: an id, a label in the pack's language, the item type and slot (used for the items' random images), and the kind. **Edit in the colorizer** opens a grayscale or masked sprite in the colorizer; **Save to the draft** sends its materials back.
 
 From the colorizer, **Add to a pack draft** adds the current sprite directly, with its masks.
 
@@ -34,12 +36,16 @@ From the colorizer, **Add to a pack draft** adds the current sprite directly, wi
 
 ![The Publish tab](../../../assets/screens/en/packs-creator-publish.png)
 
-- **Install on this device** installs the pack so you can try it in the generators at once. It shows on the packs page as **Created on this device**. Installing it again replaces it.
+- **Install on this device** installs the pack; tick it in a world's rules (or in **Tools › World rules**) to try it in the generators. It shows on the packs page as **Created on this device**. Installing it again replaces it.
 - **Export** downloads a `.zip` (`<id>-<version>.zip`) with `pack.json` and the files, ready to publish.
 
 Both run the **same checks** as **Add a pack**: a draft that exports is a pack that installs.
 
-To change a pack already installed from a link or made here, use **Edit as a draft** on its card: its content is copied into a new draft.
+To change a pack made here, use **Edit as a draft** on its card: its content is copied into a new draft that keeps its id. To start from another pack (Base, a pack added from a link…), use **Duplicate**: the copy gets a new id.
+
+### Translate a pack
+
+A pack has one language. To offer your pack in English and French, **duplicate** it, change the language in **Details** and translate the name, description, lists and labels. Publish both packs; each world ticks the one in its language.
 
 ## Publish on GitHub
 
@@ -59,8 +65,7 @@ A minimal repository:
 my-pack/
 ├── pack.json
 ├── generators/
-│   └── en/
-│       └── items.json
+│   └── items.json
 └── sprites/
     ├── sword.png
     └── sword.json
@@ -72,20 +77,20 @@ And its `pack.json`:
 {
   "format": 1,
   "id": "my-pack",
-  "name": { "en": "My pack", "fr": "Mon pack" },
-  "description": { "en": "Swords from the north.", "fr": "Des épées du nord." },
+  "language": "en",
+  "name": "My pack",
+  "description": "Swords from the north.",
   "version": "1.0.0",
   "author": "Your name",
   "license": "CC-BY-4.0",
   "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
   "generators": {
-    "en": { "items": "generators/en/items.json" }
+    "items": "generators/items.json"
   },
   "sprites": [
     {
       "id": "sword",
-      "en": "Sword",
-      "fr": "Épée",
+      "label": "Sword",
       "type": "equipment",
       "slot": "weapon1",
       "kind": "masked",
@@ -100,13 +105,14 @@ And its `pack.json`:
 | --- | --- |
 | `format` | Always `1`. |
 | `id` | Lowercase letters, digits and dashes; unique. |
-| `name`, `description` | A text in `en` and in `fr`. |
+| `language` | The pack's language: `en` or `fr`. |
+| `name`, `description` | Texts, in the pack's language. |
 | `version`, `author`, `license` | Texts. |
 | `licenseUrl`, `homepage` | **https** links (`homepage` is optional). |
-| `generators` | Per language (`en`, `fr`), the `items`, `npcs`, `skills`, `classes` files; each one is optional. |
+| `generators` | The `items`, `npcs`, `skills`, `classes` files; each one is optional. |
 | `sprites` | The list of sprites (see below). |
 
-For each sprite: `id`, the `en` and `fr` labels, `type` (`item`, `consumable` or `equipment`), `slot` (`none` for anything that isn't equipment, otherwise `head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` or `weapon2`), `kind` (`grayscale`, `masked` or `colored`), `image`, and `materials` for a `masked` sprite (the JSON the colorizer exports).
+For each sprite: `id`, `label` (in the pack's language), `type` (`item`, `consumable` or `equipment`), `slot` (`none` for anything that isn't equipment, otherwise `head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` or `weapon2`), `kind` (`grayscale`, `masked` or `colored`), `image`, and `materials` for a `masked` sprite (the JSON the colorizer exports).
 
 Paths are **relative** to `pack.json`: no leading `/`, no `..`, no links.
 

@@ -227,4 +227,4 @@ Tickets in `pack-languages/` (PL). Decisions from the user on 2026-11-13 are in 
 | 105 | **PL02** Pack creator and duplicate in one language (folded into PL01) | PL01 |
 | 106 | **PL03** Active packs in the world rules (done) | PL01 |
 | 107 | **PL04** Generators and sprites use the world's packs (done) | PL03 |
-| 108 | **PL05** User docs: one language per pack, packs per world | PL01, PL04 |
+| 108 | **PL05** User docs: one language per pack, packs per world (done) | PL01, PL04 |

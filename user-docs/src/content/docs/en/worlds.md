@@ -17,7 +17,7 @@ In **Worlds**, click **New world**. The wizard has three steps, with a preview o
 
 ![The Attributes step of the wizard](../../../assets/screens/en/worlds-wizard-attributes.png)
 
-**3. Rules**: progression, economy, skills and combat. You can also add the **default items** and the **default classes and skills** to have a playable world right away.
+**3. Rules**: progression, economy, skills, combat and the world's [content packs](/docs/en/packs/#a-worlds-packs) (by default, the Base in the app's language). You can also add the **default items** and the **default classes and skills** to have a playable world right away.
 
 ![The Rules step of the wizard](../../../assets/screens/en/worlds-wizard-rules.png)
 
@@ -32,7 +32,7 @@ Your worlds are listed in **Worlds**, with the ones you joined as a player (a **
 Once the game is running, **World rules** lets you adjust everything. Changes reach the players at once. The page has three tabs:
 
 - **Attributes**: the same settings as in the wizard.
-- **Rules**: progression (stat and skill points, max level, the XP curve: flat, growing, steep, classic or custom), economy (starting money, selling), skills (whether they roll dice), what players see of NPCs shown on the table, and combat.
+- **Rules**: progression (stat and skill points, max level, the XP curve: flat, growing, steep, classic or custom), economy (starting money, selling), skills (whether they roll dice), what players see of NPCs shown on the table, combat, and the [packs](/docs/en/packs/#a-worlds-packs) the generators use.
 - **Offline**: what players can still do while the host is offline (roll dice, write notes, equip, sell…).
 
 ![The World rules page](../../../assets/screens/en/worlds-rules.png)
