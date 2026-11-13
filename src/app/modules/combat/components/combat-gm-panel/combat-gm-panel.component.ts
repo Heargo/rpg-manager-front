@@ -1,11 +1,4 @@
 import {
-  CdkDrag,
-  CdkDragDrop,
-  CdkDragHandle,
-  CdkDropList,
-  moveItemInArray,
-} from '@angular/cdk/drag-drop';
-import {
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -20,9 +13,9 @@ import { DialogModule } from '@openng/optimus-ui/dialog';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
-import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { MessageLevel } from '../../../../core/models/toast-level';
+import { CombatSelectionBusiness } from '../../business/combat-selection.business';
 import { CombatBusiness } from '../../business/combat.business';
 import { startPicks } from '../../helpers/combat-start.rules';
 import { PendingResultView } from '../../models/combat';
@@ -34,9 +27,6 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    CdkDropList,
-    CdkDrag,
-    CdkDragHandle,
     TranslocoPipe,
     ButtonModule,
     DialogModule,
@@ -44,7 +34,6 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
     InputTextModule,
     MultiSelectModule,
     StoredImageComponent,
-    ProgressBarModule,
     CombatActionsComponent,
   ],
   templateUrl: './combat-gm-panel.component.html',
@@ -52,6 +41,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
 })
 export class CombatGmPanelComponent {
   protected readonly combat = inject(CombatBusiness);
+  private readonly selection = inject(CombatSelectionBusiness);
   private readonly messages = inject(MessageService);
 
   protected readonly state = this.combat.$state;
@@ -69,10 +59,12 @@ export class CombatGmPanelComponent {
   );
 
   // Running encounter
-  protected readonly selectedId = signal<string | null>(null);
   protected readonly amount = signal<number | null>(1);
   protected readonly status = signal('');
-  protected readonly initiatives = signal<Record<string, number | null>>({});
+  protected readonly selected = computed(() => {
+    const id = this.selection.$selectedId();
+    return this.encounter()?.combatants.find((c) => c.id === id);
+  });
   protected readonly editing = signal<{ id: string; amounts: number[] } | null>(
     null,
   );
@@ -131,34 +123,6 @@ export class CombatGmPanelComponent {
     }
   }
 
-  /** What a drop on the turn order calls: the new order, by combatant id. */
-  reorder(ids: string[]): Promise<boolean> {
-    return this.run(() => this.combat.reorder(ids));
-  }
-
-  protected drop(event: CdkDragDrop<unknown>): void {
-    const ids = (this.state()?.combatants ?? []).map((c) => c.id);
-    moveItemInArray(ids, event.previousIndex, event.currentIndex);
-    void this.reorder(ids);
-  }
-
-  protected select(id: string): void {
-    this.selectedId.update((current) => (current === id ? null : id));
-  }
-
-  protected initiativeOf(id: string): number | null {
-    return this.initiatives()[id] ?? null;
-  }
-
-  protected setInitiativeDraft(id: string, value: number | null): void {
-    this.initiatives.update((drafts) => ({ ...drafts, [id]: value }));
-  }
-
-  protected setInitiative(id: string): void {
-    const value = this.initiativeOf(id);
-    if (value !== null) void this.run(() => this.combat.initiative(id, value));
-  }
-
   protected damage(id: string): void {
     const amount = this.amount();
     if (amount)
@@ -178,12 +142,6 @@ export class CombatGmPanelComponent {
       await this.run(() => this.combat.edit(id, { kind: 'add-status', status }))
     )
       this.status.set('');
-  }
-
-  protected removeStatus(id: string, status: string): void {
-    void this.run(() =>
-      this.combat.edit(id, { kind: 'remove-status', status }),
-    );
   }
 
   protected nextTurn(): void {
@@ -273,7 +231,7 @@ export class CombatGmPanelComponent {
     }));
     if (await this.run(() => this.combat.end({ xp }))) {
       this.endOpen.set(false);
-      this.selectedId.set(null);
+      this.selection.clear();
     }
   }
 

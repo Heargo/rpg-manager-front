@@ -179,19 +179,19 @@
 }
 
 .tools {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: block;
 }
 
 .notes-header {
   display: flex;
+  flex: 1;
   justify-content: space-between;
   align-items: baseline;
   gap: 0.5rem;
+  margin-right: 0.5rem;
 }
 
-.notes textarea {
+.tools textarea {
   width: 100%;
   min-height: 14rem;
   resize: vertical;

@@ -12,8 +12,10 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CombatBusiness } from '../../../combat/business/combat.business';
+import { CombatSelectionBusiness } from '../../../combat/business/combat-selection.business';
 import { CombatTargetingBusiness } from '../../../combat/business/combat-targeting.business';
 import { CombatGridComponent } from '../../../combat/components/combat-grid/combat-grid.component';
+import { CombatOrderComponent } from '../../../combat/components/combat-order/combat-order.component';
 import { CombatGmPanelComponent } from '../../../combat/components/combat-gm-panel/combat-gm-panel.component';
 import { CombatPlayerViewComponent } from '../../../combat/components/combat-player-view/combat-player-view.component';
 import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
@@ -27,10 +29,14 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
     ButtonModule,
     CardModule,
     CombatGmPanelComponent,
+    CombatOrderComponent,
     CombatGridComponent,
     CombatPlayerViewComponent,
   ],
-  providers: [{ provide: CombatBusiness, useClass: SandboxCombatBusiness }],
+  providers: [
+    { provide: CombatBusiness, useClass: SandboxCombatBusiness },
+    CombatSelectionBusiness,
+  ],
   template: `
     <div class="main-container combat-tool">
       <header>
@@ -56,6 +62,7 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
       <div class="views">
         <p-card [header]="'tools.combat.gm' | transloco">
           <div data-testid="sandbox-gm">
+            <app-combat-order [showRound]="false" />
             <app-combat-gm-panel />
           </div>
         </p-card>
