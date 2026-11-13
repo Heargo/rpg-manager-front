@@ -1,5 +1,18 @@
 :host {
   display: block;
+
+  // Two columns: the editor fills the window below the nav bar, only the panel scrolls.
+  @media (min-width: 64rem) {
+    height: calc(100dvh - 4.5rem);
+
+    .main-container {
+      height: 100%;
+      min-height: 0;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+  }
 }
 h1,
 h2 {
@@ -41,12 +54,12 @@ h2 {
   @media (min-width: 64rem) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 22rem;
-    align-items: start;
+    flex: 1;
+    min-height: 0;
 
     .stage {
-      position: sticky;
-      top: 0.5rem;
-      height: calc(100vh - 8rem);
+      height: 100%;
+      min-height: 0;
     }
     .viewport {
       flex: 1;
@@ -54,8 +67,10 @@ h2 {
       min-height: 0;
     }
     .panel {
-      max-height: calc(100vh - 8rem);
+      height: 100%;
+      min-height: 0;
       overflow-y: auto;
+      overscroll-behavior: contain;
       padding-right: 0.5rem;
     }
   }
