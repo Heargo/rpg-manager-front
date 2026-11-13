@@ -51,7 +51,6 @@ Tickets across specs: `p2p-rooms/` (P), `legacy-parity/` (L), `ui-feedback/` (U)
 | - | --- | --- | --- |
 | 17 | **L08** Item catalogue (GM) | Search/filter, give to player, default items import. | L03 |
 | 18 | **L09** Item editor (form, JSON, generate) | Uses L10 generators. **Milestone C: legacy parity for gameplay.** | L08, L10 |
-| 18b | **L12** On-device AI item generation | Split from L09 (2026-11-07): Chrome Prompt API tier, feature-detected. | L09 |
 
 ## Phase 5: resilience
 
