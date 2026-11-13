@@ -19,6 +19,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
@@ -26,7 +27,9 @@ import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
+import { LanguageBusiness } from '../../../../core/business/language.business';
 import { Skill } from '../../../skill/models/skill';
+import { MessageLevel } from '../../../../core/models/toast-level';
 import { World } from '../../../world/models/world';
 import { ClassEditorBusiness } from '../../business/class-editor.business';
 import { ClassIssue } from '../../helpers/class.rules';
@@ -228,13 +231,13 @@ const never = (): boolean => false;
                           <div class="requirement">
                             <span class="req-name">{{ requirement.name }}</span>
                             <p-inputnumber
-                              data-field="requirement-rank"
+                              data-field="requirement-level"
                               [min]="1"
-                              [max]="requirement.maxRank"
+                              [max]="requirement.maxLevel"
                               [showButtons]="true"
-                              [ngModel]="requirement.rank"
+                              [ngModel]="requirement.level"
                               (ngModelChange)="
-                                setRank(
+                                setLevel(
                                   target.node.skillId,
                                   requirement.skillId,
                                   $event ?? 0
@@ -282,11 +285,11 @@ const never = (): boolean => false;
                               "
                             />
                             <p-inputnumber
-                              data-field="new-requirement-rank"
+                              data-field="new-requirement-level"
                               [min]="1"
                               [showButtons]="true"
-                              [ngModel]="newRank()"
-                              (ngModelChange)="newRank.set($event ?? 1)"
+                              [ngModel]="newLevel()"
+                              (ngModelChange)="newLevel.set($event ?? 1)"
                             />
                           </div>
                         }
@@ -313,16 +316,16 @@ const never = (): boolean => false;
                         </p>
                         <div class="field">
                           <label>{{
-                            'class.editor.fields.rank' | transloco
+                            'class.editor.fields.level' | transloco
                           }}</label>
                           <p-inputnumber
-                            data-field="requirement-rank"
+                            data-field="requirement-level"
                             [min]="1"
-                            [max]="target.maxRank"
+                            [max]="target.maxLevel"
                             [showButtons]="true"
-                            [ngModel]="target.rank"
+                            [ngModel]="target.level"
                             (ngModelChange)="
-                              setRank(target.to, target.from, $event ?? 0)
+                              setLevel(target.to, target.from, $event ?? 0)
                             "
                           />
                         </div>
@@ -365,6 +368,19 @@ const never = (): boolean => false;
               [value]="jsonText()"
               (input)="editJson($any($event.target).value)"
             ></textarea>
+            <div>
+              <button
+                pButton
+                type="button"
+                data-action="copy-ai-prompt"
+                icon="pi pi-copy"
+                severity="secondary"
+                [text]="true"
+                [label]="'ai.copyPrompt' | transloco"
+                (click)="copyAiPrompt()"
+              ></button>
+              <small class="hint">{{ 'ai.copyPromptHint' | transloco }}</small>
+            </div>
           </div>
         </p-tabpanel>
       </p-tabpanels>
@@ -379,6 +395,15 @@ const never = (): boolean => false;
       <button
         pButton
         type="button"
+        data-action="random"
+        icon="pi pi-sparkles"
+        severity="secondary"
+        [label]="'common.random' | transloco"
+        (click)="random()"
+      ></button>
+      <button
+        pButton
+        type="button"
         data-action="save"
         icon="pi pi-save"
         [label]="'class.editor.save' | transloco"
@@ -388,7 +413,9 @@ const never = (): boolean => false;
   `,
 })
 export class ClassEditorComponent {
+  private readonly messages = inject(MessageService);
   private readonly editor = inject(ClassEditorBusiness);
+  private readonly language = inject(LanguageBusiness);
 
   /** The world whose skills and attributes the class uses. */
   readonly world = input.required<World>();
@@ -418,7 +445,7 @@ export class ClassEditorComponent {
     return null;
   });
   protected readonly paletteSearch = signal('');
-  protected readonly newRank = signal(1);
+  protected readonly newLevel = signal(1);
 
   protected readonly issues = computed(() =>
     this.editor.validate(this.draft(), this.world()),
@@ -476,7 +503,7 @@ export class ClassEditorComponent {
         requirements: node.requires.map((requirement) => ({
           ...requirement,
           name: this.nameOf(requirement.skillId),
-          maxRank: this.skillOf(requirement.skillId)?.maxRank ?? 99,
+          maxLevel: this.skillOf(requirement.skillId)?.maxLevel ?? 99,
         })),
       };
     }
@@ -491,8 +518,8 @@ export class ClassEditorComponent {
         to: selection.to,
         fromName: this.nameOf(selection.from),
         toName: this.nameOf(selection.to),
-        rank: requirement.rank,
-        maxRank: this.skillOf(selection.from)?.maxRank ?? 99,
+        level: requirement.level,
+        maxLevel: this.skillOf(selection.from)?.maxLevel ?? 99,
       };
     }
     return null;
@@ -542,10 +569,10 @@ export class ClassEditorComponent {
 
   protected addRequirement(prerequisiteId: string, skillId: string): void {
     this.onLinkDrop(prerequisiteId, skillId);
-    const rank = this.newRank();
-    if (rank > 1) this.setRank(skillId, prerequisiteId, rank);
+    const level = this.newLevel();
+    if (level > 1) this.setLevel(skillId, prerequisiteId, level);
     this.selection.set({ kind: 'node', skillId });
-    this.newRank.set(1);
+    this.newLevel.set(1);
   }
 
   /** Adds a palette skill at the first free cell (button, keyboard and touch alternative to dragging). */
@@ -580,10 +607,10 @@ export class ClassEditorComponent {
     );
   }
 
-  protected setRank(
+  protected setLevel(
     skillId: string,
     prerequisiteId: string,
-    rank: number,
+    level: number,
   ): void {
     this.setTree(
       this.draft().tree.map((node) =>
@@ -591,7 +618,7 @@ export class ClassEditorComponent {
           ? {
               ...node,
               requires: node.requires.map((r) =>
-                r.skillId === prerequisiteId ? { ...r, rank } : r,
+                r.skillId === prerequisiteId ? { ...r, level } : r,
               ),
             }
           : node,
@@ -604,6 +631,32 @@ export class ClassEditorComponent {
     const result = this.editor.parse(text, this.draft(), this.world());
     this.jsonIssues.set(result.issues);
     if (result.characterClass) this.draft.set(result.characterClass);
+  }
+
+  protected async copyAiPrompt(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(
+        this.editor.prompt(
+          this.world().attributes.map((attribute) => attribute.name),
+          this.language.$language() as 'en' | 'fr',
+        ),
+      );
+      this.messages.add({
+        severity: MessageLevel.Success,
+        summary: this.language.t('ai.promptCopied'),
+        life: 2500,
+      });
+    } catch {
+      this.messages.add({
+        severity: MessageLevel.Error,
+        summary: this.language.t('ai.copyFailed'),
+        life: 2500,
+      });
+    }
+  }
+
+  protected async random(): Promise<void> {
+    this.setDraft(await this.editor.random(this.world()));
   }
 
   protected submit(): void {

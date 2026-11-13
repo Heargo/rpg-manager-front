@@ -41,7 +41,7 @@ export function moveNode(
   });
 }
 
-/** Makes `prerequisiteId` a prerequisite (rank 1) of `skillId`; refused for itself, a duplicate or a cycle. */
+/** Makes `prerequisiteId` a prerequisite (level 1) of `skillId`; refused for itself, a duplicate or a cycle. */
 export function linkPrerequisite(
   tree: TreeNode[],
   prerequisiteId: string,
@@ -56,7 +56,7 @@ export function linkPrerequisite(
     node.skillId === skillId
       ? {
           ...node,
-          requires: [...node.requires, { skillId: prerequisiteId, rank: 1 }],
+          requires: [...node.requires, { skillId: prerequisiteId, level: 1 }],
         }
       : node,
   );

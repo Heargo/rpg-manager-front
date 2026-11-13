@@ -24,7 +24,7 @@ const world = {
 
 const npc = (roles: Npc['roles']): Npc => ({
   id: 'n1', name: 'Grok', portraitId: 'p'.repeat(64), statPoints: 0, xp: 40, level: 3, money: 77, updatedAt: 1,
-  skillPoints: 2, skills: [{ skillId: 'sk1', rank: 1 }],
+  skillPoints: 2, skills: [{ skillId: 'sk1', level: 1 }],
   attributes: [{ attributeId: 'life', level: 0, current: 4 }, { attributeId: 'str', level: 1, current: 3 }],
   inventory: [helm, sack], roles, description: 'A grumpy ogre.', xpReward: 123, loot: ['e2'],
 });

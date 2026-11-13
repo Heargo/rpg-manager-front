@@ -14,4 +14,12 @@ export class WordListService {
   loadNpcNames(lang: string): Promise<unknown> {
     return firstValueFrom(this.http.get<unknown>(`i18n/generators/${lang}/npcs.json`));
   }
+
+  loadSkillWords(lang: string): Promise<unknown> {
+    return firstValueFrom(this.http.get<unknown>(`i18n/generators/${lang}/skills.json`));
+  }
+
+  loadClassWords(lang: string): Promise<unknown> {
+    return firstValueFrom(this.http.get<unknown>(`i18n/generators/${lang}/classes.json`));
+  }
 }

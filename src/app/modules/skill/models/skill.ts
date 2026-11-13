@@ -13,12 +13,29 @@ export const SKILL_TARGETS = [
 ] as const;
 export type SkillTarget = (typeof SKILL_TARGETS)[number];
 
-export const SKILL_MAX_RANK = 10;
+export const SKILL_MAX_LEVEL = 10;
 
-/** What a skill does, on an attribute of the target (by name). Amounts are formulas on `rank`, `level` and attribute maxima. */
+/** What a skill does, on an attribute of the target (by name). Amounts are formulas on `level`, `level` and attribute maxima. */
 export type SkillEffect =
   | { kind: 'damage' | 'heal'; attribute: string; amount: string }
   | { kind: 'modify'; attribute: string; amount: string; duration: number };
+
+export const SKILL_ROLL_COUNT_MAX = 100;
+export const SKILL_ROLL_FACES_MAX = 1000;
+
+/** The dice an active skill rolls when used. */
+export interface SkillRoll {
+  count: number;
+  faces: number;
+}
+export const DEFAULT_SKILL_ROLL: SkillRoll = { count: 1, faces: 20 };
+
+/** When a use succeeds: always, the dice total reaching a value, or a formula that is 0 or more. */
+export type SkillSuccess =
+  | { mode: 'always' }
+  | { mode: 'threshold'; value: number }
+  | { mode: 'formula'; formula: string };
+export const SKILL_SUCCESS_MODES = ['always', 'threshold', 'formula'] as const;
 
 /** A catalogue entry: an active skill used in play, or a passive one with permanent modifiers. */
 export interface Skill {
@@ -29,8 +46,8 @@ export interface Skill {
   /** Display only. */
   rarity: ItemRarity;
   type: SkillType;
-  maxRank: number;
-  /** Skill points per rank. */
+  maxLevel: number;
+  /** Skill points per level. */
   pointCost: number;
   /** Active only. */
   target?: SkillTarget;
@@ -38,6 +55,12 @@ export interface Skill {
   cost?: { attribute: string; amount: number };
   /** Active only: turns, 0 = none. */
   cooldown?: number;
+  /** Active only: the dice rolled on use (default 1d20). Effect amounts may read `roll`. */
+  roll?: SkillRoll;
+  /** Active only: when a use succeeds (default always). */
+  success?: SkillSuccess;
+  /** Active only: the name of the world's combat action type its use ticks (none or unknown = the first one). */
+  actionType?: string;
   effects: SkillEffect[];
 }
 

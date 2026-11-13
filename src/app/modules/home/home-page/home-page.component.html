@@ -1,30 +1,6 @@
 <div class="landing">
-  <section class="hero" data-test="hero">
-    <svg
-      class="mark"
-      viewBox="-32 -32 1088 1088"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M158.5 248.4L512.0 44.3L865.5 248.4L569.4 304.0L454.6 304.0ZM107.0 295.7L409.6 352.5L232.8 688.4L107.0 724.8ZM917.0 295.7L917.0 724.8L791.2 688.4L614.4 352.5ZM149.9 770.6L256.0 740.0L768.0 740.0L874.1 770.6L512.0 979.7ZM468.9 360.0L555.1 360.0L725.6 684.0L298.4 684.0Z"
-      />
-    </svg>
-    <h1 class="hero-title" data-test="hero-title">
-      {{ "home.title" | transloco }}
-    </h1>
-    <button
-      type="button"
-      class="scroll-arrow"
-      data-test="scroll-arrow"
-      [attr.aria-label]="'home.scrollDown' | transloco"
-      (click)="scrollToContent(content)"
-    >
-      <i class="pi pi-chevron-down" aria-hidden="true"></i>
-    </button>
-  </section>
   <div class="below">
-    <section class="content main-container" data-test="content" #content>
+    <section class="content main-container" data-test="content">
       <div class="intro">
         <div class="text">
           <h2 class="heading">{{ "home.heading" | transloco }}</h2>

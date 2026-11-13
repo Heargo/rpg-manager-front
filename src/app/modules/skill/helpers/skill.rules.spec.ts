@@ -1,16 +1,17 @@
 import { Character, Sheet } from '../../world/models/world';
 import { Npc } from '../../npc/models/npc';
 import { Skill } from '../models/skill';
-import { evaluateSkillAmount, filterSkills, previewSkillAmount, skillUsages, validateSkill } from './skill.rules';
+import { BUILT_IN_PRESETS, applyPreset, placeholders } from './formula-preset.rules';
+import { SkillAmountScope, evaluateSkillAmount, filterSkills, parseSkillJson, previewSkillAmount, skillUsages, validateSkill } from './skill.rules';
 
 const fireball: Skill = {
-  id: 's1', name: 'Fireball', description: 'Boom.', rarity: 'rare', type: 'active', maxRank: 3, pointCost: 2,
+  id: 's1', name: 'Fireball', description: 'Boom.', rarity: 'rare', type: 'active', maxLevel: 3, pointCost: 2,
   target: 'one-enemy', cost: { attribute: 'Mana', amount: 10 }, cooldown: 1,
-  effects: [{ kind: 'damage', attribute: 'Life', amount: '5 + rank * 3' }],
+  effects: [{ kind: 'damage', attribute: 'Life', amount: '5 + skillLevel * 3' }],
 };
 const toughness: Skill = {
-  id: 's2', name: 'Toughness', description: '', rarity: 'common', type: 'passive', maxRank: 2, pointCost: 1,
-  effects: [{ kind: 'modify', attribute: 'Life', amount: 'rank * 2', duration: 0 }],
+  id: 's2', name: 'Toughness', description: '', rarity: 'common', type: 'passive', maxLevel: 2, pointCost: 1,
+  effects: [{ kind: 'modify', attribute: 'Life', amount: 'skillLevel * 2', duration: 0 }],
 };
 const names = ['Life', 'Mana', 'Strength'];
 
@@ -24,10 +25,10 @@ describe('validateSkill', () => {
     expect(validateSkill({ ...fireball, name: ' ' }, names)).toEqual([{ field: 'name', code: 'required' }]);
   });
 
-  it('refuses a max rank outside 1 to 10', () => {
-    expect(validateSkill({ ...fireball, maxRank: 0 }, names)).toEqual([{ field: 'maxRank', code: 'invalid' }]);
-    expect(validateSkill({ ...fireball, maxRank: 11 }, names)).toEqual([{ field: 'maxRank', code: 'invalid' }]);
-    expect(validateSkill({ ...fireball, maxRank: 10 }, names)).toEqual([]);
+  it('refuses a max level outside 1 to 10', () => {
+    expect(validateSkill({ ...fireball, maxLevel: 0 }, names)).toEqual([{ field: 'maxLevel', code: 'invalid' }]);
+    expect(validateSkill({ ...fireball, maxLevel: 11 }, names)).toEqual([{ field: 'maxLevel', code: 'invalid' }]);
+    expect(validateSkill({ ...fireball, maxLevel: 10 }, names)).toEqual([]);
   });
 
   it('refuses a point cost below 1', () => {
@@ -48,21 +49,30 @@ describe('validateSkill', () => {
 });
 
 describe('evaluateSkillAmount', () => {
-  it('reads rank, caster level and the caster attribute maxima', () => {
-    const scope = { rank: 2, level: 3, maxima: { Strength: 4 } };
-    expect(evaluateSkillAmount('10 + rank * 5 + Strength', scope)).toEqual({ ok: true, value: 24 });
+  it('reads skillLevel, caster level and the caster attribute maxima', () => {
+    const scope = { skillLevel: 2, level: 3, maxima: { Strength: 4 } };
+    expect(evaluateSkillAmount('10 + skillLevel * 5 + Strength', scope)).toEqual({ ok: true, value: 24 });
     expect(evaluateSkillAmount('level * 2', scope)).toEqual({ ok: true, value: 6 });
   });
 
   it('returns the error of an unknown name', () => {
-    const result = evaluateSkillAmount('Luck + 1', { rank: 1, level: 1, maxima: {} });
+    const result = evaluateSkillAmount('Luck + 1', { skillLevel: 1, level: 1, maxima: {} });
     expect(result).toMatchObject({ ok: false, error: { key: 'formula.errors.unknownName' } });
   });
 });
 
+describe('the rank formula variable is gone', () => {
+  it('rejects a formula using rank while skillLevel works', () => {
+    const old = { ...fireball, effects: [{ kind: 'damage' as const, attribute: 'Life', amount: '5 + rank * 3' }] };
+    expect(validateSkill(old, names)).toEqual([{ field: 'effects.0.amount', code: 'formula' }]);
+    expect(evaluateSkillAmount('rank * 2', { skillLevel: 2, level: 1, maxima: {} })).toMatchObject({ ok: false });
+    expect(evaluateSkillAmount('skillLevel * 2', { skillLevel: 2, level: 1, maxima: {} })).toEqual({ ok: true, value: 4 });
+  });
+});
+
 describe('previewSkillAmount', () => {
-  it('gives the amount at rank 1 and at max rank', () => {
-    expect(previewSkillAmount('rank * 4', ['Strength'], 3)).toMatchObject({ ok: true, rank1: 4, maxRank: 12 });
+  it('gives the amount at level 1 and at max level', () => {
+    expect(previewSkillAmount('skillLevel * 4', ['Strength'], 3)).toMatchObject({ ok: true, level1: 4, maxLevel: 12 });
   });
 
   it('gives the error of an invalid formula', () => {
@@ -81,7 +91,7 @@ describe('filterSkills', () => {
 
 describe('skillUsages', () => {
   const sheet = (id: string, name: string, skillId?: string) =>
-    ({ id, name, skills: skillId ? [{ skillId, rank: 1 }] : [] }) as Sheet;
+    ({ id, name, skills: skillId ? [{ skillId, level: 1 }] : [] }) as Sheet;
 
   it('lists the characters and NPCs that have the skill', () => {
     const usages = skillUsages('s1', {
@@ -96,5 +106,108 @@ describe('skillUsages', () => {
 
   it('is empty for an unused skill', () => {
     expect(skillUsages('s9', { characters: [], npcs: [] })).toEqual([]);
+  });
+});
+
+describe('success formula without a formula', () => {
+  const base = {
+    name: 'Bolt', description: '', rarity: 'common', type: 'active', maxLevel: 1, pointCost: 1, target: 'one-enemy',
+    effects: [],
+  } as const;
+
+  it('is refused by validation', () => {
+    expect(validateSkill({ ...base, success: { mode: 'formula' } } as never, ['Life'])).toEqual([
+      { field: 'success.formula', code: 'formula' },
+    ]);
+  });
+
+  it('is refused when parsing JSON', () => {
+    const text = JSON.stringify({ ...base, success: { mode: 'formula' } });
+    expect(parseSkillJson(text, base as never, ['Life']).skill).toBeUndefined();
+  });
+});
+
+describe('effect amounts reading the target', () => {
+  const withAmount = (amount: string): Skill => ({
+    ...fireball,
+    effects: [{ kind: 'damage', attribute: 'Life', amount }],
+  });
+
+  it('validateSkill accepts target_<name> and the bracketed form, and rejects an unknown target name', () => {
+    expect(validateSkill(withAmount('Strength - target_Life'), names)).toEqual([]);
+    expect(validateSkill(withAmount('[target_Life]'), names)).toEqual([]);
+    expect(validateSkill(withAmount('target_Luck'), names)).toEqual([{ field: 'effects.0.amount', code: 'formula' }]);
+  });
+
+  it('evaluateSkillAmount reads the target maxima', () => {
+    expect(
+      evaluateSkillAmount('max(1, Strength - target_Life) + skillLevel', {
+        skillLevel: 2,
+        level: 1,
+        maxima: { Strength: 10 },
+        targetMaxima: { Life: 4 },
+      } as SkillAmountScope),
+    ).toEqual({ ok: true, value: 8 });
+  });
+
+  it('previewSkillAmount treats target maxima as 1', () => {
+    expect(previewSkillAmount('target_Life * 5 + skillLevel', ['Life'], 3)).toEqual({ ok: true, level1: 6, maxLevel: 8 });
+  });
+
+  it('every built-in effect preset, applied with the first attribute, validates as an effect amount', () => {
+    const effects = BUILT_IN_PRESETS.filter((p) => p.kind === 'effect');
+    expect(effects.length).toBeGreaterThan(0);
+    for (const preset of effects) {
+      const mapping = Object.fromEntries(placeholders(preset.formula).map((t) => [t, 'Strength']));
+      const amount = applyPreset(preset, mapping);
+      expect(validateSkill(withAmount(amount), names), amount).toEqual([]);
+    }
+  });
+});
+
+describe('evaluateSkillAmount with a bracketed target name', () => {
+  const scope = { skillLevel: 1, level: 1, maxima: { 'Points de vie': 10 } };
+
+  it('reads the target maximum', () => {
+    expect(
+      evaluateSkillAmount('[target_Points de vie] + 1', { ...scope, targetMaxima: { 'Points de vie': 7 } }),
+    ).toEqual({ ok: true, value: 8 });
+  });
+
+  it('reads 0 without a target', () => {
+    expect(evaluateSkillAmount('[target_Points de vie] + 1', scope)).toEqual({ ok: true, value: 1 });
+  });
+});
+
+describe('the optional action type of a skill', () => {
+  const jab: Skill = { ...fireball, actionType: 'Movement' };
+
+  it('is accepted on an active skill, whether or not the world still has it', () => {
+    expect(validateSkill(jab, names)).toEqual([]);
+    expect(validateSkill({ ...jab, actionType: 'Gone' }, names)).toEqual([]);
+  });
+
+  it('is optional', () => {
+    expect(validateSkill({ ...fireball, actionType: undefined }, names)).toEqual([]);
+  });
+
+  it('is refused when blank', () => {
+    expect(validateSkill({ ...jab, actionType: ' ' }, names)).toEqual([{ field: 'actionType', code: 'invalid' }]);
+  });
+
+  it('is refused on a passive skill', () => {
+    expect(validateSkill({ ...toughness, actionType: 'Action' }, names)).toEqual([
+      { field: 'actionType', code: 'invalid' },
+    ]);
+  });
+
+  it('survives the JSON round trip', () => {
+    const text = JSON.stringify(jab);
+    expect(parseSkillJson(text, jab, names).skill?.actionType).toBe('Movement');
+  });
+
+  it('is refused in JSON when it is not a string', () => {
+    const text = JSON.stringify({ ...jab, actionType: 3 });
+    expect(parseSkillJson(text, jab, names).skill).toBeUndefined();
   });
 });

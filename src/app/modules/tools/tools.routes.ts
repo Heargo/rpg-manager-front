@@ -89,6 +89,22 @@ export const routesTools: Routes = [
       ),
   },
   {
+    path: 'tools/combat',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('./pages/combat-sandbox-tool-page/combat-sandbox-tool-page.component').then(
+        (m) => m.CombatSandboxToolPageComponent,
+      ),
+  },
+  {
+    path: 'tools/sprite-colorizer',
+    canActivate: [NavigationGuard],
+    loadComponent: () =>
+      import('../sprite/pages/sprite-colorizer-page/sprite-colorizer-page.component').then(
+        (m) => m.SpriteColorizerPageComponent,
+      ),
+  },
+  {
     path: 'tools/links',
     canActivate: [NavigationGuard],
     loadComponent: () =>

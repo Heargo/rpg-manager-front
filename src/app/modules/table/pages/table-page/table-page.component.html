@@ -81,7 +81,11 @@
     <div class="player-layout">
       <section class="illustration-area">
         <ng-container [ngTemplateOutlet]="illustration" />
-        <app-table-npcs [npcs]="table.$npcs()" />
+        <app-table-npcs
+          [npcs]="table.$npcs()"
+          [shopsOpen]="table.$shopsOpen()"
+          (visitShop)="visitShop($event)"
+        />
       </section>
       <aside class="player-side">
         <p-card>
@@ -107,6 +111,14 @@
             <p class="hint">{{ "table.waiting" | transloco }}</p>
           }
         </p-card>
+        @if (myCombatant(); as own) {
+          <p-card [header]="'combat.title' | transloco">
+            <app-combat-player-view
+              [combatantId]="own.combatantId"
+              [characterId]="own.characterId"
+            />
+          </p-card>
+        }
         <p-card [header]="'dice.title' | transloco">
           <app-dice-roller />
         </p-card>
@@ -208,8 +220,34 @@
 <!-- Game master: the illustration and the quick images. -->
 <ng-template #scenePanel>
   <div class="scene">
+    <section class="combat">
+      <h2>{{ "combat.title" | transloco }}</h2>
+      <app-combat-gm-panel />
+    </section>
     <ng-container [ngTemplateOutlet]="illustration" />
-    <app-table-npcs [npcs]="table.$npcs()" />
+    <p-select
+      class="shop-target"
+      data-testid="shop-target"
+      [options]="shopTargets()"
+      optionValue="playerId"
+      [ngModel]="shopTarget()"
+      (ngModelChange)="shopTarget.set($event)"
+      appendTo="body"
+      [ariaLabel]="'merchant.table.target' | transloco"
+    >
+      <ng-template #selectedItem let-target>
+        {{ target.name ?? ("merchant.table.everyone" | transloco) }}
+      </ng-template>
+      <ng-template #item let-target>
+        {{ target.name ?? ("merchant.table.everyone" | transloco) }}
+      </ng-template>
+    </p-select>
+    <app-table-npcs
+      [npcs]="table.$npcs()"
+      [shopsOpen]="table.$shopsOpen()"
+      [gameMaster]="true"
+      (setShop)="setShop($event)"
+    />
     <div class="scene-actions">
       <p-fileupload
         #uploader
@@ -300,3 +338,24 @@
     </section>
   </div>
 </ng-template>
+
+<p-dialog
+  [visible]="!!visitedShop()"
+  (visibleChange)="!$event && leaveShop()"
+  [modal]="true"
+  [dismissableMask]="true"
+  [header]="'merchant.shop.title' | transloco"
+  [style]="{ width: 'min(36rem, calc(100vw - 2rem))' }"
+>
+  @if (visitedShop(); as shop) {
+    @if (characters.$myCharacter(); as mine) {
+      <app-merchant-shop
+        [shop]="shop"
+        [money]="mine.money"
+        [inventory]="mine.inventory"
+        (buy)="buy($event)"
+        (sell)="sell($event)"
+      />
+    }
+  }
+</p-dialog>

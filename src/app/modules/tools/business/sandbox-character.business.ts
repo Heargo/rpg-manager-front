@@ -53,10 +53,13 @@ export class SandboxCharacterBusiness {
         'sandbox-character',
         0,
       );
+      // Default class ids are random per world; the name 'Mage' is the same in EN and FR.
+      const mage = world.classes.find((entry) => entry.name === 'Mage');
       return {
         lang,
         character: {
           ...character,
+          classId: mage?.id,
           samplePortrait: SANDBOX_HERO_PORTRAIT,
           inventory: items.map((item, index) => ({
             id: `inv-${index}`,

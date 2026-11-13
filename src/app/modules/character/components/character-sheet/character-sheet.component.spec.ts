@@ -253,9 +253,7 @@ describe('CharacterSheetComponent', () => {
 
     async function openEquipment() {
       const rendered = await render({ canPlay: false, gameMaster: false });
-      const tab = Array.from(rendered.el.querySelectorAll('p-tab')).find((t) =>
-        t.textContent?.includes('Equipment'),
-      ) as HTMLElement;
+      const tab = rendered.el.querySelector('p-tab[aria-label="Equipment"]') as HTMLElement;
       tab.click();
       rendered.fixture.detectChanges();
       await rendered.fixture.whenStable();
@@ -282,5 +280,37 @@ describe('CharacterSheetComponent', () => {
       expect(el.querySelector('.slots')!.textContent).toContain('Iron helm');
       expect(el.querySelectorAll('.slots [data-slot-silhouette]').length).toBe(9);
     });
+  });
+});
+
+describe('CharacterSheetComponent Sell follows the world selling rules', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  const withItem = { ...character, inventory: [{ ...character.inventory[0], equipped: false }] };
+
+  async function openSell(rules: { sellAnywhere?: boolean; sellAnywhereRatio?: number }) {
+    const rendered = await render({ canPlay: true, gameMaster: false, character: withItem });
+    rendered.fixture.componentRef.setInput('world', { ...world, ...rules });
+    await rendered.fixture.whenStable();
+    (rendered.el.querySelector('p-tab[aria-label="Inventory"]') as HTMLElement | null)?.click();
+    await rendered.fixture.whenStable();
+    (rendered.el.querySelector('.tile-main') as HTMLButtonElement).click();
+    rendered.fixture.detectChanges();
+    await rendered.fixture.whenStable();
+    return rendered;
+  }
+  const sellButton = () =>
+    Array.from(document.querySelectorAll('p-dialog button, .p-dialog button')).find((b) => /Sell for/.test(b.textContent ?? ''));
+
+  it('pays the sell-anywhere ratio', async () => {
+    await openSell({ sellAnywhere: true, sellAnywhereRatio: 0.5 });
+    expect(sellButton()!.textContent).toMatch(/\b5\b/);
+    expect(sellButton()!.textContent).not.toMatch(/\b10\b/);
+  });
+
+  it('hides Sell when sell anywhere is off', async () => {
+    await openSell({ sellAnywhere: false });
+    expect(document.querySelector('p-dialog, .p-dialog')).not.toBeNull();
+    expect(sellButton()).toBeUndefined();
   });
 });

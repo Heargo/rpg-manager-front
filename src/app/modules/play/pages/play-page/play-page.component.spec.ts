@@ -20,7 +20,7 @@ describe('PlayPageComponent join entry scanning', () => {
     const play = {
       load: async () => undefined,
       $worlds: signal([]),
-      $joinedRooms: signal([]),
+      $joinedWorlds: signal([]),
       $roomStatus: signal('idle'),
       $roomName: signal(undefined),
       $hostedWorldId: signal(undefined),

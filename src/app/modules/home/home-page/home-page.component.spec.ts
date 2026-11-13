@@ -49,47 +49,24 @@ describe('HomePageComponent (landing)', () => {
     const el = await render();
     expect(hook(el, 'footer-credits')!.getAttribute('href')).toBe('/credits');
     expect(hook(el, 'footer-contact')!.getAttribute('href')).toBe('/contact');
-    expect(hook(el, 'footer-privacy')!.getAttribute('href')).toBe('/privacy-policy');
+    expect(hook(el, 'footer-privacy')!.getAttribute('href')).toBe(
+      '/privacy-policy',
+    );
   });
 
-  describe('full-height hero', () => {
-    it('shows the logo mark and "RPG Manager" in the hero', async () => {
+  describe('single content section', () => {
+    it('has no hero section nor scroll arrow', async () => {
       const el = await render();
-      const hero = hook(el, 'hero');
-      expect(hero).not.toBeNull();
-      expect(hero!.querySelector('svg')).not.toBeNull();
-      expect(hook(el, 'hero-title')!.textContent!.trim()).toBe('RPG Manager');
-      expect(hero!.contains(hook(el, 'hero-title'))).toBe(true);
+      expect(hook(el, 'hero')).toBeNull();
+      expect(hook(el, 'scroll-arrow')).toBeNull();
     });
 
-    it('keeps the pitch, screenshot and calls to action in a content section outside the hero', async () => {
-      const el = await render();
-      const hero = hook(el, 'hero')!;
-      const content = hook(el, 'content');
-      expect(content).not.toBeNull();
-      expect(hero.contains(content)).toBe(false);
-      for (const name of ['pitch', 'screenshot', 'cta-play', 'cta-tools']) {
-        expect(content!.contains(hook(el, name))).toBe(true);
-        expect(hero.contains(hook(el, name))).toBe(false);
-      }
-    });
-
-    it('has a labelled scroll arrow button in the hero', async () => {
-      const el = await render();
-      const arrow = hook(el, 'scroll-arrow')!;
-      expect(arrow.tagName).toBe('BUTTON');
-      expect(hook(el, 'hero')!.contains(arrow)).toBe(true);
-      expect(arrow.getAttribute('aria-label')!.length).toBeGreaterThan(0);
-      expect(arrow.getAttribute('aria-label')).not.toMatch(/^home\./);
-    });
-
-    it('scrolls the content section into view when the arrow is clicked', async () => {
+    it('keeps the pitch, screenshot and calls to action in the content section', async () => {
       const el = await render();
       const content = hook(el, 'content')!;
-      const scroll = vi.fn();
-      content.scrollIntoView = scroll;
-      hook(el, 'scroll-arrow')!.click();
-      expect(scroll).toHaveBeenCalledTimes(1);
+      for (const name of ['pitch', 'screenshot', 'cta-play', 'cta-tools']) {
+        expect(content.contains(hook(el, name))).toBe(true);
+      }
     });
   });
 

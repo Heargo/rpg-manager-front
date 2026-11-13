@@ -90,7 +90,7 @@ describe('item JSON', () => {
 
 describe('buildItemPrompt', () => {
   it('names the world attributes, the allowed values and asks for JSON', () => {
-    const prompt = buildItemPrompt(attributes);
+    const prompt = buildItemPrompt(attributes, 'en');
     for (const word of [
       'Life',
       'Mana',

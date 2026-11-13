@@ -275,16 +275,16 @@ describe('attribute cap', () => {
 
 describe('attributeStats with passive skills', () => {
   const passive = (id: string, attribute: string, amount: string, duration = 0): Skill => ({
-    id, name: id, description: '', rarity: 'common', type: 'passive', maxRank: 3, pointCost: 1,
+    id, name: id, description: '', rarity: 'common', type: 'passive', maxLevel: 3, pointCost: 1,
     effects: [{ kind: 'modify', attribute, amount, duration }],
   });
 
-  it('adds the permanent modify effects at the sheet rank to the max, as their own line', () => {
+  it('adds the permanent modify effects at the sheet level to the max, as their own line', () => {
     const stats = attributeStats(
       attributes,
-      character({ skills: [{ skillId: 'tough', rank: 2 }] }),
+      character({ skills: [{ skillId: 'tough', level: 2 }] }),
       barIds,
-      [passive('tough', 'Life', '5 + rank')],
+      [passive('tough', 'Life', '5 + skillLevel')],
     );
     expect(stats[0]).toMatchObject({ bonus: 0, skillBonus: 7, max: 19 });
     expect(stats[2]).toMatchObject({ skillBonus: 0, max: 3 });
@@ -293,7 +293,7 @@ describe('attributeStats with passive skills', () => {
   it('reads the caster attribute maxima in the formula', () => {
     const stats = attributeStats(
       attributes,
-      character({ skills: [{ skillId: 'tough', rank: 1 }] }),
+      character({ skills: [{ skillId: 'tough', level: 1 }] }),
       barIds,
       [passive('tough', 'Life', 'Strength')],
     );
@@ -304,7 +304,7 @@ describe('attributeStats with passive skills', () => {
     const active: Skill = { ...passive('act', 'Life', '50'), type: 'active', target: 'self' };
     const stats = attributeStats(
       attributes,
-      character({ skills: [{ skillId: 'act', rank: 1 }, { skillId: 'timed', rank: 1 }] }),
+      character({ skills: [{ skillId: 'act', level: 1 }, { skillId: 'timed', level: 1 }] }),
       barIds,
       [active, passive('timed', 'Life', '50', 3), passive('other', 'Life', '50')],
     );

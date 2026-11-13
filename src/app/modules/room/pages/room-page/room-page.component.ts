@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -9,16 +15,22 @@ import { RoomBusiness } from '../../business/room.business';
 import { RoomSizeBusiness } from '../../business/room-size.business';
 import { InviteCardComponent } from '../../components/invite-card/invite-card.component';
 import { MemberListComponent } from '../../components/member-list/member-list.component';
-import { OfflineFeaturesBusiness } from '../../../world/business/offline-features.business';
-import { OfflineFeatures } from '../../../world/models/world';
-import { OfflineFeaturesPanelComponent } from '../../components/offline-features-panel/offline-features-panel.component';
 import { CharacterListComponent } from '../../../character/components/character-list/character-list.component';
 
 /** The open room's lobby. With no room open (or after leaving), the Play hub takes over. */
 @Component({
   selector: 'app-room-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, ButtonModule, CardModule, MessageModule, InviteCardComponent, MemberListComponent, CharacterListComponent, OfflineFeaturesPanelComponent],
+  imports: [
+    RouterLink,
+    TranslocoPipe,
+    ButtonModule,
+    CardModule,
+    MessageModule,
+    InviteCardComponent,
+    MemberListComponent,
+    CharacterListComponent,
+  ],
   templateUrl: './room-page.component.html',
   styleUrl: './room-page.component.scss',
 })
@@ -26,7 +38,6 @@ export class RoomPageComponent {
   protected readonly room = inject(RoomBusiness);
   protected readonly size = inject(RoomSizeBusiness);
   protected readonly profile = inject(ProfileBusiness);
-  protected readonly offlineFeatures = inject(OfflineFeaturesBusiness);
   private readonly router = inject(Router);
 
   protected readonly inviting = signal(false);
@@ -37,7 +48,8 @@ export class RoomPageComponent {
     // Wait for a saved room to be reopened before deciding there is none.
     void this.room.whenReady().then(() => this.ready.set(true));
     effect(() => {
-      if (this.ready() && this.room.$status() === 'idle') void this.router.navigate(['/play']);
+      if (this.ready() && this.room.$status() === 'idle')
+        void this.router.navigate(['/play']);
     });
   }
 
@@ -50,14 +62,6 @@ export class RoomPageComponent {
       this.error.set(this.room.describeError(error));
     } finally {
       this.inviting.set(false);
-    }
-  }
-
-  protected async setOfflineFeatures(features: OfflineFeatures): Promise<void> {
-    try {
-      await this.offlineFeatures.set(features);
-    } catch (error) {
-      this.error.set(this.room.describeError(error));
     }
   }
 

@@ -42,6 +42,17 @@ describe('static pages', () => {
     }
   });
 
+  it('credits the use of AI, with a contact link, in both languages', async () => {
+    for (const lang of ['en', 'fr']) {
+      TestBed.resetTestingModule();
+      const el = await visit('/credits', lang);
+      const ai = el.querySelector('[data-test="ai"]')!;
+      expect(ai.textContent).toMatch(/IA|AI/);
+      expect(ai.textContent).not.toMatch(/credits\./);
+      expect(ai.querySelector('a[href="/contact"]')).not.toBeNull();
+    }
+  });
+
   it('renders the contact page with a title', async () => {
     const el = await visit('/contact');
     expect(el.querySelector('h1')!.textContent!.trim().length).toBeGreaterThan(0);

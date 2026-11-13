@@ -22,9 +22,9 @@ const GEOMETRY: BoardGeometry = {
 const BULGE = 36;
 
 /**
- * Draws a class tree: a node per skill (its icon, name, rank / max rank) placed on its grid cell, a curve from the
+ * Draws a class tree: a node per skill (its icon, name, level / max level) placed on its grid cell, a curve from the
  * bottom of each prerequisite to the top of the node that needs it. With `states` (from `treeNodeStates`) nodes are locked, available or
- * learned; `ranks` gives the rank a sheet has in each skill.
+ * learned; `levels` gives the level a sheet has in each skill.
  */
 @Component({
   selector: 'app-skill-tree',
@@ -76,9 +76,9 @@ const BULGE = 36;
           <i class="icon" [class]="node.icon"></i>
           <div class="body">
             <span class="name">{{ node.name }}</span>
-            <span class="rank" data-field="rank">{{
-              'class.tree.rank'
-                | transloco: { rank: node.rank, max: node.maxRank }
+            <span class="level" data-field="level">{{
+              'class.tree.level'
+                | transloco: { level: node.level, max: node.maxLevel }
             }}</span>
           </div>
         </div>
@@ -154,7 +154,7 @@ const BULGE = 36;
       line-height: 1.2;
       overflow-wrap: anywhere;
     }
-    .rank {
+    .level {
       color: var(--p-text-muted-color);
     }
   `,
@@ -167,8 +167,8 @@ export class SkillTreeComponent {
   readonly skills = input.required<Skill[]>();
   /** Locked / available / learned per node, for a sheet. */
   readonly states = input<TreeNodeStatus[]>();
-  /** The sheet's rank per skill id. */
-  readonly ranks = input<Record<string, number>>({});
+  /** The sheet's level per skill id. */
+  readonly levels = input<Record<string, number>>({});
   /** A node was tapped: its skill id. */
   readonly nodeSelected = output<string>();
 
@@ -182,8 +182,8 @@ export class SkillTreeComponent {
         skillId: node.skillId,
         name: skill?.name ?? node.skillId,
         icon: skill?.type === 'passive' ? 'pi pi-shield' : 'pi pi-bolt',
-        rank: this.ranks()[node.skillId] ?? 0,
-        maxRank: skill?.maxRank ?? 0,
+        level: this.levels()[node.skillId] ?? 0,
+        maxLevel: skill?.maxLevel ?? 0,
         state: status?.state,
         hint:
           status?.missing
@@ -194,7 +194,7 @@ export class SkillTreeComponent {
                   })
                 : this.language.t('class.tree.missingRequires', {
                     name: this.nameOf(m.skillId),
-                    rank: m.rank,
+                    level: m.level,
                   }),
             )
             .join(', ') ?? '',

@@ -21,7 +21,7 @@ import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { ImageBusiness } from '../../../../core/business/image.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
-import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
+import { ImagePickerComponent } from '../../../../core/components/image-picker/image-picker.component';
 import {
   EQUIPMENT_SLOTS,
   ITEM_RARITIES,
@@ -75,7 +75,7 @@ function toDraft(item: Item | undefined): ItemDraft {
     TabsModule,
     TextareaModule,
     CoinInputComponent,
-    StoredImageComponent,
+    ImagePickerComponent,
   ],
   template: `
     <p-tabs value="form">
@@ -93,15 +93,13 @@ function toDraft(item: Item | undefined): ItemDraft {
               <label for="item-image">{{
                 'item.fields.image' | transloco
               }}</label>
-              <app-stored-image class="preview" [imageId]="imageId()">
-                <span class="pi pi-image"></span>
-              </app-stored-image>
-              <input
-                id="item-image"
-                data-field="image"
-                type="file"
+              <app-image-picker
+                inputId="item-image"
+                field="image"
                 accept="image/*"
-                (change)="upload($any($event.target))"
+                [imageId]="imageId()"
+                (picked)="upload($event)"
+                (removed)="imageId.set(undefined)"
               />
             </div>
             <div class="field">
@@ -219,6 +217,19 @@ function toDraft(item: Item | undefined): ItemDraft {
                 issueText(jsonIssues())
               }}</p-message>
             }
+            <div>
+              <button
+                pButton
+                type="button"
+                data-action="copy-ai-prompt"
+                icon="pi pi-copy"
+                severity="secondary"
+                [text]="true"
+                [label]="'ai.copyPrompt' | transloco"
+                (click)="copyAiPrompt()"
+              ></button>
+              <small class="hint">{{ 'ai.copyPromptHint' | transloco }}</small>
+            </div>
           </div>
         </p-tabpanel>
 
@@ -243,9 +254,9 @@ function toDraft(item: Item | undefined): ItemDraft {
               <button
                 pButton
                 type="button"
-                data-action="generate"
+                data-action="generate-seed"
                 icon="pi pi-sparkles"
-                [label]="'item.editor.generate' | transloco"
+                [label]="'common.generateFromSeed' | transloco"
                 (click)="generate()"
               ></button>
               <button
@@ -258,21 +269,6 @@ function toDraft(item: Item | undefined): ItemDraft {
                 (click)="reroll()"
               ></button>
             </div>
-            <div>
-              <button
-                pButton
-                type="button"
-                data-action="copy-prompt"
-                icon="pi pi-copy"
-                severity="secondary"
-                [text]="true"
-                [label]="'item.editor.copyPrompt' | transloco"
-                (click)="copyPrompt()"
-              ></button>
-              <small class="hint">{{
-                'item.editor.copyPromptHint' | transloco
-              }}</small>
-            </div>
           </div>
         </p-tabpanel>
       </p-tabpanels>
@@ -282,6 +278,15 @@ function toDraft(item: Item | undefined): ItemDraft {
       <p-message severity="warn">{{ issueText(issues()) }}</p-message>
     }
     <div class="actions">
+      <button
+        pButton
+        type="button"
+        data-action="random"
+        icon="pi pi-sparkles"
+        severity="secondary"
+        [label]="'common.random' | transloco"
+        (click)="reroll()"
+      ></button>
       <button
         pButton
         type="button"
@@ -321,15 +326,6 @@ function toDraft(item: Item | undefined): ItemDraft {
       gap: 0.25rem;
       min-width: 0;
     }
-    .preview {
-      width: 6rem;
-      height: 6rem;
-      border-radius: 0.5rem;
-      background: var(--p-content-hover-background);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
     .json {
       font-family: monospace;
     }
@@ -340,6 +336,7 @@ function toDraft(item: Item | undefined): ItemDraft {
     .actions {
       display: flex;
       justify-content: flex-end;
+      gap: 0.5rem;
     }
   `,
 })
@@ -444,20 +441,29 @@ export class ItemEditorComponent {
     return this.generate();
   }
 
-  protected async copyPrompt(): Promise<void> {
+  protected async copyAiPrompt(): Promise<void> {
     try {
       await navigator.clipboard.writeText(
-        this.editor.prompt(this.attributeNames()),
+        this.editor.prompt(
+          this.attributeNames(),
+          this.language.$language() as 'en' | 'fr',
+        ),
       );
-      this.toast(MessageLevel.Success, 'item.editor.promptCopied');
+      this.messages.add({
+        severity: MessageLevel.Success,
+        summary: this.language.t('ai.promptCopied'),
+        life: 2500,
+      });
     } catch {
-      this.toast(MessageLevel.Error, 'item.editor.copyFailed');
+      this.messages.add({
+        severity: MessageLevel.Error,
+        summary: this.language.t('ai.copyFailed'),
+        life: 2500,
+      });
     }
   }
 
-  protected async upload(input: HTMLInputElement): Promise<void> {
-    const file = input.files?.[0];
-    if (!file) return;
+  protected async upload(file: File): Promise<void> {
     try {
       this.imageId.set(await this.images.storeUpload(file));
     } catch {

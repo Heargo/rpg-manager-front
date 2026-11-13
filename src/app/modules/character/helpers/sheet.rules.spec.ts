@@ -33,7 +33,7 @@ function sheet(overrides: Partial<Sheet> = {}): Sheet {
     updatedAt: 0,
     classId: 'warrior',
     skillPoints: 2,
-    skills: [{ skillId: 'bash', rank: 1 }],
+    skills: [{ skillId: 'bash', level: 1 }],
     ...overrides,
   };
 }
@@ -64,7 +64,7 @@ describe('rules on a plain sheet', () => {
     if (!result.ok) return;
     expect(result.character.inventory).toEqual([]);
     expect(result.character.attributes.find((a) => a.attributeId === 'life')?.current).toBe(9);
-    expect(result.character).toMatchObject({ classId: 'warrior', skillPoints: 2, skills: [{ skillId: 'bash', rank: 1 }] });
+    expect(result.character).toMatchObject({ classId: 'warrior', skillPoints: 2, skills: [{ skillId: 'bash', level: 1 }] });
   });
 
   it('derives the level from the sheet xp', () => {

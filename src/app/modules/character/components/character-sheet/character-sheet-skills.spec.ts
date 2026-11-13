@@ -6,17 +6,17 @@ import { Character } from '../../../world/models/world';
 import { CharacterAction } from '../../helpers/character-actions.rules';
 import { CharacterSheetComponent } from './character-sheet.component';
 
-const skill = (id: string, maxRank: number, pointCost: number): Skill => ({
-  id, name: id.toUpperCase(), description: '', rarity: 'common', type: 'active', maxRank, pointCost,
-  target: 'one-enemy', cooldown: 0, effects: [{ kind: 'damage', attribute: 'Life', amount: 'rank' }],
+const skill = (id: string, maxLevel: number, pointCost: number): Skill => ({
+  id, name: id.toUpperCase(), description: '', rarity: 'common', type: 'active', maxLevel, pointCost,
+  target: 'one-enemy', cooldown: 0, effects: [{ kind: 'damage', attribute: 'Life', amount: 'skillLevel' }],
 });
 
 const mage: CharacterClass = {
   id: 'mage', name: 'Mage', description: '',
   tree: [
     { skillId: 'bolt', requires: [], minLevel: 1, column: 0, row: 0 },
-    { skillId: 'strike', requires: [{ skillId: 'bolt', rank: 2 }], minLevel: 2, column: 1, row: 0 },
-    { skillId: 'aura', requires: [{ skillId: 'strike', rank: 1 }], minLevel: 1, column: 2, row: 0 },
+    { skillId: 'strike', requires: [{ skillId: 'bolt', level: 2 }], minLevel: 2, column: 1, row: 0 },
+    { skillId: 'aura', requires: [{ skillId: 'strike', level: 1 }], minLevel: 1, column: 2, row: 0 },
   ],
 };
 /** What `class/mine` returns: the class (null without one) and the skills it references plus the sheet's. */
@@ -37,7 +37,7 @@ const character: Character = {
   attributes: [{ attributeId: 'life', level: 0, current: 10 }],
   inventory: [], rev: 1, updatedAt: 0,
   classId: 'mage', skillPoints: 3,
-  skills: [{ skillId: 'bolt', rank: 2 }, { skillId: 'taught', rank: 1 }],
+  skills: [{ skillId: 'bolt', level: 2 }, { skillId: 'taught', level: 1 }],
 };
 
 async function render(inputs: { gameMaster: boolean; character?: Character }) {
@@ -57,7 +57,7 @@ async function render(inputs: { gameMaster: boolean; character?: Character }) {
   fixture.componentInstance.act.subscribe((action) => actions.push(action));
   await fixture.whenStable();
   const el = fixture.nativeElement as HTMLElement;
-  const tab = Array.from(el.querySelectorAll('p-tab')).find((t) => t.textContent?.includes('Skills')) as HTMLElement;
+  const tab = el.querySelector('p-tab[aria-label="Skills"]') as HTMLElement;
   tab.click();
   fixture.detectChanges();
   await fixture.whenStable();
@@ -88,7 +88,7 @@ describe('CharacterSheetComponent Skills tab', () => {
     expect(el.querySelector('[data-taught="bolt"]')).toBeNull();
   });
 
-  it('lets a player learn or rank up what they can afford, and emits learn-skill', async () => {
+  it('lets a player learn or level up what they can afford, and emits learn-skill', async () => {
     const { actions, click, el } = await render({ gameMaster: false });
 
     expect(el.querySelector('[data-learn="aura"]')).toBeNull();
@@ -116,7 +116,7 @@ describe('CharacterSheetComponent Skills tab', () => {
     click('[data-remove-taught="taught"]');
     expect(actions).toEqual([
       { kind: 'refund-skill', skillId: 'bolt' },
-      { kind: 'set-skill', skillId: 'taught', rank: 0 },
+      { kind: 'set-skill', skillId: 'taught', level: 0 },
     ]);
   });
 });

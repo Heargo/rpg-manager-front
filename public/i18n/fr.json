@@ -6,9 +6,32 @@
   },
   "common": {
     "cancel": "Annuler",
-    "offlineBanner": "Vous êtes hors ligne. Les données enregistrées restent disponibles ; rejoindre une salle demande un réseau."
+    "image": {
+      "choose": "Choisir une image",
+      "change": "Changer",
+      "remove": "Retirer"
+    },
+    "imageWarning": "Privilégiez les images faites par des artistes humains.",
+    "offlineBanner": "Vous êtes hors ligne. Les données enregistrées restent disponibles ; rejoindre une salle demande un réseau.",
+    "random": "Aléatoire",
+    "generateFromSeed": "Générer depuis cette graine"
+  },
+  "ai": {
+    "copyPrompt": "Copier le prompt IA",
+    "copyPromptHint": "Collez-le dans n'importe quelle IA, puis collez ici le JSON qu'elle renvoie.",
+    "promptCopied": "Prompt copié",
+    "copyFailed": "Le prompt n'a pas pu être copié"
   },
   "nav": {
+    "worlds": "Mondes",
+    "catalogues": "Catalogues",
+    "table": "Table",
+    "roomRules": "Règles du monde",
+    "closeWorld": "Fermer le monde",
+    "closeWorldHostTitle": "Fermer le monde ?",
+    "closeWorldHostMessage": "La salle se ferme pour tout le monde et les joueurs sont déconnectés.",
+    "closeWorldPlayerTitle": "Quitter le monde ?",
+    "closeWorldPlayerMessage": "Vous quittez la salle. Vous pourrez la rejoindre plus tard avec une invitation.",
     "play": "Jouer",
     "profile": "Profil",
     "language": "Langue",
@@ -23,10 +46,12 @@
     "npcCatalogue": "Catalogue de PNJ",
     "npcEditor": "Éditeur de PNJ",
     "skillCatalogue": "Catalogue de compétences",
-    "classCatalogue": "Catalogue de classes"
+    "classCatalogue": "Catalogue de classes",
+    "spriteColorizer": "Colorisation de sprites",
+    "combat": "Combat"
   },
   "play": {
-    "title": "Jouer",
+    "title": "Mondes",
     "activeRoom": "Salle ouverte : {{ name }}.",
     "backToRoom": "Retour à la salle",
     "worlds": {
@@ -46,7 +71,20 @@
     },
     "rooms": {
       "empty": "Les salles que vous rejoignez comme joueur apparaissent ici.",
-      "forgetMessage": "Oublier « {{ name }} » ? Vous pourrez revenir avec une nouvelle invitation."
+      "forgetMessage": "Oublier « {{ name }} » ? Il quitte cette liste. Vous pourrez le rejoindre avec une nouvelle invitation."
+    },
+    "badge": {
+      "gm": "MJ",
+      "player": "Joueur"
+    },
+    "joined": {
+      "title": "Mondes rejoints",
+      "hostedBy": "Hôte : {{ name }}",
+      "lastSeen": "vu pour la dernière fois {{ date }}",
+      "rejoin": "Rejoindre",
+      "openSheet": "Ouvrir le personnage",
+      "remove": "Retirer de la liste",
+      "readOnly": "Ceci est votre copie enregistrée du personnage dans « {{ name }} ». Elle est en lecture seule jusqu'à ce que vous rejoigniez."
     }
   },
   "world": {
@@ -125,10 +163,16 @@
       "attributeNameTooLong": "Un nom d'attribut est trop long.",
       "attributeNamesUnique": "Deux attributs ont le même nom.",
       "baseValueInteger": "Les valeurs de base doivent être des nombres entiers.",
+      "ratioInvalid": "Utilisez un ratio de 0 à 10.",
       "nonNegativeInteger": "Utilisez un nombre entier, 0 ou plus.",
       "image": "Cette image n'a pas pu être utilisée.",
       "capInvalid": "Le plafond doit être un nombre entier, 1 ou plus.",
       "capTooLow": "Le plafond ne peut pas être sous la valeur de base ({{ base }}).",
+      "combatLifeUnknown": "L'attribut de vie doit être un attribut du monde.",
+      "combatDiceInvalid": "Dés d'initiative : 1 à 100 dés de 2 à 1000 faces.",
+      "combatActionTypes": "Les types d'action ont un nom unique et un nombre d'au moins 1.",
+      "combatGrid": "La grille demande des colonnes et des lignes entières d'au moins 1.",
+      "combatFormula": "Cette formule est invalide ou lit un attribut inconnu.",
       "formulaInvalid": "Corrigez les formules des attributs en rouge.",
       "maxLevelInvalid": "Le niveau max doit être un entier de 2 à 100.",
       "levelCurveInvalid": "Courbe invalide : utilisez uniquement level, et chaque niveau doit coûter au moins 1 XP.",
@@ -168,7 +212,19 @@
       "intro": "Modifiez les attributs et les règles du monde. Les changements arrivent aussitôt chez les joueurs; les fiches sont mises à jour.",
       "open": "Règles du monde",
       "attributes": "Attributs",
+      "tabs": {
+        "attributes": "Attributs",
+        "rules": "Règles",
+        "offline": "Hors ligne"
+      },
       "progression": "Progression",
+      "selling": {
+        "sellAnywhere": "Autoriser la vente partout",
+        "hint": "Les joueurs peuvent vendre des objets depuis leur fiche, sans marchand. Les ratios ci-dessous multiplient le prix de l'objet.",
+        "sellAnywhereRatio": "La vente partout paie (x prix)",
+        "merchantBuyRatio": "Les marchands font payer (x prix)",
+        "merchantSellRatio": "Les marchands paient (x prix)"
+      },
       "economy": "Économie",
       "save": "Enregistrer les règles",
       "saved": "Règles enregistrées",
@@ -176,6 +232,11 @@
       "removeTitle": "Supprimer cet attribut ?",
       "removeMessage": "« {{ name }} » sera retiré de toutes les fiches et des modificateurs d'objets qui l'utilisent.",
       "notHosting": "Hébergez une salle pour modifier les règles de son monde.",
+      "skillRolls": {
+        "title": "Compétences",
+        "hint": "Les compétences actives lancent des dés quand on les utilise, et peuvent échouer.",
+        "label": "Les compétences lancent des dés"
+      },
       "npcs": {
         "title": "PNJ sur la table",
         "hint": "Ce que les joueurs voient d'un PNJ montré par le MJ, selon son rôle. Le nom et le portrait sont toujours visibles ; avec plusieurs rôles, les cases s'additionnent.",
@@ -187,6 +248,28 @@
           "attributes": "Tous les attributs",
           "equipment": "Objets équipés"
         }
+      },
+      "combat": {
+        "title": "Combat",
+        "hint": "Le déroulement des combats : vie, initiative, actions, grille, déplacement et formules d'attaque et de défense. Les formules peuvent lire le niveau et les maxima des attributs.",
+        "lifeAttribute": "Attribut de vie (0 = à terre)",
+        "initiativeMode": "Initiative",
+        "modes": {
+          "rolled": "Lancée",
+          "typed": "Saisie par le MJ",
+          "free": "Ordre libre"
+        },
+        "initiativeDice": "Dés d'initiative",
+        "initiativeFormula": "Bonus d'initiative (formule)",
+        "actionTypes": "Actions par tour",
+        "actionName": "Nom de l'action",
+        "addAction": "Ajouter un type d'action",
+        "removeAction": "Retirer ce type d'action",
+        "grid": "Utiliser une grille",
+        "gridSize": "Taille de la grille (colonnes × lignes)",
+        "movement": "Déplacement par tour (formule)",
+        "basicAttack": "Dégâts de l'attaque de base (formule, facultatif)",
+        "defence": "Défense (formule, facultatif)"
       }
     }
   },
@@ -210,6 +293,7 @@
       "later": "Plus tard"
     },
     "errors": {
+      "sellDisabled": "La vente depuis la fiche est désactivée dans ce monde.",
       "invalid": "Ce personnage ne peut pas être créé.",
       "nameRequired": "Donnez un nom à votre personnage.",
       "classRequired": "Choisissez une classe pour votre personnage.",
@@ -237,13 +321,12 @@
       "levelZero": "Cet attribut est déjà au niveau 0.",
       "notInTree": "Cette compétence n'est pas dans l'arbre de la classe.",
       "skillLocked": "Cette compétence est encore verrouillée.",
-      "skillMaxRank": "Cette compétence est déjà au rang maximum.",
+      "skillMaxLevel": "Cette compétence est déjà au niveau maximum.",
       "noSkillPoints": "Pas assez de points de compétence.",
-      "skillNeeded": "Une autre compétence apprise a besoin de ce rang.",
+      "skillNeeded": "Une autre compétence apprise a besoin de ce niveau.",
       "skillNotLearned": "Cette compétence n'est pas apprise.",
       "unknownSkill": "Cette compétence n'existe pas dans ce monde.",
-      "invalidRank": "Ce rang n'est pas valide pour cette compétence.",
-      "unknownClass": "Cette classe n'existe pas dans ce monde."
+      "invalidLevel": "Ce niveau n'est pas valide pour cette compétence."
     },
     "sheet": {
       "playedBy": "Joué par {{ name }}",
@@ -271,13 +354,21 @@
       "xp": "Expérience",
       "grantXpLabel": "Expérience",
       "grantXp": "Donner",
+      "grantSkillPointsLabel": "Points de compétence",
+      "grantSkillPoints": "Donner",
       "levelUp": "Niveau {{ level }} ! +{{ points }} points de stats, +{{ skillPoints }} points de compétence",
       "maxLevel": "Niveau max",
       "levelBadge": "Niveau {{ level }}",
       "skillPoints": "Points de compétence",
-      "skillCost": "{{ cost }} par rang",
+      "skillCost": "{{ cost }} par niveau",
       "learnSkill": "Apprendre {{ name }}",
-      "refundSkill": "Reprendre un rang de {{ name }}",
+      "useSkill": "Utiliser {{ name }}",
+      "useSuccess": "Réussite",
+      "useFailure": "Échec",
+      "useRolled": "Jet : {{ total }}",
+      "useAmount": "{{ kind }} {{ attribute }} : {{ amount }}",
+      "useError": "La formule de réussite n'a pas pu être évaluée.",
+      "refundSkill": "Retirer un niveau de {{ name }}",
       "removeSkill": "Retirer {{ name }}",
       "noClass": "Pas encore de classe.",
       "taughtSkills": "Autres compétences",
@@ -391,7 +482,9 @@
       "notHosting": "Hébergez un monde pour gérer son catalogue d'objets.",
       "toolIntro": "Un catalogue d'exemple sur les attributs par défaut. Rien n'est enregistré.",
       "create": "Nouvel objet",
-      "edit": "Modifier"
+      "edit": "Modifier",
+      "view": "Voir",
+      "selected": "Objet sélectionné"
     },
     "errors": {
       "invalid": "Cet objet ne peut pas être donné.",
@@ -409,11 +502,6 @@
       "tabGenerate": "Générer",
       "jsonHint": "Modifiez l'objet en JSON. Le formulaire suit dès que le JSON est valide.",
       "generateHint": "Tire un objet au hasard sur les attributs de ce monde et remplit le formulaire. La même graine donne le même objet.",
-      "generate": "Générer",
-      "copyPrompt": "Copier le prompt IA",
-      "copyPromptHint": "Collez-le dans n'importe quelle IA, puis collez le JSON obtenu dans l'onglet JSON.",
-      "promptCopied": "Prompt copié",
-      "copyFailed": "Le prompt n'a pas pu être copié",
       "imageFailed": "Cette image n'a pas pu être utilisée",
       "save": "Enregistrer",
       "saved": "{{ name }} enregistré",
@@ -578,17 +666,7 @@
       "generic": "Une erreur est survenue.",
       "otherTab": "Une salle est déjà ouverte dans un autre onglet de l'application. Utilisez cet onglet, ou fermez-le d'abord."
     },
-    "recent": {
-      "title": "Salles rejointes",
-      "hint": "Pour revenir, demandez un nouveau lien d'invitation à l'hôte.",
-      "hostedBy": "Hôte : {{ name }}",
-      "lastSeen": "vue {{ date }}",
-      "forget": "Oublier cette salle"
-    },
     "hostOfflineTooltip": "Hôte hors ligne : certaines fonctions restent disponibles ; demandez un nouveau lien d'invitation à l'hôte pour vous reconnecter",
-    "offline": {
-      "title": "Fonctions hors ligne"
-    },
     "size": {
       "max": "Maximum conseillé pour cet appareil : {{max}} personnes (vous compris).",
       "over": "La salle dépasse le maximum conseillé de {{max}} personnes. Vous pouvez continuer, mais le jeu risque de ramer.",
@@ -679,6 +757,14 @@
       "title": "Fiche de personnage",
       "intro": "Un personnage d'exemple sur les attributs par défaut, avec les objets par défaut dans son sac. Tout suit les règles du jeu et reste sur cette page.",
       "reset": "Recommencer"
+    },
+    "combat": {
+      "title": "Combat",
+      "intro": "Le personnage d'exemple contre un ennemi du catalogue, avec le panneau du MJ et la vue du joueur sur le même écran. Rien n'est enregistré.",
+      "start": "Affronter le gobelin des cavernes",
+      "gm": "Maître du jeu",
+      "player": "Joueur",
+      "noEncounter": "Lancez une rencontre pour voir la vue du joueur."
     }
   },
   "home": {
@@ -690,7 +776,6 @@
     "footerCredits": "Crédits",
     "footerContact": "Contact",
     "footerPrivacy": "Politique de confidentialité",
-    "scrollDown": "Défiler vers le contenu",
     "heading": "Votre table, dans le navigateur",
     "highlightsLabel": "Points forts",
     "buildTitle": "Construisez votre monde",
@@ -709,6 +794,9 @@
     "librariesTitle": "Bibliothèques",
     "toolsTitle": "Outils externes",
     "tools": "La page des outils renvoie vers des générateurs gratuits créés par d'autres : Procgen Arcana de Watabou, Fantasy Map Generator d'Azgaar et Squoosh. Ils ne font pas partie de cette application.",
+    "aiTitle": "Utilisation de l'IA",
+    "ai": "L'IA a été utilisée pour le code, la documentation, le logo et les icônes SVG personnalisées. Je serais ravi de collaborer avec des artistes pour retirer le slop et donner plus de vie aux interfaces. Note : ce projet existe depuis avant Claude, et la direction artistique et la palette de couleurs sont voulues, ce n'est pas une copie de la DA d'Anthropic.",
+    "aiContact": "Me contacter",
     "illustrationsTitle": "Illustrations",
     "sampleHeroPrefix": "Portrait du héros d'exemple : illustration de",
     "sampleHeroSuffix": "."
@@ -804,6 +892,34 @@
       "xpLabel": "Coût en XP par niveau"
     }
   },
+  "merchant": {
+    "errors": {
+      "closed": "Cette boutique est fermée.",
+      "notInStock": "Cet objet n'est plus en stock.",
+      "cantAfford": "Vous n'avez pas assez d'argent.",
+      "unknownItem": "Vous n'avez pas cet objet.",
+      "invalid": "Cette demande de boutique est invalide.",
+      "gameMasterOnly": "Seul le maître du jeu ouvre ou ferme une boutique.",
+      "playerOnly": "Seul un joueur achète ou vend."
+    },
+    "shop": {
+      "title": "Boutique",
+      "money": "Votre argent",
+      "buy": "En vente",
+      "buyAction": "Acheter",
+      "sell": "Vendre au marchand",
+      "sellAction": "Vendre",
+      "noStock": "Rien à vendre.",
+      "nothingToSell": "Rien à vendre."
+    },
+    "table": {
+      "open": "Ouvrir la boutique",
+      "close": "Fermer la boutique",
+      "visit": "Visiter la boutique",
+      "target": "Ouvrir ou fermer la boutique pour",
+      "everyone": "Tous les joueurs"
+    }
+  },
   "npc": {
     "catalogue": {
       "title": "Catalogue de PNJ",
@@ -842,12 +958,12 @@
       "tabGenerate": "Générer",
       "jsonHint": "Modifiez le PNJ en JSON ; il est appliqué au formulaire tant qu'il est valide.",
       "generateHint": "Tire un PNJ au hasard (nom, niveau, attributs, équipement) depuis une graine ; le formulaire est remplacé.",
-      "generate": "Générer",
       "save": "Enregistrer",
       "equipped": "Équipé",
       "loot": "Butin",
       "removeItem": "Retirer",
       "fields": {
+        "portrait": "Portrait",
         "name": "Nom",
         "description": "Description",
         "roles": "Rôles",
@@ -919,7 +1035,8 @@
       "deleteMessage": "{{ name }} sera retirée du monde.",
       "empty": "Aucune compétence trouvée.",
       "copySuffix": "(copie)",
-      "ranks": "Jusqu'au rang {{ max }}, {{ cost }} point(s) par rang",
+      "levels": "Jusqu'au niveau {{ max }}, {{ cost }} point(s) par niveau",
+      "cooldown": "Recharge {{ turns }} tour(s)",
       "inUse": "{{ name }} est utilisée par {{ usages }} : retirez-la d'abord.",
       "failed": "La compétence n'a pas pu être enregistrée."
     },
@@ -931,31 +1048,153 @@
       "save": "Enregistrer",
       "addEffect": "Ajouter un effet",
       "removeEffect": "Retirer l'effet",
-      "formulaHint": "Les montants sont des formules : rank, level et noms d'attributs (les maxima du lanceur).",
-      "preview": "Rang 1 : {{ rank1 }} · Rang {{ max }} : {{ maxRank }}",
+      "successMode": {
+        "always": "Toujours",
+        "threshold": "Total d'au moins",
+        "formula": "Formule"
+      },
+      "successHint": "Variables : roll, skillLevel, level, vos attributs par leur nom, et ceux de la cible en target_<nom>.",
+      "formulaHint": "Les montants sont des formules : skillLevel, level et noms d'attributs (les maxima du lanceur).",
+      "preview": "Niveau 1 : {{ level1 }} · Niveau {{ max }} : {{ maxLevel }}",
       "fields": {
         "name": "Nom",
         "description": "Description",
         "type": "Type",
         "rarity": "Rareté",
-        "maxRank": "Rang max (1 à 10)",
-        "pointCost": "Points de compétence par rang",
+        "maxLevel": "Niveau max de la compétence (1 à 10)",
+        "pointCost": "Points de compétence par niveau",
         "target": "Cible",
+        "actionType": "Type d'action",
         "cooldown": "Récupération (tours)",
         "costAttribute": "Coût : attribut",
         "costAmount": "Coût : montant",
         "effects": "Effets",
         "amount": "Montant",
-        "duration": "Durée (tours, 0 = permanent)"
+        "duration": "Durée (tours, 0 = permanent)",
+        "rollCount": "Dés lancés",
+        "rollFaces": "Faces des dés",
+        "successMode": "Réussite",
+        "successValue": "Réussit quand le total atteint",
+        "successFormula": "Réussit quand ceci vaut 0 ou plus",
+        "kind": "Type d'effet",
+        "attribute": "Attribut visé"
       },
       "issue": {
         "name": "Donnez un nom à la compétence.",
-        "maxRank": "Le rang max va de 1 à 10.",
-        "pointCost": "Un rang coûte au moins 1 point de compétence.",
+        "maxLevel": "Le niveau max va de 1 à 10.",
+        "pointCost": "Un niveau coûte au moins 1 point de compétence.",
         "target": "Une compétence active a une cible ; une passive n'en a pas.",
+        "actionType": "Seule une compétence active peut nommer un type d'action.",
         "effects_amount": "Le montant d'un effet n'est pas une formule valide.",
-        "json": "Ce JSON n'est pas une compétence valide."
-      }
+        "json": "Ce JSON n'est pas une compétence valide.",
+        "roll_count": "Lancez de 1 à 100 dés.",
+        "roll_faces": "Un dé a de 2 à 1000 faces.",
+        "success_value": "Le seuil est un nombre entier.",
+        "success_formula": "La formule de réussite n'est pas valide (roll, skillLevel, level, noms d'attributs, target_<attribut>)."
+      },
+      "help": {
+        "description": "Affichée dans le catalogue et sur la fiche.",
+        "type": "Une compétence active s'utilise en combat ; une passive s'applique toujours.",
+        "rarity": "La rareté de la compétence.",
+        "maxLevel": "Combien de fois la compétence peut monter de niveau.",
+        "pointCost": "Points de compétence dépensés à chaque niveau.",
+        "target": "Qui la compétence vise.",
+        "actionType": "Le compteur d'action du monde que son usage coche ; vide, il coche le premier.",
+        "cooldown": "Tours à attendre avant de la réutiliser.",
+        "costAttribute": "L'attribut dépensé à l'usage ; vide pour aucun coût.",
+        "costAmount": "Ce que coûte chaque usage.",
+        "roll": "Les dés lancés quand la compétence est utilisée.",
+        "successMode": "Quand la compétence fonctionne : toujours, au-dessus d'un total, ou par formule.",
+        "successValue": "Le total des dés nécessaire pour réussir.",
+        "successFormula": "Une formule ; la compétence réussit quand elle donne 0 ou plus.",
+        "effects": "Ce que fait la compétence quand elle fonctionne. Chaque montant est une formule."
+      },
+      "sections": {
+        "identity": "Identité",
+        "cost": "Coût et niveaux",
+        "roll": "Jet et réussite",
+        "effects": "Effets",
+        "identityHint": "Le nom, le texte affiché et le type de la compétence.",
+        "costHint": "Combien de niveaux, ce qu'ils coûtent, et ce que coûte un usage."
+      },
+      "effectTitle": "Effet {{ n }}"
+    },
+    "variables": {
+      "title": "Variables et formules",
+      "toggle": "Aide sur les variables",
+      "successTitle": "Formule de réussite",
+      "successBody": "Décide si la compétence fonctionne. Elle réussit quand le résultat vaut 0 ou plus (vrai).",
+      "amountTitle": "Formule de montant",
+      "amountBody": "Un nombre de points : les dégâts, les soins ou le bonus d'un effet.",
+      "exampleLabel": "Exemple :",
+      "roll": "Le total des dés lancés pour cet usage.",
+      "skillLevel": "Le niveau de compétence que le personnage a investi.",
+      "level": "Le niveau du personnage.",
+      "caster": "Le maximum du lanceur pour cet attribut.",
+      "target": "Le maximum de la cible pour cet attribut.",
+      "spaces": "Un nom avec des espaces s'écrit entre crochets, celui de la cible aussi :"
+    },
+    "presets": {
+      "manage": "Gérer les préréglages",
+      "manageTitle": "Préréglages de formules",
+      "hint": "Utilisez {A}, {B}… pour les attributs du lanceur et {target.A}… pour ceux de la cible. Vous choisissez les vrais attributs en appliquant un préréglage.",
+      "choose": "Préréglage",
+      "saveAs": "Enregistrer comme préréglage",
+      "saved": "Préréglage enregistré.",
+      "mappingTitle": "{{ name }} : à quel attribut correspond chaque lettre ?",
+      "casterAttribute": "{{ token }} : attribut du lanceur",
+      "targetAttribute": "{{ token }} : attribut de la cible",
+      "apply": "Appliquer",
+      "save": "Enregistrer",
+      "new": "Nouveau préréglage",
+      "name": "Nom",
+      "formula": "Formule",
+      "description": "Description",
+      "duplicate": "Dupliquer",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "copyName": "{{ name }} (copie)",
+      "kind": {
+        "success": "Réussite",
+        "effect": "Effet"
+      },
+      "errors": {
+        "invalid": "Cette formule n'est pas valide (roll, skillLevel, level, {A}, {target.A}).",
+        "builtIn": "Les préréglages intégrés ne se modifient pas ; dupliquez-les.",
+        "name": "Donnez un nom au préréglage."
+      },
+      "builtIn": {
+        "rollPlusAttribute": {
+          "name": "Jet + attribut",
+          "description": "Réussit quand le jet plus votre attribut atteint 10."
+        },
+        "rollAgainstTarget": {
+          "name": "Jet contre la cible",
+          "description": "Votre attribut plus le jet contre l'attribut de la cible."
+        },
+        "rollPlusLevel": {
+          "name": "Jet + niveau de compétence",
+          "description": "Un niveau de compétence plus élevé facilite la réussite."
+        },
+        "perLevel": {
+          "name": "Par niveau de compétence",
+          "description": "5 par niveau de compétence."
+        },
+        "attributeScaled": {
+          "name": "Selon un attribut",
+          "description": "La moitié de votre attribut plus 3 par niveau de compétence."
+        },
+        "rollScaled": {
+          "name": "Selon le jet",
+          "description": "Le jet multiplié par le niveau de compétence."
+        },
+        "overTarget": {
+          "name": "Au-delà de la défense de la cible",
+          "description": "Votre attribut moins celui de la cible, au moins 1, plus le niveau de compétence."
+        }
+      },
+      "deleteTitle": "Supprimer ce préréglage ?",
+      "deleteMessage": "« {{ name }} » sera supprimé de cet appareil."
     }
   },
   "class": {
@@ -982,12 +1221,12 @@
       "startingItems": "Objets de départ",
       "tree": "Arbre de compétences",
       "skillList": "Compétences",
-      "maxRank": "Rang max {{ count }}"
+      "maxLevel": "Niveau max {{ count }}"
     },
     "tree": {
-      "rank": "{{ rank }}/{{ max }}",
+      "level": "{{ level }}/{{ max }}",
       "missingLevel": "Niveau {{ level }}",
-      "missingRequires": "{{ name }} rang {{ rank }}"
+      "missingRequires": "{{ name }} niveau {{ level }}"
     },
     "editor": {
       "tabForm": "Formulaire",
@@ -1010,7 +1249,7 @@
         "noMatch": "Aucune compétence ne correspond."
       },
       "node": {
-        "maxRank": "Max {{ count }}",
+        "maxLevel": "Max {{ count }}",
         "level": "Niv. {{ count }}"
       },
       "inspector": {
@@ -1024,17 +1263,198 @@
         "tree": "Arbre de compétences",
         "minLevel": "Niveau minimum",
         "requires": "Nécessite",
-        "rank": "Rang requis"
+        "level": "Niveau de compétence requis"
       },
       "issue": {
         "required": "Donnez un nom à la classe.",
-        "invalid": "Une valeur est invalide ou hors limites (niveau min, rang requis, attribut de bonus ou JSON).",
+        "invalid": "Une valeur est invalide ou hors limites (niveau min, niveau de compétence requis, attribut de bonus ou JSON).",
         "noRoot": "L'arbre a besoin d'au moins une compétence sans prérequis.",
         "cycle": "Les prérequis forment un cycle.",
         "outsideTree": "Un prérequis doit être une compétence du même arbre.",
         "duplicate": "Une compétence ne peut être qu'une fois dans l'arbre.",
         "unknownSkill": "Une compétence de l'arbre n'est pas dans le catalogue."
       }
+    }
+  },
+  "sprite": {
+    "title": "Colorisation de sprites",
+    "intro": "Recolorez un sprite en niveaux de gris matériau par matériau. Tout reste dans votre navigateur.",
+    "openImage": "Ouvrir une image",
+    "demo": "Sprite de démo",
+    "exportPng": "Exporter en PNG",
+    "exportJson": "Exporter en JSON",
+    "importJson": "Importer un JSON",
+    "undo": "Annuler",
+    "redo": "Rétablir",
+    "importFailed": "Ce fichier n'est pas une configuration pour une image de cette taille.",
+    "loadFailed": "Cette image n'a pas pu être lue.",
+    "empty": "Ouvrez une image ou essayez le sprite de démo pour commencer.",
+    "tools": {
+      "title": "Outils",
+      "brush": "Pinceau",
+      "eraser": "Gomme",
+      "bucket": "Pot de peinture",
+      "wand": "Baguette magique",
+      "pan": "Déplacer",
+      "size": "Taille",
+      "hardness": "Dureté",
+      "tolerance": "Tolérance",
+      "contiguous": "Contigu",
+      "global": "Global",
+      "applySelection": "Appliquer la sélection",
+      "invertSelection": "Inverser la sélection",
+      "clearSelection": "Effacer la sélection",
+      "wandHint": "Maj ajoute à la sélection, Alt en retire.",
+      "polygon": "Polygone",
+      "snap": "Aimanter aux contours",
+      "snapRadius": "Rayon d'aimantation",
+      "polygonHint": "Cliquez pour ajouter des sommets. Entrée ou double-clic ferme (Maj ajoute, Alt retire), Échap annule."
+    },
+    "view": {
+      "zoomIn": "Zoom avant",
+      "zoomOut": "Zoom arrière",
+      "fit": "Ajuster",
+      "original": "Original",
+      "recolored": "Recoloré",
+      "overlay": "Afficher le masque du matériau"
+    },
+    "materials": {
+      "title": "Matériaux",
+      "add": "Ajouter un matériau",
+      "defaultName": "Matériau {{n}}",
+      "base": "Base",
+      "rename": "Renommer",
+      "delete": "Supprimer le matériau",
+      "show": "Afficher",
+      "hide": "Masquer",
+      "lock": "Verrouiller",
+      "unlock": "Déverrouiller",
+      "up": "Monter",
+      "down": "Descendre",
+      "select": "Sélectionner"
+    },
+    "gradient": {
+      "title": "Dégradé",
+      "stopColor": "Couleur du point",
+      "stopPosition": "Position du point (%)",
+      "addStop": "Ajouter un point",
+      "removeStop": "Retirer le point"
+    },
+    "shapes": {
+      "title": "Formes",
+      "detect": "Détecter les formes",
+      "hint": "Cliquez sur des formes pour les sélectionner, puis appliquez-les à un matériau.",
+      "pixels": "{{n}} px",
+      "apply": "Appliquer au calque",
+      "applyNew": "Appliquer à un nouveau calque",
+      "newName": "Forme",
+      "none": "Aucune forme trouvée."
+    },
+    "presets": {
+      "title": "Préréglages",
+      "steel": "Acier",
+      "wood": "Bois",
+      "gold": "Or",
+      "ice": "Glace",
+      "fire": "Feu",
+      "leaf": "Feuille",
+      "arcane": "Arcane",
+      "name": "Nom du préréglage",
+      "save": "Enregistrer comme préréglage",
+      "delete": "Supprimer le préréglage"
+    }
+  },
+  "combat": {
+    "title": "Combat",
+    "errors": {
+      "notConsumable": "Seuls les consommables peuvent être utilisés.",
+      "unknownItem": "Cet objet n'est plus dans l'inventaire.",
+      "invalidAmount": "Donnez entre 1 et 100 points.",
+      "initiativeNotTyped": "L'initiative est lancée dans ce monde.",
+      "invalid": "Cette demande n'est pas valide.",
+      "gameMasterOnly": "Seul le maître du jeu peut faire cela.",
+      "notYours": "Ce combattant n'est pas le vôtre.",
+      "noEncounter": "Aucun combat n'est en cours.",
+      "alreadyStarted": "Un combat est déjà en cours.",
+      "life-attribute-required": "Le combat demande un attribut de vie dans les règles de combat du monde.",
+      "no-combatants": "Choisissez au moins un combattant.",
+      "character-not-found": "Ce personnage n'existe pas.",
+      "npc-not-found": "Ce PNJ n'est pas dans le catalogue.",
+      "caster-not-found": "Ce combattant n'est pas dans le combat.",
+      "skill-not-known": "Ce combattant ne connaît pas cette compétence.",
+      "skill-not-active": "Seules les compétences actives s'utilisent en combat.",
+      "target-not-found": "Cette cible n'est pas dans le combat."
+    },
+    "order": "Ordre des tours",
+    "round": "Round {{round}}",
+    "yourTurn": "À vous de jouer",
+    "endTurn": "Finir mon tour",
+    "nextTurn": "Tour suivant",
+    "undo": "Annuler",
+    "down": "À terre",
+    "drag": "Glisser pour réordonner",
+    "details": "Détails",
+    "roll": "{{caster}} a lancé {{rolls}} (total {{total}}) pour {{skill}}",
+    "waitingGm": "En attente du MJ…",
+    "start": {
+      "title": "Lancer une rencontre",
+      "characters": "Personnages",
+      "npcs": "PNJ",
+      "pick": "Ajouter",
+      "picked": "Inclus",
+      "fewer": "Un de moins",
+      "more": "Un de plus",
+      "action": "Lancer la rencontre",
+      "noCharacters": "Aucun personnage dans ce monde pour l'instant.",
+      "noNpcs": "Aucun PNJ dans le catalogue pour l'instant."
+    },
+    "initiative": {
+      "label": "Initiative",
+      "yours": "Votre initiative",
+      "set": "Valider"
+    },
+    "skill": {
+      "damage": "{{amount}} dégâts",
+      "heal": "{{amount}} soins",
+      "modify": "{{amount}} {{attribute}} pendant {{duration}} tours",
+      "cooldown": "récupération {{turns}}"
+    },
+    "actions": {
+      "use": "Utiliser",
+      "skills": "Compétences",
+      "useSkill": "Utiliser",
+      "items": "Objets",
+      "useItem": "Utiliser",
+      "pickTargets": "Choisissez les cibles de {{skill}}",
+      "confirm": "Confirmer",
+      "cancel": "Annuler"
+    },
+    "pending": {
+      "title": "Résultats à appliquer",
+      "line": "{{caster}} : {{skill}} sur {{target}}",
+      "rolled": "lancer {{rolls}} = {{total}}",
+      "failed": "raté",
+      "apply": "Appliquer",
+      "edit": "Modifier",
+      "dismiss": "Écarter"
+    },
+    "manual": {
+      "damage": "Dégâts",
+      "heal": "Soins"
+    },
+    "status": {
+      "placeholder": "Statut (Étourdi…)",
+      "add": "Ajouter le statut",
+      "remove": "Retirer le statut"
+    },
+    "end": {
+      "action": "Terminer",
+      "title": "Terminer la rencontre",
+      "xp": "Expérience par personnage",
+      "money": "Argent des ennemis vaincus : {{amount}}",
+      "loot": "Butin",
+      "confirm": "Terminer la rencontre",
+      "hint": "L'argent et le butin sont à distribuer à la table."
     }
   }
 }

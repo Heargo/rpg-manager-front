@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
@@ -18,8 +19,11 @@ import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
+import { ImageBusiness } from '../../../../core/business/image.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
+import { ImagePickerComponent } from '../../../../core/components/image-picker/image-picker.component';
+import { MessageLevel } from '../../../../core/models/toast-level';
 import { World } from '../../../world/models/world';
 import { NpcEditorBusiness } from '../../business/npc-editor.business';
 import { NpcEditorIssue } from '../../helpers/npc-editor.rules';
@@ -41,6 +45,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
     TabsModule,
     TextareaModule,
     CoinInputComponent,
+    ImagePickerComponent,
   ],
   template: `
     <p-tabs value="form">
@@ -54,6 +59,22 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
       <p-tabpanels>
         <p-tabpanel value="form">
           <div class="form">
+            <div class="field image">
+              <label for="npc-portrait">{{
+                'npc.editor.fields.portrait' | transloco
+              }}</label>
+              <span data-testid="portrait-preview" class="preview">
+                <app-image-picker
+                  inputId="npc-portrait"
+                  field="portrait"
+                  removeAction="remove-portrait"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  [imageId]="draft().portraitId"
+                  (picked)="upload($event)"
+                  (removed)="patch({ portraitId: undefined })"
+                />
+              </span>
+            </div>
             <div class="field">
               <label for="npc-name">{{
                 'npc.editor.fields.name' | transloco
@@ -246,12 +267,12 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 <div class="entry" data-field="skill-entry">
                   <span class="name">{{ skillName(entry.skillId) }}</span>
                   <p-inputnumber
-                    data-field="skill-rank"
+                    data-field="skill-level"
                     [min]="0"
-                    [max]="skillMaxRank(entry.skillId)"
+                    [max]="skillMaxLevel(entry.skillId)"
                     [showButtons]="true"
-                    [ngModel]="entry.rank"
-                    (ngModelChange)="setSkillRank(entry.skillId, $event)"
+                    [ngModel]="entry.level"
+                    (ngModelChange)="setSkillLevel(entry.skillId, $event)"
                   />
                   <button
                     pButton
@@ -262,7 +283,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                     severity="danger"
                     [text]="true"
                     [attr.aria-label]="'npc.editor.removeSkill' | transloco"
-                    (click)="setSkillRank(entry.skillId, 0)"
+                    (click)="setSkillLevel(entry.skillId, 0)"
                   ></button>
                 </div>
               }
@@ -343,6 +364,19 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 issueText(jsonIssues())
               }}</p-message>
             }
+            <div>
+              <button
+                pButton
+                type="button"
+                data-action="copy-ai-prompt"
+                icon="pi pi-copy"
+                severity="secondary"
+                [text]="true"
+                [label]="'ai.copyPrompt' | transloco"
+                (click)="copyAiPrompt()"
+              ></button>
+              <small class="hint">{{ 'ai.copyPromptHint' | transloco }}</small>
+            </div>
           </div>
         </p-tabpanel>
 
@@ -383,9 +417,9 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
               <button
                 pButton
                 type="button"
-                data-action="generate"
+                data-action="generate-seed"
                 icon="pi pi-sparkles"
-                [label]="'npc.editor.generate' | transloco"
+                [label]="'common.generateFromSeed' | transloco"
                 (click)="generate()"
               ></button>
               <button
@@ -410,6 +444,15 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
       <button
         pButton
         type="button"
+        data-action="random"
+        icon="pi pi-sparkles"
+        severity="secondary"
+        [label]="'common.random' | transloco"
+        (click)="reroll()"
+      ></button>
+      <button
+        pButton
+        type="button"
         data-action="save"
         icon="pi pi-save"
         [label]="'npc.editor.save' | transloco"
@@ -422,6 +465,9 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
       display: flex;
       flex-direction: column;
       gap: 1rem;
+    }
+    .preview {
+      display: block;
     }
     .form {
       display: flex;
@@ -470,12 +516,15 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
     .actions {
       display: flex;
       justify-content: flex-end;
+      gap: 0.5rem;
     }
   `,
 })
 export class NpcEditorComponent {
   private readonly editor = inject(NpcEditorBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly images = inject(ImageBusiness);
+  private readonly messages = inject(MessageService);
 
   /** The world whose attributes, level rules and item catalogue the NPC is built on. */
   readonly world = input.required<World>();
@@ -499,6 +548,9 @@ export class NpcEditorComponent {
   protected readonly seed = signal(this.editor.newSeed());
   protected readonly generateClassId = signal<string | null>(null);
 
+  private readonly attributeNames = computed(() =>
+    this.world().attributes.map((attribute) => attribute.name),
+  );
   protected readonly issues = computed(() =>
     this.editor.validate(this.draft()),
   );
@@ -517,6 +569,14 @@ export class NpcEditorComponent {
 
   protected patch(change: Partial<Npc>): void {
     this.setDraft({ ...this.draft(), ...change });
+  }
+
+  protected async upload(file: File): Promise<void> {
+    try {
+      this.patch({ portraitId: await this.images.storeUpload(file) });
+    } catch {
+      // Not a usable image: keep the current portrait.
+    }
   }
 
   protected setRoles(roles: NpcRole[]): void {
@@ -574,12 +634,12 @@ export class NpcEditorComponent {
       );
   }
 
-  protected setSkillRank(skillId: string, rank: number | null): void {
+  protected setSkillLevel(skillId: string, level: number | null): void {
     this.setDraft(
       this.editor.setSkill(
         this.draft(),
         skillId,
-        Math.trunc(rank ?? 0),
+        Math.trunc(level ?? 0),
         this.world(),
       ),
     );
@@ -589,8 +649,8 @@ export class NpcEditorComponent {
     return this.world().skills.find((s) => s.id === skillId)?.name ?? skillId;
   }
 
-  protected skillMaxRank(skillId: string): number {
-    return this.world().skills.find((s) => s.id === skillId)?.maxRank ?? 1;
+  protected skillMaxLevel(skillId: string): number {
+    return this.world().skills.find((s) => s.id === skillId)?.maxLevel ?? 1;
   }
 
   protected addItem(itemId: string | null): void {
@@ -633,6 +693,28 @@ export class NpcEditorComponent {
   protected reroll(): Promise<void> {
     this.seed.set(this.editor.newSeed());
     return this.generate();
+  }
+
+  protected async copyAiPrompt(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(
+        this.editor.prompt(
+          this.attributeNames(),
+          this.language.$language() as 'en' | 'fr',
+        ),
+      );
+      this.messages.add({
+        severity: MessageLevel.Success,
+        summary: this.language.t('ai.promptCopied'),
+        life: 2500,
+      });
+    } catch {
+      this.messages.add({
+        severity: MessageLevel.Error,
+        summary: this.language.t('ai.copyFailed'),
+        life: 2500,
+      });
+    }
   }
 
   protected submit(): void {

@@ -1,0 +1,350 @@
+{
+  "version": 1,
+  "templates": [
+    "{noun} {adjective}",
+    "{noun} {suffix}",
+    "{noun}",
+    "{noun} {adjective} {suffix}"
+  ],
+  "nouns": {
+    "active": [
+      {
+        "text": "Frappe",
+        "gender": "f"
+      },
+      {
+        "text": "Boule de feu",
+        "gender": "f"
+      },
+      {
+        "text": "Éclair",
+        "gender": "m"
+      },
+      {
+        "text": "Entaille",
+        "gender": "f"
+      },
+      {
+        "text": "Volée",
+        "gender": "f"
+      },
+      {
+        "text": "Châtiment",
+        "gender": "m"
+      },
+      {
+        "text": "Charge",
+        "gender": "f"
+      },
+      {
+        "text": "Maléfice",
+        "gender": "m"
+      },
+      {
+        "text": "Déflagration",
+        "gender": "f"
+      },
+      {
+        "text": "Fouet",
+        "gender": "m"
+      },
+      {
+        "text": "Barrage",
+        "gender": "m"
+      },
+      {
+        "text": "Fendoir",
+        "gender": "m"
+      },
+      {
+        "text": "Tourbillon",
+        "gender": "m"
+      },
+      {
+        "text": "Estocade",
+        "gender": "f"
+      },
+      {
+        "text": "Tir",
+        "gender": "m"
+      },
+      {
+        "text": "Déferlante",
+        "gender": "f"
+      },
+      {
+        "text": "Pulsation",
+        "gender": "f"
+      },
+      {
+        "text": "Éclat",
+        "gender": "m"
+      },
+      {
+        "text": "Rempart",
+        "gender": "m"
+      },
+      {
+        "text": "Prière",
+        "gender": "f"
+      },
+      {
+        "text": "Ralliement",
+        "gender": "m"
+      },
+      {
+        "text": "Rugissement",
+        "gender": "m"
+      },
+      {
+        "text": "Chant",
+        "gender": "m"
+      },
+      {
+        "text": "Guérison",
+        "gender": "f"
+      },
+      {
+        "text": "Bénédiction",
+        "gender": "f"
+      },
+      {
+        "text": "Stratagème",
+        "gender": "m"
+      }
+    ],
+    "passive": [
+      {
+        "text": "Résilience",
+        "gender": "f"
+      },
+      {
+        "text": "Concentration",
+        "gender": "f"
+      },
+      {
+        "text": "Instinct",
+        "gender": "m"
+      },
+      {
+        "text": "Maîtrise",
+        "gender": "f"
+      },
+      {
+        "text": "Discipline",
+        "gender": "f"
+      },
+      {
+        "text": "Vigueur",
+        "gender": "f"
+      },
+      {
+        "text": "Vigilance",
+        "gender": "f"
+      },
+      {
+        "text": "Entraînement",
+        "gender": "m"
+      },
+      {
+        "text": "Robustesse",
+        "gender": "f"
+      },
+      {
+        "text": "Aplomb",
+        "gender": "m"
+      },
+      {
+        "text": "Intuition",
+        "gender": "f"
+      },
+      {
+        "text": "Endurance",
+        "gender": "f"
+      },
+      {
+        "text": "Prestance",
+        "gender": "f"
+      },
+      {
+        "text": "Réflexe",
+        "gender": "m"
+      },
+      {
+        "text": "Volonté",
+        "gender": "f"
+      },
+      {
+        "text": "Ténacité",
+        "gender": "f"
+      },
+      {
+        "text": "Grâce",
+        "gender": "f"
+      },
+      {
+        "text": "Ruse",
+        "gender": "f"
+      },
+      {
+        "text": "Détermination",
+        "gender": "f"
+      },
+      {
+        "text": "Stoïcisme",
+        "gender": "m"
+      },
+      {
+        "text": "Prudence",
+        "gender": "f"
+      },
+      {
+        "text": "Héritage",
+        "gender": "m"
+      },
+      {
+        "text": "Don",
+        "gender": "m"
+      },
+      {
+        "text": "Sang-froid",
+        "gender": "m"
+      }
+    ]
+  },
+  "adjectives": [
+    "rapide",
+    {
+      "m": "écrasant",
+      "f": "écrasante"
+    },
+    {
+      "m": "brûlant",
+      "f": "brûlante"
+    },
+    {
+      "m": "ténébreux",
+      "f": "ténébreuse"
+    },
+    {
+      "m": "radieux",
+      "f": "radieuse"
+    },
+    "sauvage",
+    {
+      "m": "silencieux",
+      "f": "silencieuse"
+    },
+    {
+      "m": "tonitruant",
+      "f": "tonitruante"
+    },
+    {
+      "m": "glacé",
+      "f": "glacée"
+    },
+    {
+      "m": "vertueux",
+      "f": "vertueuse"
+    },
+    {
+      "m": "rusé",
+      "f": "rusée"
+    },
+    {
+      "m": "fougueux",
+      "f": "fougueuse"
+    },
+    {
+      "m": "sacré",
+      "f": "sacrée"
+    },
+    "impitoyable",
+    {
+      "m": "évanescent",
+      "f": "évanescente"
+    },
+    {
+      "m": "flamboyant",
+      "f": "flamboyante"
+    },
+    {
+      "m": "perçant",
+      "f": "perçante"
+    },
+    {
+      "m": "spectral",
+      "f": "spectrale"
+    },
+    "inflexible",
+    {
+      "m": "éternel",
+      "f": "éternelle"
+    },
+    "implacable",
+    {
+      "m": "doux",
+      "f": "douce"
+    },
+    {
+      "m": "furieux",
+      "f": "furieuse"
+    },
+    {
+      "m": "caché",
+      "f": "cachée"
+    }
+  ],
+  "suffixes": [
+    "de la tempête",
+    "des déchus",
+    "de cendres",
+    "de la traque",
+    "de l'aube",
+    "des profondeurs",
+    "d'épines",
+    "du néant",
+    "de fer",
+    "du dernier rempart",
+    "de braises",
+    "de la lune",
+    "du dépit",
+    "des anciens",
+    "de givre",
+    "des terres sauvages",
+    "de sang",
+    "de la clémence",
+    "du crépuscule",
+    "du serpent",
+    "du serment",
+    "du silence",
+    "du phénix",
+    "de la fureur"
+  ],
+  "descriptions": {
+    "active": [
+      "Un geste éprouvé qui récompense la main sûre.",
+      "Née de cent escarmouches, elle met fin aux combats en un clin d'œil.",
+      "Elle coûte cher, mais personne ne l'oublie.",
+      "Enseignée seulement à ceux qui ont gagné la confiance des anciens.",
+      "Une technique spectaculaire au but très pratique.",
+      "Puise dans les réserves de son auteur pour renverser la situation.",
+      "Facile à apprendre, infinie à perfectionner.",
+      "Souvent la dernière chose que l'ennemi voit venir.",
+      "Appréciée des vétérans qui aiment finir ce qu'ils commencent.",
+      "Elle demande l'esprit clair et un réflexe vif."
+    ],
+    "passive": [
+      "Façonne discrètement tout ce que fait son possesseur.",
+      "Des années de pratique en ont fait une seconde nature.",
+      "Personne ne la remarque avant qu'elle ne sauve la mise.",
+      "Un don durable laissé par un long entraînement.",
+      "Inutile de l'invoquer : elle est simplement là.",
+      "Un trait qui se renforce à chaque épreuve.",
+      "Influence la manière dont son possesseur affronte le danger.",
+      "Une vieille habitude devenue talent.",
+      "Ceux qui la possèdent en parlent rarement.",
+      "Acquise à la dure et jamais oubliée."
+    ]
+  }
+}

@@ -1,3 +1,4 @@
+import { ImageWarningComponent } from '../../../../core/components/image-warning/image-warning.component';
 import { DEFAULT_NPC_VISIBILITY } from '../../../npc/helpers/npc-visibility.rules';
 import { NpcVisibilityRules } from '../../../npc/models/npc';
 import {
@@ -51,7 +52,7 @@ import {
   WORLD_NAME_MAX_LENGTH,
 } from '../../helpers/world-draft.rules';
 import { RuleFieldsComponent } from '../../components/rule-fields/rule-fields.component';
-import { OfflineFeatures, WorldDraft } from '../../models/world';
+import { CombatRules, OfflineFeatures, WorldDraft } from '../../models/world';
 
 interface AttributeRow {
   key: number;
@@ -69,8 +70,10 @@ const PRESETS: readonly (FormulaPreset | 'custom')[] = [
   'custom',
 ];
 
-/** New game wizard: identity → attributes → rules, with a live preview. */
+import { createPointerKind } from '../../../../core/helpers/pointer-kind';
 import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
+
+/** New game wizard: identity → attributes → rules, with a live preview. */
 @Component({
   selector: 'app-world-new-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -81,6 +84,7 @@ import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
     ButtonModule,
     CheckboxModule,
     FileUploadModule,
+    ImageWarningComponent,
     InputNumberModule,
     InputTextModule,
     MessageModule,
@@ -133,6 +137,15 @@ export class WorldNewPageComponent {
   protected readonly npcVisibility = signal<NpcVisibilityRules>(
     DEFAULT_NPC_VISIBILITY,
   );
+  protected readonly skillRollsEnabled = signal(true);
+  /** Combat settings; the defaults until the player edits them. */
+  protected readonly combat = signal<CombatRules | undefined>(undefined);
+  /** Row key of the combat life attribute (not its name, so renaming the row keeps it). */
+  private readonly combatLifeKey = signal<number | null>(null);
+  protected readonly sellAnywhere = signal(true);
+  protected readonly sellAnywhereRatio = signal(1);
+  protected readonly merchantBuyRatio = signal(1);
+  protected readonly merchantSellRatio = signal(0.5);
   protected readonly offline = signal<OfflineFeatures>({
     ...DEFAULT_OFFLINE_FEATURES,
   });
@@ -166,7 +179,13 @@ export class WorldNewPageComponent {
     skillPointsPerLevel: this.skillPointsPerLevel(),
     startingMoney: this.startingMoney(),
     offlineFeatures: this.offline(),
+    skillRollsEnabled: this.skillRollsEnabled(),
+    sellAnywhere: this.sellAnywhere(),
+    sellAnywhereRatio: this.sellAnywhereRatio(),
+    merchantBuyRatio: this.merchantBuyRatio(),
+    merchantSellRatio: this.merchantSellRatio(),
     npcVisibility: this.npcVisibility(),
+    combat: this.combatWithLife(),
   }));
   /** Per row, the problem of its cap (null when none or valid). */
   protected readonly capErrors = computed(() =>
@@ -195,9 +214,11 @@ export class WorldNewPageComponent {
   protected setChart(target: number | 'curve' | null): void {
     this.chartOpen.set(target);
   }
+  /** Mouse or finger: iOS calls a tap's click a mouse click, so this asks the press. */
+  protected readonly pointer = createPointerKind();
   /** Mouse hover opens the chart; touch and pen go through the tap. */
   protected hoverChart(event: Event, target: number | 'curve' | null): void {
-    if ((event as PointerEvent).pointerType === 'mouse') this.setChart(target);
+    if (this.pointer.isMouseHover(event)) this.setChart(target);
   }
   /** Keyboard focus opens the chart (a pointer press is handled by hover or tap). */
   protected focusChart(event: Event, target: number | 'curve'): void {
@@ -211,7 +232,7 @@ export class WorldNewPageComponent {
   }
   /** A tap (or Enter) toggles the chart; a mouse click leaves the hover state alone. */
   protected tapChart(event: Event, target: number | 'curve'): void {
-    if ((event as PointerEvent).pointerType === 'mouse') return;
+    if (this.pointer.isMouseClick(event)) return;
     this.chartOpen.update((open) => (open === target ? null : target));
   }
   protected readonly errors = computed(() =>
@@ -365,7 +386,17 @@ export class WorldNewPageComponent {
     this.startingSkillPoints.set(draft.startingSkillPoints ?? 1);
     this.skillPointsPerLevel.set(draft.skillPointsPerLevel ?? 1);
     this.offline.set({ ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures });
+    this.skillRollsEnabled.set(draft.skillRollsEnabled ?? true);
+    this.sellAnywhere.set(draft.sellAnywhere ?? true);
+    this.sellAnywhereRatio.set(draft.sellAnywhereRatio ?? 1);
+    this.merchantBuyRatio.set(draft.merchantBuyRatio ?? 1);
+    this.merchantSellRatio.set(draft.merchantSellRatio ?? 0.5);
     this.npcVisibility.set(draft.npcVisibility ?? DEFAULT_NPC_VISIBILITY);
+    this.combat.set(draft.combat);
+    const life = draft.combat?.lifeAttribute?.trim();
+    this.combatLifeKey.set(
+      this.attributes().find((row) => row.name.trim() === life)?.key ?? null,
+    );
   }
 
   protected async create(): Promise<void> {
@@ -392,6 +423,16 @@ export class WorldNewPageComponent {
     } finally {
       this.creating.set(false);
     }
+  }
+
+  /** The edited combat rules, their life attribute following its row (cleared when the row is deleted). */
+  private combatWithLife(): CombatRules | undefined {
+    const combat = this.combat();
+    if (!combat) return undefined;
+    const row = this.attributes().find(
+      (entry) => entry.key === this.combatLifeKey(),
+    );
+    return { ...combat, lifeAttribute: row?.name.trim() || undefined };
   }
 
   private barName(key: number | null): string | undefined {

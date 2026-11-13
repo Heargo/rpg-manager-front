@@ -64,6 +64,7 @@
                 [disabled]="uploading()"
                 (uploadHandler)="upload($event)"
               />
+              <app-image-warning />
               <div class="actions">
                 <p-button
                   [label]="'world.new.next' | transloco"
@@ -193,6 +194,7 @@
                         data-chart-trigger
                         [attr.tabindex]="previews()[i].levels ? 0 : null"
                         [attr.aria-expanded]="chartOpen() === i"
+                        (pointerdown)="pointer.down($event)"
                         (pointerenter)="hoverChart($event, i)"
                         (pointerleave)="hoverChart($event, null)"
                         (focus)="focusChart($event, i)"
@@ -356,6 +358,7 @@
                 [draft]="draft()"
                 (draftChange)="applyRules($event)"
                 [errors]="errors()"
+                [collapsed]="true"
               />
 
               <div class="check">

@@ -5,3 +5,10 @@
   top: 0.5rem;
   z-index: 10;
 }
+
+// On a phone the Close the world button keeps only its icon (the aria-label names it).
+@media (max-width: 640px) {
+  .close-world ::ng-deep .p-button-label {
+    display: none;
+  }
+}

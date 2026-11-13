@@ -8,7 +8,10 @@ import { ITEM_RARITIES } from '../../../core/models/item';
 import { Sheet } from '../../world/models/world';
 import {
   Skill,
-  SKILL_MAX_RANK,
+  SKILL_MAX_LEVEL,
+  SKILL_ROLL_COUNT_MAX,
+  SKILL_SUCCESS_MODES,
+  SKILL_ROLL_FACES_MAX,
   SKILL_TARGETS,
   SKILL_TYPES,
   SkillDraft,
@@ -22,11 +25,34 @@ export interface SkillIssue {
 }
 
 export interface SkillAmountScope {
-  rank: number;
+  skillLevel: number;
   /** The caster's level. */
   level: number;
   /** The caster's attribute maxima, by name. */
   maxima: Record<string, number>;
+  /** The target's attribute maxima, by name; absent reads 0. */
+  targetMaxima?: Record<string, number>;
+  /** The dice total of the use (0 when none). */
+  roll?: number;
+}
+
+export const TARGET_PREFIX = 'target_';
+
+/**
+ * The `target_<name>` variables for a formula: one per attribute of the caster or the target (the caster and the target
+ * share the world's attributes), valued at the target's maximum, or 0 without a target.
+ */
+export function targetVariables(
+  maxima: Record<string, number>,
+  targetMaxima?: Record<string, number>,
+): Record<string, number> {
+  const names = new Set([
+    ...Object.keys(maxima),
+    ...Object.keys(targetMaxima ?? {}),
+  ]);
+  return Object.fromEntries(
+    [...names].map((name) => [TARGET_PREFIX + name, targetMaxima?.[name] ?? 0]),
+  );
 }
 
 const amountFormula = (amount: string) => ({
@@ -34,7 +60,7 @@ const amountFormula = (amount: string) => ({
   expression: amount,
 });
 
-/** The checks of the catalogue: name, ranks, cost, active-only fields and every effect amount formula. */
+/** The checks of the catalogue: name, levels, cost, active-only fields and every effect amount formula. */
 export function validateSkill(
   skill: SkillDraft,
   attributeNames: string[],
@@ -42,11 +68,11 @@ export function validateSkill(
   const issues: SkillIssue[] = [];
   if (!skill.name.trim()) issues.push({ field: 'name', code: 'required' });
   if (
-    !Number.isInteger(skill.maxRank) ||
-    skill.maxRank < 1 ||
-    skill.maxRank > SKILL_MAX_RANK
+    !Number.isInteger(skill.maxLevel) ||
+    skill.maxLevel < 1 ||
+    skill.maxLevel > SKILL_MAX_LEVEL
   ) {
-    issues.push({ field: 'maxRank', code: 'invalid' });
+    issues.push({ field: 'maxLevel', code: 'invalid' });
   }
   if (!Number.isInteger(skill.pointCost) || skill.pointCost < 1)
     issues.push({ field: 'pointCost', code: 'invalid' });
@@ -54,21 +80,68 @@ export function validateSkill(
     issues.push({ field: 'target', code: 'required' });
   if (skill.type === 'passive' && skill.target)
     issues.push({ field: 'target', code: 'invalid' });
+  if (
+    skill.actionType !== undefined &&
+    (skill.type !== 'active' ||
+      typeof skill.actionType !== 'string' ||
+      !skill.actionType.trim())
+  )
+    issues.push({ field: 'actionType', code: 'invalid' });
   skill.effects.forEach((effect, index) => {
     if (
       validateFormula(
         amountFormula(effect.amount),
-        [...attributeNames, 'rank'],
+        [
+          ...attributeNames,
+          ...attributeNames.map((name) => TARGET_PREFIX + name),
+          'skillLevel',
+          'roll',
+        ],
         ['level'],
       )
     ) {
       issues.push({ field: `effects.${index}.amount`, code: 'formula' });
     }
   });
+  if (skill.type === 'active') {
+    const { roll, success } = skill;
+    if (roll) {
+      if (
+        !Number.isInteger(roll.count) ||
+        roll.count < 1 ||
+        roll.count > SKILL_ROLL_COUNT_MAX
+      )
+        issues.push({ field: 'roll.count', code: 'invalid' });
+      if (
+        !Number.isInteger(roll.faces) ||
+        roll.faces < 2 ||
+        roll.faces > SKILL_ROLL_FACES_MAX
+      )
+        issues.push({ field: 'roll.faces', code: 'invalid' });
+    }
+    if (success?.mode === 'threshold' && !Number.isInteger(success.value))
+      issues.push({ field: 'success.value', code: 'invalid' });
+    if (
+      success?.mode === 'formula' &&
+      (typeof success.formula !== 'string' ||
+        !success.formula.trim() ||
+        validateFormula(
+          amountFormula(success.formula),
+          [
+            ...attributeNames,
+            ...attributeNames.map((name) => TARGET_PREFIX + name),
+            'skillLevel',
+            'roll',
+          ],
+          ['level'],
+        ))
+    )
+      issues.push({ field: 'success.formula', code: 'formula' });
+  }
   return issues;
 }
 
-/** An effect amount for a caster: `rank`, `level` and the caster's attribute maxima by name. */
+/** An effect amount for a caster: `skillLevel`, `level` and the caster's attribute maxima by name. */
 export function evaluateSkillAmount(
   amount: string,
   scope: SkillAmountScope,
@@ -77,28 +150,38 @@ export function evaluateSkillAmount(
     level: scope.level,
     base: 0,
     playerLevel: scope.level,
-    levels: { ...scope.maxima, rank: scope.rank },
+    levels: {
+      ...scope.maxima,
+      ...targetVariables(scope.maxima, scope.targetMaxima),
+      skillLevel: scope.skillLevel,
+      roll: scope.roll ?? 0,
+    },
   });
 }
 
 export type SkillAmountPreview =
-  | { ok: true; rank1: number; maxRank: number }
+  | { ok: true; level1: number; maxLevel: number }
   | { ok: false; error: FormulaError };
 
-/** The amount at rank 1 and at max rank for a level 1 caster whose attribute maxima are 1. */
+/** The amount at skillLevel 1 and at max skillLevel for a level 1 caster whose attribute maxima are 1. */
 export function previewSkillAmount(
   amount: string,
   attributeNames: string[],
-  maxRank: number,
+  maxLevel: number,
 ): SkillAmountPreview {
   const maxima = Object.fromEntries(attributeNames.map((name) => [name, 1]));
-  const at = (rank: number) =>
-    evaluateSkillAmount(amount, { rank, level: 1, maxima });
+  const at = (skillLevel: number) =>
+    evaluateSkillAmount(amount, {
+      skillLevel,
+      level: 1,
+      maxima,
+      targetMaxima: maxima,
+    });
   const first = at(1);
   if (!first.ok) return { ok: false, error: first.error };
-  const last = at(maxRank);
+  const last = at(maxLevel);
   if (!last.ok) return { ok: false, error: last.error };
-  return { ok: true, rank1: first.value, maxRank: last.value };
+  return { ok: true, level1: first.value, maxLevel: last.value };
 }
 
 export function filterSkills(skills: Skill[], filter: SkillFilter): Skill[] {
@@ -175,7 +258,7 @@ export function emptySkill(): SkillDraft {
     description: '',
     rarity: 'common',
     type: 'active',
-    maxRank: 1,
+    maxLevel: 1,
     pointCost: 1,
     target: 'one-enemy',
     cooldown: 0,
@@ -208,11 +291,21 @@ export function parseSkillJson(
     typeof value === 'object' &&
     value !== null &&
     typeof record['name'] === 'string' &&
-    typeof record['maxRank'] === 'number' &&
+    typeof record['maxLevel'] === 'number' &&
     typeof record['pointCost'] === 'number' &&
     (SKILL_TYPES as readonly unknown[]).includes(record['type']) &&
     (record['target'] === undefined ||
       (SKILL_TARGETS as readonly unknown[]).includes(record['target'])) &&
+    (record['roll'] === undefined ||
+      (typeof record['roll'] === 'object' && record['roll'] !== null)) &&
+    (record['success'] === undefined ||
+      (typeof record['success'] === 'object' &&
+        record['success'] !== null &&
+        (SKILL_SUCCESS_MODES as readonly unknown[]).includes(
+          (record['success'] as { mode?: unknown }).mode,
+        ))) &&
+    (record['actionType'] === undefined ||
+      typeof record['actionType'] === 'string') &&
     Array.isArray(record['effects']) &&
     record['effects'].every(
       (effect) =>

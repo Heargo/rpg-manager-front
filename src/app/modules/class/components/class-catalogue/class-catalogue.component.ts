@@ -21,7 +21,7 @@ import { filterClasses } from '../../helpers/class.rules';
 import { CharacterClass } from '../../models/class';
 import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
 
-/** A world's class catalogue: search, a card per class, with edit, duplicate and delete. */
+/** A world's class catalogue: search, a list row per class, with edit, duplicate and delete. */
 @Component({
   selector: 'app-class-catalogue',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,14 +65,29 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
     </div>
 
     @if (shown().length) {
-      <div class="grid">
+      <ul class="list">
         @for (entry of shown(); track entry.id) {
-          <div class="card" data-field="class">
-            <strong>{{ entry.name }}</strong>
-            <p class="hint">{{ entry.description }}</p>
-            <span class="hint">{{
-              'class.catalogue.skills' | transloco: { count: entry.tree.length }
-            }}</span>
+          <li class="row" data-field="class">
+            @if (entry.imageId) {
+              <app-stored-image
+                class="thumb"
+                [imageId]="entry.imageId"
+                [alt]="entry.name"
+              />
+            }
+            <div class="main">
+              <div class="line">
+                <strong data-field="class-name">{{ entry.name }}</strong>
+                <span class="meta" data-field="class-bonuses">{{
+                  bonusSummary(entry)
+                }}</span>
+                <span class="meta" data-field="class-skill-count">{{
+                  'class.catalogue.skills'
+                    | transloco: { count: entry.tree.length }
+                }}</span>
+              </div>
+              <p class="hint">{{ entry.description }}</p>
+            </div>
             <div class="actions">
               <button
                 pButton
@@ -101,7 +116,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
                 icon="pi pi-copy"
                 severity="secondary"
                 [text]="true"
-                [label]="'class.catalogue.duplicate' | transloco"
+                [attr.aria-label]="'class.catalogue.duplicate' | transloco"
                 (click)="duplicate.emit(entry)"
               ></button>
               <button
@@ -115,9 +130,9 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
                 (click)="askDelete(entry)"
               ></button>
             </div>
-          </div>
+          </li>
         }
-      </div>
+      </ul>
     } @else {
       <p class="hint">{{ 'class.catalogue.empty' | transloco }}</p>
     }
@@ -194,8 +209,8 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
                   <header>
                     <strong>{{ skill.name }}</strong>
                     <span class="hint">{{
-                      'class.catalogue.maxRank'
-                        | transloco: { count: skill.maxRank }
+                      'class.catalogue.maxLevel'
+                        | transloco: { count: skill.maxLevel }
                     }}</span>
                   </header>
                   <p class="hint">{{ skill.description }}</p>
@@ -219,23 +234,61 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
       gap: 0.75rem;
       align-items: center;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-      gap: 1rem;
-    }
-    .card {
+    /* one card per entry, so a long list keeps some relief */
+    .list {
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
-      padding: 0.75rem;
+      gap: 0.6rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
       border: 1px solid var(--p-content-border-color);
-      border-radius: 0.5rem;
+      border-radius: 0.75rem;
+      background: var(--p-content-background);
+      box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+      transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+    }
+    .row:hover {
+      border-color: var(--p-primary-color);
+      box-shadow: 0 3px 10px rgb(0 0 0 / 0.12);
+    }
+    .thumb {
+      flex: none;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.4rem;
+    }
+    .main {
+      flex: 1;
+      min-width: 0;
+    }
+    .line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.25rem 0.75rem;
+    }
+    .meta {
+      color: var(--p-text-muted-color);
+      font-size: 0.85rem;
     }
     .actions {
+      flex: none;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+    }
+    .main .hint {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .details {
       display: flex;
@@ -351,6 +404,12 @@ export class ClassCatalogueComponent {
   protected readonly shown = computed(() =>
     filterClasses(this.classes(), { search: this.search() }),
   );
+
+  protected bonusSummary(entry: CharacterClass): string {
+    return (entry.bonuses ?? [])
+      .map((b) => `${b.attribute} ${b.value > 0 ? '+' : ''}${b.value}`)
+      .join(', ');
+  }
 
   protected askDelete(entry: CharacterClass): void {
     this.confirmation.confirm({

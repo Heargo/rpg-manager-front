@@ -13,11 +13,15 @@ import { ClassCatalogueComponent } from './class-catalogue.component';
  * `[data-field="details-item"]` per starting item (by item name), the read-only `app-skill-tree`, and a
  * `[data-skill="<skillId>"]` block per tree skill with its name and description. Clicking a tree node
  * (`[data-tree-node]`) scrolls its `[data-skill]` block into view. Inputs added: `skills` and `items` (catalogues).
+
+ * Row contract (list rework): each `[data-field="class"]` is one row with `[data-field="class-name"]`,
+ * `[data-field="class-bonuses"]` (summary, e.g. "Life +5"), `[data-field="class-skill-count"]` (tree length) and an
+ * `app-stored-image` when the class has an imageId. The View/Edit/Delete hooks are unchanged.
  */
 describe('ClassCatalogueComponent', () => {
   const skill = (id: string, name: string, description: string): Skill => ({
-    id, name, description, rarity: 'common', type: 'passive', maxRank: 3, pointCost: 1,
-    effects: [{ kind: 'modify', attribute: 'Life', amount: 'rank', duration: 0 }],
+    id, name, description, rarity: 'common', type: 'passive', maxLevel: 3, pointCost: 1,
+    effects: [{ kind: 'modify', attribute: 'Life', amount: 'skillLevel', duration: 0 }],
   });
   const skills = [skill('s1', 'Slash', 'A fast cut.'), skill('s2', 'Parry', 'Turns a blow aside.')];
   const items: Item[] = [
@@ -29,10 +33,10 @@ describe('ClassCatalogueComponent', () => {
     startingItems: ['i1'],
     tree: [
       { skillId: 's1', requires: [], minLevel: 1, column: 0, row: 0 },
-      { skillId: 's2', requires: [{ skillId: 's1', rank: 1 }], minLevel: 2, column: 1, row: 0 },
+      { skillId: 's2', requires: [{ skillId: 's1', level: 1 }], minLevel: 2, column: 1, row: 0 },
     ],
   };
-  const mage: CharacterClass = { id: 'c2', name: 'Mage', description: 'Casts.', tree: [] };
+  const mage: CharacterClass = { id: 'c2', name: 'Mage', description: 'Casts.', tree: [], imageId: 'img-mage' };
 
   async function setup() {
     TestBed.configureTestingModule({ imports: [ClassCatalogueComponent], providers: TEST_PROVIDERS });
@@ -91,5 +95,29 @@ describe('ClassCatalogueComponent', () => {
     await fixture.whenStable();
     expect(scroll).toHaveBeenCalledTimes(1);
     expect(scroll.mock.contexts[0]).toBe(details.querySelector('[data-skill="s2"]'));
+  });
+
+  it('renders one row per class with name, bonuses summary and skill count', async () => {
+    const { el } = await setup();
+    const rows = el.querySelectorAll<HTMLElement>('[data-field="class"]');
+    expect(rows).toHaveLength(2);
+    expect(rows[0].querySelector('[data-field="class-name"]')!.textContent).toContain('Warrior');
+    expect(rows[0].querySelector('[data-field="class-bonuses"]')!.textContent).toContain('Life');
+    expect(rows[0].querySelector('[data-field="class-bonuses"]')!.textContent).toContain('+5');
+    expect(rows[0].querySelector('[data-field="class-skill-count"]')!.textContent).toContain('2');
+    expect(rows[1].querySelector('[data-field="class-skill-count"]')!.textContent).toContain('0');
+  });
+
+  it('shows the class image in its row when it has one', async () => {
+    const { el } = await setup();
+    const rows = el.querySelectorAll<HTMLElement>('[data-field="class"]');
+    expect(rows[0].querySelector('app-stored-image')).toBeNull();
+    expect(rows[1].querySelector('app-stored-image')).not.toBeNull();
+  });
+
+  it('keeps Edit and Delete on each row', async () => {
+    const { el } = await setup();
+    expect(el.querySelectorAll('[data-field="class"] [data-action="edit"]')).toHaveLength(2);
+    expect(el.querySelectorAll('[data-field="class"] [data-action="delete"]')).toHaveLength(2);
   });
 });

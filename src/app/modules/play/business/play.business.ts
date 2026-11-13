@@ -1,22 +1,24 @@
 import { computed, inject, Injectable } from '@angular/core';
+import { JoinedWorldsBusiness } from './joined-worlds.business';
 import { RoomBusiness } from '../../room/business/room.business';
 import { WorldLibraryBusiness } from '../../world/business/world-library.business';
 
-/** The "Play" hub: the worlds this device hosts and the rooms it joined, tying the world and room features together. */
+/** The "Play" hub: the worlds this device hosts and the ones it joined, tying the world and room features together. */
 @Injectable({ providedIn: 'root' })
 export class PlayBusiness {
   private readonly worlds = inject(WorldLibraryBusiness);
   private readonly room = inject(RoomBusiness);
+  private readonly joined = inject(JoinedWorldsBusiness);
 
   readonly $worlds = this.worlds.$worlds;
-  readonly $joinedRooms = this.room.$recentRooms;
+  readonly $joinedWorlds = this.joined.$worlds;
   readonly $roomStatus = this.room.$status;
   readonly $roomName = computed(() => this.room.$room()?.name);
   /** The world whose room is open on this device, if any. */
   readonly $hostedWorldId = computed(() => (this.room.$isHost() ? this.room.$room()?.worldId : undefined));
 
-  load(): Promise<void> {
-    return this.worlds.load();
+  async load(): Promise<void> {
+    await Promise.all([this.worlds.load(), this.joined.load()]);
   }
 
   /** Opens a room for the world. Resolves false when another tab is already hosting. */
@@ -49,8 +51,8 @@ export class PlayBusiness {
     return this.worlds.importWorld(text);
   }
 
-  forgetRoom(roomId: string): Promise<void> {
-    return this.room.forgetRecentRoom(roomId);
+  removeJoinedWorld(worldId: string): Promise<void> {
+    return this.joined.remove(worldId);
   }
 
   describeError(error: unknown): string {

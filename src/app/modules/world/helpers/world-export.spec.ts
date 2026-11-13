@@ -177,7 +177,7 @@ describe('world export of attribute caps', () => {
 });
 
 describe('world import of sheet skills and class', () => {
-  const character = { id: 'c', playerId: 'p', name: 'Ada', statPoints: 0, xp: 0, level: 1, money: 0, rev: 0, updatedAt: 0, attributes: [], inventory: [], skillPoints: 3, skills: [{ skillId: 's1', rank: 2 }], classId: 'warrior' };
+  const character = { id: 'c', playerId: 'p', name: 'Ada', statPoints: 0, xp: 0, level: 1, money: 0, rev: 0, updatedAt: 0, attributes: [], inventory: [], skillPoints: 3, skills: [{ skillId: 's1', level: 2 }], classId: 'warrior' };
   const parse = (changes: Record<string, unknown>, remove: string[] = []) => {
     const file = JSON.parse(JSON.stringify(buildWorldExport(world, {}, 9)));
     const next: Record<string, unknown> = { ...character, ...changes };
@@ -189,7 +189,7 @@ describe('world import of sheet skills and class', () => {
   it('refuses an old export without skillPoints or skills, and keeps the new fields of a valid one', () => {
     const valid = parse({});
     expect(valid.ok).toBe(true);
-    if (valid.ok) expect(valid.value.world.characters[0]).toMatchObject({ classId: 'warrior', skillPoints: 3, skills: [{ skillId: 's1', rank: 2 }] });
+    if (valid.ok) expect(valid.value.world.characters[0]).toMatchObject({ classId: 'warrior', skillPoints: 3, skills: [{ skillId: 's1', level: 2 }] });
     expect(parse({}, ['classId']).ok).toBe(true);
     const noPoints = parse({}, ['skillPoints']);
     expect(noPoints.ok).toBe(false);
@@ -205,10 +205,10 @@ describe('world import of sheet skills and class', () => {
     if (!badClass.ok) expect(badClass.errors).toContain('world.characters[0].classId must be a string');
     const badPoints = parse({ skillPoints: -1 });
     expect(badPoints.ok).toBe(false);
-    const badSkill = parse({ skills: [{ skillId: 's1', rank: 0 }] });
+    const badSkill = parse({ skills: [{ skillId: 's1', level: 0 }] });
     expect(badSkill.ok).toBe(false);
-    if (!badSkill.ok) expect(badSkill.errors).toContain('world.characters[0].skills[0].rank must be an integer of 1 or more');
-    const noId = parse({ skills: [{ rank: 1 }] });
+    if (!badSkill.ok) expect(badSkill.errors).toContain('world.characters[0].skills[0].level must be an integer of 1 or more');
+    const noId = parse({ skills: [{ level: 1 }] });
     expect(noId.ok).toBe(false);
     if (!noId.ok) expect(noId.errors).toContain('world.characters[0].skills[0].skillId must be a string');
   });

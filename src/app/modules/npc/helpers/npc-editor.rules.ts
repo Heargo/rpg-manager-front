@@ -327,23 +327,23 @@ export function setNpcClass(npc: Npc, classId: string | undefined): Npc {
   return next;
 }
 
-/** The NPC with this skill at that rank (0 removes it); an unknown skill or a rank out of range changes nothing. */
+/** The NPC with this skill at that level (0 removes it); an unknown skill or a level out of range changes nothing. */
 export function setNpcSkill(
   npc: Npc,
   skillId: string,
-  rank: number,
+  level: number,
   world: World,
 ): Npc {
   const result = applyNpcAction(
     npc,
-    { kind: 'set-skill', skillId, rank },
+    { kind: 'set-skill', skillId, level },
     world,
   );
   return result.ok ? result.character : npc;
 }
 
 /**
- * The NPC spending the points of its level along its class tree, one rank at a time on the first node
+ * The NPC spending the points of its level along its class tree, one level at a time on the first node
  * (row, then column) it can learn. Skills already on the sheet are kept.
  */
 export function learnNpcSkillsFromClass(npc: Npc, world: World): Npc {
@@ -375,7 +375,7 @@ function learnNpcSkills(
   const spent = npc.skills.reduce((sum, entry) => {
     const skill = world.skills.find((s) => s.id === entry.skillId);
     const inTree = tree.some((node) => node.skillId === entry.skillId);
-    return sum + (inTree && skill ? entry.rank * skill.pointCost : 0);
+    return sum + (inTree && skill ? entry.level * skill.pointCost : 0);
   }, 0);
   let current: Npc = {
     ...npc,

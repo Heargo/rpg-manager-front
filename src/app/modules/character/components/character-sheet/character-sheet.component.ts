@@ -24,10 +24,12 @@ import { StoredImageComponent } from '../../../../core/components/stored-image/s
 import { EQUIPMENT_SLOTS, EquipmentSlot } from '../../../../core/models/item';
 import { ItemCardComponent } from '../../../item/components/item-card/item-card.component';
 import { RARITY_SEVERITY } from '../../../item/helpers/item-display';
+import { sellAnywherePrice } from '../../../npc/helpers/merchant.rules';
 import { CharacterCardComponent } from '../character-card/character-card.component';
 import { SlotSilhouetteComponent } from '../../../../core/components/slot-silhouette/slot-silhouette.component';
 import { SkillTreeComponent } from '../../../class/components/skill-tree/skill-tree.component';
 import { treeNodeStates } from '../../../class/helpers/class.rules';
+import { SkillUseResult } from '../../../skill/helpers/skill-roll.rules';
 import { ClassView } from '../../models/character-api';
 import { Character, InventoryItem } from '../../../world/models/world';
 import {
@@ -39,6 +41,10 @@ import {
   CharacterActionKind,
   MAX_GRANTED_POINTS,
 } from '../../helpers/character-actions.rules';
+
+interface UseView extends SkillUseResult {
+  effects: { kind: string; attribute: string; amount: number }[];
+}
 
 const ITEM_ICONS: Record<string, string> = {
   item: 'pi pi-box',
@@ -98,6 +104,7 @@ export class CharacterSheetComponent {
   protected readonly icons = ITEM_ICONS;
   protected readonly grantAmount = signal(1);
   protected readonly grantXpAmount = signal(100);
+  protected readonly grantSkillPointsAmount = signal(1);
   /** The item whose details dialog is open. */
   private readonly openItemId = signal<string | null>(null);
   /** The item the context menu / action menu was opened on. */
@@ -131,9 +138,9 @@ export class CharacterSheetComponent {
     const tree = this.classView()?.characterClass?.tree;
     return tree ? treeNodeStates(tree, this.character()) : [];
   });
-  protected readonly ranks = computed(() =>
+  protected readonly levels = computed(() =>
     Object.fromEntries(
-      this.character().skills.map((entry) => [entry.skillId, entry.rank]),
+      this.character().skills.map((entry) => [entry.skillId, entry.level]),
     ),
   );
   /** One row per skill of the class tree, with what the player can do with it. */
@@ -145,17 +152,18 @@ export class CharacterSheetComponent {
       const state = this.treeStates().find(
         (entry) => entry.skillId === node.skillId,
       )?.state;
-      const rank = this.ranks()[node.skillId] ?? 0;
+      const level = this.levels()[node.skillId] ?? 0;
       return {
         skillId: node.skillId,
         name: skill?.name ?? node.skillId,
-        rank,
-        maxRank: skill?.maxRank ?? 0,
+        level,
+        maxLevel: skill?.maxLevel ?? 0,
         cost: skill?.pointCost ?? 0,
+        usable: skill?.type === 'active' && level > 0,
         learnable:
           !!skill &&
           state !== 'locked' &&
-          rank < skill.maxRank &&
+          level < skill.maxLevel &&
           character.skillPoints >= skill.pointCost,
       };
     });
@@ -175,11 +183,50 @@ export class CharacterSheetComponent {
         return {
           skillId: entry.skillId,
           name: skill?.name ?? entry.skillId,
-          rank: entry.rank,
-          maxRank: skill?.maxRank ?? entry.rank,
+          level: entry.level,
+          maxLevel: skill?.maxLevel ?? entry.level,
+          usable: skill?.type === 'active' && entry.level > 0,
         };
       });
   });
+
+  /** The last use of each skill, by id. */
+  protected readonly uses = signal<Record<string, UseView>>({});
+
+  /** Skills whose roll is running: their Use button waits. */
+  protected readonly pendingUses = signal<string[]>([]);
+
+  protected async useSkill(skillId: string): Promise<void> {
+    if (this.pendingUses().includes(skillId)) return;
+    this.pendingUses.update((ids) => [...ids, skillId]);
+    try {
+      await this.runUse(skillId);
+    } finally {
+      this.pendingUses.update((ids) => ids.filter((id) => id !== skillId));
+    }
+  }
+
+  private async runUse(skillId: string): Promise<void> {
+    const skill = this.classView()?.skills.find((entry) => entry.id === skillId);
+    if (!skill) return;
+    const result = await this.characters.useSkill(
+      skill,
+      this.levels()[skillId] ?? 0,
+      this.character(),
+      this.world(),
+    );
+    this.uses.update((uses) => ({
+      ...uses,
+      [skillId]: {
+        ...result,
+        effects: skill.effects.map((effect, index) => ({
+          kind: effect.kind,
+          attribute: effect.attribute,
+          amount: Math.round(result.amounts[index]),
+        })),
+      },
+    }));
+  }
 
   protected learn(skillId: string): void {
     this.act.emit({ kind: 'learn-skill', skillId });
@@ -190,11 +237,23 @@ export class CharacterSheetComponent {
   }
 
   protected removeTaught(skillId: string): void {
-    this.act.emit({ kind: 'set-skill', skillId, rank: 0 });
+    this.act.emit({ kind: 'set-skill', skillId, level: 0 });
   }
 
   protected isLocked(kind: CharacterActionKind): boolean {
     return this.lockedActions().includes(kind);
+  }
+
+  /** Selling anywhere is allowed by the world (default on). */
+  protected readonly canSell = computed(
+    () => this.world().sellAnywhere !== false,
+  );
+
+  /** What selling anywhere pays for the item. */
+  protected sellPriceOf(entry: InventoryItem): number {
+    return sellAnywherePrice(entry.item.price, {
+      sellAnywhereRatio: this.world().sellAnywhereRatio ?? 1,
+    });
   }
 
   protected money(amount: number): string {
@@ -218,6 +277,12 @@ export class CharacterSheetComponent {
     const amount = this.grantXpAmount();
     if (Number.isInteger(amount) && amount >= 1)
       this.act.emit({ kind: 'grant-xp', amount });
+  }
+
+  protected grantSkillPoints(): void {
+    const amount = this.grantSkillPointsAmount();
+    if (Number.isInteger(amount) && amount >= 1)
+      this.act.emit({ kind: 'grant-skill-points', amount });
   }
 
   protected refund(attributeId: string): void {
@@ -314,7 +379,7 @@ export class CharacterSheetComponent {
   }
 
   protected sell(entry: InventoryItem): void {
-    const price = this.money(entry.item.price);
+    const price = this.money(this.sellPriceOf(entry));
     this.confirm.confirm({
       header: this.language.t('character.items.sellTitle'),
       message: this.language.t('character.items.sellMessage', {
@@ -367,15 +432,16 @@ export class CharacterSheetComponent {
         command: () => this.use(entry),
       });
     }
-    items.push(
-      { separator: true },
-      {
-        ...locked('sell'),
-        label: t('character.items.sell'),
-        icon: 'pi pi-wallet',
-        command: () => this.sell(entry),
-      },
-    );
+    if (this.canSell())
+      items.push(
+        { separator: true },
+        {
+          ...locked('sell'),
+          label: t('character.items.sell'),
+          icon: 'pi pi-wallet',
+          command: () => this.sell(entry),
+        },
+      );
     return items;
   }
 }

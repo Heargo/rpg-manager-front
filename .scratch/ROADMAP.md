@@ -115,6 +115,7 @@ Tickets in `npcs-skills-combat/` (N). Status: validated (2026-11-08), every tick
 | 46 | **N12** Combat rules (pure) and world combat settings | Pure rules first. | N05, N15 |
 | 47 | **N13** Combat protocol and host persistence | | N12, N02, N10 |
 | 48 | **N14** Combat UI and sandbox tool (list mode) | | N13, N07 |
+| 48b | **N20** Combat protocol follow-ups | N13 review notes: player view leaks, typed initiative in rolled mode, error keys. | N13 |
 | 49 | **N16** Combat grid | Optional per world; after list mode works. | N14 |
 
 ## How each ticket is developed
@@ -125,3 +126,45 @@ Follow [workflow.md](../workflow.md): baseline, agreed seams, red / green / revi
 
 - Every ticket triaged to `ready-for-agent` on validation.
 - Shared dice rolls: **off** by default, with a toggle next to the Roll button (validated with this order).
+
+## Phase 9: UI feedback round 2 (2026-11-12)
+
+Tickets in `ui-feedback-2/` (F), developed on the `feedback` branch. Bugs and cheap wins first, then navigation and pages, then the model changes, the sprite colorizer last.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 50 | **F01** Mobile nav menu and dice inputs bugs | none |
+| 51 | **F02** Landing: single full-height section | none |
+| 52 | **F03** Credits: use of AI | none |
+| 53 | **F04** Nav bar two states, close the world | none |
+| 54 | **F05** Room page cleanup, offline features to World rules | none |
+| 55 | **F06** World rules clickable tabs | F05 |
+| 56 | **F07** Character details icon tabs | none |
+| 57 | **F08** Catalogues rework | none |
+| 58 | **F09** NPC portrait, human artists warning | none |
+| 59 | **F10** Random button, Copy AI prompt | none |
+| 60 | **F11** Skill and class generators | F10 |
+| 61 | **F12** Joined worlds offline | none |
+| 62 | **F13** Skill dice rolls | none |
+| 63 | **F14** Sprite colorizer (P0, P1) | none |
+| 64 | **F15** Sprite colorizer advanced (P2) | F14 |
+| 65 | **F16** P2P and encryption learning doc | none |
+
+## Phase 10: UI feedback round 3 (2026-11-12)
+
+Tickets in `ui-feedback-3/` (G). Bugs and small visual fixes first, then the shared image picker and the sheet preview, the skill editor last.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 66 | **G01** Landing: footer below the fold | none |
+| 67 | **G02** Wording: credits AI note, "niveau de compétence" | none |
+| 68 | **G03** Item catalogue: wider price slider | none |
+| 69 | **G04** Skill and class lists: one card per entry | none |
+| 70 | **G05** Tools menu per state, bordeaux Close button | none |
+| 71 | **G06** World rules: paired fields on one line | none |
+| 72 | **G07** Empty image picker | none |
+| 73 | **G08** Sheet preview: Mage by default, grant skill points | none |
+| 73b | **G11** Rank becomes skill level in the code | G02 |
+| 74 | **G09** Skill editor: readable form, variables help | G11 |
+| 75 | **G10** Formula presets for skills | G09 |
+| 76 | **G12** Skill form: modern layout | G09 |

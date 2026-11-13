@@ -14,6 +14,7 @@ import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
+import { TabsModule } from '@openng/optimus-ui/tabs';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import {
   AttributeFormula,
@@ -61,6 +62,7 @@ const PRESETS: readonly (FormulaPreset | 'custom')[] = [
     InputTextModule,
     MessageModule,
     SelectModule,
+    TabsModule,
     RuleFieldsComponent,
   ],
   templateUrl: './world-rules-page.component.html',
@@ -92,7 +94,13 @@ export class WorldRulesPageComponent {
       startingSkillPoints: world?.startingSkillPoints,
       skillPointsPerLevel: world?.skillPointsPerLevel,
       offlineFeatures: world?.offlineFeatures,
+      skillRollsEnabled: world?.skillRollsEnabled,
+      sellAnywhere: world?.sellAnywhere,
+      sellAnywhereRatio: world?.sellAnywhereRatio,
+      merchantBuyRatio: world?.merchantBuyRatio,
+      merchantSellRatio: world?.merchantSellRatio,
       npcVisibility: world?.npcVisibility,
+      combat: world?.combat,
     }),
   });
   protected readonly attributes = linkedSignal<World | null, AttributeRow[]>({
@@ -106,6 +114,25 @@ export class WorldRulesPageComponent {
         formula: attribute.formula,
         cap: attribute.cap,
       })),
+  });
+
+  protected readonly attributeNames = computed(() =>
+    this.attributes().map((row) => row.name.trim()),
+  );
+
+  /** The edited combat settings, the life attribute following its row when that is renamed. */
+  private readonly combatRules = computed(() => {
+    const combat = this.fields().combat ?? this.world()!.combat;
+    const life = combat.lifeAttribute;
+    const original = this.world()!.attributes.find(
+      (attribute) => life !== undefined && attribute.name === life,
+    );
+    const row = this.attributes().find((entry) => entry.id === original?.id);
+    if (!original) return combat;
+    return {
+      ...combat,
+      lifeAttribute: row ? row.name.trim() : undefined,
+    };
   });
 
   private readonly rules = computed<WorldRules>(() => {
@@ -129,7 +156,16 @@ export class WorldRulesPageComponent {
       startingSkillPoints: fields.startingSkillPoints ?? 0,
       skillPointsPerLevel: fields.skillPointsPerLevel ?? 0,
       offlineFeatures: { ...world!.offlineFeatures, ...fields.offlineFeatures },
+      skillRollsEnabled:
+        fields.skillRollsEnabled ?? world!.skillRollsEnabled ?? true,
+      sellAnywhere: fields.sellAnywhere ?? world!.sellAnywhere ?? true,
+      sellAnywhereRatio:
+        fields.sellAnywhereRatio ?? world!.sellAnywhereRatio ?? 1,
+      merchantBuyRatio: fields.merchantBuyRatio ?? world!.merchantBuyRatio ?? 1,
+      merchantSellRatio:
+        fields.merchantSellRatio ?? world!.merchantSellRatio ?? 0.5,
       npcVisibility: fields.npcVisibility ?? world!.npcVisibility,
+      combat: this.combatRules(),
     };
   });
   protected readonly errors = computed(() =>
@@ -144,6 +180,21 @@ export class WorldRulesPageComponent {
       attributes: this.rules().attributes,
     }),
   );
+  protected readonly tab = signal<'attributes' | 'rules' | 'offline'>(
+    'attributes',
+  );
+  /** The tab that holds each validation error: attributes, or the other rule fields. */
+  protected readonly invalidTabs = computed(() => {
+    const keys = Object.keys(this.errors());
+    return {
+      attributes:
+        keys.includes('attributes') ||
+        this.capErrors().some(Boolean) ||
+        this.formulaErrors().some(Boolean),
+      rules: keys.some((key) => key !== 'attributes'),
+      offline: false,
+    };
+  });
   protected readonly canSave = computed(
     () => Object.keys(this.errors()).length === 0,
   );
@@ -243,6 +294,11 @@ export class WorldRulesPageComponent {
         error.key === 'formula.errors.notFinite')
       ? `${error.key}AtLevel`
       : error.key;
+  }
+
+  protected openTab(value: string | number | undefined): void {
+    if (value === 'attributes' || value === 'rules' || value === 'offline')
+      this.tab.set(value);
   }
 
   protected applyFields(draft: WorldDraft): void {

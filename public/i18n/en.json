@@ -6,9 +6,32 @@
   },
   "common": {
     "cancel": "Cancel",
-    "offlineBanner": "You're offline. Saved data still works; connecting to a room needs a network."
+    "image": {
+      "choose": "Choose an image",
+      "change": "Change",
+      "remove": "Remove"
+    },
+    "imageWarning": "Prefer images made by human artists.",
+    "offlineBanner": "You're offline. Saved data still works; connecting to a room needs a network.",
+    "random": "Random",
+    "generateFromSeed": "Generate from this seed"
+  },
+  "ai": {
+    "copyPrompt": "Copy AI prompt",
+    "copyPromptHint": "Paste it in any AI chat, then paste the JSON it answers with in this tab.",
+    "promptCopied": "Prompt copied",
+    "copyFailed": "The prompt could not be copied"
   },
   "nav": {
+    "worlds": "Worlds",
+    "catalogues": "Catalogues",
+    "table": "Table",
+    "roomRules": "World rules",
+    "closeWorld": "Close the world",
+    "closeWorldHostTitle": "Close the world?",
+    "closeWorldHostMessage": "The room closes for everyone and the players are disconnected.",
+    "closeWorldPlayerTitle": "Leave the world?",
+    "closeWorldPlayerMessage": "You leave the room. You can rejoin later with an invite.",
     "play": "Play",
     "profile": "Profile",
     "language": "Language",
@@ -23,10 +46,12 @@
     "npcCatalogue": "NPC catalogue",
     "npcEditor": "NPC editor",
     "skillCatalogue": "Skill catalogue",
-    "classCatalogue": "Class catalogue"
+    "classCatalogue": "Class catalogue",
+    "spriteColorizer": "Sprite colorizer",
+    "combat": "Combat"
   },
   "play": {
-    "title": "Play",
+    "title": "Worlds",
     "activeRoom": "Room open: {{ name }}.",
     "backToRoom": "Back to the room",
     "worlds": {
@@ -46,7 +71,20 @@
     },
     "rooms": {
       "empty": "Rooms you join as a player appear here.",
-      "forgetMessage": "Forget \"{{ name }}\"? You can join again with a new invite."
+      "forgetMessage": "Forget \"{{ name }}\"? It leaves this list. You can join again with a new invite."
+    },
+    "badge": {
+      "gm": "GM",
+      "player": "Player"
+    },
+    "joined": {
+      "title": "Joined worlds",
+      "hostedBy": "Host: {{ name }}",
+      "lastSeen": "last seen {{ date }}",
+      "rejoin": "Rejoin",
+      "openSheet": "Open character",
+      "remove": "Remove from the list",
+      "readOnly": "This is your saved copy of the character in \"{{ name }}\". It is read-only until you rejoin."
     }
   },
   "world": {
@@ -125,10 +163,16 @@
       "attributeNameTooLong": "An attribute name is too long.",
       "attributeNamesUnique": "Two attributes have the same name.",
       "baseValueInteger": "Base values must be whole numbers.",
+      "ratioInvalid": "Use a ratio from 0 to 10.",
       "nonNegativeInteger": "Use a whole number, 0 or more.",
       "image": "This picture couldn't be used.",
       "capInvalid": "The cap must be a whole number, 1 or more.",
       "capTooLow": "The cap can't be below the base value ({{ base }}).",
+      "combatLifeUnknown": "The life attribute must be one of the world's attributes.",
+      "combatDiceInvalid": "Initiative dice: 1 to 100 dice with 2 to 1000 faces.",
+      "combatActionTypes": "Action types need a unique name and a count of 1 or more.",
+      "combatGrid": "The grid needs whole columns and rows of 1 or more.",
+      "combatFormula": "This formula is invalid or reads an unknown attribute.",
       "formulaInvalid": "Fix the formulas of the attributes marked in red.",
       "maxLevelInvalid": "Max level must be a whole number from 2 to 100.",
       "levelCurveInvalid": "Invalid level curve: use only level, and every level must cost at least 1 XP.",
@@ -168,7 +212,19 @@
       "intro": "Edit the attributes and rules of the world. Changes reach the players right away; sheets are updated to match.",
       "open": "World rules",
       "attributes": "Attributes",
+      "tabs": {
+        "attributes": "Attributes",
+        "rules": "Rules",
+        "offline": "Offline"
+      },
       "progression": "Progression",
+      "selling": {
+        "sellAnywhere": "Allow Sell anywhere",
+        "hint": "Players may sell items from their sheet, without a merchant. The ratios below multiply the item price.",
+        "sellAnywhereRatio": "Sell anywhere pays (x price)",
+        "merchantBuyRatio": "Merchants charge (x price)",
+        "merchantSellRatio": "Merchants pay (x price)"
+      },
       "economy": "Economy",
       "save": "Save rules",
       "saved": "Rules saved",
@@ -176,6 +232,11 @@
       "removeTitle": "Delete this attribute?",
       "removeMessage": "\"{{ name }}\" will be removed from every sheet and from the item modifiers that use it.",
       "notHosting": "Host a room to edit its world rules.",
+      "skillRolls": {
+        "title": "Skills",
+        "hint": "Active skills roll dice when used, and may fail.",
+        "label": "Skills roll dice"
+      },
       "npcs": {
         "title": "NPCs on the table",
         "hint": "What the players see of an NPC the game master shows, by role. The name and portrait are always shown; with several roles, the ticks add up.",
@@ -187,6 +248,28 @@
           "attributes": "Every attribute",
           "equipment": "Equipped items"
         }
+      },
+      "combat": {
+        "title": "Combat",
+        "hint": "How encounters run: life, initiative, actions, grid, movement and the attack and defence formulas. Formulas can read level and the attributes' maxima.",
+        "lifeAttribute": "Life attribute (0 means down)",
+        "initiativeMode": "Initiative",
+        "modes": {
+          "rolled": "Rolled",
+          "typed": "Typed by the GM",
+          "free": "Free order"
+        },
+        "initiativeDice": "Initiative dice",
+        "initiativeFormula": "Initiative bonus (formula)",
+        "actionTypes": "Actions per turn",
+        "actionName": "Action name",
+        "addAction": "Add an action type",
+        "removeAction": "Remove this action type",
+        "grid": "Use a grid",
+        "gridSize": "Grid size (columns × rows)",
+        "movement": "Movement per turn (formula)",
+        "basicAttack": "Basic attack damage (formula, optional)",
+        "defence": "Defence (formula, optional)"
       }
     }
   },
@@ -210,6 +293,7 @@
       "later": "Later"
     },
     "errors": {
+      "sellDisabled": "Selling from the sheet is turned off in this world.",
       "invalid": "This character can't be created.",
       "nameRequired": "Give your character a name.",
       "classRequired": "Choose a class for your character.",
@@ -237,13 +321,12 @@
       "levelZero": "This attribute is already at level 0.",
       "notInTree": "This skill isn't in the class tree.",
       "skillLocked": "This skill is still locked.",
-      "skillMaxRank": "This skill is already at its max rank.",
+      "skillMaxLevel": "This skill is already at its max level.",
       "noSkillPoints": "Not enough skill points.",
-      "skillNeeded": "Another learned skill needs this rank.",
+      "skillNeeded": "Another learned skill needs this level.",
       "skillNotLearned": "This skill isn't learned.",
       "unknownSkill": "This skill doesn't exist in this world.",
-      "invalidRank": "This rank is not valid for this skill.",
-      "unknownClass": "This class doesn't exist in this world."
+      "invalidLevel": "This level is not valid for this skill."
     },
     "sheet": {
       "playedBy": "Played by {{ name }}",
@@ -271,13 +354,21 @@
       "xp": "Experience",
       "grantXpLabel": "Experience",
       "grantXp": "Grant",
+      "grantSkillPointsLabel": "Skill points",
+      "grantSkillPoints": "Grant",
       "levelUp": "Level {{ level }}! +{{ points }} stat points, +{{ skillPoints }} skill points",
       "maxLevel": "Max level",
       "levelBadge": "Level {{ level }}",
       "skillPoints": "Skill points",
-      "skillCost": "{{ cost }} per rank",
+      "skillCost": "{{ cost }} per level",
       "learnSkill": "Learn {{ name }}",
-      "refundSkill": "Take back a rank of {{ name }}",
+      "useSkill": "Use {{ name }}",
+      "useSuccess": "Success",
+      "useFailure": "Failure",
+      "useRolled": "Rolled {{ total }}",
+      "useAmount": "{{ kind }} {{ attribute }}: {{ amount }}",
+      "useError": "The success formula could not be evaluated.",
+      "refundSkill": "Take back a level of {{ name }}",
       "removeSkill": "Remove {{ name }}",
       "noClass": "No class yet.",
       "taughtSkills": "Other skills",
@@ -391,7 +482,9 @@
       "notHosting": "Host a world to manage its item catalogue.",
       "toolIntro": "A sample catalogue on the default attributes. Nothing is saved.",
       "create": "New item",
-      "edit": "Edit"
+      "edit": "Edit",
+      "view": "View",
+      "selected": "Selected item"
     },
     "errors": {
       "invalid": "This item can't be given.",
@@ -409,11 +502,6 @@
       "tabGenerate": "Generate",
       "jsonHint": "Edit the item as JSON. The form follows as soon as the JSON is valid.",
       "generateHint": "Draws a random item on this world's attributes and fills the form. The same seed gives the same item.",
-      "generate": "Generate",
-      "copyPrompt": "Copy the AI prompt",
-      "copyPromptHint": "Paste it in any AI chat, then paste the JSON it gives back in the JSON tab.",
-      "promptCopied": "Prompt copied",
-      "copyFailed": "The prompt could not be copied",
       "imageFailed": "This image could not be used",
       "save": "Save",
       "saved": "{{ name }} saved",
@@ -578,17 +666,7 @@
       "generic": "Something went wrong.",
       "otherTab": "This app is already hosting a room in another tab. Use that tab, or close it first."
     },
-    "recent": {
-      "title": "Rooms you joined",
-      "hint": "To rejoin, ask the host for a new invite link.",
-      "hostedBy": "Host: {{ name }}",
-      "lastSeen": "last seen {{ date }}",
-      "forget": "Forget this room"
-    },
     "hostOfflineTooltip": "Host offline: some features still work; ask the host for a new invite to reconnect",
-    "offline": {
-      "title": "Offline features"
-    },
     "size": {
       "max": "Recommended maximum for this device: {{max}} people (you included).",
       "over": "The room is over the recommended maximum of {{max}} people. You can keep playing, but the game may lag.",
@@ -679,6 +757,14 @@
       "title": "Character sheet",
       "intro": "A sample character on the default attributes, with the default items in the bag. Everything follows the game rules and stays on this page.",
       "reset": "Start over"
+    },
+    "combat": {
+      "title": "Combat",
+      "intro": "The sample character against a catalogue enemy, with the game master's panel and the player's view on one screen. Nothing is saved.",
+      "start": "Fight the cave goblin",
+      "gm": "Game master",
+      "player": "Player",
+      "noEncounter": "Start an encounter to see the player's view."
     }
   },
   "home": {
@@ -690,7 +776,6 @@
     "footerCredits": "Credits",
     "footerContact": "Contact",
     "footerPrivacy": "Privacy policy",
-    "scrollDown": "Scroll down to the content",
     "heading": "Your table, in the browser",
     "highlightsLabel": "Highlights",
     "buildTitle": "Build your world",
@@ -709,6 +794,9 @@
     "librariesTitle": "Libraries",
     "toolsTitle": "External tools",
     "tools": "The tools page links to free generators by others: Watabou's Procgen Arcana, Azgaar's Fantasy Map Generator and Squoosh. They are not part of this app.",
+    "aiTitle": "Use of AI",
+    "ai": "AI was used for the code, the documentation, the logo and the custom SVG icons. I would be glad to work with artists to remove the slop and give the interfaces more life. Note: this project predates Claude; its art direction and colour palette are deliberate, not a copy of Anthropic's.",
+    "aiContact": "Get in touch",
     "illustrationsTitle": "Illustrations",
     "sampleHeroPrefix": "Sample hero portrait: art by",
     "sampleHeroSuffix": "."
@@ -804,6 +892,34 @@
       "xpLabel": "XP cost per level"
     }
   },
+  "merchant": {
+    "errors": {
+      "closed": "This shop is closed.",
+      "notInStock": "This item isn't in stock anymore.",
+      "cantAfford": "You can't afford this.",
+      "unknownItem": "You don't have this item.",
+      "invalid": "This shop request is invalid.",
+      "gameMasterOnly": "Only the game master opens or closes a shop.",
+      "playerOnly": "Only a player buys or sells."
+    },
+    "shop": {
+      "title": "Shop",
+      "money": "Your money",
+      "buy": "For sale",
+      "buyAction": "Buy",
+      "sell": "Sell to the merchant",
+      "sellAction": "Sell",
+      "noStock": "Nothing for sale.",
+      "nothingToSell": "Nothing to sell."
+    },
+    "table": {
+      "open": "Open shop",
+      "close": "Close shop",
+      "visit": "Visit shop",
+      "target": "Open or close the shop for",
+      "everyone": "All players"
+    }
+  },
   "npc": {
     "catalogue": {
       "title": "NPC catalogue",
@@ -842,12 +958,12 @@
       "tabGenerate": "Generate",
       "jsonHint": "Edit the NPC as JSON; it is applied to the form while it is valid.",
       "generateHint": "Draw a random NPC (name, level, attributes, equipment) from a seed; the form is replaced.",
-      "generate": "Generate",
       "save": "Save",
       "equipped": "Equipped",
       "loot": "Loot",
       "removeItem": "Remove",
       "fields": {
+        "portrait": "Portrait",
         "name": "Name",
         "description": "Description",
         "roles": "Roles",
@@ -919,7 +1035,8 @@
       "deleteMessage": "{{ name }} will be removed from the world.",
       "empty": "No skill found.",
       "copySuffix": "(copy)",
-      "ranks": "Up to rank {{ max }}, {{ cost }} point(s) per rank",
+      "levels": "Up to level {{ max }}, {{ cost }} point(s) per level",
+      "cooldown": "Cooldown {{ turns }} turn(s)",
       "inUse": "{{ name }} is used by {{ usages }}: remove it from them first.",
       "failed": "The skill could not be saved."
     },
@@ -931,31 +1048,153 @@
       "save": "Save",
       "addEffect": "Add an effect",
       "removeEffect": "Remove the effect",
-      "formulaHint": "Amounts are formulas: rank, level and attribute names (the caster's maxima).",
-      "preview": "Rank 1: {{ rank1 }} · Rank {{ max }}: {{ maxRank }}",
+      "successMode": {
+        "always": "Always",
+        "threshold": "Total at least",
+        "formula": "Formula"
+      },
+      "successHint": "Variables: roll, skillLevel, level, your attributes by name, and the target's as target_<name>.",
+      "formulaHint": "Amounts are formulas: skillLevel, level and attribute names (the caster's maxima).",
+      "preview": "Level 1: {{ level1 }} · Level {{ max }}: {{ maxLevel }}",
       "fields": {
         "name": "Name",
         "description": "Description",
         "type": "Type",
         "rarity": "Rarity",
-        "maxRank": "Max rank (1 to 10)",
-        "pointCost": "Skill points per rank",
+        "maxLevel": "Max skill level (1 to 10)",
+        "pointCost": "Skill points per level",
         "target": "Target",
+        "actionType": "Action type",
         "cooldown": "Cooldown (turns)",
         "costAttribute": "Cost: attribute",
         "costAmount": "Cost: amount",
         "effects": "Effects",
         "amount": "Amount",
-        "duration": "Duration (turns, 0 = permanent)"
+        "duration": "Duration (turns, 0 = permanent)",
+        "rollCount": "Dice rolled",
+        "rollFaces": "Dice faces",
+        "successMode": "Success",
+        "successValue": "Succeeds when the total reaches",
+        "successFormula": "Succeeds when this is 0 or more",
+        "kind": "Effect type",
+        "attribute": "Target attribute"
       },
       "issue": {
         "name": "Give the skill a name.",
-        "maxRank": "The max rank is from 1 to 10.",
-        "pointCost": "A rank costs at least 1 skill point.",
+        "maxLevel": "The max level is from 1 to 10.",
+        "pointCost": "A level costs at least 1 skill point.",
         "target": "An active skill needs a target; a passive one has none.",
+        "actionType": "Only an active skill can name an action type.",
         "effects_amount": "An effect amount is not a valid formula.",
-        "json": "This JSON is not a valid skill."
-      }
+        "json": "This JSON is not a valid skill.",
+        "roll_count": "Roll 1 to 100 dice.",
+        "roll_faces": "Dice have 2 to 1000 faces.",
+        "success_value": "The threshold is a whole number.",
+        "success_formula": "The success formula is not valid (roll, skillLevel, level, attribute names, target_<attribute>)."
+      },
+      "help": {
+        "description": "Shown in the catalogue and on the sheet.",
+        "type": "Active skills are used in a fight; passive ones always apply.",
+        "rarity": "How rare the skill is to find.",
+        "maxLevel": "How many times the skill can be levelled up.",
+        "pointCost": "Skill points spent for each level.",
+        "target": "Who the skill is aimed at.",
+        "actionType": "Which of the world's action counters using it ticks; empty ticks the first one.",
+        "cooldown": "Turns to wait before using it again.",
+        "costAttribute": "The attribute spent to use the skill; leave empty for no cost.",
+        "costAmount": "How much of it each use costs.",
+        "roll": "The dice rolled when the skill is used.",
+        "successMode": "When the skill works: always, above a total, or by formula.",
+        "successValue": "The dice total needed to succeed.",
+        "successFormula": "A formula; the skill succeeds when it gives 0 or more.",
+        "effects": "What the skill does when it works. Each amount is a formula."
+      },
+      "sections": {
+        "identity": "Identity",
+        "cost": "Cost and levels",
+        "roll": "Roll and success",
+        "effects": "Effects",
+        "identityHint": "The skill's name, shown text and type.",
+        "costHint": "How many levels, what they cost, and what one use costs."
+      },
+      "effectTitle": "Effect {{ n }}"
+    },
+    "variables": {
+      "title": "Variables and formulas",
+      "toggle": "Variables help",
+      "successTitle": "Success formula",
+      "successBody": "Decides if the skill works. It succeeds when the result is 0 or more (true).",
+      "amountTitle": "Amount formula",
+      "amountBody": "A number of points: the damage, healing or bonus of an effect.",
+      "exampleLabel": "Example:",
+      "roll": "The total of the dice rolled for this use.",
+      "skillLevel": "The skill level the character has put in this skill.",
+      "level": "The character's level.",
+      "caster": "The caster's maximum of this attribute.",
+      "target": "The target's maximum of this attribute.",
+      "spaces": "A name with spaces goes in square brackets, the target's too:"
+    },
+    "presets": {
+      "manage": "Manage presets",
+      "manageTitle": "Formula presets",
+      "hint": "Use {A}, {B}… for the caster's attributes and {target.A}… for the target's. You pick the real attributes when you apply a preset.",
+      "choose": "Preset",
+      "saveAs": "Save as preset",
+      "saved": "Preset saved.",
+      "mappingTitle": "{{ name }}: which attribute does each letter stand for?",
+      "casterAttribute": "{{ token }}: caster attribute",
+      "targetAttribute": "{{ token }}: target attribute",
+      "apply": "Apply",
+      "save": "Save",
+      "new": "New preset",
+      "name": "Name",
+      "formula": "Formula",
+      "description": "Description",
+      "duplicate": "Duplicate",
+      "edit": "Edit",
+      "delete": "Delete",
+      "copyName": "{{ name }} (copy)",
+      "kind": {
+        "success": "Success",
+        "effect": "Effect"
+      },
+      "errors": {
+        "invalid": "This formula is not valid (roll, skillLevel, level, {A}, {target.A}).",
+        "builtIn": "Built-in presets cannot be changed; duplicate them instead.",
+        "name": "Give the preset a name."
+      },
+      "builtIn": {
+        "rollPlusAttribute": {
+          "name": "Roll + attribute",
+          "description": "Succeeds when the roll plus your attribute reaches 10."
+        },
+        "rollAgainstTarget": {
+          "name": "Roll against the target",
+          "description": "Your attribute plus the roll against the target's attribute."
+        },
+        "rollPlusLevel": {
+          "name": "Roll + skill level",
+          "description": "Higher skill levels make success easier."
+        },
+        "perLevel": {
+          "name": "Per skill level",
+          "description": "5 for each skill level."
+        },
+        "attributeScaled": {
+          "name": "Scaled on an attribute",
+          "description": "Half of your attribute plus 3 per skill level."
+        },
+        "rollScaled": {
+          "name": "Scaled on the roll",
+          "description": "The roll times the skill level."
+        },
+        "overTarget": {
+          "name": "Beyond the target's defence",
+          "description": "Your attribute minus the target's, at least 1, plus the skill level."
+        }
+      },
+      "deleteTitle": "Delete this preset?",
+      "deleteMessage": "“{{ name }}” will be deleted from this device."
     }
   },
   "class": {
@@ -982,12 +1221,12 @@
       "startingItems": "Starting items",
       "tree": "Skill tree",
       "skillList": "Skills",
-      "maxRank": "Max rank {{ count }}"
+      "maxLevel": "Max level {{ count }}"
     },
     "tree": {
-      "rank": "{{ rank }}/{{ max }}",
+      "level": "{{ level }}/{{ max }}",
       "missingLevel": "Level {{ level }}",
-      "missingRequires": "{{ name }} rank {{ rank }}"
+      "missingRequires": "{{ name }} level {{ level }}"
     },
     "editor": {
       "tabForm": "Form",
@@ -1010,7 +1249,7 @@
         "noMatch": "No skill matches."
       },
       "node": {
-        "maxRank": "Max {{ count }}",
+        "maxLevel": "Max {{ count }}",
         "level": "Lv {{ count }}"
       },
       "inspector": {
@@ -1024,17 +1263,198 @@
         "tree": "Skill tree",
         "minLevel": "Minimum level",
         "requires": "Requires",
-        "rank": "Required rank"
+        "level": "Required skill level"
       },
       "issue": {
         "required": "Give the class a name.",
-        "invalid": "A value is out of range or invalid (min level, required rank, bonus attribute or JSON).",
+        "invalid": "A value is out of range or invalid (min level, required skill level, bonus attribute or JSON).",
         "noRoot": "The tree needs at least one skill with no prerequisite.",
         "cycle": "The prerequisites form a cycle.",
         "outsideTree": "A prerequisite must be a skill of the same tree.",
         "duplicate": "A skill can be in the tree only once.",
         "unknownSkill": "A skill of the tree is not in the catalogue."
       }
+    }
+  },
+  "sprite": {
+    "title": "Sprite colorizer",
+    "intro": "Recolour a grayscale sprite material by material. Everything stays in your browser.",
+    "openImage": "Open image",
+    "demo": "Demo sprite",
+    "exportPng": "Export PNG",
+    "exportJson": "Export JSON",
+    "importJson": "Import JSON",
+    "undo": "Undo",
+    "redo": "Redo",
+    "importFailed": "This file is not a configuration for an image of this size.",
+    "loadFailed": "This image could not be read.",
+    "empty": "Open an image or try the demo sprite to start.",
+    "tools": {
+      "title": "Tools",
+      "brush": "Brush",
+      "eraser": "Eraser",
+      "bucket": "Bucket",
+      "wand": "Magic wand",
+      "pan": "Pan",
+      "size": "Size",
+      "hardness": "Hardness",
+      "tolerance": "Tolerance",
+      "contiguous": "Contiguous",
+      "global": "Global",
+      "applySelection": "Apply selection",
+      "invertSelection": "Invert selection",
+      "clearSelection": "Clear selection",
+      "wandHint": "Shift adds to the selection, Alt removes from it.",
+      "polygon": "Polygon",
+      "snap": "Snap to edges",
+      "snapRadius": "Snap radius",
+      "polygonHint": "Click to add vertices. Enter or double-click closes (Shift adds, Alt removes), Escape cancels."
+    },
+    "view": {
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fit": "Fit",
+      "original": "Original",
+      "recolored": "Recoloured",
+      "overlay": "Show the material mask"
+    },
+    "materials": {
+      "title": "Materials",
+      "add": "Add material",
+      "defaultName": "Material {{n}}",
+      "base": "Base",
+      "rename": "Rename",
+      "delete": "Delete material",
+      "show": "Show",
+      "hide": "Hide",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "up": "Move up",
+      "down": "Move down",
+      "select": "Select"
+    },
+    "gradient": {
+      "title": "Gradient",
+      "stopColor": "Stop colour",
+      "stopPosition": "Stop position (%)",
+      "addStop": "Add stop",
+      "removeStop": "Remove stop"
+    },
+    "shapes": {
+      "title": "Shapes",
+      "detect": "Detect shapes",
+      "hint": "Click shapes to select them, then apply them to a material.",
+      "pixels": "{{n}} px",
+      "apply": "Apply to layer",
+      "applyNew": "Apply to new layer",
+      "newName": "Shape",
+      "none": "No shape found."
+    },
+    "presets": {
+      "title": "Presets",
+      "steel": "Steel",
+      "wood": "Wood",
+      "gold": "Gold",
+      "ice": "Ice",
+      "fire": "Fire",
+      "leaf": "Leaf",
+      "arcane": "Arcane",
+      "name": "Preset name",
+      "save": "Save as preset",
+      "delete": "Delete preset"
+    }
+  },
+  "combat": {
+    "title": "Combat",
+    "errors": {
+      "notConsumable": "Only consumables can be used.",
+      "unknownItem": "This item isn't in the inventory anymore.",
+      "invalidAmount": "Grant between 1 and 100 points.",
+      "initiativeNotTyped": "Initiative is rolled in this world.",
+      "invalid": "This request isn't valid.",
+      "gameMasterOnly": "Only the game master can do that.",
+      "notYours": "This isn't your combatant.",
+      "noEncounter": "There is no encounter in progress.",
+      "alreadyStarted": "An encounter is already in progress.",
+      "life-attribute-required": "Combat needs a life attribute in the world's combat rules.",
+      "no-combatants": "Pick at least one combatant.",
+      "character-not-found": "This character doesn't exist.",
+      "npc-not-found": "This NPC isn't in the catalogue.",
+      "caster-not-found": "This combatant isn't in the encounter.",
+      "skill-not-known": "This combatant doesn't know that skill.",
+      "skill-not-active": "Only active skills can be used in combat.",
+      "target-not-found": "This target isn't in the encounter."
+    },
+    "order": "Turn order",
+    "round": "Round {{round}}",
+    "yourTurn": "Your turn",
+    "endTurn": "End my turn",
+    "nextTurn": "Next turn",
+    "undo": "Undo",
+    "down": "Down",
+    "drag": "Drag to reorder",
+    "details": "Details",
+    "roll": "{{caster}} rolled {{rolls}} (total {{total}}) for {{skill}}",
+    "waitingGm": "Waiting for the GM…",
+    "start": {
+      "title": "Start an encounter",
+      "characters": "Characters",
+      "npcs": "NPCs",
+      "pick": "Add",
+      "picked": "In",
+      "fewer": "One fewer",
+      "more": "One more",
+      "action": "Start the encounter",
+      "noCharacters": "No character in this world yet.",
+      "noNpcs": "No NPC in the catalogue yet."
+    },
+    "initiative": {
+      "label": "Initiative",
+      "yours": "Your initiative",
+      "set": "Set"
+    },
+    "skill": {
+      "damage": "{{amount}} damage",
+      "heal": "{{amount}} healing",
+      "modify": "{{amount}} {{attribute}} for {{duration}} turns",
+      "cooldown": "cooldown {{turns}}"
+    },
+    "actions": {
+      "use": "Use",
+      "skills": "Skills",
+      "useSkill": "Use",
+      "items": "Items",
+      "useItem": "Use",
+      "pickTargets": "Pick the targets of {{skill}}",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "pending": {
+      "title": "Results to apply",
+      "line": "{{caster}}: {{skill}} on {{target}}",
+      "rolled": "rolled {{rolls}} = {{total}}",
+      "failed": "failed",
+      "apply": "Apply",
+      "edit": "Edit",
+      "dismiss": "Dismiss"
+    },
+    "manual": {
+      "damage": "Damage",
+      "heal": "Heal"
+    },
+    "status": {
+      "placeholder": "Status (Stunned…)",
+      "add": "Add status",
+      "remove": "Remove status"
+    },
+    "end": {
+      "action": "End",
+      "title": "End the encounter",
+      "xp": "Experience per character",
+      "money": "Money from the defeated enemies: {{amount}}",
+      "loot": "Loot",
+      "confirm": "End the encounter",
+      "hint": "The money and the loot are for you to hand out at the table."
     }
   }
 }

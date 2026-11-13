@@ -10,6 +10,9 @@ import { CharacterHostBusiness } from '../app/modules/character/business/charact
 import { CharacterBusiness } from '../app/modules/character/business/character.business';
 import { PlayerCopyGateBusiness } from '../app/modules/character/business/player-copy-gate.business';
 import { CharacterService } from '../app/modules/character/services/character.service';
+import { CombatHostBusiness } from '../app/modules/combat/business/combat-host.business';
+import { CombatBusiness } from '../app/modules/combat/business/combat.business';
+import { CombatService } from '../app/modules/combat/services/combat.service';
 import { DiceHostBusiness } from '../app/modules/dice/business/dice-host.business';
 import { DiceRollBusiness } from '../app/modules/dice/business/dice-roll.business';
 import { DiceService } from '../app/modules/dice/services/dice.service';
@@ -21,6 +24,9 @@ import { RoomStorageService } from '../app/modules/room/services/room-storage.se
 import { RoomService } from '../app/modules/room/services/room.service';
 import { ItemHostBusiness } from '../app/modules/item/business/item-host.business';
 import { ItemService } from '../app/modules/item/services/item.service';
+import { MerchantHostBusiness } from '../app/modules/npc/business/merchant-host.business';
+import { MerchantBusiness } from '../app/modules/npc/business/merchant.business';
+import { MerchantService } from '../app/modules/npc/services/merchant.service';
 import { NpcCatalogueBusiness } from '../app/modules/npc/business/npc-catalogue.business';
 import { SkillCatalogueBusiness } from '../app/modules/skill/business/skill-catalogue.business';
 import { ClassCatalogueBusiness } from '../app/modules/class/business/class-catalogue.business';
@@ -63,8 +69,14 @@ const GAME_DEVICE = [
   ItemService,
   ItemHostBusiness,
   NpcCatalogueBusiness,
+  MerchantService,
+  MerchantHostBusiness,
+  MerchantBusiness,
   SkillCatalogueBusiness,
   ClassCatalogueBusiness,
+  CombatService,
+  CombatHostBusiness,
+  CombatBusiness,
   GameSessionBusiness,
   ImageTransferService,
   ImageBusiness,

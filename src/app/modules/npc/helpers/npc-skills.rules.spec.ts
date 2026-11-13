@@ -20,13 +20,13 @@ const names: NpcNameList = {
   templates: ['{given} {epithet}'],
 };
 
-const skill = (id: string, maxRank: number, pointCost: number): Skill => ({
+const skill = (id: string, maxLevel: number, pointCost: number): Skill => ({
   id,
   name: id,
   description: '',
   rarity: 'common',
   type: 'passive',
-  maxRank,
+  maxLevel,
   pointCost,
   effects: [],
 });
@@ -46,14 +46,14 @@ const warrior: CharacterClass = {
   tree: [
     {
       skillId: 'c',
-      requires: [{ skillId: 'a', rank: 2 }],
+      requires: [{ skillId: 'a', level: 2 }],
       minLevel: 3,
       column: 1,
       row: 1,
     },
     {
       skillId: 'b',
-      requires: [{ skillId: 'a', rank: 1 }],
+      requires: [{ skillId: 'a', level: 1 }],
       minLevel: 1,
       column: 0,
       row: 1,
@@ -125,31 +125,31 @@ describe('npcSkillPoints', () => {
 });
 
 describe('learnNpcSkillsFromClass', () => {
-  const ranks = (n: Npc) =>
-    Object.fromEntries(n.skills.map((s) => [s.skillId, s.rank]));
+  const levels = (n: Npc) =>
+    Object.fromEntries(n.skills.map((s) => [s.skillId, s.level]));
 
   it('raises the first node in tree order (row, then column) until it is maxed, then the next', () => {
     const learned = learnNpcSkillsFromClass(npc({ level: 1 }), world);
-    expect(ranks(learned)).toEqual({ a: 2 });
+    expect(levels(learned)).toEqual({ a: 2 });
     expect(learned.skillPoints).toBe(0);
   });
 
   it('goes on to nodes the earlier ones unlocked, and stops when none is affordable', () => {
     const learned = learnNpcSkillsFromClass(npc({ level: 3 }), world);
-    expect(ranks(learned)).toEqual({ a: 2, b: 1 });
+    expect(levels(learned)).toEqual({ a: 2, b: 1 });
     expect(learned.skillPoints).toBe(1);
   });
 
   it('learns a node whose minimum level the NPC reaches', () => {
     const learned = learnNpcSkillsFromClass(npc({ level: 4 }), world);
-    expect(ranks(learned)).toEqual({ a: 2, b: 1, c: 1 });
+    expect(levels(learned)).toEqual({ a: 2, b: 1, c: 1 });
     expect(learned.skillPoints).toBe(0);
   });
 
   it('refuses a node below its minimum level even with points left', () => {
     const rich = { ...world, startingSkillPoints: 6, skillPointsPerLevel: 0 };
     const learned = learnNpcSkillsFromClass(npc({ level: 2 }), rich);
-    expect(ranks(learned)).toEqual({ a: 2, b: 1 });
+    expect(levels(learned)).toEqual({ a: 2, b: 1 });
     expect(learned.skillPoints).toBe(3);
   });
 
@@ -158,16 +158,16 @@ describe('learnNpcSkillsFromClass', () => {
       npc({ classId: 'brute', level: 1 }),
       world,
     );
-    expect(ranks(learned)).toEqual({ e: 2 });
+    expect(levels(learned)).toEqual({ e: 2 });
     expect(learned.skillPoints).toBe(0);
   });
 
   it('keeps the skills already on the sheet, including those outside the tree', () => {
     const learned = learnNpcSkillsFromClass(
-      npc({ level: 1, skills: [{ skillId: 'free', rank: 2 }] }),
+      npc({ level: 1, skills: [{ skillId: 'free', level: 2 }] }),
       world,
     );
-    expect(ranks(learned)).toMatchObject({ free: 2, a: 2 });
+    expect(levels(learned)).toMatchObject({ free: 2, a: 2 });
   });
 
   it('does nothing without a class', () => {
@@ -177,42 +177,42 @@ describe('learnNpcSkillsFromClass', () => {
 });
 
 describe('setNpcSkill', () => {
-  it('adds any catalogue skill at any rank up to its max, in or out of the tree', () => {
+  it('adds any catalogue skill at any level up to its max, in or out of the tree', () => {
     expect(setNpcSkill(npc(), 'free', 3, world).skills).toEqual([
-      { skillId: 'free', rank: 3 },
+      { skillId: 'free', level: 3 },
     ]);
     expect(setNpcSkill(npc(), 'c', 1, world).skills).toEqual([
-      { skillId: 'c', rank: 1 },
+      { skillId: 'c', level: 1 },
     ]);
   });
 
-  it('re-ranks a skill the NPC has and leaves the others', () => {
+  it('re-levels a skill the NPC has and leaves the others', () => {
     const base = npc({
       skills: [
-        { skillId: 'a', rank: 1 },
-        { skillId: 'free', rank: 1 },
+        { skillId: 'a', level: 1 },
+        { skillId: 'free', level: 1 },
       ],
     });
     expect(setNpcSkill(base, 'free', 3, world).skills).toEqual([
-      { skillId: 'a', rank: 1 },
-      { skillId: 'free', rank: 3 },
+      { skillId: 'a', level: 1 },
+      { skillId: 'free', level: 3 },
     ]);
   });
 
-  it('removes the skill at rank 0', () => {
+  it('removes the skill at level 0', () => {
     const base = npc({
       skills: [
-        { skillId: 'a', rank: 1 },
-        { skillId: 'free', rank: 1 },
+        { skillId: 'a', level: 1 },
+        { skillId: 'free', level: 1 },
       ],
     });
     expect(setNpcSkill(base, 'a', 0, world).skills).toEqual([
-      { skillId: 'free', rank: 1 },
+      { skillId: 'free', level: 1 },
     ]);
   });
 
-  it('ignores an unknown skill and a rank above the max or below 0', () => {
-    const base = npc({ skills: [{ skillId: 'a', rank: 1 }] });
+  it('ignores an unknown skill and a level above the max or below 0', () => {
+    const base = npc({ skills: [{ skillId: 'a', level: 1 }] });
     expect(setNpcSkill(base, 'ghost', 1, world)).toEqual(base);
     expect(setNpcSkill(base, 'a', 3, world)).toEqual(base);
     expect(setNpcSkill(base, 'a', -1, world)).toEqual(base);
@@ -242,20 +242,20 @@ describe('generateNpc with classes', () => {
     for (const seed of ['s1', 's2', 's3', 's4', 's5']) {
       const npcOut = draw(seed, 'warrior');
       expect(npcOut.classId).toBe('warrior');
-      const rank = (id: string) =>
-        npcOut.skills.find((s) => s.skillId === id)?.rank ?? 0;
+      const level = (id: string) =>
+        npcOut.skills.find((s) => s.skillId === id)?.level ?? 0;
       const cost = npcOut.skills.reduce(
         (sum, s) =>
-          sum + s.rank * skills.find((k) => k.id === s.skillId)!.pointCost,
+          sum + s.level * skills.find((k) => k.id === s.skillId)!.pointCost,
         0,
       );
       expect(cost + npcOut.skillPoints).toBe(2 + (npcOut.level - 1));
       expect(
         npcOut.skills.every((s) => ['a', 'b', 'c'].includes(s.skillId)),
       ).toBe(true);
-      if (rank('b') > 0) expect(rank('a')).toBeGreaterThanOrEqual(1);
-      if (rank('c') > 0) {
-        expect(rank('a')).toBe(2);
+      if (level('b') > 0) expect(level('a')).toBeGreaterThanOrEqual(1);
+      if (level('c') > 0) {
+        expect(level('a')).toBe(2);
         expect(npcOut.level).toBeGreaterThanOrEqual(3);
       }
     }

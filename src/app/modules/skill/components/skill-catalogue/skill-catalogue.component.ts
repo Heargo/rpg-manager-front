@@ -17,7 +17,7 @@ import { LanguageBusiness } from '../../../../core/business/language.business';
 import { filterSkills } from '../../helpers/skill.rules';
 import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
 
-/** A world's skill catalogue: search and type filter, a card per skill, with edit, duplicate and delete. */
+/** A world's skill catalogue: search and type filter, a list row per skill, with edit, duplicate and delete. */
 @Component({
   selector: 'app-skill-catalogue',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,20 +61,31 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
     </div>
 
     @if (shown().length) {
-      <div class="grid">
+      <ul class="list">
         @for (skill of shown(); track skill.id) {
-          <div class="card" data-field="skill">
-            <div class="head">
-              <strong>{{ skill.name }}</strong>
-              <span class="tag">{{
-                'skill.type.' + skill.type | transloco
-              }}</span>
+          <li class="row" data-field="skill">
+            <div class="main">
+              <div class="line">
+                <strong data-field="skill-name">{{ skill.name }}</strong>
+                <span class="tag" data-field="skill-type">{{
+                  'skill.type.' + skill.type | transloco
+                }}</span>
+                @if (skill.cost) {
+                  <span class="meta" data-field="skill-cost"
+                    >{{ skill.cost.attribute }} {{ skill.cost.amount }}</span
+                  >
+                }
+                @if (skill.type === 'active' && skill.cooldown !== undefined) {
+                  <span class="meta" data-field="skill-cooldown">{{
+                    'skill.catalogue.cooldown'
+                      | transloco: { turns: skill.cooldown }
+                  }}</span>
+                }
+              </div>
+              <p class="hint" data-field="skill-description">
+                {{ skill.description }}
+              </p>
             </div>
-            <p class="hint">{{ skill.description }}</p>
-            <span class="hint">{{
-              'skill.catalogue.ranks'
-                | transloco: { max: skill.maxRank, cost: skill.pointCost }
-            }}</span>
             <div class="actions">
               <button
                 pButton
@@ -93,7 +104,7 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
                 icon="pi pi-copy"
                 severity="secondary"
                 [text]="true"
-                [label]="'skill.catalogue.duplicate' | transloco"
+                [attr.aria-label]="'skill.catalogue.duplicate' | transloco"
                 (click)="duplicate.emit(skill)"
               ></button>
               <button
@@ -107,9 +118,9 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
                 (click)="askDelete(skill)"
               ></button>
             </div>
-          </div>
+          </li>
         }
-      </div>
+      </ul>
     } @else {
       <p class="hint">{{ 'skill.catalogue.empty' | transloco }}</p>
     }
@@ -126,27 +137,55 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
       gap: 0.75rem;
       align-items: center;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-      gap: 1rem;
-    }
-    .card {
+    /* one card per entry, so a long list keeps some relief */
+    .list {
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
-      padding: 0.75rem;
-      border: 1px solid var(--p-content-border-color);
-      border-radius: 0.5rem;
+      gap: 0.6rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
     }
-    .head {
+    .row {
       display: flex;
-      justify-content: space-between;
+      align-items: center;
       gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--p-content-border-color);
+      border-radius: 0.75rem;
+      background: var(--p-content-background);
+      box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+      transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+    }
+    .row:hover {
+      border-color: var(--p-primary-color);
+      box-shadow: 0 3px 10px rgb(0 0 0 / 0.12);
+    }
+    .main {
+      flex: 1;
+      min-width: 0;
+    }
+    .line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.25rem 0.75rem;
+    }
+    .tag,
+    .meta {
+      color: var(--p-text-muted-color);
+      font-size: 0.85rem;
     }
     .actions {
+      flex: none;
       display: flex;
-      justify-content: space-between;
+    }
+    .hint {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .hint {
       margin: 0;

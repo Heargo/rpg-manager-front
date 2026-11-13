@@ -17,9 +17,7 @@ describe('PlayBusiness', () => {
     roomBusiness = {
       hostRoom: vi.fn(async () => true),
       leave: vi.fn(),
-      forgetRecentRoom: vi.fn(async () => undefined),
       describeError: vi.fn(() => 'message'),
-      $recentRooms: signal([]),
       $status: signal('idle'),
       $room: room,
       $isHost: isHost,

@@ -16,11 +16,4 @@ export class HomePageComponent {
     { key: 'p2p', icon: 'pi-wifi' },
     { key: 'tools', icon: 'pi-wrench' },
   ];
-
-  protected scrollToContent(content: HTMLElement): void {
-    const reduced = window.matchMedia?.(
-      '(prefers-reduced-motion: reduce)',
-    ).matches;
-    content.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
-  }
 }

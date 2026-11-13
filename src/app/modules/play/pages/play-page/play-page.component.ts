@@ -16,6 +16,7 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { DataViewModule } from '@openng/optimus-ui/dataview';
 import { MessageModule } from '@openng/optimus-ui/message';
+import { TagModule } from '@openng/optimus-ui/tag';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { LocalDatePipe } from '../../../../core/pipes/local-date.pipe';
@@ -37,6 +38,7 @@ import { PlayBusiness } from '../../business/play.business';
     CardModule,
     DataViewModule,
     MessageModule,
+    TagModule,
     TextareaModule,
     WorldCardComponent,
     QrScanComponent,
@@ -116,13 +118,24 @@ export class PlayPageComponent implements OnInit {
     });
   }
 
-  protected forgetRoom(roomId: string, name: string): void {
+  /** Rejoins with the invite saved when the world was joined. */
+  protected async rejoin(invite: string): Promise<void> {
+    const hash = invite.indexOf('#');
+    const fragment = (hash >= 0 ? invite.slice(hash + 1) : invite).replace(/\s+/g, '');
+    if (fragment) await this.router.navigate(['/join'], { fragment });
+  }
+
+  protected async openSheet(worldId: string): Promise<void> {
+    await this.router.navigate(['/play/joined', worldId]);
+  }
+
+  protected removeJoined(worldId: string, name: string): void {
     this.confirm.confirm({
-      header: this.language.t('room.recent.forget'),
+      header: this.language.t('play.joined.remove'),
       message: this.language.t('play.rooms.forgetMessage', { name }),
       icon: 'pi pi-trash',
       acceptButtonProps: {
-        label: this.language.t('room.recent.forget'),
+        label: this.language.t('play.joined.remove'),
         severity: 'danger',
       },
       rejectButtonProps: {
@@ -130,7 +143,7 @@ export class PlayPageComponent implements OnInit {
         severity: 'secondary',
         text: true,
       },
-      accept: () => void this.play.forgetRoom(roomId),
+      accept: () => void this.play.removeJoinedWorld(worldId),
     });
   }
 

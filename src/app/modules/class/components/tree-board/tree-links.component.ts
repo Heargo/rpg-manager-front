@@ -6,12 +6,12 @@ import {
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 
-/** A link of the board, as drawn: its curve, the rank chip position and its state. */
+/** A link of the board, as drawn: its curve, the level chip position and its state. */
 export interface BoardLink {
   key: string;
   from: string;
   to: string;
-  rank: number;
+  level: number;
   path: string;
   midX: number;
   midY: number;
@@ -19,7 +19,7 @@ export interface BoardLink {
   invalid: boolean;
 }
 
-/** The links layer of the tree board: arrowed curves (clickable) with a rank chip at their middle. */
+/** The links layer of the tree board: arrowed curves (clickable) with a level chip at their middle. */
 @Component({
   selector: 'app-tree-links',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -77,7 +77,7 @@ export interface BoardLink {
         [style.top.px]="link.midY"
         (click)="$event.stopPropagation(); select(link.from, link.to)"
       >
-        {{ link.rank }}
+        {{ link.level }}
       </button>
     }
   `,

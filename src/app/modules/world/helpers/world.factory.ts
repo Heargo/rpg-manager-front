@@ -1,10 +1,13 @@
+import { normalizeName } from '../../../core/helpers/formula';
 import {
   DEFAULT_LEVEL_CURVE,
   DEFAULT_MAX_LEVEL,
   DEFAULT_STAT_POINTS_PER_LEVEL,
 } from '../../character/helpers/level.rules';
 import { DEFAULT_NPC_VISIBILITY } from '../../npc/helpers/npc-visibility.rules';
+import { defaultCombatRules } from './world-combat.rules';
 import {
+  CombatRules,
   OfflineFeatures,
   World,
   WorldDraft,
@@ -60,7 +63,13 @@ export function createWorld(
     skillPointsPerLevel: draft.skillPointsPerLevel ?? 1,
     startingMoney: draft.startingMoney ?? 0,
     offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures },
+    skillRollsEnabled: draft.skillRollsEnabled ?? true,
+    sellAnywhere: draft.sellAnywhere ?? true,
+    sellAnywhereRatio: draft.sellAnywhereRatio ?? 1,
+    merchantBuyRatio: draft.merchantBuyRatio ?? 1,
+    merchantSellRatio: draft.merchantSellRatio ?? 0.5,
     npcVisibility: draft.npcVisibility ?? DEFAULT_NPC_VISIBILITY,
+    combat: combatFor(draft, attributes),
     items: [],
     characters: [],
     npcs: [],
@@ -70,6 +79,24 @@ export function createWorld(
     quickImageIds: [],
     createdAt: now,
     updatedAt: now,
+  };
+}
+
+/** The draft's combat rules with the life attribute name as written in the world, or the defaults on the life bar. */
+function combatFor(
+  draft: WorldDraft,
+  attributes: { name: string }[],
+): CombatRules {
+  if (!draft.combat)
+    return defaultCombatRules(draft.barAttributes?.life?.trim());
+  const life = draft.combat.lifeAttribute?.trim();
+  return {
+    ...draft.combat,
+    lifeAttribute: attributes.find(
+      (attribute) =>
+        life !== undefined &&
+        normalizeName(attribute.name) === normalizeName(life),
+    )?.name,
   };
 }
 
@@ -142,5 +169,8 @@ export function toWorldInfo(world: World): WorldInfo {
     skillPointsPerLevel: world.skillPointsPerLevel,
     startingMoney: world.startingMoney,
     offlineFeatures: world.offlineFeatures,
+    skillRollsEnabled: world.skillRollsEnabled,
+    sellAnywhere: world.sellAnywhere,
+    sellAnywhereRatio: world.sellAnywhereRatio,
   };
 }

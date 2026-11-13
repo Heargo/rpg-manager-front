@@ -43,8 +43,8 @@ describe('ClassCatalogueBusiness (GM)', () => {
     await gm.injector.get(WorldSessionBusiness).update((w) => ({
       ...w,
       skills: [{
-        id: 's1', name: 'Slash', description: '', rarity: 'common', type: 'passive', maxRank: 3, pointCost: 1,
-        effects: [{ kind: 'modify', attribute: 'Life', amount: 'rank', duration: 0 }],
+        id: 's1', name: 'Slash', description: '', rarity: 'common', type: 'passive', maxLevel: 3, pointCost: 1,
+        effects: [{ kind: 'modify', attribute: 'Life', amount: 'skillLevel', duration: 0 }],
       }],
       classes: [cls('c1', 'Warrior'), cls('c2', 'Mage')],
     }));
@@ -196,7 +196,7 @@ describe('SandboxClassCatalogueBusiness (Tools)', () => {
     const classes = TestBed.inject(SandboxClassCatalogueBusiness);
     const skills = TestBed.inject(SandboxSkillCatalogueBusiness);
     const skill = await skills.save({
-      name: 'Slash', description: '', rarity: 'common', type: 'passive', maxRank: 1, pointCost: 1, effects: [],
+      name: 'Slash', description: '', rarity: 'common', type: 'passive', maxLevel: 1, pointCost: 1, effects: [],
     });
     const saved = await classes.save({ ...cls('x', 'Rogue', skill.id), id: undefined });
     expect(await skills.remove(skill.id)).toEqual({

@@ -1,9 +1,9 @@
 import { ItemModifier } from '../../../core/models/item';
 
-/** A prerequisite of a tree node: another skill of the same tree, at a minimum rank. */
+/** A prerequisite of a tree node: another skill of the same tree, at a minimum level. */
 export interface TreeRequirement {
   skillId: string;
-  rank: number;
+  level: number;
 }
 
 /** A skill of a class tree, with its prerequisites, its minimum level and its cell in the editor grid. */
@@ -35,11 +35,11 @@ export interface ClassFilter {
   search: string;
 }
 
-/** What a sheet's tree node is for it: not yet reachable, reachable, or already ranked. */
+/** What a sheet's tree node is for it: not yet reachable, reachable, or already learned. */
 export type TreeNodeState = 'locked' | 'available' | 'learned';
 
 export type TreeMissing =
-  | { kind: 'requires'; skillId: string; rank: number }
+  | { kind: 'requires'; skillId: string; level: number }
   | { kind: 'level'; minLevel: number };
 
 export interface TreeNodeStatus {

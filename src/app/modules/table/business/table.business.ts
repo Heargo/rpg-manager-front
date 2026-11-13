@@ -5,6 +5,7 @@ import { LanguageBusiness } from '../../../core/business/language.business';
 import { PeerApiError } from '../../../core/p2p/helpers/peer-api-error';
 import { RoomBusiness } from '../../room/business/room.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
+import { MerchantBusiness } from '../../npc/business/merchant.business';
 import { PublicNpc } from '../../npc/models/npc';
 import { TableScene } from '../models/table';
 import { TableService } from '../services/table.service';
@@ -21,6 +22,7 @@ export class TableBusiness {
   private readonly session = inject(WorldSessionBusiness);
   private readonly images = inject(ImageBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly merchants = inject(MerchantBusiness);
   private readonly npcs = toSignal(this.service.watchNpcs(), {
     initialValue: null,
   });
@@ -32,6 +34,10 @@ export class TableBusiness {
   /** The NPCs shown on the table, as the players see them. */
   readonly $npcs = computed<PublicNpc[]>(() => this.npcs() ?? []);
   readonly $isGameMaster = this.room.$isHost;
+  /** The shops open for this device's player (for the game master, every open shop). */
+  readonly $shops = this.merchants.$shops;
+  /** The merchants whose shop is open (see `$shops`). */
+  readonly $shopsOpen = this.merchants.$openNpcIds;
   /** Game master only: the strip of pictures ready to show. */
   readonly $quickImageIds = computed(
     () => this.session.$world()?.quickImageIds ?? [],
@@ -62,6 +68,21 @@ export class TableBusiness {
 
   hideNpc(npcId: string): Promise<void> {
     return this.service.setNpc(npcId, false);
+  }
+
+  /** Game master: opens or closes a merchant's shop for the given players, or for everyone. */
+  setShop(npcId: string, open: boolean, playerIds?: string[]): Promise<void> {
+    return open
+      ? this.merchants.open(npcId, playerIds)
+      : this.merchants.close(npcId, playerIds);
+  }
+
+  buyFrom(npcId: string, inventoryId: string): Promise<unknown> {
+    return this.merchants.buy(npcId, inventoryId);
+  }
+
+  sellTo(npcId: string, inventoryId: string): Promise<unknown> {
+    return this.merchants.sell(npcId, inventoryId);
   }
 
   removeQuickImage(imageId: string): Promise<void> {
@@ -97,6 +118,8 @@ export class TableBusiness {
   }
 
   describeError(error: unknown): string {
+    if (error instanceof PeerApiError && error.message.startsWith('merchant.'))
+      return this.merchants.describeError(error);
     if (error instanceof PeerApiError && error.message.startsWith('table.')) {
       console.error('Table error', error);
       return this.language.t(error.message);

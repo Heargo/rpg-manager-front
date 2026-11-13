@@ -4,6 +4,7 @@ import { LevelCurve } from '../../character/helpers/level.rules';
 import { Npc, NpcVisibilityRules } from '../../npc/models/npc';
 import { CharacterClass } from '../../class/models/class';
 import { Skill } from '../../skill/models/skill';
+import { Encounter } from '../../combat/models/combat';
 
 /** An attribute every character of the world has (Strength, Life…). */
 export interface WorldAttribute {
@@ -14,6 +15,31 @@ export interface WorldAttribute {
   formula: AttributeFormula;
   /** Optional hard cap (integer >= 1) on the formula result; equipment bonuses still add on top. */
   cap?: number;
+}
+
+export const INITIATIVE_MODES = ['rolled', 'typed', 'free'] as const;
+export type InitiativeMode = (typeof INITIATIVE_MODES)[number];
+
+/** How a world runs combat (the rules page's Combat section, the wizard). Formulas read `level` and attribute maxima by name. */
+export interface CombatRules {
+  /** Name of the attribute that is the life (0 = down); combat cannot start without one. */
+  lifeAttribute?: string;
+  initiative: {
+    mode: InitiativeMode;
+    /** Dice rolled for each combatant in `rolled` mode. */
+    dice: { count: number; faces: number };
+    /** Added to the dice total. */
+    formula: string;
+  };
+  /** What a combatant can do on its turn, each with how many per turn. */
+  actionTypes: { name: string; count: number }[];
+  grid: { enabled: boolean; columns: number; rows: number };
+  /** Movement per turn (formula). */
+  movement: string;
+  /** Damage of a basic attack (formula), none when omitted. */
+  basicAttack?: string;
+  /** What a hit loses to defence (formula), none when omitted. */
+  defence?: string;
 }
 
 /** The editable rules of a world (the rules page, the wizard's Rules step); attributes without an id are new. */
@@ -33,8 +59,20 @@ export interface WorldRules {
   startingSkillPoints: number;
   skillPointsPerLevel: number;
   offlineFeatures: OfflineFeatures;
+  /** Active skills roll dice when used (default on when omitted). */
+  skillRollsEnabled?: boolean;
+  /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
+  sellAnywhere?: boolean;
+  /** What Sell anywhere pays, times the item price (0 to 10, default 1). */
+  sellAnywhereRatio?: number;
+  /** What merchants charge, times the item price (0 to 10, default 1). */
+  merchantBuyRatio?: number;
+  /** What merchants pay, times the item price (0 to 10, default 0.5). */
+  merchantSellRatio?: number;
   /** Kept as is when omitted. */
   npcVisibility?: NpcVisibilityRules;
+  /** Kept as is when omitted. */
+  combat?: CombatRules;
 }
 
 /** What players can still do while the host is offline (p2p-rooms spec, Host offline). */
@@ -95,7 +133,7 @@ export interface Sheet {
 
 export interface SheetSkill {
   skillId: string;
-  rank: number;
+  level: number;
 }
 
 export type Character = Sheet & {
@@ -128,8 +166,21 @@ export interface World {
   skillPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
+  /** Active skills roll dice when used (default on when omitted). */
+  skillRollsEnabled?: boolean;
+  /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
+  sellAnywhere?: boolean;
+  /** What Sell anywhere pays, times the item price (0 to 10, default 1). */
+  sellAnywhereRatio?: number;
+  /** What merchants charge, times the item price (0 to 10, default 1). */
+  merchantBuyRatio?: number;
+  /** What merchants pay, times the item price (0 to 10, default 0.5). */
+  merchantSellRatio?: number;
   /** Per NPC role, what the players see of an NPC shown on the table. */
   npcVisibility: NpcVisibilityRules;
+  combat: CombatRules;
+  /** The encounter in progress, saved with the world so it survives a host reload. */
+  encounter?: Encounter;
   items: Item[];
   characters: Character[];
   /** The GM's NPC catalogue; host-only, never sent in WorldInfo. */
@@ -177,7 +228,18 @@ export interface WorldDraft {
   skillPointsPerLevel?: number;
   startingMoney?: number;
   offlineFeatures?: Partial<OfflineFeatures>;
+  skillRollsEnabled?: boolean;
+  /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
+  sellAnywhere?: boolean;
+  /** What Sell anywhere pays, times the item price (0 to 10, default 1). */
+  sellAnywhereRatio?: number;
+  /** What merchants charge, times the item price (0 to 10, default 1). */
+  merchantBuyRatio?: number;
+  /** What merchants pay, times the item price (0 to 10, default 0.5). */
+  merchantSellRatio?: number;
   npcVisibility?: NpcVisibilityRules;
+  /** The wizard's combat settings; the defaults when omitted. */
+  combat?: CombatRules;
 }
 
 /** What players receive about the hosted world (no catalogue, characters or GM notes). */
@@ -196,6 +258,9 @@ export interface WorldInfo {
   skillPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
+  skillRollsEnabled?: boolean;
+  sellAnywhere?: boolean;
+  sellAnywhereRatio?: number;
 }
 
 export const WORLD_TOPICS = {

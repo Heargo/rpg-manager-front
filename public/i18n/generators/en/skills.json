@@ -1,0 +1,243 @@
+{
+  "version": 1,
+  "templates": [
+    "{adjective} {noun}",
+    "{noun} of {suffix}",
+    "{noun}",
+    "{adjective} {noun} of {suffix}"
+  ],
+  "nouns": {
+    "active": [
+      {
+        "text": "Strike"
+      },
+      {
+        "text": "Fireball"
+      },
+      {
+        "text": "Bolt"
+      },
+      {
+        "text": "Slash"
+      },
+      {
+        "text": "Volley"
+      },
+      {
+        "text": "Smite"
+      },
+      {
+        "text": "Charge"
+      },
+      {
+        "text": "Hex"
+      },
+      {
+        "text": "Blast"
+      },
+      {
+        "text": "Lash"
+      },
+      {
+        "text": "Barrage"
+      },
+      {
+        "text": "Cleave"
+      },
+      {
+        "text": "Whirlwind"
+      },
+      {
+        "text": "Stab"
+      },
+      {
+        "text": "Shot"
+      },
+      {
+        "text": "Surge"
+      },
+      {
+        "text": "Pulse"
+      },
+      {
+        "text": "Burst"
+      },
+      {
+        "text": "Ward"
+      },
+      {
+        "text": "Prayer"
+      },
+      {
+        "text": "Rally"
+      },
+      {
+        "text": "Roar"
+      },
+      {
+        "text": "Chant"
+      },
+      {
+        "text": "Mending"
+      },
+      {
+        "text": "Blessing"
+      },
+      {
+        "text": "Gambit"
+      }
+    ],
+    "passive": [
+      {
+        "text": "Resilience"
+      },
+      {
+        "text": "Focus"
+      },
+      {
+        "text": "Instinct"
+      },
+      {
+        "text": "Mastery"
+      },
+      {
+        "text": "Discipline"
+      },
+      {
+        "text": "Vigor"
+      },
+      {
+        "text": "Awareness"
+      },
+      {
+        "text": "Training"
+      },
+      {
+        "text": "Fortitude"
+      },
+      {
+        "text": "Poise"
+      },
+      {
+        "text": "Insight"
+      },
+      {
+        "text": "Endurance"
+      },
+      {
+        "text": "Presence"
+      },
+      {
+        "text": "Reflexes"
+      },
+      {
+        "text": "Willpower"
+      },
+      {
+        "text": "Tenacity"
+      },
+      {
+        "text": "Grace"
+      },
+      {
+        "text": "Cunning"
+      },
+      {
+        "text": "Resolve"
+      },
+      {
+        "text": "Stoicism"
+      },
+      {
+        "text": "Alertness"
+      },
+      {
+        "text": "Heritage"
+      },
+      {
+        "text": "Knack"
+      },
+      {
+        "text": "Composure"
+      }
+    ]
+  },
+  "adjectives": [
+    "Swift",
+    "Crushing",
+    "Burning",
+    "Shadowy",
+    "Radiant",
+    "Savage",
+    "Silent",
+    "Thunderous",
+    "Frozen",
+    "Righteous",
+    "Cunning",
+    "Wild",
+    "Hallowed",
+    "Ruthless",
+    "Fading",
+    "Blazing",
+    "Piercing",
+    "Spectral",
+    "Iron",
+    "Eternal",
+    "Merciless",
+    "Gentle",
+    "Furious",
+    "Hidden"
+  ],
+  "suffixes": [
+    "the Storm",
+    "the Fallen",
+    "Ash",
+    "the Hunt",
+    "Dawn",
+    "the Deep",
+    "Thorns",
+    "the Void",
+    "Iron",
+    "the Last Stand",
+    "Embers",
+    "the Moon",
+    "Spite",
+    "the Ancients",
+    "Frost",
+    "the Wild",
+    "Blood",
+    "Mercy",
+    "Twilight",
+    "the Serpent",
+    "the Oath",
+    "Silence",
+    "the Phoenix",
+    "Fury"
+  ],
+  "descriptions": {
+    "active": [
+      "A practiced move that rewards a steady hand.",
+      "Born in a hundred skirmishes, it ends fights quickly.",
+      "It costs dearly, but nobody forgets it.",
+      "Taught only to those who earned the trust of their elders.",
+      "A showy technique that hides a very practical purpose.",
+      "Draws on the user's reserves to turn the moment around.",
+      "Simple to learn, endless to refine.",
+      "Often the last thing an enemy sees coming.",
+      "A favorite of veterans who prefer to finish what they start.",
+      "It takes a clear head and a quick reaction."
+    ],
+    "passive": [
+      "Quietly shapes everything its owner does.",
+      "Years of practice have made it second nature.",
+      "Nobody notices it until it saves the day.",
+      "A lasting gift of long training.",
+      "It never needs to be called upon: it is simply there.",
+      "A trait that grows stronger with every hardship.",
+      "Shapes the way its owner faces danger.",
+      "An old habit that became a talent.",
+      "Those who have it rarely speak of it.",
+      "Earned the hard way and never forgotten."
+    ]
+  }
+}

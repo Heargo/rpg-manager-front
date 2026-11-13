@@ -9,7 +9,7 @@ import { isHostedBy, resumeRoom } from '../helpers/room.rules';
 import { RoomStorageService } from '../services/room-storage.service';
 import { HostLockService } from '../services/host-lock.service';
 import { QrService } from '../services/qr.service';
-import { JoinedRoomRecord, RoomMember, RoomState } from '../models/room';
+import { RoomMember, RoomState } from '../models/room';
 import { TransportError } from '../../../core/p2p/room-transport';
 import { RoomService } from '../services/room.service';
 import { SignalMailboxService } from '../services/signal-mailbox.service';
@@ -89,7 +89,7 @@ export class RoomBusiness {
   private readonly invites = signal<PendingInvite[]>([]);
   private readonly me = signal<RoomMember | null>(null);
   private readonly restored = signal(false);
-  private readonly recent = signal<JoinedRoomRecord[]>([]);
+  private readonly joinedInvite = signal<string | undefined>(undefined);
   private readonly ready: Promise<void>;
   private readonly mode = signal<JoinMode>('manual');
   /** Seq of the offer each pending invite holds in its box. */
@@ -115,8 +115,8 @@ export class RoomBusiness {
   readonly $isHost = computed(() => this.service.$role() === 'host');
   /** True after the room was reopened from storage: players have to be re-invited. */
   readonly $restored = this.restored.asReadonly();
-  /** Rooms joined as a player, most recent first. */
-  readonly $recentRooms = computed(() => [...this.recent()].sort((a, b) => b.lastSeenAt - a.lastSeenAt));
+  /** The invite link (what follows `#`) the player last joined with, kept to rejoin the same room later. */
+  readonly $joinedInvite = this.joinedInvite.asReadonly();
   readonly $status = computed<RoomStatus>(() => {
     const role = this.service.$role();
     if (role === 'host') return 'hosting';
@@ -136,13 +136,6 @@ export class RoomBusiness {
     });
     this.service.servePing();
     this.ready = this.restore();
-    // A player keeps the last state of each room they joined.
-    effect(() => {
-      const room = this.$room();
-      const me = this.me();
-      if (!room || !me || this.service.$role() !== 'client') return;
-      this.rememberJoined(room);
-    });
   }
 
   /** Resolves once a saved room (if any) has been reopened. */
@@ -336,6 +329,7 @@ export class RoomBusiness {
       answeredSeq: 0,
     };
     this.attempt = attempt;
+    this.joinedInvite.set(buildInviteFragment(offerCode, boxId));
     this.mode.set(boxId ? 'mailbox' : 'manual');
     try {
       let offer = offerCode;
@@ -580,18 +574,12 @@ export class RoomBusiness {
     this.invites.update((invites) => invites.map((invite) => (invite.id === inviteId ? { ...invite, state } : invite)));
   }
 
-  async forgetRecentRoom(id: string): Promise<void> {
-    await this.storage.deleteJoined(id);
-    this.recent.update((rooms) => rooms.filter((room) => room.id !== id));
-  }
-
   // ---- Storage ----
 
-  /** Reopens the room this device was hosting before a reload, and loads the rooms it joined. */
+  /** Reopens the room this device was hosting before a reload. */
   private async restore(): Promise<void> {
     try {
-      const [hosted, joined] = await Promise.all([this.storage.loadHosted(), this.storage.listJoined()]);
-      this.recent.set(joined);
+      const hosted = await this.storage.loadHosted();
       const { playerId, name } = this.profile.$profile();
       if (!hosted || this.service.$role() !== 'none' || !isHostedBy(hosted.state, playerId)) return;
       // Another tab already reopened it.
@@ -603,17 +591,5 @@ export class RoomBusiness {
     } catch (error) {
       console.warn('Could not restore rooms', error);
     }
-  }
-
-  private rememberJoined(room: RoomState): void {
-    const record: JoinedRoomRecord = {
-      id: room.id,
-      name: room.name,
-      hostName: room.members.find((member) => member.isHost)?.name ?? '',
-      members: room.members,
-      lastSeenAt: Date.now(),
-    };
-    this.recent.update((rooms) => [...rooms.filter((r) => r.id !== room.id), record]);
-    this.storage.saveJoined(record).catch((error) => console.warn('Could not save the room', error));
   }
 }

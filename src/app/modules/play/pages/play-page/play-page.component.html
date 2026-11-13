@@ -42,11 +42,18 @@
         <div class="grid">
           @for (world of worlds; track world.id) {
             <app-world-card
+              data-test="world-entry"
               [name]="world.name"
               [description]="world.description"
               [imageId]="world.imageId"
             >
               <span meta>
+                <p-tag
+                  data-test="world-badge"
+                  severity="warn"
+                  icon="pi pi-crown"
+                  [value]="'play.badge.gm' | transloco"
+                />
                 {{
                   "play.worlds.characters"
                     | transloco: { count: world.characterCount }
@@ -102,6 +109,65 @@
     </p-dataview>
   </section>
 
+  <section>
+    <h2>{{ "play.joined.title" | transloco }}</h2>
+    @if (play.$joinedWorlds().length) {
+      <div class="grid">
+        @for (world of play.$joinedWorlds(); track world.worldId) {
+          <app-world-card
+            data-test="world-entry"
+            [name]="world.name"
+            [description]="'play.joined.hostedBy' | transloco: { name: world.hostName }"
+          >
+            <span meta>
+              <p-tag
+                data-test="world-badge"
+                severity="info"
+                icon="pi pi-user"
+                [value]="'play.badge.player' | transloco"
+              />
+              {{
+                "play.joined.lastSeen"
+                  | transloco: { date: (world.lastSeenAt | localDate: "dateTime") }
+              }}
+            </span>
+            <ng-container actions>
+              <button
+                pButton
+                type="button"
+                data-test="remove-joined"
+                icon="pi pi-trash"
+                severity="danger"
+                [text]="true"
+                [attr.aria-label]="'play.joined.remove' | transloco"
+                (click)="removeJoined(world.worldId, world.name)"
+              ></button>
+              <button
+                pButton
+                type="button"
+                data-test="open-sheet"
+                icon="pi pi-id-card"
+                severity="secondary"
+                [label]="'play.joined.openSheet' | transloco"
+                (click)="openSheet(world.worldId)"
+              ></button>
+              <button
+                pButton
+                type="button"
+                data-test="rejoin"
+                icon="pi pi-sign-in"
+                [label]="'play.joined.rejoin' | transloco"
+                (click)="rejoin(world.invite)"
+              ></button>
+            </ng-container>
+          </app-world-card>
+        }
+      </div>
+    } @else {
+      <p class="hint">{{ "play.rooms.empty" | transloco }}</p>
+    }
+  </section>
+
   <div class="columns">
     <p-card [header]="'room.start.joinTitle' | transloco">
       <form class="stack" (ngSubmit)="join()">
@@ -134,43 +200,6 @@
           ></button>
         </div>
       </form>
-    </p-card>
-
-    <p-card [header]="'room.recent.title' | transloco">
-      @if (play.$joinedRooms().length) {
-        <p class="hint">{{ "room.recent.hint" | transloco }}</p>
-        <ul class="recent">
-          @for (recent of play.$joinedRooms(); track recent.id) {
-            <li>
-              <div class="recent-text">
-                <strong>{{ recent.name }}</strong>
-                <small>
-                  {{
-                    "room.recent.hostedBy"
-                      | transloco: { name: recent.hostName }
-                  }}
-                  ·
-                  {{
-                    "room.recent.lastSeen"
-                      | transloco
-                        : { date: (recent.lastSeenAt | localDate: "dateTime") }
-                  }}
-                </small>
-              </div>
-              <p-button
-                icon="pi pi-trash"
-                severity="secondary"
-                [text]="true"
-                [rounded]="true"
-                [ariaLabel]="'room.recent.forget' | transloco"
-                (onClick)="forgetRoom(recent.id, recent.name)"
-              />
-            </li>
-          }
-        </ul>
-      } @else {
-        <p class="hint">{{ "play.rooms.empty" | transloco }}</p>
-      }
     </p-card>
   </div>
 </div>

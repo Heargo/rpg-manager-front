@@ -11,10 +11,10 @@ import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ConfirmationService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
-import { DataViewModule } from '@openng/optimus-ui/dataview';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { SliderModule } from '@openng/optimus-ui/slider';
+import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import {
@@ -30,7 +30,7 @@ import {
 } from '../../helpers/item-catalogue.rules';
 import { ItemCardComponent } from '../item-card/item-card.component';
 
-/** A world's item catalogue: search and filters, a card per item, with give (when someone can receive), edit and delete. */
+/** A world's item catalogue: search and filters, an inventory grid of slots; the selected one gets give (when someone can receive), edit and delete. */
 @Component({
   selector: 'app-item-catalogue',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,11 +38,11 @@ import { ItemCardComponent } from '../item-card/item-card.component';
     FormsModule,
     TranslocoPipe,
     ButtonModule,
-    DataViewModule,
     InputTextModule,
     MultiSelectModule,
     SliderModule,
     CoinDisplayComponent,
+    StoredImageComponent,
     ItemCardComponent,
   ],
   template: `
@@ -77,13 +77,8 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         [showToggleAll]="false"
         display="chip"
       />
-      <div class="price">
-        <span class="price-label">
-          {{ 'item.catalogue.price' | transloco }}
-          <app-coin-display [copper]="range()[0]" />
-          {{ 'item.catalogue.priceTo' | transloco }}
-          <app-coin-display [copper]="range()[1]" />
-        </span>
+      <div class="price-filter">
+        <span class="price-label">{{ 'item.catalogue.price' | transloco }}</span>
         <p-slider
           [range]="true"
           [min]="bounds().min"
@@ -91,7 +86,13 @@ import { ItemCardComponent } from '../item-card/item-card.component';
           [step]="100"
           [ngModel]="range()"
           (ngModelChange)="priceRange.set($event)"
+          [attr.aria-label]="'item.catalogue.price' | transloco"
         />
+        <span class="price-ends">
+          <app-coin-display [copper]="range()[0]" />
+          <span class="price-to">{{ 'item.catalogue.priceTo' | transloco }}</span>
+          <app-coin-display [copper]="range()[1]" />
+        </span>
       </div>
       <button
         pButton
@@ -112,52 +113,99 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       ></button>
     </div>
 
-    <p-dataview [value]="shown()" layout="grid" [emptyMessage]="' '">
-      <ng-template #grid let-items>
-        <div class="grid">
-          @for (item of items; track item.id) {
-            <div class="entry">
-              <app-item-card [item]="item" />
-              <div class="actions">
-                @if (canGive()) {
-                  <button
-                    pButton
-                    type="button"
-                    data-action="give"
-                    icon="pi pi-gift"
-                    [label]="'item.catalogue.give' | transloco"
-                    (click)="give.emit(item)"
-                  ></button>
+    <div class="inventory">
+      @if (shown().length) {
+        <div class="grid" role="listbox">
+          @for (item of shown(); track item.id) {
+            <button
+              type="button"
+              class="slot"
+              data-field="slot"
+              role="option"
+              [attr.data-rarity]="item.rarity"
+              [attr.aria-selected]="selected()?.id === item.id"
+              [class.selected]="selected()?.id === item.id"
+              (click)="select(item)"
+            >
+              <span class="art">
+                @if (item.imageId) {
+                  <app-stored-image
+                    class="image"
+                    [imageId]="item.imageId"
+                    [alt]="item.name"
+                  />
+                } @else {
+                  <i
+                    data-field="slot-kind-icon"
+                    [class]="kindIcons[item.type]"
+                    aria-hidden="true"
+                  ></i>
                 }
-                <button
-                  pButton
-                  type="button"
-                  data-action="edit"
-                  icon="pi pi-pencil"
-                  severity="secondary"
-                  [text]="true"
-                  [label]="'item.catalogue.edit' | transloco"
-                  (click)="edit.emit(item)"
-                ></button>
-                <button
-                  pButton
-                  type="button"
-                  data-action="delete"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  [text]="true"
-                  [attr.aria-label]="'item.catalogue.delete' | transloco"
-                  (click)="askDelete(item)"
-                ></button>
-              </div>
-            </div>
+              </span>
+              <span class="name">{{ item.name }}</span>
+              <span class="price" data-field="slot-price">
+                <app-coin-display [copper]="item.price" />
+              </span>
+            </button>
           }
         </div>
-      </ng-template>
-      <ng-template #emptymessage>
+      } @else {
         <p class="empty">{{ 'item.catalogue.empty' | transloco }}</p>
-      </ng-template>
-    </p-dataview>
+      }
+
+      @if (selected(); as current) {
+        <aside
+          class="panel"
+          data-field="slot-actions"
+          [attr.aria-label]="'item.catalogue.selected' | transloco"
+        >
+          <strong class="panel-name">{{ current.name }}</strong>
+          <div class="actions">
+            <button
+              pButton
+              type="button"
+              data-action="view"
+              icon="pi pi-eye"
+              severity="secondary"
+              [label]="'item.catalogue.view' | transloco"
+              (click)="viewing.set(!viewing())"
+            ></button>
+            @if (canGive()) {
+              <button
+                pButton
+                type="button"
+                data-action="give"
+                icon="pi pi-gift"
+                [label]="'item.catalogue.give' | transloco"
+                (click)="give.emit(current)"
+              ></button>
+            }
+            <button
+              pButton
+              type="button"
+              data-action="edit"
+              icon="pi pi-pencil"
+              severity="secondary"
+              [label]="'item.catalogue.edit' | transloco"
+              (click)="edit.emit(current)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              data-action="delete"
+              icon="pi pi-trash"
+              severity="danger"
+              [text]="true"
+              [attr.aria-label]="'item.catalogue.delete' | transloco"
+              (click)="askDelete(current)"
+            ></button>
+          </div>
+          @if (viewing()) {
+            <app-item-card [item]="current" />
+          }
+        </aside>
+      }
+    </div>
   `,
   styles: `
     :host {
@@ -171,36 +219,137 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       gap: 0.75rem;
       align-items: center;
     }
-    .price {
+    /* a compact slider; min and max sit at each end, clearly apart */
+    .price-filter {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      flex: 0 1 15rem;
+      min-width: min(13rem, 100%);
+      padding-inline: 0.5rem;
+    }
+    .price-label {
+      font-size: 0.875rem;
+      color: var(--p-text-muted-color);
+    }
+    .price-ends {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    .price-to {
+      color: var(--p-text-muted-color);
+      font-size: 0.875rem;
+    }
+    .inventory {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .grid {
+      flex: 1 1 24rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+      gap: 0.5rem;
+    }
+    .panel {
+      flex: 1 1 16rem;
+      max-width: 24rem;
+      position: sticky;
+      top: 1rem;
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
-      min-width: 12rem;
-    }
-    .price-label {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
-      // Every row as tall as the tallest card: uniform cards across the catalogue (user, 2026-11-08).
-      grid-auto-rows: 1fr;
-      gap: 1rem;
-    }
-    .entry {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .entry app-item-card {
-      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid var(--p-content-border-color);
+      border-radius: 0.5rem;
+      background: var(--p-content-background);
     }
     .actions {
       display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .slot {
+      --rarity: var(--p-surface-400);
+      aspect-ratio: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       justify-content: space-between;
+      gap: 0.15rem;
+      padding: 0.25rem;
+      overflow: hidden;
+      border: 2px solid var(--rarity);
+      border-radius: 0.5rem;
+      background: var(--p-content-background);
+      color: var(--p-text-color);
+      font: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+    .slot[data-rarity='uncommon'] {
+      --rarity: var(--p-green-500);
+    }
+    .slot[data-rarity='rare'] {
+      --rarity: var(--p-blue-500);
+    }
+    .slot[data-rarity='mythic'] {
+      --rarity: var(--p-orange-500);
+    }
+    .slot[data-rarity='legendary'] {
+      --rarity: var(--p-red-500);
+    }
+    .slot:hover {
+      background: var(--p-content-hover-background);
+    }
+    .slot.selected {
+      background: var(--p-highlight-background);
+      box-shadow: 0 0 0 2px var(--p-primary-color);
+    }
+    .slot:focus-visible {
+      outline: 2px solid var(--p-primary-color);
+      outline-offset: 2px;
+    }
+    .art {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--rarity);
+    }
+    .image {
+      width: 100%;
+      height: 100%;
+    }
+    .name {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    .price {
+      display: block;
+      max-width: 100%;
+      min-width: 0;
+      color: var(--p-text-muted-color);
+      font-size: 0.65rem;
+      line-height: 1.1;
+    }
+    // Coins wrap and stay inside the slot (the display is nowrap by default).
+    .price ::ng-deep app-coin-display {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0 0.3rem;
+      white-space: normal;
     }
     .empty {
       color: var(--p-text-muted-color);
@@ -221,6 +370,13 @@ export class ItemCatalogueComponent {
   readonly remove = output<Item>();
   readonly addDefaults = output<void>();
 
+  protected readonly kindIcons: Record<ItemType, string> = {
+    item: 'pi pi-box',
+    consumable: 'pi pi-heart',
+    equipment: 'pi pi-shield',
+  };
+  protected readonly selectedId = signal<string | null>(null);
+  protected readonly viewing = signal(false);
   protected readonly search = signal('');
   protected readonly rarities = signal<ItemRarity[]>([]);
   protected readonly types = signal<ItemType[]>([]);
@@ -257,6 +413,16 @@ export class ItemCatalogueComponent {
       label: this.language.t('item.type.' + value),
     })),
   );
+
+  /** The selected item, as long as it is still in the catalogue. */
+  protected readonly selected = computed(
+    () => this.world().items.find((i) => i.id === this.selectedId()) ?? null,
+  );
+
+  protected select(item: Item): void {
+    if (this.selectedId() !== item.id) this.viewing.set(false);
+    this.selectedId.set(item.id);
+  }
 
   protected askDelete(item: Item): void {
     this.confirmation.confirm({

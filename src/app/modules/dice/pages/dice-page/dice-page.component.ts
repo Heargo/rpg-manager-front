@@ -80,6 +80,11 @@ import { DiceOverlayComponent } from '../../components/dice-overlay/dice-overlay
     .roller { display: flex; flex-direction: column; gap: 1rem; align-items: center; }
     .notation { display: flex; align-items: center; gap: 0.5rem; }
     :host ::ng-deep .count, :host ::ng-deep .sides { width: 5rem; text-align: center; font-size: 1.5rem; }
+    :host ::ng-deep .count { width: 7rem; }
+    :host ::ng-deep p-selectbutton, :host ::ng-deep .p-selectbutton { max-width: 100%; }
+    :host ::ng-deep .p-selectbutton { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.25rem; }
+    :host ::ng-deep .p-selectbutton .p-togglebutton { border-radius: var(--p-togglebutton-border-radius, 6px); }
+    .roller { max-width: 100%; }
     .d { font-size: 1.5rem; font-weight: 700; }
     .history { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
     .history li { display: flex; gap: 0.75rem; align-items: baseline; flex-wrap: wrap; }

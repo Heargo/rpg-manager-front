@@ -57,4 +57,15 @@ describe('SandboxCharacterBusiness', () => {
     sandbox.reset();
     expect(sandbox.$character()!.statPoints).toBe(5);
   });
+
+  it('gives the sample character the sandbox Mage class, again after a reset', () => {
+    const mage = sandbox.$world().classes.find((entry) => entry.name === 'Mage')!;
+    expect(mage).toBeDefined();
+    expect(sandbox.$character()!.classId).toBe(mage.id);
+    const before = sandbox.$character()!.skillPoints;
+    sandbox.act({ kind: 'grant-skill-points', amount: 3 });
+    expect(sandbox.$character()!.skillPoints).toBe(before + 3);
+    sandbox.reset();
+    expect(sandbox.$character()!.classId).toBe(mage.id);
+  });
 });
