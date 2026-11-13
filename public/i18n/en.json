@@ -1446,6 +1446,7 @@
       "invalid": "This request isn't valid.",
       "gameMasterOnly": "Only the game master can do that.",
       "notYours": "This isn't your combatant.",
+      "notYourTurn": "This isn't your turn.",
       "noEncounter": "There is no encounter in progress.",
       "alreadyStarted": "An encounter is already in progress.",
       "life-attribute-required": "Combat needs a life attribute in the world's combat rules.",
@@ -1468,6 +1469,7 @@
     "details": "Details",
     "roll": "{{caster}} rolled {{rolls}} (total {{total}}) for {{skill}}",
     "waitingGm": "Waiting for the GM…",
+    "waitingTurn": "Waiting for {{name}}",
     "start": {
       "title": "Start an encounter",
       "characters": "Characters",

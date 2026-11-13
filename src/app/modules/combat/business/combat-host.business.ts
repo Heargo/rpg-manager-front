@@ -153,15 +153,18 @@ export class CombatHostBusiness {
     const own = (
       route: Parameters<CombatService['serve']>[0],
       run: (p: Payload, world: World, enc: Encounter) => World,
+      onTurnOnly = false,
     ) =>
       this.service.serve(route, async (payload, context) => {
         await this.change(payload, (p, world, enc) => {
-          this.assertOwnerOrGameMaster(
-            context,
-            world,
-            enc,
-            text(p['combatantId'] ?? p['casterId']),
-          );
+          const combatantId = text(p['combatantId'] ?? p['casterId']);
+          this.assertOwnerOrGameMaster(context, world, enc, combatantId);
+          if (
+            onTurnOnly &&
+            context.from !== SELF_PEER &&
+            enc.combatants[enc.turn]?.id !== combatantId
+          )
+            throw new PeerApiError('rejected', 'combat.errors.notYourTurn');
           return run(p, world, enc);
         });
       });
@@ -241,30 +244,37 @@ export class CombatHostBusiness {
           ),
         );
       }),
-      own('useSkill', (p, world, enc) => {
-        const result = useSkill(
-          enc,
-          {
-            casterId: text(p['casterId']),
-            skillId: text(p['skillId']),
-            targetIds: list(p['targetIds'], text, 20),
-          },
-          world.skills,
-          world.skillRollsEnabled ?? true,
-          this.random,
-          world.combat,
-        );
-        if (!result.ok)
-          throw new PeerApiError('rejected', `combat.errors.${result.error}`);
-        return this.with(world, result.encounter);
-      }),
-      own('useItem', (p, world, enc) =>
-        this.useItem(
-          world,
-          enc,
-          text(p['combatantId']),
-          text(p['inventoryId']),
-        ),
+      own(
+        'useSkill',
+        (p, world, enc) => {
+          const result = useSkill(
+            enc,
+            {
+              casterId: text(p['casterId']),
+              skillId: text(p['skillId']),
+              targetIds: list(p['targetIds'], text, 20),
+            },
+            world.skills,
+            world.skillRollsEnabled ?? true,
+            this.random,
+            world.combat,
+          );
+          if (!result.ok)
+            throw new PeerApiError('rejected', `combat.errors.${result.error}`);
+          return this.with(world, result.encounter);
+        },
+        true,
+      ),
+      own(
+        'useItem',
+        (p, world, enc) =>
+          this.useItem(
+            world,
+            enc,
+            text(p['combatantId']),
+            text(p['inventoryId']),
+          ),
+        true,
       ),
       own('move', (p, world, enc) => {
         const position = body(p['position']);
@@ -278,16 +288,19 @@ export class CombatHostBusiness {
           moveCombatant(enc, text(p['combatantId']), { x, y }),
         );
       }),
-      own('tickAction', (p, world, enc) =>
-        this.with(
-          world,
-          setActionUsed(
-            enc,
-            text(p['combatantId']),
-            text(p['action']),
-            whole(p['used'], 0, 100),
+      own(
+        'tickAction',
+        (p, world, enc) =>
+          this.with(
+            world,
+            setActionUsed(
+              enc,
+              text(p['combatantId']),
+              text(p['action']),
+              whole(p['used'], 0, 100),
+            ),
           ),
-        ),
+        true,
       ),
       this.service.serve('endTurn', async (_payload, context) => {
         await this.change({}, (_p, world, enc) => {

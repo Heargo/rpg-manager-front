@@ -318,6 +318,93 @@ describe('combat (GM + players)', () => {
       ).toBe(1);
     });
 
+    describe('actions only on the own turn', () => {
+      const notYourTurn = {
+        code: 'rejected',
+        message: 'combat.errors.notYourTurn',
+      };
+
+      it('rejects a player skill off turn and changes nothing', async () => {
+        await startAll();
+        await combat(gm).endTurn();
+        await settle();
+
+        await expect(
+          combat(ada).useSkill({
+            casterId: adaId(),
+            skillId: fireballId,
+            targetIds: [goblinId()],
+          }),
+        ).rejects.toMatchObject(notYourTurn);
+        expect(state(gm).pending).toEqual([]);
+        expect(current('ada', 'Mana')).toBe(10);
+      });
+
+      it('rejects a player item off turn and changes nothing', async () => {
+        await startAll();
+        await combat(gm).endTurn();
+        await settle();
+
+        await expect(
+          combat(ada).useItem(adaId(), 'inv-potion'),
+        ).rejects.toMatchObject(notYourTurn);
+        expect(record('ada').inventory).toHaveLength(1);
+      });
+
+      it('rejects a player counter tick off turn and changes nothing', async () => {
+        await startAll();
+        await combat(gm).endTurn();
+        await settle();
+
+        await expect(
+          combat(ada).tickAction(adaId(), 'Action', 1),
+        ).rejects.toMatchObject(notYourTurn);
+        expect(
+          named(gm, 'Ada').actions.find((a) => a.name === 'Action')?.used,
+        ).toBe(0);
+      });
+
+      it('lets the player act on their own turn', async () => {
+        await startAll();
+
+        await combat(ada).tickAction(adaId(), 'Action', 1);
+        await combat(ada).useItem(adaId(), 'inv-potion');
+        await combat(ada).useSkill({
+          casterId: adaId(),
+          skillId: fireballId,
+          targetIds: [goblinId()],
+        });
+        await settle();
+
+        expect(state(gm).pending).toHaveLength(1);
+        expect(record('ada').inventory).toEqual([]);
+      });
+
+      it('lets the GM act for any combatant off turn', async () => {
+        await startAll();
+
+        await combat(gm).tickAction(bobId(), 'Action', 1);
+        await combat(gm).tickAction(goblinId(), 'Movement', 1);
+        await settle();
+
+        expect(
+          named(ada, 'Bob').actions.find((a) => a.name === 'Action')?.used,
+        ).toBe(1);
+        expect(
+          named(ada, 'Goblin').actions.find((a) => a.name === 'Movement')?.used,
+        ).toBe(1);
+      });
+
+      it('has the notYourTurn key in English and French', () => {
+        const lookup = (json: unknown) =>
+          (json as Record<string, Record<string, Record<string, unknown>>>)[
+            'combat'
+          ]['errors']['notYourTurn'];
+        expect(typeof lookup(en)).toBe('string');
+        expect(typeof lookup(fr)).toBe('string');
+      });
+    });
+
     it('moves a token: the player their own, the GM any', async () => {
       await startAll();
 

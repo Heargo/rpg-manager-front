@@ -14,7 +14,7 @@ import { CombatPlayerViewComponent } from './combat-player-view.component';
  * - `[data-testid="your-turn"]` banner only while the player's own combatant is the active one; `[data-action="end-turn"]` likewise.
  * - Own skills `[data-testid="skill"]` (`data-name`, text with the preview "5 damage, 3 Mana, cooldown 2", `[data-action="use-skill"]`), own items
  *   `[data-testid="item"]` (`data-name`, `[data-action="use-item"]`) and counters `[data-testid="action-counter"]` (`data-action-name`, `data-used`, `data-count`,
- *   `[data-action="tick"]`), shown outside the turn too.
+ *   `[data-action="tick"]`), shown only on the player's turn; off turn no `app-combat-actions` and `[data-testid="waiting-turn"]` "Waiting for <active name>" (FR "En attente de").
  * - Targeting: after `use-skill`, `[data-testid="target"]` per combatant (`data-name`), then `[data-action="confirm-skill"]`. The roll then shows in
  *   `[data-testid="roll"]` (the rolls and the skill name) and `[data-testid="waiting-gm"]` while one of the player's results is pending.
  * - Typed initiative: `[data-testid="initiative-input"]` (number) and `[data-action="initiative-set"]` when the world's mode is `typed`.
@@ -105,15 +105,38 @@ describe('CombatPlayerViewComponent', () => {
       expect(el.querySelector('[data-testid="item"]')).toBeNull();
     });
 
-    it('keeps the skills readable outside the turn', async () => {
+    it('shows no actions off turn, but a line naming the active combatant', async () => {
       await table.combat(table.gm).endTurn();
       await settle();
       await open(table.ada, 'Ada', 'ada');
 
       expect(el.querySelector('[data-testid="your-turn"]')).toBeNull();
-      expect(
-        el.querySelector('[data-testid="skill"]')!.getAttribute('data-name'),
-      ).toBe('Fireball');
+      expect(el.querySelector('app-combat-actions')).toBeNull();
+      expect(el.querySelector('[data-testid="skill"]')).toBeNull();
+      expect(clean(el.querySelector('[data-testid="waiting-turn"]'))).toContain(
+        'Waiting for Bob',
+      );
+      expect(orderNames()).toEqual(['Ada', 'Bob', 'Goblin']);
+    });
+
+    it('shows the actions and no waiting line on the own turn', async () => {
+      await open(table.ada, 'Ada', 'ada');
+
+      expect(el.querySelector('app-combat-actions')).not.toBeNull();
+      expect(el.querySelector('[data-testid="waiting-turn"]')).toBeNull();
+    });
+
+    it('brings the actions back when the turn comes round', async () => {
+      await open(table.bob, 'Bob', 'bob');
+      expect(clean(el.querySelector('[data-testid="waiting-turn"]'))).toContain(
+        'Waiting for Ada',
+      );
+
+      await table.combat(table.gm).endTurn();
+      await settle();
+
+      expect(el.querySelector('[data-testid="waiting-turn"]')).toBeNull();
+      expect(el.querySelector('app-combat-actions')).not.toBeNull();
     });
 
     it('offers no GM controls', async () => {

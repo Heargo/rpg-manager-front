@@ -1446,6 +1446,7 @@
       "invalid": "Cette demande n'est pas valide.",
       "gameMasterOnly": "Seul le maître du jeu peut faire cela.",
       "notYours": "Ce combattant n'est pas le vôtre.",
+      "notYourTurn": "Ce n'est pas votre tour.",
       "noEncounter": "Aucun combat n'est en cours.",
       "alreadyStarted": "Un combat est déjà en cours.",
       "life-attribute-required": "Le combat demande un attribut de vie dans les règles de combat du monde.",
@@ -1468,6 +1469,7 @@
     "details": "Détails",
     "roll": "{{caster}} a lancé {{rolls}} (total {{total}}) pour {{skill}}",
     "waitingGm": "En attente du MJ…",
+    "waitingTurn": "En attente de {{name}}",
     "start": {
       "title": "Lancer une rencontre",
       "characters": "Personnages",
