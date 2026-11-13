@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideBasePack } from '../../../../testing/base-pack';
 import { ImageBusiness } from '../../../core/business/image.business';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
 import { autoMaterials } from '../helpers/auto-materials';
@@ -23,6 +24,7 @@ function setup(saved: SpriteSet[] = []) {
   TestBed.configureTestingModule({
     providers: [
       { provide: SpriteFileService, useValue: files },
+      provideBasePack(),
       { provide: SpriteSetStorageService, useValue: { list: async () => saved } },
       { provide: ImageBusiness, useValue: images },
       { provide: ImageStorageService, useValue: storage },
@@ -37,7 +39,7 @@ describe('RandomItemImageBusiness', () => {
     const id = await business.create({ name: 'Hache du nord', type: 'equipment', slot: 'weapon1' }, 'seed');
     expect(id).toBe('stored-1');
     const url = (files.fetchImage.mock.calls[0] as unknown[])[0];
-    expect(['assets/sprites/axe.png', 'assets/sprites/waraxe.png']).toContain(url);
+    expect(['packs/base/sprites/axe.png', 'packs/base/sprites/waraxe.png']).toContain(url);
     expect(files.fetchText).toHaveBeenCalledWith(String(url).replace('.png', '.json'));
     expect(files.encodePng).toHaveBeenCalled();
     expect(images.storeUpload).toHaveBeenCalled();

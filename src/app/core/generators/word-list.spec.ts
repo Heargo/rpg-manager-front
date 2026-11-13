@@ -1,5 +1,5 @@
-import en from '../../../../public/i18n/generators/en/items.json';
-import fr from '../../../../public/i18n/generators/fr/items.json';
+import en from '../../../../public/packs/base/generators/en/items.json';
+import fr from '../../../../public/packs/base/generators/fr/items.json';
 import { validateWordList, WordList } from './word-list';
 
 function clone(): Record<string, any> {

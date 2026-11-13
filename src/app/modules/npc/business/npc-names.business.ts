@@ -5,12 +5,12 @@ import {
   NpcNameList,
   validateNpcNameList,
 } from '../../../core/generators/npc-name-list';
-import { WordListService } from '../../../core/services/word-list.service';
+import { PackBusiness } from '../../../core/business/pack.business';
 
 /** Person-name lists for the NPC generator, per language, cached; falls back to English when a list is missing or invalid. */
 @Injectable({ providedIn: 'root' })
 export class NpcNamesBusiness {
-  private readonly service = inject(WordListService);
+  private readonly service = inject(PackBusiness);
   private readonly languageBusiness = inject(LanguageBusiness);
   private readonly cache = new Map<string, Promise<NpcNameList>>();
 
@@ -30,7 +30,7 @@ export class NpcNamesBusiness {
 
   private async load(lang: string): Promise<NpcNameList> {
     try {
-      const result = validateNpcNameList(await this.service.loadNpcNames(lang));
+      const result = validateNpcNameList(await this.service.wordList('npcs', lang));
       if (result.ok) return result.value;
       console.warn(`NPC name list "${lang}" is invalid:`, result.errors);
     } catch (error) {

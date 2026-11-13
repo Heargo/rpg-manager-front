@@ -3,13 +3,13 @@ import { DEFAULT_LANGUAGE } from '../constants/languages';
 import { ClassWordList } from '../generators/class-generator';
 import { SkillWordList } from '../generators/skill-generator';
 import { isRecord, validateWordList, WordList } from '../generators/word-list';
-import { WordListService } from '../services/word-list.service';
+import { PackBusiness } from './pack.business';
 import { LanguageBusiness } from './language.business';
 
 /** Item word lists for the generators, per language, cached; falls back to English when a list is missing or invalid. */
 @Injectable({ providedIn: 'root' })
 export class WordListBusiness {
-  private readonly service = inject(WordListService);
+  private readonly service = inject(PackBusiness);
   private readonly languageBusiness = inject(LanguageBusiness);
   private readonly cache = new Map<string, Promise<WordList>>();
 
@@ -29,7 +29,7 @@ export class WordListBusiness {
 
   private async load(lang: string): Promise<WordList> {
     try {
-      const result = validateWordList(await this.service.loadItemWords(lang));
+      const result = validateWordList(await this.service.wordList('items', lang));
       if (result.ok) return result.value;
       console.warn(`Item word list "${lang}" is invalid:`, result.errors);
     } catch (error) {
@@ -50,7 +50,7 @@ export class WordListBusiness {
     return this.cached(
       this.skillCache,
       lang,
-      (l) => this.service.loadSkillWords(l),
+      (l) => this.service.wordList('skills', l),
       isSkillWordList,
       (l) => this.skillWords(l),
     );
@@ -63,7 +63,7 @@ export class WordListBusiness {
     return this.cached(
       this.classCache,
       lang,
-      (l) => this.service.loadClassWords(l),
+      (l) => this.service.wordList('classes', l),
       isClassWordList,
       (l) => this.classWords(l),
     );

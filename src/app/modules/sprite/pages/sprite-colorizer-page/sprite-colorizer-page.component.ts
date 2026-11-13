@@ -1,3 +1,4 @@
+import { BundledSprite, PackBusiness } from '../../../../core/business/pack.business';
 import {
   afterNextRender,
   ChangeDetectionStrategy,
@@ -32,8 +33,6 @@ import { SpriteColorizerBusiness } from '../../business/sprite-colorizer.busines
 import { brushCursor } from '../../helpers/brush-cursor';
 import {
   searchSprites,
-  SPRITE_LIBRARY,
-  spriteUrl,
 } from '../../helpers/sprite-library';
 import { gradientColor } from '../../helpers/gradient-mapping';
 import { isBuiltInPreset } from '../../helpers/presets';
@@ -90,6 +89,8 @@ const toHex = (rgb: number[]) =>
 export class SpriteColorizerPageComponent {
   protected readonly business = inject(SpriteColorizerBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly packs = inject(PackBusiness);
+  private readonly bundled = signal<BundledSprite[]>([]);
   private readonly messages = inject(MessageService);
   private readonly confirmation = inject(ConfirmationService);
   private readonly injector = inject(Injector);
@@ -146,10 +147,10 @@ export class SpriteColorizerPageComponent {
   });
   protected readonly librarySprites = computed(() => {
     const lang = this.language.$language() ?? 'fr';
-    return searchSprites(this.libraryQuery(), lang).map((sprite) => ({
+    return searchSprites(this.bundled(), this.libraryQuery(), lang).map((sprite) => ({
       id: sprite.id,
       label: lang === 'fr' ? sprite.fr : sprite.en,
-      url: spriteUrl(sprite.id),
+      url: sprite.imageUrl,
     }));
   });
   /** The pixel under a mouse or pen, for the brush outline. */
@@ -220,6 +221,7 @@ export class SpriteColorizerPageComponent {
   private shownImage: unknown = null;
 
   constructor() {
+    this.packs.sprites().then((sprites) => this.bundled.set(sprites)).catch(() => undefined);
     // Fit the sprite in the viewport when a new image arrives.
     effect(() => {
       const image = this.business.$image();
@@ -550,7 +552,7 @@ export class SpriteColorizerPageComponent {
   private defaultSetName(): string {
     const name = this.business.$fileName();
     if (this.business.$currentSetId()) return name;
-    const sprite = SPRITE_LIBRARY.find((s) => s.id === name);
+    const sprite = this.bundled().find((s) => s.id === name);
     if (!sprite) return name;
     return this.language.$language() === 'en' ? sprite.en : sprite.fr;
   }

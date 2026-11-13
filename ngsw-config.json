@@ -13,7 +13,9 @@
           "/manifest.webmanifest",
           "/*.css",
           "/*.js",
-          "/i18n/**"
+          "/i18n/**",
+          "/packs/base/pack.json",
+          "/packs/base/generators/**"
         ]
       }
     },
@@ -23,7 +25,8 @@
       "updateMode": "prefetch",
       "resources": {
         "files": [
-          "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
+          "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)",
+          "/packs/base/sprites/**"
         ]
       }
     }

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideBasePack } from '../../../../../testing/base-pack';
 import { ConfirmationService } from '@openng/optimus-ui/api';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { routesTools } from '../../../tools/tools.routes';
@@ -12,6 +13,7 @@ async function render() {
     imports: [SpriteColorizerPageComponent],
     providers: [
       ...TEST_PROVIDERS,
+      provideBasePack(),
       { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
     ],
   });
@@ -174,7 +176,7 @@ describe('SpriteColorizerPageComponent', () => {
       button('Sprite library')!.click();
       await fixture.whenStable();
       expect(tiles()).toHaveLength(101);
-      expect(tiles()[0].querySelector('img')!.getAttribute('src')).toMatch(/^assets\/sprites\/.+\.png$/);
+      expect(tiles()[0].querySelector('img')!.getAttribute('src')).toMatch(/^packs\/base\/sprites\/.+\.png$/);
     });
 
     it('filters by name and loads the picked sprite', async () => {

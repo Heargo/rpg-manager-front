@@ -1,9 +1,9 @@
 import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../../public/i18n/generators/en/items.json';
+import en from '../../../../../../public/packs/base/generators/en/items.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { ImageBusiness } from '../../../../core/business/image.business';
-import { WordListService } from '../../../../core/services/word-list.service';
+import { PackBusiness } from '../../../../core/business/pack.business';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
 import { ItemEditorComponent } from './item-editor.component';
 
@@ -16,7 +16,7 @@ describe('ItemEditorComponent image picker', () => {
       imports: [ItemEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: WordListService, useValue: { loadItemWords: async () => en } },
+        { provide: PackBusiness, useValue: { wordList: async () => en } },
         { provide: ImageBusiness, useValue: { storeUpload, url: async () => 'blob:i' } },
       ],
     });

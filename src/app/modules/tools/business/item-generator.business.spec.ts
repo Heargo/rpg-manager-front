@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { WordListService } from '../../../core/services/word-list.service';
+import { PackBusiness } from '../../../core/business/pack.business';
 import { provideTestTranslations } from '../../../../testing/test-providers';
-import en from '../../../../../public/i18n/generators/en/items.json';
+import en from '../../../../../public/packs/base/generators/en/items.json';
 import { ItemGeneratorBusiness } from './item-generator.business';
 
 async function settle(): Promise<void> {
@@ -19,8 +19,8 @@ describe('ItemGeneratorBusiness', () => {
       providers: [
         provideTestTranslations(),
         {
-          provide: WordListService,
-          useValue: { loadItemWords: async () => en },
+          provide: PackBusiness,
+          useValue: { wordList: async () => en },
         },
       ],
     });

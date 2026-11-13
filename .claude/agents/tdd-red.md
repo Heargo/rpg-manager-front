@@ -18,7 +18,7 @@ You write the **red** tests for one ticket. Your brief names the ticket file and
 
 - One test per behaviour the ticket asks for, at the agreed seams only, through the public interface.
 - Expected values come from the ticket or the spec, as literals: a test that recomputes the answer the way the code would is tautological.
-- Mock only the boundaries the repo already mocks (`WordListService`, `ImageProcessingService`, image storage, the transport through the fake network). Keep collaborators inside the seam real.
+- Mock only the boundaries the repo already mocks (`PackService`, `ImageProcessingService`, image storage, the transport through the fake network). Keep collaborators inside the seam real.
 - Randomness through a seeded `RandomSource`, never `Math.random()`.
 - Edit test files only. When a test needs a symbol that doesn't exist yet, import it as if it existed; the missing export is part of the red.
 

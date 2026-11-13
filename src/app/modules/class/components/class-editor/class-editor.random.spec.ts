@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../../public/i18n/generators/en/classes.json';
+import en from '../../../../../../public/packs/base/generators/en/classes.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
-import { WordListService } from '../../../../core/services/word-list.service';
+import { PackBusiness } from '../../../../core/business/pack.business';
 import { Skill } from '../../../skill/models/skill';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
 import { World } from '../../../world/models/world';
 import { ClassEditorComponent } from './class-editor.component';
 
-/** `WordListService.loadClassWords(lang)` is mocked. `[data-action="random"]` fills the form, the JSON and the tree. */
+/** `PackBusiness.wordList` is mocked. `[data-action="random"]` fills the form, the JSON and the tree. */
 describe('ClassEditorComponent Random', () => {
   const skill = (id: string): Skill => ({
     id, name: id, description: '', rarity: 'common', type: 'passive', maxLevel: 3, pointCost: 1,
@@ -25,7 +25,7 @@ describe('ClassEditorComponent Random', () => {
   async function setup() {
     TestBed.configureTestingModule({
       imports: [ClassEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: WordListService, useValue: { loadClassWords: async () => en } }],
+      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en } }],
     });
     const fixture = TestBed.createComponent(ClassEditorComponent);
     fixture.componentRef.setInput('world', world);

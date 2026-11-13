@@ -23,12 +23,8 @@ import {
 import { Point, rasterizePolygon } from '../helpers/polygon';
 import { defaultMinSize, detectShapes, DetectedShape } from '../helpers/shape-detection';
 import { PRESETS } from '../helpers/presets';
-import {
-  DEMO_SPRITE_ID,
-  SPRITE_LIBRARY,
-  spriteSetUrl,
-  spriteUrl,
-} from '../helpers/sprite-library';
+import { DEMO_SPRITE_ID } from '../helpers/sprite-library';
+import { PackBusiness } from '../../../core/business/pack.business';
 import { SpriteSet, SpriteSetSource, SpriteSetTags } from '../models/sprite-set';
 import { SpriteSetStorageService } from '../services/sprite-set-storage.service';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
@@ -76,6 +72,7 @@ export class SpriteColorizerBusiness {
   private readonly shapes = inject(SpriteShapeService);
   private readonly setStorage = inject(SpriteSetStorageService);
   private readonly imageStorage = inject(ImageStorageService);
+  private readonly packs = inject(PackBusiness);
   private readonly history = new History();
 
   private readonly image = signal<SpriteImage | null>(null);
@@ -178,15 +175,24 @@ export class SpriteColorizerBusiness {
     this.source = { kind: 'file', blob: file };
   }
 
-  /** Loads a bundled sprite (`SPRITE_LIBRARY`) by id, with its ready-made materials when it has some. */
+  /** Loads a bundled sprite (from the Base pack) by id, with its ready-made materials when it has some. */
   async loadLibrary(id: string): Promise<void> {
+    const sprite = await this.bundledSprite(id);
     const [image, config] = await Promise.all([
-      this.files.fetchImage(spriteUrl(id)),
-      this.files.fetchText(spriteSetUrl(id)).catch(() => null),
+      this.files.fetchImage(sprite.imageUrl),
+      sprite.materialsUrl
+        ? this.files.fetchText(sprite.materialsUrl).catch(() => null)
+        : null,
     ]);
     this.loadImage(image, id);
     this.source = { kind: 'library', spriteId: id };
     if (config) this.replaceDocument(config);
+  }
+
+  private async bundledSprite(id: string) {
+    const sprite = (await this.packs.sprites()).find((s) => s.id === id);
+    if (!sprite) throw new Error(`Unknown sprite "${id}"`);
+    return sprite;
   }
 
   // Saved sets
@@ -209,7 +215,7 @@ export class SpriteColorizerBusiness {
     const current = this.savedSets().find((s) => s.id === this.currentSetId());
     const bundled =
       source.kind === 'library'
-        ? SPRITE_LIBRARY.find((s) => s.id === (source as { spriteId: string }).spriteId)
+        ? await this.bundledSprite(source.spriteId).catch(() => undefined)
         : undefined;
     const tags: SpriteSetTags | undefined = current
       ? current.tags
@@ -237,7 +243,9 @@ export class SpriteColorizerBusiness {
     if (!set) throw new Error('Unknown sprite set');
     let image: SpriteImage;
     if (set.source.kind === 'library') {
-      image = await this.files.fetchImage(spriteUrl(set.source.spriteId));
+      image = await this.files.fetchImage(
+        (await this.bundledSprite(set.source.spriteId)).imageUrl,
+      );
     } else {
       const blob = await this.imageStorage.get(set.source.imageId);
       if (!blob) throw new Error('Missing sprite image');

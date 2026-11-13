@@ -1,5 +1,5 @@
 /**
- * Writes public/assets/sprites/<id>.json, the ready-made materials of each bundled sprite (sprite colorizer JSON
+ * Writes public/packs/base/sprites/<id>.json, the ready-made materials of each bundled sprite (sprite colorizer JSON
  * config), from the automatic first guess. Run with `npm run sprites:sets`; existing files are kept unless --force,
  * so a set fixed by hand in the colorizer (exported, then copied here) is not overwritten.
  */
@@ -10,7 +10,7 @@ import { autoMaterials } from '../src/app/modules/sprite/helpers/auto-materials'
 import { exportConfig } from '../src/app/modules/sprite/helpers/config-export';
 import { SpriteImage } from '../src/app/modules/sprite/models/sprite';
 
-const DIR = 'public/assets/sprites';
+const DIR = 'public/packs/base/sprites';
 const force = process.argv.includes('--force');
 
 /** Decodes an 8-bit RGBA or RGB, non-interlaced PNG (what the bundled pack uses). */

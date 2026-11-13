@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideBasePack } from '../../../../testing/base-pack';
 import { gray } from '../helpers/sprite-test-images';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
 import { autoMaterials } from '../helpers/auto-materials';
@@ -373,6 +374,7 @@ describe('SpriteColorizerBusiness', () => {
         providers: [
           { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
           { provide: SpriteFileService, useValue: files },
+          provideBasePack(),
         ],
       });
       return { business: TestBed.inject(SpriteColorizerBusiness), files };
@@ -381,7 +383,7 @@ describe('SpriteColorizerBusiness', () => {
     it('loads a bundled sprite by id, named after it', async () => {
       const { business, files } = setupFiles();
       await business.loadLibrary('sword');
-      expect(files.fetchImage).toHaveBeenCalledWith('assets/sprites/sword.png');
+      expect(files.fetchImage).toHaveBeenCalledWith('packs/base/sprites/sword.png');
       expect(business.$document()!.width).toBe(2);
       expect(business.$fileName()).toBe('sword');
     });
@@ -389,7 +391,7 @@ describe('SpriteColorizerBusiness', () => {
     it('loads the axe as the demo sprite', async () => {
       const { business, files } = setupFiles();
       await business.loadDemo();
-      expect(files.fetchImage).toHaveBeenCalledWith('assets/sprites/axe.png');
+      expect(files.fetchImage).toHaveBeenCalledWith('packs/base/sprites/axe.png');
       expect(business.$fileName()).toBe('axe');
     });
   });
@@ -428,6 +430,7 @@ describe('SpriteColorizerBusiness', () => {
           { provide: SpriteSetStorageService, useValue: setStorage },
           { provide: ImageStorageService, useValue: images },
           { provide: SpriteFileService, useValue: files },
+          provideBasePack(),
         ],
       });
       return { business: TestBed.inject(SpriteColorizerBusiness), setStorage, images, files, sets: () => sets };
@@ -439,7 +442,7 @@ describe('SpriteColorizerBusiness', () => {
     it('opens a bundled sprite with its ready-made materials', async () => {
       const { business, files } = setupSets();
       await business.loadLibrary('axe');
-      expect(files.fetchText).toHaveBeenCalledWith('assets/sprites/axe.json');
+      expect(files.fetchText).toHaveBeenCalledWith('packs/base/sprites/axe.json');
       expect(names(business)).toEqual(['Base', 'Part 1']);
       expect(business.$canUndo()).toBe(false);
     });
@@ -540,6 +543,7 @@ describe('SpriteColorizerBusiness', () => {
       TestBed.configureTestingModule({
         providers: [
           { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
+          provideBasePack(),
           { provide: SpriteSetStorageService, useValue: setStorage },
           {
             provide: SpriteFileService,

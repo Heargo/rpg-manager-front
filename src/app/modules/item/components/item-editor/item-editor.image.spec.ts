@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../../public/i18n/generators/en/items.json';
+import en from '../../../../../../public/packs/base/generators/en/items.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
-import { WordListService } from '../../../../core/services/word-list.service';
+import { PackBusiness } from '../../../../core/business/pack.business';
 import { RandomItemImageBusiness } from '../../../sprite/business/random-item-image.business';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
 import { Item, World } from '../../../world/models/world';
@@ -32,7 +32,7 @@ describe('ItemEditorComponent random image', () => {
       imports: [ItemEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: WordListService, useValue: { loadItemWords: async () => en } },
+        { provide: PackBusiness, useValue: { wordList: async () => en } },
         { provide: RandomItemImageBusiness, useValue: { create } },
       ],
     });
