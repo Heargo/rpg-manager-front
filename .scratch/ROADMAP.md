@@ -197,5 +197,5 @@ Tickets in `content-packs/` (K). Status: validated (2026-11-13), every ticket re
 | 90 | **K04** Pack choice next to the seed (done) | K01, K02 |
 | 91 | **K05** Unofficial packs from a link or GitHub repository (done) | K03 |
 | 92 | **K07** Pack creator (done) | K02, K05 |
-| 92b | **K08** Pack creator: the colorizer link (split from K07) | K07 |
+| 92b | **K08** Pack creator: the colorizer link (split from K07) (done) | K07 |
 | 93 | **K06** Documentation: using and creating packs | K04, K05, K07, K08 |

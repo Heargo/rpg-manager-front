@@ -25,6 +25,8 @@ import { defaultMinSize, detectShapes, DetectedShape } from '../helpers/shape-de
 import { PRESETS } from '../helpers/presets';
 import { DEMO_SPRITE_ID } from '../helpers/sprite-library';
 import { PackBusiness } from '../../../core/business/pack.business';
+import { PackCreatorBusiness } from '../../../core/business/pack-creator.business';
+import { DraftSprite } from '../../../core/packs/pack-draft';
 import { SpriteSet, SpriteSetSource, SpriteSetTags } from '../models/sprite-set';
 import { SpriteSetStorageService } from '../services/sprite-set-storage.service';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
@@ -73,6 +75,7 @@ export class SpriteColorizerBusiness {
   private readonly setStorage = inject(SpriteSetStorageService);
   private readonly imageStorage = inject(ImageStorageService);
   private readonly packs = inject(PackBusiness);
+  private readonly creator = inject(PackCreatorBusiness);
   private readonly history = new History();
 
   private readonly image = signal<SpriteImage | null>(null);
@@ -96,6 +99,11 @@ export class SpriteColorizerBusiness {
   private readonly detected = signal(false);
   private readonly savedSets = signal<SpriteSet[]>([]);
   private readonly currentSetId = signal<string | null>(null);
+  private readonly draftTarget = signal<{
+    draftId: string;
+    draftName: string;
+    spriteId: string;
+  } | null>(null);
   /** Where the open image comes from, to save it with a set; a file is kept as is until it is stored. */
   private source: SpriteSetSource | { kind: 'file'; blob: Blob } | null = null;
 
@@ -125,6 +133,8 @@ export class SpriteColorizerBusiness {
   readonly $savedSets = this.savedSets.asReadonly();
   /** The saved set the open document came from or was saved as; saving writes over it. */
   readonly $currentSetId = this.currentSetId.asReadonly();
+  /** The draft sprite being edited, when the open image comes from a pack draft. */
+  readonly $draftTarget = this.draftTarget.asReadonly();
   readonly $activeLayerId = computed(() => {
     const doc = this.document();
     const id = this.activeId();
@@ -164,6 +174,7 @@ export class SpriteColorizerBusiness {
     this.history.clear();
     this.source = null;
     this.currentSetId.set(null);
+    this.draftTarget.set(null);
     this.version.update((v) => v + 1);
   }
 
@@ -188,6 +199,62 @@ export class SpriteColorizerBusiness {
     this.loadImage(image, id);
     this.source = { kind: 'library', spriteId: id };
     if (config) this.replaceDocument(config);
+  }
+
+  /** Opens the image of a pack draft sprite with its materials (none: as a loaded image); saving goes back to it. */
+  async loadDraftSprite(draftId: string, spriteId: string): Promise<void> {
+    const draft = await this.creator.getDraft(draftId);
+    if (!draft) throw new Error(`Unknown draft "${draftId}"`);
+    const sprite = draft.sprites.find((s) => s.id === spriteId);
+    if (!sprite) throw new Error(`Unknown sprite "${spriteId}"`);
+    if (sprite.kind === 'colored') throw new Error('sprite.coloredRefused');
+    const image = await this.files.decode(sprite.image);
+    this.loadImage(image, spriteId);
+    this.source = { kind: 'file', blob: sprite.image };
+    if (sprite.materials) this.replaceDocument(sprite.materials);
+    this.draftTarget.set({
+      draftId,
+      spriteId,
+      draftName: draft.details.name.en || draft.details.name.fr,
+    });
+  }
+
+  /** Writes the current materials back to the draft sprite being edited. */
+  async saveToDraft(): Promise<void> {
+    const target = this.draftTarget();
+    const doc = this.document();
+    if (!target || !doc) return;
+    await this.creator.updateSpriteMaterials(
+      target.draftId,
+      target.spriteId,
+      exportConfig(doc),
+    );
+  }
+
+  /** Adds the open grayscale image with its materials to a draft as a masked sprite. */
+  async addCurrentToDraft(
+    draftId: string,
+    details: Pick<DraftSprite, 'id' | 'en' | 'fr' | 'type' | 'slot'>,
+  ): Promise<DraftSprite> {
+    const doc = this.document();
+    const image = this.image();
+    if (!doc || !image) throw new Error('No open sprite');
+    return this.creator.addFromColorizer(draftId, {
+      ...details,
+      image: await this.files.encodePng(image),
+      materials: exportConfig(doc),
+    });
+  }
+
+  /** The kind of item the open bundled sprite is for, to prefill a pack sprite. */
+  async openTags(): Promise<SpriteSetTags | undefined> {
+    const source = this.source;
+    if (source?.kind === 'library')
+      return this.bundledSprite(source.spriteId).then(
+        (s) => ({ type: s.type, slot: s.slot }),
+        () => undefined,
+      );
+    return this.savedSets().find((s) => s.id === this.currentSetId())?.tags;
   }
 
   private async bundledSprite(id: string) {

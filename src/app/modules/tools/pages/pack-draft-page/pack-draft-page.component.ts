@@ -10,7 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -382,6 +382,14 @@ const slotKey = (lang: PackLanguage, generator: PackGenerator) =>
                         />
                       </label>
                     </div>
+                    @if (sprite.kind !== 'colored') {
+                      <p-button
+                        severity="secondary"
+                        icon="pi pi-palette"
+                        [label]="'packs.creator.editInColorizer' | transloco"
+                        (onClick)="editInColorizer(sprite.id)"
+                      />
+                    }
                     <p-button
                       severity="danger"
                       icon="pi pi-trash"
@@ -532,6 +540,7 @@ export class PackDraftPageComponent {
   private readonly language = inject(LanguageBusiness);
   private readonly messages = inject(MessageService);
   private readonly pending = inject(PendingTasks);
+  private readonly router = inject(Router);
 
   protected readonly languages = PACK_LANGUAGES;
   protected readonly generators = PACK_GENERATORS;
@@ -614,6 +623,15 @@ export class PackDraftPageComponent {
     } catch (error) {
       this.fail(error);
     }
+  }
+
+  /** Opens a sprite in the colorizer, after the pending edits are written. */
+  protected async editInColorizer(spriteId: string): Promise<void> {
+    // Pending edits are written first, so the colorizer reads the saved draft.
+    if (this.saveTimer !== undefined) await this.flush();
+    await this.router.navigate(['/tools/sprite-colorizer'], {
+      queryParams: { draft: this.draftId(), sprite: spriteId },
+    });
   }
 
   // --- saving -----------------------------------------------------------------------------------------------

@@ -72,6 +72,13 @@
         (onClick)="saveSet()"
       />
       <p-button
+        icon="pi pi-plus"
+        [label]="'sprite.draft.add' | transloco"
+        severity="secondary"
+        [disabled]="!business.$document()"
+        (onClick)="openAdd()"
+      />
+      <p-button
         icon="pi pi-file-export"
         [ariaLabel]="'sprite.exportJson' | transloco"
         [pTooltip]="'sprite.exportJson' | transloco"
@@ -90,6 +97,25 @@
       />
     </div>
   </header>
+
+  @if (business.$draftTarget()) {
+    <p-message severity="info" data-test="draft-banner" class="draft-banner">
+      <div class="row">
+        <span>{{ draftBanner() }}</span>
+        <p-button
+          icon="pi pi-save"
+          [label]="'sprite.draft.save' | transloco"
+          (onClick)="saveToDraft()"
+        />
+        <p-button
+          icon="pi pi-arrow-left"
+          severity="secondary"
+          [label]="'sprite.draft.back' | transloco"
+          (onClick)="backToDraft()"
+        />
+      </div>
+    </p-message>
+  }
 
   <div class="layout">
     <main class="stage">
@@ -747,6 +773,113 @@
         }
         <p class="library-credit">{{ "sprite.library.credit" | transloco }}</p>
       }
+    </div>
+  }
+</p-dialog>
+
+<p-toast key="draft-added" position="bottom-right">
+  <ng-template #message let-message>
+    <div class="row">
+      <span>{{ message.detail }}</span>
+      <p-button
+        size="small"
+        [label]="'sprite.draft.open' | transloco"
+        (onClick)="openDraft(message.data.draftId)"
+      />
+    </div>
+  </ng-template>
+</p-toast>
+
+<p-dialog
+  [header]="'sprite.draft.addTitle' | transloco"
+  [visible]="addOpen()"
+  (visibleChange)="addOpen.set($event)"
+  [modal]="true"
+  [dismissableMask]="true"
+  [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
+>
+  @if (addOpen()) {
+    <div class="add-form">
+      <label>
+        {{ "sprite.draft.chooseDraft" | transloco }}
+        <p-select
+          data-test="add-draft-select"
+          [options]="draftOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="addDraftId()"
+          (ngModelChange)="addDraftId.set($event)"
+          appendTo="body"
+        />
+      </label>
+      <button
+        pButton
+        type="button"
+        data-test="add-new-draft"
+        icon="pi pi-plus"
+        severity="secondary"
+        size="small"
+        [label]="'sprite.draft.newDraft' | transloco"
+        (click)="newDraft()"
+      ></button>
+      <label>
+        {{ "sprite.draft.spriteId" | transloco }}
+        <input
+          pInputText
+          type="text"
+          data-test="add-sprite-id"
+          [ngModel]="addDetails().id"
+          (ngModelChange)="patchAdd({ id: $event })"
+        />
+      </label>
+      <label>
+        {{ "sprite.draft.labelEn" | transloco }}
+        <input
+          pInputText
+          type="text"
+          [ngModel]="addDetails().en"
+          (ngModelChange)="patchAdd({ en: $event })"
+        />
+      </label>
+      <label>
+        {{ "sprite.draft.labelFr" | transloco }}
+        <input
+          pInputText
+          type="text"
+          [ngModel]="addDetails().fr"
+          (ngModelChange)="patchAdd({ fr: $event })"
+        />
+      </label>
+      <label>
+        {{ "sprite.draft.type" | transloco }}
+        <p-select
+          [options]="typeOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="addDetails().type"
+          (ngModelChange)="setAddType($event)"
+          appendTo="body"
+        />
+      </label>
+      <label>
+        {{ "sprite.draft.slot" | transloco }}
+        <p-select
+          [options]="slotOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="addDetails().slot"
+          (ngModelChange)="patchAdd({ slot: $event })"
+          appendTo="body"
+        />
+      </label>
+      <button
+        pButton
+        type="button"
+        data-test="add-confirm"
+        [label]="'sprite.draft.confirm' | transloco"
+        [disabled]="!addDraftId() || !addDetails().id || adding()"
+        (click)="confirmAdd()"
+      ></button>
     </div>
   }
 </p-dialog>

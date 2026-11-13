@@ -1413,6 +1413,27 @@
       "kind": "Type d’objet",
       "kindNone": "Pas utilisé pour les objets",
       "kindHint": "Les images aléatoires des objets de ce type peuvent utiliser ce sprite"
+    },
+    "draft": {
+      "banner": "Sprite « {{ sprite }} » du brouillon « {{ draft }} »",
+      "save": "Enregistrer dans le brouillon",
+      "saved": "Enregistré dans le brouillon.",
+      "saveFailed": "Le brouillon n'a pas pu être enregistré.",
+      "back": "Retour au brouillon",
+      "loadFailed": "Ce sprite du brouillon n'a pas pu être ouvert.",
+      "add": "Ajouter à un brouillon de pack",
+      "addTitle": "Ajouter à un brouillon de pack",
+      "chooseDraft": "Brouillon",
+      "newDraft": "Nouveau brouillon",
+      "spriteId": "Id",
+      "labelEn": "Libellé (anglais)",
+      "labelFr": "Libellé (français)",
+      "type": "Type",
+      "slot": "Emplacement",
+      "confirm": "Ajouter",
+      "added": "Sprite ajouté au brouillon.",
+      "addFailed": "Le sprite n'a pas pu être ajouté : {{ reason }}",
+      "open": "Ouvrir le brouillon"
     }
   },
   "combat": {
@@ -1630,7 +1651,8 @@
       "publishIntro": "Installez le pack sur cet appareil pour l'utiliser tout de suite, ou exportez-le en .zip pour le partager.",
       "installDevice": "Installer sur cet appareil",
       "export": "Exporter",
-      "installed": "Pack installé sur cet appareil"
+      "installed": "Pack installé sur cet appareil",
+      "editInColorizer": "Modifier dans le colorizer"
     },
     "createdHere": "Créé sur cet appareil",
     "editAsDraft": "Modifier comme brouillon"

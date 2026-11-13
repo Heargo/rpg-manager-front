@@ -1413,6 +1413,27 @@
       "kind": "Item kind",
       "kindNone": "Not used for items",
       "kindHint": "Random item images of this kind can use this sprite"
+    },
+    "draft": {
+      "banner": "Sprite \"{{ sprite }}\" of the draft \"{{ draft }}\"",
+      "save": "Save to the draft",
+      "saved": "Saved to the draft.",
+      "saveFailed": "The draft could not be saved.",
+      "back": "Back to the draft",
+      "loadFailed": "This draft sprite could not be opened.",
+      "add": "Add to a pack draft",
+      "addTitle": "Add to a pack draft",
+      "chooseDraft": "Draft",
+      "newDraft": "New draft",
+      "spriteId": "Id",
+      "labelEn": "Label (English)",
+      "labelFr": "Label (French)",
+      "type": "Type",
+      "slot": "Slot",
+      "confirm": "Add",
+      "added": "Sprite added to the draft.",
+      "addFailed": "The sprite could not be added: {{ reason }}",
+      "open": "Open the draft"
     }
   },
   "combat": {
@@ -1630,7 +1651,8 @@
       "publishIntro": "Install the pack on this device to use it now, or export it as a .zip to share.",
       "installDevice": "Install on this device",
       "export": "Export",
-      "installed": "Pack installed on this device"
+      "installed": "Pack installed on this device",
+      "editInColorizer": "Edit in the colorizer"
     },
     "createdHere": "Created on this device",
     "editAsDraft": "Edit as a draft"

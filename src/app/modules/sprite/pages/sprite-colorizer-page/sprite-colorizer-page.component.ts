@@ -12,18 +12,25 @@ import {
   ElementRef,
   inject,
   Injector,
+  input,
+  untracked,
   signal,
   viewChild,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { ColorPickerModule } from '@openng/optimus-ui/colorpicker';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { SelectModule } from '@openng/optimus-ui/select';
-import { EQUIPMENT_SLOTS } from '../../../../core/models/item';
+import { MessageModule } from '@openng/optimus-ui/message';
+import { ToastModule } from '@openng/optimus-ui/toast';
+import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
+import { slugifyPackId } from '../../../../core/packs/pack-draft';
+import { EQUIPMENT_SLOTS, ITEM_TYPES, ItemSlot, ItemType } from '../../../../core/models/item';
 import { SpriteSetTags } from '../../models/sprite-set';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
@@ -82,6 +89,8 @@ const toHex = (rgb: number[]) =>
     SelectButtonModule,
     SliderModule,
     TagModule,
+    MessageModule,
+    ToastModule,
     ToggleSwitchModule,
     TooltipModule,
   ],
@@ -94,6 +103,54 @@ const toHex = (rgb: number[]) =>
   styleUrl: './sprite-colorizer-page.component.scss',
 })
 export class SpriteColorizerPageComponent {
+  /** The pack draft and the sprite in it to edit; bound from the query params. */
+  readonly draft = input<string>();
+  readonly sprite = input<string>();
+
+  private readonly creator = inject(PackCreatorBusiness);
+  private readonly router = inject(Router);
+  protected readonly addOpen = signal(false);
+  protected readonly addDraftId = signal<string | null>(null);
+  protected readonly addDetails = signal({
+    id: '',
+    en: '',
+    fr: '',
+    type: 'item' as ItemType,
+    slot: 'none' as ItemSlot,
+  });
+  protected readonly adding = signal(false);
+  protected readonly draftOptions = computed(() =>
+    this.creator.$drafts().map((d) => ({
+      label:
+        (this.language.$language() === 'en'
+          ? d.details.name.en || d.details.name.fr
+          : d.details.name.fr || d.details.name.en) ||
+        this.language.t('packs.creator.untitled'),
+      value: d.id,
+    })),
+  );
+  protected readonly typeOptions = computed(() =>
+    ITEM_TYPES.map((value) => ({
+      value,
+      label: this.language.t(`item.type.${value}`),
+    })),
+  );
+  protected readonly slotOptions = computed(() => [
+    { value: 'none', label: this.language.t('packs.creator.slotNone') },
+    ...EQUIPMENT_SLOTS.map((value) => ({
+      value,
+      label: this.language.t(`item.slot.${value}`),
+    })),
+  ]);
+  protected readonly draftBanner = computed(() => {
+    const target = this.business.$draftTarget();
+    return target
+      ? this.language.t('sprite.draft.banner', {
+          sprite: target.spriteId,
+          draft: target.draftName,
+        })
+      : '';
+  });
   protected readonly business = inject(SpriteColorizerBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly packs = inject(PackBusiness);
@@ -256,6 +313,18 @@ export class SpriteColorizerPageComponent {
       .manifest()
       .then((pack) => this.bundledPacks.set([pack]))
       .catch(() => undefined);
+    // Open the draft sprite named by the query params.
+    effect(() => {
+      const draft = this.draft();
+      const sprite = this.sprite();
+      if (draft && sprite)
+        untracked(() =>
+          this.loadSprite(
+            () => this.business.loadDraftSprite(draft, sprite),
+            'sprite.draft.loadFailed',
+          ),
+        );
+    });
     // Fit the sprite in the viewport when a new image arrives.
     effect(() => {
       const image = this.business.$image();
@@ -649,17 +718,93 @@ export class SpriteColorizerPageComponent {
     return this.loadSprite(() => this.business.loadDemo());
   }
 
-  private async loadSprite(load: () => Promise<void>): Promise<void> {
+  private async loadSprite(
+    load: () => Promise<void>,
+    failure = 'sprite.loadFailed',
+  ): Promise<void> {
     try {
       await load();
     } catch (error) {
       const refused =
         error instanceof Error && error.message === 'sprite.coloredRefused';
-      this.toast(
-        MessageLevel.Error,
-        refused ? 'sprite.coloredRefused' : 'sprite.loadFailed',
-      );
+      this.toast(MessageLevel.Error, refused ? 'sprite.coloredRefused' : failure);
     }
+  }
+
+  // Pack drafts
+
+  protected async saveToDraft(): Promise<void> {
+    try {
+      await this.business.saveToDraft();
+      this.toast(MessageLevel.Success, 'sprite.draft.saved');
+    } catch {
+      this.toast(MessageLevel.Error, 'sprite.draft.saveFailed');
+    }
+  }
+
+  protected backToDraft(): void {
+    const target = this.business.$draftTarget();
+    if (target) void this.router.navigate(['/tools/pack-creator', target.draftId]);
+  }
+
+  protected openAdd(): void {
+    const name = this.business.$fileName();
+    this.addDetails.set({
+      id: slugifyPackId(name),
+      en: name,
+      fr: name,
+      type: 'item',
+      slot: 'none',
+    });
+    this.addOpen.set(true);
+    void this.creator.loadDrafts().then(() => {
+      if (!this.addDraftId())
+        this.addDraftId.set(this.creator.$drafts()[0]?.id ?? null);
+    });
+    void this.business.openTags().then((tags) => {
+      if (tags) this.patchAdd(tags);
+    });
+  }
+
+  protected patchAdd(patch: Partial<ReturnType<typeof this.addDetails>>): void {
+    this.addDetails.update((d) => ({ ...d, ...patch }));
+  }
+
+  protected setAddType(type: ItemType): void {
+    this.patchAdd({ type, ...(type === 'equipment' ? {} : { slot: 'none' }) });
+  }
+
+  protected async newDraft(): Promise<void> {
+    const draft = await this.creator.createDraft();
+    this.addDraftId.set(draft.id);
+  }
+
+  protected async confirmAdd(): Promise<void> {
+    const draftId = this.addDraftId();
+    if (!draftId || this.adding()) return;
+    this.adding.set(true);
+    try {
+      await this.business.addCurrentToDraft(draftId, this.addDetails());
+      this.addOpen.set(false);
+      this.messages.add({
+        key: 'draft-added',
+        severity: MessageLevel.Success,
+        detail: this.language.t('sprite.draft.added'),
+        data: { draftId },
+      });
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : '';
+      this.messages.add({
+        severity: MessageLevel.Error,
+        detail: this.language.t('sprite.draft.addFailed', { reason }),
+      });
+    } finally {
+      this.adding.set(false);
+    }
+  }
+
+  protected openDraft(draftId: string): void {
+    void this.router.navigate(['/tools/pack-creator', draftId]);
   }
 
   protected async importJson(input: HTMLInputElement): Promise<void> {

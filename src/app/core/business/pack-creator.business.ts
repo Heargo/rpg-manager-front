@@ -169,6 +169,39 @@ export class PackCreatorBusiness {
     return this.addSprite(draftId, { ...meta, image: file });
   }
 
+  /** Adds the colorizer's sprite as a masked sprite, with its materials; same limits as `addPng`. */
+  async addFromColorizer(
+    draftId: string,
+    sprite: Omit<DraftSprite, 'kind' | 'materials'> & { materials: string },
+  ): Promise<DraftSprite> {
+    const checked = await checkImageFile(
+      `sprites/${sprite.id}.png`,
+      sprite.image,
+      (b) => this.images.dimensions(b),
+    );
+    if ('error' in checked) throw new PackError([checked.error]);
+    return this.addSprite(draftId, { ...sprite, kind: 'masked' });
+  }
+
+  /** Replaces the materials of a sprite and keeps its image; a grayscale sprite becomes masked, a colored one is refused. */
+  async updateSpriteMaterials(
+    draftId: string,
+    spriteId: string,
+    materials: string,
+  ): Promise<DraftSprite> {
+    const draft = await this.draftOrThrow(draftId);
+    const sprite = draft.sprites.find((s) => s.id === spriteId);
+    if (!sprite) throw new PackError([`sprite "${spriteId}" does not exist`]);
+    if (sprite.kind === 'colored')
+      throw new PackError([`sprite "${spriteId}": a colored sprite has no materials`]);
+    const updated: DraftSprite = { ...sprite, kind: 'masked', materials };
+    await this.saveDraft({
+      ...draft,
+      sprites: draft.sprites.map((s) => (s === sprite ? updated : s)),
+    });
+    return updated;
+  }
+
   /** The sprite sets saved in the colorizer, to add as sprites. */
   listSpriteSets(): Promise<SpriteSet[]> {
     return this.sets.list();
