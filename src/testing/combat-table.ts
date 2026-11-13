@@ -62,6 +62,13 @@ const ring: InventoryItem = {
 
 const rules = (mode: InitiativeMode): CombatRules => ({
   lifeAttribute: 'Life',
+  steps: {
+    initiative: true,
+    actionCounters: true,
+    gmValidation: true,
+    defence: true,
+    rewards: true,
+  },
   initiative: { mode, dice: { count: 1, faces: 1 }, formula: 'level' },
   actionTypes: [
     { name: 'Action', count: 1 },
@@ -79,8 +86,12 @@ export type Device = ReturnType<typeof gameDevice>;
  * players Ada (skill Fireball: 5 damage to one enemy, 3 Mana, cooldown 2; a Potion) and Bob. The catalogue has one enemy, Goblin
  * (level 5, 40 XP, 7 money, loot a Ring). No encounter yet.
  */
-export async function combatTable(mode: InitiativeMode) {
+export async function combatTable(
+  mode: InitiativeMode,
+  extra: Partial<CombatRules> = {},
+) {
   globalThis.indexedDB = new IDBFactory();
+  TestBed.resetTestingModule();
   TestBed.configureTestingModule({ providers: TEST_PROVIDERS });
   const net = createPeerNetwork();
   const gm = gameDevice(net, 'gm', 'Gm');
@@ -96,7 +107,7 @@ export async function combatTable(mode: InitiativeMode) {
     ],
     barAttributes: { life: 'Life', mana: 'Mana' },
     startingMoney: 0,
-    combat: rules(mode),
+    combat: { ...rules(mode), ...extra },
   });
   await gm.injector.get(RoomBusiness).hostRoom('Eldoria', world.id);
   await settle();

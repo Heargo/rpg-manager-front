@@ -23,7 +23,7 @@ import {
   healCombatant,
   moveCombatant,
   nextTurn,
-  proposeRewards,
+  combatRewards,
   removeCombatant,
   removeStatus,
   reorderCombatants,
@@ -50,6 +50,7 @@ import {
 import { sampleNpcs } from '../../npc/helpers/npc.rules';
 import { Skill } from '../../skill/models/skill';
 import { SandboxWorldBusiness } from '../../world/business/sandbox-world.business';
+import { effectiveInitiativeMode } from '../../world/helpers/world-combat.rules';
 import { Character, InventoryItem, World } from '../../world/models/world';
 import { SandboxCharacterBusiness } from './sandbox-character.business';
 
@@ -105,8 +106,8 @@ export class SandboxCombatBusiness implements CombatTable {
   readonly $characters = computed(() => this.world().characters);
   readonly $npcs = computed(() => this.world().npcs);
   readonly $skills = computed(() => this.world().skills);
-  readonly $initiativeMode = computed(
-    () => this.world().combat.initiative.mode,
+  readonly $initiativeMode = computed(() =>
+    effectiveInitiativeMode(this.world().combat),
   );
 
   constructor() {
@@ -155,7 +156,7 @@ export class SandboxCombatBusiness implements CombatTable {
 
   rewards() {
     const encounter = this.encounter();
-    return encounter ? proposeRewards(encounter) : null;
+    return encounter ? combatRewards(encounter, this.world().combat) : null;
   }
 
   money(amount: number): string {
@@ -175,7 +176,7 @@ export class SandboxCombatBusiness implements CombatTable {
     if (!result.ok) throw new Error(`combat.errors.${result.error}`);
     this.encounter.set(
       withoutUndo(
-        world.combat.initiative.mode === 'rolled'
+        effectiveInitiativeMode(world.combat) === 'rolled'
           ? rollInitiative(result.encounter, world.combat, this.random)
           : result.encounter,
       ),
@@ -229,7 +230,9 @@ export class SandboxCombatBusiness implements CombatTable {
   async end(rewards?: CombatRewards): Promise<void> {
     const world = this.world();
     let sheet = this.sheet();
-    for (const { characterId, amount } of rewards?.xp ?? []) {
+    for (const { characterId, amount } of world.combat.steps.rewards
+      ? (rewards?.xp ?? [])
+      : []) {
       if (!sheet || sheet.id !== characterId || amount < 1) continue;
       const result = applyCharacterAction(
         world.attributes,
@@ -259,6 +262,7 @@ export class SandboxCombatBusiness implements CombatTable {
         world.skills,
         world.skillRollsEnabled ?? true,
         this.random,
+        world.combat,
       );
       if (!result.ok) throw new Error(`combat.errors.${result.error}`);
       return result.encounter;

@@ -20,8 +20,19 @@ export interface WorldAttribute {
 export const INITIATIVE_MODES = ['rolled', 'typed', 'free'] as const;
 export type InitiativeMode = (typeof INITIATIVE_MODES)[number];
 
+/** The optional steps of a combat; all on by default (World rules, Combat section). */
+export interface CombatSteps {
+  initiative: boolean;
+  actionCounters: boolean;
+  gmValidation: boolean;
+  defence: boolean;
+  rewards: boolean;
+}
+
 /** How a world runs combat (the rules page's Combat section, the wizard). Formulas read `level` and attribute maxima by name. */
 export interface CombatRules {
+  /** Which steps of a combat are played; a step that is off is skipped. */
+  steps: CombatSteps;
   /** Name of the attribute that is the life (0 = down); combat cannot start without one. */
   lifeAttribute?: string;
   initiative: {

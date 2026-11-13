@@ -74,6 +74,13 @@ const ring: InventoryItem = {
 
 const rules = (mode: InitiativeMode): CombatRules => ({
   lifeAttribute: 'Life',
+  steps: {
+    initiative: true,
+    actionCounters: true,
+    gmValidation: true,
+    defence: true,
+    rewards: true,
+  },
   initiative: { mode, dice: { count: 1, faces: 1 }, formula: 'level' },
   actionTypes: [
     { name: 'Action', count: 1 },
@@ -126,7 +133,7 @@ describe('combat (GM + players)', () => {
     await settle();
   }
 
-  async function setup(mode: InitiativeMode) {
+  async function setup(mode: InitiativeMode, extra: Partial<CombatRules> = {}) {
     globalThis.indexedDB = new IDBFactory();
     TestBed.configureTestingModule({ providers: [provideTestTranslations()] });
     net = createPeerNetwork();
@@ -142,7 +149,7 @@ describe('combat (GM + players)', () => {
       ],
       barAttributes: { life: 'Life', mana: 'Mana' },
       startingMoney: 0,
-      combat: rules(mode),
+      combat: { ...rules(mode), ...extra },
     });
     await gm.injector.get(RoomBusiness).hostRoom('Eldoria', world.id);
     await settle();
@@ -771,6 +778,106 @@ describe('combat (GM + players)', () => {
         'Bob',
       ]);
       expect(named(bob, 'Ada').initiative).toBe(15);
+    });
+  });
+
+  describe('optional steps', () => {
+    const all = {
+      initiative: true,
+      actionCounters: true,
+      gmValidation: true,
+      defence: true,
+      rewards: true,
+    };
+    const without = (step: keyof typeof all) => ({ ...all, [step]: false });
+    const fireballAtGoblin = async () => {
+      await combat(ada).useSkill({
+        casterId: adaId(),
+        skillId: fireballId,
+        targetIds: [goblinId()],
+      });
+      await settle();
+    };
+
+    it('starts without a roll when the initiative step is off, and refuses a typed initiative', async () => {
+      await setup('rolled', { steps: without('initiative') });
+      await startAll();
+
+      expect(named(gm, 'Goblin').initiative).toBeUndefined();
+      expect(state(ada).combatants.map((c) => c.name)).toEqual(['Ada', 'Bob', 'Goblin']);
+      await expect(combat(ada).initiative(adaId(), 15)).rejects.toMatchObject({
+        code: 'rejected',
+        message: 'combat.errors.initiativeNotTyped',
+      });
+      await expect(combat(gm).initiative(goblinId(), 20)).rejects.toMatchObject({
+        code: 'rejected',
+        message: 'combat.errors.initiativeNotTyped',
+      });
+    });
+
+    it('shows the free order mode to every device when the initiative step is off', async () => {
+      await setup('typed', { steps: without('initiative') });
+      await startAll();
+
+      for (const device of [gm, ada, bob])
+        expect(combat(device).$initiativeMode()).toBe('free');
+    });
+
+    it('gives combatants no action counters when that step is off', async () => {
+      await setup('free', { steps: without('actionCounters') });
+      await startAll();
+
+      for (const device of [gm, ada, bob])
+        expect(state(device).combatants.map((c) => c.actions)).toEqual([[], [], []]);
+    });
+
+    it('applies a skill at once when GM validation is off: no pending result, the target loses life, the cost is taken', async () => {
+      await setup('free', { steps: without('gmValidation') });
+      await startAll();
+
+      await fireballAtGoblin();
+
+      for (const device of [gm, ada, bob]) expect(state(device).pending).toHaveLength(0);
+      expect(named(gm, 'Goblin').life?.current).toBe(5);
+      // Players only see an enemy's life bar (world visibility rules).
+      for (const device of [ada, bob]) expect(named(device, 'Goblin').lifeBar).toEqual({ percent: 50 });
+      expect(current('ada', 'Mana')).toBe(7);
+    });
+
+    it('takes the defence off an immediate hit while the defence step is on', async () => {
+      await setup('free', { steps: without('gmValidation'), defence: '2' });
+      await startAll();
+
+      await fireballAtGoblin();
+
+      expect(named(gm, 'Goblin').life?.current).toBe(7);
+    });
+
+    it('offers no defence when that step is off: the host ignores defence: true', async () => {
+      await setup('free', { steps: without('defence'), defence: '2' });
+      await startAll();
+      await fireballAtGoblin();
+      expect(state(gm).pending).toHaveLength(1);
+
+      await combat(gm).apply(state(gm).pending[0].id, { defence: true });
+      await settle();
+
+      expect(named(gm, 'Goblin').life?.current).toBe(5);
+    });
+
+    it('gives no rewards when that step is off: nothing to propose, the XP sent is ignored', async () => {
+      await setup('free', { steps: without('rewards') });
+      await startAll();
+      await combat(gm).edit(goblinId(), { kind: 'damage', amount: 15 });
+      expect(combat(gm).rewards()).toBeNull();
+
+      await combat(gm).end({
+        xp: [{ characterId: record('ada').id, amount: 20 }],
+      });
+      await settle();
+
+      expect(hostWorld().encounter).toBeUndefined();
+      expect(record('ada').xp).toBe(0);
     });
   });
 });

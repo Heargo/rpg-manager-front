@@ -190,6 +190,10 @@ export class RuleFieldsComponent {
     this.patch({ combat: { ...this.combat(), ...change } });
   }
 
+  protected setStep(step: keyof CombatRules['steps'], on: boolean): void {
+    this.patchCombat({ steps: { ...this.combat().steps, [step]: on } });
+  }
+
   protected setDice(change: Partial<CombatRules['initiative']['dice']>): void {
     const { initiative } = this.combat();
     this.patchCombat({

@@ -270,7 +270,14 @@
         "movement": "Déplacement par tour (formule)",
         "basicAttack": "Dégâts de l'attaque de base (formule, facultatif)",
         "defence": "Défense (formule, facultatif)",
-        "gridMap": "Image de la carte de la grille"
+        "gridMap": "Image de la carte de la grille",
+        "steps": {
+          "initiative": "Initiative (ordre des tours)",
+          "actionCounters": "Compteurs d'actions",
+          "gmValidation": "Validation des résultats de compétence par le MJ",
+          "defence": "Défense",
+          "rewards": "Récompenses de fin de combat"
+        }
       }
     }
   },

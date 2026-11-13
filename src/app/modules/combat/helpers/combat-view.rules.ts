@@ -1,6 +1,7 @@
 import { normalizeName } from '../../../core/helpers/formula';
 import { movementAllowance, placeUnplaced } from './combat-grid.rules';
 import { Npc, NpcRole, NpcVisibility } from '../../npc/models/npc';
+import { effectiveInitiativeMode } from '../../world/helpers/world-combat.rules';
 import { World } from '../../world/models/world';
 import {
   CombatAttribute,
@@ -36,7 +37,7 @@ export function projectEncounter(
     ? placeUnplaced(encounter.combatants, grid)
     : encounter.combatants;
   return {
-    initiativeMode: world.combat?.initiative.mode,
+    initiativeMode: world.combat && effectiveInitiativeMode(world.combat),
     ...(world.combat?.grid.enabled && {
       grid: {
         columns: world.combat.grid.columns,

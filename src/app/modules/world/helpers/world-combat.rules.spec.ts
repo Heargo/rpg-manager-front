@@ -1,6 +1,11 @@
 import { CombatRules, WorldDraft, WorldRules } from '../models/world';
 import { createWorld, remapWorldImages, worldImageIds } from './world.factory';
-import { defaultCombatRules } from './world-combat.rules';
+import {
+  combatImportProblems,
+  defaultCombatRules,
+  effectiveInitiativeMode,
+  validateCombatRules,
+} from './world-combat.rules';
 import { buildWorldExport, parseWorldExport } from './world-export';
 import { validateWorldDraft } from './world-draft.rules';
 import { applyWorldRules, validateWorldRules } from './world-rules.rules';
@@ -242,5 +247,71 @@ describe('combat grid map image', () => {
     const withMap = { ...world, combat: { ...world.combat, grid: { enabled: true, columns: 8, rows: 6, imageId: 'map-1' } } };
     expect(worldImageIds(withMap)).toContain('map-1');
     expect(remapWorldImages(withMap, new Map([['map-1', 'map-2']])).combat.grid.imageId).toBe('map-2');
+  });
+});
+
+describe('optional combat steps', () => {
+  const names = ['Life', 'Mana'];
+  const all = {
+    initiative: true,
+    actionCounters: true,
+    gmValidation: true,
+    defence: true,
+    rewards: true,
+  };
+  const rules = (patch: Partial<CombatRules>): CombatRules => ({
+    ...defaultCombatRules('Life'),
+    ...patch,
+  });
+
+  it('are all on by default', () => {
+    expect(defaultCombatRules('Life').steps).toEqual(all);
+    expect(defaultCombatRules().steps).toEqual(all);
+  });
+
+  it('gives the free mode when the initiative step is off, the configured mode otherwise', () => {
+    const typed = { mode: 'typed' as const, dice: { count: 1, faces: 20 }, formula: '0' };
+    expect(effectiveInitiativeMode(rules({ initiative: typed }))).toBe('typed');
+    expect(
+      effectiveInitiativeMode(rules({ initiative: typed, steps: { ...all, initiative: false } })),
+    ).toBe('free');
+  });
+
+  it('does not validate the initiative settings while that step is off', () => {
+    const broken = { mode: 'rolled' as const, dice: { count: 0, faces: 20 }, formula: '0' };
+    expect(validateCombatRules(rules({ initiative: broken }), names).combatInitiative).toBeDefined();
+    expect(
+      validateCombatRules(rules({ initiative: broken, steps: { ...all, initiative: false } }), names),
+    ).toEqual({});
+  });
+
+  it('does not validate the action types while that step is off', () => {
+    const broken = [{ name: '', count: 0 }];
+    expect(validateCombatRules(rules({ actionTypes: broken }), names).combatActionTypes).toBeDefined();
+    expect(
+      validateCombatRules(rules({ actionTypes: broken, steps: { ...all, actionCounters: false } }), names),
+    ).toEqual({});
+  });
+
+  it('does not validate the defence formula while that step is off', () => {
+    expect(validateCombatRules(rules({ defence: 'Armor +' }), names).combatDefence).toBeDefined();
+    expect(
+      validateCombatRules(rules({ defence: 'Armor +', steps: { ...all, defence: false } }), names),
+    ).toEqual({});
+  });
+
+  it('still validates the other settings when a step is off', () => {
+    expect(
+      validateCombatRules(rules({ movement: '4 +', steps: { ...all, rewards: false } }), names).combatMovement,
+    ).toBeDefined();
+  });
+
+  it('accepts an imported combat block with the steps and refuses one without or with a bad one', () => {
+    expect(combatImportProblems(defaultCombatRules('Life'), names)).toEqual([]);
+    const { steps: _steps, ...without } = defaultCombatRules('Life');
+    expect(combatImportProblems(without, names)).toContain('world.combat.steps is invalid');
+    expect(
+      combatImportProblems({ ...without, steps: { ...all, rewards: 'no' } }, names),
+    ).toContain('world.combat.steps is invalid');
   });
 });

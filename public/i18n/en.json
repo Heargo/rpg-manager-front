@@ -270,7 +270,14 @@
         "movement": "Movement per turn (formula)",
         "basicAttack": "Basic attack damage (formula, optional)",
         "defence": "Defence (formula, optional)",
-        "gridMap": "Grid map image"
+        "gridMap": "Grid map image",
+        "steps": {
+          "initiative": "Initiative (turn order)",
+          "actionCounters": "Action counters",
+          "gmValidation": "GM validation of skill results",
+          "defence": "Defence",
+          "rewards": "Rewards at the end"
+        }
       }
     }
   },

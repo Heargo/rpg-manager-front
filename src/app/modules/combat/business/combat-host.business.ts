@@ -7,6 +7,7 @@ import { applyCharacterAction } from '../../character/helpers/character-actions.
 import { CharacterHostBusiness } from '../../character/business/character-host.business';
 import { RoomHostBusiness } from '../../room/business/room-host.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
+import { effectiveInitiativeMode } from '../../world/helpers/world-combat.rules';
 import { World } from '../../world/models/world';
 import {
   addCombatant,
@@ -223,7 +224,10 @@ export class CombatHostBusiness {
         await this.finish(parseRewards(body(payload)['rewards']));
       }),
       own('initiative', (p, world, enc) => {
-        if (world.combat.initiative.mode === 'rolled')
+        if (
+          !world.combat.steps.initiative ||
+          world.combat.initiative.mode === 'rolled'
+        )
           throw new PeerApiError(
             'rejected',
             'combat.errors.initiativeNotTyped',
@@ -248,6 +252,7 @@ export class CombatHostBusiness {
           world.skills,
           world.skillRollsEnabled ?? true,
           this.random,
+          world.combat,
         );
         if (!result.ok)
           throw new PeerApiError('rejected', `combat.errors.${result.error}`);
@@ -371,7 +376,7 @@ export class CombatHostBusiness {
       if (!result.ok)
         throw new PeerApiError('rejected', `combat.errors.${result.error}`);
       const rolled =
-        world.combat.initiative.mode === 'rolled'
+        effectiveInitiativeMode(world.combat) === 'rolled'
           ? rollInitiative(result.encounter, world.combat, this.random)
           : result.encounter;
       return this.with(world, withoutUndo(rolled));
@@ -385,7 +390,9 @@ export class CombatHostBusiness {
       if (!world.encounter)
         throw new PeerApiError('rejected', 'combat.errors.noEncounter');
       let characters = world.characters;
-      for (const { characterId, amount } of rewards?.xp ?? []) {
+      for (const { characterId, amount } of world.combat.steps.rewards
+        ? (rewards?.xp ?? [])
+        : []) {
         if (amount < 1) continue;
         const character = characters.find((c) => c.id === characterId);
         if (!character) throw invalid();

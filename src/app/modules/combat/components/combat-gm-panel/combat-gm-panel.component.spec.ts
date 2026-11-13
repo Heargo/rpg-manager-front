@@ -364,4 +364,43 @@ describe('CombatGmPanelComponent', () => {
     expect(table.record('ada').xp).toBe(20);
     expect(table.record('bob').xp).toBe(20);
   });
+
+  describe('optional steps', () => {
+    const steps = (off: string) => ({
+      initiative: off !== 'initiative',
+      actionCounters: off !== 'actionCounters',
+      gmValidation: off !== 'gmValidation',
+      defence: off !== 'defence',
+      rewards: off !== 'rewards',
+    });
+
+    it('shows no counters on the active row when the action counters step is off', async () => {
+      table.destroy();
+      table = await combatTable('free', { steps: steps('actionCounters') });
+      await table.start();
+      await open();
+
+      expect(el.querySelector('[data-testid="action-counter"]')).toBeNull();
+      expect(el.querySelector('[data-testid="active-row"]')).not.toBeNull();
+    });
+
+    it('ends at once, with no rewards dialog and no XP, when the rewards step is off', async () => {
+      table.destroy();
+      table = await combatTable('free', { steps: steps('rewards') });
+      await table.start();
+      await table.combat(table.gm).edit(table.named(table.gm, 'Goblin').id, {
+        kind: 'damage',
+        amount: 10,
+      });
+      await open();
+
+      await click(el.querySelector('[data-action="end"]'));
+      const dialog = document.body.querySelector('[data-testid="end-dialog"]');
+      if (dialog) await click(dialog.querySelector('[data-action="confirm-end"]'));
+
+      expect(dialog?.querySelector('[data-testid="reward-xp"]') ?? null).toBeNull();
+      expect(table.combat(table.bob).$state()).toBeNull();
+      expect(table.record('ada').xp).toBe(0);
+    });
+  });
 });

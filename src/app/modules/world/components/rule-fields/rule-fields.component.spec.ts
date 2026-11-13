@@ -258,4 +258,53 @@ describe('RuleFieldsComponent combat settings', () => {
     await type('#combat-movement', '4 +');
     expect(section.querySelector('[data-testid="combat-error-movement"]')).not.toBeNull();
   });
+
+  describe('step switches', () => {
+    const steps = ['initiative', 'action-counters', 'gm-validation', 'defence', 'rewards'];
+    const toggle = (section: HTMLElement, step: string) =>
+      section.querySelector(`#combat-step-${step}`) as HTMLInputElement;
+
+    it('has one switch per step, all on by default', async () => {
+      const { section } = await openCombat();
+      for (const step of steps) expect(toggle(section, step).checked, step).toBe(true);
+    });
+
+    it('turns a step off in the draft', async () => {
+      const { section, emitted, settle } = await openCombat();
+      toggle(section, 'rewards').click();
+      await settle();
+      expect(emitted.at(-1)!.combat!.steps).toEqual({
+        initiative: true,
+        actionCounters: true,
+        gmValidation: true,
+        defence: true,
+        rewards: false,
+      });
+    });
+
+    it('hides the initiative settings while that step is off', async () => {
+      const { section, settle } = await openCombat();
+      toggle(section, 'initiative').click();
+      await settle();
+      for (const id of ['#combat-initiative-mode', '#combat-initiative-count', '#combat-initiative-faces', '#combat-initiative-formula'])
+        expect(section.querySelector(id), id).toBeNull();
+      expect(section.querySelector('#combat-movement')).not.toBeNull();
+    });
+
+    it('hides the action types while that step is off', async () => {
+      const { section, settle } = await openCombat();
+      toggle(section, 'action-counters').click();
+      await settle();
+      expect(section.querySelector('[data-testid="combat-action"]')).toBeNull();
+      expect(section.querySelector('[data-testid="combat-action-add"]')).toBeNull();
+    });
+
+    it('hides the defence formula while that step is off', async () => {
+      const { section, settle } = await openCombat();
+      toggle(section, 'defence').click();
+      await settle();
+      expect(section.querySelector('#combat-defence')).toBeNull();
+      expect(section.querySelector('#combat-basic-attack')).not.toBeNull();
+    });
+  });
 });

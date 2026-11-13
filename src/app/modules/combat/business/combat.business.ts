@@ -6,6 +6,7 @@ import { CharacterBusiness } from '../../character/business/character.business';
 import { Npc } from '../../npc/models/npc';
 import { RoomBusiness } from '../../room/business/room.business';
 import { Skill } from '../../skill/models/skill';
+import { effectiveInitiativeMode } from '../../world/helpers/world-combat.rules';
 import { WorldInfoBusiness } from '../../world/business/world-info.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
 import {
@@ -15,7 +16,7 @@ import {
 } from '../../world/models/world';
 import {
   EncounterPicks,
-  proposeRewards,
+  combatRewards,
   RewardProposal,
   skillAvailability,
 } from '../helpers/combat.rules';
@@ -85,7 +86,7 @@ export class CombatBusiness {
 
   readonly $initiativeMode = computed<InitiativeMode | undefined>(() =>
     this.room.$isHost()
-      ? this.session.$world()?.combat.initiative.mode
+      ? effectiveInitiativeMode(this.session.$world()!.combat)
       : this.watched()?.initiativeMode,
   );
 
@@ -139,7 +140,8 @@ export class CombatBusiness {
   /** Game master: what the defeated enemies give. */
   rewards(): RewardProposal | null {
     const encounter = this.$encounter();
-    return encounter ? proposeRewards(encounter) : null;
+    const rules = this.session.$world()?.combat;
+    return encounter && rules ? combatRewards(encounter, rules) : null;
   }
 
   /** An amount of copper as text. */

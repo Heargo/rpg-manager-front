@@ -114,7 +114,9 @@ function combatantFrom(
     })),
     skills: sheet.skills.map((s) => ({ ...s })),
     cooldowns: {},
-    actions: world.combat.actionTypes.map((a) => ({ ...a, used: 0 })),
+    actions: world.combat.steps.actionCounters
+      ? world.combat.actionTypes.map((a) => ({ ...a, used: 0 }))
+      : [],
     effects: [],
     statuses: [],
     down: false,
@@ -488,6 +490,7 @@ export function useSkill(
   skills: Skill[],
   rollsEnabled: boolean,
   random: RandomSource,
+  rules?: CombatRules,
 ): CombatResult<Encounter> {
   const caster = enc.combatants.find((c) => c.id === use.casterId);
   if (!caster) return { ok: false, error: 'caster-not-found' };
@@ -545,35 +548,46 @@ export function useSkill(
         }
       : withCost;
   };
+  const used = commit(enc, {
+    ...tickedAction(
+      {
+        ...enc,
+        combatants: enc.combatants.map((c) =>
+          c.id === caster.id ? paid(c) : c,
+        ),
+      },
+      caster.id,
+      skill.actionType,
+    ),
+    seq,
+    pending: [...enc.pending, ...pending],
+    log: [
+      ...enc.log,
+      {
+        kind: 'skill',
+        round: enc.round,
+        casterId: caster.id,
+        skillId: skill.id,
+        skillName: skill.name,
+        rolls,
+        total: pending[0]?.total ?? 0,
+        success: pending.every((p) => p.success),
+      },
+    ],
+  });
+  if (!rules || rules.steps.gmValidation) return { ok: true, encounter: used };
+  // No GM validation: each result lands at once, as if the GM applied the rolled amounts.
+  const ids = pending.map((p) => p.id);
+  const applied = ids.reduce(
+    (current, id) => applyPending(current, id, { defence: true, rules }),
+    used,
+  );
   return {
     ok: true,
-    encounter: commit(enc, {
-      ...tickedAction(
-        {
-          ...enc,
-          combatants: enc.combatants.map((c) =>
-            c.id === caster.id ? paid(c) : c,
-          ),
-        },
-        caster.id,
-        skill.actionType,
-      ),
-      seq,
-      pending: [...enc.pending, ...pending],
-      log: [
-        ...enc.log,
-        {
-          kind: 'skill',
-          round: enc.round,
-          casterId: caster.id,
-          skillId: skill.id,
-          skillName: skill.name,
-          rolls,
-          total: pending[0]?.total ?? 0,
-          success: pending.every((p) => p.success),
-        },
-      ],
-    }),
+    encounter: {
+      ...withoutUndo(applied),
+      ...(used.previous ? { previous: used.previous } : {}),
+    },
   };
 }
 
@@ -583,7 +597,7 @@ const defenceOf = (
   target: Combatant | undefined,
   rules: CombatRules,
 ): number => {
-  if (!target || !rules.defence) return 0;
+  if (!target || !rules.defence || !rules.steps.defence) return 0;
   const result = evaluateFormula(
     { preset: 'custom', expression: rules.defence },
     {
@@ -782,6 +796,14 @@ export function proposeRewards(enc: Encounter): RewardProposal {
       c.loot.map((entry) => ({ fromName: c.name, entry })),
     ),
   };
+}
+
+/** The rewards of a finished combat, none when the rewards step is off. */
+export function combatRewards(
+  enc: Encounter,
+  rules: CombatRules,
+): RewardProposal | null {
+  return rules.steps.rewards ? proposeRewards(enc) : null;
 }
 
 // --- host-side helpers ------------------------------------------------------

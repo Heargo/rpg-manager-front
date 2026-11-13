@@ -237,6 +237,10 @@ export class CombatGmPanelComponent {
 
   // End
   protected openEnd(): void {
+    if (!this.combat.rewards()) {
+      void this.confirmEnd();
+      return;
+    }
     const names = new Map(this.combat.$characters().map((c) => [c.id, c.name]));
     this.endXp.set(
       (this.combat.rewards()?.xp.perCharacter ?? []).map((entry) => ({

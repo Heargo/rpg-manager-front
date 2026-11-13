@@ -219,4 +219,31 @@ describe('CombatPlayerViewComponent', () => {
       expect(table.named(table.bob, 'Ada').initiative).toBe(15);
     });
   });
+
+  describe('optional steps', () => {
+    const all = {
+      initiative: true,
+      actionCounters: true,
+      gmValidation: true,
+      defence: true,
+      rewards: true,
+    };
+
+    it('offers no typed initiative when the initiative step is off, even in typed mode', async () => {
+      table = await combatTable('typed', { steps: { ...all, initiative: false } });
+      await table.start();
+      await open(table.ada, 'Ada', 'ada');
+
+      expect(el.querySelector('[data-testid="initiative-input"]')).toBeNull();
+      expect(el.querySelector('[data-action="initiative-set"]')).toBeNull();
+    });
+
+    it('shows no action counters when that step is off', async () => {
+      table = await combatTable('free', { steps: { ...all, actionCounters: false } });
+      await table.start();
+      await open(table.ada, 'Ada', 'ada');
+
+      expect(el.querySelector('[data-testid="action-counter"]')).toBeNull();
+    });
+  });
 });
