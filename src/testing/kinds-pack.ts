@@ -1,16 +1,15 @@
 import { Provider } from '@angular/core';
-import base from '../../public/packs/base/pack.json';
+import baseFr from '../../public/packs/base-fr/pack.json';
 import { BASE_ONLY_REGISTRY } from './extra-pack';
 import { PackService } from '../app/core/services/pack.service';
 
 /** A pack with one sprite of each kind (the grayscale one even ships a materials file, which must be ignored). */
 export const KINDS_MANIFEST = {
-  ...base,
+  ...baseFr,
   sprites: [
     {
       id: 'alpha',
-      en: 'Alpha',
-      fr: 'Alpha',
+      label: 'Alpha',
       type: 'item',
       slot: 'none',
       kind: 'grayscale',
@@ -19,8 +18,7 @@ export const KINDS_MANIFEST = {
     },
     {
       id: 'bravo',
-      en: 'Bravo',
-      fr: 'Bravo',
+      label: 'Bravo',
       type: 'item',
       slot: 'none',
       kind: 'masked',
@@ -29,8 +27,7 @@ export const KINDS_MANIFEST = {
     },
     {
       id: 'charlie',
-      en: 'Charlie',
-      fr: 'Charlie',
+      label: 'Charlie',
       type: 'item',
       slot: 'none',
       kind: 'colored',
@@ -44,7 +41,8 @@ export function provideKindsPack(): Provider {
   return {
     provide: PackService,
     useValue: {
-      loadManifest: async () => KINDS_MANIFEST,
+      // Both Bases serve the kinds, so a sprite is found whatever the app language.
+      loadManifest: async (id: string) => ({ ...KINDS_MANIFEST, id, language: id === 'base-en' ? 'en' : 'fr' }),
       loadRegistry: async () => BASE_ONLY_REGISTRY,
       loadBlob: async () => new Blob(['x']),
       loadJson: async (url: string) => ({ url }),

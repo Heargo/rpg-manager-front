@@ -1,8 +1,8 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../public/packs/base/generators/en/items.json';
-import fr from '../../../../public/packs/base/generators/fr/items.json';
+import en from '../../../../public/packs/base-en/generators/items.json';
+import fr from '../../../../public/packs/base-fr/generators/items.json';
 import { EXTRA_ITEMS, extraPackService, provideExtraPack } from '../../../testing/extra-pack';
 import { provideTestTranslations } from '../../../testing/test-providers';
 import { LanguageBusiness } from './language.business';
@@ -17,9 +17,9 @@ describe('pack choice: businesses over the Base and extra packs', () => {
     globalThis.indexedDB = new IDBFactory();
     const service = extraPackService({
       loadJson: vi.fn(async (url: string) => {
-        if (url === 'packs/base/generators/en/items.json') return en;
-        if (url === 'packs/base/generators/fr/items.json') return fr;
-        if (url === 'packs/extra/generators/fr/items.json') return EXTRA_ITEMS;
+        if (url === 'packs/base-en/generators/items.json') return en;
+        if (url === 'packs/base-fr/generators/items.json') return fr;
+        if (url === 'packs/extra/generators/items.json') return EXTRA_ITEMS;
         return { url };
       }),
     });
@@ -30,34 +30,36 @@ describe('pack choice: businesses over the Base and extra packs', () => {
   });
 
   describe('PackBusiness.packsFor', () => {
-    it('lists Base alone while extra is not enabled', async () => {
-      expect(await packs.packsFor('items', 'fr')).toEqual(['base']);
+    it('lists the Base of the language alone while extra is not enabled', async () => {
+      expect(await packs.packsFor('items', 'fr')).toEqual(['base-fr']);
+      expect(await packs.packsFor('items', 'en')).toEqual(['base-en']);
     });
 
-    it('lists the enabled packs that have content for the generator and language, Base first', async () => {
+    it('lists the enabled packs of that language that have content for the generator, its Base first', async () => {
       await packs.enable('extra');
 
-      expect(await packs.packsFor('items', 'fr')).toEqual(['base', 'extra']);
-      expect(await packs.packsFor('items', 'en')).toEqual(['base']);
-      expect(await packs.packsFor('npcs', 'fr')).toEqual(['base']);
+      expect(await packs.packsFor('items', 'fr')).toEqual(['base-fr', 'extra']);
+      expect(await packs.packsFor('items', 'en')).toEqual(['base-en']);
+      expect(await packs.packsFor('npcs', 'fr')).toEqual(['base-fr']);
     });
 
     it('stops listing a pack that is turned off', async () => {
       await packs.enable('extra');
       await packs.disable('extra');
 
-      expect(await packs.packsFor('items', 'fr')).toEqual(['base']);
+      expect(await packs.packsFor('items', 'fr')).toEqual(['base-fr']);
     });
 
-    it('lists a pack with sprites for the sprites content', async () => {
+    it('lists a pack with sprites for the sprites content, in its language only', async () => {
       await packs.enable('extra');
 
-      expect(await packs.packsFor('sprites', 'en')).toEqual(['base', 'extra']);
+      expect(await packs.packsFor('sprites', 'fr')).toEqual(['base-fr', 'extra']);
+      expect(await packs.packsFor('sprites', 'en')).toEqual(['base-en']);
     });
   });
 
   describe('WordListBusiness.itemWords with a pack', () => {
-    it('defaults to Base', async () => {
+    it('defaults to the Base of the language', async () => {
       await packs.enable('extra');
 
       expect((await words.itemWords('fr')).bases.weapon1[0].text).toBe('Épée');
@@ -69,7 +71,7 @@ describe('pack choice: businesses over the Base and extra packs', () => {
       expect((await words.itemWords('fr', 'extra')).bases.weapon1[0].text).toBe('Zircon');
     });
 
-    it('falls back to Base in that language when the pack lacks the language', async () => {
+    it('falls back to the Base of the requested language when the pack is in another language', async () => {
       await packs.enable('extra');
 
       expect((await words.itemWords('en', 'extra')).bases.weapon1[0].text).toBe('Sword');
@@ -78,12 +80,12 @@ describe('pack choice: businesses over the Base and extra packs', () => {
     it('caches per language and pack', async () => {
       await packs.enable('extra');
 
-      const base = await words.itemWords('fr', 'base');
+      const base = await words.itemWords('fr', 'base-fr');
       const extra = await words.itemWords('fr', 'extra');
 
       expect(extra).not.toBe(base);
       expect(await words.itemWords('fr', 'extra')).toBe(extra);
-      expect(await words.itemWords('fr', 'base')).toBe(base);
+      expect(await words.itemWords('fr', 'base-fr')).toBe(base);
     });
   });
 });

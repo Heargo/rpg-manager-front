@@ -21,7 +21,7 @@ const sprite = () => gray(4, 1, [10, 10, 220, 220]);
 const png = (content: string) => new Blob([content], { type: 'image/png' });
 const named = (draft: PackDraft, name: string): PackDraft => ({
   ...draft,
-  details: { ...draft.details, name: { en: name, fr: name } },
+  details: { ...draft.details, name },
 });
 
 /**
@@ -92,8 +92,7 @@ describe('SpriteColorizerPageComponent: pack drafts', () => {
   describe('editing a draft sprite', () => {
     const maskedSprite = () => ({
       id: 'axe',
-      en: 'Axe',
-      fr: 'Hache',
+      label: 'Hache',
       type: 'equipment' as const,
       slot: 'weapon1' as const,
       kind: 'masked' as const,
@@ -231,7 +230,7 @@ describe('SpriteColorizerPageComponent: pack drafts', () => {
         expect(added).toMatchObject({ id: 'axe', kind: 'masked' });
         expect(JSON.parse(added.materials!).layers.map((l: { name: string }) => l.name)).toContain('Blade');
       });
-      expect((await p.creator.getDraft((await p.creator.listDrafts()).find((d) => d.details.name.en === 'Other pack')!.id))!.sprites).toEqual([]);
+      expect((await p.creator.getDraft((await p.creator.listDrafts()).find((d) => d.details.name === 'Other pack')!.id))!.sprites).toEqual([]);
       expect(p.toast).toHaveBeenCalledWith(expect.objectContaining({ severity: 'success' }));
     });
 

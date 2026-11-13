@@ -2,13 +2,17 @@ import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { EXTRA_ITEMS, ExtraPackFake, extraPackService, provideExtraPack } from '../../../testing/extra-pack';
+import { provideTestTranslations } from '../../../testing/test-providers';
+import { LanguageBusiness } from './language.business';
 import { PackBusiness } from './pack.business';
 
 const BASE_SPRITES = 101;
 
 function fresh(service: ExtraPackFake): PackBusiness {
   TestBed.resetTestingModule();
-  TestBed.configureTestingModule({ providers: [provideExtraPack(service)] });
+  TestBed.configureTestingModule({ providers: [provideTestTranslations(), provideExtraPack(service)] });
+  // The app is in French: the Base in use is base-fr and the French `extra` pack counts.
+  TestBed.inject(LanguageBusiness).setLanguage('fr');
   return TestBed.inject(PackBusiness);
 }
 
@@ -35,18 +39,18 @@ describe('PackBusiness official packs', () => {
   };
   const ids = async (b: PackBusiness) => (await b.sprites()).map((s) => s.id);
 
-  it('lists the registry: Base and the fixture pack', async () => {
+  it('lists the registry: both Bases and the fixture pack', async () => {
     const registry = await business.registry();
 
-    expect(registry.map((p) => p.id)).toEqual(['base', 'extra']);
-    expect(registry[1]).toMatchObject({ size: 1234, sprites: 1, languages: ['fr'], author: 'Jane Doe' });
+    expect(registry.map((p) => p.id)).toEqual(['base-fr', 'base-en', 'extra']);
+    expect(registry[2]).toMatchObject({ size: 1234, sprites: 1, language: 'fr', author: 'Jane Doe' });
   });
 
-  it('has only Base installed and enabled until a pack is turned on, and fetches nothing for it', async () => {
+  it('has only the two Bases installed and enabled until a pack is turned on, and fetches nothing for it', async () => {
     const sprites = await business.sprites();
 
     expect(sprites).toHaveLength(BASE_SPRITES);
-    expect(business.$installed().map((p) => p.id)).toEqual(['base']);
+    expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en']);
     expect(service.loadBlob).not.toHaveBeenCalled();
     expect(service.loadManifest).not.toHaveBeenCalledWith('extra');
   });
@@ -56,8 +60,8 @@ describe('PackBusiness official packs', () => {
 
     expect(service.loadManifest).toHaveBeenCalledWith('extra');
     expect(service.loadBlob).toHaveBeenCalledWith('packs/extra/sprites/gem.png');
-    expect(service.loadJson).toHaveBeenCalledWith('packs/extra/generators/fr/items.json');
-    expect(business.$installed().map((p) => p.id)).toEqual(['base', 'extra']);
+    expect(service.loadJson).toHaveBeenCalledWith('packs/extra/generators/items.json');
+    expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'extra']);
     expect(business.$installed().find((p) => p.id === 'extra')?.enabled).toBe(true);
   });
 
@@ -66,7 +70,7 @@ describe('PackBusiness official packs', () => {
     const sprites = await business.sprites();
 
     expect(sprites).toHaveLength(BASE_SPRITES + 1);
-    expect(sprites[0].packId).toBe('base');
+    expect(sprites[0].packId).toBe('base-fr');
     expect(sprites[sprites.length - 1]).toMatchObject({ id: 'gem', packId: 'extra', kind: 'grayscale' });
     expect(sprites[sprites.length - 1].imageUrl).toBe('blob:fake-1');
     await business.sprites();
@@ -77,7 +81,7 @@ describe('PackBusiness official packs', () => {
     await business.enable('extra');
     service.loadJson.mockClear();
 
-    expect(await business.wordList('items', 'fr', 'extra')).toEqual(EXTRA_ITEMS);
+    expect(await business.wordList('items', 'extra')).toEqual(EXTRA_ITEMS);
     expect(service.loadJson).not.toHaveBeenCalled();
   });
 
@@ -97,8 +101,8 @@ describe('PackBusiness official packs', () => {
     const second = fresh(offline);
 
     expect(await ids(second)).toContain('gem');
-    expect(second.$installed().map((p) => p.id)).toEqual(['base', 'extra']);
-    expect(await second.wordList('items', 'fr', 'extra')).toEqual(EXTRA_ITEMS);
+    expect(second.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'extra']);
+    expect(await second.wordList('items', 'extra')).toEqual(EXTRA_ITEMS);
     expect(offline.loadBlob).not.toHaveBeenCalled();
   });
 
@@ -137,8 +141,8 @@ describe('PackBusiness official packs', () => {
     expect(await ids(business)).not.toContain('gem');
     const again = fresh(extraPackService());
     expect(await ids(again)).toHaveLength(BASE_SPRITES);
-    expect(await installed(again)).toEqual(['base']);
-    await expect(again.wordList('items', 'fr', 'extra')).rejects.toThrow();
+    expect(await installed(again)).toEqual(['base-fr', 'base-en']);
+    await expect(again.wordList('items', 'extra')).rejects.toThrow();
   });
 
   it('a failed file fetch stores nothing and rejects with the error', async () => {
@@ -151,9 +155,9 @@ describe('PackBusiness official packs', () => {
 
     await expect(b.enable('extra')).rejects.toThrow(/network down/);
 
-    expect(await installed(b)).toEqual(['base']);
+    expect(await installed(b)).toEqual(['base-fr', 'base-en']);
     const again = fresh(extraPackService());
-    expect(await installed(again)).toEqual(['base']);
+    expect(await installed(again)).toEqual(['base-fr', 'base-en']);
     expect(await ids(again)).toHaveLength(BASE_SPRITES);
   });
 
@@ -166,12 +170,33 @@ describe('PackBusiness official packs', () => {
     await expect(b.enable('extra')).rejects.toThrow(/format/);
 
     expect(bad.loadBlob).not.toHaveBeenCalled();
-    expect(await installed(fresh(extraPackService()))).toEqual(['base']);
+    expect(await installed(fresh(extraPackService()))).toEqual(['base-fr', 'base-en']);
   });
 
-  it('Base cannot be disabled or removed', async () => {
-    await expect(business.disable('base')).rejects.toThrow();
-    await expect(business.remove('base')).rejects.toThrow();
+  it('serves the sprites of a French pack in a French app only, and none in an English one', async () => {
+    await business.enable('extra');
+    TestBed.inject(LanguageBusiness).setLanguage('en');
+
+    const sprites = await business.sprites();
+
+    expect(sprites.map((s) => s.packId)).not.toContain('extra');
+    expect(new Set(sprites.map((s) => s.packId))).toEqual(new Set(['base-en']));
+    expect(sprites).toHaveLength(BASE_SPRITES);
+  });
+
+  it('gives the sprites of an enabled French pack their single label', async () => {
+    await business.enable('extra');
+
+    const gem = (await business.sprites()).find((s) => s.id === 'gem');
+
+    expect(gem?.label).toBe('Gemme');
+  });
+
+  it('Neither Base can be disabled or removed', async () => {
+    for (const id of ['base-fr', 'base-en']) {
+      await expect(business.disable(id)).rejects.toThrow();
+      await expect(business.remove(id)).rejects.toThrow();
+    }
 
     expect(await ids(business)).toHaveLength(BASE_SPRITES);
   });

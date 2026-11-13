@@ -215,7 +215,7 @@ export class SpriteColorizerBusiness {
     this.draftTarget.set({
       draftId,
       spriteId,
-      draftName: draft.details.name.en || draft.details.name.fr,
+      draftName: draft.details.name,
     });
   }
 
@@ -234,7 +234,7 @@ export class SpriteColorizerBusiness {
   /** Adds the open grayscale image with its materials to a draft as a masked sprite. */
   async addCurrentToDraft(
     draftId: string,
-    details: Pick<DraftSprite, 'id' | 'en' | 'fr' | 'type' | 'slot'>,
+    details: Pick<DraftSprite, 'id' | 'label' | 'type' | 'slot'>,
   ): Promise<DraftSprite> {
     const doc = this.document();
     const image = this.image();

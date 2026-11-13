@@ -176,7 +176,7 @@ describe('SpriteColorizerPageComponent', () => {
       button('Sprite library')!.click();
       await fixture.whenStable();
       expect(tiles()).toHaveLength(101);
-      expect(tiles()[0].querySelector('img')!.getAttribute('src')).toMatch(/^packs\/base\/sprites\/.+\.png$/);
+      expect(tiles()[0].querySelector('img')!.getAttribute('src')).toMatch(/^packs\/base-en\/sprites\/.+\.png$/);
     });
 
     it('filters by name and loads the picked sprite', async () => {

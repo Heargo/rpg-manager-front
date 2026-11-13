@@ -1,5 +1,5 @@
 import { Provider } from '@angular/core';
-import glowMaterials from '../../public/packs/base/sprites/axe.json';
+import glowMaterials from '../../public/packs/base-fr/sprites/axe.json';
 import { ImageProcessingService } from '../app/core/services/image-processing.service';
 import { PackService } from '../app/core/services/pack.service';
 import { EXTRA_ITEMS, EXTRA_NPCS, ExtraPackFake, extraPackService } from './extra-pack';
@@ -7,23 +7,24 @@ import { EXTRA_ITEMS, EXTRA_NPCS, ExtraPackFake, extraPackService } from './extr
 export const NEON_LINK = 'https://example.com/packs/neon/pack.json';
 export const NEON_ROOT = 'https://example.com/packs/neon/';
 
-/** An unofficial pack: a grayscale, a masked (128 x 128, materials from the Base axe) and a colored sprite, French items and NPCs. */
+/** An unofficial pack: a grayscale, a masked (128 x 128, materials from the Base axe) and a colored sprite, French, with items and NPCs. */
 export function neonManifest(): Record<string, any> {
   return {
     format: 1,
     id: 'neon',
-    name: { en: 'Neon', fr: 'Neon' },
-    description: { en: 'Glowing things', fr: 'Des choses brillantes' },
+    language: 'fr',
+    name: 'Neon',
+    description: 'Des choses brillantes',
     version: '1.0.0',
     author: 'Ann Author',
     license: 'CC-BY-4.0',
     licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
     homepage: 'https://example.com/neon',
-    generators: { fr: { items: 'generators/fr/items.json', npcs: 'generators/fr/npcs.json' } },
+    generators: { items: 'generators/items.json', npcs: 'generators/npcs.json' },
     sprites: [
-      { id: 'spark', en: 'Spark', fr: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/spark.png' },
-      { id: 'glow', en: 'Glow', fr: 'Lueur', type: 'equipment', slot: 'weapon1', kind: 'masked', image: 'sprites/glow.png', materials: 'sprites/glow.json' },
-      { id: 'tint', en: 'Tint', fr: 'Teinte', type: 'consumable', slot: 'none', kind: 'colored', image: 'sprites/tint.png' },
+      { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/spark.png' },
+      { id: 'glow', label: 'Lueur', type: 'equipment', slot: 'weapon1', kind: 'masked', image: 'sprites/glow.png', materials: 'sprites/glow.json' },
+      { id: 'tint', label: 'Teinte', type: 'consumable', slot: 'none', kind: 'colored', image: 'sprites/tint.png' },
     ],
   };
 }
@@ -40,8 +41,8 @@ export interface NeonWorld {
 
 export function neonWorld(): NeonWorld {
   const json = new Map<string, unknown>([
-    [`${NEON_ROOT}generators/fr/items.json`, EXTRA_ITEMS],
-    [`${NEON_ROOT}generators/fr/npcs.json`, EXTRA_NPCS],
+    [`${NEON_ROOT}generators/items.json`, EXTRA_ITEMS],
+    [`${NEON_ROOT}generators/npcs.json`, EXTRA_NPCS],
     [`${NEON_ROOT}sprites/glow.json`, glowMaterials],
   ]);
   return { manifest: neonManifest(), json, blobSizes: new Map(), dimensions: new Map() };

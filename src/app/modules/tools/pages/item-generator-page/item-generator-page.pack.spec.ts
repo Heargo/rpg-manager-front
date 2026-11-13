@@ -28,7 +28,7 @@ describe('ItemGeneratorPageComponent pack choice', () => {
   it('lists Random then the packs with items in the language, defaulting to Random', async () => {
     const { fixture } = await setup();
 
-    expect(packOptionValues(fixture)).toEqual(['random', 'base', 'extra']);
+    expect(packOptionValues(fixture)).toEqual(['random', 'base-fr', 'extra']);
     expect(packSelected(fixture)).toBe('random');
   });
 
@@ -44,7 +44,7 @@ describe('ItemGeneratorPageComponent pack choice', () => {
   it('shows Base words when Base is chosen', async () => {
     const { fixture, el, settle } = await setup();
 
-    packSelect(fixture).triggerEventHandler('ngModelChange', 'base');
+    packSelect(fixture).triggerEventHandler('ngModelChange', 'base-fr');
     await settle();
 
     expect(el.querySelector('app-item-card')).not.toBeNull();

@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../../public/packs/base/generators/en/skills.json';
+import en from '../../../../../../public/packs/base-en/generators/skills.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { PackBusiness } from '../../../../core/business/pack.business';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
@@ -19,7 +19,7 @@ describe('SkillEditorComponent Random', () => {
   async function setup() {
     TestBed.configureTestingModule({
       imports: [SkillEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } }],
+      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } }],
     });
     const fixture = TestBed.createComponent(SkillEditorComponent);
     fixture.componentRef.setInput('world', world);

@@ -1,0 +1,928 @@
+{
+ "format": 1,
+ "id": "base-fr",
+ "language": "fr",
+ "name": "Base (français)",
+ "description": "Les listes de mots et les 101 sprites d'objets fournis avec l'application.",
+ "version": "1.0.0",
+ "author": "RPG Manager (sprites: Florian Sciberras)",
+ "license": "CC-BY-4.0",
+ "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+ "generators": {
+  "items": "generators/items.json",
+  "npcs": "generators/npcs.json",
+  "skills": "generators/skills.json",
+  "classes": "generators/classes.json"
+ },
+ "sprites": [
+  {
+   "id": "amulet_1",
+   "label": "Amulette",
+   "type": "equipment",
+   "slot": "necklace",
+   "kind": "masked",
+   "image": "sprites/amulet_1.png",
+   "materials": "sprites/amulet_1.json"
+  },
+  {
+   "id": "amulet_2",
+   "label": "Amulette 2",
+   "type": "equipment",
+   "slot": "necklace",
+   "kind": "masked",
+   "image": "sprites/amulet_2.png",
+   "materials": "sprites/amulet_2.json"
+  },
+  {
+   "id": "amulet_3",
+   "label": "Amulette 3",
+   "type": "equipment",
+   "slot": "necklace",
+   "kind": "masked",
+   "image": "sprites/amulet_3.png",
+   "materials": "sprites/amulet_3.json"
+  },
+  {
+   "id": "apple",
+   "label": "Pomme",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/apple.png",
+   "materials": "sprites/apple.json"
+  },
+  {
+   "id": "armor_1",
+   "label": "Armure",
+   "type": "equipment",
+   "slot": "chest",
+   "kind": "masked",
+   "image": "sprites/armor_1.png",
+   "materials": "sprites/armor_1.json"
+  },
+  {
+   "id": "armor_2",
+   "label": "Armure 2",
+   "type": "equipment",
+   "slot": "chest",
+   "kind": "masked",
+   "image": "sprites/armor_2.png",
+   "materials": "sprites/armor_2.json"
+  },
+  {
+   "id": "armor_3",
+   "label": "Armure 3",
+   "type": "equipment",
+   "slot": "chest",
+   "kind": "masked",
+   "image": "sprites/armor_3.png",
+   "materials": "sprites/armor_3.json"
+  },
+  {
+   "id": "arrows",
+   "label": "Flèches",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/arrows.png",
+   "materials": "sprites/arrows.json"
+  },
+  {
+   "id": "axe",
+   "label": "Hache",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/axe.png",
+   "materials": "sprites/axe.json"
+  },
+  {
+   "id": "beer",
+   "label": "Bière",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/beer.png",
+   "materials": "sprites/beer.json"
+  },
+  {
+   "id": "belt",
+   "label": "Ceinture",
+   "type": "equipment",
+   "slot": "legs",
+   "kind": "masked",
+   "image": "sprites/belt.png",
+   "materials": "sprites/belt.json"
+  },
+  {
+   "id": "berries",
+   "label": "Baies",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/berries.png",
+   "materials": "sprites/berries.json"
+  },
+  {
+   "id": "billhook",
+   "label": "Serpe",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/billhook.png",
+   "materials": "sprites/billhook.json"
+  },
+  {
+   "id": "bomb",
+   "label": "Bombe",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/bomb.png",
+   "materials": "sprites/bomb.json"
+  },
+  {
+   "id": "bone",
+   "label": "Os",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/bone.png",
+   "materials": "sprites/bone.json"
+  },
+  {
+   "id": "book_1",
+   "label": "Livre",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/book_1.png",
+   "materials": "sprites/book_1.json"
+  },
+  {
+   "id": "book_2",
+   "label": "Livre 2",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/book_2.png",
+   "materials": "sprites/book_2.json"
+  },
+  {
+   "id": "book_3",
+   "label": "Livre 3",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/book_3.png",
+   "materials": "sprites/book_3.json"
+  },
+  {
+   "id": "boots",
+   "label": "Bottes",
+   "type": "equipment",
+   "slot": "foot",
+   "kind": "masked",
+   "image": "sprites/boots.png",
+   "materials": "sprites/boots.json"
+  },
+  {
+   "id": "bow_long",
+   "label": "Arc long",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/bow_long.png",
+   "materials": "sprites/bow_long.json"
+  },
+  {
+   "id": "bow_short",
+   "label": "Arc court",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/bow_short.png",
+   "materials": "sprites/bow_short.json"
+  },
+  {
+   "id": "bread",
+   "label": "Pain",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/bread.png",
+   "materials": "sprites/bread.json"
+  },
+  {
+   "id": "caltrop",
+   "label": "Chausse-trape",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/caltrop.png",
+   "materials": "sprites/caltrop.json"
+  },
+  {
+   "id": "cape",
+   "label": "Cape",
+   "type": "equipment",
+   "slot": "chest",
+   "kind": "masked",
+   "image": "sprites/cape.png",
+   "materials": "sprites/cape.json"
+  },
+  {
+   "id": "carrot",
+   "label": "Carotte",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/carrot.png",
+   "materials": "sprites/carrot.json"
+  },
+  {
+   "id": "cheese",
+   "label": "Fromage",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/cheese.png",
+   "materials": "sprites/cheese.json"
+  },
+  {
+   "id": "chicken",
+   "label": "Cuisse de poulet",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/chicken.png",
+   "materials": "sprites/chicken.json"
+  },
+  {
+   "id": "coin",
+   "label": "Pièce",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/coin.png",
+   "materials": "sprites/coin.json"
+  },
+  {
+   "id": "compass",
+   "label": "Boussole",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/compass.png",
+   "materials": "sprites/compass.json"
+  },
+  {
+   "id": "crown",
+   "label": "Couronne",
+   "type": "equipment",
+   "slot": "head",
+   "kind": "masked",
+   "image": "sprites/crown.png",
+   "materials": "sprites/crown.json"
+  },
+  {
+   "id": "dagger",
+   "label": "Dague",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/dagger.png",
+   "materials": "sprites/dagger.json"
+  },
+  {
+   "id": "drum",
+   "label": "Tambour",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/drum.png",
+   "materials": "sprites/drum.json"
+  },
+  {
+   "id": "earring",
+   "label": "Boucle d’oreille",
+   "type": "equipment",
+   "slot": "earring",
+   "kind": "masked",
+   "image": "sprites/earring.png",
+   "materials": "sprites/earring.json"
+  },
+  {
+   "id": "egg",
+   "label": "Œuf",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/egg.png",
+   "materials": "sprites/egg.json"
+  },
+  {
+   "id": "eyepatch",
+   "label": "Cache-œil",
+   "type": "equipment",
+   "slot": "head",
+   "kind": "masked",
+   "image": "sprites/eyepatch.png",
+   "materials": "sprites/eyepatch.json"
+  },
+  {
+   "id": "falchion",
+   "label": "Fauchon",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/falchion.png",
+   "materials": "sprites/falchion.json"
+  },
+  {
+   "id": "feather",
+   "label": "Plume",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/feather.png",
+   "materials": "sprites/feather.json"
+  },
+  {
+   "id": "fish",
+   "label": "Poisson",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/fish.png",
+   "materials": "sprites/fish.json"
+  },
+  {
+   "id": "fishing_rod",
+   "label": "Canne à pêche",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/fishing_rod.png",
+   "materials": "sprites/fishing_rod.json"
+  },
+  {
+   "id": "flail",
+   "label": "Fléau",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/flail.png",
+   "materials": "sprites/flail.json"
+  },
+  {
+   "id": "flower",
+   "label": "Fleur",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/flower.png",
+   "materials": "sprites/flower.json"
+  },
+  {
+   "id": "flute",
+   "label": "Flûte",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/flute.png",
+   "materials": "sprites/flute.json"
+  },
+  {
+   "id": "gem_1",
+   "label": "Gemme",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/gem_1.png",
+   "materials": "sprites/gem_1.json"
+  },
+  {
+   "id": "gem_2",
+   "label": "Gemme 2",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/gem_2.png",
+   "materials": "sprites/gem_2.json"
+  },
+  {
+   "id": "gem_3",
+   "label": "Gemme 3",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/gem_3.png",
+   "materials": "sprites/gem_3.json"
+  },
+  {
+   "id": "glasses",
+   "label": "Lunettes",
+   "type": "equipment",
+   "slot": "head",
+   "kind": "masked",
+   "image": "sprites/glasses.png",
+   "materials": "sprites/glasses.json"
+  },
+  {
+   "id": "glove_1",
+   "label": "Gant",
+   "type": "equipment",
+   "slot": "hand",
+   "kind": "masked",
+   "image": "sprites/glove_1.png",
+   "materials": "sprites/glove_1.json"
+  },
+  {
+   "id": "glove_2",
+   "label": "Gant 2",
+   "type": "equipment",
+   "slot": "hand",
+   "kind": "masked",
+   "image": "sprites/glove_2.png",
+   "materials": "sprites/glove_2.json"
+  },
+  {
+   "id": "glove_3",
+   "label": "Gant 3",
+   "type": "equipment",
+   "slot": "hand",
+   "kind": "masked",
+   "image": "sprites/glove_3.png",
+   "materials": "sprites/glove_3.json"
+  },
+  {
+   "id": "gourd",
+   "label": "Gourde",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/gourd.png",
+   "materials": "sprites/gourd.json"
+  },
+  {
+   "id": "hammer",
+   "label": "Marteau",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/hammer.png",
+   "materials": "sprites/hammer.json"
+  },
+  {
+   "id": "helm",
+   "label": "Heaume",
+   "type": "equipment",
+   "slot": "head",
+   "kind": "masked",
+   "image": "sprites/helm.png",
+   "materials": "sprites/helm.json"
+  },
+  {
+   "id": "honey",
+   "label": "Miel",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/honey.png",
+   "materials": "sprites/honey.json"
+  },
+  {
+   "id": "horn",
+   "label": "Cor",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/horn.png",
+   "materials": "sprites/horn.json"
+  },
+  {
+   "id": "jar_1",
+   "label": "Bocal",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/jar_1.png",
+   "materials": "sprites/jar_1.json"
+  },
+  {
+   "id": "jar_2",
+   "label": "Bocal 2",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/jar_2.png",
+   "materials": "sprites/jar_2.json"
+  },
+  {
+   "id": "jar_3",
+   "label": "Bocal 3",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/jar_3.png",
+   "materials": "sprites/jar_3.json"
+  },
+  {
+   "id": "key_1",
+   "label": "Clé",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/key_1.png",
+   "materials": "sprites/key_1.json"
+  },
+  {
+   "id": "key_2",
+   "label": "Clé 2",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/key_2.png",
+   "materials": "sprites/key_2.json"
+  },
+  {
+   "id": "key_3",
+   "label": "Clé 3",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/key_3.png",
+   "materials": "sprites/key_3.json"
+  },
+  {
+   "id": "key_4",
+   "label": "Clé 4",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/key_4.png",
+   "materials": "sprites/key_4.json"
+  },
+  {
+   "id": "letter",
+   "label": "Lettre",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/letter.png",
+   "materials": "sprites/letter.json"
+  },
+  {
+   "id": "lockpick",
+   "label": "Crochet",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/lockpick.png",
+   "materials": "sprites/lockpick.json"
+  },
+  {
+   "id": "luth",
+   "label": "Luth",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/luth.png",
+   "materials": "sprites/luth.json"
+  },
+  {
+   "id": "magic_hat",
+   "label": "Chapeau magique",
+   "type": "equipment",
+   "slot": "head",
+   "kind": "masked",
+   "image": "sprites/magic_hat.png",
+   "materials": "sprites/magic_hat.json"
+  },
+  {
+   "id": "map",
+   "label": "Carte",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/map.png",
+   "materials": "sprites/map.json"
+  },
+  {
+   "id": "ocarina",
+   "label": "Ocarina",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/ocarina.png",
+   "materials": "sprites/ocarina.json"
+  },
+  {
+   "id": "pick",
+   "label": "Pioche",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/pick.png",
+   "materials": "sprites/pick.json"
+  },
+  {
+   "id": "poison",
+   "label": "Poison",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/poison.png",
+   "materials": "sprites/poison.json"
+  },
+  {
+   "id": "potion_1",
+   "label": "Potion",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/potion_1.png",
+   "materials": "sprites/potion_1.json"
+  },
+  {
+   "id": "potion_2",
+   "label": "Potion 2",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/potion_2.png",
+   "materials": "sprites/potion_2.json"
+  },
+  {
+   "id": "powder",
+   "label": "Poudre",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/powder.png",
+   "materials": "sprites/powder.json"
+  },
+  {
+   "id": "pumpkin",
+   "label": "Citrouille",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/pumpkin.png",
+   "materials": "sprites/pumpkin.json"
+  },
+  {
+   "id": "rapier",
+   "label": "Rapière",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/rapier.png",
+   "materials": "sprites/rapier.json"
+  },
+  {
+   "id": "ring_1",
+   "label": "Anneau",
+   "type": "equipment",
+   "slot": "ring",
+   "kind": "masked",
+   "image": "sprites/ring_1.png",
+   "materials": "sprites/ring_1.json"
+  },
+  {
+   "id": "ring_2",
+   "label": "Anneau 2",
+   "type": "equipment",
+   "slot": "ring",
+   "kind": "masked",
+   "image": "sprites/ring_2.png",
+   "materials": "sprites/ring_2.json"
+  },
+  {
+   "id": "ring_3",
+   "label": "Anneau 3",
+   "type": "equipment",
+   "slot": "ring",
+   "kind": "masked",
+   "image": "sprites/ring_3.png",
+   "materials": "sprites/ring_3.json"
+  },
+  {
+   "id": "rock",
+   "label": "Pierre",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/rock.png",
+   "materials": "sprites/rock.json"
+  },
+  {
+   "id": "rope",
+   "label": "Corde",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/rope.png",
+   "materials": "sprites/rope.json"
+  },
+  {
+   "id": "rune_1",
+   "label": "Rune",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/rune_1.png",
+   "materials": "sprites/rune_1.json"
+  },
+  {
+   "id": "rune_2",
+   "label": "Rune 2",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/rune_2.png",
+   "materials": "sprites/rune_2.json"
+  },
+  {
+   "id": "rune_3",
+   "label": "Rune 3",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/rune_3.png",
+   "materials": "sprites/rune_3.json"
+  },
+  {
+   "id": "rune_4",
+   "label": "Rune 4",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/rune_4.png",
+   "materials": "sprites/rune_4.json"
+  },
+  {
+   "id": "saw",
+   "label": "Scie",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/saw.png",
+   "materials": "sprites/saw.json"
+  },
+  {
+   "id": "scroll",
+   "label": "Parchemin",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/scroll.png",
+   "materials": "sprites/scroll.json"
+  },
+  {
+   "id": "shield_1",
+   "label": "Bouclier",
+   "type": "equipment",
+   "slot": "weapon2",
+   "kind": "masked",
+   "image": "sprites/shield_1.png",
+   "materials": "sprites/shield_1.json"
+  },
+  {
+   "id": "shield_2",
+   "label": "Bouclier 2",
+   "type": "equipment",
+   "slot": "weapon2",
+   "kind": "masked",
+   "image": "sprites/shield_2.png",
+   "materials": "sprites/shield_2.json"
+  },
+  {
+   "id": "shield_3",
+   "label": "Bouclier 3",
+   "type": "equipment",
+   "slot": "weapon2",
+   "kind": "masked",
+   "image": "sprites/shield_3.png",
+   "materials": "sprites/shield_3.json"
+  },
+  {
+   "id": "shovel",
+   "label": "Pelle",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/shovel.png",
+   "materials": "sprites/shovel.json"
+  },
+  {
+   "id": "skull",
+   "label": "Crâne",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/skull.png",
+   "materials": "sprites/skull.json"
+  },
+  {
+   "id": "sleepingbag",
+   "label": "Sac de couchage",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/sleepingbag.png",
+   "materials": "sprites/sleepingbag.json"
+  },
+  {
+   "id": "spear",
+   "label": "Lance",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/spear.png",
+   "materials": "sprites/spear.json"
+  },
+  {
+   "id": "sword",
+   "label": "Épée",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/sword.png",
+   "materials": "sprites/sword.json"
+  },
+  {
+   "id": "torch",
+   "label": "Torche",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/torch.png",
+   "materials": "sprites/torch.json"
+  },
+  {
+   "id": "trap",
+   "label": "Piège",
+   "type": "item",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/trap.png",
+   "materials": "sprites/trap.json"
+  },
+  {
+   "id": "turnip",
+   "label": "Navet",
+   "type": "consumable",
+   "slot": "none",
+   "kind": "masked",
+   "image": "sprites/turnip.png",
+   "materials": "sprites/turnip.json"
+  },
+  {
+   "id": "wand_1",
+   "label": "Baguette",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/wand_1.png",
+   "materials": "sprites/wand_1.json"
+  },
+  {
+   "id": "wand_2",
+   "label": "Baguette 2",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/wand_2.png",
+   "materials": "sprites/wand_2.json"
+  },
+  {
+   "id": "wand_3",
+   "label": "Baguette 3",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/wand_3.png",
+   "materials": "sprites/wand_3.json"
+  },
+  {
+   "id": "waraxe",
+   "label": "Hache de guerre",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/waraxe.png",
+   "materials": "sprites/waraxe.json"
+  },
+  {
+   "id": "warhammer",
+   "label": "Marteau de guerre",
+   "type": "equipment",
+   "slot": "weapon1",
+   "kind": "masked",
+   "image": "sprites/warhammer.png",
+   "materials": "sprites/warhammer.json"
+  }
+ ]
+}

@@ -2,8 +2,9 @@ import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { unzipSync } from 'fflate';
-import basePack from '../../../../public/packs/base/pack.json';
-import glowMaterials from '../../../../public/packs/base/sprites/axe.json';
+import baseEnPack from '../../../../public/packs/base-en/pack.json';
+import baseFrPack from '../../../../public/packs/base-fr/pack.json';
+import glowMaterials from '../../../../public/packs/base-fr/sprites/axe.json';
 import { EXTRA_ITEMS } from '../../../testing/extra-pack';
 import { NEON_LINK, neonProviders, neonWorld } from '../../../testing/unofficial-pack';
 import { SpriteSet } from '../../modules/sprite/models/sprite-set';
@@ -16,6 +17,7 @@ import { ImageProcessingService } from '../services/image-processing.service';
 import { validatePack } from '../packs/pack';
 import { PackStorageService } from '../services/pack-storage.service';
 import { PackCreatorBusiness } from './pack-creator.business';
+import { LanguageBusiness } from './language.business';
 import { PackBusiness } from './pack.business';
 
 const MB = 1024 * 1024;
@@ -45,6 +47,7 @@ function setup() {
     dims,
     service: fakes.service,
     creator: TestBed.inject(PackCreatorBusiness),
+    language: TestBed.inject(LanguageBusiness),
     packs: TestBed.inject(PackBusiness),
     storage: TestBed.inject(PackStorageService),
     sets: TestBed.inject(SpriteSetStorageService),
@@ -62,28 +65,29 @@ async function rejection(promise: Promise<unknown>): Promise<string> {
   throw new Error('expected a rejection');
 }
 
-/** A saved draft with valid details (id `mine`) and a French items list. */
+/** A saved French draft with valid details (id `mine`) and an items list. */
 async function validDraft({ creator }: Setup, over: Partial<PackDraft['details']> = {}): Promise<PackDraft> {
   const draft = await creator.createDraft();
   const saved: PackDraft = {
     ...draft,
     details: {
       id: 'mine',
-      name: { en: 'Mine', fr: 'Mien' },
-      description: { en: 'My pack', fr: 'Mon pack' },
+      language: 'fr',
+      name: 'Mien',
+      description: 'Mon pack',
       version: '1.0.0',
       author: 'Ann Author',
       license: 'CC-BY-4.0',
       licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
       ...over,
     },
-    generators: { fr: { items: EXTRA_ITEMS } },
+    generators: { items: EXTRA_ITEMS },
   };
   await creator.saveDraft(saved);
   return saved;
 }
 
-const spark = { id: 'spark', en: 'Spark', fr: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' } as const;
+const spark = { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' } as const;
 
 describe('PackCreatorBusiness', () => {
   describe('drafts', () => {
@@ -95,6 +99,20 @@ describe('PackCreatorBusiness', () => {
       expect(draft.id).toBeTruthy();
       expect(draft.sprites).toEqual([]);
       expect((await s.creator.listDrafts()).map((d) => d.id)).toEqual([draft.id]);
+    });
+
+    it('creates a draft in the app language, with one empty name, description and list slot per generator', async () => {
+      const s = setup();
+      s.language.setLanguage('fr');
+
+      const french = await s.creator.createDraft();
+      s.language.setLanguage('en');
+      const english = await s.creator.createDraft();
+
+      expect(french.details.language).toBe('fr');
+      expect(english.details.language).toBe('en');
+      expect(english.details).toMatchObject({ name: '', description: '' });
+      expect(english.generators).toEqual({});
     });
 
     it('lists the latest changed first and stamps updatedAt on save', async () => {
@@ -186,9 +204,9 @@ describe('PackCreatorBusiness', () => {
 
       const added = await s.creator.addFromSpriteSet(draft.id, 's1');
 
-      expect(added).toMatchObject({ kind: 'masked', type: 'equipment', slot: 'weapon1', id: 'blue-axe', en: 'Blue axe', fr: 'Blue axe' });
+      expect(added).toMatchObject({ kind: 'masked', type: 'equipment', slot: 'weapon1', id: 'blue-axe', label: 'Blue axe' });
       expect(added.materials).toBe(JSON.stringify(glowMaterials));
-      expect(s.service.loadBlob).toHaveBeenCalledWith('packs/base/sprites/axe.png');
+      expect(s.service.loadBlob).toHaveBeenCalledWith('packs/base-en/sprites/axe.png');
       expect(added.image).toBeInstanceOf(Blob);
       expect((await s.creator.getDraft(draft.id))?.sprites.map((x) => x.id)).toEqual(['blue-axe']);
     });
@@ -215,14 +233,26 @@ describe('PackCreatorBusiness', () => {
   });
 
   describe('copyBaseList', () => {
-    it('copies the Base word list of a language and generator into the draft', async () => {
+    it('copies the word list of the Base of the draft language into the draft', async () => {
       const s = setup();
-      const draft = await s.creator.createDraft();
+      const draft = await validDraft(s);
 
-      await s.creator.copyBaseList(draft.id, 'fr', 'items');
+      await s.creator.copyBaseList(draft.id, 'npcs');
 
       const saved = await s.creator.getDraft(draft.id);
-      expect(saved?.generators.fr?.items).toEqual({ url: 'packs/base/generators/fr/items.json' });
+      expect(saved?.generators.npcs).toEqual({ url: 'packs/base-fr/generators/npcs.json' });
+      expect(saved?.generators.items).toEqual(EXTRA_ITEMS);
+    });
+
+    it('copies from base-en for an English draft, whatever the app language', async () => {
+      const s = setup();
+      s.language.setLanguage('fr');
+      const draft = await validDraft(s, { language: 'en' });
+
+      await s.creator.copyBaseList(draft.id, 'items');
+
+      const saved = await s.creator.getDraft(draft.id);
+      expect(saved?.generators.items).toEqual({ url: 'packs/base-en/generators/items.json' });
     });
   });
 
@@ -237,9 +267,10 @@ describe('PackCreatorBusiness', () => {
 
       const [stored] = await s.storage.list();
       expect(stored).toMatchObject({ id: 'mine', enabled: true, source: { kind: 'local' } });
-      expect(s.packs.$installed().map((p) => p.id)).toEqual(['base', 'mine']);
-      expect((await s.packs.sprites()).filter((x) => x.packId === 'mine').map((x) => x.id)).toEqual(['spark']);
-      expect(await s.packs.wordList('items', 'fr', 'mine')).toEqual(EXTRA_ITEMS);
+      expect(s.packs.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'mine']);
+      s.language.setLanguage('fr');
+      expect((await s.packs.sprites()).filter((x) => x.packId === 'mine').map((x) => [x.id, x.label])).toEqual([['spark', 'Etincelle']]);
+      expect(await s.packs.wordList('items', 'mine')).toEqual(EXTRA_ITEMS);
     });
 
     it('installing again from the same draft replaces the pack', async () => {
@@ -266,18 +297,35 @@ describe('PackCreatorBusiness', () => {
     it('lists the invalid word list with its file name and stores nothing', async () => {
       const s = setup();
       const draft = await validDraft(s);
-      await s.creator.saveDraft({ ...draft, generators: { fr: { items: { version: 1 } } } });
+      await s.creator.saveDraft({ ...draft, generators: { items: { version: 1 } } });
 
-      expect(await rejection(s.creator.install(draft.id))).toContain('generators/fr/items.json');
+      expect(await rejection(s.creator.install(draft.id))).toContain('generators/items.json');
       expect(await s.storage.list()).toEqual([]);
     });
 
-    it('refuses an official pack id', async () => {
+    it.each(['base-fr', 'base-en'])('refuses the official pack id %s', async (id) => {
       const s = setup();
-      const draft = await validDraft(s, { id: 'base' });
+      const draft = await validDraft(s, { id });
 
       expect(await rejection(s.creator.install(draft.id))).toContain('official');
       expect(await s.storage.list()).toEqual([]);
+    });
+
+    it('stores the new manifest: language, single name and description, one label per sprite', async () => {
+      const s = setup();
+      const draft = await validDraft(s);
+      await s.creator.addPng(draft.id, png(), spark);
+
+      await s.creator.install(draft.id);
+
+      const [stored] = await s.storage.list();
+      expect(stored.manifest).toMatchObject({
+        language: 'fr',
+        name: 'Mien',
+        description: 'Mon pack',
+        generators: { items: 'generators/items.json' },
+        sprites: [{ id: 'spark', label: 'Etincelle' }],
+      });
     });
 
     it('refuses an id installed from a link', async () => {
@@ -301,15 +349,17 @@ describe('PackCreatorBusiness', () => {
 
       expect(fileName).toBe('mine-1.0.0.zip');
       const entries = unzipSync(bytes);
-      expect(Object.keys(entries).sort()).toEqual(['generators/fr/items.json', 'pack.json', 'sprites/spark.png']);
+      expect(Object.keys(entries).sort()).toEqual(['generators/items.json', 'pack.json', 'sprites/spark.png']);
       const manifest = JSON.parse(new TextDecoder().decode(entries['pack.json']));
       expect(manifest).toMatchObject({
         format: 1,
         id: 'mine',
-        generators: { fr: { items: 'generators/fr/items.json' } },
-        sprites: [{ id: 'spark', image: 'sprites/spark.png' }],
+        language: 'fr',
+        name: 'Mien',
+        generators: { items: 'generators/items.json' },
+        sprites: [{ id: 'spark', label: 'Etincelle', image: 'sprites/spark.png' }],
       });
-      expect(JSON.parse(new TextDecoder().decode(entries['generators/fr/items.json']))).toEqual(EXTRA_ITEMS);
+      expect(JSON.parse(new TextDecoder().decode(entries['generators/items.json']))).toEqual(EXTRA_ITEMS);
       expect(new TextDecoder().decode(entries['sprites/spark.png'])).toBe('png-bytes');
     });
 
@@ -328,8 +378,9 @@ describe('PackCreatorBusiness', () => {
 
       const draft = await s.creator.draftFromInstalled('neon');
 
-      expect(draft.details).toMatchObject({ id: 'neon', name: { en: 'Neon', fr: 'Neon' }, version: '1.0.0', author: 'Ann Author' });
-      expect(draft.generators.fr?.items).toEqual(EXTRA_ITEMS);
+      expect(draft.details).toMatchObject({ id: 'neon', language: 'fr', name: 'Neon', version: '1.0.0', author: 'Ann Author' });
+      expect(draft.generators.items).toEqual(EXTRA_ITEMS);
+      expect(draft.sprites[0].label).toBe('Etincelle');
       expect(draft.sprites.map((x) => [x.id, x.kind])).toEqual([['spark', 'grayscale'], ['glow', 'masked'], ['tint', 'colored']]);
       expect(JSON.parse(draft.sprites[1].materials!)).toEqual(glowMaterials);
       expect(draft.sprites[0].image).toBeInstanceOf(Blob);
@@ -351,7 +402,8 @@ describe('PackCreatorBusiness', () => {
       const s = setup();
       await s.packs.enable('extra');
 
-      await expect(s.creator.draftFromInstalled('base')).rejects.toBeDefined();
+      await expect(s.creator.draftFromInstalled('base-fr')).rejects.toBeDefined();
+      await expect(s.creator.draftFromInstalled('base-en')).rejects.toBeDefined();
       await expect(s.creator.draftFromInstalled('extra')).rejects.toBeDefined();
       expect(await s.creator.listDrafts()).toEqual([]);
     });
@@ -367,36 +419,48 @@ describe('PackCreatorBusiness', () => {
       const draft = await s.creator.duplicate('neon');
 
       expect(draft.details).toMatchObject({
-        id: 'neon-copy',
-        name: { en: 'Neon (copy)', fr: 'Neon (copie)' },
-        description: { en: 'Glowing things', fr: 'Des choses brillantes' },
+        id: 'neon-copie',
+        language: 'fr',
+        name: 'Neon (copie)',
+        description: 'Des choses brillantes',
         version: '1.0.0',
         author: 'Ann Author',
         license: 'CC-BY-4.0',
         licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
         homepage: 'https://example.com/neon',
       });
-      expect(draft.generators.fr?.items).toEqual(EXTRA_ITEMS);
+      expect(draft.generators.items).toEqual(EXTRA_ITEMS);
       expect(draft.sprites.map((x) => [x.id, x.kind])).toEqual([['spark', 'grayscale'], ['glow', 'masked'], ['tint', 'colored']]);
       expect(JSON.parse(draft.sprites[1].materials!)).toEqual(glowMaterials);
       expect(draft.sprites[0].image).toBeInstanceOf(Blob);
       expect((await s.creator.listDrafts()).map((d) => d.id)).toEqual([draft.id]);
-      expect(buildPack(draft).manifest.id).toBe('neon-copy');
+      expect(buildPack(draft).manifest.id).toBe('neon-copie');
       expect(validatePack(buildPack(draft).manifest).ok).toBe(true);
     });
 
-    it('uses -copie and (copie) when the language is French', async () => {
+    it('follows the language of the pack, not the app: -copie for a French pack in an English app', async () => {
       const s = setup();
-      TestBed.inject(TranslocoService).setActiveLang('fr');
+      TestBed.inject(TranslocoService).setActiveLang('en');
       await s.packs.install(await s.packs.prepare(NEON_LINK));
 
       const draft = await s.creator.duplicate('neon');
 
       expect(draft.details.id).toBe('neon-copie');
-      expect(draft.details.name).toEqual({ en: 'Neon (copie)', fr: 'Neon (copie)' });
+      expect(draft.details.name).toBe('Neon (copie)');
     });
 
-    it('skips taken ids: -copy, then -copy-2, -copy-3', async () => {
+    it('uses -copy and (copy) for an English pack, even in a French app', async () => {
+      const s = setup();
+      TestBed.inject(TranslocoService).setActiveLang('fr');
+      const mine = await validDraft(s, { id: 'mine-en', language: 'en', name: 'Mine' });
+      await s.creator.install(mine.id);
+
+      const draft = await s.creator.duplicate('mine-en');
+
+      expect(draft.details).toMatchObject({ id: 'mine-en-copy', name: 'Mine (copy)', language: 'en' });
+    });
+
+    it('skips taken ids: -copie, then -copie-2, -copie-3', async () => {
       const s = setup();
       await s.packs.install(await s.packs.prepare(NEON_LINK));
 
@@ -404,7 +468,7 @@ describe('PackCreatorBusiness', () => {
       const second = await s.creator.duplicate('neon');
       const third = await s.creator.duplicate('neon');
 
-      expect([first, second, third].map((d) => d.details.id)).toEqual(['neon-copy', 'neon-copy-2', 'neon-copy-3']);
+      expect([first, second, third].map((d) => d.details.id)).toEqual(['neon-copie', 'neon-copie-2', 'neon-copie-3']);
     });
 
     it('skips an id taken by an installed pack', async () => {
@@ -416,7 +480,7 @@ describe('PackCreatorBusiness', () => {
 
       const second = await s.creator.duplicate('neon');
 
-      expect(second.details.id).toBe('neon-copy-2');
+      expect(second.details.id).toBe('neon-copie-2');
     });
 
     it('copies a pack created on this device with its sprites', async () => {
@@ -428,8 +492,8 @@ describe('PackCreatorBusiness', () => {
       const copy = await s.creator.duplicate('mine');
 
       expect(copy.id).not.toBe(mine.id);
-      expect(copy.details).toMatchObject({ id: 'mine-copy', name: { en: 'Mine (copy)', fr: 'Mien (copie)' }, author: 'Ann Author' });
-      expect(copy.generators.fr?.items).toEqual(EXTRA_ITEMS);
+      expect(copy.details).toMatchObject({ id: 'mine-copie', language: 'fr', name: 'Mien (copie)', author: 'Ann Author' });
+      expect(copy.generators.items).toEqual(EXTRA_ITEMS);
       expect(ids(copy)).toEqual(['spark']);
       expect(await text(copy.sprites[0].image)).toBe('png-bytes');
       expect(validatePack(buildPack(copy).manifest).ok).toBe(true);
@@ -441,30 +505,44 @@ describe('PackCreatorBusiness', () => {
 
       const draft = await s.creator.duplicate('extra');
 
-      expect(draft.details).toMatchObject({ id: 'extra-copy', name: { en: 'Extra (copy)', fr: 'Extra (copie)' }, author: 'Jane Doe', license: 'CC0-1.0' });
-      expect(draft.generators.fr?.items).toEqual(EXTRA_ITEMS);
+      expect(draft.details).toMatchObject({ id: 'extra-copie', language: 'fr', name: 'Extra (copie)', author: 'Jane Doe', license: 'CC0-1.0' });
+      expect(draft.generators.items).toEqual(EXTRA_ITEMS);
       expect(ids(draft)).toEqual(['gem']);
       expect(draft.sprites[0].image).toBeInstanceOf(Blob);
     });
 
-    it('copies Base: every word list and every sprite, read from the app', async () => {
+    it.each([
+      ['base-fr', 'fr', baseFrPack, 'Hache', 'base-fr-copie', /\(copie\)$/],
+      ['base-en', 'en', baseEnPack, 'Axe', 'base-en-copy', /\(copy\)$/],
+    ] as const)('copies %s: its language, four word lists and 101 sprites with their labels, read from the app', async (id, language, manifest, axeLabel, copyId, copyName) => {
       const s = setup();
 
-      const draft = await s.creator.duplicate('base');
+      const draft = await s.creator.duplicate(id);
 
-      expect(draft.details).toMatchObject({ id: 'base-copy', name: { en: 'Base (copy)', fr: 'Base (copie)' }, version: '1.0.0', license: 'CC-BY-4.0' });
-      expect(draft.generators.fr?.items).toEqual({ url: 'packs/base/generators/fr/items.json' });
-      expect(draft.generators.en?.classes).toEqual({ url: 'packs/base/generators/en/classes.json' });
-      expect(Object.keys(draft.generators.en!).sort()).toEqual(['classes', 'items', 'npcs', 'skills']);
-      expect(Object.keys(draft.generators.fr!).sort()).toEqual(['classes', 'items', 'npcs', 'skills']);
-      expect(draft.sprites.length).toBe(basePack.sprites.length);
+      expect(draft.details).toMatchObject({ id: copyId, language, name: expect.stringMatching(copyName), version: '1.0.0', license: 'CC-BY-4.0' });
+      expect(draft.generators.items).toEqual({ url: `packs/${id}/generators/items.json` });
+      expect(draft.generators.classes).toEqual({ url: `packs/${id}/generators/classes.json` });
+      expect(Object.keys(draft.generators).sort()).toEqual(['classes', 'items', 'npcs', 'skills']);
+      expect(draft.sprites.length).toBe(manifest.sprites.length);
       expect(draft.sprites.length).toBe(101);
+      expect(draft.sprites.find((x) => x.id === 'axe')?.label).toBe(axeLabel);
       expect(draft.sprites.every((x) => x.image instanceof Blob)).toBe(true);
       const masked = draft.sprites.filter((x) => x.kind === 'masked');
-      expect(masked.length).toBe(basePack.sprites.filter((x) => x.kind === 'masked').length);
+      expect(masked.length).toBe(manifest.sprites.filter((x) => x.kind === 'masked').length);
       expect(masked.length).toBeGreaterThan(0);
       expect(masked.every((x) => !!x.materials)).toBe(true);
       expect(validatePack(buildPack(draft).manifest).ok).toBe(true);
+    });
+
+    it('duplicating base-en gives an English draft with English lists and labels, in a French app too', async () => {
+      const s = setup();
+      s.language.setLanguage('fr');
+
+      const draft = await s.creator.duplicate('base-en');
+
+      expect(draft.details.language).toBe('en');
+      expect(draft.details.name).toMatch(/\(copy\)$/);
+      expect(draft.sprites.find((x) => x.id === 'axe')?.label).toBe('Axe');
     });
 
     it('refuses an official pack that is not downloaded and an unknown id, saving nothing', async () => {

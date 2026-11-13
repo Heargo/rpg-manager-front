@@ -16,8 +16,7 @@ export type SpriteKind = (typeof SPRITE_KINDS)[number];
 
 export interface PackSprite {
   id: string;
-  en: string;
-  fr: string;
+  label: string;
   type: ItemType;
   slot: ItemSlot;
   kind: SpriteKind;
@@ -28,16 +27,15 @@ export interface PackSprite {
 export interface Pack {
   format: number;
   id: string;
-  name: Record<PackLanguage, string>;
-  description: Record<PackLanguage, string>;
+  language: PackLanguage;
+  name: string;
+  description: string;
   version: string;
   author: string;
   license: string;
   licenseUrl: string;
   homepage?: string;
-  generators: Partial<
-    Record<PackLanguage, Partial<Record<PackGenerator, string>>>
-  >;
+  generators: Partial<Record<PackGenerator, string>>;
   sprites: PackSprite[];
 }
 
@@ -82,13 +80,10 @@ export function validatePack(json: unknown): PackValidation {
     errors.push(`format must be ${PACK_FORMAT}`);
   if (typeof json['id'] !== 'string' || !ID.test(json['id']))
     errors.push('id must be kebab-case (lowercase letters, digits and dashes)');
-  for (const field of ['name', 'description']) {
-    const value = json[field];
-    for (const lang of PACK_LANGUAGES) {
-      if (!isObject(value) || !text(value[lang]))
-        errors.push(`${field}.${lang} is required`);
-    }
-  }
+  if (!(PACK_LANGUAGES as readonly unknown[]).includes(json['language']))
+    errors.push(`language must be one of ${PACK_LANGUAGES.join(', ')}`);
+  for (const field of ['name', 'description'])
+    if (!text(json[field])) errors.push(`${field} is required (a text)`);
   for (const field of ['version', 'author', 'license', 'licenseUrl']) {
     if (!text(json[field])) errors.push(`${field} is required`);
   }
@@ -106,20 +101,13 @@ export function validatePack(json: unknown): PackValidation {
   if (generators !== undefined) {
     if (!isObject(generators)) errors.push('generators must be an object');
     else
-      for (const [lang, files] of Object.entries(generators)) {
-        if (!(PACK_LANGUAGES as readonly string[]).includes(lang)) {
-          errors.push(`generators.${lang}: unknown language`);
-        } else if (!isObject(files)) {
-          errors.push(`generators.${lang} must be an object`);
-        } else
-          for (const [generator, path] of Object.entries(files)) {
-            if (!(PACK_GENERATORS as readonly string[]).includes(generator))
-              errors.push(`generators.${lang}.${generator}: unknown generator`);
-            else if (!isRelativePath(path))
-              errors.push(
-                `generators.${lang}.${generator} must be a relative path inside the pack`,
-              );
-          }
+      for (const [generator, path] of Object.entries(generators)) {
+        if (!(PACK_GENERATORS as readonly string[]).includes(generator))
+          errors.push(`generators.${generator}: unknown generator`);
+        else if (!isRelativePath(path))
+          errors.push(
+            `generators.${generator} must be a relative path inside the pack`,
+          );
       }
   }
 
@@ -139,9 +127,7 @@ export function validatePack(json: unknown): PackValidation {
         errors.push(`${name}: id is invalid`);
       else if (seen.has(id)) errors.push(`${name}: id is used twice`);
       else seen.add(id);
-      for (const lang of PACK_LANGUAGES)
-        if (!text(sprite[lang]))
-          errors.push(`${name}: ${lang} label is required`);
+      if (!text(sprite['label'])) errors.push(`${name}: label is required`);
       if (!(ITEM_TYPES as readonly string[]).includes(sprite['type'] as string))
         errors.push(`${name}: type must be one of ${ITEM_TYPES.join(', ')}`);
       if (

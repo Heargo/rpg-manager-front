@@ -2,7 +2,7 @@ import { computed, inject, Injectable, resource, Signal } from '@angular/core';
 import { PackGenerator } from '../packs/pack';
 import { choosePack, RANDOM_PACK } from '../packs/pack-choice';
 import { LanguageBusiness } from './language.business';
-import { PackBusiness } from './pack.business';
+import { basePackId, PackBusiness } from './pack.business';
 
 export type PackChoiceContent = PackGenerator;
 
@@ -29,12 +29,9 @@ export class PackChoiceBusiness {
     return computed(() => {
       const lang = this.language.$language();
       const names = new Map(
-        this.packs.$installed().map((p) => [
-          p.id,
-          p.name[lang as 'en' | 'fr'] ?? p.name['en'] ?? p.id,
-        ]),
+        this.packs.$installed().map((p) => [p.id, p.name || p.id]),
       );
-      const ids = candidates.hasValue() ? candidates.value() : ['base'];
+      const ids = candidates.hasValue() ? candidates.value() : [basePackId(lang)];
       return [
         { value: RANDOM_PACK, label: this.language.t('packs.choiceRandom') },
         ...ids.map((id) => ({ value: id, label: names.get(id) ?? id })),

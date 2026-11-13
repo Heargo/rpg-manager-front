@@ -3,7 +3,6 @@ import {
   Pack,
   PACK_FORMAT,
   PACK_GENERATORS,
-  PACK_LANGUAGES,
   PackGenerator,
   PackLanguage,
   PackSprite,
@@ -13,8 +12,7 @@ import {
 /** A sprite of a draft: the image itself, and for a masked one its materials (the colorizer's JSON text). */
 export interface DraftSprite {
   id: string;
-  en: string;
-  fr: string;
+  label: string;
   type: ItemType;
   slot: ItemSlot;
   kind: SpriteKind;
@@ -24,8 +22,9 @@ export interface DraftSprite {
 
 export interface DraftDetails {
   id: string;
-  name: Record<PackLanguage, string>;
-  description: Record<PackLanguage, string>;
+  language: PackLanguage;
+  name: string;
+  description: string;
   version: string;
   author: string;
   license: string;
@@ -38,9 +37,7 @@ export interface PackDraft {
   id: string;
   updatedAt: number;
   details: DraftDetails;
-  generators: Partial<
-    Record<PackLanguage, Partial<Record<PackGenerator, unknown>>>
-  >;
+  generators: Partial<Record<PackGenerator, unknown>>;
   sprites: DraftSprite[];
 }
 
@@ -54,8 +51,8 @@ export function slugifyPackId(name: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-export const wordListPath = (lang: PackLanguage, generator: PackGenerator) =>
-  `generators/${lang}/${generator}.json`;
+export const wordListPath = (generator: PackGenerator) =>
+  `generators/${generator}.json`;
 
 function parseJson(text: string): unknown {
   try {
@@ -66,7 +63,7 @@ function parseJson(text: string): unknown {
 }
 
 /**
- * The manifest and the files of a draft, in the documented layout: `generators/<lang>/<generator>.json`,
+ * The manifest and the files of a draft, in the documented layout: `generators/<generator>.json`,
  * `sprites/<id>.png`, `sprites/<id>.json`. Empty word list slots are left out. Nothing is checked here.
  */
 export function buildPack(draft: PackDraft): {
@@ -77,16 +74,12 @@ export function buildPack(draft: PackDraft): {
   const files = new Map<string, Blob | unknown>();
 
   const generators: Pack['generators'] = {};
-  for (const lang of PACK_LANGUAGES) {
-    const slots: Partial<Record<PackGenerator, string>> = {};
-    for (const generator of PACK_GENERATORS) {
-      const value = draft.generators[lang]?.[generator];
-      if (value === undefined) continue;
-      const path = wordListPath(lang, generator);
-      slots[generator] = path;
-      files.set(path, value);
-    }
-    if (Object.keys(slots).length) generators[lang] = slots;
+  for (const generator of PACK_GENERATORS) {
+    const value = draft.generators[generator];
+    if (value === undefined) continue;
+    const path = wordListPath(generator);
+    generators[generator] = path;
+    files.set(path, value);
   }
 
   const sprites: PackSprite[] = draft.sprites.map((sprite) => {
@@ -94,8 +87,7 @@ export function buildPack(draft: PackDraft): {
     files.set(image, sprite.image);
     const entry: PackSprite = {
       id: sprite.id,
-      en: sprite.en,
-      fr: sprite.fr,
+      label: sprite.label,
       type: sprite.type,
       slot: sprite.slot,
       kind: sprite.kind,
@@ -111,8 +103,9 @@ export function buildPack(draft: PackDraft): {
   const manifest: Pack = {
     format: PACK_FORMAT,
     id: details.id,
-    name: { ...details.name },
-    description: { ...details.description },
+    language: details.language,
+    name: details.name,
+    description: details.description,
     version: details.version,
     author: details.author,
     license: details.license,

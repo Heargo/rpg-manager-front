@@ -6,9 +6,7 @@ import { ItemSlot, ItemType } from '../models/item';
 import {
   Pack,
   PACK_GENERATORS,
-  PACK_LANGUAGES,
   PackGenerator,
-  PackLanguage,
   packFileUrl,
   SpriteKind,
   validatePack,
@@ -34,7 +32,7 @@ import { StoredPackFile } from '../services/pack-storage.service';
 import { runLimited } from '../helpers/pool';
 import { ImageBusiness } from './image.business';
 import { LanguageBusiness } from './language.business';
-import { BASE_PACK_ID, PackBusiness, PackError } from './pack.business';
+import { basePackId, isBasePack, PackBusiness, PackError } from './pack.business';
 
 /** What a sprite needs besides its image. */
 export type SpriteMeta = Omit<DraftSprite, 'image' | 'materials'>;
@@ -51,8 +49,8 @@ interface BuiltPack {
 /** Sprite files read at once when copying Base. */
 const MAX_FETCHES = 4;
 
-/** The word added to a copy's id and names: `[english, french]`. */
-const COPY_WORDS = ['copy', 'copie'] as const;
+/** The word added to a copy's id and name, in the language of the pack. */
+const COPY_WORDS = { en: 'copy', fr: 'copie' } as const;
 
 const uniqueId = (wanted: string, taken: Set<string>): string => {
   const base = wanted || 'sprite';
@@ -118,8 +116,9 @@ export class PackCreatorBusiness {
       updatedAt: Date.now(),
       details: {
         id: '',
-        name: { en: '', fr: '' },
-        description: { en: '', fr: '' },
+        language: this.language.$language() === 'fr' ? 'fr' : 'en',
+        name: '',
+        description: '',
         version: '1.0.0',
         author: '',
         license: '',
@@ -229,8 +228,7 @@ export class PackCreatorBusiness {
     );
     return this.addSprite(draftId, {
       id,
-      en: set.name,
-      fr: set.name,
+      label: set.name,
       type: set.tags?.type ?? 'item',
       slot: set.tags?.slot ?? 'none',
       kind: 'masked',
@@ -256,20 +254,20 @@ export class PackCreatorBusiness {
     return this.service.loadBlob(sprite.imageUrl);
   }
 
-  /** Copies the Base word list of a language and generator into the draft. */
+  /** Copies the word list of a generator from the Base of the draft's language into the draft. */
   async copyBaseList(
     draftId: string,
-    lang: PackLanguage,
     generator: PackGenerator,
   ): Promise<unknown> {
-    const value = await this.packs.wordList(generator, lang, BASE_PACK_ID);
     const draft = await this.draftOrThrow(draftId);
+    const value = await this.packs.wordList(
+      generator,
+      basePackId(draft.details.language),
+    );
+    const latest = await this.draftOrThrow(draftId);
     await this.saveDraft({
-      ...draft,
-      generators: {
-        ...draft.generators,
-        [lang]: { ...draft.generators[lang], [generator]: value },
-      },
+      ...latest,
+      generators: { ...latest.generators, [generator]: value },
     });
     return value;
   }
@@ -283,7 +281,7 @@ export class PackCreatorBusiness {
   async idWarning(id: string): Promise<'official' | 'link' | null> {
     if (!id) return null;
     const entries = await this.packs.registry().catch(() => []);
-    if (id === BASE_PACK_ID || entries.some((p) => p.id === id))
+    if (isBasePack(id) || entries.some((p) => p.id === id))
       return 'official';
     const installed = this.packs.$installed().find((p) => p.id === id);
     return installed?.link ? 'link' : null;
@@ -298,11 +296,10 @@ export class PackCreatorBusiness {
     if (!result.ok) errors.push(...result.errors.map((e) => `pack.json: ${e}`));
 
     const lists = new Map<string, (json: unknown) => string[]>();
-    for (const lang of PACK_LANGUAGES)
-      for (const generator of PACK_GENERATORS) {
-        const path = manifest.generators[lang]?.[generator];
-        if (path) lists.set(path, listChecker(generator));
-      }
+    for (const generator of PACK_GENERATORS) {
+      const path = manifest.generators[generator];
+      if (path) lists.set(path, listChecker(generator));
+    }
     const dimensions = new Map<string, ImageSize>();
     const files = new Map<string, StoredPackFile>();
     let size = 0;
@@ -373,12 +370,10 @@ export class PackCreatorBusiness {
       throw new PackError([`"${packId}" cannot be edited as a draft`]);
 
     const generators: PackDraft['generators'] = {};
-    for (const lang of PACK_LANGUAGES)
-      for (const generator of PACK_GENERATORS) {
-        if (!pack.generators[lang]?.[generator]) continue;
-        const value = await this.packs.wordList(generator, lang, packId);
-        generators[lang] = { ...generators[lang], [generator]: value };
-      }
+    for (const generator of PACK_GENERATORS) {
+      if (!pack.generators[generator]) continue;
+      generators[generator] = await this.packs.wordList(generator, packId);
+    }
 
     const sprites = await this.copySprites(pack.id, pack.sprites);
 
@@ -387,8 +382,9 @@ export class PackCreatorBusiness {
       updatedAt: Date.now(),
       details: {
         id: pack.id,
-        name: { ...pack.name },
-        description: { ...pack.description },
+        language: pack.language,
+        name: pack.name,
+        description: pack.description,
         version: pack.version,
         author: pack.author,
         license: pack.license,
@@ -407,8 +403,8 @@ export class PackCreatorBusiness {
     packId: string,
     list: Pack['sprites'],
   ): Promise<DraftSprite[]> {
-    const base = packId === BASE_PACK_ID;
-    const manifestUrl = `packs/${BASE_PACK_ID}/pack.json`;
+    const base = isBasePack(packId);
+    const manifestUrl = `packs/${packId}/pack.json`;
     const sprites: DraftSprite[] = new Array(list.length);
     const indexes = list.map((_, i) => i);
     await runLimited(indexes, MAX_FETCHES, async (i) => {
@@ -437,8 +433,7 @@ export class PackCreatorBusiness {
       }
       sprites[i] = {
         id: sprite.id,
-        en: sprite.en,
-        fr: sprite.fr,
+        label: sprite.label,
         type: sprite.type as ItemType,
         slot: sprite.slot as ItemSlot,
         kind: sprite.kind as SpriteKind,
@@ -456,34 +451,28 @@ export class PackCreatorBusiness {
     if (!pack) throw new PackError([`"${packId}" cannot be duplicated`]);
 
     const generators: PackDraft['generators'] = {};
-    for (const lang of PACK_LANGUAGES)
-      for (const generator of PACK_GENERATORS) {
-        if (!pack.generators[lang]?.[generator]) continue;
-        const value = await this.packs.wordList(generator, lang, packId);
-        generators[lang] = { ...generators[lang], [generator]: value };
-      }
+    for (const generator of PACK_GENERATORS) {
+      if (!pack.generators[generator]) continue;
+      generators[generator] = await this.packs.wordList(generator, packId);
+    }
     const sprites = await this.copySprites(pack.id, pack.sprites);
 
-    const [english, french] = COPY_WORDS;
-    const suffix = this.language.$language() === 'fr' ? french : english;
+    const suffix = COPY_WORDS[pack.language];
     const taken = new Set<string>([
       ...(await this.packs.registry().catch(() => [])).map((p) => p.id),
       ...this.packs.$installed().map((p) => p.id),
       ...(await this.storage.list()).map((d) => d.details.id),
     ]);
     const id = uniqueId(`${pack.id}-${suffix}`, taken);
-    const name = (value: string, word: string) => `${value} (${word})`;
 
     const draft: PackDraft = {
       id: crypto.randomUUID(),
       updatedAt: Date.now(),
       details: {
         id,
-        name: {
-          en: name(pack.name.en, suffix),
-          fr: name(pack.name.fr, french),
-        },
-        description: { ...pack.description },
+        language: pack.language,
+        name: `${pack.name} (${suffix})`,
+        description: pack.description,
         version: pack.version,
         author: pack.author,
         license: pack.license,

@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { NEON_LINK, neonProviders } from '../../../testing/unofficial-pack';
+import { provideTestTranslations } from '../../../testing/test-providers';
 import { PackStorageService } from '../services/pack-storage.service';
 import { PackBusiness } from './pack.business';
 
@@ -11,7 +12,7 @@ describe('PackBusiness update atomicity', () => {
     URL.createObjectURL = vi.fn(() => 'blob:fake');
     URL.revokeObjectURL = vi.fn();
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ providers: neonProviders().providers });
+    TestBed.configureTestingModule({ providers: [provideTestTranslations(), ...neonProviders().providers] });
     const business = TestBed.inject(PackBusiness);
     const storage = TestBed.inject(PackStorageService);
     await business.install(await business.prepare(NEON_LINK));

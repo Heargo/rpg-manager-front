@@ -54,7 +54,7 @@ describe('PackCreatorPageComponent', () => {
   it('lists the drafts with their name and an Open and Delete button', async () => {
     const { creator, settle, rows, button } = await render();
     const draft = await creator.createDraft();
-    await creator.saveDraft({ ...draft, details: { ...draft.details, name: { en: 'Neon lights', fr: 'Néons' } } });
+    await creator.saveDraft({ ...draft, details: { ...draft.details, name: 'Neon lights' } });
 
     await settle(() => expect(rows().length).toBe(1));
 

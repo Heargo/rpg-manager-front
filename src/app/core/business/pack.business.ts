@@ -3,12 +3,14 @@ import {
   Pack,
   packFileUrl,
   PackGenerator,
+  PackLanguage,
   PackSprite,
   SPRITE_KINDS,
   SpriteKind,
   validatePack,
 } from '../packs/pack';
 import { runLimited } from '../helpers/pool';
+import { LanguageBusiness } from './language.business';
 import {
   checkImageFile,
   checkJsonFile,
@@ -28,7 +30,14 @@ import {
   StoredPackFile,
 } from '../services/pack-storage.service';
 
-export const BASE_PACK_ID = 'base';
+export const BASE_PACK_IDS = ['base-fr', 'base-en'] as const;
+
+/** The Base pack of a language (English for a language without a Base). */
+export const basePackId = (lang: string): string =>
+  lang === 'fr' ? 'base-fr' : 'base-en';
+
+export const isBasePack = (id: string): boolean =>
+  (BASE_PACK_IDS as readonly string[]).includes(id);
 
 /** At most this many files are fetched at a time. */
 const MAX_FETCHES = 4;
@@ -49,7 +58,7 @@ export interface PreparedPack {
   manifestUrl: string;
   size: number;
   counts: {
-    generators: Record<string, number>;
+    generators: number;
     sprites: Partial<Record<SpriteKind, number>>;
   };
   files: Map<string, StoredPackFile>;
@@ -71,8 +80,9 @@ export interface BundledSprite extends PackSprite {
 /** A pack available on this device: Base, or an official pack that was downloaded. */
 export interface InstalledPack {
   id: string;
-  name: Pack['name'];
-  description: Pack['description'];
+  language: PackLanguage;
+  name: string;
+  description: string;
   author: string;
   license: string;
   licenseUrl: string;
@@ -97,6 +107,7 @@ const installedOf = (
   local = false,
 ): InstalledPack => ({
   id: pack.id,
+  language: pack.language,
   name: pack.name,
   description: pack.description,
   author: pack.author,
@@ -121,14 +132,15 @@ export class PackBusiness {
   private readonly service = inject(PackService);
   private readonly storage = inject(PackStorageService);
   private readonly images = inject(ImageProcessingService);
+  private readonly languageBusiness = inject(LanguageBusiness);
   private readonly enabling = new Map<string, Promise<void>>();
-  private manifestPromise: Promise<Pack> | null = null;
+  private readonly manifestPromises = new Map<string, Promise<Pack>>();
   private registryPromise: Promise<PackRegistryEntry[]> | null = null;
   private loadPromise: Promise<void> | null = null;
   private readonly stored = signal<StoredPack[]>([]);
-  private readonly base = signal<Pack | null>(null);
+  private readonly bases = signal<Record<string, Pack | null>>({});
   private readonly loaded = signal(false);
-  private baseEntry?: PackRegistryEntry;
+  private baseEntries: PackRegistryEntry[] = [];
   /** Object URLs of stored packs' files, by pack id then path; created once per pack. */
   private readonly urls = new Map<string, Promise<Map<string, string>>>();
   private order: string[] = [];
@@ -137,7 +149,7 @@ export class PackBusiness {
   readonly $installed = computed<InstalledPack[]>(() => {
     if (!this.loaded()) return [];
     return [
-      this.installedBase(),
+      ...BASE_PACK_IDS.map((id) => this.installedBase(id)),
       ...this.sortedStored().map((p) =>
         installedOf(
           p.manifest,
@@ -152,21 +164,16 @@ export class PackBusiness {
     ];
   });
 
-  /** Base from its manifest, or from its registry entry when the manifest cannot be read. */
-  private installedBase(): InstalledPack {
-    const base = this.base();
+  /** A Base from its manifest, or from its registry entry when the manifest cannot be read. */
+  private installedBase(id: string): InstalledPack {
+    const base = this.bases()[id];
     if (base) return installedOf(base, true, true);
-    const entry = this.baseEntry;
+    const entry = this.baseEntries.find((p) => p.id === id);
     return {
-      id: BASE_PACK_ID,
-      name: {
-        en: entry?.name['en'] ?? 'Base',
-        fr: entry?.name['fr'] ?? 'Base',
-      },
-      description: {
-        en: entry?.description['en'] ?? '',
-        fr: entry?.description['fr'] ?? '',
-      },
+      id,
+      language: entry?.language ?? (id === 'base-fr' ? 'fr' : 'en'),
+      name: entry?.name ?? 'Base',
+      description: entry?.description ?? '',
       author: entry?.author ?? '',
       license: entry?.license ?? '',
       licenseUrl: entry?.licenseUrl ?? '',
@@ -186,23 +193,26 @@ export class PackBusiness {
     return [...this.stored()].sort((a, b) => rank(a.id) - rank(b.id));
   }
 
-  /** The Base manifest, loaded and validated once; throws with the errors when it is invalid. */
-  manifest(): Promise<Pack> {
-    if (!this.manifestPromise) {
-      const promise = this.loadManifest();
-      this.manifestPromise = promise;
+  /** A Base manifest, loaded and validated once; throws with the errors when it is invalid. */
+  manifest(id: string): Promise<Pack> {
+    let promise = this.manifestPromises.get(id);
+    if (!promise) {
+      promise = this.loadManifest(id);
+      this.manifestPromises.set(id, promise);
       // A failed load shouldn't stay cached: retry next time.
-      promise.catch(() => (this.manifestPromise = null));
+      const known = promise;
+      known.catch(() => {
+        if (this.manifestPromises.get(id) === known)
+          this.manifestPromises.delete(id);
+      });
     }
-    return this.manifestPromise;
+    return promise;
   }
 
-  private async loadManifest(): Promise<Pack> {
-    const result = validatePack(await this.service.loadManifest(BASE_PACK_ID));
+  private async loadManifest(id: string): Promise<Pack> {
+    const result = validatePack(await this.service.loadManifest(id));
     if (!result.ok)
-      throw new Error(
-        `Invalid pack "${BASE_PACK_ID}": ${result.errors.join('; ')}`,
-      );
+      throw new Error(`Invalid pack "${id}": ${result.errors.join('; ')}`);
     return result.value;
   }
 
@@ -237,10 +247,13 @@ export class PackBusiness {
     this.loadPromise ??= (async () => {
       const entries = await this.registryEntries().catch(() => []);
       this.order = entries.map((p) => p.id);
-      this.baseEntry = entries.find((p) => p.id === BASE_PACK_ID);
+      this.baseEntries = entries.filter((p) => isBasePack(p.id));
       this.stored.set(await this.storage.list().catch(() => []));
-      // Without a readable Base manifest, Base is listed from the registry and `sprites()` reports the error.
-      this.base.set(await this.manifest().catch(() => null));
+      // Without a readable Base manifest, the Base is listed from the registry and `sprites()` reports the error.
+      const bases: Record<string, Pack | null> = {};
+      for (const id of BASE_PACK_IDS)
+        bases[id] = await this.manifest(id).catch(() => null);
+      this.bases.set(bases);
       this.loaded.set(true);
     })();
     this.loadPromise.catch(() => (this.loadPromise = null));
@@ -252,39 +265,64 @@ export class PackBusiness {
     return this.ensureLoaded();
   }
 
-  /** The sprites of every enabled pack, Base first, with their file URLs. */
+  /** The sprites of the Base of the app language and of the enabled packs in that language, with their file URLs. */
   async sprites(): Promise<BundledSprite[]> {
     await this.ensureLoaded();
-    const enabled = this.sortedStored().filter((p) => p.enabled);
+    const lang = this.languageBusiness.$language();
+    const baseId = basePackId(lang);
+    const enabled = this.sortedStored().filter(
+      (p) => p.enabled && p.manifest.language === lang,
+    );
     // Base files ship with the app; a stored pack stays usable when they cannot be read.
-    const base = await this.manifest().catch((error) => {
+    const base = await this.manifest(baseId).catch((error) => {
       if (!enabled.length) throw error;
       return null;
     });
-    const manifestUrl = `packs/${BASE_PACK_ID}/pack.json`;
+    const manifestUrl = `packs/${baseId}/pack.json`;
     const result: BundledSprite[] = (base?.sprites ?? []).map((sprite) => ({
       ...sprite,
-      packId: BASE_PACK_ID,
+      packId: baseId,
       imageUrl: packFileUrl(manifestUrl, sprite.image),
       ...(sprite.materials
         ? { materialsUrl: packFileUrl(manifestUrl, sprite.materials) }
         : {}),
     }));
-    for (const record of enabled) {
-      const urls = await this.objectUrls(record);
-      for (const sprite of record.manifest.sprites) {
-        const materialsUrl = sprite.materials
-          ? urls.get(sprite.materials)
-          : undefined;
-        result.push({
-          ...sprite,
-          packId: record.id,
-          imageUrl: urls.get(sprite.image) ?? '',
-          ...(materialsUrl ? { materialsUrl } : {}),
-        });
-      }
-    }
+    for (const record of enabled) result.push(...(await this.storedSprites(record)));
     return result;
+  }
+
+  private async storedSprites(record: StoredPack): Promise<BundledSprite[]> {
+    const urls = await this.objectUrls(record);
+    return record.manifest.sprites.map((sprite) => {
+      const materialsUrl = sprite.materials
+        ? urls.get(sprite.materials)
+        : undefined;
+      return {
+        ...sprite,
+        packId: record.id,
+        imageUrl: urls.get(sprite.image) ?? '',
+        ...(materialsUrl ? { materialsUrl } : {}),
+      };
+    });
+  }
+
+  /** The sprites of one installed pack, whatever its language, for its details. */
+  async spritesOf(packId: string): Promise<BundledSprite[]> {
+    await this.ensureLoaded();
+    if (isBasePack(packId)) {
+      const base = await this.manifest(packId);
+      const manifestUrl = `packs/${packId}/pack.json`;
+      return base.sprites.map((sprite) => ({
+        ...sprite,
+        packId,
+        imageUrl: packFileUrl(manifestUrl, sprite.image),
+        ...(sprite.materials
+          ? { materialsUrl: packFileUrl(manifestUrl, sprite.materials) }
+          : {}),
+      }));
+    }
+    const record = this.stored().find((p) => p.id === packId);
+    return record ? this.storedSprites(record) : [];
   }
 
   /** The object URLs of a stored pack's sprite files, created once until the pack is disabled or removed. */
@@ -346,7 +384,7 @@ export class PackBusiness {
       return;
     }
     if (!entry) throw new Error(`Unknown pack "${id}"`);
-    if (entry.builtIn || id === BASE_PACK_ID) return;
+    if (entry.builtIn || isBasePack(id)) return;
     if (this.stored().some((p) => p.id === id)) {
       await this.storage.setEnabled(id, true);
     } else {
@@ -371,8 +409,8 @@ export class PackBusiness {
       images.add(sprite.image);
       if (sprite.materials) jsons.add(sprite.materials);
     }
-    for (const paths of Object.values(manifest.generators))
-      for (const path of Object.values(paths ?? {})) if (path) jsons.add(path);
+    for (const path of Object.values(manifest.generators))
+      if (path) jsons.add(path);
 
     const url = (path: string) => `packs/${id}/${path}`;
     const files = new Map<string, StoredPackFile>();
@@ -408,7 +446,7 @@ export class PackBusiness {
 
   /** Turns a downloaded pack off; its files stay on the device. */
   async disable(id: string): Promise<void> {
-    if (id === BASE_PACK_ID) throw new Error('The Base pack is always on');
+    if (isBasePack(id)) throw new Error('A Base pack is always on');
     await this.ensureLoaded();
     await this.storage.setEnabled(id, false);
     await this.revokeUrls(id);
@@ -417,7 +455,7 @@ export class PackBusiness {
 
   /** Deletes a downloaded pack and its files from the device. */
   async remove(id: string): Promise<void> {
-    if (id === BASE_PACK_ID) throw new Error('The Base pack cannot be removed');
+    if (isBasePack(id)) throw new Error('A Base pack cannot be removed');
     await this.ensureLoaded();
     await this.storage.remove(id);
     await this.revokeUrls(id);
@@ -461,9 +499,8 @@ export class PackBusiness {
       images.add(sprite.image);
       if (sprite.materials) materials.add(sprite.materials);
     }
-    for (const files of Object.values(manifest.generators))
-      for (const [generator, path] of Object.entries(files ?? {}))
-        if (path) lists.set(path, listChecker(generator as PackGenerator));
+    for (const [generator, path] of Object.entries(manifest.generators))
+      if (path) lists.set(path, listChecker(generator as PackGenerator));
 
     const tasks: (() => Promise<void>)[] = [
       ...[...images].map((path) => async () => {
@@ -508,11 +545,10 @@ export class PackBusiness {
     if (size > MAX_PACK_BYTES) errors.push('pack: larger than 20 MB in total');
     if (errors.length) throw new PackError([...new Set(errors)].sort());
 
-    const counts: PreparedPack['counts'] = { generators: {}, sprites: {} };
-    for (const [lang, paths] of Object.entries(manifest.generators)) {
-      const n = Object.values(paths ?? {}).filter(Boolean).length;
-      if (n) counts.generators[lang] = n;
-    }
+    const counts: PreparedPack['counts'] = {
+      generators: Object.values(manifest.generators).filter(Boolean).length,
+      sprites: {},
+    };
     for (const kind of SPRITE_KINDS) {
       const n = manifest.sprites.filter((s) => s.kind === kind).length;
       if (n) counts.sprites[kind] = n;
@@ -531,7 +567,7 @@ export class PackBusiness {
     const official = entries.some((p) => p.id === id);
     const stored = this.stored().find((p) => p.id === id);
     const storedSource = stored?.source;
-    if (official || id === BASE_PACK_ID || storedSource === 'official')
+    if (official || isBasePack(id) || storedSource === 'official')
       throw new PackError([`pack.json: id "${id}" is an official pack`]);
     if (storedSource && storedSource.kind === 'unofficial') {
       if (storedSource.link !== source)
@@ -621,47 +657,46 @@ export class PackBusiness {
   }
 
   /**
-   * The enabled packs (Base first) with content of that kind: word lists in the language for `items`, `npcs`,
-   * `skills` and `classes`, or sprites for `sprites`. Base is always listed.
+   * The packs in `lang` with content of that kind: the Base of the language first, then the enabled packs in that
+   * language with a word list for the generator (`items`, `npcs`, `skills`, `classes`) or with sprites (`sprites`).
    */
   async packsFor(
     content: PackGenerator | 'sprites',
     lang: string,
   ): Promise<string[]> {
     await this.ensureLoaded();
-    const result = [BASE_PACK_ID];
+    const result = [basePackId(lang)];
     for (const record of this.sortedStored()) {
-      if (!record.enabled) continue;
+      if (!record.enabled || record.manifest.language !== lang) continue;
       const has =
         content === 'sprites'
           ? record.manifest.sprites.length > 0
-          : !!record.manifest.generators[lang as 'en' | 'fr']?.[content];
+          : !!record.manifest.generators[content];
       if (has) result.push(record.id);
     }
     return result;
   }
 
-  /** The raw word list of a generator in a language; rejects when the pack has none. */
-  async wordList(
-    generator: PackGenerator,
-    lang: string,
-    packId: string = BASE_PACK_ID,
-  ): Promise<unknown> {
+  /** The language of an installed pack, `undefined` when it is not installed. */
+  async languageOf(packId: string): Promise<PackLanguage | undefined> {
+    await this.ensureLoaded();
+    return this.$installed().find((p) => p.id === packId)?.language;
+  }
+
+  /** The raw word list of a generator in a pack; rejects when the pack has none. */
+  async wordList(generator: PackGenerator, packId: string): Promise<unknown> {
     const missing = () =>
-      new Error(`Pack "${packId}" has no ${generator} word list for "${lang}"`);
-    if (packId !== BASE_PACK_ID) {
+      new Error(`Pack "${packId}" has no ${generator} word list`);
+    if (!isBasePack(packId)) {
       await this.ensureLoaded();
       const record = this.stored().find((p) => p.id === packId);
-      const path =
-        record?.manifest.generators[lang as 'en' | 'fr']?.[generator];
+      const path = record?.manifest.generators[generator];
       const file = path ? await this.storage.getFile(packId, path) : undefined;
       if (file?.kind !== 'json') throw missing();
       return file.value;
     }
-    const pack = await this.manifest();
-    const path = (
-      pack.generators as Record<string, Record<string, string> | undefined>
-    )[lang]?.[generator];
+    const pack = await this.manifest(packId);
+    const path = pack.generators[generator];
     if (!path) throw missing();
     return this.service.loadJson(
       packFileUrl(`packs/${packId}/pack.json`, path),

@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
 import { TranslocoService } from '@jsverse/transloco';
-import npcNames from '../../../../../../public/packs/base/generators/en/npcs.json';
+import npcNames from '../../../../../../public/packs/base-en/generators/npcs.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { ImageBusiness } from '../../../../core/business/image.business';
 import { PackBusiness } from '../../../../core/business/pack.business';
@@ -26,7 +26,7 @@ describe('NpcEditorComponent portrait', () => {
       imports: [NpcEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: PackBusiness, useValue: { wordList: async () => npcNames, packsFor: async () => ['base'], $installed: () => [] } },
+        { provide: PackBusiness, useValue: { wordList: async () => npcNames, packsFor: async () => ['base-en'], $installed: () => [] } },
         { provide: ImageBusiness, useValue: { storeUpload, url: async () => 'blob:portrait' } },
       ],
     });

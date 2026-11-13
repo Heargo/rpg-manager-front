@@ -16,7 +16,7 @@ import { SpriteColorizerBusiness } from './sprite-colorizer.business';
 const sprite = () => gray(4, 1, [10, 10, 220, 220]);
 const text = async (blob: Blob) => new TextDecoder().decode(await blob.arrayBuffer());
 const png = (content: string) => new Blob([content], { type: 'image/png' });
-const details = { id: 'blue-axe', en: 'Blue axe', fr: 'Hache bleue', type: 'equipment', slot: 'weapon1' } as const;
+const details = { id: 'blue-axe', label: 'Hache bleue', type: 'equipment', slot: 'weapon1' } as const;
 
 function setup() {
   globalThis.indexedDB = new IDBFactory();
@@ -64,7 +64,7 @@ describe('SpriteColorizerBusiness: pack drafts', () => {
     it('opens a grayscale draft sprite as a loaded image, without materials', async () => {
       const s = setup();
       const draft = await s.creator.createDraft();
-      await s.creator.addPng(draft.id, png('spark'), { id: 'spark', en: 'Spark', fr: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' });
+      await s.creator.addPng(draft.id, png('spark'), { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' });
 
       await s.business.loadDraftSprite(draft.id, 'spark');
 
@@ -85,7 +85,7 @@ describe('SpriteColorizerBusiness: pack drafts', () => {
     it('writes the current materials back to the draft sprite, which becomes masked', async () => {
       const s = setup();
       const draft = await s.creator.createDraft();
-      await s.creator.addPng(draft.id, png('spark'), { id: 'spark', en: 'Spark', fr: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' });
+      await s.creator.addPng(draft.id, png('spark'), { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' });
       await s.business.loadDraftSprite(draft.id, 'spark');
       s.business.addMaterial('Blade');
 

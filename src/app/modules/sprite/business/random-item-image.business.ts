@@ -42,7 +42,7 @@ export class RandomItemImageBusiness {
     const candidates: SpriteCandidate[] = [
       ...library.map((s) => ({
         key: `library:${s.id}`,
-        labels: [s.en, s.fr],
+        labels: [s.label],
         type: s.type,
         slot: s.slot,
       })),

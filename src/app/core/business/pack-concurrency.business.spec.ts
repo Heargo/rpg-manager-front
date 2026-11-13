@@ -8,11 +8,14 @@ import {
   extraPackService,
   provideExtraPack,
 } from '../../../testing/extra-pack';
+import { provideTestTranslations } from '../../../testing/test-providers';
+import { LanguageBusiness } from './language.business';
 import { PackBusiness } from './pack.business';
 
 function fresh(service: ExtraPackFake): PackBusiness {
   TestBed.resetTestingModule();
-  TestBed.configureTestingModule({ providers: [provideExtraPack(service)] });
+  TestBed.configureTestingModule({ providers: [provideTestTranslations(), provideExtraPack(service)] });
+  TestBed.inject(LanguageBusiness).setLanguage('fr');
   return TestBed.inject(PackBusiness);
 }
 
@@ -43,7 +46,8 @@ describe('PackBusiness concurrency (K03 review fixes)', () => {
     globalThis.indexedDB = new IDBFactory();
     const service = extraPackService();
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ providers: [provideExtraPack(service)] });
+    TestBed.configureTestingModule({ providers: [provideTestTranslations(), provideExtraPack(service)] });
+    TestBed.inject(LanguageBusiness).setLanguage('fr');
     const business = TestBed.inject(PackBusiness);
 
     await Promise.all([business.enable('extra'), business.enable('extra')]);
@@ -52,7 +56,7 @@ describe('PackBusiness concurrency (K03 review fixes)', () => {
       service.loadManifest.mock.calls.filter(([id]) => id === 'extra'),
     ).toHaveLength(1);
     expect(service.loadBlob).toHaveBeenCalledTimes(1);
-    expect(business.$installed().map((p) => p.id)).toEqual(['base', 'extra']);
+    expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'extra']);
   });
 
   it('an official download fetches at most 4 files at a time', async () => {
@@ -69,8 +73,7 @@ describe('PackBusiness concurrency (K03 review fixes)', () => {
       ...structuredClone(EXTRA_MANIFEST),
       sprites: Array.from({ length: 12 }, (_, i) => ({
         id: `g${i}`,
-        en: 'G',
-        fr: 'G',
+        label: 'G',
         type: 'item',
         slot: 'none',
         kind: 'grayscale',
@@ -90,7 +93,7 @@ describe('PackBusiness concurrency (K03 review fixes)', () => {
       ),
     });
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ providers: [provideExtraPack(service)] });
+    TestBed.configureTestingModule({ providers: [provideTestTranslations(), provideExtraPack(service)] });
 
     await TestBed.inject(PackBusiness).enable('extra');
 

@@ -31,14 +31,22 @@ describe('ItemEditorComponent pack choice', () => {
   it('lists Random then the packs with items in the language, defaulting to Random', async () => {
     const { fixture } = await setup(true);
 
-    expect(packOptionValues(fixture)).toEqual(['random', 'base', 'extra']);
+    expect(packOptionValues(fixture)).toEqual(['random', 'base-fr', 'extra']);
     expect(packSelected(fixture)).toBe('random');
   });
 
   it('lists Random and Base when no other pack is enabled', async () => {
     const { fixture } = await setup(false);
 
-    expect(packOptionValues(fixture)).toEqual(['random', 'base']);
+    expect(packOptionValues(fixture)).toEqual(['random', 'base-fr']);
+  });
+
+  it('lists only the Base of the language when the app is in English, even with a French pack enabled', async () => {
+    const { fixture, settle } = await setup(true);
+    TestBed.inject(LanguageBusiness).setLanguage('en');
+    await settle();
+
+    expect(packOptionValues(fixture)).toEqual(['random', 'base-en']);
   });
 
   it('generates from the seed with the chosen pack words', async () => {
@@ -57,7 +65,7 @@ describe('ItemEditorComponent pack choice', () => {
 
   it('generates with Base words when Base is chosen', async () => {
     const { fixture, el, settle } = await setup(true);
-    packSelect(fixture).triggerEventHandler('ngModelChange', 'base');
+    packSelect(fixture).triggerEventHandler('ngModelChange', 'base-fr');
     const seed = el.querySelector<HTMLInputElement>('[data-field="seed"]')!;
     seed.value = 'fixed-seed';
     seed.dispatchEvent(new Event('input'));

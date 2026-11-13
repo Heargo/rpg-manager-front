@@ -2,22 +2,23 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { packFileUrl, validatePack } from './pack';
 
-const BASE_JSON = join(process.cwd(), 'public/packs/base/pack.json');
+const BASE_JSON = (id: string) => join(process.cwd(), `public/packs/${id}/pack.json`);
 
 const valid = (): Record<string, unknown> => ({
   format: 1,
   id: 'my-pack',
-  name: { en: 'My pack', fr: 'Mon pack' },
-  description: { en: 'Things', fr: 'Des choses' },
+  language: 'fr',
+  name: 'Mon pack',
+  description: 'Des choses',
   version: '1.0.0',
   author: 'Someone',
   license: 'CC-BY-4.0',
   licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
-  generators: { en: { items: 'generators/en/items.json' } },
+  generators: { items: 'generators/items.json' },
   sprites: [
-    { id: 'axe', en: 'Axe', fr: 'Hache', type: 'equipment', slot: 'weapon1', kind: 'masked', image: 'sprites/axe.png', materials: 'sprites/axe.json' },
-    { id: 'gem', en: 'Gem', fr: 'Gemme', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/gem.png' },
-    { id: 'pie', en: 'Pie', fr: 'Tarte', type: 'consumable', slot: 'none', kind: 'colored', image: 'sprites/pie.png' },
+    { id: 'axe', label: 'Hache', type: 'equipment', slot: 'weapon1', kind: 'masked', image: 'sprites/axe.png', materials: 'sprites/axe.json' },
+    { id: 'gem', label: 'Gemme', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/gem.png' },
+    { id: 'pie', label: 'Tarte', type: 'consumable', slot: 'none', kind: 'colored', image: 'sprites/pie.png' },
   ],
 });
 
@@ -61,9 +62,48 @@ describe('validatePack', () => {
     }
   });
 
-  it('requires name and description in en and fr', () => {
-    expect(errorsOf({ ...valid(), name: { en: 'Only' } }).some((e) => e.includes('name'))).toBe(true);
-    expect(errorsOf({ ...valid(), description: { fr: 'Seul' } }).some((e) => e.includes('description'))).toBe(true);
+  it('requires name and description as plain strings, and rejects the per-language objects', () => {
+    expect(errorsOf({ ...valid(), name: '' }).some((e) => e.includes('name'))).toBe(true);
+    expect(errorsOf({ ...valid(), description: undefined }).some((e) => e.includes('description'))).toBe(true);
+    expect(errorsOf({ ...valid(), name: { en: 'Mine', fr: 'Mien' } }).some((e) => e.includes('name'))).toBe(true);
+    expect(errorsOf({ ...valid(), description: { en: 'My', fr: 'Mon' } }).some((e) => e.includes('description'))).toBe(true);
+  });
+
+  it('accepts the languages en and fr', () => {
+    expect(validatePack({ ...valid(), language: 'en' }).ok).toBe(true);
+    expect(validatePack({ ...valid(), language: 'fr' }).ok).toBe(true);
+  });
+
+  it('requires a language that is en or fr, naming the field', () => {
+    const missing = valid();
+    delete missing['language'];
+    expect(errorsOf(missing).some((e) => e.includes('language'))).toBe(true);
+    for (const language of ['de', '', 'EN', 42, ['en']]) {
+      expect(errorsOf({ ...valid(), language }).some((e) => e.includes('language')), String(language)).toBe(true);
+    }
+  });
+
+  it('rejects generators given per language, as the old format did', () => {
+    const json = { ...valid(), generators: { en: { items: 'generators/en/items.json' } } };
+    expect(validatePack(json).ok).toBe(false);
+    const both = { ...valid(), generators: { fr: { items: 'generators/fr/items.json' }, en: {} } };
+    expect(validatePack(both).ok).toBe(false);
+  });
+
+  it('rejects a sprite labelled with en and fr instead of a label', () => {
+    const json = valid();
+    (json['sprites'] as Record<string, unknown>[])[1] = {
+      id: 'gem', en: 'Gem', fr: 'Gemme', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/gem.png',
+    };
+    expect(errorsOf(json).some((e) => e.includes('gem') && e.includes('label'))).toBe(true);
+  });
+
+  it('requires a label on every sprite', () => {
+    const json = valid();
+    delete (json['sprites'] as Record<string, unknown>[])[0]['label'];
+    expect(errorsOf(json).some((e) => e.includes('axe') && e.includes('label'))).toBe(true);
+    (json['sprites'] as Record<string, unknown>[])[0]['label'] = '  ';
+    expect(errorsOf(json).some((e) => e.includes('axe') && e.includes('label'))).toBe(true);
   });
 
   it('requires version, author, license and licenseUrl', () => {
@@ -75,13 +115,8 @@ describe('validatePack', () => {
   });
 
   it('rejects a generator other than items, npcs, skills and classes', () => {
-    const json = { ...valid(), generators: { en: { weapons: 'generators/en/weapons.json' } } };
+    const json = { ...valid(), generators: { weapons: 'generators/weapons.json' } };
     expect(errorsOf(json).some((e) => e.includes('weapons'))).toBe(true);
-  });
-
-  it('rejects a generator language other than en and fr', () => {
-    const json = { ...valid(), generators: { de: { items: 'generators/de/items.json' } } };
-    expect(errorsOf(json).some((e) => e.includes('de'))).toBe(true);
   });
 
   it('rejects a sprite kind that is not grayscale, masked or colored', () => {
@@ -113,7 +148,7 @@ describe('validatePack', () => {
 
   it('rejects absolute, parent, URL and backslash paths', () => {
     for (const path of ['/etc/passwd', '../x.json', 'a/../../x.json', 'https://evil.test/x.json', 'data:text/plain,hi', 'a\\b.json']) {
-      const json = { ...valid(), generators: { en: { items: path } } };
+      const json = { ...valid(), generators: { items: path } };
       expect(errorsOf(json).some((e) => e.includes('items')), path).toBe(true);
     }
     const sprite = valid();
@@ -141,7 +176,7 @@ describe('validatePack links', () => {
 
 describe('packFileUrl', () => {
   it('resolves a path next to the manifest', () => {
-    expect(packFileUrl('packs/base/pack.json', 'sprites/axe.png')).toBe('packs/base/sprites/axe.png');
+    expect(packFileUrl('packs/base-fr/pack.json', 'sprites/axe.png')).toBe('packs/base-fr/sprites/axe.png');
   });
 
   it('works for a manifest at the root and for an absolute manifest URL', () => {
@@ -150,17 +185,21 @@ describe('packFileUrl', () => {
   });
 });
 
-describe('the real Base pack (public/packs/base/pack.json)', () => {
-  const read = (): unknown => JSON.parse(readFileSync(BASE_JSON, 'utf8'));
+describe.each([
+  ['base-fr', 'fr', 'Hache'],
+  ['base-en', 'en', 'Axe'],
+] as const)('the real %s pack (public/packs/%s/pack.json)', (id, language, axeLabel) => {
+  const read = (): unknown => JSON.parse(readFileSync(BASE_JSON(id), 'utf8'));
 
-  it('is a valid manifest with id "base"', () => {
+  it(`is a valid manifest with id "${id}" and language "${language}"`, () => {
     const result = validatePack(read());
     if (!result.ok) throw new Error(result.errors.join('\n'));
-    expect(result.value.id).toBe('base');
+    expect(result.value.id).toBe(id);
+    expect(result.value.language).toBe(language);
     expect(result.value.format).toBe(1);
   });
 
-  it('lists 101 masked sprites, each id once', () => {
+  it('lists 101 masked sprites, each id once, with a label in its language', () => {
     const result = validatePack(read());
     if (!result.ok) throw new Error(result.errors.join('\n'));
     const sprites = result.value.sprites;
@@ -168,29 +207,33 @@ describe('the real Base pack (public/packs/base/pack.json)', () => {
     expect(new Set(sprites.map((s) => s.id)).size).toBe(101);
     expect(sprites.every((s) => s.kind === 'masked')).toBe(true);
     const axe = sprites.find((s) => s.id === 'axe');
-    expect(axe).toMatchObject({ en: 'Axe', fr: 'Hache', type: 'equipment', slot: 'weapon1', image: 'sprites/axe.png', materials: 'sprites/axe.json' });
+    expect(axe).toMatchObject({ label: axeLabel, type: 'equipment', slot: 'weapon1', image: 'sprites/axe.png', materials: 'sprites/axe.json' });
   });
 
-  it('provides the four generators in en and fr', () => {
+  it('provides the four generators once', () => {
     const result = validatePack(read());
     if (!result.ok) throw new Error(result.errors.join('\n'));
-    for (const lang of ['en', 'fr'] as const) {
-      for (const generator of ['items', 'npcs', 'skills', 'classes'] as const) {
-        expect(result.value.generators[lang]?.[generator]).toBe(`generators/${lang}/${generator}.json`);
-      }
+    for (const generator of ['items', 'npcs', 'skills', 'classes'] as const) {
+      expect(result.value.generators[generator]).toBe(`generators/${generator}.json`);
     }
   });
 
   it('has every listed file on disk', () => {
     const result = validatePack(read());
     if (!result.ok) throw new Error(result.errors.join('\n'));
-    const dir = dirname(BASE_JSON);
+    const dir = dirname(BASE_JSON(id));
     const files = [
-      ...Object.values(result.value.generators).flatMap((g) => Object.values(g ?? {})),
+      ...Object.values(result.value.generators),
       ...result.value.sprites.flatMap((s) => [s.image, s.materials ?? '']),
     ].filter(Boolean) as string[];
-    expect(files.length).toBe(8 + 202);
+    expect(files.length).toBe(4 + 202);
     for (const file of files) expect(existsSync(join(dir, file)), file).toBe(true);
-    expect(statSync(BASE_JSON).size).toBeLessThan(64 * 1024);
+    expect(statSync(BASE_JSON(id)).size).toBeLessThan(64 * 1024);
+  });
+});
+
+describe('the old public/packs/base folder', () => {
+  it('is gone, replaced by base-fr and base-en', () => {
+    expect(existsSync(join(process.cwd(), 'public/packs/base'))).toBe(false);
   });
 });

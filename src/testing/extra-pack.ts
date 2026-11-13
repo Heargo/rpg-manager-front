@@ -1,50 +1,59 @@
 import { Provider } from '@angular/core';
-import base from '../../public/packs/base/pack.json';
+import { baseManifest } from './base-pack';
 import { PackService } from '../app/core/services/pack.service';
 
-const BASE_ENTRY = {
-  id: 'base',
-  name: { en: 'Base', fr: 'Base' },
-  description: { en: 'Core', fr: 'Coeur' },
+const BASE_FR_ENTRY = {
+  id: 'base-fr',
+  name: 'Base (français)',
+  description: 'Coeur',
   author: 'Florian Sciberras',
   license: 'CC-BY-4.0',
   licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
   size: 100,
   sprites: 101,
-  languages: ['en', 'fr'],
+  language: 'fr',
   builtIn: true,
+};
+
+const BASE_EN_ENTRY = {
+  ...BASE_FR_ENTRY,
+  id: 'base-en',
+  name: 'Base (English)',
+  description: 'Core',
+  language: 'en',
 };
 
 const EXTRA_ENTRY = {
   id: 'extra',
-  name: { en: 'Extra', fr: 'Extra' },
-  description: { en: 'More things', fr: 'Plus de choses' },
+  name: 'Extra',
+  description: 'Plus de choses',
   author: 'Jane Doe',
   license: 'CC0-1.0',
   licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
   size: 1234,
   sprites: 1,
-  languages: ['fr'],
+  language: 'fr',
 };
 
-/** The registry file with Base alone. */
-export const BASE_ONLY_REGISTRY = { format: 1, packs: [BASE_ENTRY] };
-/** The registry file with Base and the fixture official pack `extra`. */
-export const EXTRA_REGISTRY = { format: 1, packs: [BASE_ENTRY, EXTRA_ENTRY] };
+/** The registry file with the two Bases alone. */
+export const BASE_ONLY_REGISTRY = { format: 1, packs: [BASE_FR_ENTRY, BASE_EN_ENTRY] };
+/** The registry file with the two Bases and the fixture official pack `extra` (French). */
+export const EXTRA_REGISTRY = { format: 1, packs: [BASE_FR_ENTRY, BASE_EN_ENTRY, EXTRA_ENTRY] };
 
-/** The fixture official pack: one grayscale sprite and one French items list. */
+/** The fixture official pack: French, one grayscale sprite and one items list. */
 export const EXTRA_MANIFEST = {
   format: 1,
   id: 'extra',
+  language: 'fr',
   name: EXTRA_ENTRY.name,
   description: EXTRA_ENTRY.description,
   version: '1.0.0',
   author: 'Jane Doe',
   license: 'CC0-1.0',
   licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
-  generators: { fr: { items: 'generators/fr/items.json' } },
+  generators: { items: 'generators/items.json' },
   sprites: [
-    { id: 'gem', en: 'Gem', fr: 'Gemme', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/gem.png' },
+    { id: 'gem', label: 'Gemme', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/gem.png' },
   ],
 };
 
@@ -80,18 +89,18 @@ export interface ExtraPackFake {
 }
 
 /**
- * `PackService` faked on a registry listing Base and `extra`. Base files are `{ url }`; `extra` files are served
- * from the fixture: `loadManifest('extra')`, `loadJson('packs/extra/generators/fr/items.json')`,
+ * `PackService` faked on a registry listing both Bases and `extra`. Base files are `{ url }`; `extra` files are served
+ * from the fixture: `loadManifest('extra')`, `loadJson('packs/extra/generators/items.json')`,
  * `loadBlob('packs/extra/sprites/gem.png')`. Overrides replace any method (e.g. to fail a fetch).
  */
 export function extraPackService(overrides: Partial<ExtraPackFake> = {}): ExtraPackFake {
   return {
     loadRegistry: vi.fn(async () => EXTRA_REGISTRY),
-    loadManifest: vi.fn(async (id: string) => (id === 'extra' ? structuredClone(EXTRA_MANIFEST) : base)),
+    loadManifest: vi.fn(async (id: string) => (id === 'extra' ? structuredClone(EXTRA_MANIFEST) : baseManifest(id))),
     loadJson: vi.fn(async (url: string) =>
-      url === 'packs/extra/generators/fr/items.json'
+      url === 'packs/extra/generators/items.json'
         ? EXTRA_ITEMS
-        : url === 'packs/extra/generators/fr/npcs.json'
+        : url === 'packs/extra/generators/npcs.json'
           ? EXTRA_NPCS
           : { url },
     ),

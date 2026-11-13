@@ -1,4 +1,4 @@
-import en from '../../../../public/packs/base/generators/en/items.json';
+import en from '../../../../public/packs/base-en/generators/items.json';
 import { EQUIPMENT_SLOTS, ITEM_RARITIES, ITEM_TYPES } from '../models/item';
 import { CONSUMABLE_VALUE_MULTIPLIER, generateItem, RARITY_RULES } from './item-generator';
 import { seededRandomSource } from './random-source';

@@ -833,21 +833,12 @@
         />
       </label>
       <label>
-        {{ "sprite.draft.labelEn" | transloco }}
+        {{ "sprite.draft.label" | transloco }}
         <input
           pInputText
           type="text"
-          [ngModel]="addDetails().en"
-          (ngModelChange)="patchAdd({ en: $event })"
-        />
-      </label>
-      <label>
-        {{ "sprite.draft.labelFr" | transloco }}
-        <input
-          pInputText
-          type="text"
-          [ngModel]="addDetails().fr"
-          (ngModelChange)="patchAdd({ fr: $event })"
+          [ngModel]="addDetails().label"
+          (ngModelChange)="patchAdd({ label: $event })"
         />
       </label>
       <label>

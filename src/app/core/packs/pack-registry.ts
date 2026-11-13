@@ -1,12 +1,12 @@
-import { PACK_LANGUAGES } from './pack';
+import { PACK_LANGUAGES, PackLanguage } from './pack';
 
 export const REGISTRY_FORMAT = 1;
 
 /** An official pack as listed in `public/packs/index.json`. */
 export interface PackRegistryEntry {
   id: string;
-  name: Record<string, string>;
-  description: Record<string, string>;
+  name: string;
+  description: string;
   author: string;
   license: string;
   licenseUrl: string;
@@ -14,7 +14,7 @@ export interface PackRegistryEntry {
   size: number;
   /** Number of sprites. */
   sprites: number;
-  languages: string[];
+  language: PackLanguage;
   /** Bundled with the app and always on (Base). */
   builtIn?: boolean;
 }
@@ -63,21 +63,16 @@ export function validateRegistry(json: unknown): RegistryValidation {
     else if (seen.has(id))
       errors.push(`${where}: id is used twice (duplicate)`);
     else seen.add(id);
-    for (const field of ['name', 'description']) {
-      const value = entry[field];
-      for (const lang of PACK_LANGUAGES)
-        if (!isObject(value) || !text(value[lang]))
-          errors.push(`${where}: ${field}.${lang} is required`);
-    }
+    for (const field of ['name', 'description'])
+      if (!text(entry[field])) errors.push(`${where}: ${field} is required`);
     for (const field of ['author', 'license', 'licenseUrl'])
       if (!text(entry[field])) errors.push(`${where}: ${field} is required`);
     if (!count(entry['size']))
       errors.push(`${where}: size must be a count of bytes`);
     if (!count(entry['sprites']))
       errors.push(`${where}: sprites must be a count`);
-    const languages = entry['languages'];
-    if (!Array.isArray(languages) || !languages.every(text))
-      errors.push(`${where}: languages must be a list of language codes`);
+    if (!(PACK_LANGUAGES as readonly unknown[]).includes(entry['language']))
+      errors.push(`${where}: language must be one of ${PACK_LANGUAGES.join(', ')}`);
     if (entry['builtIn'] !== undefined && typeof entry['builtIn'] !== 'boolean')
       errors.push(`${where}: builtIn must be true or false`);
   });

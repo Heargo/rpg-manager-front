@@ -11,8 +11,9 @@ import { PackDraftPageComponent } from './pack-draft-page.component';
 
 const validDetails = (): PackDraft['details'] => ({
   id: 'mine',
-  name: { en: 'Mine', fr: 'Mien' },
-  description: { en: 'My pack', fr: 'Mon pack' },
+  language: 'fr',
+  name: 'Mien',
+  description: 'Mon pack',
   version: '1.0.0',
   author: 'Ann Author',
   license: 'CC-BY-4.0',
@@ -68,10 +69,39 @@ describe('PackDraftPageComponent', () => {
     expect(labels).toEqual(['Details', 'Word lists', 'Sprites', 'Publish']);
   });
 
-  it('derives the id from the English name as it is typed', async () => {
+  it('has one name and one description field, and no per-language ones', async () => {
+    const { $ } = await render();
+
+    expect($('input[data-test="draft-name"]')).not.toBeNull();
+    expect($('[data-test="draft-description"]')).not.toBeNull();
+    expect($('[data-test="draft-name-en"]')).toBeNull();
+    expect($('[data-test="draft-name-fr"]')).toBeNull();
+    expect($('[data-test="draft-description-en"]')).toBeNull();
+    expect($('[data-test="draft-description-fr"]')).toBeNull();
+  });
+
+  it('has a language select showing the language of the draft', async () => {
+    const { $ } = await render((d) => ({ ...d, details: { ...d.details, language: 'fr' } }));
+
+    const select = $('p-select[data-test="draft-language"]');
+
+    expect(select).not.toBeNull();
+    expect(select!.textContent).toContain('Français');
+  });
+
+  it('shows four word list slots, one per generator', async () => {
+    const { el, tab } = await render();
+    await tab('Word lists');
+
+    const slots = [...el.querySelectorAll('textarea[data-test^="wordlist-"]')].map((t) => t.getAttribute('data-test'));
+
+    expect(slots).toEqual(['wordlist-items', 'wordlist-npcs', 'wordlist-skills', 'wordlist-classes']);
+  });
+
+  it('derives the id from the name as it is typed', async () => {
     const { settle, $, type } = await render();
 
-    type('input[data-test="draft-name-en"]', 'Épée de Feu');
+    type('input[data-test="draft-name"]', 'Épée de Feu');
 
     await settle(() => expect($<HTMLInputElement>('input[data-test="draft-id"]')!.value).toBe('epee-de-feu'));
   });
@@ -79,23 +109,23 @@ describe('PackDraftPageComponent', () => {
   it('autosaves the details so the draft comes back as it was left', async () => {
     const { creator, draft, type } = await render();
 
-    type('input[data-test="draft-name-en"]', 'Neon lights');
+    type('input[data-test="draft-name"]', 'Neon lights');
 
-    await vi.waitFor(async () => expect((await creator.getDraft(draft.id))?.details.name.en).toBe('Neon lights'), { timeout: 3000 });
+    await vi.waitFor(async () => expect((await creator.getDraft(draft.id))?.details.name).toBe('Neon lights'), { timeout: 3000 });
   });
 
   it('shows the validators error live under an invalid word list, and none once it is valid', async () => {
     const { settle, $, tab, type } = await render();
     await tab('Word lists');
 
-    type('textarea[data-test="wordlist-fr-items"]', '{');
-    await settle(() => expect($('[data-test="wordlist-error-fr-items"]')!.textContent).toContain('JSON'));
+    type('textarea[data-test="wordlist-items"]', '{');
+    await settle(() => expect($('[data-test="wordlist-error-items"]')!.textContent).toContain('JSON'));
 
-    type('textarea[data-test="wordlist-fr-items"]', '{"version":1}');
-    await settle(() => expect($('[data-test="wordlist-error-fr-items"]')!.textContent!.trim()).not.toBe(''));
+    type('textarea[data-test="wordlist-items"]', '{"version":1}');
+    await settle(() => expect($('[data-test="wordlist-error-items"]')!.textContent!.trim()).not.toBe(''));
 
-    type('textarea[data-test="wordlist-fr-items"]', JSON.stringify(EXTRA_ITEMS));
-    await settle(() => expect($('[data-test="wordlist-error-fr-items"]')).toBeNull());
+    type('textarea[data-test="wordlist-items"]', JSON.stringify(EXTRA_ITEMS));
+    await settle(() => expect($('[data-test="wordlist-error-items"]')).toBeNull());
   });
 
   it('Install on this device lists the errors of an invalid draft and stores nothing', async () => {
@@ -112,7 +142,7 @@ describe('PackDraftPageComponent', () => {
     const { settle, tab, button, storage } = await render((d) => ({
       ...d,
       details: validDetails(),
-      generators: { fr: { items: EXTRA_ITEMS } },
+      generators: { items: EXTRA_ITEMS },
     }));
     await tab('Publish');
 

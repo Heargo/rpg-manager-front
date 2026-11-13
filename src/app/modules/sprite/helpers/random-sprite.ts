@@ -7,7 +7,7 @@ import { PRESETS } from './presets';
 /** A sprite set that can illustrate an item: a bundled sprite or a tagged set saved on the device. */
 export interface SpriteCandidate {
   key: string;
-  /** Names to match against the item's name (a bundled sprite's English and French labels). */
+  /** Names to match against the item's name (a bundled sprite's label). */
   labels: string[];
   type: ItemType;
   slot: ItemSlot;

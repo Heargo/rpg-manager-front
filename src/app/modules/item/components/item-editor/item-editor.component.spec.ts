@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../../public/packs/base/generators/en/items.json';
+import en from '../../../../../../public/packs/base-en/generators/items.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { PackBusiness } from '../../../../core/business/pack.business';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
@@ -36,7 +36,7 @@ describe('ItemEditorComponent', () => {
       imports: [ItemEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } },
+        { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } },
       ],
     });
     const fixture = TestBed.createComponent(ItemEditorComponent);

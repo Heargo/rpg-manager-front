@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { PackBusiness } from '../../../core/business/pack.business';
-import { LanguageBusiness } from '../../../core/business/language.business';
 import { SiteFooterComponent } from '../components/site-footer/site-footer.component';
 
 /** Libraries actually listed in package.json, with their licences. */
@@ -136,14 +135,9 @@ export const CREDIT_LIBRARIES = [
 })
 export class CreditsPageComponent {
   private readonly packBusiness = inject(PackBusiness);
-  private readonly language = inject(LanguageBusiness);
-  /** Installed packs other than Base, with their name in the active language. */
+  /** Installed packs other than Base, with their name. */
   protected readonly packs = computed(() => {
-    const lang = this.language.$language() === 'fr' ? 'fr' : 'en';
-    return this.packBusiness
-      .$installed()
-      .filter((p) => !p.builtIn)
-      .map((p) => ({ ...p, name: p.name[lang] }));
+    return this.packBusiness.$installed().filter((p) => !p.builtIn);
   });
   protected readonly libraries = CREDIT_LIBRARIES;
   constructor() {

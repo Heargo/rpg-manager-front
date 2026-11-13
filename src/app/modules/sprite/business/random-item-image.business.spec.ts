@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideBasePack } from '../../../../testing/base-pack';
 import { provideKindsPack } from '../../../../testing/kinds-pack';
+import { provideTestTranslations } from '../../../../testing/test-providers';
+import { LanguageBusiness } from '../../../core/business/language.business';
 import { ImageBusiness } from '../../../core/business/image.business';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
 import { autoMaterials } from '../helpers/auto-materials';
@@ -25,12 +27,15 @@ function setup(saved: SpriteSet[] = []) {
   TestBed.configureTestingModule({
     providers: [
       { provide: SpriteFileService, useValue: files },
+      provideTestTranslations(),
       provideBasePack(),
       { provide: SpriteSetStorageService, useValue: { list: async () => saved } },
       { provide: ImageBusiness, useValue: images },
       { provide: ImageStorageService, useValue: storage },
     ],
   });
+  // The item names of these specs are French, and so is the app: sprites come from base-fr.
+  TestBed.inject(LanguageBusiness).setLanguage('fr');
   return { business: TestBed.inject(RandomItemImageBusiness), files, images, storage };
 }
 
@@ -40,7 +45,7 @@ describe('RandomItemImageBusiness', () => {
     const id = await business.create({ name: 'Hache du nord', type: 'equipment', slot: 'weapon1' }, 'seed');
     expect(id).toBe('stored-1');
     const url = (files.fetchImage.mock.calls[0] as unknown[])[0];
-    expect(['packs/base/sprites/axe.png', 'packs/base/sprites/waraxe.png']).toContain(url);
+    expect(['packs/base-fr/sprites/axe.png', 'packs/base-fr/sprites/waraxe.png']).toContain(url);
     expect(files.fetchText).toHaveBeenCalledWith(String(url).replace('.png', '.json'));
     expect(files.encodePng).toHaveBeenCalled();
     expect(images.storeUpload).toHaveBeenCalled();
@@ -88,12 +93,14 @@ describe('RandomItemImageBusiness', () => {
       TestBed.configureTestingModule({
         providers: [
           { provide: SpriteFileService, useValue: files },
+          provideTestTranslations(),
           provideKindsPack(),
           { provide: SpriteSetStorageService, useValue: { list: async () => [] } },
           { provide: ImageBusiness, useValue: images },
           { provide: ImageStorageService, useValue: { get: vi.fn() } },
         ],
       });
+      TestBed.inject(LanguageBusiness).setLanguage('fr');
       return { business: TestBed.inject(RandomItemImageBusiness), files, images };
     }
     const look = (name: string) => ({ name, type: 'item' as const, slot: 'none' as const });
@@ -101,7 +108,7 @@ describe('RandomItemImageBusiness', () => {
     it('recolours a masked sprite from its bundled materials', async () => {
       const { business, files, images } = setupKinds();
       await business.create(look('Bravo'), 's');
-      expect(files.fetchText).toHaveBeenCalledWith('packs/base/sprites/bravo.json');
+      expect(files.fetchText).toHaveBeenCalledWith('packs/base-fr/sprites/bravo.json');
       expect(files.encodePng).toHaveBeenCalled();
       expect(images.storeUpload).toHaveBeenCalled();
     });
@@ -109,7 +116,7 @@ describe('RandomItemImageBusiness', () => {
     it('recolours a grayscale sprite through the automatic guess, ignoring any materials file', async () => {
       const { business, files, images } = setupKinds();
       await business.create(look('Alpha'), 's');
-      expect(files.fetchImage).toHaveBeenCalledWith('packs/base/sprites/alpha.png');
+      expect(files.fetchImage).toHaveBeenCalledWith('packs/base-fr/sprites/alpha.png');
       expect(files.fetchText).not.toHaveBeenCalled();
       expect(files.encodePng).toHaveBeenCalled();
       expect(images.storeUpload).toHaveBeenCalled();
@@ -119,7 +126,7 @@ describe('RandomItemImageBusiness', () => {
       const { business, files, images } = setupKinds();
       const id = await business.create(look('Charlie'), 's');
       expect(id).toBe('stored-1');
-      expect(files.fetchBlob).toHaveBeenCalledWith('packs/base/sprites/charlie.png');
+      expect(files.fetchBlob).toHaveBeenCalledWith('packs/base-fr/sprites/charlie.png');
       expect(files.encodePng).not.toHaveBeenCalled();
       expect(files.fetchText).not.toHaveBeenCalled();
       expect(images.storeUpload).toHaveBeenCalledWith(png);

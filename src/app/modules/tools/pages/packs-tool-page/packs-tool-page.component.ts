@@ -27,6 +27,7 @@ import {
 } from '../../../../core/business/pack.business';
 import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
+import { SUPPORTED_LANGUAGES } from '../../../../core/constants/languages';
 import {
   PACK_GENERATORS,
   SPRITE_KINDS,
@@ -84,7 +85,12 @@ export function formatSize(bytes: number): string {
               <li data-test="pack-card" [attr.data-pack]="entry.id">
                 <p-card>
                   <div class="head">
-                    <h3>{{ text(entry.name) }}</h3>
+                    <h3>{{ entry.name }}</h3>
+                    <p-tag
+                      data-test="pack-language"
+                      severity="secondary"
+                      [value]="languageName(entry.language)"
+                    />
                     @if (entry.builtIn) {
                       <p-tag
                         severity="info"
@@ -110,14 +116,14 @@ export function formatSize(bytes: number): string {
                           [disabled]="busy().has(entry.id)"
                           [ariaLabel]="
                             'packs.toggle'
-                              | transloco: { name: text(entry.name) }
+                              | transloco: { name: entry.name }
                           "
                           (ngModelChange)="toggle(entry, $event)"
                         />
                       }
                     }
                   </div>
-                  <p class="desc">{{ text(entry.description) }}</p>
+                  <p class="desc">{{ entry.description }}</p>
                   <dl>
                     <dt>{{ 'packs.author' | transloco }}</dt>
                     <dd>{{ entry.author }}</dd>
@@ -136,8 +142,8 @@ export function formatSize(bytes: number): string {
                     }
                     <dt>{{ 'packs.detailsSprites' | transloco }}</dt>
                     <dd>{{ entry.sprites }}</dd>
-                    <dt>{{ 'packs.languages' | transloco }}</dt>
-                    <dd>{{ languages(entry) }}</dd>
+                    <dt>{{ 'packs.language' | transloco }}</dt>
+                    <dd>{{ languageName(entry.language) }}</dd>
                   </dl>
                   <ng-template #footer>
                     <div class="actions">
@@ -164,7 +170,7 @@ export function formatSize(bytes: number): string {
                           icon="pi pi-trash"
                           [label]="'packs.remove' | transloco"
                           [disabled]="busy().has(entry.id)"
-                          (onClick)="confirmRemove(entry.id, text(entry.name))"
+                          (onClick)="confirmRemove(entry.id, entry.name)"
                         />
                       }
                     </div>
@@ -185,7 +191,12 @@ export function formatSize(bytes: number): string {
               <li data-test="unofficial-pack-card" [attr.data-pack]="pack.id">
                 <p-card>
                   <div class="head">
-                    <h3>{{ text(pack.name) }}</h3>
+                    <h3>{{ pack.name }}</h3>
+                    <p-tag
+                      data-test="pack-language"
+                      severity="secondary"
+                      [value]="languageName(pack.language)"
+                    />
                     @if (!pack.link) {
                       <p-tag
                         severity="secondary"
@@ -204,13 +215,13 @@ export function formatSize(bytes: number): string {
                         [ngModel]="pack.enabled"
                         [disabled]="busy().has(pack.id)"
                         [ariaLabel]="
-                          'packs.toggle' | transloco: { name: text(pack.name) }
+                          'packs.toggle' | transloco: { name: pack.name }
                         "
                         (ngModelChange)="toggleUnofficial(pack, $event)"
                       />
                     }
                   </div>
-                  <p class="desc">{{ text(pack.description) }}</p>
+                  <p class="desc">{{ pack.description }}</p>
                   <dl>
                     <dt>{{ 'packs.author' | transloco }}</dt>
                     <dd>{{ pack.author }}</dd>
@@ -273,7 +284,7 @@ export function formatSize(bytes: number): string {
                         icon="pi pi-trash"
                         [label]="'packs.remove' | transloco"
                         [disabled]="busy().has(pack.id)"
-                        (onClick)="confirmRemove(pack.id, text(pack.name))"
+                        (onClick)="confirmRemove(pack.id, pack.name)"
                       />
                     </div>
                   </ng-template>
@@ -316,8 +327,8 @@ export function formatSize(bytes: number): string {
       }
       @if (prepared(); as pack) {
         <div data-test="pack-preview">
-          <h3>{{ text(pack.manifest.name) }}</h3>
-          <p>{{ text(pack.manifest.description) }}</p>
+          <h3>{{ pack.manifest.name }}</h3>
+          <p>{{ pack.manifest.description }}</p>
           <dl>
             <dt>{{ 'packs.author' | transloco }}</dt>
             <dd>{{ pack.manifest.author }}</dd>
@@ -343,10 +354,15 @@ export function formatSize(bytes: number): string {
             <dd>{{ pack.manifest.version }}</dd>
             <dt>{{ 'packs.size' | transloco }}</dt>
             <dd>{{ size(pack.size) }}</dd>
-            @for (lang of countsGenerators(pack); track lang.lang) {
-              <dt>{{ 'packs.lang.' + lang.lang | transloco }}</dt>
+            <dt>{{ 'packs.language' | transloco }}</dt>
+            <dd>{{ languageName(pack.manifest.language) }}</dd>
+            @if (pack.counts.generators) {
+              <dt>{{ 'packs.detailsGenerators' | transloco }}</dt>
               <dd>
-                {{ 'packs.wordLists' | transloco: { count: lang.count } }}
+                {{
+                  'packs.wordLists'
+                    | transloco: { count: pack.counts.generators }
+                }}
               </dd>
             }
             @for (kind of countsSprites(pack); track kind.kind) {
@@ -384,7 +400,7 @@ export function formatSize(bytes: number): string {
               'packs.updateVersions'
                 | transloco
                   : {
-                      name: text(pending.update.prepared.manifest.name),
+                      name: pending.update.prepared.manifest.name,
                       from: pending.update.oldVersion,
                       to: pending.update.newVersion,
                     }
@@ -418,7 +434,7 @@ export function formatSize(bytes: number): string {
       [style]="{ width: 'min(40rem, calc(100vw - 2rem))' }"
     >
       @if (details(); as pack) {
-        <p>{{ text(pack.description) }}</p>
+        <p>{{ pack.description }}</p>
         <p>
           <a
             [href]="pack.licenseUrl"
@@ -429,16 +445,17 @@ export function formatSize(bytes: number): string {
           ({{ pack.license }})
         </p>
         <h3>{{ 'packs.detailsGenerators' | transloco }}</h3>
-        @for (lang of generatorLanguages(); track lang.lang) {
-          <p>
-            <strong>{{ 'packs.lang.' + lang.lang | transloco }}</strong>:
-            @for (g of lang.generators; track g) {
-              <p-tag
-                severity="secondary"
-                [value]="'packs.generator.' + g | transloco"
-              />
-            }
-          </p>
+        <p>
+          <strong>{{ 'packs.language' | transloco }}</strong>:
+          <span data-test="pack-details-language">{{
+            languageName(pack.language)
+          }}</span>
+        </p>
+        @for (g of generatorNames(); track g) {
+          <p-tag
+            severity="secondary"
+            [value]="'packs.generator.' + g | transloco"
+          />
         } @empty {
           <p class="hint">{{ 'packs.detailsNoGenerators' | transloco }}</p>
         }
@@ -455,7 +472,7 @@ export function formatSize(bytes: number): string {
                   width="48"
                   height="48"
                 />
-                <span>{{ spriteLabel(sprite) }}</span>
+                <span>{{ sprite.label }}</span>
               </li>
             }
           </ul>
@@ -599,7 +616,7 @@ export class PacksToolPageComponent {
 
   protected readonly detailsTitle = computed(() => {
     const pack = this.details();
-    return pack ? this.text(pack.name) : '';
+    return pack ? pack.name : '';
   });
 
   protected readonly spriteGroups = computed(() =>
@@ -609,15 +626,10 @@ export class PacksToolPageComponent {
     })).filter((group) => group.sprites.length),
   );
 
-  protected readonly generatorLanguages = computed(() => {
+  protected readonly generatorNames = computed(() => {
     const id = this.details()?.id;
     const pack = this.business.$installed().find((p) => p.id === id);
-    return Object.entries(pack?.generators ?? {})
-      .map(([lang, files]) => ({
-        lang,
-        generators: PACK_GENERATORS.filter((g) => files?.[g]),
-      }))
-      .filter((l) => l.generators.length);
+    return PACK_GENERATORS.filter((g) => pack?.generators[g]);
   });
 
   constructor() {
@@ -629,23 +641,13 @@ export class PacksToolPageComponent {
     );
   }
 
-  protected text(value: Record<string, string>): string {
-    const lang = this.language.$language() ?? 'en';
-    return value[lang] ?? value['en'] ?? '';
-  }
-
   protected size(bytes: number): string {
     return formatSize(bytes);
   }
 
-  protected languages(entry: PackRegistryEntry): string {
-    return entry.languages
-      .map((l) => this.language.t(`packs.lang.${l}`))
-      .join(', ');
-  }
-
-  protected spriteLabel(sprite: BundledSprite): string {
-    return this.language.$language() === 'fr' ? sprite.fr : sprite.en;
+  /** A pack language in its own language, whatever the app language. */
+  protected languageName(code: string): string {
+    return SUPPORTED_LANGUAGES.find((l) => l.code === code)?.label ?? code;
   }
 
   private installed(id: string) {
@@ -831,13 +833,6 @@ export class PacksToolPageComponent {
     return /^packs\.link\.\w+$/.test(error) ? this.language.t(error) : error;
   }
 
-  protected countsGenerators(pack: PreparedPack) {
-    return Object.entries(pack.counts.generators).map(([lang, count]) => ({
-      lang,
-      count,
-    }));
-  }
-
   protected countsSprites(pack: PreparedPack) {
     return SPRITE_KINDS.filter((k) => pack.counts.sprites[k]).map((kind) => ({
       kind,
@@ -878,8 +873,7 @@ export class PacksToolPageComponent {
     this.detailSprites.set([]);
     this.details.set(entry);
     try {
-      const sprites = await this.business.sprites();
-      this.detailSprites.set(sprites.filter((s) => s.packId === entry.id));
+      this.detailSprites.set(await this.business.spritesOf(entry.id));
     } catch (error) {
       this.fail(error);
     }

@@ -10,8 +10,7 @@ import { PackDraftPageComponent } from './pack-draft-page.component';
 
 const sprite = (id: string, kind: DraftSprite['kind']): DraftSprite => ({
   id,
-  en: id,
-  fr: id,
+  label: id,
   type: 'item',
   slot: 'none',
   kind,

@@ -11,8 +11,7 @@ const sprite = (n: number): DraftSprite => {
   const id = `s${String(n).padStart(2, '0')}`;
   return {
     id,
-    en: id,
-    fr: id,
+    label: id,
     type: 'item',
     slot: 'none',
     kind: 'grayscale',
@@ -136,8 +135,8 @@ describe('PackDraftPageComponent: sprites tab on a large draft', () => {
     await vi.waitFor(
       async () => {
         const sprites = (await saved()).sprites;
-        expect(sprites.find((s) => s.id === 's14')!.en).toBe('Renamed');
-        expect(sprites.filter((s) => s.en === 'Renamed')).toHaveLength(1);
+        expect(sprites.find((s) => s.id === 's14')!.label).toBe('Renamed');
+        expect(sprites.filter((s) => s.label === 'Renamed')).toHaveLength(1);
       },
       { timeout: 3000 },
     );

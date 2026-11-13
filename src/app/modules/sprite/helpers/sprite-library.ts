@@ -3,22 +3,21 @@ import { Pack, SpriteKind } from '../../../core/packs/pack';
 
 export const DEMO_SPRITE_ID = 'axe';
 
-/** The sprites whose label (in `lang`) or id contains every word of `query`, accents and case ignored, by label. */
+/** The sprites whose label contains every word of `query`, accents and case ignored, by label. */
 export function searchSprites(
   sprites: readonly BundledSprite[],
   query: string,
   lang: string,
   kind: SpriteKind | null = null,
 ): BundledSprite[] {
-  const fr = lang === 'fr';
   const words = fold(query).split(/\s+/).filter(Boolean);
   return sprites
     .filter((sprite) => {
       if (kind && sprite.kind !== kind) return false;
-      const text = fold(`${fr ? sprite.fr : sprite.en} ${sprite.id}`);
+      const text = fold(sprite.label);
       return words.every((word) => text.includes(word));
     })
-    .sort((a, b) => (fr ? a.fr : a.en).localeCompare(fr ? b.fr : b.en, lang));
+    .sort((a, b) => a.label.localeCompare(b.label, lang));
 }
 
 export interface SpriteGroup {
@@ -27,16 +26,15 @@ export interface SpriteGroup {
   sprites: BundledSprite[];
 }
 
-/** The sprites under the name (in `lang`) of their pack, in pack order; packs without a sprite are left out. */
+/** The sprites under the name of their pack, in pack order; packs without a sprite are left out. */
 export function groupSpritesByPack(
   sprites: readonly BundledSprite[],
   packs: readonly Pick<Pack, 'id' | 'name'>[],
-  lang: string,
 ): SpriteGroup[] {
   return packs
     .map((pack) => ({
       packId: pack.id,
-      name: (lang === 'fr' ? pack.name.fr : pack.name.en) ?? pack.name.en,
+      name: pack.name,
       sprites: sprites.filter((s) => s.packId === pack.id),
     }))
     .filter((group) => group.sprites.length > 0);

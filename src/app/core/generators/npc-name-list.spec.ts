@@ -1,5 +1,5 @@
-import en from '../../../../public/packs/base/generators/en/npcs.json';
-import fr from '../../../../public/packs/base/generators/fr/npcs.json';
+import en from '../../../../public/packs/base-en/generators/npcs.json';
+import fr from '../../../../public/packs/base-fr/generators/npcs.json';
 import { validateNpcNameList } from './npc-name-list';
 
 function clone(): Record<string, any> {

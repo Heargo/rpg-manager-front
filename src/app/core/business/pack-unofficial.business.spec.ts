@@ -3,7 +3,9 @@ import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { EXTRA_ITEMS } from '../../../testing/extra-pack';
 import { NEON_LINK, NEON_ROOT, NeonWorld, neonProviders, neonWorld } from '../../../testing/unofficial-pack';
+import { provideTestTranslations } from '../../../testing/test-providers';
 import { PackStorageService } from '../services/pack-storage.service';
+import { LanguageBusiness } from './language.business';
 import { PackBusiness } from './pack.business';
 
 const BASE_SPRITES = 101;
@@ -16,7 +18,9 @@ function setup(world: NeonWorld = neonWorld(), link = NEON_LINK) {
   URL.revokeObjectURL = vi.fn();
   const fakes = neonProviders(world, link);
   TestBed.resetTestingModule();
-  TestBed.configureTestingModule({ providers: fakes.providers });
+  TestBed.configureTestingModule({ providers: [provideTestTranslations(), ...fakes.providers] });
+  // The neon pack is French, and so is the app: the Base in use is base-fr.
+  TestBed.inject(LanguageBusiness).setLanguage('fr');
   return { world, ...fakes, business: TestBed.inject(PackBusiness), storage: TestBed.inject(PackStorageService) };
 }
 
@@ -38,13 +42,13 @@ describe('PackBusiness unofficial packs', () => {
 
       const preview = await business.prepare(NEON_LINK);
 
-      expect(preview.manifest).toMatchObject({ id: 'neon', name: { en: 'Neon' }, version: '1.0.0', author: 'Ann Author' });
+      expect(preview.manifest).toMatchObject({ id: 'neon', name: 'Neon', language: 'fr', version: '1.0.0', author: 'Ann Author' });
       expect(preview.source).toBe(NEON_LINK);
       expect(preview.size).toBeGreaterThanOrEqual('png-bytes'.length * 3);
-      expect(preview.counts.generators).toEqual({ fr: 2 });
+      expect(preview.counts.generators).toBe(2);
       expect(preview.counts.sprites).toMatchObject({ grayscale: 1, masked: 1, colored: 1 });
       expect(await storage.list()).toEqual([]);
-      expect(business.$installed().map((p) => p.id)).toEqual(['base']);
+      expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en']);
     });
 
     it('fetches the manifest at the resolved URL and the files next to it', async () => {
@@ -87,7 +91,7 @@ describe('PackBusiness unofficial packs', () => {
 
     it('rejects a manifest over 64 KB', async () => {
       const world = neonWorld();
-      world.manifest['description'] = { en: 'x'.repeat(70_000), fr: 'y' };
+      world.manifest['description'] = 'x'.repeat(70_000);
       const { business } = setup(world);
 
       expect(await rejection(business.prepare(NEON_LINK))).toContain('pack.json');
@@ -95,30 +99,30 @@ describe('PackBusiness unofficial packs', () => {
 
     it('rejects a bad items word list naming the file and the problem', async () => {
       const world = neonWorld();
-      world.json.set(`${NEON_ROOT}generators/fr/items.json`, { version: 1 });
+      world.json.set(`${NEON_ROOT}generators/items.json`, { version: 1 });
       const { business, storage } = setup(world);
 
       const message = await rejection(business.prepare(NEON_LINK));
 
-      expect(message).toContain('generators/fr/items.json');
+      expect(message).toContain('generators/items.json');
       expect(message).toContain('templates');
       expect(await storage.list()).toEqual([]);
     });
 
     it('rejects a bad NPC name list naming the file', async () => {
       const world = neonWorld();
-      world.json.set(`${NEON_ROOT}generators/fr/npcs.json`, { version: 1, given: [] });
+      world.json.set(`${NEON_ROOT}generators/npcs.json`, { version: 1, given: [] });
       const { business } = setup(world);
 
-      expect(await rejection(business.prepare(NEON_LINK))).toContain('generators/fr/npcs.json');
+      expect(await rejection(business.prepare(NEON_LINK))).toContain('generators/npcs.json');
     });
 
     it('rejects a file that cannot be fetched, naming it', async () => {
       const world = neonWorld();
-      world.json.delete(`${NEON_ROOT}generators/fr/npcs.json`);
+      world.json.delete(`${NEON_ROOT}generators/npcs.json`);
       const { business } = setup(world);
 
-      expect(await rejection(business.prepare(NEON_LINK))).toContain('generators/fr/npcs.json');
+      expect(await rejection(business.prepare(NEON_LINK))).toContain('generators/npcs.json');
     });
 
     it('rejects a PNG over 1 MB', async () => {
@@ -173,7 +177,7 @@ describe('PackBusiness unofficial packs', () => {
     it('rejects a pack over 20 MB in total', async () => {
       const world = neonWorld();
       world.manifest['sprites'] = Array.from({ length: 21 }, (_, i) => ({
-        id: `s${i}`, en: 'S', fr: 'S', type: 'item', slot: 'none', kind: 'grayscale', image: `sprites/s${i}.png`,
+        id: `s${i}`, label: 'S', type: 'item', slot: 'none', kind: 'grayscale', image: `sprites/s${i}.png`,
       }));
       world.manifest['generators'] = {};
       for (let i = 0; i < 21; i++) world.blobSizes.set(`${NEON_ROOT}sprites/s${i}.png`, 1_000_000);
@@ -185,20 +189,20 @@ describe('PackBusiness unofficial packs', () => {
 
     it('lists every error, not only the first', async () => {
       const world = neonWorld();
-      world.json.set(`${NEON_ROOT}generators/fr/items.json`, { version: 1 });
+      world.json.set(`${NEON_ROOT}generators/items.json`, { version: 1 });
       world.blobSizes.set(`${NEON_ROOT}sprites/spark.png`, MB + 1);
       const { business } = setup(world);
 
       const message = await rejection(business.prepare(NEON_LINK));
 
-      expect(message).toContain('generators/fr/items.json');
+      expect(message).toContain('generators/items.json');
       expect(message).toContain('sprites/spark.png');
     });
 
     it('fetches at most 4 files at a time', async () => {
       const world = neonWorld();
       world.manifest['sprites'] = Array.from({ length: 12 }, (_, i) => ({
-        id: `s${i}`, en: 'S', fr: 'S', type: 'item', slot: 'none', kind: 'grayscale', image: `sprites/s${i}.png`,
+        id: `s${i}`, label: 'S', type: 'item', slot: 'none', kind: 'grayscale', image: `sprites/s${i}.png`,
       }));
       const { business, inFlight } = setup(world);
 
@@ -209,7 +213,7 @@ describe('PackBusiness unofficial packs', () => {
     });
 
     it('refuses an id that is an official pack, Base included', async () => {
-      for (const id of ['extra', 'base']) {
+      for (const id of ['extra', 'base-fr', 'base-en']) {
         const world = neonWorld();
         world.manifest['id'] = id;
         const { business, storage } = setup(world);
@@ -237,8 +241,8 @@ describe('PackBusiness unofficial packs', () => {
       expect(glow.packId).toBe('neon');
       expect(glow.imageUrl).toMatch(/^blob:/);
       expect(glow.materialsUrl).toMatch(/^blob:/);
-      expect(await business.wordList('items', 'fr', 'neon')).toEqual(EXTRA_ITEMS);
-      expect(await business.packsFor('items', 'fr')).toEqual(['base', 'neon']);
+      expect(await business.wordList('items', 'neon')).toEqual(EXTRA_ITEMS);
+      expect(await business.packsFor('items', 'fr')).toEqual(['base-fr', 'neon']);
     });
 
     it('keeps the pack after a reload of the app', async () => {
@@ -246,7 +250,8 @@ describe('PackBusiness unofficial packs', () => {
       await business.install(await business.prepare(NEON_LINK));
       const fakes = neonProviders(world);
       TestBed.resetTestingModule();
-      TestBed.configureTestingModule({ providers: fakes.providers });
+      TestBed.configureTestingModule({ providers: [provideTestTranslations(), ...fakes.providers] });
+      TestBed.inject(LanguageBusiness).setLanguage('fr');
 
       const reloaded = TestBed.inject(PackBusiness);
 
@@ -259,7 +264,7 @@ describe('PackBusiness unofficial packs', () => {
       const other = 'https://other.example.org/neon/pack.json';
       const second = neonProviders(world, other);
       TestBed.resetTestingModule();
-      TestBed.configureTestingModule({ providers: second.providers });
+      TestBed.configureTestingModule({ providers: [provideTestTranslations(), ...second.providers] });
       const business2 = TestBed.inject(PackBusiness);
 
       await expect(business2.prepare(other)).rejects.toBeDefined();
@@ -273,7 +278,7 @@ describe('PackBusiness unofficial packs', () => {
       await business.install(await business.prepare(NEON_LINK));
 
       await business.disable('neon');
-      expect(await business.packsFor('items', 'fr')).toEqual(['base']);
+      expect(await business.packsFor('items', 'fr')).toEqual(['base-fr']);
       await business.remove('neon');
 
       expect(await storage.list()).toEqual([]);
@@ -307,7 +312,7 @@ describe('PackBusiness unofficial packs', () => {
     it('checkUpdate rejects for a pack that is not unofficial', async () => {
       const { business } = setup();
 
-      await expect(business.checkUpdate('base')).rejects.toBeDefined();
+      await expect(business.checkUpdate('base-fr')).rejects.toBeDefined();
       await expect(business.checkUpdate('nope')).rejects.toBeDefined();
     });
   });

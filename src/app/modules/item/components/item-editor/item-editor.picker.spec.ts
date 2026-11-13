@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../../public/packs/base/generators/en/items.json';
+import en from '../../../../../../public/packs/base-en/generators/items.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { ImageBusiness } from '../../../../core/business/image.business';
 import { PackBusiness } from '../../../../core/business/pack.business';
@@ -16,7 +16,7 @@ describe('ItemEditorComponent image picker', () => {
       imports: [ItemEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } },
+        { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } },
         { provide: ImageBusiness, useValue: { storeUpload, url: async () => 'blob:i' } },
       ],
     });

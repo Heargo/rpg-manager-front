@@ -23,7 +23,7 @@ async function render(world: NeonWorld = neonWorld()) {
       await fixture.whenStable();
       check();
     });
-  await settle(() => expect(el.querySelectorAll('[data-test="pack-card"]').length).toBe(2));
+  await settle(() => expect(el.querySelectorAll('[data-test="pack-card"]').length).toBe(3));
   /** Dialogs may be rendered inside the page or in the document body. */
   const root = () => document.body;
   const button = (text: string) =>
@@ -94,14 +94,14 @@ describe('PacksToolPageComponent unofficial packs', () => {
 
   it('lists the errors per file and offers no Install when the pack is invalid', async () => {
     const world = neonWorld();
-    world.json.set(`${NEON_ROOT}generators/fr/items.json`, { version: 1 });
+    world.json.set(`${NEON_ROOT}generators/items.json`, { version: 1 });
     const { check, settle, root, button, unofficial, storage } = await render(world);
 
     await check();
 
     await settle(() => expect(root().querySelector('[data-test="pack-errors"]')).not.toBeNull());
     const errors = [...root().querySelectorAll('[data-test="pack-errors"] li')].map((li) => li.textContent);
-    expect(errors.some((e) => e!.includes('generators/fr/items.json'))).toBe(true);
+    expect(errors.some((e) => e!.includes('generators/items.json'))).toBe(true);
     expect(root().querySelector('[data-test="pack-preview"]')).toBeNull();
     expect(button('Install')).toBeUndefined();
     expect(unofficial('neon')).toBeNull();

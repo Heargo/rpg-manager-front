@@ -16,7 +16,7 @@ async function render(service = extraPackService()) {
   const el = fixture.nativeElement as HTMLElement;
   await vi.waitFor(async () => {
     await fixture.whenStable();
-    expect(el.querySelectorAll('[data-test="pack-card"]').length).toBe(2);
+    expect(el.querySelectorAll('[data-test="pack-card"]').length).toBe(3);
   });
   const card = (id: string) => el.querySelector<HTMLElement>(`[data-test="pack-card"][data-pack="${id}"]`)!;
   const settle = (check: () => void) =>
@@ -43,19 +43,30 @@ describe('PacksToolPageComponent', () => {
 
     const extra = card('extra').textContent!;
     expect(extra).toContain('Extra');
-    expect(extra).toContain('More things');
+    expect(extra).toContain('Plus de choses');
     expect(extra).toContain('Jane Doe');
     expect(extra).toContain('CC0-1.0');
     expect(extra).toMatch(/1\.2\s?(kB|KB|Ko)|1234/);
-    expect(card('base').textContent).toContain('Base');
+    expect(card('base-fr').textContent).toContain('Base');
   });
 
-  it('shows Base as always on, with no toggle and no remove button', async () => {
+  it('shows each Base as always on, with no toggle and no remove button', async () => {
     const { card } = await render();
 
-    expect(card('base').textContent).toContain('Always on');
-    expect(card('base').querySelector('p-toggleswitch')).toBeNull();
-    expect(card('base').textContent).not.toContain('Remove from device');
+    for (const id of ['base-fr', 'base-en']) {
+      expect(card(id).textContent, id).toContain('Always on');
+      expect(card(id).querySelector('p-toggleswitch'), id).toBeNull();
+      expect(card(id).textContent, id).not.toContain('Remove from device');
+    }
+  });
+
+  it('shows the language of each pack as a tag on its card', async () => {
+    const { card } = await render();
+
+    const tag = (id: string) => card(id).querySelector('[data-test="pack-language"]')?.textContent;
+    expect(tag('base-fr')).toContain('Français');
+    expect(tag('base-en')).toContain('English');
+    expect(tag('extra')).toContain('Français');
   });
 
   it('shows the other pack off, not downloaded, with a toggle and no remove button', async () => {

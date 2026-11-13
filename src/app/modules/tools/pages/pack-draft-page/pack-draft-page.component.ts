@@ -27,14 +27,13 @@ import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
+import { SUPPORTED_LANGUAGES } from '../../../../core/constants/languages';
 import { downloadBlob } from '../../../../core/helpers/download';
 import { EQUIPMENT_SLOTS, ITEM_TYPES } from '../../../../core/models/item';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import {
   PACK_GENERATORS,
-  PACK_LANGUAGES,
   PackGenerator,
-  PackLanguage,
   SPRITE_KINDS,
 } from '../../../../core/packs/pack';
 import {
@@ -50,8 +49,6 @@ type Tab = 'details' | 'lists' | 'sprites' | 'publish';
 const SAVE_DELAY_MS = 500;
 /** Sprites shown per page: a row holds three selects, so all of them at once freezes the editor. */
 const SPRITES_PER_PAGE = 12;
-const slotKey = (lang: PackLanguage, generator: PackGenerator) =>
-  `${lang}-${generator}`;
 
 /** The pack editor: details, word lists, sprites, then install or export. Changes are saved as they are made. */
 @Component({
@@ -97,27 +94,28 @@ const slotKey = (lang: PackLanguage, generator: PackGenerator) =>
           <p-tabpanels>
             <p-tabpanel value="details">
               <div class="form">
-                <label for="draft-name-en">{{
-                  'packs.creator.nameEn' | transloco
+                <label for="draft-language">{{
+                  'packs.creator.language' | transloco
                 }}</label>
-                <input
-                  pInputText
-                  id="draft-name-en"
-                  data-test="draft-name-en"
-                  type="text"
-                  [ngModel]="current.details.name.en"
-                  (ngModelChange)="setName('en', $event)"
+                <p-select
+                  inputId="draft-language"
+                  data-test="draft-language"
+                  [options]="languageOptions"
+                  optionLabel="label"
+                  optionValue="code"
+                  [ngModel]="current.details.language"
+                  (ngModelChange)="patchDetails({ language: $event })"
                 />
-                <label for="draft-name-fr">{{
-                  'packs.creator.nameFr' | transloco
+                <label for="draft-name">{{
+                  'packs.creator.name' | transloco
                 }}</label>
                 <input
                   pInputText
-                  id="draft-name-fr"
-                  data-test="draft-name-fr"
+                  id="draft-name"
+                  data-test="draft-name"
                   type="text"
-                  [ngModel]="current.details.name.fr"
-                  (ngModelChange)="setName('fr', $event)"
+                  [ngModel]="current.details.name"
+                  (ngModelChange)="setName($event)"
                 />
                 <label for="draft-id">{{
                   'packs.creator.packId' | transloco
@@ -140,27 +138,16 @@ const slotKey = (lang: PackLanguage, generator: PackGenerator) =>
                     }}</p-message>
                   }
                 </div>
-                <label for="draft-description-en">{{
-                  'packs.creator.descriptionEn' | transloco
+                <label for="draft-description">{{
+                  'packs.creator.description' | transloco
                 }}</label>
                 <textarea
                   pTextarea
-                  id="draft-description-en"
-                  data-test="draft-description-en"
+                  id="draft-description"
+                  data-test="draft-description"
                   rows="3"
-                  [ngModel]="current.details.description.en"
-                  (ngModelChange)="setDescription('en', $event)"
-                ></textarea>
-                <label for="draft-description-fr">{{
-                  'packs.creator.descriptionFr' | transloco
-                }}</label>
-                <textarea
-                  pTextarea
-                  id="draft-description-fr"
-                  data-test="draft-description-fr"
-                  rows="3"
-                  [ngModel]="current.details.description.fr"
-                  (ngModelChange)="setDescription('fr', $event)"
+                  [ngModel]="current.details.description"
+                  (ngModelChange)="patchDetails({ description: $event })"
                 ></textarea>
                 <label for="draft-version">{{
                   'packs.creator.version' | transloco
@@ -222,60 +209,57 @@ const slotKey = (lang: PackLanguage, generator: PackGenerator) =>
             <p-tabpanel value="lists">
               @if (tab() === 'lists') {
                 <p class="hint">{{ 'packs.creator.listsIntro' | transloco }}</p>
-                @for (lang of languages; track lang) {
-                  @for (generator of generators; track generator) {
-                    <section class="list">
-                      <h3>
-                        {{ 'packs.lang.' + lang | transloco }} -
-                        {{ 'packs.generator.' + generator | transloco }}
-                      </h3>
-                      <textarea
-                        pTextarea
-                        class="json"
-                        rows="6"
-                        [attr.data-test]="'wordlist-' + lang + '-' + generator"
-                        [attr.aria-label]="'packs.lang.' + lang | transloco"
-                        [ngModel]="text(lang, generator)"
-                        (ngModelChange)="setText(lang, generator, $event)"
-                      ></textarea>
-                      @if (listErrors(lang, generator); as errors) {
-                        <ul
-                          class="errors"
-                          [attr.data-test]="
-                            'wordlist-error-' + lang + '-' + generator
-                          "
-                        >
-                          @for (error of errors; track error) {
-                            <li>{{ error }}</li>
-                          }
-                        </ul>
-                      }
-                      <div class="actions">
-                        <p-fileupload
-                          mode="basic"
-                          accept=".json,application/json"
-                          [auto]="true"
-                          [customUpload]="true"
-                          chooseIcon="pi pi-upload"
-                          [chooseLabel]="'packs.creator.importFile' | transloco"
-                          (uploadHandler)="importFile(lang, generator, $event)"
-                        />
-                        <p-button
-                          severity="secondary"
-                          icon="pi pi-copy"
-                          [label]="'packs.creator.copyBase' | transloco"
-                          (onClick)="copyBase(lang, generator)"
-                        />
-                        <p-button
-                          severity="secondary"
-                          outlined
-                          icon="pi pi-times"
-                          [label]="'packs.creator.clear' | transloco"
-                          (onClick)="setText(lang, generator, '')"
-                        />
-                      </div>
-                    </section>
-                  }
+                @for (generator of generators; track generator) {
+                  <section class="list">
+                    <h3>
+                      {{ 'packs.generator.' + generator | transloco }}
+                    </h3>
+                    <textarea
+                      pTextarea
+                      class="json"
+                      rows="6"
+                      [attr.data-test]="'wordlist-' + generator"
+                      [attr.aria-label]="
+                        'packs.generator.' + generator | transloco
+                      "
+                      [ngModel]="text(generator)"
+                      (ngModelChange)="setText(generator, $event)"
+                    ></textarea>
+                    @if (listErrors(generator); as errors) {
+                      <ul
+                        class="errors"
+                        [attr.data-test]="'wordlist-error-' + generator"
+                      >
+                        @for (error of errors; track error) {
+                          <li>{{ error }}</li>
+                        }
+                      </ul>
+                    }
+                    <div class="actions">
+                      <p-fileupload
+                        mode="basic"
+                        accept=".json,application/json"
+                        [auto]="true"
+                        [customUpload]="true"
+                        chooseIcon="pi pi-upload"
+                        [chooseLabel]="'packs.creator.importFile' | transloco"
+                        (uploadHandler)="importFile(generator, $event)"
+                      />
+                      <p-button
+                        severity="secondary"
+                        icon="pi pi-copy"
+                        [label]="'packs.creator.copyBase' | transloco"
+                        (onClick)="copyBase(generator)"
+                      />
+                      <p-button
+                        severity="secondary"
+                        outlined
+                        icon="pi pi-times"
+                        [label]="'packs.creator.clear' | transloco"
+                        (onClick)="setText(generator, '')"
+                      />
+                    </div>
+                  </section>
                 }
               }
             </p-tabpanel>
@@ -354,24 +338,13 @@ const slotKey = (lang: PackLanguage, generator: PackGenerator) =>
                           }}</small>
                         }
                         <label>
-                          {{ 'packs.creator.labelEn' | transloco }}
+                          {{ 'packs.creator.label' | transloco }}
                           <input
                             pInputText
                             type="text"
-                            [ngModel]="entry.sprite.en"
+                            [ngModel]="entry.sprite.label"
                             (ngModelChange)="
-                              patchSprite(entry.index, { en: $event })
-                            "
-                          />
-                        </label>
-                        <label>
-                          {{ 'packs.creator.labelFr' | transloco }}
-                          <input
-                            pInputText
-                            type="text"
-                            [ngModel]="entry.sprite.fr"
-                            (ngModelChange)="
-                              patchSprite(entry.index, { fr: $event })
+                              patchSprite(entry.index, { label: $event })
                             "
                           />
                         </label>
@@ -573,7 +546,7 @@ export class PackDraftPageComponent {
   private readonly pending = inject(PendingTasks);
   private readonly router = inject(Router);
 
-  protected readonly languages = PACK_LANGUAGES;
+  protected readonly languageOptions = [...SUPPORTED_LANGUAGES];
   protected readonly generators = PACK_GENERATORS;
   protected readonly tab = signal<Tab>('details');
   protected readonly draft = signal<PackDraft | null>(null);
@@ -657,15 +630,12 @@ export class PackDraftPageComponent {
         return;
       }
       const texts: Record<string, string> = {};
-      for (const lang of PACK_LANGUAGES)
-        for (const generator of PACK_GENERATORS) {
-          const value = draft.generators[lang]?.[generator];
-          if (value !== undefined)
-            texts[slotKey(lang, generator)] =
-              typeof value === 'string'
-                ? value
-                : JSON.stringify(value, null, 2);
-        }
+      for (const generator of PACK_GENERATORS) {
+        const value = draft.generators[generator];
+        if (value !== undefined)
+          texts[generator] =
+            typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+      }
       this.texts.set(texts);
       this.draft.set(draft);
     } catch (error) {
@@ -712,47 +682,30 @@ export class PackDraftPageComponent {
     this.change((d) => ({ ...d, details: { ...d.details, ...patch } }));
   }
 
-  protected setName(lang: PackLanguage, value: string): void {
+  protected setName(name: string): void {
     this.change((d) => {
       const { details } = d;
-      const derived = (name: DraftDetails['name']) =>
-        slugifyPackId(name.en || name.fr);
-      const name = { ...details.name, [lang]: value };
       // The id follows the name until the author edits it.
-      const follows = details.id === derived(details.name);
+      const follows = details.id === slugifyPackId(details.name);
       return {
         ...d,
         details: {
           ...details,
           name,
-          ...(follows ? { id: derived(name) } : {}),
+          ...(follows ? { id: slugifyPackId(name) } : {}),
         },
       };
     });
   }
 
-  protected setDescription(lang: PackLanguage, value: string): void {
-    this.change((d) => ({
-      ...d,
-      details: {
-        ...d.details,
-        description: { ...d.details.description, [lang]: value },
-      },
-    }));
-  }
-
   // --- word lists -------------------------------------------------------------------------------------------
 
-  protected text(lang: PackLanguage, generator: PackGenerator): string {
-    return this.texts()[slotKey(lang, generator)] ?? '';
+  protected text(generator: PackGenerator): string {
+    return this.texts()[generator] ?? '';
   }
 
-  protected setText(
-    lang: PackLanguage,
-    generator: PackGenerator,
-    text: string,
-  ): void {
-    this.texts.update((t) => ({ ...t, [slotKey(lang, generator)]: text }));
+  protected setText(generator: PackGenerator, text: string): void {
+    this.texts.update((t) => ({ ...t, [generator]: text }));
     const empty = text.trim() === '';
     let value: unknown = text;
     if (!empty) {
@@ -763,20 +716,17 @@ export class PackDraftPageComponent {
       }
     }
     this.change((d) => {
-      const slots = { ...d.generators[lang] };
-      if (empty) delete slots[generator];
-      else slots[generator] = value;
-      return { ...d, generators: { ...d.generators, [lang]: slots } };
+      const generators = { ...d.generators };
+      if (empty) delete generators[generator];
+      else generators[generator] = value;
+      return { ...d, generators };
     });
   }
 
   /** The problems of a list as typed, or null when it is empty or valid. */
-  protected listErrors(
-    lang: PackLanguage,
-    generator: PackGenerator,
-  ): string[] | null {
-    const key = slotKey(lang, generator);
-    const text = this.text(lang, generator);
+  protected listErrors(generator: PackGenerator): string[] | null {
+    const key = generator;
+    const text = this.text(generator);
     const known = this.checked.get(key);
     if (known?.text === text) return known.errors;
     let errors: string[] | null = null;
@@ -796,31 +746,23 @@ export class PackDraftPageComponent {
   }
 
   protected async importFile(
-    lang: PackLanguage,
     generator: PackGenerator,
     event: FileUploadHandlerEvent,
   ): Promise<void> {
     const file = event.files[0];
     if (!file) return;
     try {
-      this.setText(lang, generator, await file.text());
+      this.setText(generator, await file.text());
     } catch (error) {
       this.fail(error);
     }
   }
 
-  protected async copyBase(
-    lang: PackLanguage,
-    generator: PackGenerator,
-  ): Promise<void> {
+  protected async copyBase(generator: PackGenerator): Promise<void> {
     try {
       await this.flush();
-      const value = await this.creator.copyBaseList(
-        this.draftId(),
-        lang,
-        generator,
-      );
-      this.setText(lang, generator, JSON.stringify(value, null, 2));
+      const value = await this.creator.copyBaseList(this.draftId(), generator);
+      this.setText(generator, JSON.stringify(value, null, 2));
     } catch (error) {
       this.fail(error);
     }
@@ -886,8 +828,7 @@ export class PackDraftPageComponent {
       this.adopt(
         await this.creator.addPng(this.draftId(), file, {
           id,
-          en: name,
-          fr: name,
+          label: name,
           type: 'item',
           slot: 'none',
           kind: 'grayscale',

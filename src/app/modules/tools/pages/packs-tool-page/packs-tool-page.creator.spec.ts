@@ -62,19 +62,19 @@ describe('PacksToolPageComponent pack creator', () => {
 
     await settle(async () => expect((await creator.listDrafts()).length).toBe(1));
     const [draft] = await creator.listDrafts();
-    expect(draft.details.id).toBe('neon-copy');
+    expect(draft.details.id).toBe('neon-copie');
     await settle(() => expect(router.url).toBe(`/tools/pack-creator/${draft.id}`));
   });
 
-  it('the Base card has Duplicate, which opens a draft of Base', async () => {
+  it('each Base card has Duplicate, which opens a draft of that Base in its language', async () => {
     const { el, settle, button, creator, router } = await render();
-    const base = el.querySelector<HTMLElement>('[data-test="pack-card"][data-pack="base"]')!;
+    const base = el.querySelector<HTMLElement>('[data-test="pack-card"][data-pack="base-fr"]')!;
 
     button('Duplicate', base)!.click();
 
     await settle(async () => expect((await creator.listDrafts()).length).toBe(1));
     const [draft] = await creator.listDrafts();
-    expect(draft.details.id).toBe('base-copy');
+    expect(draft.details).toMatchObject({ id: 'base-fr-copie', language: 'fr' });
     await settle(() => expect(router.url).toBe(`/tools/pack-creator/${draft.id}`));
   });
 
@@ -95,8 +95,9 @@ describe('PacksToolPageComponent pack creator', () => {
       ...draft,
       details: {
         id: 'mine',
-        name: { en: 'Mine', fr: 'Mien' },
-        description: { en: 'My pack', fr: 'Mon pack' },
+        language: 'fr',
+        name: 'Mien',
+        description: 'Mon pack',
         version: '1.0.0',
         author: 'Ann Author',
         license: 'CC-BY-4.0',
@@ -113,10 +114,21 @@ describe('PacksToolPageComponent pack creator', () => {
     expect(button('Duplicate', card('mine'))).toBeDefined();
   });
 
+  it('the English Base card duplicates into an English draft', async () => {
+    const { el, settle, button, creator } = await render();
+    const base = el.querySelector<HTMLElement>('[data-test="pack-card"][data-pack="base-en"]')!;
+
+    button('Duplicate', base)!.click();
+
+    await settle(async () => expect((await creator.listDrafts()).length).toBe(1));
+    const [draft] = await creator.listDrafts();
+    expect(draft.details).toMatchObject({ id: 'base-en-copy', language: 'en' });
+  });
+
   it('official packs have no Edit as a draft button', async () => {
     const { el, button } = await render();
 
-    const official = el.querySelector<HTMLElement>('[data-test="pack-card"][data-pack="base"]')!;
+    const official = el.querySelector<HTMLElement>('[data-test="pack-card"][data-pack="base-fr"]')!;
 
     expect(button('Edit as a draft', official)).toBeUndefined();
   });

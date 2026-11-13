@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { PackBusiness } from '../../../core/business/pack.business';
 import { provideTestTranslations } from '../../../../testing/test-providers';
-import en from '../../../../../public/packs/base/generators/en/items.json';
+import en from '../../../../../public/packs/base-en/generators/items.json';
 import { SandboxCharacterBusiness } from './sandbox-character.business';
 
 async function settle(): Promise<void> {
@@ -20,7 +20,7 @@ describe('SandboxCharacterBusiness', () => {
         provideTestTranslations(),
         {
           provide: PackBusiness,
-          useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] },
+          useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] },
         },
       ],
     });

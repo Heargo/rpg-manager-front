@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import base from '../../../../public/packs/base/pack.json';
-import en from '../../../../public/packs/base/generators/en/items.json';
-import fr from '../../../../public/packs/base/generators/fr/items.json';
+import en from '../../../../public/packs/base-en/generators/items.json';
+import fr from '../../../../public/packs/base-fr/generators/items.json';
+import { baseManifest } from '../../../testing/base-pack';
 import { provideTestTranslations } from '../../../testing/test-providers';
 import { PackService } from '../services/pack.service';
 import { LanguageBusiness } from './language.business';
@@ -14,11 +14,11 @@ describe('WordListBusiness', () => {
 
   beforeEach(() => {
     files = {
-      'packs/base/generators/en/items.json': en,
-      'packs/base/generators/fr/items.json': fr,
+      'packs/base-en/generators/items.json': en,
+      'packs/base-fr/generators/items.json': fr,
     };
     service = {
-      loadManifest: vi.fn(async () => base),
+      loadManifest: vi.fn(async (id: string) => baseManifest(id)),
       loadJson: vi.fn(async (url: string) => {
         if (!(url in files)) throw new Error('404');
         return files[url];
@@ -31,13 +31,24 @@ describe('WordListBusiness', () => {
     business = TestBed.inject(WordListBusiness);
   });
 
-  it('loads the list for the active language', async () => {
+  it('loads the list of base-fr for a French app', async () => {
     TestBed.inject(LanguageBusiness).setLanguage('fr');
 
     const words = await business.itemWords();
 
     expect(words.bases.weapon1[0].text).toBe('Épée');
-    expect(service.loadJson).toHaveBeenCalledWith('packs/base/generators/fr/items.json');
+    expect(service.loadJson).toHaveBeenCalledWith('packs/base-fr/generators/items.json');
+    expect(service.loadJson).not.toHaveBeenCalledWith('packs/base-en/generators/items.json');
+  });
+
+  it('loads the list of base-en for an English app', async () => {
+    TestBed.inject(LanguageBusiness).setLanguage('en');
+
+    const words = await business.itemWords();
+
+    expect(words.bases.weapon1[0].text).toBe('Sword');
+    expect(service.loadJson).toHaveBeenCalledWith('packs/base-en/generators/items.json');
+    expect(service.loadJson).not.toHaveBeenCalledWith('packs/base-fr/generators/items.json');
   });
 
   it('caches per language', async () => {
@@ -47,8 +58,8 @@ describe('WordListBusiness', () => {
     expect(service.loadJson).toHaveBeenCalledTimes(1);
   });
 
-  it('falls back to English when a list is invalid, and warns', async () => {
-    files['packs/base/generators/fr/items.json'] = { version: 1 };
+  it('falls back to base-en when the list of base-fr is invalid, and warns', async () => {
+    files['packs/base-fr/generators/items.json'] = { version: 1 };
 
     const words = await business.itemWords('fr');
 
@@ -56,16 +67,19 @@ describe('WordListBusiness', () => {
     expect(console.warn).toHaveBeenCalled();
   });
 
-  it('falls back to English when a list is missing', async () => {
-    const words = await business.itemWords('de');
+  it('falls back to base-en when the list of base-fr is missing', async () => {
+    delete files['packs/base-fr/generators/items.json'];
+
+    const words = await business.itemWords('fr');
+
     expect(words.bases.weapon1[0].text).toBe('Sword');
   });
 
-  it('fails when even English is unavailable, and retries next time', async () => {
-    delete files['packs/base/generators/en/items.json'];
+  it('fails when even base-en is unavailable, and retries next time', async () => {
+    delete files['packs/base-en/generators/items.json'];
     await expect(business.itemWords('en')).rejects.toThrow('default item word list');
 
-    files['packs/base/generators/en/items.json'] = en;
+    files['packs/base-en/generators/items.json'] = en;
     await expect(business.itemWords('en')).resolves.toBeTruthy();
   });
 });

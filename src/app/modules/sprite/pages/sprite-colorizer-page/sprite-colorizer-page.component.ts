@@ -113,19 +113,14 @@ export class SpriteColorizerPageComponent {
   protected readonly addDraftId = signal<string | null>(null);
   protected readonly addDetails = signal({
     id: '',
-    en: '',
-    fr: '',
+    label: '',
     type: 'item' as ItemType,
     slot: 'none' as ItemSlot,
   });
   protected readonly adding = signal(false);
   protected readonly draftOptions = computed(() =>
     this.creator.$drafts().map((d) => ({
-      label:
-        (this.language.$language() === 'en'
-          ? d.details.name.en || d.details.name.fr
-          : d.details.name.fr || d.details.name.en) ||
-        this.language.t('packs.creator.untitled'),
+      label: d.details.name || this.language.t('packs.creator.untitled'),
       value: d.id,
     })),
   );
@@ -155,7 +150,7 @@ export class SpriteColorizerPageComponent {
   private readonly language = inject(LanguageBusiness);
   private readonly packs = inject(PackBusiness);
   private readonly bundled = signal<BundledSprite[]>([]);
-  private readonly bundledPacks = signal<Pack[]>([]);
+  private readonly bundledPacks = signal<Pick<Pack, 'id' | 'name'>[]>([]);
   private readonly messages = inject(MessageService);
   private readonly confirmation = inject(ConfirmationService);
   private readonly injector = inject(Injector);
@@ -224,13 +219,13 @@ export class SpriteColorizerPageComponent {
       lang,
       this.libraryKind(),
     );
-    return groupSpritesByPack(found, this.bundledPacks(), lang).map(
+    return groupSpritesByPack(found, this.bundledPacks()).map(
       (group) => ({
         packId: group.packId,
         name: group.name,
         sprites: group.sprites.map((sprite) => ({
           id: sprite.id,
-          label: lang === 'fr' ? sprite.fr : sprite.en,
+          label: sprite.label,
           url: sprite.imageUrl,
           kind: sprite.kind,
         })),
@@ -310,8 +305,8 @@ export class SpriteColorizerPageComponent {
       .then((sprites) => this.bundled.set(sprites))
       .catch(() => undefined);
     this.packs
-      .manifest()
-      .then((pack) => this.bundledPacks.set([pack]))
+      .load()
+      .then(() => this.bundledPacks.set(this.packs.$installed()))
       .catch(() => undefined);
     // Open the draft sprite named by the query params.
     effect(() => {
@@ -652,13 +647,13 @@ export class SpriteColorizerPageComponent {
     }
   }
 
-  /** A saved set keeps its name; a bundled sprite is named after its label in the page's language. */
+  /** A saved set keeps its name; a bundled sprite is named after its label. */
   private defaultSetName(): string {
     const name = this.business.$fileName();
     if (this.business.$currentSetId()) return name;
     const sprite = this.bundled().find((s) => s.id === name);
     if (!sprite) return name;
-    return this.language.$language() === 'en' ? sprite.en : sprite.fr;
+    return sprite.label;
   }
 
   protected async openSet(id: string): Promise<void> {
@@ -751,8 +746,7 @@ export class SpriteColorizerPageComponent {
     const name = this.business.$fileName();
     this.addDetails.set({
       id: slugifyPackId(name),
-      en: name,
-      fr: name,
+      label: name,
       type: 'item',
       slot: 'none',
     });

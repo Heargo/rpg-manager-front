@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../../public/packs/base/generators/en/classes.json';
+import en from '../../../../../../public/packs/base-en/generators/classes.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { PackBusiness } from '../../../../core/business/pack.business';
 import { Skill } from '../../../skill/models/skill';
@@ -25,7 +25,7 @@ describe('ClassEditorComponent Random', () => {
   async function setup() {
     TestBed.configureTestingModule({
       imports: [ClassEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } }],
+      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } }],
     });
     const fixture = TestBed.createComponent(ClassEditorComponent);
     fixture.componentRef.setInput('world', world);

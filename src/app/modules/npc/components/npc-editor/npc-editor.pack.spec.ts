@@ -30,7 +30,7 @@ describe('NpcEditorComponent pack choice', () => {
   it('lists Random then the packs with NPC names in the language, defaulting to Random', async () => {
     const { fixture } = await setup();
 
-    expect(packOptionValues(fixture)).toEqual(['random', 'base', 'extra']);
+    expect(packOptionValues(fixture)).toEqual(['random', 'base-fr', 'extra']);
     expect(packSelected(fixture)).toBe('random');
   });
 

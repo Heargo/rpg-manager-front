@@ -1,43 +1,54 @@
-import base from '../../../../../public/packs/base/pack.json';
+import baseEn from '../../../../../public/packs/base-en/pack.json';
+import baseFr from '../../../../../public/packs/base-fr/pack.json';
 import { DEMO_SPRITE_ID, groupSpritesByPack, searchSprites } from './sprite-library';
 
-/** The Base pack's sprites, as PackBusiness exposes them. */
-const sprites = base.sprites.map((s) => ({
-  ...s,
-  packId: 'base',
-  imageUrl: `packs/base/${s.image}`,
-}));
-const search = (query: string, lang: string) => searchSprites(sprites as never, query, lang);
+/** A Base pack's sprites, as PackBusiness exposes them. */
+const bundled = (pack: typeof baseFr | typeof baseEn) =>
+  pack.sprites.map((s) => ({
+    ...s,
+    packId: pack.id,
+    imageUrl: `packs/${pack.id}/${s.image}`,
+  }));
+const frSprites = bundled(baseFr);
+const enSprites = bundled(baseEn);
+const searchFr = (query: string) => searchSprites(frSprites as never, query, 'fr');
+const searchEn = (query: string) => searchSprites(enSprites as never, query, 'en');
 
 describe('sprite library', () => {
   it('uses the axe as the demo sprite', () => {
     expect(DEMO_SPRITE_ID).toBe('axe');
-    expect(sprites.some((s) => s.id === DEMO_SPRITE_ID)).toBe(true);
+    expect(frSprites.some((s) => s.id === DEMO_SPRITE_ID)).toBe(true);
+    expect(enSprites.some((s) => s.id === DEMO_SPRITE_ID)).toBe(true);
   });
 
-  it('returns every sprite, sorted by label in the language, for an empty query', () => {
-    const fr = search('', 'fr');
+  it('returns every sprite, sorted by its label, for an empty query', () => {
+    const fr = searchFr('');
     expect(fr).toHaveLength(101);
-    const labels = fr.map((s) => s.fr);
+    const labels = fr.map((s) => s.label);
     expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b, 'fr')));
+    expect(searchEn('')).toHaveLength(101);
   });
 
-  it('matches the label in the given language', () => {
-    expect(search('hache', 'fr').map((s) => s.id)).toEqual(['axe', 'waraxe']);
-    expect(search('axe', 'en').map((s) => s.id)).toEqual(['axe', 'pick', 'waraxe']);
+  it('matches the single label of the pack', () => {
+    expect(searchFr('hache').map((s) => s.id)).toEqual(['axe', 'waraxe']);
+    expect(searchEn('axe').map((s) => s.id)).toEqual(['axe', 'pick', 'waraxe']);
+  });
+
+  it('does not match the label of the other language', () => {
+    expect(searchEn('hache')).toEqual([]);
+    expect(searchFr('sword')).toEqual([]);
   });
 
   it('ignores case and accents, and needs every word', () => {
-    expect(search('EPEE', 'fr').map((s) => s.id)).toEqual(['sword']);
-    expect(search('hache guerre', 'fr').map((s) => s.id)).toEqual(['waraxe']);
-    expect(search('zzz', 'en')).toEqual([]);
+    expect(searchFr('EPEE').map((s) => s.id)).toEqual(['sword']);
+    expect(searchFr('hache guerre').map((s) => s.id)).toEqual(['waraxe']);
+    expect(searchEn('zzz')).toEqual([]);
   });
 
   describe('kinds and packs', () => {
-    const sprite = (id: string, en: string, kind: string, packId = 'base') => ({
+    const sprite = (id: string, label: string, kind: string, packId = 'base-fr') => ({
       id,
-      en,
-      fr: en,
+      label,
       type: 'item',
       slot: 'none',
       kind,
@@ -68,28 +79,27 @@ describe('sprite library', () => {
 
     it('groups sprites under the name of their pack in the language, in pack order', () => {
       const packs = [
-        { id: 'base', name: { en: 'Base', fr: 'Socle' } },
-        { id: 'extra', name: { en: 'Extra', fr: 'Bonus' } },
+        { id: 'base-fr', name: 'Socle' },
+        { id: 'extra', name: 'Bonus' },
       ] as never[];
       const sprites = [
         sprite('x', 'X', 'masked', 'extra'),
         sprite('a', 'A', 'masked'),
         sprite('b', 'B', 'colored'),
       ] as never[];
-      const groups = groupSpritesByPack(sprites, packs, 'fr');
+      const groups = groupSpritesByPack(sprites, packs);
       expect(groups.map((g) => [g.packId, g.name, g.sprites.map((s) => s.id)])).toEqual([
-        ['base', 'Socle', ['a', 'b']],
+        ['base-fr', 'Socle', ['a', 'b']],
         ['extra', 'Bonus', ['x']],
       ]);
-      expect(groupSpritesByPack(sprites, packs, 'en').map((g) => g.name)).toEqual(['Base', 'Extra']);
     });
 
     it('leaves out the packs that have no sprite', () => {
       const packs = [
-        { id: 'base', name: { en: 'Base', fr: 'Base' } },
-        { id: 'empty', name: { en: 'Empty', fr: 'Vide' } },
+        { id: 'base-fr', name: 'Base' },
+        { id: 'empty', name: 'Vide' },
       ] as never[];
-      expect(groupSpritesByPack([sprite('a', 'A', 'masked')] as never[], packs, 'en').map((g) => g.packId)).toEqual(['base']);
+      expect(groupSpritesByPack([sprite('a', 'A', 'masked')] as never[], packs).map((g) => g.packId)).toEqual(['base-fr']);
     });
   });
 });

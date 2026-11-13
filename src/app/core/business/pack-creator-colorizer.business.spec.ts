@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { provideTestTranslations } from '../../../testing/test-providers';
-import glowMaterials from '../../../../public/packs/base/sprites/axe.json';
+import glowMaterials from '../../../../public/packs/base-fr/sprites/axe.json';
 import { neonProviders, neonWorld } from '../../../testing/unofficial-pack';
 import { ImageProcessingService } from '../services/image-processing.service';
 import { PackCreatorBusiness } from './pack-creator.business';
@@ -27,7 +27,7 @@ function setup() {
   return { dims, creator: TestBed.inject(PackCreatorBusiness) };
 }
 
-const axe = { id: 'axe', en: 'Axe', fr: 'Hache', type: 'equipment', slot: 'weapon1' } as const;
+const axe = { id: 'axe', label: 'Hache', type: 'equipment', slot: 'weapon1' } as const;
 
 describe('PackCreatorBusiness: colorizer link', () => {
   describe('addFromColorizer', () => {
@@ -77,7 +77,7 @@ describe('PackCreatorBusiness: colorizer link', () => {
   });
 
   describe('updateSpriteMaterials', () => {
-    const grayscale = { id: 'spark', en: 'Spark', fr: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' } as const;
+    const grayscale = { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' } as const;
 
     it('replaces the materials of a masked sprite and keeps its image', async () => {
       const s = setup();

@@ -3,28 +3,28 @@ import { IDBFactory } from 'fake-indexeddb';
 import { DebugElement } from '@angular/core';
 import { ComponentFixture } from '@angular/core/testing';
 import { NgModel } from '@angular/forms';
-import enItems from '../../public/packs/base/generators/en/items.json';
-import frItems from '../../public/packs/base/generators/fr/items.json';
-import enNpcs from '../../public/packs/base/generators/en/npcs.json';
-import frNpcs from '../../public/packs/base/generators/fr/npcs.json';
-import base_pack from '../../public/packs/base/pack.json';
+import enItems from '../../public/packs/base-en/generators/items.json';
+import frItems from '../../public/packs/base-fr/generators/items.json';
+import enNpcs from '../../public/packs/base-en/generators/npcs.json';
+import frNpcs from '../../public/packs/base-fr/generators/npcs.json';
+import { baseManifest } from './base-pack';
 import { EXTRA_ITEMS, EXTRA_MANIFEST, EXTRA_NPCS, extraPackService, provideExtraPack } from './extra-pack';
 
 /**
- * `PackService` fake for the generator components: real Base word lists (items and NPC names, EN and FR) and
- * the `extra` pack, whose French items are all "Zircon" and French NPCs all "Zorg".
+ * `PackService` fake for the generator components: real Base word lists (items and NPC names, `base-en` and `base-fr`) and
+ * the French `extra` pack, whose items are all "Zircon" and NPCs all "Zorg".
  */
 export function packChoiceProviders() {
   globalThis.indexedDB = new IDBFactory();
   URL.createObjectURL = vi.fn(() => 'blob:fake');
   URL.revokeObjectURL = vi.fn();
   const files: Record<string, unknown> = {
-    'packs/base/generators/en/items.json': enItems,
-    'packs/base/generators/fr/items.json': frItems,
-    'packs/base/generators/en/npcs.json': enNpcs,
-    'packs/base/generators/fr/npcs.json': frNpcs,
-    'packs/extra/generators/fr/items.json': EXTRA_ITEMS,
-    'packs/extra/generators/fr/npcs.json': EXTRA_NPCS,
+    'packs/base-en/generators/items.json': enItems,
+    'packs/base-fr/generators/items.json': frItems,
+    'packs/base-en/generators/npcs.json': enNpcs,
+    'packs/base-fr/generators/npcs.json': frNpcs,
+    'packs/extra/generators/items.json': EXTRA_ITEMS,
+    'packs/extra/generators/npcs.json': EXTRA_NPCS,
   };
   const fake = extraPackService();
   fake.loadJson = vi.fn(async (url: string) => (url in files ? files[url] : { url }));
@@ -32,9 +32,9 @@ export function packChoiceProviders() {
     id === 'extra'
       ? {
           ...structuredClone(EXTRA_MANIFEST),
-          generators: { fr: { items: 'generators/fr/items.json', npcs: 'generators/fr/npcs.json' } },
+          generators: { items: 'generators/items.json', npcs: 'generators/npcs.json' },
         }
-      : base_pack,
+      : baseManifest(id),
   );
   return provideExtraPack(fake);
 }

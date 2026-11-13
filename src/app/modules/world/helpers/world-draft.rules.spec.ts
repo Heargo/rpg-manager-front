@@ -1,4 +1,4 @@
-import en from '../../../../../public/packs/base/generators/en/items.json';
+import en from '../../../../../public/packs/base-en/generators/items.json';
 import { seededRandomSource } from '../../../core/generators/random-source';
 import { WordList } from '../../../core/generators/word-list';
 import { EQUIPMENT_SLOTS } from '../../../core/models/item';

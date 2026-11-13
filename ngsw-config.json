@@ -15,8 +15,10 @@
           "/*.js",
           "/i18n/**",
           "/packs/index.json",
-          "/packs/base/pack.json",
-          "/packs/base/generators/**"
+          "/packs/base-fr/pack.json",
+          "/packs/base-en/pack.json",
+          "/packs/base-fr/generators/**",
+          "/packs/base-en/generators/**"
         ]
       }
     },
@@ -27,7 +29,8 @@
       "resources": {
         "files": [
           "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)",
-          "/packs/base/sprites/**"
+          "/packs/base-fr/sprites/**",
+          "/packs/base-en/sprites/**"
         ]
       }
     }

@@ -1,13 +1,14 @@
 import { inject, Injectable } from '@angular/core';
-import { DEFAULT_LANGUAGE } from '../constants/languages';
 import { ClassWordList } from '../generators/class-generator';
 import { SkillWordList } from '../generators/skill-generator';
 import { isClassWordList, isSkillWordList } from '../generators/pack-word-lists';
 import { validateWordList, WordList } from '../generators/word-list';
-import { BASE_PACK_ID, PackBusiness } from './pack.business';
+import { basePackId, PackBusiness } from './pack.business';
 import { LanguageBusiness } from './language.business';
 
-/** Item word lists for the generators, per language, cached; falls back to English when a list is missing or invalid. */
+const FALLBACK_BASE = 'base-en';
+
+/** Item word lists for the generators, per pack, cached; falls back to the Base of the language, then to base-en when a list is missing or invalid. */
 @Injectable({ providedIn: 'root' })
 export class WordListBusiness {
   private readonly service = inject(PackBusiness);
@@ -17,9 +18,9 @@ export class WordListBusiness {
   /** Word list for the given language (the active one by default). */
   itemWords(
     lang: string = this.languageBusiness.$language(),
-    packId: string = BASE_PACK_ID,
+    packId: string = basePackId(lang),
   ): Promise<WordList> {
-    const key = `${packId}:${lang}`;
+    const key = packId;
     let words = this.cache.get(key);
     if (!words) {
       words = this.load(lang, packId);
@@ -32,18 +33,27 @@ export class WordListBusiness {
 
   private async load(lang: string, packId: string): Promise<WordList> {
     try {
+      await this.checkLanguage(lang, packId);
       const result = validateWordList(
-        await this.service.wordList('items', lang, packId),
+        await this.service.wordList('items', packId),
       );
       if (result.ok) return result.value;
       console.warn(`Item word list "${lang}" is invalid:`, result.errors);
     } catch (error) {
       console.warn(`Item word list "${lang}" could not be loaded:`, error);
     }
-    if (packId !== BASE_PACK_ID) return this.itemWords(lang, BASE_PACK_ID);
-    if (lang === DEFAULT_LANGUAGE)
+    if (packId !== basePackId(lang)) return this.itemWords(lang);
+    if (packId === FALLBACK_BASE)
       throw new Error('The default item word list is unavailable');
-    return this.itemWords(DEFAULT_LANGUAGE);
+    return this.itemWords('en', FALLBACK_BASE);
+  }
+
+  /** A pack only gives word lists in its own language; throws otherwise so the caller falls back to the Base. */
+  private async checkLanguage(lang: string, packId: string): Promise<void> {
+    if (packId === basePackId(lang)) return;
+    const language = await this.service.languageOf(packId);
+    if (language !== lang)
+      throw new Error(`Pack "${packId}" is not in "${lang}"`);
   }
 
   private readonly skillCache = new Map<string, Promise<SkillWordList>>();
@@ -52,13 +62,13 @@ export class WordListBusiness {
   /** Skill word list for the given language (the active one by default). */
   skillWords(
     lang: string = this.languageBusiness.$language(),
-    packId: string = BASE_PACK_ID,
+    packId: string = basePackId(lang),
   ): Promise<SkillWordList> {
     return this.cached(
       this.skillCache,
       lang,
       packId,
-      (l, p) => this.service.wordList('skills', l, p),
+      (_l, p) => this.service.wordList('skills', p),
       isSkillWordList,
       (l, p) => this.skillWords(l, p),
     );
@@ -67,13 +77,13 @@ export class WordListBusiness {
   /** Class word list for the given language (the active one by default). */
   classWords(
     lang: string = this.languageBusiness.$language(),
-    packId: string = BASE_PACK_ID,
+    packId: string = basePackId(lang),
   ): Promise<ClassWordList> {
     return this.cached(
       this.classCache,
       lang,
       packId,
-      (l, p) => this.service.wordList('classes', l, p),
+      (_l, p) => this.service.wordList('classes', p),
       isClassWordList,
       (l, p) => this.classWords(l, p),
     );
@@ -87,21 +97,22 @@ export class WordListBusiness {
     valid: (json: unknown) => json is T,
     fallback: (lang: string, packId: string) => Promise<T>,
   ): Promise<T> {
-    const key = `${packId}:${lang}`;
+    const key = packId;
     let words = cache.get(key);
     if (!words) {
       words = (async () => {
         try {
+          await this.checkLanguage(lang, packId);
           const json = await load(lang, packId);
           if (valid(json)) return json;
           console.warn(`Word list "${lang}" is invalid`);
         } catch (error) {
           console.warn(`Word list "${lang}" could not be loaded:`, error);
         }
-        if (packId !== BASE_PACK_ID) return fallback(lang, BASE_PACK_ID);
-        if (lang === DEFAULT_LANGUAGE)
+        if (packId !== basePackId(lang)) return fallback(lang, basePackId(lang));
+        if (packId === FALLBACK_BASE)
           throw new Error('The default word list is unavailable');
-        return fallback(DEFAULT_LANGUAGE, BASE_PACK_ID);
+        return fallback('en', FALLBACK_BASE);
       })();
       cache.set(key, words);
       words.catch(() => cache.delete(key));

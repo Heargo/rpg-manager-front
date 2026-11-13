@@ -27,7 +27,7 @@ async function setup() {
     });
   await settle(() =>
     expect(
-      fixture.nativeElement.querySelector('input[data-test="draft-name-en"]'),
+      fixture.nativeElement.querySelector('input[data-test="draft-name"]'),
     ).not.toBeNull(),
   );
   return { creator, fixture, a, b, settle };
@@ -47,7 +47,7 @@ describe('PackDraftPageComponent lifecycle', () => {
   it('saves pending edits before another draft is loaded', async () => {
     const { creator, fixture, a, b, settle } = await setup();
     const input = fixture.nativeElement.querySelector(
-      'input[data-test="draft-name-en"]',
+      'input[data-test="draft-name"]',
     ) as HTMLInputElement;
     input.value = 'Edited';
     input.dispatchEvent(new Event('input'));
@@ -55,10 +55,10 @@ describe('PackDraftPageComponent lifecycle', () => {
     fixture.componentRef.setInput('draftId', b.id);
 
     await settle(async () =>
-      expect((await creator.getDraft(a.id))?.details.name.en).toBe('Edited'),
+      expect((await creator.getDraft(a.id))?.details.name).toBe('Edited'),
     );
     await vi.waitFor(async () =>
-      expect((await creator.getDraft(a.id))?.details.name.en).toBe('Edited'),
+      expect((await creator.getDraft(a.id))?.details.name).toBe('Edited'),
     );
   });
 });

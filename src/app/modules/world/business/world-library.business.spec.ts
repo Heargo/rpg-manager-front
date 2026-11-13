@@ -4,13 +4,13 @@ import { TestBed } from '@angular/core/testing';
 import { ImageBusiness } from '../../../core/business/image.business';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
 import { WorldImportError, WorldLibraryBusiness } from './world-library.business';
-import en from '../../../../../public/packs/base/generators/en/items.json';
+import en from '../../../../../public/packs/base-en/generators/items.json';
 import { PackBusiness } from '../../../core/business/pack.business';
 import { provideTestTranslations } from '../../../../testing/test-providers';
 
 const TEST_WORLD_PROVIDERS = [
   provideTestTranslations(),
-  { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base'], $installed: () => [] } },
+  { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } },
 ];
 
 describe('WorldLibraryBusiness (IndexedDB)', () => {

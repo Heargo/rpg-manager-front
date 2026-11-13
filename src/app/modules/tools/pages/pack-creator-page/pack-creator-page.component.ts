@@ -131,13 +131,8 @@ export class PackCreatorPageComponent implements OnInit {
   }
 
   protected name(draft: PackDraft): string {
-    const { name } = draft.details;
-    const lang = this.language.$language() === 'fr' ? 'fr' : 'en';
-    const other = lang === 'fr' ? 'en' : 'fr';
     return (
-      name[lang].trim() ||
-      name[other].trim() ||
-      this.language.t('packs.creator.untitled')
+      draft.details.name.trim() || this.language.t('packs.creator.untitled')
     );
   }
 

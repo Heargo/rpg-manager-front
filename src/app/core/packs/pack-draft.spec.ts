@@ -10,15 +10,16 @@ function draft(over: Partial<PackDraft> = {}): PackDraft {
     updatedAt: 1000,
     details: {
       id: 'mine',
-      name: { en: 'Mine', fr: 'Mien' },
-      description: { en: 'My pack', fr: 'Mon pack' },
+      language: 'fr',
+      name: 'Mien',
+      description: 'Mon pack',
       version: '1.0.0',
       author: 'Ann Author',
       license: 'CC-BY-4.0',
       licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
       homepage: 'https://example.com/mine',
     },
-    generators: { fr: { items: EXTRA_ITEMS, npcs: EXTRA_NPCS } },
+    generators: { items: EXTRA_ITEMS, npcs: EXTRA_NPCS },
     sprites: [],
     ...over,
   };
@@ -26,8 +27,7 @@ function draft(over: Partial<PackDraft> = {}): PackDraft {
 
 const sprite = (over: Partial<DraftSprite> = {}): DraftSprite => ({
   id: 'spark',
-  en: 'Spark',
-  fr: 'Etincelle',
+  label: 'Etincelle',
   type: 'item',
   slot: 'none',
   kind: 'grayscale',
@@ -57,27 +57,28 @@ describe('buildPack', () => {
     expect(manifest).toEqual({
       format: 1,
       id: 'mine',
-      name: { en: 'Mine', fr: 'Mien' },
-      description: { en: 'My pack', fr: 'Mon pack' },
+      language: 'fr',
+      name: 'Mien',
+      description: 'Mon pack',
       version: '1.0.0',
       author: 'Ann Author',
       license: 'CC-BY-4.0',
       licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
       homepage: 'https://example.com/mine',
-      generators: { fr: { items: 'generators/fr/items.json', npcs: 'generators/fr/npcs.json' } },
+      generators: { items: 'generators/items.json', npcs: 'generators/npcs.json' },
       sprites: [],
     });
   });
 
-  it('leaves out the homepage when empty, and the empty generator slots and languages', () => {
-    const d = draft({ generators: { en: {}, fr: { items: EXTRA_ITEMS, skills: undefined } } });
+  it('leaves out the homepage when empty, and the empty generator slots', () => {
+    const d = draft({ generators: { items: EXTRA_ITEMS, skills: undefined } });
     d.details.homepage = '';
 
     const { manifest, files } = buildPack(d);
 
     expect(manifest).not.toHaveProperty('homepage');
-    expect(manifest.generators).toEqual({ fr: { items: 'generators/fr/items.json' } });
-    expect([...files.keys()]).toEqual(['generators/fr/items.json']);
+    expect(manifest.generators).toEqual({ items: 'generators/items.json' });
+    expect([...files.keys()]).toEqual(['generators/items.json']);
   });
 
   it('lays out word lists, sprite images and materials in the documented folders', () => {
@@ -87,20 +88,20 @@ describe('buildPack', () => {
     const { manifest, files } = buildPack(draft({ sprites: [grayscale, masked] }));
 
     expect(manifest.sprites).toEqual([
-      { id: 'spark', en: 'Spark', fr: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/spark.png' },
+      { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/spark.png' },
       {
-        id: 'glow', en: 'Spark', fr: 'Etincelle', type: 'equipment', slot: 'weapon1', kind: 'masked',
+        id: 'glow', label: 'Etincelle', type: 'equipment', slot: 'weapon1', kind: 'masked',
         image: 'sprites/glow.png', materials: 'sprites/glow.json',
       },
     ]);
     expect([...files.keys()].sort()).toEqual([
-      'generators/fr/items.json',
-      'generators/fr/npcs.json',
+      'generators/items.json',
+      'generators/npcs.json',
       'sprites/glow.json',
       'sprites/glow.png',
       'sprites/spark.png',
     ]);
-    expect(files.get('generators/fr/items.json')).toEqual(EXTRA_ITEMS);
+    expect(files.get('generators/items.json')).toEqual(EXTRA_ITEMS);
     expect(files.get('sprites/spark.png')).toBe(grayscale.image);
     expect(files.get('sprites/glow.json')).toEqual({ version: 1, materials: [] });
   });
@@ -109,6 +110,26 @@ describe('buildPack', () => {
     const { manifest } = buildPack(draft({ sprites: [sprite({ kind: 'colored', materials: MATERIALS })] }));
 
     expect(manifest.sprites[0]).not.toHaveProperty('materials');
+  });
+
+  it('writes the draft language into the manifest, for an English draft too', () => {
+    const d = draft({ generators: { items: EXTRA_ITEMS } });
+    d.details.language = 'en';
+    d.details.name = 'Mine';
+
+    const { manifest } = buildPack(d);
+
+    expect(manifest.language).toBe('en');
+    expect(manifest.name).toBe('Mine');
+    expect(validatePack(manifest).ok).toBe(true);
+  });
+
+  it('keeps one label per sprite and no en or fr field', () => {
+    const { manifest } = buildPack(draft({ sprites: [sprite()] }));
+
+    expect(manifest.sprites[0]).toMatchObject({ label: 'Etincelle' });
+    expect(manifest.sprites[0]).not.toHaveProperty('en');
+    expect(manifest.sprites[0]).not.toHaveProperty('fr');
   });
 
   it('produces a manifest that passes validatePack', () => {
