@@ -653,6 +653,18 @@
                 <span class="saved-name">{{ set.name }}</span>
               }
               <span class="saved-date">{{ set.date }}</span>
+              <p-select
+                class="saved-kind"
+                data-test="set-kind"
+                [options]="setKinds()"
+                optionLabel="label"
+                optionValue="value"
+                appendTo="body"
+                [ariaLabel]="'sprite.sets.kind' | transloco"
+                [pTooltip]="'sprite.sets.kindHint' | transloco"
+                [ngModel]="set.kind"
+                (ngModelChange)="setKind(set.id, $event)"
+              />
               <span class="row tight">
                 <p-button
                   icon="pi pi-folder-open"

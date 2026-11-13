@@ -1,3 +1,5 @@
+import { ItemSlot, ItemType } from '../../../core/models/item';
+
 /** Where a saved sprite set's grayscale image comes from. */
 export type SpriteSetSource =
   | { kind: 'library'; spriteId: string }
@@ -12,4 +14,11 @@ export interface SpriteSet {
   /** The materials, as the colorizer's JSON configuration. */
   config: string;
   updatedAt: number;
+  /** The kind of item it can illustrate; without tags, random item images leave it out. */
+  tags?: SpriteSetTags;
+}
+
+export interface SpriteSetTags {
+  type: ItemType;
+  slot: ItemSlot;
 }

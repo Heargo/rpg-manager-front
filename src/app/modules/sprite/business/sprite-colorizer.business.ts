@@ -2,7 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { snapToEdge } from '../helpers/edges';
 import { exportConfig, importConfig } from '../helpers/config-export';
 import { floodFill, magicWand } from '../helpers/flood-select';
-import { mapGradientInto } from '../helpers/gradient-mapping';
+import { renderSprite } from '../helpers/gradient-mapping';
 import { Command, History } from '../helpers/history';
 import {
   addLayer,
@@ -23,8 +23,13 @@ import {
 import { Point, rasterizePolygon } from '../helpers/polygon';
 import { defaultMinSize, detectShapes, DetectedShape } from '../helpers/shape-detection';
 import { PRESETS } from '../helpers/presets';
-import { DEMO_SPRITE_ID, spriteSetUrl, spriteUrl } from '../helpers/sprite-library';
-import { SpriteSet, SpriteSetSource } from '../models/sprite-set';
+import {
+  DEMO_SPRITE_ID,
+  SPRITE_LIBRARY,
+  spriteSetUrl,
+  spriteUrl,
+} from '../helpers/sprite-library';
+import { SpriteSet, SpriteSetSource, SpriteSetTags } from '../models/sprite-set';
 import { SpriteSetStorageService } from '../services/sprite-set-storage.service';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
 import {
@@ -144,17 +149,7 @@ export class SpriteColorizerBusiness {
   readonly $recolored = computed<SpriteImage | null>(() => {
     const image = this.image();
     const doc = this.document();
-    if (!image || !doc) return null;
-    const out: SpriteImage = {
-      width: image.width,
-      height: image.height,
-      data: new Uint8ClampedArray(image.data),
-    };
-    for (const layer of doc.layers) {
-      if (layer.visible)
-        mapGradientInto(out, image, layer.mask, layer.gradient.stops);
-    }
-    return out;
+    return image && doc ? renderSprite(image, doc) : null;
   });
 
   loadImage(image: SpriteImage, name = 'sprite'): void {
@@ -211,12 +206,21 @@ export class SpriteColorizerBusiness {
         source?.kind === 'file' ? source.blob : await this.files.encodePng(image);
       source = { kind: 'image', imageId: await this.imageStorage.put(blob) };
     }
+    const current = this.savedSets().find((s) => s.id === this.currentSetId());
+    const bundled =
+      source.kind === 'library'
+        ? SPRITE_LIBRARY.find((s) => s.id === (source as { spriteId: string }).spriteId)
+        : undefined;
+    const tags: SpriteSetTags | undefined = current
+      ? current.tags
+      : bundled && { type: bundled.type, slot: bundled.slot };
     const set: SpriteSet = {
       id: this.currentSetId() ?? crypto.randomUUID(),
       name: name.trim() || this.name(),
       source,
       config: exportConfig(doc),
       updatedAt: Date.now(),
+      ...(tags ? { tags } : {}),
     };
     await this.setStorage.save(set);
     this.source = source;
@@ -250,6 +254,15 @@ export class SpriteColorizerBusiness {
     if (!set || !name.trim()) return;
     await this.setStorage.save({ ...set, name: name.trim(), updatedAt: Date.now() });
     if (this.currentSetId() === id) this.name.set(name.trim());
+    await this.refreshSets();
+  }
+
+  /** The kind of item a saved set can illustrate; none leaves it out of random item images. */
+  async setSetTags(id: string, tags: SpriteSetTags | undefined): Promise<void> {
+    const set = this.savedSets().find((s) => s.id === id);
+    if (!set) return;
+    const { tags: _old, ...rest } = set;
+    await this.setStorage.save(tags ? { ...rest, tags } : rest);
     await this.refreshSets();
   }
 

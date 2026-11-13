@@ -520,7 +520,8 @@
         "price": "Le prix doit être de 0 ou plus.",
         "modifiers": "Les modificateurs sont des entiers sur les attributs de ce monde.",
         "json": "Ce JSON n'est pas un objet valide."
-      }
+      },
+      "randomImage": "Image aléatoire"
     }
   },
   "dice": {
@@ -1388,7 +1389,10 @@
       "delete": "Supprimer",
       "deleteTitle": "Supprimer ce sprite ?",
       "deleteMessage": "« {{name}} » et ses matériaux seront supprimés de cet appareil.",
-      "empty": "Aucun sprite enregistré. Ouvrez-en un, définissez ses matériaux et cliquez sur Enregistrer."
+      "empty": "Aucun sprite enregistré. Ouvrez-en un, définissez ses matériaux et cliquez sur Enregistrer.",
+      "kind": "Type d’objet",
+      "kindNone": "Pas utilisé pour les objets",
+      "kindHint": "Les images aléatoires des objets de ce type peuvent utiliser ce sprite"
     }
   },
   "combat": {

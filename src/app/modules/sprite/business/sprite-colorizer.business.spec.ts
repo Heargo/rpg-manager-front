@@ -526,4 +526,41 @@ describe('SpriteColorizerBusiness', () => {
       expect(business.$savedSets().map((s) => s.name)).toEqual(['Saved']);
     });
   });
+
+  describe('sprite set tags', () => {
+    it('tags a saved copy of a bundled sprite like the sprite, and lets the user change or clear the tags', async () => {
+      let sets: SpriteSet[] = [];
+      const setStorage = {
+        list: vi.fn(async () => sets),
+        save: vi.fn(async (s: SpriteSet) => {
+          sets = [...sets.filter((x) => x.id !== s.id), s];
+        }),
+        delete: vi.fn(),
+      };
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: SpritePresetStorageService, useValue: { load: () => [], save: vi.fn() } },
+          { provide: SpriteSetStorageService, useValue: setStorage },
+          {
+            provide: SpriteFileService,
+            useValue: {
+              fetchImage: vi.fn(async () => gray(2, 1, [1, 2])),
+              fetchText: vi.fn(async () => {
+                throw new Error('404');
+              }),
+            },
+          },
+        ],
+      });
+      const business = TestBed.inject(SpriteColorizerBusiness);
+      await business.loadLibrary('helm');
+      await business.saveSet('My helm');
+      expect(sets[0].tags).toEqual({ type: 'equipment', slot: 'head' });
+
+      await business.setSetTags(sets[0].id, { type: 'equipment', slot: 'chest' });
+      expect(business.$savedSets()[0].tags).toEqual({ type: 'equipment', slot: 'chest' });
+      await business.setSetTags(sets[0].id, undefined);
+      expect(business.$savedSets()[0].tags).toBeUndefined();
+    });
+  });
 });

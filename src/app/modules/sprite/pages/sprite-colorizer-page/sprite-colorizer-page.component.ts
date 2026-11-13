@@ -17,6 +17,9 @@ import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { ColorPickerModule } from '@openng/optimus-ui/colorpicker';
 import { DialogModule } from '@openng/optimus-ui/dialog';
+import { SelectModule } from '@openng/optimus-ui/select';
+import { EQUIPMENT_SLOTS } from '../../../../core/models/item';
+import { SpriteSetTags } from '../../models/sprite-set';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { SelectButtonModule } from '@openng/optimus-ui/selectbutton';
@@ -68,6 +71,7 @@ const toHex = (rgb: number[]) =>
     ButtonModule,
     ColorPickerModule,
     DialogModule,
+    SelectModule,
     InputNumberModule,
     InputTextModule,
     SelectButtonModule,
@@ -112,6 +116,16 @@ export class SpriteColorizerPageComponent {
     { value: 'mine', label: this.language.t('sprite.library.mine') },
   ]);
   protected readonly renamingSetId = signal<string | null>(null);
+  /** What a saved set can illustrate, for the random item images; '' = nothing. */
+  protected readonly setKinds = computed(() => [
+    { value: '', label: this.language.t('sprite.sets.kindNone') },
+    { value: 'item', label: this.language.t('item.type.item') },
+    { value: 'consumable', label: this.language.t('item.type.consumable') },
+    ...EQUIPMENT_SLOTS.map((slot) => ({
+      value: `equipment:${slot}`,
+      label: `${this.language.t('item.type.equipment')} · ${this.language.t('item.slot.' + slot)}`,
+    })),
+  ]);
   /** The saved sets, with their date in the page's language. */
   protected readonly savedSets = computed(() => {
     const format = new Intl.DateTimeFormat(this.language.$language() ?? 'fr', {
@@ -120,7 +134,15 @@ export class SpriteColorizerPageComponent {
     });
     return this.business
       .$savedSets()
-      .map((set) => ({ ...set, date: format.format(set.updatedAt) }));
+      .map((set) => ({
+        ...set,
+        date: format.format(set.updatedAt),
+        kind: !set.tags
+          ? ''
+          : set.tags.type === 'equipment'
+            ? `equipment:${set.tags.slot}`
+            : set.tags.type,
+      }));
   });
   protected readonly librarySprites = computed(() => {
     const lang = this.language.$language() ?? 'fr';
@@ -553,6 +575,16 @@ export class SpriteColorizerPageComponent {
     if (this.renamingSetId() !== id) return;
     this.renamingSetId.set(null);
     await this.business.renameSet(id, name);
+  }
+
+  protected setKind(id: string, kind: string): void {
+    const [type, slot] = kind.split(':');
+    const tags: SpriteSetTags | undefined = !kind
+      ? undefined
+      : type === 'equipment'
+        ? { type: 'equipment', slot: slot as SpriteSetTags['slot'] }
+        : { type: type as SpriteSetTags['type'], slot: 'none' };
+    void this.business.setSetTags(id, tags);
   }
 
   protected deleteSet(set: { id: string; name: string }): void {

@@ -520,7 +520,8 @@
         "price": "The price must be 0 or more.",
         "modifiers": "Modifiers must be whole numbers on the attributes of this world.",
         "json": "This is not valid JSON for an item."
-      }
+      },
+      "randomImage": "Random image"
     }
   },
   "dice": {
@@ -1388,7 +1389,10 @@
       "delete": "Delete",
       "deleteTitle": "Delete this sprite?",
       "deleteMessage": "\"{{name}}\" and its materials will be deleted from this device.",
-      "empty": "No saved sprite yet. Open one, set its materials and press Save."
+      "empty": "No saved sprite yet. Open one, set its materials and press Save.",
+      "kind": "Item kind",
+      "kindNone": "Not used for items",
+      "kindHint": "Random item images of this kind can use this sprite"
     }
   },
   "combat": {

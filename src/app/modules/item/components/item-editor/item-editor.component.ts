@@ -22,6 +22,7 @@ import { ImageBusiness } from '../../../../core/business/image.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
 import { ImagePickerComponent } from '../../../../core/components/image-picker/image-picker.component';
+import { RandomItemImageBusiness } from '../../../sprite/business/random-item-image.business';
 import {
   EQUIPMENT_SLOTS,
   ITEM_RARITIES,
@@ -101,6 +102,17 @@ function toDraft(item: Item | undefined): ItemDraft {
                 (picked)="upload($event)"
                 (removed)="imageId.set(undefined)"
               />
+              <button
+                pButton
+                type="button"
+                data-action="random-image"
+                icon="pi pi-sparkles"
+                severity="secondary"
+                size="small"
+                [loading]="drawingImage()"
+                [label]="'item.editor.randomImage' | transloco"
+                (click)="randomImage()"
+              ></button>
             </div>
             <div class="field">
               <label for="item-name">{{
@@ -308,6 +320,9 @@ function toDraft(item: Item | undefined): ItemDraft {
       flex-direction: column;
       gap: 0.75rem;
     }
+    [data-action='random-image'] {
+      align-self: flex-start;
+    }
     .row,
     .seed,
     .modifiers {
@@ -343,6 +358,7 @@ function toDraft(item: Item | undefined): ItemDraft {
 export class ItemEditorComponent {
   private readonly editor = inject(ItemEditorBusiness);
   private readonly images = inject(ImageBusiness);
+  private readonly randomImages = inject(RandomItemImageBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly messages = inject(MessageService);
 
@@ -364,6 +380,7 @@ export class ItemEditorComponent {
   });
   protected readonly imageId = linkedSignal(() => this.item()?.imageId);
   protected readonly seed = signal(this.editor.newSeed());
+  protected readonly drawingImage = signal(false);
 
   protected readonly attributeNames = computed(() =>
     this.world().attributes.map((attribute) => attribute.name),
@@ -434,6 +451,24 @@ export class ItemEditorComponent {
       this.attributeNames(),
     );
     this.setDraft(draft);
+    await this.drawImage(this.seed());
+  }
+
+  /** A new random image for the item as it is now (its name, type and slot pick the sprite). */
+  protected randomImage(): Promise<void> {
+    return this.drawImage(this.editor.newSeed());
+  }
+
+  /** Keeps the current image when no sprite can be drawn (offline, nothing bundled). */
+  private async drawImage(seed: string): Promise<void> {
+    this.drawingImage.set(true);
+    try {
+      this.imageId.set(await this.randomImages.create(this.draft(), seed));
+    } catch {
+      /* the item keeps its image */
+    } finally {
+      this.drawingImage.set(false);
+    }
   }
 
   protected reroll(): Promise<void> {
