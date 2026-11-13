@@ -52,6 +52,8 @@ Les auteurs et licences des packs installés apparaissent dans les [crédits](/d
 
 Dans l'assistant de création (étape **Règles**) et dans **Règles du monde**, la section **Packs** liste les packs installés avec leur langue. Cochez ceux que le monde utilise. Un nouveau monde commence avec le Base de la langue de l'application. Vous pouvez mélanger les langues, par exemple Base (français) et un pack de sprites anglais.
 
+![La section Packs des règles du monde](../../assets/screens/fr/worlds-rules-packs.png)
+
 Un pack coché mais absent de l'appareil (monde importé, pack supprimé) est marqué **manquant** : **Installer** le télécharge si c'est un pack officiel, sinon vous pouvez le retirer du monde.
 
 Dans les **Outils**, sans partie lancée, les générateurs utilisent les packs choisis dans **Outils › Règles du monde** (par défaut, le Base de la langue de l'application).

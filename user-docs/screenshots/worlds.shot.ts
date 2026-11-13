@@ -10,6 +10,12 @@ test('worlds: lobby and world rules', async ({ page, context }, info) => {
   await go(page, '/room/rules');
   await expect(page.locator('h1')).toBeVisible();
   await shot(page, lang, 'worlds-rules');
+  await page.getByRole('tab').nth(1).click();
+  const packs = page.getByTestId('rules-section-packs');
+  await expect(packs).toBeVisible();
+  await packs.scrollIntoViewIfNeeded();
+  await shot(page, lang, 'worlds-rules-packs', { locator: packs });
+  await page.getByRole('tab').first().click();
   const combat = page.getByTestId('rules-section-combat');
   if (await combat.count()) {
     await page.getByRole('tab').nth(1).click();

@@ -52,6 +52,8 @@ The authors and licenses of installed packs are listed in the [credits](/docs/en
 
 In the creation wizard (**Rules** step) and in **World rules**, the **Packs** section lists the installed packs with their language. Tick the ones the world uses. A new world starts with the Base in the app's language. You can mix languages, for example Base (English) and a French sprite pack.
 
+![The Packs section of the world rules](../../../assets/screens/en/worlds-rules-packs.png)
+
 A ticked pack that isn't on the device (imported world, removed pack) is marked **missing**: **Install** downloads it if it is official, otherwise you can remove it from the world.
 
 In the **Tools**, with no game running, the generators use the packs chosen in **Tools › World rules** (by default, the Base in the app's language).
