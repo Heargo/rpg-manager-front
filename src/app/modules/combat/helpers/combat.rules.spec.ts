@@ -298,13 +298,13 @@ describe('startEncounter', () => {
   it('starts every action counter unused, from the world action types', () => {
     const { enc } = start({
       actionTypes: [
-        { name: 'Action', count: 2 },
-        { name: 'Bonus', count: 1 },
+        { name: 'Action', count: 2, movement: false },
+        { name: 'Bonus', count: 1, movement: false },
       ],
     });
     expect(by(enc, 'Aria').actions).toEqual([
-      { name: 'Action', count: 2, used: 0 },
-      { name: 'Bonus', count: 1, used: 0 },
+      { name: 'Action', count: 2, used: 0, movement: false },
+      { name: 'Bonus', count: 1, used: 0, movement: false },
     ]);
   });
 
@@ -449,6 +449,7 @@ describe('turns and rounds', () => {
       name: 'Action',
       count: 1,
       used: 1,
+      movement: false,
     });
     enc = nextTurn(enc);
     expect(by(enc, 'Bram').actions[0].used).toBe(0);
@@ -955,8 +956,8 @@ describe('optional combat steps', () => {
   it('keeps the action counters when the step is on', () => {
     const { enc } = start({ steps: all });
     expect(by(enc, 'Aria').actions).toEqual([
-      { name: 'Action', count: 1, used: 0 },
-      { name: 'Movement', count: 1, used: 0 },
+      { name: 'Action', count: 1, used: 0, movement: false },
+      { name: 'Movement', count: 1, used: 0, movement: true },
     ]);
   });
 

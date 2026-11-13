@@ -248,7 +248,33 @@ describe('RuleFieldsComponent combat settings', () => {
     first.value = 'Strike';
     first.dispatchEvent(new Event('input'));
     await settle();
-    expect(emitted.at(-1)!.combat!.actionTypes[0]).toEqual({ name: 'Strike', count: 1 });
+    expect(emitted.at(-1)!.combat!.actionTypes[0]).toEqual({ name: 'Strike', count: 1, movement: false });
+  });
+
+  it('shows a movement switch per action type, on for Movement and off for Action by default', async () => {
+    const { section } = await openCombat();
+    expect((section.querySelector('#action-type-movement-0') as HTMLInputElement).checked).toBe(false);
+    expect((section.querySelector('#action-type-movement-1') as HTMLInputElement).checked).toBe(true);
+  });
+
+  it('saves the movement flag of an action type in the rules', async () => {
+    const { section, emitted, settle } = await openCombat();
+    (section.querySelector('#action-type-movement-0') as HTMLInputElement).click();
+    await settle();
+    (section.querySelector('#action-type-movement-1') as HTMLInputElement).click();
+    await settle();
+    expect(emitted.at(-1)!.combat!.actionTypes).toEqual([
+      { name: 'Action', count: 1, movement: true },
+      { name: 'Movement', count: 1, movement: false },
+    ]);
+  });
+
+  it('adds a new action type that is not a movement one', async () => {
+    const { section, emitted, settle } = await openCombat();
+    (section.querySelector('[data-testid="combat-action-add"]') as HTMLElement).click();
+    await settle();
+    expect(emitted.at(-1)!.combat!.actionTypes[2]).toEqual({ name: '', count: 1, movement: false });
+    expect((section.querySelector('#action-type-movement-2') as HTMLInputElement).checked).toBe(false);
   });
 
   it('shows a live error for a broken or unknown-name formula, and none for a good one', async () => {

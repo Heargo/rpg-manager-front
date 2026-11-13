@@ -83,8 +83,8 @@ const rules = (mode: InitiativeMode): CombatRules => ({
   },
   initiative: { mode, dice: { count: 1, faces: 1 }, formula: 'level' },
   actionTypes: [
-    { name: 'Action', count: 1 },
-    { name: 'Movement', count: 1 },
+    { name: 'Action', count: 1, movement: false },
+    { name: 'Movement', count: 1, movement: true },
   ],
   grid: { enabled: true, columns: 10, rows: 10 },
   movement: '6',
@@ -417,6 +417,120 @@ describe('combat (GM + players)', () => {
 
       expect(named(bob, 'Ada').position).toEqual({ x: 3, y: 4 });
       expect(named(bob, 'Goblin').position).toEqual({ x: 8, y: 8 });
+    });
+
+    describe('grid moves', () => {
+      const used = (d: Device, name: string, action: string) =>
+        named(d, name).actions.find((a) => a.name === action)?.used;
+      const rejected = (key: string) => ({
+        code: 'rejected',
+        message: `combat.errors.${key}`,
+      });
+
+      it('rejects a player move off turn and changes nothing', async () => {
+        await startAll();
+        await combat(gm).endTurn();
+        await settle();
+
+        await expect(
+          combat(ada).move(adaId(), { x: 1, y: 1 }),
+        ).rejects.toMatchObject(rejected('notYourTurn'));
+        expect(named(gm, 'Ada').position).toEqual({ x: 0, y: 0 });
+        expect(used(gm, 'Ada', 'Movement')).toBe(0);
+      });
+
+      it('moves a player on their turn to a reachable cell and ticks Movement', async () => {
+        await startAll();
+
+        await combat(ada).move(adaId(), { x: 3, y: 4 });
+        await settle();
+
+        expect(named(bob, 'Ada').position).toEqual({ x: 3, y: 4 });
+        expect(used(bob, 'Ada', 'Movement')).toBe(1);
+        expect(used(bob, 'Ada', 'Action')).toBe(0);
+      });
+
+      it('rejects a second move once Movement is at 0', async () => {
+        await startAll();
+        await combat(ada).move(adaId(), { x: 3, y: 4 });
+        await settle();
+
+        await expect(
+          combat(ada).move(adaId(), { x: 4, y: 4 }),
+        ).rejects.toMatchObject(rejected('noMovementLeft'));
+        expect(named(gm, 'Ada').position).toEqual({ x: 3, y: 4 });
+        expect(used(gm, 'Ada', 'Movement')).toBe(1);
+      });
+
+      it('rejects a cell beyond the movement allowance and a cell held by another token', async () => {
+        await startAll();
+
+        await expect(
+          combat(ada).move(adaId(), { x: 7, y: 0 }),
+        ).rejects.toMatchObject(rejected('outOfReach'));
+        await expect(
+          combat(ada).move(adaId(), { x: 0, y: 1 }),
+        ).rejects.toMatchObject(rejected('outOfReach'));
+        expect(named(gm, 'Ada').position).toEqual({ x: 0, y: 0 });
+        expect(used(gm, 'Ada', 'Movement')).toBe(0);
+      });
+
+      it('counts the reach from the current position, not from where the turn began', async () => {
+        await startAll();
+        await combat(ada).move(adaId(), { x: 6, y: 6 });
+        await combat(gm).tickAction(adaId(), 'Movement', 0);
+        await settle();
+
+        await combat(ada).move(adaId(), { x: 9, y: 9 });
+        await settle();
+
+        expect(named(gm, 'Ada').position).toEqual({ x: 9, y: 9 });
+        expect(used(gm, 'Ada', 'Movement')).toBe(1);
+      });
+
+      it('lets the GM move any token anywhere, off turn, without ticking', async () => {
+        await startAll();
+
+        await combat(gm).move(bobId(), { x: 5, y: 5 });
+        await combat(gm).move(goblinId(), { x: 0, y: 9 });
+        await combat(gm).move(adaId(), { x: 9, y: 9 });
+        await settle();
+
+        expect(named(ada, 'Bob').position).toEqual({ x: 5, y: 5 });
+        expect(named(ada, 'Goblin').position).toEqual({ x: 0, y: 9 });
+        expect(named(ada, 'Ada').position).toEqual({ x: 9, y: 9 });
+        for (const name of ['Ada', 'Bob', 'Goblin'])
+          expect(named(ada, name).actions).toEqual([
+            { name: 'Action', count: 1, used: 0, movement: false },
+            { name: 'Movement', count: 1, used: 0, movement: true },
+          ]);
+        await expect(
+          combat(gm).move(goblinId(), { x: 10, y: 0 }),
+        ).rejects.toMatchObject({ code: 'invalid' });
+      });
+
+      it('undoes the position and the counter together, in one step', async () => {
+        await startAll();
+        await combat(ada).move(adaId(), { x: 3, y: 4 });
+        await settle();
+
+        await combat(gm).undo();
+        await settle();
+
+        expect(named(bob, 'Ada').position).toEqual({ x: 0, y: 0 });
+        expect(used(bob, 'Ada', 'Movement')).toBe(0);
+      });
+
+      it('has the outOfReach and noMovementLeft keys in English and French', () => {
+        const lookup = (json: unknown, key: string) =>
+          (json as Record<string, Record<string, Record<string, unknown>>>)[
+            'combat'
+          ]['errors'][key];
+        for (const key of ['outOfReach', 'noMovementLeft']) {
+          expect(typeof lookup(en, key)).toBe('string');
+          expect(typeof lookup(fr, key)).toBe('string');
+        }
+      });
     });
 
     it('ends turns: the active player or the GM, the round goes up when the order wraps', async () => {

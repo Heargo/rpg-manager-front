@@ -1,4 +1,6 @@
 import { evaluateFormula } from '../../../core/helpers/formula';
+import { CombatRules } from '../../world/models/world';
+import { Combatant } from '../models/combat';
 
 export interface Cell {
   x: number;
@@ -110,4 +112,38 @@ export function movementAllowance(
     },
   );
   return result.ok ? Math.max(0, Math.round(result.value)) : 0;
+}
+
+export type MoveCheck =
+  | { ok: true; tickAction?: string }
+  | { ok: false; error: 'outOfReach' | 'noMovementLeft' };
+
+/**
+ * Whether a combatant may move to a cell: it must be within its movement allowance of where it stands, on a cell no one else holds. With
+ * action counters on and a movement type, the first movement type must have a use left and is the one to tick.
+ */
+export function canMoveTo(
+  enc: { combatants: Combatant[] },
+  rules: CombatRules,
+  id: string,
+  cell: Cell,
+): MoveCheck {
+  const combatants = placeUnplaced(enc.combatants, rules.grid);
+  const mover = combatants.find((c) => c.id === id);
+  if (!mover?.position) return { ok: false, error: 'outOfReach' };
+  const others = occupiedCells(combatants.filter((c) => c.id !== id));
+  const reach = reachableCells(
+    mover.position,
+    movementAllowance(rules.movement, mover),
+    rules.grid,
+    others,
+  );
+  if (!reach.some((other) => sameCell(other, cell)))
+    return { ok: false, error: 'outOfReach' };
+  const type = rules.steps.actionCounters
+    ? mover.actions.find((a) => a.movement)
+    : undefined;
+  if (!type) return { ok: true };
+  if (type.used >= type.count) return { ok: false, error: 'noMovementLeft' };
+  return { ok: true, tickAction: type.name };
 }

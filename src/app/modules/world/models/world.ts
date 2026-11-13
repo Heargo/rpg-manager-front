@@ -43,7 +43,7 @@ export interface CombatRules {
     formula: string;
   };
   /** What a combatant can do on its turn, each with how many per turn. */
-  actionTypes: { name: string; count: number }[];
+  actionTypes: { name: string; count: number; movement: boolean }[];
   grid: {
     enabled: boolean;
     columns: number;

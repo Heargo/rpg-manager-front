@@ -32,7 +32,12 @@ export interface Combatant {
   skills: SheetSkill[];
   /** Turns left before a skill can be used again, by skill id (absent = ready). */
   cooldowns: Record<string, number>;
-  actions: { name: string; count: number; used: number }[];
+  actions: {
+    name: string;
+    count: number;
+    used: number;
+    movement: boolean;
+  }[];
   effects: CombatEffect[];
   statuses: string[];
   initiative?: number;
@@ -122,7 +127,12 @@ export interface CombatantView {
   position?: { x: number; y: number };
   /** Cells it can move per turn, when the world has a grid. */
   movement?: number;
-  actions: { name: string; count: number; used: number }[];
+  actions: {
+    name: string;
+    count: number;
+    used: number;
+    movement: boolean;
+  }[];
   level?: number;
   description?: string;
   lifeBar?: { percent: number };

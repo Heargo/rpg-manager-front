@@ -13,9 +13,11 @@ import { CombatGridComponent } from './combat-grid.component';
  * - `[data-testid="grid"]` (`data-columns`, `data-rows`) holds one `[data-testid="cell"]` per cell (`data-x`, `data-y`) and one `[data-testid="token"]` per
  *   combatant (`data-name`, `data-x`, `data-y`, `data-enemy="true"` on enemies only). Combatants without a position are placed first (party left, enemies right).
  * - `[data-testid="grid-map"]` (`data-image-id`) only when the world's grid has a map image.
- * - Movement: on the active combatant's turn, `[data-reachable="true"]` marks the cells within the world's movement allowance of the cell where the turn
- *   started (not occupied by another token). Not enforced.
- * - `moveTo(combatantId, { x, y })` (what a token drag calls): a player's own token goes through `combat/move`, another token is ignored; the GM moves any.
+ * - Movement: on the active combatant's turn, `[data-reachable="true"]` marks the cells within the world's movement allowance of the token's
+ *   current cell (not occupied by another token); on a player's device, none once the first movement type has no use left.
+ * - `[data-testid="token"]` has the class `movable` when it can be dragged: a player's own token, only on their turn; any token on the GM's device.
+ * - `moveTo(combatantId, { x, y })` (what a token drag calls): a player's own token goes through `combat/move` (the host enforces turn and reach),
+ *   another token is ignored; the GM moves any.
  * - Targeting (`skillId` set, the skill has a `range`): `[data-in-range="true"]` on the cells and tokens within range of the caster. A click on a token, or on
  *   a cell holding a token, emits `targetPicked` with that combatant's id (range is not enforced); a click on an empty cell emits nothing.
  * Fixture: grid 10x10, movement "6". Ada, Bob (party) and Goblin (enemy) start at (0,0), (0,1) and (9,0).
@@ -173,14 +175,68 @@ describe('CombatGridComponent', () => {
       expect(el.querySelectorAll('[data-reachable="true"]')).toHaveLength(0);
     });
 
-    it('counts from the cell where the turn started, even after a move', async () => {
+    it('counts from the current position, not from where the turn began', async () => {
       await open(table.ada, own('Ada'));
+      await table.combat(table.gm).move(table.named(table.gm, 'Ada').id, { x: 3, y: 3 });
+      await settle();
+
+      expect(reachable(9, 9)).toBe(true);
+      expect(reachable(9, 3)).toBe(true);
+      expect(reachable(0, 0)).toBe(true);
+      expect(reachable(3, 3)).toBe(true);
+      expect(reachable(3, 9)).toBe(true);
+    });
+
+    it('shows no reachable cell once the player has no movement left', async () => {
+      await open(table.ada, own('Ada'));
+      expect(el.querySelectorAll('[data-reachable="true"]').length).toBeGreaterThan(0);
 
       await mounted.ref.instance.moveTo(table.named(table.ada, 'Ada').id, { x: 3, y: 3 });
       await settle();
 
-      expect(reachable(6, 6)).toBe(true);
-      expect(reachable(9, 3)).toBe(false);
+      expect(el.querySelectorAll('[data-reachable="true"]')).toHaveLength(0);
+    });
+  });
+
+  describe('who can drag', () => {
+    const movable = (name: string) => token(name).classList.contains('movable');
+
+    it("lets a player drag only their own token, and only on their turn", async () => {
+      await open(table.bob, own('Bob'));
+      expect(movable('Bob')).toBe(false);
+      expect(movable('Ada')).toBe(false);
+      mounted.destroy();
+
+      await open(table.ada, own('Ada'));
+      expect(movable('Ada')).toBe(true);
+      expect(movable('Bob')).toBe(false);
+      expect(movable('Goblin')).toBe(false);
+
+      await table.combat(table.gm).endTurn();
+      await settle();
+      expect(movable('Ada')).toBe(false);
+      mounted.destroy();
+
+      await open(table.bob, own('Bob'));
+      expect(movable('Bob')).toBe(true);
+    });
+
+    it('lets the GM drag every token at any time', async () => {
+      await open(table.gm);
+      for (const name of ['Ada', 'Bob', 'Goblin']) expect(movable(name)).toBe(true);
+
+      await table.combat(table.gm).endTurn();
+      await settle();
+      for (const name of ['Ada', 'Bob', 'Goblin']) expect(movable(name)).toBe(true);
+    });
+
+    it('does not move a player token off turn', async () => {
+      await open(table.bob, own('Bob'));
+
+      await mounted.ref.instance.moveTo(table.named(table.bob, 'Bob').id, { x: 1, y: 2 });
+      await settle();
+
+      expect(position('Bob')).toEqual({ x: 0, y: 1 });
     });
   });
 

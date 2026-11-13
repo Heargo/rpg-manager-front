@@ -2,6 +2,7 @@ export interface ActionCounter {
   name: string;
   count: number;
   used: number;
+  movement: boolean;
 }
 
 export interface ActionTab<S extends object> extends ActionCounter {
@@ -18,14 +19,16 @@ export function actionTabs<S extends object>(
     name: a.name,
     count: a.count,
     used: a.used,
+    movement: a.movement,
     left: a.count - a.used,
     skills: [] as S[],
   }));
+  const fallback = tabs.find((t) => !t.movement) ?? tabs[0];
   for (const skill of skills) {
     const tab =
       tabs.find(
         (t) => t.name === (skill as { actionType?: string }).actionType,
-      ) ?? tabs[0];
+      ) ?? fallback;
     tab?.skills.push(skill);
   }
   return tabs;

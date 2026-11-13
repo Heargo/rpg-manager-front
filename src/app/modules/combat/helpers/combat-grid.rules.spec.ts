@@ -5,6 +5,7 @@ import {
   placeUnplaced,
   reachableCells,
   cellsInRange,
+  canMoveTo,
 } from './combat-grid.rules';
 
 /**
@@ -136,5 +137,58 @@ describe('placeUnplaced', () => {
       { x: 3, y: 1 },
       { x: 2, y: 0 },
     ]);
+  });
+});
+
+/**
+ * `canMoveTo(enc, rules, id, cell)`: `enc` is the encounter (`combatants` with `id`, `position`, `level`, `attributes`, `actions` counters
+ * `{ name, count, used, movement }`), `rules` the world's `CombatRules` (`movement` formula, `grid`, `steps.actionCounters`). Returns
+ * `{ ok: true, tickAction? }` or `{ ok: false, error: 'outOfReach' | 'noMovementLeft' }`.
+ */
+describe('canMoveTo', () => {
+  const rules = (actionCounters = true) =>
+    ({ movement: '2', grid: { enabled: true, ...grid }, steps: { actionCounters } }) as never;
+  const combatant = (id: string, position: { x: number; y: number }, actions: { name: string; count: number; used: number; movement: boolean }[]) => ({
+    id,
+    position,
+    level: 1,
+    attributes: [],
+    actions,
+  });
+  const walk = (used: number) => [
+    { name: 'Action', count: 1, used: 0, movement: false },
+    { name: 'Walk', count: 1, used, movement: true },
+    { name: 'Run', count: 1, used: 0, movement: true },
+  ];
+  const enc = (actions = walk(0)) =>
+    ({
+      combatants: [combatant('a', { x: 3, y: 3 }, actions), combatant('b', { x: 4, y: 3 }, [])],
+    }) as never;
+
+  it('accepts a reachable cell and names the first movement type to tick', () => {
+    expect(canMoveTo(enc(), rules(), 'a', { x: 5, y: 5 })).toEqual({ ok: true, tickAction: 'Walk' });
+  });
+
+  it('counts the reach from the current position', () => {
+    expect(canMoveTo(enc(), rules(), 'a', { x: 6, y: 3 })).toEqual({ ok: false, error: 'outOfReach' });
+    expect(canMoveTo(enc(), rules(), 'a', { x: 1, y: 1 })).toEqual({ ok: true, tickAction: 'Walk' });
+  });
+
+  it('refuses a cell held by another combatant', () => {
+    expect(canMoveTo(enc(), rules(), 'a', { x: 4, y: 3 })).toEqual({ ok: false, error: 'outOfReach' });
+  });
+
+  it('refuses when the first movement type has no use left, even if a later one has', () => {
+    expect(canMoveTo(enc(walk(1)), rules(), 'a', { x: 5, y: 5 })).toEqual({ ok: false, error: 'noMovementLeft' });
+  });
+
+  it('checks only the reach when the combatant has no movement type', () => {
+    const plainActions = [{ name: 'Action', count: 1, used: 1, movement: false }];
+    expect(canMoveTo(enc(plainActions), rules(), 'a', { x: 5, y: 5 })).toEqual({ ok: true });
+    expect(canMoveTo(enc(plainActions), rules(), 'a', { x: 9, y: 9 })).toEqual({ ok: false, error: 'outOfReach' });
+  });
+
+  it('checks only the reach when the action counters are off', () => {
+    expect(canMoveTo(enc(walk(1)), rules(false), 'a', { x: 5, y: 5 })).toEqual({ ok: true });
   });
 });

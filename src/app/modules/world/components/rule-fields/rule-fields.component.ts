@@ -287,7 +287,7 @@ export class RuleFieldsComponent {
 
   protected addAction(): void {
     this.patchCombat({
-      actionTypes: [...this.combat().actionTypes, { name: '', count: 1 }],
+      actionTypes: [...this.combat().actionTypes, { name: '', count: 1, movement: false }],
     });
   }
 

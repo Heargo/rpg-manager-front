@@ -28,8 +28,8 @@ describe('combat rules defaults', () => {
       lifeAttribute: 'Life',
       initiative: { mode: 'rolled', dice: { count: 1, faces: 20 }, formula: '0' },
       actionTypes: [
-        { name: 'Action', count: 1 },
-        { name: 'Movement', count: 1 },
+        { name: 'Action', count: 1, movement: false },
+        { name: 'Movement', count: 1, movement: true },
       ],
       grid: { enabled: false },
       movement: '6',
@@ -67,7 +67,7 @@ describe('validateWorldDraft combat settings', () => {
       validateWorldDraft(
         draft({
           initiative: { mode: 'typed', dice: { count: 2, faces: 6 }, formula: 'Mana + level' },
-          actionTypes: [{ name: 'Action', count: 2 }],
+          actionTypes: [{ name: 'Action', count: 2, movement: false }],
           grid: { enabled: true, columns: 20, rows: 12 },
           movement: 'Mana / 2',
           basicAttack: 'Life / 2 + 1',
@@ -109,19 +109,19 @@ describe('validateWorldDraft combat settings', () => {
   });
 
   it('refuses empty, duplicated or zero-count action types', () => {
-    expect(validateWorldDraft(draft({ actionTypes: [{ name: ' ', count: 1 }] })).combatActionTypes).toBe('world.errors.combatActionTypes');
+    expect(validateWorldDraft(draft({ actionTypes: [{ name: ' ', count: 1, movement: false }] })).combatActionTypes).toBe('world.errors.combatActionTypes');
     expect(
       validateWorldDraft(
         draft({
           actionTypes: [
-            { name: 'Action', count: 1 },
-            { name: 'action', count: 1 },
+            { name: 'Action', count: 1, movement: false },
+            { name: 'action', count: 1, movement: false },
           ],
         }),
       ).combatActionTypes,
     ).toBe('world.errors.combatActionTypes');
-    expect(validateWorldDraft(draft({ actionTypes: [{ name: 'Action', count: 0 }] })).combatActionTypes).toBe('world.errors.combatActionTypes');
-    expect(validateWorldDraft(draft({ actionTypes: [{ name: 'Action', count: 1.5 }] })).combatActionTypes).toBe('world.errors.combatActionTypes');
+    expect(validateWorldDraft(draft({ actionTypes: [{ name: 'Action', count: 0, movement: false }] })).combatActionTypes).toBe('world.errors.combatActionTypes');
+    expect(validateWorldDraft(draft({ actionTypes: [{ name: 'Action', count: 1.5, movement: false }] })).combatActionTypes).toBe('world.errors.combatActionTypes');
   });
 
   it('refuses a grid with a bad size, only when it is on', () => {
@@ -172,6 +172,22 @@ describe('world rules with combat settings', () => {
     expect(renamed.combat.lifeAttribute).toBe('Health');
     const removed = applyWorldRules(world, { ...rulesOf(world.combat), attributes: [world.attributes[1]] }, () => 'new');
     expect(removed.combat.lifeAttribute).toBeUndefined();
+  });
+});
+
+describe('combatImportProblems and the movement flag', () => {
+  const valid = defaultCombatRules('Life');
+
+  it('refuses an action type without a movement flag or with a non-boolean one', () => {
+    expect(
+      combatImportProblems({ ...valid, actionTypes: [{ name: 'Action', count: 1 }] }, ['Life', 'Mana']),
+    ).toContain('world.combat.actionTypes is invalid');
+    expect(
+      combatImportProblems(
+        { ...valid, actionTypes: [{ name: 'Action', count: 1, movement: 'yes' }] },
+        ['Life', 'Mana'],
+      ),
+    ).toContain('world.combat.actionTypes is invalid');
   });
 });
 
@@ -286,7 +302,7 @@ describe('optional combat steps', () => {
   });
 
   it('does not validate the action types while that step is off', () => {
-    const broken = [{ name: '', count: 0 }];
+    const broken = [{ name: '', count: 0, movement: false }];
     expect(validateCombatRules(rules({ actionTypes: broken }), names).combatActionTypes).toBeDefined();
     expect(
       validateCombatRules(rules({ actionTypes: broken, steps: { ...all, actionCounters: false } }), names),

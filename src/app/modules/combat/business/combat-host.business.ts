@@ -19,6 +19,7 @@ import {
   EncounterPicks,
   healCombatant,
   moveCombatant,
+  moveCounted,
   nextTurn,
   removeCombatant,
   removeStatus,
@@ -34,6 +35,7 @@ import {
   useSkill,
   withoutUndo,
 } from '../helpers/combat.rules';
+import { canMoveTo, placeUnplaced } from '../helpers/combat-grid.rules';
 import { projectEncounter } from '../helpers/combat-view.rules';
 import { CombatEdit, CombatRewards, Encounter } from '../models/combat';
 import { CombatService } from '../services/combat.service';
@@ -152,7 +154,12 @@ export class CombatHostBusiness {
       });
     const own = (
       route: Parameters<CombatService['serve']>[0],
-      run: (p: Payload, world: World, enc: Encounter) => World,
+      run: (
+        p: Payload,
+        world: World,
+        enc: Encounter,
+        context: PeerContext,
+      ) => World,
       onTurnOnly = false,
     ) =>
       this.service.serve(route, async (payload, context) => {
@@ -165,7 +172,7 @@ export class CombatHostBusiness {
             enc.combatants[enc.turn]?.id !== combatantId
           )
             throw new PeerApiError('rejected', 'combat.errors.notYourTurn');
-          return run(p, world, enc);
+          return run(p, world, enc, context);
         });
       });
     const stops = [
@@ -276,16 +283,34 @@ export class CombatHostBusiness {
           ),
         true,
       ),
-      own('move', (p, world, enc) => {
+      own('move', (p, world, enc, context) => {
         const position = body(p['position']);
         const grid = world.combat.grid;
         const x = whole(position['x'], 0, 1000);
         const y = whole(position['y'], 0, 1000);
         if (grid.enabled && (x >= grid.columns || y >= grid.rows))
           throw invalid();
+        const id = text(p['combatantId']);
+        if (context.from === SELF_PEER)
+          return this.with(
+            world,
+            moveCombatant(
+              {
+                ...enc,
+                combatants: placeUnplaced(enc.combatants, world.combat.grid),
+              },
+              id,
+              { x, y },
+            ),
+          );
+        if (enc.combatants[enc.turn]?.id !== id)
+          throw new PeerApiError('rejected', 'combat.errors.notYourTurn');
+        const check = canMoveTo(enc, world.combat, id, { x, y });
+        if (!check.ok)
+          throw new PeerApiError('rejected', `combat.errors.${check.error}`);
         return this.with(
           world,
-          moveCombatant(enc, text(p['combatantId']), { x, y }),
+          moveCounted(enc, id, { x, y }, world.combat.grid, check.tickAction),
         );
       }),
       own(

@@ -15,7 +15,7 @@ const combatant = (over: Partial<Combatant>): Combatant => ({
   ],
   skills: [{ skillId: 'secret-skill', level: 1 }],
   cooldowns: { 'secret-skill': 2 },
-  actions: [{ name: 'Action', count: 1, used: 0 }],
+  actions: [{ name: 'Action', count: 1, used: 0, movement: false }],
   effects: [],
   statuses: ['Poisoned'],
   down: false,
@@ -177,7 +177,7 @@ describe('projectEncounter', () => {
       down: true,
       initiative: 12,
       position: { x: 2, y: 3 },
-      actions: [{ name: 'Action', count: 1, used: 0 }],
+      actions: [{ name: 'Action', count: 1, used: 0, movement: false }],
     });
   });
 

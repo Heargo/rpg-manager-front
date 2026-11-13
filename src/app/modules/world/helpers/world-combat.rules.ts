@@ -14,8 +14,8 @@ export function defaultCombatRules(lifeName?: string): CombatRules {
     },
     initiative: { mode: 'rolled', dice: { count: 1, faces: 20 }, formula: '0' },
     actionTypes: [
-      { name: 'Action', count: 1 },
-      { name: 'Movement', count: 1 },
+      { name: 'Action', count: 1, movement: false },
+      { name: 'Movement', count: 1, movement: true },
     ],
     grid: { enabled: false, columns: 10, rows: 10 },
     movement: '6',
@@ -152,7 +152,8 @@ export function combatImportProblems(
       (action) =>
         isRecord(action) &&
         typeof action['name'] === 'string' &&
-        typeof action['count'] === 'number',
+        typeof action['count'] === 'number' &&
+        typeof action['movement'] === 'boolean',
     )
   )
     problems.push('world.combat.actionTypes is invalid');

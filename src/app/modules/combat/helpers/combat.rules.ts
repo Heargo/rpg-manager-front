@@ -6,6 +6,7 @@ import { resolveSkillUse, rollOf } from '../../skill/helpers/skill-roll.rules';
 import { evaluateSkillAmount } from '../../skill/helpers/skill.rules';
 import { Skill } from '../../skill/models/skill';
 import { Npc } from '../../npc/models/npc';
+import { GridSize, placeUnplaced } from './combat-grid.rules';
 import {
   Character,
   CombatRules,
@@ -820,6 +821,22 @@ export function moveCombatant(
       c.id === id ? { ...c, position } : c,
     ),
   };
+}
+
+/** A player's move: the token goes to the cell and the movement counter ticks, as one undo step. The placed tokens keep their cells. */
+export function moveCounted(
+  enc: Encounter,
+  id: string,
+  position: { x: number; y: number },
+  grid: GridSize,
+  action?: string,
+): Encounter {
+  const placed = {
+    ...enc,
+    combatants: placeUnplaced(enc.combatants, grid),
+  };
+  const moved = moveCombatant(placed, id, position);
+  return commit(enc, action ? tickedAction(moved, id, action) : moved);
 }
 
 /** Sets the current value of the given attributes on a combatant (an undo step), e.g. after the character's record changed. */

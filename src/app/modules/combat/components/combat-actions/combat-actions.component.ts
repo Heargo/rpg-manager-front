@@ -24,7 +24,7 @@ import {
   targetGroups,
   targetsArePicked,
 } from '../../helpers/combat-targeting.rules';
-import { actionTabs } from '../../helpers/combat-actions.rules';
+import { ActionCounter, actionTabs } from '../../helpers/combat-actions.rules';
 import { CombatAttribute } from '../../models/combat';
 
 /** What one combatant can do on its turn: tick the action counters, use a skill (pick its targets) or an item. */
@@ -333,7 +333,7 @@ export class CombatActionsComponent {
   readonly sheetSkills = input<{ skillId: string; level: number }[]>([]);
   readonly level = input(1);
   readonly attributes = input<CombatAttribute[]>([]);
-  readonly actions = input<{ name: string; count: number; used: number }[]>([]);
+  readonly actions = input<ActionCounter[]>([]);
 
   /** The skill this combatant is aiming, if any. */
   protected readonly casting = computed(() => {

@@ -520,6 +520,16 @@
                 [ngModel]="action.count"
                 (ngModelChange)="setAction($index, { count: $event ?? 0 })"
               />
+              <div class="toggle">
+                <p-toggleswitch
+                  [inputId]="'action-type-movement-' + $index"
+                  [ngModel]="action.movement"
+                  (ngModelChange)="setAction($index, { movement: $event })"
+                />
+                <label [for]="'action-type-movement-' + $index">{{
+                  "world.rules.combat.actionMovement" | transloco
+                }}</label>
+              </div>
               <p-button
                 icon="pi pi-trash"
                 severity="secondary"

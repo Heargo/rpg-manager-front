@@ -2,12 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   input,
   output,
   signal,
-  untracked,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
@@ -220,13 +218,6 @@ export class CombatGridComponent {
     });
   });
 
-  /** Where the active combatant's turn began. */
-  private readonly turnStart = signal<{ turn: string; cell: Cell } | null>(
-    null,
-  );
-  private readonly turn = computed(
-    () => `${this.state()?.round}:${this.activeId()}`,
-  );
   private readonly active = computed(() =>
     this.tokens().find((c) => c.id === this.activeId()),
   );
@@ -238,13 +229,20 @@ export class CombatGridComponent {
     const own = this.combatantId();
     if (!grid || !active || (own !== undefined && own !== active.id))
       return new Set<string>();
-    const start = this.turnStart();
-    const from = start?.turn === this.turn() ? start.cell : active.position;
+    const movementType = active.actions.find((a) => a.movement);
+    if (
+      own !== undefined &&
+      movementType &&
+      movementType.used >= movementType.count
+    )
+      return new Set<string>();
     const others = occupiedCells(
       this.tokens().filter((c) => c.id !== active.id),
     );
     return new Set(
-      reachableCells(from, active.movement ?? 0, grid, others).map(key),
+      reachableCells(active.position, active.movement ?? 0, grid, others).map(
+        key,
+      ),
     );
   });
 
@@ -276,23 +274,14 @@ export class CombatGridComponent {
   } | null>(null);
   private dragged = false;
 
-  constructor() {
-    effect(() => {
-      const turn = this.turn();
-      untracked(() => {
-        const active = this.active();
-        if (active && this.turnStart()?.turn !== turn)
-          this.turnStart.set({ turn, cell: active.position });
-      });
-    });
-  }
-
   protected canMove(id: string): boolean {
     const own = this.combatantId();
-    return own === undefined ? this.combat.$isGameMaster() : own === id;
+    return own === undefined
+      ? this.combat.$isGameMaster()
+      : own === id && this.activeId() === id;
   }
 
-  /** What a token drag calls: a player moves their own token, the game master any. */
+  /** What a token drag calls: a player moves their own token on their turn, the game master any. */
   async moveTo(id: string, cell: Cell): Promise<void> {
     if (!this.canMove(id)) return;
     try {
