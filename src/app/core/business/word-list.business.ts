@@ -2,7 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { DEFAULT_LANGUAGE } from '../constants/languages';
 import { ClassWordList } from '../generators/class-generator';
 import { SkillWordList } from '../generators/skill-generator';
-import { isRecord, validateWordList, WordList } from '../generators/word-list';
+import { isClassWordList, isSkillWordList } from '../generators/pack-word-lists';
+import { validateWordList, WordList } from '../generators/word-list';
 import { BASE_PACK_ID, PackBusiness } from './pack.business';
 import { LanguageBusiness } from './language.business';
 
@@ -107,36 +108,4 @@ export class WordListBusiness {
     }
     return words;
   }
-}
-
-const isList = (value: unknown): boolean =>
-  Array.isArray(value) && value.length > 0;
-
-function isSkillWordList(json: unknown): json is SkillWordList {
-  if (
-    !isRecord(json) ||
-    !isRecord(json['nouns']) ||
-    !isRecord(json['descriptions'])
-  )
-    return false;
-  const { nouns, descriptions } = json;
-  return (
-    isList(json['templates']) &&
-    isList(json['adjectives']) &&
-    isList(json['suffixes']) &&
-    ['active', 'passive'].every(
-      (type) =>
-        isList((nouns as Record<string, unknown>)[type]) &&
-        isList((descriptions as Record<string, unknown>)[type]),
-    )
-  );
-}
-
-function isClassWordList(json: unknown): json is ClassWordList {
-  return (
-    isRecord(json) &&
-    ['templates', 'nouns', 'adjectives', 'suffixes', 'descriptions'].every(
-      (key) => isList(json[key]),
-    )
-  );
 }

@@ -52,6 +52,14 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
 const text = (value: unknown): value is string =>
   typeof value === 'string' && value.trim() !== '';
 
+const isHttpsUrl = (value: unknown): boolean => {
+  try {
+    return typeof value === 'string' && new URL(value).protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 /** A path relative to the manifest: no absolute path, no `..`, no URL scheme, no backslash. */
 function isRelativePath(path: unknown): path is string {
   if (!text(path)) return false;
@@ -84,6 +92,13 @@ export function validatePack(json: unknown): PackValidation {
   for (const field of ['version', 'author', 'license', 'licenseUrl']) {
     if (!text(json[field])) errors.push(`${field} is required`);
   }
+  for (const field of ['licenseUrl', 'homepage'])
+    if (
+      (field === 'licenseUrl' || json[field] !== undefined) &&
+      text(json[field]) &&
+      !isHttpsUrl(json[field])
+    )
+      errors.push(`${field} must be an https URL`);
   if (json['homepage'] !== undefined && !text(json['homepage']))
     errors.push('homepage must be a text');
 

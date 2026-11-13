@@ -1547,6 +1547,27 @@
     "lang": {
       "en": "Anglais",
       "fr": "Français"
+    },
+    "add": "Ajouter un pack",
+    "linkLabel": "Lien vers le pack",
+    "linkPlaceholder": "https://github.com/auteur/depot ou un lien vers pack.json",
+    "check": "Vérifier",
+    "install": "Installer",
+    "update": "Mettre à jour",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "version": "Version",
+    "source": "Source",
+    "unofficialTitle": "Packs ajoutés depuis un lien",
+    "warning": "Contenu non vérifié par les auteurs de l'application",
+    "wordLists": "{{ count }} listes de mots",
+    "updateVersions": "Remplacer {{ name }} version {{ from }} par la version {{ to }} ?",
+    "link": {
+      "empty": "Saisissez un lien.",
+      "invalid": "Ce lien n'est pas valide.",
+      "notHttps": "Le lien doit commencer par https://.",
+      "notRepository": "Ce lien GitHub n'est ni un dépôt, ni un dossier d'un dépôt, ni un fichier pack.json.",
+      "notJson": "Le lien doit pointer vers un fichier pack.json ou un dépôt GitHub."
     }
   }
 }

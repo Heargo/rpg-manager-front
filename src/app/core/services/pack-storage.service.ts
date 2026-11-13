@@ -2,11 +2,15 @@ import { Injectable } from '@angular/core';
 import { AppDatabase, openAppDatabase } from '../helpers/app-database';
 import { Pack } from '../packs/pack';
 
-/** An official pack downloaded on this device. */
+/** Where a stored pack comes from: the official registry, or a link the user gave. */
+export type PackSource =
+  'official' | { kind: 'unofficial'; link: string; manifestUrl: string };
+
+/** A pack downloaded on this device. */
 export interface StoredPack {
   id: string;
   manifest: Pack;
-  source: 'official';
+  source: PackSource;
   enabled: boolean;
   installedAt: number;
   size: number;
@@ -26,7 +30,7 @@ export class PackStorageService {
     return (await (await this.db()).getAll('packs')) as unknown as StoredPack[];
   }
 
-  /** Stores the pack and all its files in one transaction. */
+  /** Stores the pack and all its files in one transaction, replacing any pack with the same id. */
   async install(
     pack: StoredPack,
     files: Map<string, StoredPackFile>,
@@ -37,9 +41,18 @@ export class PackStorageService {
     );
     const packs = tx.objectStore('packs');
     const store = tx.objectStore('packFiles');
-    void packs.put(pack as unknown as { id: string });
-    for (const [path, file] of files)
-      void store.put(file, `${pack.id}/${path}`);
+    try {
+      // Replace in one transaction: a failed write leaves the previous version untouched.
+      void packs.delete(pack.id);
+      void store.delete(IDBKeyRange.bound(`${pack.id}/`, `${pack.id}/\uffff`));
+      void packs.put(pack as unknown as { id: string });
+      for (const [path, file] of files)
+        void store.put(file, `${pack.id}/${path}`);
+    } catch (error) {
+      tx.abort();
+      await tx.done.catch(() => undefined);
+      throw error;
+    }
     await tx.done;
   }
 

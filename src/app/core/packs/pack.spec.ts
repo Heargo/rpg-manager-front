@@ -126,6 +126,19 @@ describe('validatePack', () => {
   });
 });
 
+describe('validatePack links', () => {
+  it.each(['licenseUrl', 'homepage'])('refuses a %s that is not an https URL', (field) => {
+    for (const bad of ['javascript:alert(1)', 'http://example.com/x', 'data:text/html,hi', 'not a url']) {
+      const errors = errorsOf({ ...valid(), [field]: bad });
+      expect(errors.some((e) => e.includes(field)), `${field}=${bad}`).toBe(true);
+    }
+  });
+
+  it('accepts https links for licenseUrl and homepage', () => {
+    expect(validatePack({ ...valid(), homepage: 'https://example.com/neon' }).ok).toBe(true);
+  });
+});
+
 describe('packFileUrl', () => {
   it('resolves a path next to the manifest', () => {
     expect(packFileUrl('packs/base/pack.json', 'sprites/axe.png')).toBe('packs/base/sprites/axe.png');

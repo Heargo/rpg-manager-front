@@ -1,3 +1,5 @@
+import 'fake-indexeddb/auto';
+import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { PackService } from '../services/pack.service';
 import { PackBusiness } from './pack.business';
@@ -27,6 +29,8 @@ describe('PackBusiness', () => {
   let business: PackBusiness;
 
   beforeEach(() => {
+    // A fresh database: packs stored by other spec files in this worker must not show up here.
+    globalThis.indexedDB = new IDBFactory();
     json = manifest();
     service = {
       loadManifest: vi.fn(async () => json),

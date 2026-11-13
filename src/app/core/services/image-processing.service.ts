@@ -9,6 +9,16 @@ export const DEFAULT_IMAGE_MAX_SIZE = 512;
  */
 @Injectable({ providedIn: 'root' })
 export class ImageProcessingService {
+  /** The pixel size of an image, decoded; rejects when the bytes are not an image. */
+  async dimensions(file: Blob): Promise<{ width: number; height: number }> {
+    const bitmap = await createImageBitmap(file);
+    try {
+      return { width: bitmap.width, height: bitmap.height };
+    } finally {
+      bitmap.close();
+    }
+  }
+
   async resize(file: Blob, max = DEFAULT_IMAGE_MAX_SIZE): Promise<Blob> {
     const bitmap = await createImageBitmap(file);
     try {

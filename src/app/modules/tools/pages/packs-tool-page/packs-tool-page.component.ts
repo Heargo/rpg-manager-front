@@ -8,6 +8,8 @@ import {
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
+import { InputTextModule } from '@openng/optimus-ui/inputtext';
+import { MessageModule } from '@openng/optimus-ui/message';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { DialogModule } from '@openng/optimus-ui/dialog';
@@ -16,7 +18,10 @@ import { TagModule } from '@openng/optimus-ui/tag';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 import {
   BundledSprite,
+  InstalledPack,
   PackBusiness,
+  PackUpdate,
+  PreparedPack,
 } from '../../../../core/business/pack.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import {
@@ -43,6 +48,8 @@ export function formatSize(bytes: number): string {
     ButtonModule,
     CardModule,
     DialogModule,
+    InputTextModule,
+    MessageModule,
     ProgressSpinnerModule,
     TagModule,
     ToggleSwitchModule,
@@ -52,6 +59,11 @@ export function formatSize(bytes: number): string {
       <header>
         <h1>{{ 'packs.title' | transloco }}</h1>
         <p class="hint">{{ 'packs.intro' | transloco }}</p>
+        <p-button
+          icon="pi pi-plus"
+          [label]="'packs.add' | transloco"
+          (onClick)="openAdd()"
+        />
       </header>
       <ul class="grid">
         @for (entry of registry(); track entry.id) {
@@ -127,7 +139,7 @@ export function formatSize(bytes: number): string {
                     icon="pi pi-trash"
                     [label]="'packs.remove' | transloco"
                     [disabled]="busy().has(entry.id)"
-                    (onClick)="confirmRemove(entry)"
+                    (onClick)="confirmRemove(entry.id, text(entry.name))"
                   />
                 }
               </div>
@@ -135,7 +147,199 @@ export function formatSize(bytes: number): string {
           </li>
         }
       </ul>
+      @if (unofficial().length) {
+        <h2>{{ 'packs.unofficialTitle' | transloco }}</h2>
+        <ul class="grid">
+          @for (pack of unofficial(); track pack.id) {
+            <li data-test="unofficial-pack-card" [attr.data-pack]="pack.id">
+              <p-card>
+                <div class="head">
+                  <h2>{{ text(pack.name) }}</h2>
+                  @if (busy().has(pack.id)) {
+                    <p-progressspinner
+                      strokeWidth="6"
+                      [style]="{ width: '1.5rem', height: '1.5rem' }"
+                      [ariaLabel]="'packs.downloading' | transloco"
+                    />
+                  }
+                  @for (key of [toggleKey(pack.id)]; track key) {
+                    <p-toggleswitch
+                      [ngModel]="pack.enabled"
+                      [disabled]="busy().has(pack.id)"
+                      [ariaLabel]="
+                        'packs.toggle' | transloco: { name: text(pack.name) }
+                      "
+                      (ngModelChange)="toggleUnofficial(pack, $event)"
+                    />
+                  }
+                </div>
+                <p>{{ text(pack.description) }}</p>
+                <dl>
+                  <dt>{{ 'packs.author' | transloco }}</dt>
+                  <dd>{{ pack.author }}</dd>
+                  <dt>{{ 'packs.license' | transloco }}</dt>
+                  <dd>
+                    <a
+                      [href]="pack.licenseUrl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >{{ pack.license }}</a
+                    >
+                  </dd>
+                  <dt>{{ 'packs.version' | transloco }}</dt>
+                  <dd>{{ pack.version }}</dd>
+                  <dt>{{ 'packs.source' | transloco }}</dt>
+                  <dd>
+                    <a
+                      [href]="pack.link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >{{ pack.link }}</a
+                    >
+                  </dd>
+                </dl>
+                <div class="actions">
+                  <p-button
+                    severity="secondary"
+                    icon="pi pi-refresh"
+                    [label]="'packs.update' | transloco"
+                    [disabled]="busy().has(pack.id)"
+                    (onClick)="checkUpdate(pack)"
+                  />
+                  <p-button
+                    severity="danger"
+                    icon="pi pi-trash"
+                    [label]="'packs.remove' | transloco"
+                    [disabled]="busy().has(pack.id)"
+                    (onClick)="confirmRemove(pack.id, text(pack.name))"
+                  />
+                </div>
+              </p-card>
+            </li>
+          }
+        </ul>
+      }
     </div>
+    <p-dialog
+      [header]="'packs.add' | transloco"
+      [visible]="addOpen()"
+      (visibleChange)="!$event && closeAdd()"
+      [modal]="true"
+      [style]="{ width: 'min(40rem, calc(100vw - 2rem))' }"
+    >
+      <div class="add-link">
+        <input
+          pInputText
+          data-test="pack-link"
+          type="text"
+          [ngModel]="link()"
+          (ngModelChange)="link.set($event)"
+          [placeholder]="'packs.linkPlaceholder' | transloco"
+          [attr.aria-label]="'packs.linkLabel' | transloco"
+        />
+        <p-button
+          [label]="'packs.check' | transloco"
+          [loading]="checking()"
+          (onClick)="check()"
+        />
+      </div>
+      @if (errors().length) {
+        <ul data-test="pack-errors" class="errors">
+          @for (error of errors(); track error) {
+            <li>{{ errorText(error) }}</li>
+          }
+        </ul>
+      }
+      @if (prepared(); as pack) {
+        <div data-test="pack-preview">
+          <h3>{{ text(pack.manifest.name) }}</h3>
+          <p>{{ text(pack.manifest.description) }}</p>
+          <dl>
+            <dt>{{ 'packs.author' | transloco }}</dt>
+            <dd>{{ pack.manifest.author }}</dd>
+            <dt>{{ 'packs.license' | transloco }}</dt>
+            <dd>
+              <a
+                [href]="pack.manifest.licenseUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                >{{ pack.manifest.license }}</a
+              >
+            </dd>
+            <dt>{{ 'packs.source' | transloco }}</dt>
+            <dd>
+              <a [href]="pack.source" target="_blank" rel="noopener noreferrer">{{
+                pack.source
+              }}</a>
+            </dd>
+            <dt>{{ 'packs.version' | transloco }}</dt>
+            <dd>{{ pack.manifest.version }}</dd>
+            <dt>{{ 'packs.size' | transloco }}</dt>
+            <dd>{{ size(pack.size) }}</dd>
+            @for (lang of countsGenerators(pack); track lang.lang) {
+              <dt>{{ 'packs.lang.' + lang.lang | transloco }}</dt>
+              <dd>
+                {{
+                  'packs.wordLists' | transloco: { count: lang.count }
+                }}
+              </dd>
+            }
+            @for (kind of countsSprites(pack); track kind.kind) {
+              <dt>{{ 'sprite.kind.' + kind.kind | transloco }}</dt>
+              <dd>{{ kind.count }}</dd>
+            }
+          </dl>
+          <p-message severity="warn">{{ 'packs.warning' | transloco }}</p-message>
+        </div>
+      }
+      <ng-template #footer>
+        @if (prepared()) {
+          <p-button
+            icon="pi pi-download"
+            [label]="'packs.install' | transloco"
+            [loading]="installing()"
+            (onClick)="install()"
+          />
+        }
+      </ng-template>
+    </p-dialog>
+    <p-dialog
+      [header]="'packs.update' | transloco"
+      [visible]="update() !== null"
+      (visibleChange)="!$event && update.set(null)"
+      [modal]="true"
+      [style]="{ width: 'min(32rem, calc(100vw - 2rem))' }"
+    >
+      @if (update(); as pending) {
+        <div data-test="pack-update">
+          <p>
+            {{
+              'packs.updateVersions'
+                | transloco
+                  : {
+                      name: text(pending.update.prepared.manifest.name),
+                      from: pending.update.oldVersion,
+                      to: pending.update.newVersion,
+                    }
+            }}
+          </p>
+          <p-message severity="warn">{{ 'packs.warning' | transloco }}</p-message>
+        </div>
+      }
+      <ng-template #footer>
+        <p-button
+          severity="secondary"
+          outlined
+          [label]="'packs.cancel' | transloco"
+          (onClick)="update.set(null)"
+        />
+        <p-button
+          [label]="'packs.confirm' | transloco"
+          [loading]="installing()"
+          (onClick)="confirmUpdate()"
+        />
+      </ng-template>
+    </p-dialog>
     <p-dialog
       [header]="detailsTitle()"
       [visible]="details() !== null"
@@ -226,6 +430,16 @@ export function formatSize(bytes: number): string {
       flex-wrap: wrap;
       gap: 0.5rem;
     }
+    .add-link {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .add-link input {
+      flex: 1;
+    }
+    .errors {
+      color: var(--p-red-500);
+    }
     .thumbs {
       display: flex;
       flex-wrap: wrap;
@@ -251,6 +465,16 @@ export class PacksToolPageComponent {
   protected readonly registry = signal<PackRegistryEntry[]>([]);
   protected readonly busy = signal<ReadonlySet<string>>(new Set());
   protected readonly details = signal<PackRegistryEntry | null>(null);
+  protected readonly addOpen = signal(false);
+  protected readonly link = signal('');
+  protected readonly checking = signal(false);
+  protected readonly installing = signal(false);
+  protected readonly prepared = signal<PreparedPack | null>(null);
+  protected readonly errors = signal<string[]>([]);
+  protected readonly update = signal<{ update: PackUpdate } | null>(null);
+  protected readonly unofficial = computed(() =>
+    this.business.$installed().filter((p) => p.link),
+  );
   private readonly detailSprites = signal<BundledSprite[]>([]);
   private readonly resets = signal<Record<string, number>>({});
 
@@ -339,8 +563,124 @@ export class PacksToolPageComponent {
     }
   }
 
-  protected confirmRemove(entry: PackRegistryEntry): void {
-    const name = this.text(entry.name);
+  protected async toggleUnofficial(
+    pack: InstalledPack,
+    on: boolean,
+  ): Promise<void> {
+    if (on === pack.enabled) return;
+    this.setBusy(pack.id, true);
+    try {
+      if (on) await this.business.enable(pack.id);
+      else await this.business.disable(pack.id);
+    } catch (error) {
+      this.fail(error);
+      this.resets.update((r) => ({ ...r, [pack.id]: (r[pack.id] ?? 0) + 1 }));
+    } finally {
+      this.setBusy(pack.id, false);
+    }
+  }
+
+  protected openAdd(): void {
+    this.link.set('');
+    this.prepared.set(null);
+    this.errors.set([]);
+    this.addOpen.set(true);
+  }
+
+  protected closeAdd(): void {
+    this.addOpen.set(false);
+    this.prepared.set(null);
+    this.errors.set([]);
+  }
+
+  protected async check(): Promise<void> {
+    this.prepared.set(null);
+    this.errors.set([]);
+    this.checking.set(true);
+    try {
+      this.prepared.set(await this.business.prepare(this.link()));
+    } catch (error) {
+      this.errors.set(this.errorList(error));
+    } finally {
+      this.checking.set(false);
+    }
+  }
+
+  protected async install(): Promise<void> {
+    const pack = this.prepared();
+    if (!pack) return;
+    this.installing.set(true);
+    try {
+      await this.business.install(pack);
+      this.closeAdd();
+    } catch (error) {
+      this.prepared.set(null);
+      this.errors.set(this.errorList(error));
+    } finally {
+      this.installing.set(false);
+    }
+  }
+
+  protected async checkUpdate(pack: InstalledPack): Promise<void> {
+    this.setBusy(pack.id, true);
+    try {
+      this.update.set({ update: await this.business.checkUpdate(pack.id) });
+    } catch (error) {
+      this.fail(
+        this.errorList(error)
+          .map((e) => this.errorText(e))
+          .join('\n'),
+      );
+    } finally {
+      this.setBusy(pack.id, false);
+    }
+  }
+
+  protected async confirmUpdate(): Promise<void> {
+    const pending = this.update();
+    if (!pending) return;
+    this.installing.set(true);
+    try {
+      await this.business.install(pending.update.prepared);
+      this.update.set(null);
+    } catch (error) {
+      this.fail(
+        this.errorList(error)
+          .map((e) => this.errorText(e))
+          .join('\n'),
+      );
+    } finally {
+      this.installing.set(false);
+    }
+  }
+
+  private errorList(error: unknown): string[] {
+    const list = (error as { errors?: string[] }).errors;
+    return list?.length
+      ? list
+      : [error instanceof Error ? error.message : String(error)];
+  }
+
+  /** Link errors are translation keys; the others come from the pack and are shown as they are. */
+  protected errorText(error: string): string {
+    return /^packs\.link\.\w+$/.test(error) ? this.language.t(error) : error;
+  }
+
+  protected countsGenerators(pack: PreparedPack) {
+    return Object.entries(pack.counts.generators).map(([lang, count]) => ({
+      lang,
+      count,
+    }));
+  }
+
+  protected countsSprites(pack: PreparedPack) {
+    return SPRITE_KINDS.filter((k) => pack.counts.sprites[k]).map((kind) => ({
+      kind,
+      count: pack.counts.sprites[kind] ?? 0,
+    }));
+  }
+
+  protected confirmRemove(id: string, name: string): void {
     this.confirmation.confirm({
       header: this.language.t('packs.removeTitle'),
       message: this.language.t('packs.removeMessage', { name }),
@@ -354,18 +694,18 @@ export class PacksToolPageComponent {
         severity: 'secondary',
         outlined: true,
       },
-      accept: () => void this.remove(entry),
+      accept: () => void this.remove(id),
     });
   }
 
-  private async remove(entry: PackRegistryEntry): Promise<void> {
-    this.setBusy(entry.id, true);
+  private async remove(id: string): Promise<void> {
+    this.setBusy(id, true);
     try {
-      await this.business.remove(entry.id);
+      await this.business.remove(id);
     } catch (error) {
       this.fail(error);
     } finally {
-      this.setBusy(entry.id, false);
+      this.setBusy(id, false);
     }
   }
 

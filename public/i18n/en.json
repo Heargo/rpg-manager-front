@@ -1547,6 +1547,27 @@
     "lang": {
       "en": "English",
       "fr": "French"
+    },
+    "add": "Add a pack",
+    "linkLabel": "Link to the pack",
+    "linkPlaceholder": "https://github.com/owner/repository or a pack.json link",
+    "check": "Check",
+    "install": "Install",
+    "update": "Update",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "version": "Version",
+    "source": "Source",
+    "unofficialTitle": "Packs added from a link",
+    "warning": "Content not checked by the app's authors",
+    "wordLists": "{{ count }} word lists",
+    "updateVersions": "Replace {{ name }} version {{ from }} with version {{ to }}?",
+    "link": {
+      "empty": "Enter a link.",
+      "invalid": "This is not a valid link.",
+      "notHttps": "The link must start with https://.",
+      "notRepository": "This GitHub link is not a repository, a folder of a repository or a pack.json file.",
+      "notJson": "The link must point to a pack.json file or a GitHub repository."
     }
   }
 }
