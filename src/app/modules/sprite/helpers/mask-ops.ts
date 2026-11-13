@@ -7,6 +7,24 @@ export function brushRadius(size: number, hardness: number): number {
   );
 }
 
+/** The pixels a brush covers around its centre, one run per row: `dx` from `from` to `to` inclusive. */
+export function brushRows(
+  size: number,
+  hardness: number,
+): { dy: number; from: number; to: number }[] {
+  const radius = brushRadius(size, hardness);
+  const reach = Math.ceil(radius);
+  const limit = radius * radius;
+  const rows: { dy: number; from: number; to: number }[] = [];
+  for (let dy = -reach; dy <= reach; dy++) {
+    // The centre pixel is always painted, even when the disc is smaller than a pixel.
+    if (dy * dy > limit && dy !== 0) continue;
+    const half = Math.floor(Math.sqrt(limit - dy * dy));
+    rows.push({ dy, from: -half, to: half });
+  }
+  return rows;
+}
+
 /** Stamps a round brush into `mask` (in place). Size is the diameter in pixels; hardness 0..1 shrinks the disc. */
 export function stampBrushInPlace(
   mask: Uint8Array,
@@ -17,18 +35,11 @@ export function stampBrushInPlace(
   size: number,
   hardness: number,
 ): void {
-  const radius = brushRadius(size, hardness);
-  const reach = Math.ceil(radius);
-  const limit = radius * radius;
-  for (let dy = -reach; dy <= reach; dy++) {
+  for (const { dy, from, to } of brushRows(size, hardness)) {
     const y = cy + dy;
     if (y < 0 || y >= height) continue;
-    for (let dx = -reach; dx <= reach; dx++) {
-      const x = cx + dx;
-      if (x < 0 || x >= width) continue;
-      if ((dx === 0 && dy === 0) || dx * dx + dy * dy <= limit)
-        mask[y * width + x] = 1;
-    }
+    for (let x = Math.max(0, cx + from); x <= Math.min(width - 1, cx + to); x++)
+      mask[y * width + x] = 1;
   }
 }
 

@@ -179,19 +179,11 @@
                 }
               }
               @if (brushCursor(); as cursor) {
-                @if (cursor.outer) {
-                  <circle
-                    class="brush-outer"
-                    [attr.cx]="cursor.cx"
-                    [attr.cy]="cursor.cy"
-                    [attr.r]="cursor.outer"
-                  />
-                }
-                <circle
+                <path
                   class="brush"
-                  [attr.cx]="cursor.cx"
-                  [attr.cy]="cursor.cy"
-                  [attr.r]="cursor.radius"
+                  [attr.d]="cursor.outline"
+                  [attr.stroke-width]="1 / zoom()"
+                  [attr.stroke-dasharray]="3 / zoom() + ' ' + 3 / zoom()"
                 />
               }
             </svg>

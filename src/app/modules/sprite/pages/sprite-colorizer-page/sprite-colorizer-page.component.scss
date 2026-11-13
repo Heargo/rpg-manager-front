@@ -269,18 +269,15 @@ h2 {
     stroke-dasharray: 6 4;
     opacity: 0.8;
   }
-  .brush,
-  .brush-outer {
+  // Only the edges of the pixels the brush paints, dashed black, inside left see-through (like GIMP).
+  // Width and dashes are set in image units divided by the zoom: `non-scaling-stroke` ignores the
+  // sheet's CSS scale, so it would draw one image pixel wide.
+  .brush {
     fill: none;
-    stroke: var(--p-content-background);
-    stroke-width: 1;
-    filter: drop-shadow(0 0 1px rgb(0 0 0 / 0.9));
+    stroke: #000;
+    vector-effect: none;
   }
-  .brush-outer {
-    stroke-dasharray: 3 3;
-    opacity: 0.8;
-  }
-  circle:not(.brush, .brush-outer) {
+  circle {
     fill: var(--p-content-background);
     &.first {
       fill: var(--p-primary-color);
