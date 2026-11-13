@@ -7,16 +7,21 @@ import {
   signal,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
+import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
+import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
 import { TabsModule } from '@openng/optimus-ui/tabs';
+import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { Skill } from '../../../skill/models/skill';
 import { CombatBusiness } from '../../business/combat.business';
 import { CombatTargetingBusiness } from '../../business/combat-targeting.business';
 import {
   defaultTargets,
+  targetGroups,
   targetsArePicked,
 } from '../../helpers/combat-targeting.rules';
 import { actionTabs } from '../../helpers/combat-actions.rules';
@@ -26,7 +31,16 @@ import { CombatAttribute } from '../../models/combat';
 @Component({
   selector: 'app-combat-actions',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, ButtonModule, TabsModule, NgTemplateOutlet],
+  imports: [
+    TranslocoPipe,
+    FormsModule,
+    ButtonModule,
+    TabsModule,
+    MultiSelectModule,
+    ProgressBarModule,
+    StoredImageComponent,
+    NgTemplateOutlet,
+  ],
   template: `
     @if (tabs().length) {
       <p-tabs [value]="selected()" (valueChange)="select($event)">
@@ -154,23 +168,55 @@ import { CombatAttribute } from '../../models/combat';
             'combat.actions.pickTargets' | transloco: { skill: cast.skill.name }
           }}
         </h4>
-        <div class="targets">
-          @for (combatant of combatants(); track combatant.id) {
-            <button
-              pButton
-              type="button"
+        <p-multiselect
+          class="targets"
+          data-testid="targets"
+          [options]="groups()"
+          optionLabel="name"
+          optionValue="id"
+          optionDisabled="disabled"
+          [group]="true"
+          optionGroupLabel="id"
+          optionGroupChildren="options"
+          display="chip"
+          [filter]="true"
+          [showToggleAll]="false"
+          [disabled]="!picking(cast.skill)"
+          [ngModel]="cast.targets"
+          (ngModelChange)="targeting.set($event ?? [])"
+          [placeholder]="'combat.targets.placeholder' | transloco"
+        >
+          <ng-template #group let-group>
+            {{ 'combat.targets.' + group.id | transloco }}
+          </ng-template>
+          <ng-template #item let-option>
+            <div
+              class="target"
               data-testid="target"
-              size="small"
-              [attr.data-name]="combatant.name"
-              [attr.data-picked]="cast.targets.includes(combatant.id)"
-              [outlined]="!cast.targets.includes(combatant.id)"
-              [severity]="combatant.side === 'enemy' ? 'danger' : 'primary'"
-              [disabled]="!picking(cast.skill)"
-              [label]="combatant.name"
-              (click)="toggle(combatant.id)"
-            ></button>
-          }
-        </div>
+              [attr.data-name]="option.name"
+            >
+              @if (option.portraitId; as portraitId) {
+                <app-stored-image
+                  class="portrait"
+                  [imageId]="portraitId"
+                  [alt]="option.name"
+                >
+                  <span class="initial">{{ initial(option.name) }}</span>
+                </app-stored-image>
+              } @else {
+                <span class="initial portrait">{{ initial(option.name) }}</span>
+              }
+              <span>{{ option.name }}</span>
+              @if (option.lifePercent !== undefined) {
+                <p-progressbar
+                  class="life"
+                  [value]="option.lifePercent"
+                  [showValue]="false"
+                />
+              }
+            </div>
+          </ng-template>
+        </p-multiselect>
         <div class="buttons">
           <button
             pButton
@@ -206,7 +252,6 @@ import { CombatAttribute } from '../../models/combat';
       color: var(--p-text-muted-color);
     }
     .counters,
-    .targets,
     .buttons {
       display: flex;
       flex-wrap: wrap;
@@ -246,6 +291,32 @@ import { CombatAttribute } from '../../models/combat';
       display: flex;
       flex-direction: column;
     }
+    .targets {
+      width: 100%;
+    }
+    .target {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .portrait {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      object-fit: cover;
+      overflow: hidden;
+      flex: none;
+    }
+    .initial {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--p-content-border-color);
+    }
+    .life {
+      width: 3rem;
+      height: 0.4rem;
+    }
     small {
       color: var(--p-text-muted-color);
     }
@@ -254,7 +325,7 @@ import { CombatAttribute } from '../../models/combat';
 export class CombatActionsComponent {
   private readonly combat = inject(CombatBusiness);
   private readonly messages = inject(MessageService);
-  private readonly targeting = inject(CombatTargetingBusiness);
+  protected readonly targeting = inject(CombatTargetingBusiness);
 
   readonly combatantId = input.required<string>();
   /** The character whose bag the items come from (none for an NPC). */
@@ -273,6 +344,29 @@ export class CombatActionsComponent {
   protected readonly combatants = computed(
     () => this.combat.$state()?.combatants ?? [],
   );
+
+  protected readonly groups = computed(() => {
+    const cast = this.casting();
+    const state = this.combat.$state();
+    if (!cast || !state) return [];
+    return targetGroups(
+      cast.skill,
+      cast.casterId,
+      state.combatants.map((c) => ({
+        id: c.id,
+        name: c.name,
+        side: c.side,
+        ...(c.portraitId !== undefined && { portraitId: c.portraitId }),
+        ...(c.lifeBar && { lifePercent: c.lifeBar.percent }),
+        ...(c.position && { position: c.position }),
+      })),
+      state.grid && { ...state.grid, enabled: true },
+    );
+  });
+
+  protected initial(name: string): string {
+    return name.charAt(0).toUpperCase();
+  }
 
   protected readonly skillEntries = computed(() =>
     this.sheetSkills().flatMap(({ skillId, level }) => {
@@ -339,10 +433,6 @@ export class CombatActionsComponent {
 
   protected picking(skill: Skill): boolean {
     return targetsArePicked(skill);
-  }
-
-  protected toggle(id: string): void {
-    this.targeting.toggle(id);
   }
 
   protected async confirm(): Promise<void> {

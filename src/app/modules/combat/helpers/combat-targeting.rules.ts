@@ -1,5 +1,6 @@
 import { Skill } from '../../skill/models/skill';
 import { CombatSide } from '../models/combat';
+import { Cell, combatantsInRange } from './combat-grid.rules';
 
 interface Candidate {
   id: string;
@@ -54,4 +55,77 @@ export function toggleTarget(
       ? picked.filter((p) => p !== id)
       : [...picked, id];
   return picked.length === 1 && picked[0] === id ? [] : [id];
+}
+
+export interface TargetOption {
+  id: string;
+  name: string;
+  portraitId?: string;
+  lifePercent?: number;
+  disabled: boolean;
+}
+
+export interface TargetGroup {
+  id: 'enemies' | 'allies';
+  options: TargetOption[];
+}
+
+interface TargetCandidate extends Candidate {
+  name: string;
+  portraitId?: string;
+  lifePercent?: number;
+  position?: Cell;
+}
+
+const isHarmful = (skill: Pick<Skill, 'target' | 'effects'>) =>
+  skill.target === 'one-enemy' ||
+  skill.target === 'all-enemies' ||
+  skill.effects.some((e) => e.kind === 'damage');
+
+/** The combatants a skill can aim at, in two groups (the harmful ones list enemies first), out-of-range ones disabled on a grid. */
+export function targetGroups(
+  skill: Pick<Skill, 'target' | 'effects' | 'range'>,
+  casterId: string,
+  combatants: TargetCandidate[],
+  grid?: { enabled?: boolean; columns?: number; rows?: number },
+): TargetGroup[] {
+  const caster = combatants.find((c) => c.id === casterId);
+  const inRange =
+    grid?.enabled && skill.range !== undefined && caster?.position
+      ? new Set(combatantsInRange(casterId, skill.range, combatants))
+      : undefined;
+  const option = (c: TargetCandidate): TargetOption => ({
+    id: c.id,
+    name: c.name,
+    ...(c.portraitId !== undefined && { portraitId: c.portraitId }),
+    ...(c.lifePercent !== undefined && { lifePercent: c.lifePercent }),
+    disabled:
+      !!inRange && c.id !== casterId && !!c.position && !inRange.has(c.id),
+  });
+  const enemyCamp = caster ? camp(caster.side) === 'friend' : true;
+  const enemies: TargetGroup = {
+    id: 'enemies',
+    options: combatants
+      .filter((c) => (camp(c.side) === 'enemy') === enemyCamp)
+      .map(option),
+  };
+  const allies: TargetGroup = {
+    id: 'allies',
+    options: combatants
+      .filter((c) => (camp(c.side) === 'enemy') !== enemyCamp)
+      .map(option),
+  };
+  return isHarmful(skill) ? [enemies, allies] : [allies, enemies];
+}
+
+/** The picked targets after the multi-select reports `ids`: single-target skills keep the last newly added one. */
+export function setTargets(
+  skill: Pick<Skill, 'target'>,
+  picked: string[],
+  ids: string[],
+): string[] {
+  if (!targetsArePicked(skill)) return picked;
+  if (skill.target === 'area') return ids;
+  const added = ids.filter((id) => !picked.includes(id));
+  return added.length ? [added[added.length - 1]] : ids.slice(-1);
 }

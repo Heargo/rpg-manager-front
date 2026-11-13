@@ -1510,6 +1510,11 @@
       "confirm": "Confirmer",
       "cancel": "Annuler"
     },
+    "targets": {
+      "enemies": "Ennemis",
+      "allies": "Alliés",
+      "placeholder": "Cibles"
+    },
     "pending": {
       "title": "Résultats à appliquer",
       "line": "{{caster}} : {{skill}} sur {{target}}",

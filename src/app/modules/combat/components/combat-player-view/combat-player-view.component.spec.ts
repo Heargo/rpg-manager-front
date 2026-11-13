@@ -3,6 +3,7 @@ import {
   combatTable,
   Device,
   mount,
+  pickTarget,
   typeNumber,
 } from '../../../../../testing/combat-table';
 import { settle } from '../../../../../testing/game-device';
@@ -15,7 +16,7 @@ import { CombatPlayerViewComponent } from './combat-player-view.component';
  * - Own skills `[data-testid="skill"]` (`data-name`, text with the preview "5 damage, 3 Mana, cooldown 2", `[data-action="use-skill"]`), own items
  *   `[data-testid="item"]` (`data-name`, `[data-action="use-item"]`) and counters `[data-testid="action-counter"]` (`data-action-name`, `data-used`, `data-count`,
  *   `[data-action="tick"]`), shown only on the player's turn; off turn no `app-combat-actions` and `[data-testid="waiting-turn"]` "Waiting for <active name>" (FR "En attente de").
- * - Targeting: after `use-skill`, `[data-testid="target"]` per combatant (`data-name`), then `[data-action="confirm-skill"]`. The roll then shows in
+ * - Targeting: after `use-skill`, `[data-testid="targets"]` multi-select (options `[data-testid="target"]`, see `pickTarget`), then `[data-action="confirm-skill"]`. The roll then shows in
  *   `[data-testid="roll"]` (the rolls and the skill name) and `[data-testid="waiting-gm"]` while one of the player's results is pending.
  * - Typed initiative: `[data-testid="initiative-input"]` (number) and `[data-action="initiative-set"]` when the world's mode is `typed`.
  * - No GM controls: no `apply`, `dismiss`, `edit`, `undo`, `next-turn`, `end` actions.
@@ -179,9 +180,7 @@ describe('CombatPlayerViewComponent', () => {
       await click(
         el.querySelector('[data-testid="skill"] [data-action="use-skill"]'),
       );
-      await click(
-        el.querySelector('[data-testid="target"][data-name="Goblin"]'),
-      );
+      await pickTarget(el, 'Goblin');
       await click(el.querySelector('[data-action="confirm-skill"]'));
 
       expect(table.state(table.gm).pending).toHaveLength(1);
@@ -207,9 +206,7 @@ describe('CombatPlayerViewComponent', () => {
       await click(
         el.querySelector('[data-testid="skill"] [data-action="use-skill"]'),
       );
-      await click(
-        el.querySelector('[data-testid="target"][data-name="Goblin"]'),
-      );
+      await pickTarget(el, 'Goblin');
       await click(el.querySelector('[data-action="confirm-skill"]'));
 
       await table.combat(table.gm).apply(table.state(table.gm).pending[0].id);

@@ -250,3 +250,11 @@ export async function click(el: Element | null) {
   (el as HTMLElement).click();
   await settle();
 }
+
+/** Opens the target multi-select under `host` (`[data-testid="targets"]`) and clicks the option named `name` (the overlay is in the document). */
+export async function pickTarget(host: Element, name: string) {
+  await click(host.querySelector('[data-testid="targets"]'));
+  await click(
+    document.querySelector(`[data-testid="target"][data-name="${name}"]`),
+  );
+}

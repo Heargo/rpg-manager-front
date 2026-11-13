@@ -1,6 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { Skill } from '../../skill/models/skill';
-import { toggleTarget } from '../helpers/combat-targeting.rules';
+import { setTargets, toggleTarget } from '../helpers/combat-targeting.rules';
 
 export interface Casting {
   casterId: string;
@@ -26,6 +26,16 @@ export class CombatTargetingBusiness {
       this.casting.set({
         ...cast,
         targets: toggleTarget(cast.skill, cast.targets, id),
+      });
+  }
+
+  /** Replaces the picked targets (from the multi-select). */
+  set(ids: string[]): void {
+    const cast = this.casting();
+    if (cast)
+      this.casting.set({
+        ...cast,
+        targets: setTargets(cast.skill, cast.targets, ids),
       });
   }
 

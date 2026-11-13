@@ -2,6 +2,7 @@ import {
   click,
   combatTable,
   mount,
+  pickTarget,
   typeNumber,
 } from '../../../../../testing/combat-table';
 import { settle } from '../../../../../testing/game-device';
@@ -18,7 +19,7 @@ import { CombatGmPanelComponent } from './combat-gm-panel.component';
  *   `[data-field="life-bar"]` (`data-percent`), `[data-field="initiative"]`, `[data-field="status"]` (one per status), and a round label `[data-field="round"]`.
  * - The active row also carries `[data-testid="active-row"]`: `[role="tab"]` per action type labelled `Name (left/count)` (click `[data-action="tick"]` to use one), `[data-testid="skill"]` (`data-name`, `data-available="false"` when on cooldown or unaffordable; text = the preview
  *   "5 damage, 3 Mana, cooldown 2"; `[data-action="use-skill"]`) and `[data-testid="item"]` (`data-name`, `[data-action="use-item"]`).
- * - Targeting: after `use-skill`, `[data-testid="target"]` per combatant (`data-name`, click to pick) and `[data-action="confirm-skill"]`.
+ * - Targeting: after `use-skill`, `[data-testid="targets"]` multi-select (click opens it, the options `[data-testid="target"]` with `data-name` are in the document, see `pickTarget`) and `[data-action="confirm-skill"]`.
  * - `[data-testid="pending"]` per pending result (text names the caster, the skill and the target) with `[data-action="apply"]`, `[data-action="dismiss"]`,
  *   `[data-action="edit"]` (shows `[data-testid="edit-amount"]`, a number input, and `[data-action="apply-edited"]`).
  * - Any row: `[data-action="select"]` expands it, showing `[data-testid="manual-amount"]` (number), `[data-action="damage"]`, `[data-action="heal"]`,
@@ -202,9 +203,7 @@ describe('CombatGmPanelComponent', () => {
       await click(
         el.querySelector('[data-testid="skill"] [data-action="use-skill"]'),
       );
-      await click(
-        el.querySelector('[data-testid="target"][data-name="Goblin"]'),
-      );
+      await pickTarget(el, 'Goblin');
       await click(el.querySelector('[data-action="confirm-skill"]'));
     };
 
