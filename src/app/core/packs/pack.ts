@@ -30,6 +30,8 @@ export interface GradientStop {
 
 export interface PackTint {
   gradient: GradientStop[];
+  /** Kind ids the tint fits; its words and descriptions are only drawn for an item whose chain has one. No list: any item. */
+  fits?: string[];
 }
 
 /** A node of the items tree: a root has a `type`, a child has a `parent`; `slot` only on an equipment chain. */
@@ -123,6 +125,17 @@ function validateTints(tints: unknown, errors: string[]): void {
   for (const [id, tint] of Object.entries(tints)) {
     const name = `tint "${id}"`;
     if (!ID.test(id)) errors.push(`${name}: id must be kebab-case`);
+    const fits = isObject(tint) ? tint['fits'] : undefined;
+    if (fits !== undefined) {
+      if (!Array.isArray(fits))
+        errors.push(`${name}: fits must be a list of kind ids`);
+      else
+        for (const kind of fits)
+          if (typeof kind !== 'string' || !ID.test(kind))
+            errors.push(
+              `${name}: fits "${String(kind)}" must be a kebab-case kind id`,
+            );
+    }
     const stops = isObject(tint) ? tint['gradient'] : undefined;
     if (!Array.isArray(stops) || stops.length < 2) {
       errors.push(`${name}: gradient needs at least 2 stops`);
@@ -131,10 +144,7 @@ function validateTints(tints: unknown, errors: string[]): void {
     stops.forEach((stop, i) => {
       const position = isObject(stop) ? stop['position'] : undefined;
       const color = isObject(stop) ? stop['color'] : undefined;
-      if (
-        typeof position !== 'number' ||
-        !(position >= 0 && position <= 1)
-      )
+      if (typeof position !== 'number' || !(position >= 0 && position <= 1))
         errors.push(`${name}: stop ${i} position must be between 0 and 1`);
       if (typeof color !== 'string' || !HEX_COLOR.test(color))
         errors.push(`${name}: stop ${i} color must be #rrggbb`);
@@ -254,7 +264,9 @@ export function validatePack(json: unknown): PackValidation {
         kinds.length === 0 ||
         !kinds.every((k) => typeof k === 'string' && ID.test(k))
       )
-        errors.push(`${name}: kinds must be a non-empty list of kebab-case ids`);
+        errors.push(
+          `${name}: kinds must be a non-empty list of kebab-case ids`,
+        );
       const kind = sprite['kind'];
       if (!(SPRITE_KINDS as readonly string[]).includes(kind as string))
         errors.push(`${name}: kind must be one of ${SPRITE_KINDS.join(', ')}`);

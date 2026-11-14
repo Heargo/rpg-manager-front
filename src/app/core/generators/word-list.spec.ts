@@ -88,10 +88,10 @@ describe('validateItemWordList', () => {
 
   it('rejects unknown fields in a kind and in a tint', () => {
     const json = valid();
-    json['kinds']['sword']['adjectives'] = {};
+    json['kinds']['sword']['colour'] = 'red';
     json['tints']['fire']['nouns'] = [];
     const errors = errorsOf(json);
-    expect(errors.some((e) => e.includes('kinds.sword') && e.includes('adjectives'))).toBe(true);
+    expect(errors.some((e) => e.includes('kinds.sword') && e.includes('colour'))).toBe(true);
     expect(errors.some((e) => e.includes('tints.fire') && e.includes('nouns'))).toBe(true);
   });
 

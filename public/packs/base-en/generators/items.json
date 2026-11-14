@@ -7,7 +7,20 @@
         "Built for a long road and a hard fight.",
         "Scratches on it tell a story of its own.",
         "It fits as if it was made for you."
-      ]
+      ],
+      "adjectives": {
+        "common": [
+          "Worn",
+          "Sturdy"
+        ],
+        "mythic": [
+          "Starforged",
+          "Wyrmscale"
+        ],
+        "legendary": [
+          "Godforged"
+        ]
+      }
     },
     "consumable": {
       "descriptions": [
@@ -22,14 +35,25 @@
         "It hums faintly when nobody is watching.",
         "Worth more to the right buyer.",
         "Its maker left a mark you don't recognise."
-      ]
+      ],
+      "adjectives": {
+        "common": [
+          "Worn"
+        ]
+      }
     },
     "helm": {
       "nouns": [
         {
           "text": "Helm"
         }
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Reinforced",
+          "Polished"
+        ]
+      }
     },
     "hood": {
       "nouns": [
@@ -64,7 +88,12 @@
         {
           "text": "Earring"
         }
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Polished"
+        ]
+      }
     },
     "ear-hoop": {
       "nouns": [
@@ -116,7 +145,12 @@
         {
           "text": "Band"
         }
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Polished"
+        ]
+      }
     },
     "signet-ring": {
       "nouns": [
@@ -327,7 +361,12 @@
         {
           "text": "Buckler"
         }
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Reinforced"
+        ]
+      }
     },
     "grimoire": {
       "nouns": [
@@ -373,7 +412,12 @@
         {
           "text": "Gem"
         }
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Polished"
+        ]
+      }
     },
     "idol": {
       "nouns": [
@@ -496,7 +540,68 @@
         "They say it once belonged to {owner}.",
         "It survived {event}, and it shows.",
         "It is shaped from {material}."
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Keen",
+          "Balanced",
+          "Polished"
+        ]
+      }
+    },
+    "chest": {
+      "adjectives": {
+        "common": [
+          "Patched"
+        ],
+        "uncommon": [
+          "Reinforced"
+        ]
+      }
+    },
+    "hand": {
+      "adjectives": {
+        "common": [
+          "Patched"
+        ],
+        "uncommon": [
+          "Reinforced"
+        ]
+      }
+    },
+    "legs": {
+      "adjectives": {
+        "common": [
+          "Patched"
+        ],
+        "uncommon": [
+          "Reinforced"
+        ]
+      }
+    },
+    "foot": {
+      "adjectives": {
+        "common": [
+          "Patched"
+        ],
+        "uncommon": [
+          "Reinforced"
+        ]
+      }
+    },
+    "head": {
+      "adjectives": {
+        "common": [
+          "Patched"
+        ]
+      }
+    },
+    "necklace": {
+      "adjectives": {
+        "uncommon": [
+          "Polished"
+        ]
+      }
     }
   },
   "tints": {
@@ -598,18 +703,12 @@
   },
   "adjectives": {
     "common": [
-      "Worn",
       "Plain",
-      "Simple",
-      "Patched",
-      "Sturdy"
+      "Simple"
     ],
     "uncommon": [
       "Fine",
-      "Polished",
-      "Reinforced",
-      "Keen",
-      "Balanced"
+      "Careful"
     ],
     "rare": [
       "Enchanted",
@@ -619,13 +718,11 @@
     ],
     "mythic": [
       "Dread",
-      "Starforged",
       "Ancient",
-      "Wyrmscale"
+      "Forgotten"
     ],
     "legendary": [
       "Eternal",
-      "Godforged",
       "Fabled",
       "Worldbreaker",
       "Undying"

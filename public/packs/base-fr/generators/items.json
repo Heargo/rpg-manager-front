@@ -7,7 +7,37 @@
         "Pour une longue route et un rude combat.",
         "Chaque éraflure raconte une histoire.",
         "On jurerait que c'est fait sur mesure pour vous."
-      ]
+      ],
+      "adjectives": {
+        "common": [
+          {
+            "m": "usé",
+            "f": "usée"
+          },
+          {
+            "m": "robuste",
+            "f": "robuste"
+          }
+        ],
+        "mythic": [
+          {
+            "m": "forgé dans les étoiles",
+            "f": "forgée dans les étoiles"
+          },
+          {
+            "m": "en écailles de wyrm",
+            "f": "en écailles de wyrm",
+            "mp": "en écailles de wyrm",
+            "fp": "en écailles de wyrm"
+          }
+        ],
+        "legendary": [
+          {
+            "m": "forgé par les dieux",
+            "f": "forgée par les dieux"
+          }
+        ]
+      }
     },
     "consumable": {
       "descriptions": [
@@ -22,7 +52,15 @@
         "Ça bourdonne doucement quand personne ne regarde.",
         "Ça vaut plus cher pour le bon acheteur.",
         "Son créateur a laissé une marque que vous ne reconnaissez pas."
-      ]
+      ],
+      "adjectives": {
+        "common": [
+          {
+            "m": "usé",
+            "f": "usée"
+          }
+        ]
+      }
     },
     "helm": {
       "nouns": [
@@ -30,7 +68,19 @@
           "text": "Casque",
           "gender": "m"
         }
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          {
+            "m": "renforcé",
+            "f": "renforcée"
+          },
+          {
+            "m": "poli",
+            "f": "polie"
+          }
+        ]
+      }
     },
     "hood": {
       "nouns": [
@@ -70,7 +120,15 @@
           "text": "Boucle d'oreille",
           "gender": "f"
         }
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          {
+            "m": "poli",
+            "f": "polie"
+          }
+        ]
+      }
     },
     "ear-hoop": {
       "nouns": [
@@ -130,7 +188,15 @@
           "text": "Bague",
           "gender": "f"
         }
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          {
+            "m": "poli",
+            "f": "polie"
+          }
+        ]
+      }
     },
     "signet-ring": {
       "nouns": [
@@ -369,7 +435,15 @@
           "text": "Rondache",
           "gender": "f"
         }
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          {
+            "m": "renforcé",
+            "f": "renforcée"
+          }
+        ]
+      }
     },
     "grimoire": {
       "nouns": [
@@ -421,7 +495,15 @@
           "text": "Gemme",
           "gender": "f"
         }
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          {
+            "m": "poli",
+            "f": "polie"
+          }
+        ]
+      }
     },
     "idol": {
       "nouns": [
@@ -555,7 +637,107 @@
         "On dit que l'arme a appartenu à {owner}.",
         "{g:Il|Elle} a survécu à {event}, et ça se voit.",
         "{g:Il|Elle} est {g:façonné|façonnée} dans {material}."
-      ]
+      ],
+      "adjectives": {
+        "uncommon": [
+          {
+            "m": "affûté",
+            "f": "affûtée"
+          },
+          {
+            "m": "équilibré",
+            "f": "équilibrée"
+          },
+          {
+            "m": "poli",
+            "f": "polie"
+          }
+        ]
+      }
+    },
+    "chest": {
+      "adjectives": {
+        "common": [
+          {
+            "m": "rapiécé",
+            "f": "rapiécée"
+          }
+        ],
+        "uncommon": [
+          {
+            "m": "renforcé",
+            "f": "renforcée"
+          }
+        ]
+      }
+    },
+    "hand": {
+      "adjectives": {
+        "common": [
+          {
+            "m": "rapiécé",
+            "f": "rapiécée"
+          }
+        ],
+        "uncommon": [
+          {
+            "m": "renforcé",
+            "f": "renforcée"
+          }
+        ]
+      }
+    },
+    "legs": {
+      "adjectives": {
+        "common": [
+          {
+            "m": "rapiécé",
+            "f": "rapiécée"
+          }
+        ],
+        "uncommon": [
+          {
+            "m": "renforcé",
+            "f": "renforcée"
+          }
+        ]
+      }
+    },
+    "foot": {
+      "adjectives": {
+        "common": [
+          {
+            "m": "rapiécé",
+            "f": "rapiécée"
+          }
+        ],
+        "uncommon": [
+          {
+            "m": "renforcé",
+            "f": "renforcée"
+          }
+        ]
+      }
+    },
+    "head": {
+      "adjectives": {
+        "common": [
+          {
+            "m": "rapiécé",
+            "f": "rapiécée"
+          }
+        ]
+      }
+    },
+    "necklace": {
+      "adjectives": {
+        "uncommon": [
+          {
+            "m": "poli",
+            "f": "polie"
+          }
+        ]
+      }
     }
   },
   "tints": {
@@ -685,20 +867,8 @@
   "adjectives": {
     "common": [
       {
-        "m": "usé",
-        "f": "usée"
-      },
-      {
         "m": "simple",
         "f": "simple"
-      },
-      {
-        "m": "rapiécé",
-        "f": "rapiécée"
-      },
-      {
-        "m": "robuste",
-        "f": "robuste"
       },
       {
         "m": "ordinaire",
@@ -711,20 +881,8 @@
         "f": "raffinée"
       },
       {
-        "m": "poli",
-        "f": "polie"
-      },
-      {
-        "m": "renforcé",
-        "f": "renforcée"
-      },
-      {
-        "m": "affûté",
-        "f": "affûtée"
-      },
-      {
-        "m": "équilibré",
-        "f": "équilibrée"
+        "m": "soigné",
+        "f": "soignée"
       }
     ],
     "rare": [
@@ -753,28 +911,18 @@
         "f": "redoutable"
       },
       {
-        "m": "forgé dans les étoiles",
-        "f": "forgée dans les étoiles"
-      },
-      {
         "m": "ancien",
         "f": "ancienne"
       },
       {
-        "m": "en écailles de wyrm",
-        "f": "en écailles de wyrm",
-        "mp": "en écailles de wyrm",
-        "fp": "en écailles de wyrm"
+        "m": "oublié",
+        "f": "oubliée"
       }
     ],
     "legendary": [
       {
         "m": "éternel",
         "f": "éternelle"
-      },
-      {
-        "m": "forgé par les dieux",
-        "f": "forgée par les dieux"
       },
       {
         "m": "fabuleux",

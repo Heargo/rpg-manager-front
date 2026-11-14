@@ -32,16 +32,27 @@ export interface Noun {
  * they are not the singular plus `s`.
  */
 export type Adjective =
-  | string
-  | ({ m: string; f: string } & { mp?: string; fp?: string });
+  string | ({ m: string; f: string } & { mp?: string; fp?: string });
 
 type PerRarity<T> = Partial<Record<ItemRarity, T[]>>;
+
+/** An adjective of a kind: a plain one, or one tied to a tint (`{ text, tint }` for a single form, or gendered forms plus `tint`). */
+export type KindAdjective =
+  | Adjective
+  | { text: string; tint: string }
+  | ({ m: string; f: string; mp?: string; fp?: string } & { tint: string });
+
+/** A suffix of a kind: a phrase, or a phrase tied to a tint. */
+export type KindSuffix = string | { text: string; tint: string };
 
 export interface KindTexts {
   nouns?: Noun[];
   descriptions?: string[];
   /** Name templates of this kind per rarity, before the language's; each has `{base}`. */
   names?: PerRarity<string>;
+  /** Adjectives and suffixes of this kind; they add up along the chain, with the top-level ones. */
+  adjectives?: PerRarity<KindAdjective>;
+  suffixes?: PerRarity<KindSuffix>;
 }
 
 export interface TintTexts {
@@ -73,7 +84,10 @@ const noun: Section = (value, path, context) => {
     value['gender'] !== 'f'
   )
     context.error(`${path}.gender must be "m" or "f"`);
-  else if (value['plural'] !== undefined && typeof value['plural'] !== 'boolean')
+  else if (
+    value['plural'] !== undefined &&
+    typeof value['plural'] !== 'boolean'
+  )
     context.error(`${path}.plural must be true or false`);
 };
 
@@ -90,7 +104,42 @@ export function isAdjective(value: unknown): value is Adjective {
 
 const adjective: Section = (value, path, context) => {
   if (!isAdjective(value))
-    context.error(`${path} must be a string or { "m": …, "f": …, "mp"?: …, "fp"?: … }`);
+    context.error(
+      `${path} must be a string or { "m": …, "f": …, "mp"?: …, "fp"?: … }`,
+    );
+};
+
+const tintId: Section = (value, path, context) => {
+  if (!nonEmptyString(value))
+    context.error(`${path} must be a non-empty string`);
+};
+
+const kindAdjective: Section = (value, path, context) => {
+  if (isRecord(value) && value['text'] !== undefined) {
+    for (const key of Object.keys(value))
+      if (key !== 'text' && key !== 'tint')
+        context.error(`${path}: unknown field "${key}"`);
+    phrase(value['text'], `${path}.text`, context);
+    if (value['tint'] !== undefined)
+      tintId(value['tint'], `${path}.tint`, context);
+    return;
+  }
+  if (isRecord(value) && value['tint'] !== undefined) {
+    const { tint, ...rest } = value;
+    tintId(tint, `${path}.tint`, context);
+    adjective(rest, path, context);
+    return;
+  }
+  adjective(value, path, context);
+};
+
+const kindSuffix: Section = (value, path, context) => {
+  if (!isRecord(value)) return phrase(value, path, context);
+  for (const key of Object.keys(value))
+    if (key !== 'text' && key !== 'tint')
+      context.error(`${path}: unknown field "${key}"`);
+  phrase(value['text'], `${path}.text`, context);
+  tintId(value['tint'], `${path}.tint`, context);
 };
 
 const perRarity = (entry: Section): Section =>
@@ -104,6 +153,8 @@ const SECTIONS: Record<string, Section> = {
       nouns: listOf(noun),
       descriptions: listOf(phrase),
       names: perRarity(phraseWithBase),
+      adjectives: perRarity(kindAdjective),
+      suffixes: perRarity(kindSuffix),
     }),
   ),
   tints: keyedBy(
@@ -143,6 +194,9 @@ export function validateItemWordList(
     has(value.suffixes?.[rarity]) ||
     Object.values(value.tints ?? {}).some((tint) =>
       has(tint.suffixes?.[rarity]),
+    ) ||
+    Object.values(value.kinds ?? {}).some((kind) =>
+      has(kind.suffixes?.[rarity]),
     );
   const noSuffix = (
     path: string,

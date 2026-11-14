@@ -23,6 +23,25 @@
      "position": 1,
      "color": "#ffffff"
     }
+   ],
+   "fits": [
+    "weapon",
+    "helm",
+    "armor",
+    "chainmail",
+    "gauntlets",
+    "bracers",
+    "greaves",
+    "cuisses",
+    "sabatons",
+    "buckler",
+    "key",
+    "lockpick",
+    "lantern",
+    "compass",
+    "ring",
+    "earring",
+    "necklace"
    ]
   },
   "wood": {
@@ -39,6 +58,14 @@
      "position": 1,
      "color": "#d9b88a"
     }
+   ],
+   "fits": [
+    "weapon",
+    "shield",
+    "shovel",
+    "saw",
+    "fishing-rod",
+    "torch"
    ]
   },
   "gold": {
@@ -103,6 +130,22 @@
      "position": 1,
      "color": "#b9f08a"
     }
+   ],
+   "fits": [
+    "consumable",
+    "hood",
+    "cap",
+    "cape",
+    "tunic",
+    "robe",
+    "doublet",
+    "glove",
+    "mittens",
+    "hose",
+    "breeches",
+    "boots",
+    "sandals",
+    "shoes"
    ]
   },
   "arcane": {
@@ -135,6 +178,25 @@
      "position": 1,
      "color": "#e8a76b"
     }
+   ],
+   "fits": [
+    "weapon",
+    "helm",
+    "armor",
+    "chainmail",
+    "gauntlets",
+    "bracers",
+    "greaves",
+    "cuisses",
+    "sabatons",
+    "buckler",
+    "key",
+    "lockpick",
+    "lantern",
+    "compass",
+    "ring",
+    "earring",
+    "necklace"
    ]
   },
   "silver": {
@@ -151,6 +213,19 @@
      "position": 1,
      "color": "#ffffff"
     }
+   ],
+   "fits": [
+    "weapon",
+    "helm",
+    "crown",
+    "armor",
+    "chainmail",
+    "ring",
+    "earring",
+    "necklace",
+    "key",
+    "lantern",
+    "compass"
    ]
   },
   "shadow": {

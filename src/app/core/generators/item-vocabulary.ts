@@ -5,9 +5,17 @@ import {
   poolDomain,
   PooledSource,
   poolParams,
+  poolTintFits,
   poolTints,
 } from '../packs/pooled-domain';
-import { Adjective, KindTexts, Noun, TintTexts } from './word-list';
+import {
+  Adjective,
+  KindAdjective,
+  KindSuffix,
+  KindTexts,
+  Noun,
+  TintTexts,
+} from './word-list';
 
 export interface ItemKindInfo {
   id: string;
@@ -29,10 +37,12 @@ export interface ItemVocabulary {
   names(id: string, rarity: ItemRarity): string[];
   drawable(filter?: { type?: ItemType; slot?: ItemSlot }): string[];
   kindForName(name: string): string | undefined;
-  adjectives(rarity: ItemRarity): Tinted<Adjective>[];
-  suffixes(rarity: ItemRarity): Tinted<string>[];
+  /** The top-level words, those of every level of the kind's chain, and the tinted words of the tints that fit the kind (no kind: every tint fits). */
+  adjectives(rarity: ItemRarity, kind?: string): Tinted<Adjective>[];
+  suffixes(rarity: ItemRarity, kind?: string): Tinted<string>[];
   tints(): string[];
-  tintDescriptions(tint: string): string[];
+  /** The descriptions of a tint, empty when the tint does not fit the kind. */
+  tintDescriptions(tint: string, kind?: string): string[];
   gradients(tint: string): GradientStop[][];
   params: Record<string, string[]>;
   templates(rarity: ItemRarity): string[];
@@ -60,6 +70,7 @@ export function buildItemVocabulary(sources: PooledSource[]): ItemVocabulary {
   const pooled = poolDomain(sources, ITEM_KIND_SCHEMA);
   const gradients = poolTints(sources);
   const params = poolParams(sources);
+  const fits = poolTintFits(sources);
   const texts = (id: string): KindTexts => pooled.texts[id] as KindTexts;
   const section = <T>(name: string): T | undefined =>
     pooled.sections[name] as T | undefined;
@@ -88,15 +99,38 @@ export function buildItemVocabulary(sources: PooledSource[]): ItemVocabulary {
     };
   };
 
-  const tinted = <T>(
-    untinted: PerRarity<T> | undefined,
-    pick: (tint: TintTexts) => PerRarity<T> | undefined,
+  const tintFits = (tint: string, kind: string | undefined): boolean => {
+    const wanted = fits[tint];
+    if (!wanted || kind === undefined) return true;
+    const chain = pooled.kinds[kind]?.chain ?? [];
+    return wanted.some((id) => chain.includes(id));
+  };
+
+  /** A word as written in a kind's list: the tint is lifted out and the value is what the generator uses. */
+  const entry = <T>(word: unknown): Tinted<T> => {
+    if (typeof word !== 'object' || word === null) return { value: word as T };
+    const { tint, text, ...rest } = word as Record<string, unknown>;
+    const value = (text !== undefined ? text : rest) as T;
+    return typeof tint === 'string' ? { value, tint } : { value };
+  };
+
+  const kindWords = <T, K>(
+    top: PerRarity<T> | undefined,
+    own: (texts: KindTexts) => PerRarity<K> | undefined,
+    fromTint: (tint: TintTexts) => PerRarity<T> | undefined,
     rarity: ItemRarity,
+    kind: string | undefined,
   ): Tinted<T>[] => [
-    ...(untinted?.[rarity] ?? []).map((value) => ({ value })),
-    ...Object.entries(tintTexts).flatMap(([tint, t]) =>
-      (pick(t)?.[rarity] ?? []).map((value) => ({ value, tint })),
-    ),
+    ...(top?.[rarity] ?? []).map((value) => ({ value })),
+    ...(pooled.kinds[kind ?? '']?.chain ?? [])
+      .flatMap((level) => own(texts(level) ?? {})?.[rarity] ?? [])
+      .map((word) => entry<T>(word))
+      .filter((word) => !word.tint || tintFits(word.tint, kind)),
+    ...Object.entries(tintTexts)
+      .filter(([tint]) => tintFits(tint, kind))
+      .flatMap(([tint, t]) =>
+        (fromTint(t)?.[rarity] ?? []).map((value) => ({ value, tint })),
+      ),
   ];
 
   const nounIndex = Object.keys(pooled.kinds).flatMap((id) =>
@@ -134,16 +168,25 @@ export function buildItemVocabulary(sources: PooledSource[]): ItemVocabulary {
       }
       return best?.id;
     },
-    adjectives: (rarity) =>
-      tinted(
+    adjectives: (rarity, kind) =>
+      kindWords<Adjective, KindAdjective>(
         section<PerRarity<Adjective>>('adjectives'),
         (t) => t.adjectives,
+        (t) => t.adjectives,
         rarity,
+        kind,
       ),
-    suffixes: (rarity) =>
-      tinted(section<PerRarity<string>>('suffixes'), (t) => t.suffixes, rarity),
+    suffixes: (rarity, kind) =>
+      kindWords<string, KindSuffix>(
+        section<PerRarity<string>>('suffixes'),
+        (t) => t.suffixes,
+        (t) => t.suffixes,
+        rarity,
+        kind,
+      ),
     tints: () => Object.keys(gradients),
-    tintDescriptions: (tint) => tintTexts[tint]?.descriptions ?? [],
+    tintDescriptions: (tint, kind) =>
+      tintFits(tint, kind) ? (tintTexts[tint]?.descriptions ?? []) : [],
     gradients: (tint) => gradients[tint] ?? [],
     params,
     templates: (rarity) =>

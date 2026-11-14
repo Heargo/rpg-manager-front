@@ -9,7 +9,7 @@ import {
 import { ItemVocabulary } from './item-vocabulary';
 import { capitalize } from './name-generator';
 import { expandPhrase, pluralForm } from './phrase';
-import { pick, randomInt, shuffle, Weighted, weightedPick } from './random';
+import { chance, pick, randomInt, shuffle, Weighted, weightedPick } from './random';
 import { RandomSource } from './random-source';
 import { Adjective, Gender } from './word-list';
 
@@ -120,8 +120,8 @@ function drawTexts(
   const gender: Gender = noun.gender ?? 'm';
   const plural = noun.plural ?? false;
   const params = vocabulary.params;
-  const adjectives = vocabulary.adjectives(rarity);
-  const suffixes = vocabulary.suffixes(rarity);
+  const adjectives = vocabulary.adjectives(rarity, kind);
+  const suffixes = vocabulary.suffixes(rarity, kind);
 
   const kindNames = vocabulary.names(kind, rarity);
   const templates = (kindNames.length > 0 ? kindNames : vocabulary.templates(rarity)).filter(
@@ -148,14 +148,21 @@ function drawTexts(
   const context = { params, gender, plural, values };
   const name = capitalize(expandPhrase(source, template, context) ?? noun.text);
 
-  const pool = [...vocabulary.descriptions(kind), ...tints.flatMap((tint) => vocabulary.tintDescriptions(tint))];
+  // The tint's own lines come first one time in two, otherwise the kind's.
+  const tintLines = tints.flatMap((tint) => vocabulary.tintDescriptions(tint, kind));
+  const kindLines = vocabulary.descriptions(kind);
+  const fromTint = tintLines.length > 0 && (kindLines.length === 0 || chance(source, 1, 2));
+  const pools = fromTint ? [tintLines, kindLines] : [kindLines];
   let description = '';
-  for (const phrase of shuffle(source, pool)) {
-    const text = expandPhrase(source, phrase, context);
-    if (text !== undefined) {
-      description = text;
-      break;
+  for (const pool of pools) {
+    for (const phrase of shuffle(source, pool)) {
+      const text = expandPhrase(source, phrase, context);
+      if (text !== undefined) {
+        description = text;
+        break;
+      }
     }
+    if (description) break;
   }
   return { name, description, tints };
 }

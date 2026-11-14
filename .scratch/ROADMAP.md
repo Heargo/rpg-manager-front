@@ -270,5 +270,5 @@ Tickets in `item-adjectives/` (IA), follow-up of IC06's review. Decisions in the
 
 | # | Ticket | Blocked by |
 | - | --- | --- |
-| 119 | **IA01** Kind adjectives, tint fits and tint descriptions first | none |
+| 119 | **IA01** Kind adjectives, tint fits and tint descriptions first (done) | none |
 | 120 | **IA02** Pack creator: kind adjectives, tint fits, common words | IA01 |

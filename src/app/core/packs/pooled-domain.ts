@@ -185,3 +185,15 @@ export function poolParams(
       result[name] = [...(result[name] ?? []), ...list];
   return result;
 }
+
+/** The kinds each tint fits: the union across packs. A tint absent from the result (no pack gives `fits`) fits any kind. */
+export function poolTintFits(
+  sources: readonly PooledSource[],
+): Record<string, string[]> {
+  const result: Record<string, string[]> = {};
+  for (const source of sources)
+    for (const [id, tint] of Object.entries(source.tints ?? {}))
+      if (tint.fits)
+        result[id] = [...new Set([...(result[id] ?? []), ...tint.fits])];
+  return result;
+}
