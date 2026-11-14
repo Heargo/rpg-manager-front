@@ -2,21 +2,19 @@ import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
 import { generateItem } from '../../../../core/generators/item-generator';
 import { seededRandomSource } from '../../../../core/generators/random-source';
-import { WordList } from '../../../../core/generators/word-list';
 import {
   EQUIPMENT_SLOTS,
   ITEM_RARITIES,
   ITEM_TYPES,
 } from '../../../../core/models/item';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
-import en from '../../../../../../public/packs/base-en/generators/items.json';
-import fr from '../../../../../../public/packs/base-fr/generators/items.json';
+import { baseWordList } from '../../../../../testing/base-words';
 import { ItemCardComponent } from './item-card.component';
 
 describe('ItemCardComponent', () => {
   it.each([
-    ['en', en],
-    ['fr', fr],
+    ['en', baseWordList('en')],
+    ['fr', baseWordList('fr')],
   ])(
     'renders every rarity, type and slot in %s without a missing translation',
     async (lang, words) => {
@@ -40,7 +38,7 @@ describe('ItemCardComponent', () => {
       ]);
 
       for (const options of combos) {
-        const item = generateItem(source, words as WordList, {
+        const item = generateItem(source, words, {
           attributes: ['Life', 'Strength'],
           ...options,
         });
@@ -60,7 +58,7 @@ describe('ItemCardComponent', () => {
     });
     TestBed.inject(TranslateService).use('en');
     const fixture = TestBed.createComponent(ItemCardComponent);
-    const item = generateItem(seededRandomSource('slot'), en as WordList, {
+    const item = generateItem(seededRandomSource('slot'), baseWordList('en'), {
       attributes: ['Life'],
       type: 'equipment',
       slot: 'ring',
@@ -81,7 +79,7 @@ describe('ItemCardComponent', () => {
     });
     TestBed.inject(TranslateService).use('en');
     const fixture = TestBed.createComponent(ItemCardComponent);
-    const item = generateItem(seededRandomSource('slot'), en as WordList, {
+    const item = generateItem(seededRandomSource('slot'), baseWordList('en'), {
       attributes: ['Life'],
       type: 'consumable',
     });

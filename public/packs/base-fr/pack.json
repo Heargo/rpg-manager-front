@@ -440,6 +440,117 @@
     },
     "warhammer": {
      "parent": "weapon"
+    },
+    "staff": {
+     "parent": "weapon"
+    },
+    "mace": {
+     "parent": "weapon"
+    },
+    "orb": {
+     "parent": "shield"
+    },
+    "grimoire": {
+     "parent": "shield"
+    },
+    "buckler": {
+     "parent": "shield"
+    },
+    "parrying-dagger": {
+     "parent": "shield"
+    },
+    "idol": {
+     "parent": "item"
+    },
+    "lantern": {
+     "parent": "item"
+    },
+    "scroll-case": {
+     "parent": "item"
+    },
+    "elixir": {
+     "parent": "consumable"
+    },
+    "brew": {
+     "parent": "consumable"
+    },
+    "tonic": {
+     "parent": "consumable"
+    },
+    "ration": {
+     "parent": "consumable"
+    },
+    "ointment": {
+     "parent": "consumable"
+    },
+    "hood": {
+     "parent": "head"
+    },
+    "diadem": {
+     "parent": "head"
+    },
+    "cap": {
+     "parent": "head"
+    },
+    "tunic": {
+     "parent": "chest"
+    },
+    "robe": {
+     "parent": "chest"
+    },
+    "chainmail": {
+     "parent": "chest"
+    },
+    "doublet": {
+     "parent": "chest"
+    },
+    "gauntlets": {
+     "parent": "hand"
+    },
+    "bracers": {
+     "parent": "hand"
+    },
+    "mittens": {
+     "parent": "hand"
+    },
+    "greaves": {
+     "parent": "legs"
+    },
+    "hose": {
+     "parent": "legs"
+    },
+    "breeches": {
+     "parent": "legs"
+    },
+    "cuisses": {
+     "parent": "legs"
+    },
+    "sandals": {
+     "parent": "foot"
+    },
+    "sabatons": {
+     "parent": "foot"
+    },
+    "shoes": {
+     "parent": "foot"
+    },
+    "pendant": {
+     "parent": "necklace"
+    },
+    "necklace-chain": {
+     "parent": "necklace"
+    },
+    "torc": {
+     "parent": "necklace"
+    },
+    "signet-ring": {
+     "parent": "ring"
+    },
+    "ear-pendant": {
+     "parent": "earring"
+    },
+    "ear-hoop": {
+     "parent": "earring"
     }
    },
    "texts": "generators/items.json"
@@ -454,6 +565,7 @@
    "texts": "generators/classes.json"
   }
  },
+ "common": "generators/common.json",
  "sprites": [
   {
    "id": "amulet_1",

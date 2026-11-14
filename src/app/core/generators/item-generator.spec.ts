@@ -1,10 +1,9 @@
-import en from '../../../../public/packs/base-en/generators/items.json';
+import { baseWordList } from '../../../testing/base-words';
 import { EQUIPMENT_SLOTS, ITEM_RARITIES, ITEM_TYPES } from '../models/item';
 import { CONSUMABLE_VALUE_MULTIPLIER, generateItem, RARITY_RULES } from './item-generator';
 import { seededRandomSource } from './random-source';
-import { WordList } from './word-list';
 
-const words = en as WordList;
+const words = baseWordList('en');
 const attributes = ['Strength', 'Agility', 'Life', 'Mana', 'Charisma'];
 
 describe('generateItem', () => {

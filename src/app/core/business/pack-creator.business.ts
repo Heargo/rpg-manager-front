@@ -25,6 +25,7 @@ import {
   checkMaterialsFile,
   ImageSize,
   listChecker,
+  commonChecker,
   MAX_PACK_BYTES,
 } from '../packs/pack-files';
 import { ImageProcessingService } from '../services/image-processing.service';
@@ -286,6 +287,22 @@ export class PackCreatorBusiness {
     return value;
   }
 
+  /** Copies the shared `common.json` of the Base of the draft's language into the draft. */
+  async copyBaseCommon(draftId: string): Promise<unknown> {
+    const draft = await this.draftOrThrow(draftId);
+    const value = await this.packs.commonTexts(
+      basePackId(draft.details.language),
+    );
+    const latest = await this.draftOrThrow(draftId);
+    await this.saveDraft({ ...latest, common: value });
+    return value;
+  }
+
+  /** The problems of a `common.json` value, as the validator words them. */
+  commonErrors(value: unknown): string[] {
+    return commonChecker(value);
+  }
+
   /** The problems of a word list value (an unparsed text is a string), as the validators word them. */
   wordListErrors(generator: PackGenerator, value: unknown): string[] {
     return listChecker(generator)(value);
@@ -314,6 +331,7 @@ export class PackCreatorBusiness {
       const path = textsPath(manifest, generator);
       if (path) lists.set(path, listChecker(generator));
     }
+    if (manifest.common) lists.set(manifest.common, commonChecker);
     const dimensions = new Map<string, ImageSize>();
     const files = new Map<string, StoredPackFile>();
     let size = 0;
@@ -388,6 +406,9 @@ export class PackCreatorBusiness {
       if (!pack.generators[generator]) continue;
       generators[generator] = await this.packs.wordList(generator, packId);
     }
+    const common = pack.common
+      ? await this.packs.commonTexts(packId)
+      : undefined;
 
     const sprites = await this.copySprites(pack.id, pack.sprites);
 
@@ -406,6 +427,7 @@ export class PackCreatorBusiness {
         ...(pack.homepage ? { homepage: pack.homepage } : {}),
       },
       generators,
+      ...(common !== undefined ? { common } : {}),
       kinds: { ...pack.kinds },
       tints: { ...pack.tints },
       sprites,
@@ -470,6 +492,9 @@ export class PackCreatorBusiness {
       if (!pack.generators[generator]) continue;
       generators[generator] = await this.packs.wordList(generator, packId);
     }
+    const common = pack.common
+      ? await this.packs.commonTexts(packId)
+      : undefined;
     const sprites = await this.copySprites(pack.id, pack.sprites);
 
     const suffix = COPY_WORDS[pack.language ?? this.draftLanguage()];
@@ -495,6 +520,7 @@ export class PackCreatorBusiness {
         ...(pack.homepage ? { homepage: pack.homepage } : {}),
       },
       generators,
+      ...(common !== undefined ? { common } : {}),
       kinds: { ...pack.kinds },
       tints: { ...pack.tints },
       sprites,

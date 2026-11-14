@@ -3,7 +3,7 @@ import { routesTools } from '../../tools.routes';
 import { settle } from '../../../../../testing/game-device';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { PackBusiness } from '../../../../core/business/pack.business';
-import en from '../../../../../../public/packs/base-en/generators/items.json';
+import { baseWordSources } from '../../../../../testing/base-words';
 import { CombatSandboxToolPageComponent } from './combat-sandbox-tool-page.component';
 
 /**
@@ -19,7 +19,7 @@ describe('CombatSandboxToolPageComponent', () => {
         ...TEST_PROVIDERS,
         {
           provide: PackBusiness,
-          useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] },
+          useValue: { ...baseWordSources('en'), packsFor: async () => ['base-en'], $installed: () => [] },
         },
       ],
     });

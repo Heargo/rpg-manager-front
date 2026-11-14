@@ -100,7 +100,7 @@ describe('PackBusiness unofficial packs', () => {
 
     it('rejects a bad items word list naming the file and the problem', async () => {
       const world = neonWorld();
-      world.json.set(`${NEON_ROOT}generators/items.json`, { version: 1 });
+      world.json.set(`${NEON_ROOT}generators/items.json`, { version: 2, templates: { common: ['no noun'] } });
       const { business, storage } = setup(world);
 
       const message = await rejection(business.prepare(NEON_LINK));

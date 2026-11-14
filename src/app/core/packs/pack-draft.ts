@@ -40,6 +40,8 @@ export interface PackDraft {
   updatedAt: number;
   details: DraftDetails;
   generators: Partial<Record<PackGenerator, unknown>>;
+  /** The shared `generators/common.json` (params), raw like the word lists. */
+  common?: unknown;
   /** The pack's own items kinds. */
   kinds: Record<string, ItemKindDef>;
   tints: Record<string, PackTint>;
@@ -55,6 +57,8 @@ export function slugifyPackId(name: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
+
+export const COMMON_PATH = 'generators/common.json';
 
 export const wordListPath = (generator: PackGenerator) =>
   `generators/${generator}.json`;
@@ -86,6 +90,7 @@ export function buildPack(draft: PackDraft): {
     domains[generator] = { texts: path };
     files.set(path, value);
   }
+  if (draft.common !== undefined) files.set(COMMON_PATH, draft.common);
   if (Object.keys(draft.kinds).length)
     domains.items = { ...domains.items, kinds: draft.kinds };
   const sprites: PackSprite[] = draft.sprites.map((sprite) => {
@@ -119,6 +124,7 @@ export function buildPack(draft: PackDraft): {
     ...(details.homepage ? { homepage: details.homepage } : {}),
     tints: draft.tints,
     domains,
+    ...(draft.common !== undefined ? { common: COMMON_PATH } : {}),
     sprites,
   };
   return { manifest, files };

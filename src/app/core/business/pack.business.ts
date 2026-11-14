@@ -25,6 +25,7 @@ import {
   failureReason as reason,
   ImageSize,
   listChecker,
+  commonChecker,
   MAX_PACK_BYTES,
 } from '../packs/pack-files';
 import { resolvePackLink } from '../packs/pack-link';
@@ -108,6 +109,8 @@ export interface InstalledPack {
   sprites: PackSprite[];
   /** The word list paths by generator, from `domains.<generator>.texts`. */
   generators: Partial<Record<PackGenerator, string>>;
+  /** The shared language file (params), when the pack has one. */
+  common?: string;
   /** The pack's own items kinds and tints. */
   kinds: Record<string, ItemKindDef>;
   tints: Record<string, PackTint>;
@@ -139,6 +142,7 @@ const installedOf = (
   builtIn,
   sprites: pack.sprites,
   generators: generatorsOf(pack),
+  ...(pack.common ? { common: pack.common } : {}),
   kinds: pack.domains?.items?.kinds ?? {},
   tints: pack.tints ?? {},
   ...(link ? { link } : {}),
@@ -455,6 +459,7 @@ export class PackBusiness {
       const path = textsPath(manifest, generator);
       if (path) jsons.add(path);
     }
+    if (manifest.common) jsons.add(manifest.common);
 
     const url = (path: string) => `packs/${id}/${path}`;
     const files = new Map<string, StoredPackFile>();
@@ -537,6 +542,7 @@ export class PackBusiness {
       const path = textsPath(manifest, generator);
       if (path) lists.set(path, listChecker(generator));
     }
+    if (manifest.common) lists.set(manifest.common, commonChecker);
 
     const tasks: (() => Promise<void>)[] = [
       ...[...images].map((path) => async () => {
@@ -711,6 +717,41 @@ export class PackBusiness {
     return result.length
       ? result
       : [basePackId(this.languageBusiness.$language())];
+  }
+
+  /** The raw `common.json` (shared params) of a pack; rejects when the pack has none. */
+  async commonTexts(packId: string): Promise<unknown> {
+    const missing = () => new Error(`Pack "${packId}" has no common texts`);
+    if (!isBasePack(packId)) {
+      await this.ensureLoaded();
+      const record = this.stored().find((p) => p.id === packId);
+      const path = record?.manifest.common;
+      const file = path ? await this.storage.getFile(packId, path) : undefined;
+      if (file?.kind !== 'json') throw missing();
+      return file.value;
+    }
+    const pack = await this.manifest(packId);
+    if (!pack.common) throw missing();
+    return this.service.loadJson(
+      packFileUrl(`packs/${packId}/pack.json`, pack.common),
+    );
+  }
+
+  /**
+   * The items kinds of a pack and of the Bases (for a kind whose parent lives in another pack), to resolve the
+   * type and slot of a kind.
+   */
+  async itemKinds(
+    packId: string,
+  ): Promise<{ own: Record<string, ItemKindDef>; fallback: Record<string, ItemKindDef> }> {
+    await this.ensureLoaded();
+    const manifest = isBasePack(packId)
+      ? await this.manifest(packId).catch(() => null)
+      : this.stored().find((p) => p.id === packId)?.manifest;
+    return {
+      own: manifest?.domains?.items?.kinds ?? {},
+      fallback: await this.baseKinds(),
+    };
   }
 
   /** The raw word list of a generator in a pack; rejects when the pack has none. */

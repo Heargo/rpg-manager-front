@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "params": {
+    "maker": [
+      "a dwarven smith",
+      "the monks of {place}",
+      "an apprentice in [a hurry|over their head]",
+      "an anonymous craftswoman",
+      "an old armourer"
+    ],
+    "owner": [
+      "a fallen captain",
+      "a famous thief",
+      "an old mage",
+      "a forgotten queen",
+      "a bounty hunter"
+    ],
+    "place": [
+      "Duskvale",
+      "the frozen coast",
+      "Firestone",
+      "the valley of ashes",
+      "Orm Forest"
+    ],
+    "event": [
+      "the battle of Three Bridges",
+      "the fall of the tower",
+      "the great famine",
+      "the endless winter",
+      "the clan war"
+    ],
+    "material": [
+      "black steel",
+      "boiled leather",
+      "polished horn",
+      "carved bone",
+      "willow wood"
+    ],
+    "creature": [
+      "a giant wolf",
+      "a wyvern",
+      "a cave bear",
+      "a marsh troll",
+      "a griffin"
+    ],
+    "effect": ["Healing", "Vigor", "Strength", "Swiftness", "Night Sight"]
+  }
+}

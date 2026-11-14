@@ -4,7 +4,8 @@ import {
   isClassWordList,
   isSkillWordList,
 } from '../generators/pack-word-lists';
-import { validateWordList } from '../generators/word-list';
+import { validateCommonTexts } from '../generators/common-texts';
+import { validateItemWordList } from '../generators/word-list';
 import { PackGenerator } from './pack';
 
 export const MAX_FILE_BYTES = 1024 * 1024;
@@ -26,7 +27,7 @@ export function listChecker(
   switch (generator) {
     case 'items':
       return (json) => {
-        const r = validateWordList(json);
+        const r = validateItemWordList(json);
         return r.ok ? [] : r.errors;
       };
     case 'npcs':
@@ -39,6 +40,12 @@ export function listChecker(
     case 'classes':
       return (json) => (isClassWordList(json) ? [] : ['not a class word list']);
   }
+}
+
+/** The checks of a pack's shared `common.json`; returns its problems. */
+export function commonChecker(json: unknown): string[] {
+  const r = validateCommonTexts(json);
+  return r.ok ? [] : r.errors;
 }
 
 /** An image file: at most 1 MB, decodable, at most 256 x 256. Gives the error, or its decoded size. */

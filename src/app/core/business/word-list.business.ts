@@ -1,8 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import { ClassWordList } from '../generators/class-generator';
 import { SkillWordList } from '../generators/skill-generator';
-import { isClassWordList, isSkillWordList } from '../generators/pack-word-lists';
-import { validateWordList, WordList } from '../generators/word-list';
+import {
+  isClassWordList,
+  isSkillWordList,
+} from '../generators/pack-word-lists';
+import { validateCommonTexts } from '../generators/common-texts';
+import { toWordList } from '../generators/item-words-adapter';
+import { validateItemWordList, WordList } from '../generators/word-list';
 import { basePackId, PackBusiness } from './pack.business';
 import { LanguageBusiness } from './language.business';
 
@@ -33,10 +38,15 @@ export class WordListBusiness {
 
   private async load(lang: string, packId: string): Promise<WordList> {
     try {
-      const result = validateWordList(
+      const params = await this.params(packId);
+      const result = validateItemWordList(
         await this.service.wordList('items', packId),
+        Object.keys(params),
       );
-      if (result.ok) return result.value;
+      if (result.ok) {
+        const kinds = await this.service.itemKinds(packId);
+        return toWordList(result.value, kinds.own, kinds.fallback, params);
+      }
       console.warn(`Item word list "${lang}" is invalid:`, result.errors);
     } catch (error) {
       console.warn(`Item word list "${lang}" could not be loaded:`, error);
@@ -45,6 +55,18 @@ export class WordListBusiness {
     if (packId === FALLBACK_BASE)
       throw new Error('The default item word list is unavailable');
     return this.itemWords('en', FALLBACK_BASE);
+  }
+
+  /** The params of the pack's `common.json`; none when it has no valid one. */
+  private async params(packId: string): Promise<Record<string, string[]>> {
+    try {
+      const result = validateCommonTexts(
+        await this.service.commonTexts(packId),
+      );
+      return result.ok ? (result.value.params ?? {}) : {};
+    } catch {
+      return {};
+    }
   }
 
   private readonly skillCache = new Map<string, Promise<SkillWordList>>();
@@ -99,7 +121,8 @@ export class WordListBusiness {
         } catch (error) {
           console.warn(`Word list "${lang}" could not be loaded:`, error);
         }
-        if (packId !== basePackId(lang)) return fallback(lang, basePackId(lang));
+        if (packId !== basePackId(lang))
+          return fallback(lang, basePackId(lang));
         if (packId === FALLBACK_BASE)
           throw new Error('The default word list is unavailable');
         return fallback('en', FALLBACK_BASE);

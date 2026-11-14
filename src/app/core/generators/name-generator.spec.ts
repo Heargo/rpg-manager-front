@@ -1,5 +1,4 @@
-import en from '../../../../public/packs/base-en/generators/items.json';
-import fr from '../../../../public/packs/base-fr/generators/items.json';
+import { baseWordList } from '../../../testing/base-words';
 import { BASE_KEYS, WordList } from './word-list';
 import { generateItemName } from './name-generator';
 import { seededRandomSource } from './random-source';
@@ -32,16 +31,15 @@ describe('generateItemName', () => {
   });
 
   it('is deterministic for a seed', () => {
-    const words = en as WordList;
+    const words = baseWordList('en');
     const name = (seed: string) => generateItemName(seededRandomSource(seed), words, { base: 'head', rarity: 'legendary' });
     expect(name('s1')).toBe(name('s1'));
   });
 
   it.each([
-    ['en', en],
-    ['fr', fr],
-  ])('builds a clean name for every base and rarity in %s', (_lang, json) => {
-    const words = json as WordList;
+    ['en', baseWordList('en')],
+    ['fr', baseWordList('fr')],
+  ])('builds a clean name for every base and rarity in %s', (_lang, words) => {
     const source = seededRandomSource('all');
     for (const base of BASE_KEYS) {
       for (const rarity of ITEM_RARITIES) {

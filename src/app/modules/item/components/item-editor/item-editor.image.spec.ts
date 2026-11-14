@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../../public/packs/base-en/generators/items.json';
+import { baseWordSources } from '../../../../../testing/base-words';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { PackBusiness } from '../../../../core/business/pack.business';
 import { RandomItemImageBusiness } from '../../../sprite/business/random-item-image.business';
@@ -32,7 +32,7 @@ describe('ItemEditorComponent random image', () => {
       imports: [ItemEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } },
+        { provide: PackBusiness, useValue: { ...baseWordSources('en'), packsFor: async () => ['base-en'], $installed: () => [] } },
         { provide: RandomItemImageBusiness, useValue: { create } },
       ],
     });

@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
-import en from '../../../../../../public/packs/base-en/generators/items.json';
+import { baseWordSources } from '../../../../../testing/base-words';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { PackBusiness } from '../../../../core/business/pack.business';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
@@ -12,7 +12,7 @@ describe('ItemEditorComponent image warning', () => {
   it('shows the human-artists warning in English and French', async () => {
     TestBed.configureTestingModule({
       imports: [ItemEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } }],
+      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { ...baseWordSources('en'), packsFor: async () => ['base-en'], $installed: () => [] } }],
     });
     const fixture = TestBed.createComponent(ItemEditorComponent);
     fixture.componentRef.setInput('world', createSandboxWorld((key) => key));
