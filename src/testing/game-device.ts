@@ -11,6 +11,7 @@ import { CharacterBusiness } from '../app/modules/character/business/character.b
 import { PlayerCopyGateBusiness } from '../app/modules/character/business/player-copy-gate.business';
 import { CharacterService } from '../app/modules/character/services/character.service';
 import { CombatHostBusiness } from '../app/modules/combat/business/combat-host.business';
+import { CombatRollsBusiness } from '../app/modules/combat/business/combat-rolls.business';
 import { CombatBusiness } from '../app/modules/combat/business/combat.business';
 import { CombatSelectionBusiness } from '../app/modules/combat/business/combat-selection.business';
 import { CombatService } from '../app/modules/combat/services/combat.service';
@@ -79,6 +80,7 @@ const GAME_DEVICE = [
   CombatHostBusiness,
   CombatBusiness,
   CombatSelectionBusiness,
+  CombatRollsBusiness,
   GameSessionBusiness,
   ImageTransferService,
   ImageBusiness,

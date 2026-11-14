@@ -12,6 +12,9 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CombatBusiness } from '../../../combat/business/combat.business';
+import { CombatRollsBusiness } from '../../../combat/business/combat-rolls.business';
+import { CombatRollBannerComponent } from '../../../combat/components/combat-roll-banner/combat-roll-banner.component';
+import { DiceOverlayComponent } from '../../../dice/components/dice-overlay/dice-overlay.component';
 import { CombatSelectionBusiness } from '../../../combat/business/combat-selection.business';
 import { CombatTargetingBusiness } from '../../../combat/business/combat-targeting.business';
 import { CombatGridComponent } from '../../../combat/components/combat-grid/combat-grid.component';
@@ -29,6 +32,8 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
     ButtonModule,
     CardModule,
     CombatGmPanelComponent,
+    CombatRollBannerComponent,
+    DiceOverlayComponent,
     CombatOrderComponent,
     CombatGridComponent,
     CombatPlayerViewComponent,
@@ -36,6 +41,8 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
   providers: [
     { provide: CombatBusiness, useClass: SandboxCombatBusiness },
     CombatSelectionBusiness,
+    // Its own instance, following the sandbox encounter instead of the room's.
+    CombatRollsBusiness,
   ],
   template: `
     <div class="main-container combat-tool">
@@ -54,6 +61,7 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
           ></button>
         }
       </header>
+      <app-combat-roll-banner />
       <app-combat-grid
         data-testid="sandbox-grid"
         [skillId]="targeting.$skillId()"
@@ -81,6 +89,7 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
         </p-card>
       </div>
     </div>
+    <app-dice-overlay />
   `,
   styles: `
     .combat-tool {

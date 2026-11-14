@@ -8,6 +8,7 @@ import {
   typeNumber,
 } from '../../../../../testing/combat-table';
 import { settle } from '../../../../../testing/game-device';
+import { DiceRollBusiness } from '../../../dice/business/dice-roll.business';
 import { NpcCatalogueBusiness } from '../../../npc/business/npc-catalogue.business';
 import { CombatSelectionBusiness } from '../../business/combat-selection.business';
 import { CombatOrderComponent } from '../combat-order/combat-order.component';
@@ -31,7 +32,8 @@ class HostComponent {}
  *   `[data-testid="place-hint"]`; Start sends the shown cell of every token. Without the grid, or without a pick, none of that.
  * - Encounter: toolbar `[data-action="next-turn"]`, `[data-action="undo"]`, `[data-action="end"]` and a round label `[data-field="round"]`; no combatant rows.
  * - `[data-testid="active-row"]` (`data-name` = the active combatant), outside the rows: tabs, skills, items, targeting (unchanged).
- * - `[data-testid="pending"]` per pending result (unchanged).
+ * - `[data-testid="pending"]` per pending result, listed once its roll has landed (`CombatRollsBusiness.isLanding(id)` is false: the GM's dice came to
+ *   rest, or 6 s passed); while it lands the result is hidden.
  * - Selected combatant (picked with `[data-action="select"]` in the order): `[data-testid="selected-edits"]` (`data-name`) holds
  *   `[data-testid="manual-amount"]`, `[data-action="damage"]`, `[data-action="heal"]`, `[data-testid="manual-status"]`, `[data-action="add-status"]`.
  *   Nothing selected: no such block. It goes away when the encounter ends.
@@ -168,12 +170,24 @@ describe('CombatGmPanelComponent', () => {
   });
 
   describe('using a skill', () => {
-    const cast = async () => {
+    const castOnly = async () => {
       await click(
         el.querySelector('[data-testid="skill"] [data-action="use-skill"]'),
       );
       await pickTarget(el, 'Goblin');
       await click(el.querySelector('[data-action="confirm-skill"]'));
+    };
+    /** The GM's device throws the roll of the use and its dice come to rest. */
+    const land = async () => {
+      const dice = table.gm.injector.get(DiceRollBusiness);
+      const roll = dice.takeUnseenTableRoll();
+      if (roll) dice.presentShared(roll);
+      dice.markSettled();
+      await settle();
+    };
+    const cast = async () => {
+      await castOnly();
+      await land();
     };
 
     beforeEach(async () => {
@@ -195,6 +209,22 @@ describe('CombatGmPanelComponent', () => {
           .querySelector('[data-testid="skill"]')!
           .getAttribute('data-available'),
       ).toBe('false');
+    });
+
+    it('hides the pending result while the roll is landing, then shows apply, edit and dismiss', async () => {
+      await castOnly();
+
+      expect(table.state(table.gm).pending).toHaveLength(1);
+      expect(el.querySelector('[data-testid="pending"]')).toBeNull();
+      expect(el.querySelector('[data-action="apply"]')).toBeNull();
+
+      await land();
+
+      expect(el.querySelectorAll('[data-testid="pending"]')).toHaveLength(1);
+      for (const action of ['apply', 'edit', 'dismiss'])
+        expect(
+          el.querySelector(`[data-testid="pending"] [data-action="${action}"]`),
+        ).not.toBeNull();
     });
 
     it('applies a pending result in one tap', async () => {

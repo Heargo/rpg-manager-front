@@ -1518,6 +1518,11 @@
       "allies": "Allies",
       "placeholder": "Targets"
     },
+    "banner": {
+      "label": "Last combat roll",
+      "success": "Success",
+      "failure": "Failure"
+    },
     "pending": {
       "title": "Results to apply",
       "line": "{{caster}}: {{skill}} on {{target}}",

@@ -8,6 +8,19 @@ export interface SharedRoll {
   /** Seed for the throw's look only. */
   seed: string;
   at: number;
+  /** Set for the dice of a combat action: what the recap banner shows (names, never attributes). */
+  combat?: SharedCombatRoll;
+}
+
+/** What a combat action adds to its shared roll. */
+export interface SharedCombatRoll {
+  casterName: string;
+  skillName: string;
+  targetNames: string[];
+  /** The results waiting for the GM (none when the GM validation is off). */
+  pendingIds: string[];
+  total: number;
+  success: boolean;
 }
 
 export interface SharedRollRequest {

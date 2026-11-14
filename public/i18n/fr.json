@@ -1518,6 +1518,11 @@
       "allies": "Alliés",
       "placeholder": "Cibles"
     },
+    "banner": {
+      "label": "Dernier jet de combat",
+      "success": "Réussite",
+      "failure": "Échec"
+    },
     "pending": {
       "title": "Résultats à appliquer",
       "line": "{{caster}} : {{skill}} sur {{target}}",

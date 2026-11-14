@@ -263,3 +263,11 @@
   display: block;
   margin-top: 1rem;
 }
+
+.roll-banner {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 1100;
+  max-width: calc(100vw - 1rem);
+}

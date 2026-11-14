@@ -32,10 +32,10 @@
     ></button>
   </div>
 
-  @if (view.pending.length) {
+  @if (landedPending().length) {
     <section class="pending-list">
       <h3>{{ "combat.pending.title" | transloco }}</h3>
-      @for (pending of view.pending; track pending.id) {
+      @for (pending of landedPending(); track pending.id) {
         <div class="pending" data-testid="pending">
           <div class="text">
             <strong>

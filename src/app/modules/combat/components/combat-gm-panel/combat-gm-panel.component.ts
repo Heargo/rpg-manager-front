@@ -17,6 +17,7 @@ import { StoredImageComponent } from '../../../../core/components/stored-image/s
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CombatSelectionBusiness } from '../../business/combat-selection.business';
 import { CombatBusiness } from '../../business/combat.business';
+import { CombatRollsBusiness } from '../../business/combat-rolls.business';
 import {
   setupTokens,
   startPicks,
@@ -49,10 +50,16 @@ import { CombatSetupGridComponent } from '../combat-setup-grid/combat-setup-grid
 export class CombatGmPanelComponent {
   protected readonly combat = inject(CombatBusiness);
   private readonly selection = inject(CombatSelectionBusiness);
+  private readonly rolls = inject(CombatRollsBusiness);
   private readonly messages = inject(MessageService);
 
   protected readonly state = this.combat.$state;
   protected readonly encounter = this.combat.$encounter;
+  /** The pending results whose roll has landed: until then the dice are still moving. */
+  protected readonly landedPending = computed(
+    () =>
+      this.state()?.pending.filter((p) => !this.rolls.isLanding(p.id)) ?? [],
+  );
 
   // Start form
   protected readonly chosen = signal<string[]>([]);

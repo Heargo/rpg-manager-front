@@ -33,6 +33,7 @@ import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterBusiness } from '../../../character/business/character.business';
 import { CombatBusiness } from '../../../combat/business/combat.business';
 import { CombatTargetingBusiness } from '../../../combat/business/combat-targeting.business';
+import { CombatRollBannerComponent } from '../../../combat/components/combat-roll-banner/combat-roll-banner.component';
 import { CombatGridComponent } from '../../../combat/components/combat-grid/combat-grid.component';
 import { CombatOrderComponent } from '../../../combat/components/combat-order/combat-order.component';
 import { CombatGmPanelComponent } from '../../../combat/components/combat-gm-panel/combat-gm-panel.component';
@@ -67,6 +68,7 @@ function readToolsOpen(): string[] {
   selector: 'app-table-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CombatRollBannerComponent,
     TableNpcsComponent,
     NgTemplateOutlet,
     FormsModule,

@@ -2,7 +2,10 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ProfileBusiness } from '../../../core/business/profile.business';
 import { rollDice } from '../../../core/generators/dice';
-import { createSeed, cryptoRandomSource } from '../../../core/generators/random-source';
+import {
+  createSeed,
+  cryptoRandomSource,
+} from '../../../core/generators/random-source';
 import { planDice, ThrowPlan, totalRatio } from '../helpers/dice-plan';
 import { SharedRoll } from '../models/dice-api';
 import { DiceService } from '../services/dice.service';
@@ -24,6 +27,8 @@ export interface DiceRoll {
   plan: ThrowPlan;
   /** Set for a roll shared with the table: who rolled, and whether it was this device's player. */
   shared?: { name: string; mine: boolean };
+  /** Set for the dice of a combat action: they can't be rolled again from the overlay. */
+  combat?: true;
 }
 
 /** The dice roller: what to roll, the fair draw, the roll being shown and recent ones. */
@@ -40,7 +45,10 @@ export class DiceRollBusiness {
   /** True in a room whose host is reachable. */
   readonly $canShare = computed(() => this.service.canShare());
   /** The table's recent shared rolls, newest first; null outside a room. */
-  readonly $tableRolls = toSignal<SharedRoll[] | null>(this.service.watchRolls(), { initialValue: null });
+  readonly $tableRolls = toSignal<SharedRoll[] | null>(
+    this.service.watchRolls(),
+    { initialValue: null },
+  );
   private readonly seenTableRolls = new Set<string>();
   private readonly current = signal<DiceRoll | null>(null);
   private readonly settled = signal(false);
@@ -55,12 +63,23 @@ export class DiceRollBusiness {
   /** Draws the values (cryptographically, unbiased) and opens the table to show them. */
   roll(count = this.$count(), sides = this.$sides()): DiceRoll {
     const values = rollDice(this.random, count, sides);
-    return this.present({ id: crypto.randomUUID(), count, sides, values, seed: createSeed(this.random), at: Date.now() });
+    return this.present({
+      id: crypto.randomUUID(),
+      count,
+      sides,
+      values,
+      seed: createSeed(this.random),
+      at: Date.now(),
+    });
   }
 
   /** Rolls for the table when sharing is on and the host is reachable (the host draws), otherwise here. */
-  async rollAtTable(count = this.$count(), sides = this.$sides()): Promise<DiceRoll> {
-    if (!this.$shareWithTable() || !this.$canShare()) return this.roll(count, sides);
+  async rollAtTable(
+    count = this.$count(),
+    sides = this.$sides(),
+  ): Promise<DiceRoll> {
+    if (!this.$shareWithTable() || !this.$canShare())
+      return this.roll(count, sides);
     const shared = await this.service.roll({ count, sides });
     this.seenTableRolls.add(shared.id);
     return this.presentShared(shared);
@@ -70,12 +89,15 @@ export class DiceRollBusiness {
   rollAgain(): Promise<DiceRoll> {
     const current = this.current();
     if (!current) return this.rollAtTable();
-    return current.shared ? this.rollAtTable(current.count, current.sides) : Promise.resolve(this.roll(current.count, current.sides));
+    return current.shared
+      ? this.rollAtTable(current.count, current.sides)
+      : Promise.resolve(this.roll(current.count, current.sides));
   }
 
   /**
    * A shared roll from someone else that this device hasn't thrown yet, at most once per roll. Rolls older than a
-   * few seconds (made while this device was elsewhere) are only marked as seen.
+   * few seconds (made while this device was elsewhere) are only marked as seen. A combat roll comes back on the
+   * device of whoever made it too.
    */
   takeUnseenTableRoll(): SharedRoll | null {
     const rolls = this.$tableRolls();
@@ -86,7 +108,12 @@ export class DiceRollBusiness {
     for (const roll of rolls) {
       if (this.seenTableRolls.has(roll.id)) continue;
       this.seenTableRolls.add(roll.id);
-      if (!unseen && roll.by.playerId !== myId && now - roll.at < TABLE_ROLL_FRESH_MS) unseen = roll;
+      if (
+        !unseen &&
+        (roll.combat || roll.by.playerId !== myId) &&
+        now - roll.at < TABLE_ROLL_FRESH_MS
+      )
+        unseen = roll;
     }
     return unseen;
   }
@@ -95,10 +122,24 @@ export class DiceRollBusiness {
   presentShared(roll: SharedRoll): DiceRoll {
     const mine = roll.by.playerId === this.profile.$profile().playerId;
     const { id, count, sides, values, seed, at } = roll;
-    return this.present({ id, count, sides, values, seed, at, shared: { name: roll.by.name, mine } });
+    return this.present({
+      id,
+      count,
+      sides,
+      values,
+      seed,
+      at,
+      shared: { name: roll.by.name, mine },
+      ...(roll.combat ? { combat: true as const } : {}),
+    });
   }
 
-  private present(input: Pick<DiceRoll, 'id' | 'count' | 'sides' | 'values' | 'at' | 'shared'> & { seed: string }): DiceRoll {
+  private present(
+    input: Pick<
+      DiceRoll,
+      'id' | 'count' | 'sides' | 'values' | 'at' | 'shared' | 'combat'
+    > & { seed: string },
+  ): DiceRoll {
     const { seed, ...rest } = input;
     const roll: DiceRoll = {
       ...rest,
@@ -108,7 +149,12 @@ export class DiceRollBusiness {
     };
     this.settled.set(false);
     this.current.set(roll);
-    this.history.update((rolls) => [roll, ...rolls.filter((entry) => entry.id !== roll.id)].slice(0, HISTORY_SIZE));
+    this.history.update((rolls) =>
+      [roll, ...rolls.filter((entry) => entry.id !== roll.id)].slice(
+        0,
+        HISTORY_SIZE,
+      ),
+    );
     return roll;
   }
 

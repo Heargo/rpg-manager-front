@@ -5,6 +5,7 @@ import { PeerContext, SELF_PEER } from '../../../core/p2p/peer-api.service';
 import { attributeStats } from '../../character/helpers/character-stats';
 import { applyCharacterAction } from '../../character/helpers/character-actions.rules';
 import { CharacterHostBusiness } from '../../character/business/character-host.business';
+import { DiceHostBusiness } from '../../dice/business/dice-host.business';
 import { RoomHostBusiness } from '../../room/business/room-host.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
 import { effectiveInitiativeMode } from '../../world/helpers/world-combat.rules';
@@ -36,6 +37,7 @@ import {
   withoutUndo,
 } from '../helpers/combat.rules';
 import { Cell, canMoveTo, placeUnplaced } from '../helpers/combat-grid.rules';
+import { skillUseRoll, SkillUseRoll } from '../helpers/combat-roll.rules';
 import { projectEncounter } from '../helpers/combat-view.rules';
 import { CombatEdit, CombatRewards, Encounter } from '../models/combat';
 import { CombatService } from '../services/combat.service';
@@ -155,6 +157,7 @@ export class CombatHostBusiness {
   private readonly service = inject(CombatService);
   private readonly session = inject(WorldSessionBusiness);
   private readonly roomHost = inject(RoomHostBusiness);
+  private readonly dice = inject(DiceHostBusiness);
   private readonly characters = inject(CharacterHostBusiness);
   private readonly random = cryptoRandomSource();
 
@@ -178,6 +181,7 @@ export class CombatHostBusiness {
         context: PeerContext,
       ) => World,
       onTurnOnly = false,
+      after?: () => void,
     ) =>
       this.service.serve(route, async (payload, context) => {
         await this.change(payload, (p, world, enc) => {
@@ -191,7 +195,10 @@ export class CombatHostBusiness {
             throw new PeerApiError('rejected', 'combat.errors.notYourTurn');
           return run(p, world, enc, context);
         });
+        after?.();
       });
+    // The dice of the skill use being handled, published to the table once the use is saved.
+    let announcement: { playerId?: string; roll: SkillUseRoll } | null = null;
     const stops = [
       this.service.serve('start', async (payload, { from }) => {
         this.assertGameMaster(from);
@@ -285,9 +292,40 @@ export class CombatHostBusiness {
           );
           if (!result.ok)
             throw new PeerApiError('rejected', `combat.errors.${result.error}`);
+          const roll = skillUseRoll(
+            enc,
+            result.encounter,
+            {
+              casterId: text(p['casterId']),
+              skillId: text(p['skillId']),
+              targetIds: list(p['targetIds'], text, 20),
+            },
+            world.skills,
+          );
+          const characterId = enc.combatants.find(
+            (c) => c.id === text(p['casterId']),
+          )?.characterId;
+          announcement = roll
+            ? {
+                playerId: world.characters.find((c) => c.id === characterId)
+                  ?.playerId,
+                roll,
+              }
+            : null;
           return this.with(world, result.encounter);
         },
         true,
+        () => {
+          const made = announcement;
+          announcement = null;
+          if (made)
+            this.dice.announce({
+              playerId: made.playerId,
+              values: made.roll.values,
+              sides: made.roll.sides,
+              combat: made.roll.combat,
+            });
+        },
       ),
       own(
         'useItem',

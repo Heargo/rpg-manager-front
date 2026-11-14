@@ -21,6 +21,7 @@ import {
 } from '../../world/models/world';
 import en from '../../../../../public/i18n/en.json';
 import fr from '../../../../../public/i18n/fr.json';
+import { DiceRollBusiness } from '../../dice/business/dice-roll.business';
 import { CombatBusiness } from './combat.business';
 
 /**
@@ -1147,6 +1148,135 @@ describe('combat (GM + players)', () => {
 
       expect(hostWorld().encounter).toBeUndefined();
       expect(record('ada').xp).toBe(0);
+    });
+  });
+
+  describe('shared rolls', () => {
+    const dice = (d: Device) => d.injector.get(DiceRollBusiness);
+    const fireballAtGoblin = async () => {
+      await combat(ada).useSkill({
+        casterId: adaId(),
+        skillId: fireballId,
+        targetIds: [goblinId()],
+      });
+      await settle();
+    };
+
+    it('publishes one shared roll per skill use on every device, with the use values, the names and the pending ids', async () => {
+      await setup('free');
+      await startAll();
+
+      await fireballAtGoblin();
+
+      for (const device of [gm, ada, bob]) {
+        const rolls = dice(device).$tableRolls()!;
+        expect(rolls).toHaveLength(1);
+        expect(rolls[0]).toMatchObject({
+          by: { playerId: 'ada', name: 'Ada' },
+          count: 1,
+          sides: 1,
+          values: [1],
+          combat: {
+            casterName: 'Ada',
+            skillName: 'Fireball',
+            targetNames: ['Goblin'],
+            pendingIds: [state(gm).pending[0].id],
+            total: 1,
+            success: true,
+          },
+        });
+      }
+    });
+
+    it('hands the roll to every device to throw, the caster own device included, once', async () => {
+      await setup('free');
+      await startAll();
+
+      await fireballAtGoblin();
+
+      const id = dice(gm).$tableRolls()![0].id;
+      for (const device of [ada, gm, bob]) {
+        expect(dice(device).takeUnseenTableRoll()?.id).toBe(id);
+        expect(dice(device).takeUnseenTableRoll()).toBeNull();
+      }
+    });
+
+    it('publishes the roll whatever the shared dice toggle', async () => {
+      await setup('free');
+      await startAll();
+      expect(dice(ada).$shareWithTable()).toBe(false);
+
+      await fireballAtGoblin();
+
+      expect(dice(bob).takeUnseenTableRoll()).not.toBeNull();
+    });
+
+    it('publishes nothing for a use that rolls no dice', async () => {
+      await setup('free');
+      await gm.injector
+        .get(WorldSessionBusiness)
+        .update((w) => ({ ...w, skillRollsEnabled: false }));
+      await startAll();
+
+      await fireballAtGoblin();
+
+      expect(state(gm).pending).toHaveLength(1);
+      for (const device of [gm, ada, bob]) {
+        expect(dice(device).$tableRolls()).toEqual([]);
+        expect(dice(device).takeUnseenTableRoll()).toBeNull();
+      }
+    });
+
+    it('publishes nothing for the initiative rolled at the start', async () => {
+      await setup('rolled');
+      await startAll();
+
+      for (const device of [gm, ada, bob]) {
+        expect(dice(device).$tableRolls()).toEqual([]);
+        expect(dice(device).takeUnseenTableRoll()).toBeNull();
+      }
+    });
+
+    it('shows a hidden NPC roll as names, dice and total only, rolled for the host player', async () => {
+      await setup('free');
+      const orc = await gm.injector.get(NpcCatalogueBusiness).save({
+        ...goblinNpc,
+        id: undefined,
+        name: 'Orc',
+        skills: [{ skillId: fireballId, level: 1 }],
+      });
+      await combat(gm).start({
+        characterIds: [record('ada').id],
+        npcs: [{ npcId: orc.id, count: 1, side: 'enemy' }],
+      });
+      await settle();
+
+      await combat(gm).useSkill({
+        casterId: named(gm, 'Orc').id,
+        skillId: fireballId,
+        targetIds: [adaId()],
+      });
+      await settle();
+
+      const [roll] = dice(ada).$tableRolls()!;
+      expect(roll).toMatchObject({
+        by: { name: 'Gm' },
+        values: [1],
+        combat: {
+          casterName: 'Orc',
+          skillName: 'Fireball',
+          targetNames: ['Ada'],
+          total: 1,
+        },
+      });
+      expect(Object.keys((roll as { combat?: object }).combat ?? {}).sort()).toEqual([
+        'casterName',
+        'pendingIds',
+        'skillName',
+        'success',
+        'targetNames',
+        'total',
+      ]);
     });
   });
 });

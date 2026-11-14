@@ -8,6 +8,7 @@ import {
   untracked,
 } from '@angular/core';
 import { LanguageBusiness } from '../../../core/business/language.business';
+import { ProfileBusiness } from '../../../core/business/profile.business';
 import { cryptoRandomSource } from '../../../core/generators/random-source';
 import { applyCharacterAction } from '../../character/helpers/character-actions.rules';
 import { attributeStats } from '../../character/helpers/character-stats';
@@ -38,6 +39,8 @@ import {
   useSkill,
   withoutUndo,
 } from '../../combat/helpers/combat.rules';
+import { CombatRollsBusiness } from '../../combat/business/combat-rolls.business';
+import { skillUseRoll } from '../../combat/helpers/combat-roll.rules';
 import { skillSummary } from '../../combat/helpers/combat-skill-summary.rules';
 import { projectEncounter } from '../../combat/helpers/combat-view.rules';
 import {
@@ -64,6 +67,8 @@ export class SandboxCombatBusiness implements CombatTable {
   private readonly hero = inject(SandboxCharacterBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly random = cryptoRandomSource();
+  private readonly rolls = inject(CombatRollsBusiness);
+  private readonly profile = inject(ProfileBusiness);
 
   /** The hero with the active skills of their class (a fresh sheet knows none), changed by combat. */
   private readonly sheet = linkedSignal<Character | undefined>(() => {
@@ -266,6 +271,21 @@ export class SandboxCombatBusiness implements CombatTable {
         world.combat,
       );
       if (!result.ok) throw new Error(`combat.errors.${result.error}`);
+      const roll = skillUseRoll(enc, result.encounter, use, world.skills);
+      if (roll)
+        this.rolls.present({
+          id: crypto.randomUUID(),
+          by: {
+            playerId: this.profile.$profile().playerId,
+            name: roll.combat.casterName,
+          },
+          count: roll.values.length,
+          sides: roll.sides,
+          values: roll.values,
+          seed: crypto.randomUUID(),
+          at: Date.now(),
+          combat: roll.combat,
+        });
       return result.encounter;
     });
   }
