@@ -390,17 +390,18 @@
       "noClass": "No class yet.",
       "taughtSkills": "Other skills",
       "refundFrom": "Take back a point from {{ name }}",
+      "statDetails": "{{ name }} details",
       "tip": {
-        "base": "Base: {{ value }}",
-        "level": "Level: {{ value }}",
-        "formula": "Formula: {{ value }}",
-        "result": "Formula result: {{ value }}",
-        "cap": "Cap: {{ value }}",
-        "bonus": "Bonus: {{ value }}",
-        "max": "Max: {{ value }}",
-        "current": "Current: {{ value }}",
-        "class": "Class: {{ value }}",
-        "skills": "Skills: {{ value }}"
+        "base": "Base",
+        "level": "Level",
+        "formula": "Formula",
+        "result": "Formula result",
+        "cap": "Cap",
+        "bonus": "Equipment bonus",
+        "max": "Max",
+        "current": "Current",
+        "class": "Class",
+        "skills": "Skills"
       }
     },
     "items": {

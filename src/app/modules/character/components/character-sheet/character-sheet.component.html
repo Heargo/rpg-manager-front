@@ -130,29 +130,38 @@
               @for (stat of stats(); track stat.attributeId) {
                 <tr>
                   <th scope="row">
-                    {{ stat.name }}
-                    @if (stat.bonus !== 0) {
-                      <span
-                        class="bonus"
-                        [class.plus]="stat.bonus > 0"
-                        [class.minus]="stat.bonus < 0"
-                        [attr.aria-label]="'character.sheet.bonus' | transloco"
-                        >{{ stat.bonus > 0 ? "+" : "" }}{{ stat.bonus }}</span
-                      >
-                    }
+                    <span class="stat-name">
+                      {{ stat.name }}
+                      @if (stat.bonus !== 0) {
+                        <span
+                          class="bonus"
+                          [class.plus]="stat.bonus > 0"
+                          [class.minus]="stat.bonus < 0"
+                          [attr.aria-label]="'character.sheet.bonus' | transloco"
+                          >{{ stat.bonus > 0 ? "+" : "" }}{{ stat.bonus }}</span
+                        >
+                      }
+                      <p-button
+                        icon="pi pi-question-circle"
+                        [rounded]="true"
+                        [text]="true"
+                        severity="secondary"
+                        size="small"
+                        styleClass="stat-help"
+                        [attr.data-stat-details]="stat.attributeId"
+                        [ariaLabel]="
+                          'character.sheet.statDetails'
+                            | transloco: { name: stat.name }
+                        "
+                        (onClick)="
+                          openStatDetails($event, stat.attributeId, statPopover)
+                        "
+                      />
+                    </span>
                   </th>
                   <td class="num optional">{{ stat.level }}</td>
                   <td class="num value">
-                    <span
-                      class="value-text"
-                      [pTooltip]="tooltip(stat.attributeId)"
-                      tooltipPosition="left"
-                      tooltipStyleClass="stat-tip"
-                      tabindex="0"
-                      >{{
-                        stat.isBar ? stat.current + " / " + stat.max : stat.max
-                      }}</span
-                    >
+                    {{ stat.isBar ? stat.current + " / " + stat.max : stat.max }}
                   </td>
                   @if ((canPlay() && c.statPoints > 0) || gameMaster()) {
                     <td class="actions">
@@ -496,6 +505,22 @@
     />
   </div>
 </ng-template>
+
+<p-popover #statPopover (onHide)="detailsAttributeId.set(null)">
+  @if (detailsStat(); as stat) {
+    <div class="stat-details" data-testid="stat-details">
+      <strong class="stat-details-title">{{ stat.name }}</strong>
+      <dl>
+        @for (row of statDetails(stat.attributeId); track row.key) {
+          <div [class.total]="row.total">
+            <dt>{{ "character.sheet.tip." + row.key | transloco }}</dt>
+            <dd>{{ row.value }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+  }
+</p-popover>
 
 <p-contextmenu #contextMenu [model]="menuModel()" appendTo="body" />
 <p-menu #actionMenu [model]="menuModel()" [popup]="true" appendTo="body" />

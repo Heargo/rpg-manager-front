@@ -37,6 +37,16 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  // On a phone the sheet sits in four nested paddings (page, card, tab panels, GM panel):
+  // trim the two inner ones so the stats table and the steppers keep their width.
+  .details {
+    padding: 0.75rem;
+  }
+
+  p-tabpanels {
+    padding-inline: 0;
+  }
+
   .card {
     position: static;
     justify-self: center;
@@ -99,13 +109,50 @@ p-tab p-badge {
 }
 
 // The sheet column can be narrow next to the card: put the label above its stepper then.
+// The sheet column can be narrow next to the card: put the label above its stepper then,
+// and let the stepper shrink to its column so its + button stays visible.
 @container sheet-details (max-width: 26rem) {
   .grant-panel {
     grid-template-columns: minmax(0, 1fr) auto;
+    padding: 0.75rem;
   }
 
   .grant label {
     grid-column: 1 / -1;
+  }
+
+  .grant p-inputnumber {
+    display: flex;
+    min-width: 0;
+
+    ::ng-deep .grant-input {
+      flex: 1 1 auto;
+      width: 0;
+      min-width: 2.5rem;
+    }
+  }
+}
+
+// The level is in the value's tooltip: on phones, drop its column so the + / − buttons fit.
+@container sheet-details (max-width: 22rem) {
+  .stats .optional {
+    display: none;
+  }
+}
+
+// Smallest phones (320px): the button goes under its stepper, the row buttons get compact.
+@container sheet-details (max-width: 18rem) {
+  .grant-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .grant {
+    row-gap: 0.4rem;
+  }
+
+  .stats .actions ::ng-deep .p-button {
+    width: 2rem;
+    height: 2rem;
   }
 }
 
@@ -160,8 +207,18 @@ p-tab p-badge {
     margin-left: 0.25rem;
   }
 
-  .value-text {
-    cursor: help;
+  .stat-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.1rem;
+  }
+
+  // The "?" sits right after the name, small and quiet.
+  ::ng-deep .stat-help {
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    font-size: 0.8rem;
   }
 
   .actions {
@@ -353,8 +410,42 @@ p-tab p-badge {
   white-space: nowrap;
 }
 
-::ng-deep .stat-tip {
-  white-space: pre-line;
+// The attribute's details popover: one label / value row per step, the max set apart.
+.stat-details {
+  min-width: 13rem;
+  max-width: min(20rem, calc(100vw - 2rem));
+
+  dl {
+    margin: 0.5rem 0 0;
+  }
+
+  dl > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.2rem 0;
+  }
+
+  dt {
+    color: var(--p-text-muted-color);
+  }
+
+  dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .total {
+    margin-top: 0.25rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--p-content-border-color);
+    font-weight: 600;
+
+    dt {
+      color: inherit;
+    }
+  }
 }
 
 .skill-points {

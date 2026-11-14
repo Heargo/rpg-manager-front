@@ -390,17 +390,18 @@
       "noClass": "Pas encore de classe.",
       "taughtSkills": "Autres compétences",
       "refundFrom": "Reprendre un point à {{ name }}",
+      "statDetails": "Détails de {{ name }}",
       "tip": {
-        "base": "Base : {{ value }}",
-        "level": "Niveau : {{ value }}",
-        "formula": "Formule : {{ value }}",
-        "result": "Résultat de la formule : {{ value }}",
-        "cap": "Plafond : {{ value }}",
-        "bonus": "Bonus : {{ value }}",
-        "max": "Maximum : {{ value }}",
-        "current": "Actuel : {{ value }}",
-        "class": "Classe : {{ value }}",
-        "skills": "Compétences : {{ value }}"
+        "base": "Base",
+        "level": "Niveau",
+        "formula": "Formule",
+        "result": "Résultat de la formule",
+        "cap": "Plafond",
+        "bonus": "Bonus d'équipement",
+        "max": "Maximum",
+        "current": "Actuel",
+        "class": "Classe",
+        "skills": "Compétences"
       }
     },
     "items": {

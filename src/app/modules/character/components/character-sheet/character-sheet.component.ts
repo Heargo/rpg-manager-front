@@ -17,6 +17,7 @@ import { ContextMenu, ContextMenuModule } from '@openng/optimus-ui/contextmenu';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { Menu, MenuModule } from '@openng/optimus-ui/menu';
+import { Popover, PopoverModule } from '@openng/optimus-ui/popover';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { LanguageBusiness } from '../../../../core/business/language.business';
@@ -41,6 +42,14 @@ import {
   CharacterActionKind,
   MAX_GRANTED_POINTS,
 } from '../../helpers/character-actions.rules';
+
+/** One line of an attribute's details popover: its label is `character.sheet.tip.<key>`. */
+interface StatDetailRow {
+  key: string;
+  value: string | number;
+  /** The final value: set apart from the steps above it. */
+  total?: boolean;
+}
 
 interface UseView extends SkillUseResult {
   effects: { kind: string; attribute: string; amount: number }[];
@@ -69,6 +78,7 @@ const ITEM_ICONS: Record<string, string> = {
     DialogModule,
     InputNumberModule,
     MenuModule,
+    PopoverModule,
     TabsModule,
     TooltipModule,
     CharacterCardComponent,
@@ -107,6 +117,11 @@ export class CharacterSheetComponent {
   protected readonly grantSkillPointsAmount = signal(1);
   /** The item whose details dialog is open. */
   private readonly openItemId = signal<string | null>(null);
+  /** The attribute whose details popover is open. */
+  protected readonly detailsAttributeId = signal<string | null>(null);
+  protected readonly detailsStat = computed(() =>
+    this.stats().find((stat) => stat.attributeId === this.detailsAttributeId()),
+  );
   /** The item the context menu / action menu was opened on. */
   private readonly menuItemId = signal<string | null>(null);
 
@@ -289,53 +304,50 @@ export class CharacterSheetComponent {
     this.act.emit({ kind: 'refund-stat-point', attributeId });
   }
 
-  /** The value's details, one per line: base, level, formula and its result, cap, equipment bonus, max, current. */
-  protected tooltip(attributeId: string): string {
+  /** Opens the details popover of one attribute, on the "?" button next to its name. */
+  protected openStatDetails(
+    event: Event,
+    attributeId: string,
+    popover: Popover,
+  ): void {
+    this.detailsAttributeId.set(attributeId);
+    popover.toggle(event);
+  }
+
+  /**
+   * The attribute's details, as label / value rows: base, level, formula and its result, cap, equipment bonus,
+   * class and skill bonuses, max, current.
+   */
+  protected statDetails(attributeId: string): StatDetailRow[] {
     const stat = this.stats().find(
       (entry) => entry.attributeId === attributeId,
     );
     const attribute = this.world().attributes.find(
       (entry) => entry.id === attributeId,
     );
-    if (!stat || !attribute) return '';
-    const t = (key: string, params?: Record<string, unknown>) =>
-      this.language.t(key, params);
+    if (!stat || !attribute) return [];
+    const signed = (value: number) => `${value > 0 ? '+' : ''}${value}`;
     const formula =
       attribute.formula.preset === 'custom'
-        ? `${t('world.formula.presets.custom')}: ${attribute.formula.expression}`
-        : `${t('world.formula.presets.' + attribute.formula.preset)} (${attribute.formula.step})`;
+        ? `${this.language.t('world.formula.presets.custom')}: ${attribute.formula.expression}`
+        : `${this.language.t('world.formula.presets.' + attribute.formula.preset)} (${attribute.formula.step})`;
     const result = stat.max - stat.bonus - stat.classBonus - stat.skillBonus;
-    const lines = [
-      t('character.sheet.tip.base', { value: stat.base }),
-      t('character.sheet.tip.level', { value: stat.level }),
-      t('character.sheet.tip.formula', { value: formula }),
-      t('character.sheet.tip.result', { value: result }),
+    const rows: StatDetailRow[] = [
+      { key: 'base', value: stat.base },
+      { key: 'level', value: stat.level },
+      { key: 'formula', value: formula },
+      { key: 'result', value: result },
     ];
     if (attribute.cap !== undefined)
-      lines.push(t('character.sheet.tip.cap', { value: attribute.cap }));
-    lines.push(
-      t('character.sheet.tip.bonus', {
-        value: `${stat.bonus > 0 ? '+' : ''}${stat.bonus}`,
-      }),
-    );
-    if (stat.classBonus !== 0) {
-      lines.push(
-        t('character.sheet.tip.class', {
-          value: `${stat.classBonus > 0 ? '+' : ''}${stat.classBonus}`,
-        }),
-      );
-    }
-    if (stat.skillBonus !== 0) {
-      lines.push(
-        t('character.sheet.tip.skills', {
-          value: `${stat.skillBonus > 0 ? '+' : ''}${stat.skillBonus}`,
-        }),
-      );
-    }
-    lines.push(t('character.sheet.tip.max', { value: stat.max }));
-    if (stat.isBar)
-      lines.push(t('character.sheet.tip.current', { value: stat.current }));
-    return lines.join('\n');
+      rows.push({ key: 'cap', value: attribute.cap });
+    rows.push({ key: 'bonus', value: signed(stat.bonus) });
+    if (stat.classBonus !== 0)
+      rows.push({ key: 'class', value: signed(stat.classBonus) });
+    if (stat.skillBonus !== 0)
+      rows.push({ key: 'skills', value: signed(stat.skillBonus) });
+    rows.push({ key: 'max', value: stat.max, total: true });
+    if (stat.isBar) rows.push({ key: 'current', value: stat.current });
+    return rows;
   }
 
   protected showDetails(entry: InventoryItem): void {
