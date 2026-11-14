@@ -1,4 +1,9 @@
-import { combatTable, click, Device, mount } from '../../../../../testing/combat-table';
+import {
+  combatTable,
+  click,
+  Device,
+  mount,
+} from '../../../../../testing/combat-table';
 import { settle } from '../../../../../testing/game-device';
 import { CharacterBusiness } from '../../../character/business/character.business';
 import { SkillCatalogueBusiness } from '../../../skill/business/skill-catalogue.business';
@@ -28,7 +33,12 @@ describe('CombatGridComponent', () => {
   let el: HTMLElement;
   let boltId: string;
 
-  const setGrid = (grid: { enabled: boolean; columns: number; rows: number; imageId?: string }) =>
+  const setGrid = (grid: {
+    enabled: boolean;
+    columns: number;
+    rows: number;
+    imageId?: string;
+  }) =>
     table.gm.injector.get(WorldSessionBusiness).update((w) => ({
       ...w,
       combat: { ...w.combat, grid },
@@ -51,9 +61,11 @@ describe('CombatGridComponent', () => {
         effects: [{ kind: 'damage', attribute: 'Life', amount: '1' }],
       })
     ).id;
-    await table.gm.injector
-      .get(CharacterBusiness)
-      .act(table.record('ada').id, { kind: 'set-skill', skillId: boltId, level: 1 });
+    await table.gm.injector.get(CharacterBusiness).act(table.record('ada').id, {
+      kind: 'set-skill',
+      skillId: boltId,
+      level: 1,
+    });
     await table.start();
   });
   afterEach(() => {
@@ -66,12 +78,21 @@ describe('CombatGridComponent', () => {
     el = mounted.el;
   };
   const token = (name: string) =>
-    el.querySelector<HTMLElement>(`[data-testid="token"][data-name="${name}"]`)!;
+    el.querySelector<HTMLElement>(
+      `[data-testid="token"][data-name="${name}"]`,
+    )!;
   const cell = (x: number, y: number) =>
-    el.querySelector<HTMLElement>(`[data-testid="cell"][data-x="${x}"][data-y="${y}"]`)!;
-  const at = (name: string) => [token(name).dataset['x'], token(name).dataset['y']];
+    el.querySelector<HTMLElement>(
+      `[data-testid="cell"][data-x="${x}"][data-y="${y}"]`,
+    )!;
+  const at = (name: string) => [
+    token(name).dataset['x'],
+    token(name).dataset['y'],
+  ];
   const position = (name: string) => table.named(table.gm, name).position;
-  const own = (name: string) => ({ combatantId: table.named(table.gm, name).id });
+  const own = (name: string) => ({
+    combatantId: table.named(table.gm, name).id,
+  });
 
   it('shows nothing while the grid is off', async () => {
     await setGrid({ enabled: false, columns: 10, rows: 10 });
@@ -116,14 +137,21 @@ describe('CombatGridComponent', () => {
     await setGrid({ enabled: true, columns: 10, rows: 10, imageId: 'map-1' });
     await settle();
     await open(table.gm);
-    expect(el.querySelector<HTMLElement>('[data-testid="grid-map"]')!.dataset['imageId']).toBe('map-1');
+    expect(
+      el.querySelector<HTMLElement>('[data-testid="grid-map"]')!.dataset[
+        'imageId'
+      ],
+    ).toBe('map-1');
   });
 
   describe('moving tokens', () => {
     it('lets a player move their own token', async () => {
       await open(table.ada, own('Ada'));
 
-      await mounted.ref.instance.moveTo(table.named(table.ada, 'Ada').id, { x: 2, y: 2 });
+      await mounted.ref.instance.moveTo(table.named(table.ada, 'Ada').id, {
+        x: 2,
+        y: 2,
+      });
       await settle();
 
       expect(position('Ada')).toEqual({ x: 2, y: 2 });
@@ -133,8 +161,14 @@ describe('CombatGridComponent', () => {
     it("ignores a player moving someone else's token", async () => {
       await open(table.ada, own('Ada'));
 
-      await mounted.ref.instance.moveTo(table.named(table.ada, 'Bob').id, { x: 5, y: 5 });
-      await mounted.ref.instance.moveTo(table.named(table.ada, 'Goblin').id, { x: 5, y: 6 });
+      await mounted.ref.instance.moveTo(table.named(table.ada, 'Bob').id, {
+        x: 5,
+        y: 5,
+      });
+      await mounted.ref.instance.moveTo(table.named(table.ada, 'Goblin').id, {
+        x: 5,
+        y: 6,
+      });
       await settle();
 
       expect(position('Bob')).toEqual({ x: 0, y: 1 });
@@ -144,8 +178,14 @@ describe('CombatGridComponent', () => {
     it('lets the GM move any token', async () => {
       await open(table.gm);
 
-      await mounted.ref.instance.moveTo(table.named(table.gm, 'Goblin').id, { x: 4, y: 4 });
-      await mounted.ref.instance.moveTo(table.named(table.gm, 'Bob').id, { x: 1, y: 5 });
+      await mounted.ref.instance.moveTo(table.named(table.gm, 'Goblin').id, {
+        x: 4,
+        y: 4,
+      });
+      await mounted.ref.instance.moveTo(table.named(table.gm, 'Bob').id, {
+        x: 1,
+        y: 5,
+      });
       await settle();
 
       expect(position('Goblin')).toEqual({ x: 4, y: 4 });
@@ -155,7 +195,8 @@ describe('CombatGridComponent', () => {
   });
 
   describe('movement allowance', () => {
-    const reachable = (x: number, y: number) => cell(x, y).dataset['reachable'] === 'true';
+    const reachable = (x: number, y: number) =>
+      cell(x, y).dataset['reachable'] === 'true';
 
     it("highlights the cells within the allowance of the active combatant's cell, not the occupied ones", async () => {
       await open(table.ada, own('Ada'));
@@ -177,7 +218,9 @@ describe('CombatGridComponent', () => {
 
     it('counts from the current position, not from where the turn began', async () => {
       await open(table.ada, own('Ada'));
-      await table.combat(table.gm).move(table.named(table.gm, 'Ada').id, { x: 3, y: 3 });
+      await table
+        .combat(table.gm)
+        .move(table.named(table.gm, 'Ada').id, { x: 3, y: 3 });
       await settle();
 
       expect(reachable(9, 9)).toBe(true);
@@ -187,11 +230,38 @@ describe('CombatGridComponent', () => {
       expect(reachable(3, 9)).toBe(true);
     });
 
+    it('labels every reachable cell with a title', async () => {
+      await open(table.ada, own('Ada'));
+
+      expect(cell(6, 6).title).toBe('Can move here');
+      expect(cell(0, 0).title).toBe('Can move here');
+      expect(cell(7, 0).title).toBe('');
+    });
+
+    it('shows a legend while reachable cells exist, and hides it otherwise', async () => {
+      await open(table.ada, own('Ada'));
+      const legend = el.querySelector('[data-testid="reach-legend"]');
+      expect(legend?.textContent).toContain('Can move here');
+
+      await mounted.ref.instance.moveTo(table.named(table.ada, 'Ada').id, {
+        x: 3,
+        y: 3,
+      });
+      await settle();
+
+      expect(el.querySelector('[data-testid="reach-legend"]')).toBeNull();
+    });
+
     it('shows no reachable cell once the player has no movement left', async () => {
       await open(table.ada, own('Ada'));
-      expect(el.querySelectorAll('[data-reachable="true"]').length).toBeGreaterThan(0);
+      expect(
+        el.querySelectorAll('[data-reachable="true"]').length,
+      ).toBeGreaterThan(0);
 
-      await mounted.ref.instance.moveTo(table.named(table.ada, 'Ada').id, { x: 3, y: 3 });
+      await mounted.ref.instance.moveTo(table.named(table.ada, 'Ada').id, {
+        x: 3,
+        y: 3,
+      });
       await settle();
 
       expect(el.querySelectorAll('[data-reachable="true"]')).toHaveLength(0);
@@ -201,7 +271,7 @@ describe('CombatGridComponent', () => {
   describe('who can drag', () => {
     const movable = (name: string) => token(name).classList.contains('movable');
 
-    it("lets a player drag only their own token, and only on their turn", async () => {
+    it('lets a player drag only their own token, and only on their turn', async () => {
       await open(table.bob, own('Bob'));
       expect(movable('Bob')).toBe(false);
       expect(movable('Ada')).toBe(false);
@@ -223,17 +293,22 @@ describe('CombatGridComponent', () => {
 
     it('lets the GM drag every token at any time', async () => {
       await open(table.gm);
-      for (const name of ['Ada', 'Bob', 'Goblin']) expect(movable(name)).toBe(true);
+      for (const name of ['Ada', 'Bob', 'Goblin'])
+        expect(movable(name)).toBe(true);
 
       await table.combat(table.gm).endTurn();
       await settle();
-      for (const name of ['Ada', 'Bob', 'Goblin']) expect(movable(name)).toBe(true);
+      for (const name of ['Ada', 'Bob', 'Goblin'])
+        expect(movable(name)).toBe(true);
     });
 
     it('does not move a player token off turn', async () => {
       await open(table.bob, own('Bob'));
 
-      await mounted.ref.instance.moveTo(table.named(table.bob, 'Bob').id, { x: 1, y: 2 });
+      await mounted.ref.instance.moveTo(table.named(table.bob, 'Bob').id, {
+        x: 1,
+        y: 2,
+      });
       await settle();
 
       expect(position('Bob')).toEqual({ x: 0, y: 1 });
@@ -242,16 +317,22 @@ describe('CombatGridComponent', () => {
 
   describe('targeting a skill with a range', () => {
     let picked: string[];
-    const inRange = (x: number, y: number) => cell(x, y).dataset['inRange'] === 'true';
-    const tokenInRange = (name: string) => token(name).dataset['inRange'] === 'true';
+    const inRange = (x: number, y: number) =>
+      cell(x, y).dataset['inRange'] === 'true';
+    const tokenInRange = (name: string) =>
+      token(name).dataset['inRange'] === 'true';
     const openTargeting = async () => {
       await open(table.gm, { skillId: boltId });
       picked = [];
-      mounted.ref.instance.targetPicked.subscribe((id: string) => picked.push(id));
+      mounted.ref.instance.targetPicked.subscribe((id: string) =>
+        picked.push(id),
+      );
     };
 
     beforeEach(async () => {
-      await table.combat(table.gm).move(table.named(table.gm, 'Goblin').id, { x: 2, y: 0 });
+      await table
+        .combat(table.gm)
+        .move(table.named(table.gm, 'Goblin').id, { x: 2, y: 0 });
       await settle();
     });
 
@@ -266,12 +347,16 @@ describe('CombatGridComponent', () => {
     });
 
     it('does not highlight a token beyond the range', async () => {
-      await table.combat(table.gm).move(table.named(table.gm, 'Goblin').id, { x: 5, y: 0 });
+      await table
+        .combat(table.gm)
+        .move(table.named(table.gm, 'Goblin').id, { x: 5, y: 0 });
       await settle();
       await openTargeting();
 
       expect(tokenInRange('Goblin')).toBe(false);
-      expect(el.querySelectorAll('[data-in-range="true"]').length).toBeGreaterThan(0);
+      expect(
+        el.querySelectorAll('[data-in-range="true"]').length,
+      ).toBeGreaterThan(0);
     });
 
     it('highlights nothing when no skill is being targeted', async () => {
@@ -298,7 +383,9 @@ describe('CombatGridComponent', () => {
     });
 
     it('still lets a target out of range be picked', async () => {
-      await table.combat(table.gm).move(table.named(table.gm, 'Goblin').id, { x: 8, y: 8 });
+      await table
+        .combat(table.gm)
+        .move(table.named(table.gm, 'Goblin').id, { x: 8, y: 8 });
       await settle();
       await openTargeting();
 

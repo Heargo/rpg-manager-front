@@ -55,6 +55,11 @@ import {
               [attr.data-reachable]="reachable().has(cell.key) ? 'true' : null"
               [attr.data-in-range]="inRange().has(cell.key) ? 'true' : null"
               [class.reachable]="reachable().has(cell.key)"
+              [title]="
+                reachable().has(cell.key)
+                  ? ('combat.grid.reachLegend' | transloco)
+                  : ''
+              "
               [class.in-range]="inRange().has(cell.key)"
               (click)="pickCell(cell)"
             ></div>
@@ -100,6 +105,12 @@ import {
           </div>
         }
       </div>
+      @if (reachable().size) {
+        <p class="legend" data-testid="reach-legend">
+          <span class="swatch"></span>
+          {{ 'combat.grid.reachLegend' | transloco }}
+        </p>
+      }
     }
   `,
   styles: `
@@ -133,7 +144,24 @@ import {
         color-mix(in srgb, var(--p-content-border-color) 60%, transparent);
     }
     .cell.reachable {
-      background: color-mix(in srgb, var(--p-primary-color) 28%, transparent);
+      background: color-mix(in srgb, var(--p-primary-color) 13%, transparent);
+    }
+    .cell.reachable:hover {
+      box-shadow: inset 0 0 0 1px var(--p-primary-color);
+    }
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0 0;
+      font-size: 0.85rem;
+      color: var(--p-text-muted-color);
+    }
+    .swatch {
+      width: 1rem;
+      height: 1rem;
+      border: 1px solid var(--p-content-border-color);
+      background: color-mix(in srgb, var(--p-primary-color) 13%, transparent);
     }
     .cell.in-range {
       background: color-mix(in srgb, var(--p-red-400) 30%, transparent);

@@ -1554,7 +1554,8 @@
       "hint": "L'argent et le butin sont à distribuer à la table."
     },
     "grid": {
-      "label": "Grille de combat"
+      "label": "Grille de combat",
+      "reachLegend": "Déplacement possible"
     }
   },
   "packs": {

@@ -1554,7 +1554,8 @@
       "hint": "The money and the loot are for you to hand out at the table."
     },
     "grid": {
-      "label": "Combat grid"
+      "label": "Combat grid",
+      "reachLegend": "Can move here"
     }
   },
   "packs": {

@@ -16,6 +16,9 @@ h4 {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+  margin-block: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--p-content-border-color);
 }
 .spacer {
   flex: 1;
