@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { ImageBusiness } from '../../../core/business/image.business';
-import { PackBusiness } from '../../../core/business/pack.business';
+import { ItemVocabularyBusiness } from '../../../core/business/item-vocabulary.business';
+import { isBasePack, PackBusiness } from '../../../core/business/pack.business';
 import { seededRandomSource } from '../../../core/generators/random-source';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
 import { autoMaterials } from '../helpers/auto-materials';
@@ -25,46 +26,52 @@ export class RandomItemImageBusiness {
   private readonly images = inject(ImageBusiness);
   private readonly packs = inject(PackBusiness);
   private readonly storage = inject(ImageStorageService);
+  private readonly vocabularies = inject(ItemVocabularyBusiness);
 
   /** The same item and seed give the same sprite and colours. Returns the stored image id. */
-  async create(
-    item: ItemLook,
-    seed: string,
-    packId?: string,
-  ): Promise<string> {
+  async create(item: ItemLook, seed: string): Promise<string> {
     const random = seededRandomSource(`${seed}:image`);
     const saved = (await this.sets.list().catch(() => [] as SpriteSet[]))
-      .filter((set) => set.tags)
+      .filter((set) => set.tags?.kinds.length)
       .sort((a, b) => a.id.localeCompare(b.id));
-    const all = await this.packs.sprites();
-    const chosenPack = packId ? all.filter((s) => s.packId === packId) : [];
-    const library = chosenPack.length ? chosenPack : all;
+    const library = await this.packs.sprites();
+    const vocabulary = await this.vocabularies.vocabulary();
     const candidates: SpriteCandidate[] = [
       ...library.map((s) => ({
         key: `library:${s.id}`,
-        labels: [s.label],
+        kinds: s.kinds,
         type: s.type,
         slot: s.slot,
+        own: !isBasePack(s.packId),
       })),
       ...saved.map((s) => ({
         key: `set:${s.id}`,
-        labels: [s.name],
-        type: s.tags!.type,
-        slot: s.tags!.slot,
+        kinds: s.tags!.kinds,
+        type: 'item' as const,
+        slot: 'none' as const,
+        own: true,
       })),
     ];
-    const chosen = pickSprite(candidates, item, random);
+    const chosen = pickSprite(candidates, item, vocabulary, random);
     if (!chosen) throw new Error('No sprite');
     if (chosen.key.startsWith('library:')) {
       const sprite = await this.sprite(chosen.key.slice('library:'.length));
       if (sprite.kind === 'colored')
-        return this.images.storeUpload(await this.files.fetchBlob(sprite.imageUrl));
+        return this.images.storeUpload(
+          await this.files.fetchBlob(sprite.imageUrl),
+        );
     }
     const { image, config } = await this.load(chosen.key, saved);
     const base = config
       ? importConfig(config, { width: image.width, height: image.height })
       : autoMaterials(image);
-    const out = renderSprite(image, randomMaterials(base, random));
+    const out = renderSprite(
+      image,
+      randomMaterials(base, random, {
+        tints: (item.tints ?? []).map((id) => vocabulary.gradients(id)),
+        pool: vocabulary.tints().map((id) => vocabulary.gradients(id)),
+      }),
+    );
     return this.images.storeUpload(await this.files.encodePng(out));
   }
 
@@ -86,7 +93,9 @@ export class RandomItemImageBusiness {
     const set = saved.find((s) => `set:${s.id}` === key)!;
     if (set.source.kind === 'library') {
       return {
-        image: await this.files.fetchImage((await this.sprite(set.source.spriteId)).imageUrl),
+        image: await this.files.fetchImage(
+          (await this.sprite(set.source.spriteId)).imageUrl,
+        ),
         config: set.config,
       };
     }

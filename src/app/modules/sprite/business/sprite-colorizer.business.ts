@@ -27,7 +27,6 @@ import { DEMO_SPRITE_ID } from '../helpers/sprite-library';
 import { PackBusiness } from '../../../core/business/pack.business';
 import { PackCreatorBusiness } from '../../../core/business/pack-creator.business';
 import { DraftSprite } from '../../../core/packs/pack-draft';
-import { baseKindFor } from '../../../core/packs/pack-kinds';
 import { SpriteSet, SpriteSetSource, SpriteSetTags } from '../models/sprite-set';
 import { SpriteSetStorageService } from '../services/sprite-set-storage.service';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
@@ -235,16 +234,13 @@ export class SpriteColorizerBusiness {
   /** Adds the open grayscale image with its materials to a draft as a masked sprite. */
   async addCurrentToDraft(
     draftId: string,
-    details: Pick<DraftSprite, 'id' | 'label'> &
-      Pick<SpriteSetTags, 'type' | 'slot'>,
+    details: Pick<DraftSprite, 'id' | 'label' | 'kinds'>,
   ): Promise<DraftSprite> {
     const doc = this.document();
     const image = this.image();
     if (!doc || !image) throw new Error('No open sprite');
-    const { type, slot, ...rest } = details;
     return this.creator.addFromColorizer(draftId, {
-      ...rest,
-      kinds: [baseKindFor(type, slot)],
+      ...details,
       image: await this.files.encodePng(image),
       materials: exportConfig(doc),
     });
@@ -255,7 +251,7 @@ export class SpriteColorizerBusiness {
     const source = this.source;
     if (source?.kind === 'library')
       return this.bundledSprite(source.spriteId).then(
-        (s) => ({ type: s.type, slot: s.slot }),
+        (s) => ({ kinds: s.kinds }),
         () => undefined,
       );
     return this.savedSets().find((s) => s.id === this.currentSetId())?.tags;
@@ -291,7 +287,7 @@ export class SpriteColorizerBusiness {
         : undefined;
     const tags: SpriteSetTags | undefined = current
       ? current.tags
-      : bundled && { type: bundled.type, slot: bundled.slot };
+      : bundled && { kinds: bundled.kinds };
     const set: SpriteSet = {
       id: this.currentSetId() ?? crypto.randomUUID(),
       name: name.trim() || this.name(),

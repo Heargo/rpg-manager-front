@@ -16,8 +16,8 @@ import { SpriteColorizerBusiness } from './sprite-colorizer.business';
 const sprite = () => gray(4, 1, [10, 10, 220, 220]);
 const text = async (blob: Blob) => new TextDecoder().decode(await blob.arrayBuffer());
 const png = (content: string) => new Blob([content], { type: 'image/png' });
-const details = { id: 'blue-axe', label: 'Hache bleue', type: 'equipment', slot: 'weapon1' } as const;
-/** The draft sprite that `details` gives: type and slot become the Base kind of the slot. */
+const details = { id: 'blue-axe', label: 'Hache bleue', kinds: ['weapon'] };
+/** The draft sprite that `details` gives: its kinds go straight through. */
 const meta = { id: 'blue-axe', label: 'Hache bleue', kinds: ['weapon'] } as const;
 
 function setup() {

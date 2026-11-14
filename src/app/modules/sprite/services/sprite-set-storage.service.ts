@@ -15,6 +15,9 @@ export class SpriteSetStorageService {
     const sets = (await (
       await this.db()
     ).getAll('spriteSets')) as unknown as SpriteSet[];
+    // Sets tagged before kinds existed lose their tags.
+    for (const set of sets)
+      if (set.tags && !Array.isArray(set.tags.kinds)) delete set.tags;
     return sets.sort((a, b) => b.updatedAt - a.updatedAt);
   }
 

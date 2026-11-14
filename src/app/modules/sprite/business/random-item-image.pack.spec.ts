@@ -8,14 +8,25 @@ import { LanguageBusiness } from '../../../core/business/language.business';
 import { ImageBusiness } from '../../../core/business/image.business';
 import { PackBusiness } from '../../../core/business/pack.business';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
+import { autoMaterials } from '../helpers/auto-materials';
+import { exportConfig } from '../helpers/config-export';
 import { gray } from '../helpers/sprite-test-images';
+import { SpriteSet } from '../models/sprite-set';
 import { SpriteFileService } from '../services/sprite-file.service';
 import { SpriteSetStorageService } from '../services/sprite-set-storage.service';
 import { RandomItemImageBusiness } from './random-item-image.business';
 
-const sprite = () => gray(4, 1, [10, 10, 220, 220]);
+/** 20 x 1 strip with three regions besides the base. */
+const strip = () =>
+  gray(
+    20,
+    1,
+    [...Array(8).fill(10), ...Array(6).fill(120), ...Array(4).fill(230), 0, 0],
+    [...Array(18).fill(255), 0, 0],
+  );
+const sprite = strip;
 
-async function setup(worldPacks?: string[]) {
+async function setup(worldPacks?: string[], saved: SpriteSet[] = []) {
   globalThis.indexedDB = new IDBFactory();
   let created = 0;
   URL.createObjectURL = vi.fn(() => `blob:extra-${++created}`);
@@ -25,82 +36,132 @@ async function setup(worldPacks?: string[]) {
     fetchText: vi.fn(async () => ''),
     fetchBlob: vi.fn(async () => new Blob(['x'])),
     decode: vi.fn(async () => sprite()),
-    encodePng: vi.fn(async () => new Blob(['png'], { type: 'image/png' })),
+    encodePng: vi.fn(async (_image: unknown) => new Blob(['png'], { type: 'image/png' })),
   };
+  const storage = { get: vi.fn(async () => new Blob(['x'], { type: 'image/png' })) };
   TestBed.configureTestingModule({
     providers: [
       { provide: SpriteFileService, useValue: files },
       provideTestTranslations(),
       provideExtraPack(extraPackService()),
-      { provide: SpriteSetStorageService, useValue: { list: async () => [] } },
+      { provide: SpriteSetStorageService, useValue: { list: async () => saved } },
       { provide: ImageBusiness, useValue: { storeUpload: vi.fn(async () => 'stored-1') } },
-      { provide: ImageStorageService, useValue: { get: vi.fn() } },
+      { provide: ImageStorageService, useValue: storage },
     ],
   });
-  TestBed.inject(LanguageBusiness).setLanguage('fr');
+  TestBed.inject(LanguageBusiness).setLanguage('en');
   await TestBed.inject(PackBusiness).enable('extra');
   if (worldPacks) await openWorldWithPacks(worldPacks);
-  return { business: TestBed.inject(RandomItemImageBusiness), files };
+  return { business: TestBed.inject(RandomItemImageBusiness), files, storage };
 }
 
-describe('RandomItemImageBusiness with a chosen pack', () => {
-  const item = { name: 'Machin', type: 'item' as const, slot: 'none' as const };
+const urlsOf = (files: { fetchImage: ReturnType<typeof vi.fn> }) =>
+  files.fetchImage.mock.calls.map((c) => String((c as unknown[])[0]));
 
-  it('draws only the chosen pack sprites', async () => {
-    const { business, files } = await setup(['base-fr', 'extra']);
+describe('RandomItemImageBusiness over the world packs', () => {
+  const gem = { name: 'Gemme', type: 'item' as const, slot: 'none' as const, kind: 'gem' };
 
-    for (let i = 0; i < 10; i++) await business.create(item, `seed-${i}`, 'extra');
+  it('draws the sprite of an active pack in another language than the world, whatever the app language', async () => {
+    const { business, files } = await setup(['base-en', 'extra']);
 
-    const urls = files.fetchImage.mock.calls.map((c) => (c as unknown[])[0]);
-    expect(urls).toHaveLength(10);
-    expect(urls.every((url) => String(url).startsWith('blob:extra-'))).toBe(true);
-  });
+    for (let i = 0; i < 10; i++) await business.create(gem, `seed-${i}`);
 
-  it('draws only Base sprites when the Base is chosen', async () => {
-    const { business, files } = await setup(['base-fr', 'extra']);
-
-    for (let i = 0; i < 10; i++) await business.create(item, `seed-${i}`, 'base-fr');
-
-    const urls = files.fetchImage.mock.calls.map((c) => String((c as unknown[])[0]));
-    expect(urls.every((url) => url.startsWith('packs/base-fr/sprites/'))).toBe(true);
-  });
-
-  it('draws a sprite of a pack in another language than the app when the world has it active', async () => {
-    const { business, files } = await setup(['base-fr', 'extra']);
-    TestBed.inject(LanguageBusiness).setLanguage('en');
-
-    for (let i = 0; i < 10; i++) await business.create(item, `seed-${i}`, 'extra');
-
-    const urls = files.fetchImage.mock.calls.map((c) => String((c as unknown[])[0]));
+    const urls = urlsOf(files);
     expect(urls).toHaveLength(10);
     expect(urls.every((url) => url.startsWith('blob:extra-'))).toBe(true);
   });
 
-  it('draws only from the active packs when no pack is chosen', async () => {
+  it('draws the Base sprites of the kind when the pack with the kind sprite is not active', async () => {
+    const { business, files } = await setup(['base-en']);
+
+    for (let i = 0; i < 10; i++)
+      await business.create({ name: 'Hache', type: 'equipment', slot: 'weapon1', kind: 'axe' }, `seed-${i}`);
+
+    expect(urlsOf(files).every((url) => url === 'packs/base-en/sprites/axe.png')).toBe(true);
+  });
+
+  it('draws from every active pack when the kind has no sprite anywhere', async () => {
     const { business, files } = await setup(['base-en', 'extra']);
 
-    for (let i = 0; i < 20; i++) await business.create(item, `seed-${i}`);
+    for (let i = 0; i < 40; i++)
+      await business.create({ name: 'Machin', type: 'item', slot: 'none' }, `seed-${i}`);
 
-    const urls = files.fetchImage.mock.calls.map((c) => String((c as unknown[])[0]));
-    expect(urls.every((url) => url.startsWith('blob:extra-') || url.startsWith('packs/base-en/sprites/'))).toBe(true);
+    const urls = urlsOf(files);
+    expect(urls.some((url) => url.startsWith('blob:extra-'))).toBe(true);
+    expect(urls.some((url) => url.startsWith('packs/base-en/sprites/'))).toBe(true);
   });
 
-  it('draws only Base sprites of the app language when there is no world, even for a downloaded pack', async () => {
-    const { business, files } = await setup();
+  it('keeps the same result for the same seed', async () => {
+    const { business, files } = await setup(['base-en', 'extra']);
+    const item = { name: 'Machin', type: 'item' as const, slot: 'none' as const };
 
-    for (let i = 0; i < 10; i++) await business.create(item, `seed-${i}`, 'extra');
-
-    const urls = files.fetchImage.mock.calls.map((c) => String((c as unknown[])[0]));
-    expect(urls).toHaveLength(10);
-    expect(urls.every((url) => url.startsWith('packs/base-fr/sprites/'))).toBe(true);
-  });
-
-  it('keeps the same result for the same seed and pack', async () => {
-    const { business, files } = await setup();
-
-    await business.create(item, 'same', 'base-fr');
-    await business.create(item, 'same', 'base-fr');
+    await business.create(item, 'same');
+    await business.create(item, 'same');
 
     expect(files.fetchImage.mock.calls[1]).toEqual(files.fetchImage.mock.calls[0]);
+    expect(files.encodePng.mock.calls[1][0]).toEqual(files.encodePng.mock.calls[0][0]);
+  });
+
+  describe('tagged sprite sets', () => {
+    const mine: SpriteSet = {
+      id: 'mine',
+      name: 'Mon rubis',
+      source: { kind: 'image', imageId: 'img-9' },
+      config: exportConfig(autoMaterials(strip())),
+      updatedAt: 1,
+      tags: { kinds: ['gem'] },
+    };
+
+    it('uses a set tagged with the kind of the item', async () => {
+      const { business, storage, files } = await setup(['base-en'], [mine]);
+
+      await business.create(gem, 'k');
+
+      expect(storage.get).toHaveBeenCalledWith('img-9');
+      expect(files.fetchImage).not.toHaveBeenCalled();
+    });
+
+    it('uses a set tagged with a parent kind of the item', async () => {
+      const { business, storage } = await setup(['base-en'], [{ ...mine, tags: { kinds: ['weapon'] } }]);
+
+      await business.create({ name: 'Bâton', type: 'equipment', slot: 'weapon1', kind: 'staff' }, 'k');
+
+      expect(storage.get).toHaveBeenCalledWith('img-9');
+    });
+
+    it('leaves the set aside when the pack gives a sprite of a nearer kind', async () => {
+      const { business, storage } = await setup(['base-en'], [{ ...mine, tags: { kinds: ['weapon'] } }]);
+
+      await business.create({ name: 'Hache', type: 'equipment', slot: 'weapon1', kind: 'axe' }, 'k');
+
+      expect(storage.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('tints', () => {
+    /** The first part the automatic materials find. */
+    const firstPart = () => {
+      const doc = autoMaterials(strip());
+      const layer = doc.layers.find((l) => l.id !== doc.baseId)!;
+      return layer.mask.findIndex((m) => m > 0);
+    };
+
+    it('colours the first part with the gradient of the first tint of the item', async () => {
+      const { business, files } = await setup(['base-en']);
+      const at = firstPart();
+
+      for (const seed of ['a', 'b', 'c', 'd', 'e']) {
+        files.encodePng.mockClear();
+        await business.create(
+          { name: 'Épée', type: 'equipment', slot: 'weapon1', kind: 'sword', tints: ['fire'] },
+          seed,
+        );
+        const out = files.encodePng.mock.calls[0][0] as { data: Uint8ClampedArray };
+        const [r, g, b] = Array.from(out.data.slice(at * 4, at * 4 + 3));
+        // The Base fire gradient is dark red to orange to yellow: red dominates, blue stays low.
+        expect(r).toBeGreaterThan(b + 60);
+        expect(r).toBeGreaterThanOrEqual(g);
+      }
+    });
   });
 });

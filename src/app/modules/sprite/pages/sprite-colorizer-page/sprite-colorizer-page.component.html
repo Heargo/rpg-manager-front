@@ -671,17 +671,20 @@
                 <span class="saved-name">{{ set.name }}</span>
               }
               <span class="saved-date">{{ set.date }}</span>
-              <p-select
+              <p-multiselect
                 class="saved-kind"
                 data-test="set-kind"
-                [options]="setKinds()"
+                [options]="itemKindOptions()"
                 optionLabel="label"
                 optionValue="value"
                 appendTo="body"
+                [showToggleAll]="false"
+                [filter]="true"
+                [placeholder]="'sprite.sets.kindNone' | translate"
                 [ariaLabel]="'sprite.sets.kind' | translate"
                 [pTooltip]="'sprite.sets.kindHint' | translate"
-                [ngModel]="set.kind"
-                (ngModelChange)="setKind(set.id, $event)"
+                [ngModel]="set.tags?.kinds ?? []"
+                (ngModelChange)="setKinds(set.id, $event)"
               />
               <span class="row tight">
                 <p-button
@@ -842,24 +845,16 @@
         />
       </label>
       <label>
-        {{ "sprite.draft.type" | translate }}
-        <p-select
-          [options]="typeOptions()"
+        {{ "packs.creator.spriteKinds" | translate }}
+        <p-multiselect
+          data-test="add-sprite-kinds"
+          [options]="itemKindOptions()"
           optionLabel="label"
           optionValue="value"
-          [ngModel]="addDetails().type"
-          (ngModelChange)="setAddType($event)"
-          appendTo="body"
-        />
-      </label>
-      <label>
-        {{ "sprite.draft.slot" | translate }}
-        <p-select
-          [options]="slotOptions()"
-          optionLabel="label"
-          optionValue="value"
-          [ngModel]="addDetails().slot"
-          (ngModelChange)="patchAdd({ slot: $event })"
+          [ngModel]="addDetails().kinds"
+          (ngModelChange)="patchAdd({ kinds: $event ?? [] })"
+          [showToggleAll]="false"
+          [filter]="true"
           appendTo="body"
         />
       </label>

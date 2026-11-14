@@ -12,7 +12,6 @@ import {
   textsPath,
   validatePack,
 } from '../packs/pack';
-import { baseKindFor } from '../packs/pack-kinds';
 import {
   buildPack,
   DraftSprite,
@@ -232,7 +231,7 @@ export class PackCreatorBusiness {
     return this.sets.list();
   }
 
-  /** Adds a saved sprite set as a masked sprite, with its materials; its tags prefill the type and slot. */
+  /** Adds a saved sprite set as a masked sprite, with its materials; its tags give the kinds. */
   async addFromSpriteSet(draftId: string, setId: string): Promise<DraftSprite> {
     const set = (await this.sets.list()).find((s) => s.id === setId);
     if (!set) throw new PackError([`sprite "${setId}" does not exist`]);
@@ -245,7 +244,7 @@ export class PackCreatorBusiness {
     return this.addSprite(draftId, {
       id,
       label: set.name,
-      kinds: [baseKindFor(set.tags?.type ?? 'item', set.tags?.slot ?? 'none')],
+      kinds: set.tags?.kinds.length ? set.tags.kinds : ['item'],
       kind: 'masked',
       image,
       materials: set.config,

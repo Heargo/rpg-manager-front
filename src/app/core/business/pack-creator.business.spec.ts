@@ -194,7 +194,7 @@ describe('PackCreatorBusiness', () => {
       source: { kind: 'library', spriteId: 'axe' },
       config: JSON.stringify(glowMaterials),
       updatedAt: 1000,
-      tags: { type: 'equipment', slot: 'weapon1' },
+      tags: { kinds: ['axe'] },
       ...over,
     });
 
@@ -205,7 +205,7 @@ describe('PackCreatorBusiness', () => {
 
       const added = await s.creator.addFromSpriteSet(draft.id, 's1');
 
-      expect(added).toMatchObject({ kind: 'masked', kinds: ['weapon'], id: 'blue-axe', label: 'Blue axe' });
+      expect(added).toMatchObject({ kind: 'masked', kinds: ['axe'], id: 'blue-axe', label: 'Blue axe' });
       expect(added.materials).toBe(JSON.stringify(glowMaterials));
       expect(s.service.loadBlob).toHaveBeenCalledWith('packs/base-en/sprites/axe.png');
       expect(added.image).toBeInstanceOf(Blob);
