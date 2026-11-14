@@ -10,7 +10,7 @@ export const NEON_ROOT = 'https://example.com/packs/neon/';
 /** An unofficial pack: a grayscale, a masked (128 x 128, materials from the Base axe) and a colored sprite, French, with items and NPCs. */
 export function neonManifest(): Record<string, any> {
   return {
-    format: 1,
+    format: 2,
     id: 'neon',
     language: 'fr',
     name: 'Neon',
@@ -20,11 +20,11 @@ export function neonManifest(): Record<string, any> {
     license: 'CC-BY-4.0',
     licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
     homepage: 'https://example.com/neon',
-    generators: { items: 'generators/items.json', npcs: 'generators/npcs.json' },
+    domains: { items: { texts: 'generators/items.json' }, npcs: { texts: 'generators/npcs.json' } },
     sprites: [
-      { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/spark.png' },
-      { id: 'glow', label: 'Lueur', type: 'equipment', slot: 'weapon1', kind: 'masked', image: 'sprites/glow.png', materials: 'sprites/glow.json' },
-      { id: 'tint', label: 'Teinte', type: 'consumable', slot: 'none', kind: 'colored', image: 'sprites/tint.png' },
+      { id: 'spark', label: 'Etincelle', domain: 'items', kinds: ['item'], kind: 'grayscale', image: 'sprites/spark.png' },
+      { id: 'glow', label: 'Lueur', domain: 'items', kinds: ['weapon'], kind: 'masked', image: 'sprites/glow.png', materials: 'sprites/glow.json' },
+      { id: 'tint', label: 'Teinte', domain: 'items', kinds: ['consumable'], kind: 'colored', image: 'sprites/tint.png' },
     ],
   };
 }

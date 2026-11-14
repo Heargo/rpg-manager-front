@@ -42,7 +42,7 @@ export const EXTRA_REGISTRY = { format: 1, packs: [BASE_FR_ENTRY, BASE_EN_ENTRY,
 
 /** The fixture official pack: French, one grayscale sprite and one items list. */
 export const EXTRA_MANIFEST = {
-  format: 1,
+  format: 2,
   id: 'extra',
   language: 'fr',
   name: EXTRA_ENTRY.name,
@@ -51,9 +51,10 @@ export const EXTRA_MANIFEST = {
   author: 'Jane Doe',
   license: 'CC0-1.0',
   licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
-  generators: { items: 'generators/items.json' },
+  // Its own tree: the pack must work with the Base unreachable.
+  domains: { items: { kinds: { gem: { type: 'item' } }, texts: 'generators/items.json' } },
   sprites: [
-    { id: 'gem', label: 'Gemme', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/gem.png' },
+    { id: 'gem', label: 'Gemme', domain: 'items', kinds: ['gem'], kind: 'grayscale', image: 'sprites/gem.png' },
   ],
 };
 

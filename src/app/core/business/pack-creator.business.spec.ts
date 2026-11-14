@@ -88,7 +88,7 @@ async function validDraft({ creator }: Setup, over: Partial<PackDraft['details']
   return saved;
 }
 
-const spark = { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' } as const;
+const spark = { id: 'spark', label: 'Etincelle', kinds: ['item'], kind: 'grayscale' } as const;
 
 describe('PackCreatorBusiness', () => {
   describe('drafts', () => {
@@ -205,7 +205,7 @@ describe('PackCreatorBusiness', () => {
 
       const added = await s.creator.addFromSpriteSet(draft.id, 's1');
 
-      expect(added).toMatchObject({ kind: 'masked', type: 'equipment', slot: 'weapon1', id: 'blue-axe', label: 'Blue axe' });
+      expect(added).toMatchObject({ kind: 'masked', kinds: ['weapon'], id: 'blue-axe', label: 'Blue axe' });
       expect(added.materials).toBe(JSON.stringify(glowMaterials));
       expect(s.service.loadBlob).toHaveBeenCalledWith('packs/base-en/sprites/axe.png');
       expect(added.image).toBeInstanceOf(Blob);
@@ -222,7 +222,7 @@ describe('PackCreatorBusiness', () => {
       const added = await s.creator.addFromSpriteSet(draft.id, 's1');
 
       expect(await text(added.image)).toBe('stored-png');
-      expect(added).toMatchObject({ kind: 'masked', type: 'item', slot: 'none' });
+      expect(added).toMatchObject({ kind: 'masked', kinds: ['item'] });
     });
 
     it('rejects an unknown set', async () => {
@@ -326,7 +326,7 @@ describe('PackCreatorBusiness', () => {
         language: 'fr',
         name: 'Mien',
         description: 'Mon pack',
-        generators: { items: 'generators/items.json' },
+        domains: { items: { texts: 'generators/items.json' } },
         sprites: [{ id: 'spark', label: 'Etincelle' }],
       });
     });
@@ -355,11 +355,11 @@ describe('PackCreatorBusiness', () => {
       expect(Object.keys(entries).sort()).toEqual(['generators/items.json', 'pack.json', 'sprites/spark.png']);
       const manifest = JSON.parse(new TextDecoder().decode(entries['pack.json']));
       expect(manifest).toMatchObject({
-        format: 1,
+        format: 2,
         id: 'mine',
         language: 'fr',
         name: 'Mien',
-        generators: { items: 'generators/items.json' },
+        domains: { items: { texts: 'generators/items.json' } },
         sprites: [{ id: 'spark', label: 'Etincelle', image: 'sprites/spark.png' }],
       });
       expect(JSON.parse(new TextDecoder().decode(entries['generators/items.json']))).toEqual(EXTRA_ITEMS);

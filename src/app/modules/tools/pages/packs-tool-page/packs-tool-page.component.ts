@@ -630,7 +630,9 @@ export class PacksToolPageComponent {
   }
 
   /** A pack language in its own language, whatever the app language. */
-  protected languageName(code: string): string {
+  /** The name of a pack language; empty for a neutral pack. */
+  protected languageName(code: string | undefined): string {
+    if (!code) return '';
     return SUPPORTED_LANGUAGES.find((l) => l.code === code)?.label ?? code;
   }
 

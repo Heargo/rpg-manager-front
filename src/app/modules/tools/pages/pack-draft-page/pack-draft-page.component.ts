@@ -21,6 +21,7 @@ import {
 } from '@openng/optimus-ui/fileupload';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
+import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { PaginatorModule } from '@openng/optimus-ui/paginator';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
@@ -29,7 +30,6 @@ import { LanguageBusiness } from '../../../../core/business/language.business';
 import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
 import { SUPPORTED_LANGUAGES } from '../../../../core/constants/languages';
 import { downloadBlob } from '../../../../core/helpers/download';
-import { EQUIPMENT_SLOTS, ITEM_TYPES } from '../../../../core/models/item';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import {
   PACK_GENERATORS,
@@ -62,6 +62,7 @@ const SPRITES_PER_PAGE = 12;
     FileUploadModule,
     InputTextModule,
     MessageModule,
+    MultiSelectModule,
     PaginatorModule,
     SelectModule,
     TabsModule,
@@ -349,27 +350,17 @@ const SPRITES_PER_PAGE = 12;
                           />
                         </label>
                         <label>
-                          {{ 'packs.creator.spriteType' | translate }}
-                          <p-select
-                            [options]="typeOptions()"
+                          {{ 'packs.creator.spriteKinds' | translate }}
+                          <p-multiselect
+                            [options]="itemKindOptions()"
                             optionLabel="label"
                             optionValue="value"
-                            [ngModel]="entry.sprite.type"
+                            [ngModel]="entry.sprite.kinds"
                             (ngModelChange)="
-                              patchSprite(entry.index, { type: $event })
+                              patchSprite(entry.index, { kinds: $event ?? [] })
                             "
-                          />
-                        </label>
-                        <label>
-                          {{ 'packs.creator.spriteSlot' | translate }}
-                          <p-select
-                            [options]="slotOptions()"
-                            optionLabel="label"
-                            optionValue="value"
-                            [ngModel]="entry.sprite.slot"
-                            (ngModelChange)="
-                              patchSprite(entry.index, { slot: $event })
-                            "
+                            [showToggleAll]="false"
+                            [filter]="true"
                           />
                         </label>
                         <label>
@@ -583,19 +574,16 @@ export class PackDraftPageComponent {
     { text: string; errors: string[] | null }
   >();
 
-  protected readonly typeOptions = computed(() =>
-    ITEM_TYPES.map((value) => ({
-      value,
-      label: this.language.t(`item.type.${value}`),
-    })),
+  /** The Base items kinds, then the draft's own, to pick a sprite's kinds from. */
+  private readonly baseItemKinds = signal<string[]>([]);
+  protected readonly itemKindOptions = computed(() =>
+    [
+      ...new Set([
+        ...this.baseItemKinds(),
+        ...Object.keys(this.draft()?.kinds ?? {}),
+      ]),
+    ].map((value) => ({ value, label: value })),
   );
-  protected readonly slotOptions = computed(() => [
-    { value: 'none', label: this.language.t('packs.creator.slotNone') },
-    ...EQUIPMENT_SLOTS.map((value) => ({
-      value,
-      label: this.language.t(`item.slot.${value}`),
-    })),
-  ]);
 
   constructor() {
     effect(() => {
@@ -608,6 +596,10 @@ export class PackDraftPageComponent {
       const id = this.draft()?.details.id ?? '';
       void this.creator.idWarning(id).then((w) => this.idWarning.set(w));
     });
+    void this.creator.baseItemKinds().then(
+      (kinds) => this.baseItemKinds.set(kinds),
+      () => undefined,
+    );
     void this.creator.listSpriteSets().then(
       (sets) => this.spriteSets.set(sets),
       () => undefined,
@@ -829,8 +821,7 @@ export class PackDraftPageComponent {
         await this.creator.addPng(this.draftId(), file, {
           id,
           label: name,
-          type: 'item',
-          slot: 'none',
+          kinds: ['item'],
           kind: 'grayscale',
         }),
       );

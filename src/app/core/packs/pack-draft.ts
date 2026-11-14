@@ -1,6 +1,8 @@
-import { ItemSlot, ItemType } from '../models/item';
 import {
+  ItemKindDef,
   Pack,
+  PackDomains,
+  PackTint,
   PACK_FORMAT,
   PACK_GENERATORS,
   PackGenerator,
@@ -13,8 +15,8 @@ import {
 export interface DraftSprite {
   id: string;
   label: string;
-  type: ItemType;
-  slot: ItemSlot;
+  /** Kinds of the items tree (domain `items`); the first one decides. */
+  kinds: readonly string[];
   kind: SpriteKind;
   image: Blob;
   materials?: string;
@@ -38,6 +40,9 @@ export interface PackDraft {
   updatedAt: number;
   details: DraftDetails;
   generators: Partial<Record<PackGenerator, unknown>>;
+  /** The pack's own items kinds. */
+  kinds: Record<string, ItemKindDef>;
+  tints: Record<string, PackTint>;
   sprites: DraftSprite[];
 }
 
@@ -73,23 +78,24 @@ export function buildPack(draft: PackDraft): {
   const { details } = draft;
   const files = new Map<string, Blob | unknown>();
 
-  const generators: Pack['generators'] = {};
+  const domains: PackDomains = {};
   for (const generator of PACK_GENERATORS) {
     const value = draft.generators[generator];
     if (value === undefined) continue;
     const path = wordListPath(generator);
-    generators[generator] = path;
+    domains[generator] = { texts: path };
     files.set(path, value);
   }
-
+  if (Object.keys(draft.kinds).length)
+    domains.items = { ...domains.items, kinds: draft.kinds };
   const sprites: PackSprite[] = draft.sprites.map((sprite) => {
     const image = `sprites/${sprite.id}.png`;
     files.set(image, sprite.image);
     const entry: PackSprite = {
       id: sprite.id,
       label: sprite.label,
-      type: sprite.type,
-      slot: sprite.slot,
+      domain: 'items',
+      kinds: [...sprite.kinds],
       kind: sprite.kind,
       image,
     };
@@ -111,7 +117,8 @@ export function buildPack(draft: PackDraft): {
     license: details.license,
     licenseUrl: details.licenseUrl,
     ...(details.homepage ? { homepage: details.homepage } : {}),
-    generators,
+    tints: draft.tints,
+    domains,
     sprites,
   };
   return { manifest, files };

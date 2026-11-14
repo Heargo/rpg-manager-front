@@ -27,6 +27,7 @@ import { DEMO_SPRITE_ID } from '../helpers/sprite-library';
 import { PackBusiness } from '../../../core/business/pack.business';
 import { PackCreatorBusiness } from '../../../core/business/pack-creator.business';
 import { DraftSprite } from '../../../core/packs/pack-draft';
+import { baseKindFor } from '../../../core/packs/pack-kinds';
 import { SpriteSet, SpriteSetSource, SpriteSetTags } from '../models/sprite-set';
 import { SpriteSetStorageService } from '../services/sprite-set-storage.service';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
@@ -234,13 +235,16 @@ export class SpriteColorizerBusiness {
   /** Adds the open grayscale image with its materials to a draft as a masked sprite. */
   async addCurrentToDraft(
     draftId: string,
-    details: Pick<DraftSprite, 'id' | 'label' | 'type' | 'slot'>,
+    details: Pick<DraftSprite, 'id' | 'label'> &
+      Pick<SpriteSetTags, 'type' | 'slot'>,
   ): Promise<DraftSprite> {
     const doc = this.document();
     const image = this.image();
     if (!doc || !image) throw new Error('No open sprite');
+    const { type, slot, ...rest } = details;
     return this.creator.addFromColorizer(draftId, {
-      ...details,
+      ...rest,
+      kinds: [baseKindFor(type, slot)],
       image: await this.files.encodePng(image),
       materials: exportConfig(doc),
     });

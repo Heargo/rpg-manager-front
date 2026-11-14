@@ -6,8 +6,15 @@ import { PackService } from '../services/pack.service';
 import { LanguageBusiness } from './language.business';
 import { basePackId, PackBusiness } from './pack.business';
 
+const KINDS = {
+  equipment: { type: 'equipment' },
+  weapon: { parent: 'equipment', slot: 'weapon1' },
+  axe: { parent: 'weapon' },
+  item: { type: 'item' },
+};
+
 const manifest = (id: string, language: 'en' | 'fr'): Record<string, unknown> => ({
-  format: 1,
+  format: 2,
   id,
   language,
   name: language === 'fr' ? 'Base française' : 'English Base',
@@ -16,13 +23,13 @@ const manifest = (id: string, language: 'en' | 'fr'): Record<string, unknown> =>
   author: 'Team',
   license: 'CC-BY-4.0',
   licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
-  generators:
+  domains:
     language === 'fr'
-      ? { items: 'generators/items.json' }
-      : { items: 'generators/items.json', npcs: 'generators/npcs.json' },
+      ? { items: { kinds: KINDS, texts: 'generators/items.json' } }
+      : { items: { kinds: KINDS, texts: 'generators/items.json' }, npcs: { texts: 'generators/npcs.json' } },
   sprites: [
-    { id: 'axe', label: language === 'fr' ? 'Hache' : 'Axe', type: 'equipment', slot: 'weapon1', kind: 'masked', image: 'sprites/axe.png', materials: 'sprites/axe.json' },
-    { id: 'gem', label: language === 'fr' ? 'Gemme' : 'Gem', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/gem.png' },
+    { id: 'axe', label: language === 'fr' ? 'Hache' : 'Axe', domain: 'items', kinds: ['axe'], kind: 'masked', image: 'sprites/axe.png', materials: 'sprites/axe.json' },
+    { id: 'gem', label: language === 'fr' ? 'Gemme' : 'Gem', domain: 'items', kinds: ['item'], kind: 'grayscale', image: 'sprites/gem.png' },
   ],
 });
 

@@ -12,8 +12,7 @@ const sprite = (n: number): DraftSprite => {
   return {
     id,
     label: id,
-    type: 'item',
-    slot: 'none',
+    kinds: ['item'],
     kind: 'grayscale',
     image: new Blob(['png'], { type: 'image/png' }),
   };

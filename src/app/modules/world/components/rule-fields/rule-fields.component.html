@@ -288,11 +288,13 @@
             (ngModelChange)="setPack(pack.id, $event)"
           />
           <label [for]="'pack-' + pack.id">{{ pack.name }}</label>
-          <p-tag
-            data-testid="pack-language"
-            [value]="pack.language.toUpperCase()"
-            severity="secondary"
-          />
+          @if (pack.language) {
+            <p-tag
+              data-testid="pack-language"
+              [value]="pack.language.toUpperCase()"
+              severity="secondary"
+            />
+          }
         </div>
       }
       @for (pack of missingPacks(); track pack.id) {

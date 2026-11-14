@@ -10,8 +10,8 @@ export const KINDS_MANIFEST = {
     {
       id: 'alpha',
       label: 'Alpha',
-      type: 'item',
-      slot: 'none',
+      domain: 'items',
+      kinds: ['item'],
       kind: 'grayscale',
       image: 'sprites/alpha.png',
       materials: 'sprites/alpha.json',
@@ -19,8 +19,8 @@ export const KINDS_MANIFEST = {
     {
       id: 'bravo',
       label: 'Bravo',
-      type: 'item',
-      slot: 'none',
+      domain: 'items',
+      kinds: ['item'],
       kind: 'masked',
       image: 'sprites/bravo.png',
       materials: 'sprites/bravo.json',
@@ -28,8 +28,8 @@ export const KINDS_MANIFEST = {
     {
       id: 'charlie',
       label: 'Charlie',
-      type: 'item',
-      slot: 'none',
+      domain: 'items',
+      kinds: ['item'],
       kind: 'colored',
       image: 'sprites/charlie.png',
     },

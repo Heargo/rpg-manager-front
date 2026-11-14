@@ -20,6 +20,8 @@ function draft(over: Partial<PackDraft> = {}): PackDraft {
       homepage: 'https://example.com/mine',
     },
     generators: { items: EXTRA_ITEMS, npcs: EXTRA_NPCS },
+    kinds: {},
+    tints: {},
     sprites: [],
     ...over,
   };
@@ -28,8 +30,7 @@ function draft(over: Partial<PackDraft> = {}): PackDraft {
 const sprite = (over: Partial<DraftSprite> = {}): DraftSprite => ({
   id: 'spark',
   label: 'Etincelle',
-  type: 'item',
-  slot: 'none',
+  kinds: ['item'],
   kind: 'grayscale',
   image: new Blob(['png-bytes'], { type: 'image/png' }),
   ...over,
@@ -51,11 +52,11 @@ describe('slugifyPackId', () => {
 });
 
 describe('buildPack', () => {
-  it('builds the manifest from the details, in format 1', () => {
+  it('builds the manifest from the details, in format 2', () => {
     const { manifest } = buildPack(draft());
 
     expect(manifest).toEqual({
-      format: 1,
+      format: 2,
       id: 'mine',
       language: 'fr',
       name: 'Mien',
@@ -65,7 +66,8 @@ describe('buildPack', () => {
       license: 'CC-BY-4.0',
       licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
       homepage: 'https://example.com/mine',
-      generators: { items: 'generators/items.json', npcs: 'generators/npcs.json' },
+      tints: {},
+      domains: { items: { texts: 'generators/items.json' }, npcs: { texts: 'generators/npcs.json' } },
       sprites: [],
     });
   });
@@ -77,20 +79,20 @@ describe('buildPack', () => {
     const { manifest, files } = buildPack(d);
 
     expect(manifest).not.toHaveProperty('homepage');
-    expect(manifest.generators).toEqual({ items: 'generators/items.json' });
+    expect(manifest.domains).toEqual({ items: { texts: 'generators/items.json' } });
     expect([...files.keys()]).toEqual(['generators/items.json']);
   });
 
   it('lays out word lists, sprite images and materials in the documented folders', () => {
     const grayscale = sprite();
-    const masked = sprite({ id: 'glow', kind: 'masked', type: 'equipment', slot: 'weapon1', materials: MATERIALS });
+    const masked = sprite({ id: 'glow', kind: 'masked', kinds: ['weapon'], materials: MATERIALS });
 
     const { manifest, files } = buildPack(draft({ sprites: [grayscale, masked] }));
 
     expect(manifest.sprites).toEqual([
-      { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/spark.png' },
+      { id: 'spark', label: 'Etincelle', domain: 'items', kinds: ['item'], kind: 'grayscale', image: 'sprites/spark.png' },
       {
-        id: 'glow', label: 'Etincelle', type: 'equipment', slot: 'weapon1', kind: 'masked',
+        id: 'glow', label: 'Etincelle', domain: 'items', kinds: ['weapon'], kind: 'masked',
         image: 'sprites/glow.png', materials: 'sprites/glow.json',
       },
     ]);

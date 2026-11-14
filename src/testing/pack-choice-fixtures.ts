@@ -32,7 +32,7 @@ export function packChoiceProviders() {
     id === 'extra'
       ? {
           ...structuredClone(EXTRA_MANIFEST),
-          generators: { items: 'generators/items.json', npcs: 'generators/npcs.json' },
+          domains: { items: { texts: 'generators/items.json' }, npcs: { texts: 'generators/npcs.json' } },
         }
       : baseManifest(id),
   );

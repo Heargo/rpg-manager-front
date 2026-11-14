@@ -5,7 +5,7 @@ import { packFileUrl, validatePack } from './pack';
 const BASE_JSON = (id: string) => join(process.cwd(), `public/packs/${id}/pack.json`);
 
 const valid = (): Record<string, unknown> => ({
-  format: 1,
+  format: 2,
   id: 'my-pack',
   language: 'fr',
   name: 'Mon pack',
@@ -14,11 +14,11 @@ const valid = (): Record<string, unknown> => ({
   author: 'Someone',
   license: 'CC-BY-4.0',
   licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
-  generators: { items: 'generators/items.json' },
+  domains: { items: { texts: 'generators/items.json' } },
   sprites: [
-    { id: 'axe', label: 'Hache', type: 'equipment', slot: 'weapon1', kind: 'masked', image: 'sprites/axe.png', materials: 'sprites/axe.json' },
-    { id: 'gem', label: 'Gemme', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/gem.png' },
-    { id: 'pie', label: 'Tarte', type: 'consumable', slot: 'none', kind: 'colored', image: 'sprites/pie.png' },
+    { id: 'axe', label: 'Hache', domain: 'items', kinds: ['weapon'], kind: 'masked', image: 'sprites/axe.png', materials: 'sprites/axe.json' },
+    { id: 'gem', label: 'Gemme', domain: 'items', kinds: ['item'], kind: 'grayscale', image: 'sprites/gem.png' },
+    { id: 'pie', label: 'Tarte', domain: 'items', kinds: ['consumable'], kind: 'colored', image: 'sprites/pie.png' },
   ],
 });
 
@@ -38,9 +38,9 @@ describe('validatePack', () => {
     }
   });
 
-  it('accepts a minimal manifest without generators, sprites or homepage', () => {
+  it('accepts a minimal manifest without domains, sprites or homepage', () => {
     const json = valid();
-    delete json['generators'];
+    delete json['domains'];
     json['sprites'] = [];
     expect(validatePack(json).ok).toBe(true);
   });
@@ -52,7 +52,7 @@ describe('validatePack', () => {
   });
 
   it('rejects an unknown format version, naming the field', () => {
-    const errors = errorsOf({ ...valid(), format: 2 });
+    const errors = errorsOf({ ...valid(), format: 1 });
     expect(errors.some((e) => e.includes('format'))).toBe(true);
   });
 
@@ -74,26 +74,27 @@ describe('validatePack', () => {
     expect(validatePack({ ...valid(), language: 'fr' }).ok).toBe(true);
   });
 
-  it('requires a language that is en or fr, naming the field', () => {
+  it('requires a language that is en or fr when there is one, naming the field', () => {
     const missing = valid();
     delete missing['language'];
-    expect(errorsOf(missing).some((e) => e.includes('language'))).toBe(true);
+    delete missing['domains'];
+    expect(validatePack(missing).ok).toBe(true);
     for (const language of ['de', '', 'EN', 42, ['en']]) {
       expect(errorsOf({ ...valid(), language }).some((e) => e.includes('language')), String(language)).toBe(true);
     }
   });
 
-  it('rejects generators given per language, as the old format did', () => {
-    const json = { ...valid(), generators: { en: { items: 'generators/en/items.json' } } };
+  it('rejects word lists given per language, as the old format did', () => {
+    const json = { ...valid(), domains: { items: { texts: { en: 'generators/en/items.json' } } } };
     expect(validatePack(json).ok).toBe(false);
-    const both = { ...valid(), generators: { fr: { items: 'generators/fr/items.json' }, en: {} } };
+    const both = { ...valid(), domains: { items: { fr: 'generators/fr/items.json', en: {} } } };
     expect(validatePack(both).ok).toBe(false);
   });
 
   it('rejects a sprite labelled with en and fr instead of a label', () => {
     const json = valid();
     (json['sprites'] as Record<string, unknown>[])[1] = {
-      id: 'gem', en: 'Gem', fr: 'Gemme', type: 'item', slot: 'none', kind: 'grayscale', image: 'sprites/gem.png',
+      id: 'gem', en: 'Gem', fr: 'Gemme', domain: 'items', kinds: ['item'], kind: 'grayscale', image: 'sprites/gem.png',
     };
     expect(errorsOf(json).some((e) => e.includes('gem') && e.includes('label'))).toBe(true);
   });
@@ -114,9 +115,10 @@ describe('validatePack', () => {
     }
   });
 
-  it('rejects a generator other than items, npcs, skills and classes', () => {
-    const json = { ...valid(), generators: { weapons: 'generators/weapons.json' } };
-    expect(errorsOf(json).some((e) => e.includes('weapons'))).toBe(true);
+  it('ignores a domain other than items, npcs, skills and classes, with a warning', () => {
+    const json = { ...valid(), domains: { weapons: { texts: 'generators/weapons.json' } } };
+    const result = validatePack(json);
+    expect(result.ok && result.warnings.some((w) => w.includes('weapons'))).toBe(true);
   });
 
   it('rejects a sprite kind that is not grayscale, masked or colored', () => {
@@ -131,12 +133,10 @@ describe('validatePack', () => {
     expect(errorsOf(json).some((e) => e.includes('materials'))).toBe(true);
   });
 
-  it('rejects a sprite type or slot that items do not have', () => {
-    const typeJson = valid();
-    (typeJson['sprites'] as Record<string, unknown>[])[0]['type'] = 'spaceship';
+  it('rejects a kind type or slot that items do not have', () => {
+    const typeJson = { ...valid(), domains: { items: { kinds: { root: { type: 'spaceship' } } } } };
     expect(errorsOf(typeJson).some((e) => e.includes('type'))).toBe(true);
-    const slotJson = valid();
-    (slotJson['sprites'] as Record<string, unknown>[])[0]['slot'] = 'tail';
+    const slotJson = { ...valid(), domains: { items: { kinds: { root: { type: 'equipment', slot: 'tail' } } } } };
     expect(errorsOf(slotJson).some((e) => e.includes('slot'))).toBe(true);
   });
 
@@ -148,7 +148,7 @@ describe('validatePack', () => {
 
   it('rejects absolute, parent, URL and backslash paths', () => {
     for (const path of ['/etc/passwd', '../x.json', 'a/../../x.json', 'https://evil.test/x.json', 'data:text/plain,hi', 'a\\b.json']) {
-      const json = { ...valid(), generators: { items: path } };
+      const json = { ...valid(), domains: { items: { texts: path } } };
       expect(errorsOf(json).some((e) => e.includes('items')), path).toBe(true);
     }
     const sprite = valid();
@@ -196,7 +196,7 @@ describe.each([
     if (!result.ok) throw new Error(result.errors.join('\n'));
     expect(result.value.id).toBe(id);
     expect(result.value.language).toBe(language);
-    expect(result.value.format).toBe(1);
+    expect(result.value.format).toBe(2);
   });
 
   it('lists 101 masked sprites, each id once, with a label in its language', () => {
@@ -207,14 +207,14 @@ describe.each([
     expect(new Set(sprites.map((s) => s.id)).size).toBe(101);
     expect(sprites.every((s) => s.kind === 'masked')).toBe(true);
     const axe = sprites.find((s) => s.id === 'axe');
-    expect(axe).toMatchObject({ label: axeLabel, type: 'equipment', slot: 'weapon1', image: 'sprites/axe.png', materials: 'sprites/axe.json' });
+    expect(axe).toMatchObject({ label: axeLabel, domain: 'items', kinds: ['axe'], image: 'sprites/axe.png', materials: 'sprites/axe.json' });
   });
 
   it('provides the four generators once', () => {
     const result = validatePack(read());
     if (!result.ok) throw new Error(result.errors.join('\n'));
     for (const generator of ['items', 'npcs', 'skills', 'classes'] as const) {
-      expect(result.value.generators[generator]).toBe(`generators/${generator}.json`);
+      expect(result.value.domains?.[generator]?.texts).toBe(`generators/${generator}.json`);
     }
   });
 
@@ -223,7 +223,7 @@ describe.each([
     if (!result.ok) throw new Error(result.errors.join('\n'));
     const dir = dirname(BASE_JSON(id));
     const files = [
-      ...Object.values(result.value.generators),
+      ...(['items', 'npcs', 'skills', 'classes'] as const).map((g) => result.value.domains?.[g]?.texts),
       ...result.value.sprites.flatMap((s) => [s.image, s.materials ?? '']),
     ].filter(Boolean) as string[];
     expect(files.length).toBe(4 + 202);

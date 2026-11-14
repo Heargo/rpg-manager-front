@@ -2,15 +2,17 @@ import { inject, Injectable, signal } from '@angular/core';
 import { strToU8, zipSync } from 'fflate';
 import { SpriteSet } from '../../modules/sprite/models/sprite-set';
 import { SpriteSetBusiness } from '../../modules/sprite/business/sprite-set.business';
-import { ItemSlot, ItemType } from '../models/item';
 import {
   Pack,
   PACK_GENERATORS,
   PackGenerator,
+  PackLanguage,
   packFileUrl,
   SpriteKind,
+  textsPath,
   validatePack,
 } from '../packs/pack';
+import { baseKindFor } from '../packs/pack-kinds';
 import {
   buildPack,
   DraftSprite,
@@ -98,6 +100,17 @@ export class PackCreatorBusiness {
     );
   }
 
+  /** The ids of the Base items kinds (both Bases share one tree), to pick a sprite's kinds from. */
+  async baseItemKinds(): Promise<string[]> {
+    const base = await this.packs.manifest(basePackId(this.language.$language()));
+    return Object.keys(base.domains?.items?.kinds ?? {});
+  }
+
+  /** The app language as a pack language, for a draft that has none yet. */
+  private draftLanguage(): PackLanguage {
+    return this.language.$language() === 'fr' ? 'fr' : 'en';
+  }
+
   /** The saved drafts, the latest changed first. */
   async listDrafts(): Promise<PackDraft[]> {
     return (await this.storage.list()).sort(
@@ -116,7 +129,7 @@ export class PackCreatorBusiness {
       updatedAt: Date.now(),
       details: {
         id: '',
-        language: this.language.$language() === 'fr' ? 'fr' : 'en',
+        language: this.draftLanguage(),
         name: '',
         description: '',
         version: '1.0.0',
@@ -125,6 +138,8 @@ export class PackCreatorBusiness {
         licenseUrl: '',
       },
       generators: {},
+      kinds: {},
+      tints: {},
       sprites: [],
     };
     await this.storage.save(draft);
@@ -229,8 +244,7 @@ export class PackCreatorBusiness {
     return this.addSprite(draftId, {
       id,
       label: set.name,
-      type: set.tags?.type ?? 'item',
-      slot: set.tags?.slot ?? 'none',
+      kinds: [baseKindFor(set.tags?.type ?? 'item', set.tags?.slot ?? 'none')],
       kind: 'masked',
       image,
       materials: set.config,
@@ -297,7 +311,7 @@ export class PackCreatorBusiness {
 
     const lists = new Map<string, (json: unknown) => string[]>();
     for (const generator of PACK_GENERATORS) {
-      const path = manifest.generators[generator];
+      const path = textsPath(manifest, generator);
       if (path) lists.set(path, listChecker(generator));
     }
     const dimensions = new Map<string, ImageSize>();
@@ -382,7 +396,7 @@ export class PackCreatorBusiness {
       updatedAt: Date.now(),
       details: {
         id: pack.id,
-        language: pack.language,
+        language: pack.language ?? this.draftLanguage(),
         name: pack.name,
         description: pack.description,
         version: pack.version,
@@ -392,6 +406,8 @@ export class PackCreatorBusiness {
         ...(pack.homepage ? { homepage: pack.homepage } : {}),
       },
       generators,
+      kinds: { ...pack.kinds },
+      tints: { ...pack.tints },
       sprites,
     };
     await this.storage.save(draft);
@@ -434,8 +450,7 @@ export class PackCreatorBusiness {
       sprites[i] = {
         id: sprite.id,
         label: sprite.label,
-        type: sprite.type as ItemType,
-        slot: sprite.slot as ItemSlot,
+        kinds: sprite.kinds,
         kind: sprite.kind as SpriteKind,
         image,
         ...(materials ? { materials } : {}),
@@ -457,7 +472,7 @@ export class PackCreatorBusiness {
     }
     const sprites = await this.copySprites(pack.id, pack.sprites);
 
-    const suffix = COPY_WORDS[pack.language];
+    const suffix = COPY_WORDS[pack.language ?? this.draftLanguage()];
     const taken = new Set<string>([
       ...(await this.packs.registry().catch(() => [])).map((p) => p.id),
       ...this.packs.$installed().map((p) => p.id),
@@ -470,7 +485,7 @@ export class PackCreatorBusiness {
       updatedAt: Date.now(),
       details: {
         id,
-        language: pack.language,
+        language: pack.language ?? this.draftLanguage(),
         name: `${pack.name} (${suffix})`,
         description: pack.description,
         version: pack.version,
@@ -480,6 +495,8 @@ export class PackCreatorBusiness {
         ...(pack.homepage ? { homepage: pack.homepage } : {}),
       },
       generators,
+      kinds: { ...pack.kinds },
+      tints: { ...pack.tints },
       sprites,
     };
     await this.storage.save(draft);

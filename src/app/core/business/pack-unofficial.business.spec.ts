@@ -178,9 +178,9 @@ describe('PackBusiness unofficial packs', () => {
     it('rejects a pack over 20 MB in total', async () => {
       const world = neonWorld();
       world.manifest['sprites'] = Array.from({ length: 21 }, (_, i) => ({
-        id: `s${i}`, label: 'S', type: 'item', slot: 'none', kind: 'grayscale', image: `sprites/s${i}.png`,
+        id: `s${i}`, label: 'S', domain: 'items', kinds: ['item'], kind: 'grayscale', image: `sprites/s${i}.png`,
       }));
-      world.manifest['generators'] = {};
+      world.manifest['domains'] = {};
       for (let i = 0; i < 21; i++) world.blobSizes.set(`${NEON_ROOT}sprites/s${i}.png`, 1_000_000);
       const { business, storage } = setup(world);
 
@@ -203,7 +203,7 @@ describe('PackBusiness unofficial packs', () => {
     it('fetches at most 4 files at a time', async () => {
       const world = neonWorld();
       world.manifest['sprites'] = Array.from({ length: 12 }, (_, i) => ({
-        id: `s${i}`, label: 'S', type: 'item', slot: 'none', kind: 'grayscale', image: `sprites/s${i}.png`,
+        id: `s${i}`, label: 'S', domain: 'items', kinds: ['item'], kind: 'grayscale', image: `sprites/s${i}.png`,
       }));
       const { business, inFlight } = setup(world);
 
