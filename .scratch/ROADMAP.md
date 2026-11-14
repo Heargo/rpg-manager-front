@@ -250,7 +250,7 @@ Tickets in `archived/encounters/` (E). Decisions from the user on 2026-11-14 are
 
 ## Phase 16: coherent generated items (2026-11-14)
 
-Tickets in `item-coherence/` (IC). Decisions from the user on 2026-11-14 are in the spec. Pure formats and the phrase engine first, then the pooled vocabulary the generator and the image build on, the creator form, the docs last.
+Tickets in `archived/item-coherence/` (IC). Decisions from the user on 2026-11-14 are in the spec. Pure formats and the phrase engine first, then the pooled vocabulary the generator and the image build on, the creator form, the docs last.
 
 | # | Ticket | Blocked by |
 | - | --- | --- |
@@ -262,4 +262,4 @@ Tickets in `item-coherence/` (IC). Decisions from the user on 2026-11-14 are in 
 | 115 | **IC06** Item generator draws a kind; the item keeps its kind and tints (done) | IC05 |
 | 116 | **IC07** Random image by kind and tint (done) | IC05, IC06 |
 | 117 | **IC08** Pack creator: structured kinds, tints and params (done) | IC01, IC03 |
-| 118 | **IC09** User docs: kinds, tints, phrases, naming conventions | IC01, IC03, IC06, IC07, IC08 |
+| 118 | **IC09** User docs: kinds, tints, phrases, naming conventions (done) | IC01, IC03, IC06, IC07, IC08 |

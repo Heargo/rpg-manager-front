@@ -3,7 +3,7 @@ title: "Content packs"
 description: "Add sprites and word lists to the generators, from official packs or a link."
 ---
 
-A **pack** adds content to the app: **word lists** for the generators (items, NPCs, skills, classes) and item **sprites**. Each pack is written in **one language** (English or French), shown on its card. To translate a pack, you make a second one in the other language.
+A **pack** adds content to the app: **word lists** for the generators (items, NPCs, skills, classes), item **sprites**, and what ties them together: **kinds** and **tints**. A pack that has texts is written in **one language** (English or French), shown on its card. To translate a pack, you make a second one in the other language. A pack can also have **no language** (see [Neutral packs](#neutral-packs)).
 
 The **Tools › Content packs** page installs and removes packs on the device. Each **world's rules** choose the packs it uses (see below).
 
@@ -11,11 +11,11 @@ The **Tools › Content packs** page installs and removes packs on the device. E
 
 ## The Base packs
 
-**Base (English)** and **Base (français)** hold the word lists and the 101 item sprites bundled with the app, each in its language. They are **always available** and cannot be removed. **Details** shows the license, the word lists and the sprites, grouped by kind.
+**Base (English)** and **Base (français)** hold the word lists, kinds, tints and the 101 item sprites bundled with the app, each in its language. They are **always available** and cannot be removed. **Details** shows the license, the word lists and the sprites, grouped by colouring.
 
 ![A pack's details](../../../assets/screens/en/packs-details.png)
 
-A sprite is one of three **kinds**:
+A sprite has one of three **colourings**:
 
 - **Grayscale**: an image you split into materials yourself in the [colorizer](/docs/en/tools/).
 - **Masked**: a grayscale image shipped with its materials, ready to recolour.
@@ -26,6 +26,82 @@ A sprite is one of three **kinds**:
 Official packs are listed on the page, but **their files are only downloaded when you click Download** (or **Install** from the rules of a world that uses it). They then stay on the device and work **offline**. **Remove from device** deletes them (you can download it again); worlds that used it then show it as missing.
 
 For now, the two Bases are the only official packs.
+
+## How items are put together
+
+Generated items rest on a few notions shared by every pack.
+
+- **Domain**: the type of content a pack's lists apply to. Today, **items** (`items`) use the kinds, tints and phrases described here. NPCs, skills and classes are domains too, but still keep their plain word lists for now; they will move to the same system later.
+- **Kind**: a concrete thing, with no language: `sword`, `potion`, `key`. The pack gives its **nouns** and **descriptions** (in its language), and its **sprites** say which kinds they illustrate. That link keeps the image consistent with the name: a Potion no longer gets the picture of an apple.
+- **Tint**: a material or an element (`steel`, `fire`, `ice`…) with a colour **gradient**. An item's adjectives and suffixes can carry a tint: a "fiery" rapier is coloured with the `fire` gradient.
+- **Param**: a list of word groups to insert into descriptions and names, for example `maker` ("a dwarf smith"). See [the phrase syntax](#the-phrase-syntax).
+
+### The kind tree and inheritance
+
+Kinds form a **tree**: a kind can have a **parent**. Only roots declare a `type` (item, consumable or equipment). The **slot** is declared once, on the level where it applies (for example `weapon`), and children inherit the type and the slot. Nouns, descriptions, name templates and sprites are looked up from the kind up through its parents: **the first level that has some wins**.
+
+```
+equipment            (type: equipment)
+└── weapon           (slot: weapon)
+    └── sword        (noun: Sword)
+        ├── rapier   (noun: Rapier)
+        └── sabre    (noun: Sabre)
+```
+
+A `rapier` is therefore a piece of equipment worn as a weapon (inherited), called "Rapier" (its own noun), gets the descriptions of `weapon`, and uses a sword picture (`sword`) when no sprite is made for `rapier`. When you add `sabre` under `sword`, it is drawn right away with a sword picture; a dedicated sprite can come later. Base's roots (`equipment`, `consumable`, `item`) carry the generic descriptions: there are no descriptions per type any more.
+
+### Neutral packs
+
+A pack can have **no language**: it then only holds sprites, kinds and tints (for example a drawing pack). Its images serve every world, whatever its language.
+
+### The world language
+
+Each world has a **language** (the **World language** setting, see [Worlds and rules](/docs/en/worlds/#the-world-language)). Generators pool the content of **all the world's active packs**, but:
+
+- **texts** (nouns, adjectives, descriptions, params, name templates) only come from packs **in the world's language**;
+- **kinds, tints and sprites** come from every active pack, whatever its language, and from neutral packs.
+
+A pack in another language is still useful for its images, kinds and tints: the world rules show it as "images, kinds and tints only".
+
+If two packs declare the same kind with a different `type`, slot or parent, the Base packs' declaration wins, then the first pack in the world's order; a warning is shown. Identical declarations merge silently. If two packs give the same tint with different gradients, they are variants of that tint: one is drawn for each image.
+
+### How an item is drawn
+
+The generator picks the type (or the one you fix), the slot, then a kind that has at least one noun in the world's language, a noun, and possibly an adjective and a suffix depending on rarity. It builds the name with a template (the kind's own, otherwise the language's), then draws a description from the nearest level of the kind that has some, plus those of the tint of the adjective or suffix. The item **keeps its kind and tints**: the random image button uses them, even if you rename the item. An item typed by hand, with no kind, is recognised by the nouns in its name; otherwise the image is chosen by type and slot.
+
+### The phrase syntax
+
+Descriptions, name templates and params are **phrases** that can vary:
+
+| Syntax | Effect |
+| --- | --- |
+| `[a\|b\|c]` | A variant drawn at random. An empty option (`[very\|]`) makes the words optional. |
+| `{maker}` | A param, drawn among those of that name in all the active packs of the world's language. A param can contain variants and other params (up to 5 levels). |
+| `{g:he\|she}` | Agreement with the gender of the drawn noun (masculine\|feminine). |
+| `{g:m\|f\|mp\|fp}` | The same agreement with plurals (masculine\|feminine\|masculine plural\|feminine plural), for plural nouns such as "Gloves". |
+| `{base}`, `{adjective}`, `{suffix}` | In a name template: the drawn noun, adjective and suffix. |
+
+Example: "A [reliable\|fearsome] weapon, made by {maker}." A phrase whose param no active pack of the language defines is skipped (another one is drawn); if none is left, the text is empty.
+
+**Plural nouns** (gloves, boots) are marked on the noun (the **Plural** box in the creator): the adjective then takes its plural form (by default the singular plus `s`, unless it ends in `s` or `x`).
+
+### Naming conventions
+
+So that packs stay compatible with each other, follow these conventions; the Base packs do.
+
+- **Kinds**: English, singular, `kebab-case`, the concrete thing (`sword`, `war-hammer`, `healing-potion`). A sub-kind gets a `parent` rather than a new isolated name.
+- **Tints**: a material or an element (`steel`, `gold`, `fire`, `ice`, `rust`, `shadow`), not a raw colour.
+- **Params**: named by their **role in the sentence** (`maker`, `owner`, `place`, `event`, `material`, `creature`, `effect`). Each entry is a complete noun phrase with its article ("a dwarf smith"), so it fits anywhere without agreement.
+
+### What the Base packs publish
+
+Both Bases declare **the same kinds and the same tints** (they merge). If you name your kinds and tints like them, your sprites and words fit together with theirs.
+
+- **Roots**: `equipment`, `consumable`, `item`.
+- **Equipment slots**: `head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon` (slot `weapon1`) and `shield` (slot `weapon2`), all children of `equipment`.
+- **Kinds** below them: for example `sword`, `rapier`, `dagger`, `axe`, `bow-long`, `staff`, `mace` under `weapon`; `helm`, `crown`, `hood` under `head`; `armor`, `cape`, `robe`, `tunic` under `chest`; `potion`, `elixir`, `bread`, `scroll` under `consumable`; `key`, `book`, `torch`, `gem`, `lantern` under `item`. The full list is in Base's `pack.json`.
+- **Tints**: `steel`, `wood`, `gold`, `ice`, `fire`, `leaf`, `arcane`, `rust`, `silver`, `shadow`.
+- **Params** (`generators/common.json`): `maker`, `owner`, `place`, `event`, `material`, `creature`, `effect`.
 
 ## Add a pack from a link
 
@@ -50,7 +126,7 @@ The authors and licenses of installed packs are listed in the [credits](/docs/en
 
 ## A world's packs
 
-In the creation wizard (**Rules** step) and in **World rules**, the **Packs** section lists the installed packs with their language. Tick the ones the world uses. A new world starts with the Base in the app's language. You can mix languages, for example Base (English) and a French sprite pack.
+In the creation wizard (**Rules** step) and in **World rules**, the **Packs** section lists the installed packs with their language. Tick the ones the world uses. A new world starts with the Base in the app's language. You can mix languages, for example Base (English) and a French sprite pack: only its images, kinds and tints are used (see [the world language](#the-world-language)).
 
 ![The Packs section of the world rules](../../../assets/screens/en/worlds-rules-packs.png)
 
@@ -58,17 +134,14 @@ A ticked pack that isn't on the device (imported world, removed pack) is marked 
 
 In the **Tools**, with no game running, the generators use the packs chosen in **Tools › World rules** (by default, the Base in the app's language).
 
-## Choose the pack in the generators
+## Packs in the generators
 
-The item editor, the item generator and the NPC editor have a **Pack** menu next to the seed.
+**Items** no longer have a **Pack** menu: the item editor and generator use all the world's active packs together (see above). The same seed, with the same packs and language, always gives the same result.
+
+The NPC editor keeps its **Pack** menu next to the seed.
 
 ![The pack choice next to the seed](../../../assets/screens/en/packs-choice.png)
 
-It offers the world's packs that have content for this generator.
-
-- **Random** (the default) picks the pack from the seed: the same seed, with the same packs, always gives the same result.
-- A named pack uses its word lists, and its sprites for the item's random image. If none of the world's packs has a list for this generator, the Base in the app's language takes over.
-
-The **Random** buttons for skills and classes pick a pack at random among those that have them.
+It offers the world's packs that have NPC lists. **Random** (the default) picks the pack from the seed; a named pack uses its word lists. If none of the world's packs has a list, the Base in the app's language takes over. The **Random** buttons for skills and classes pick a pack at random among those that have them.
 
 To make your own pack, see [Create a pack](/docs/en/create-pack/).

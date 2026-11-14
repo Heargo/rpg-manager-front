@@ -1,9 +1,9 @@
 ---
 title: "Créer un pack"
-description: "Faire un pack de listes de mots et de sprites avec le créateur de pack, l'exporter et le publier sur GitHub."
+description: "Faire un pack de catégories, de teintes, de listes de mots et de sprites avec le créateur de pack, l'exporter et le publier sur GitHub."
 ---
 
-Un pack, ce sont des **données** : un fichier `pack.json` qui décrit le pack, plus les fichiers qu'il liste (listes de mots en JSON, images PNG, matériaux des sprites en JSON). Aucun code. Le plus simple est de le faire dans l'application, avec le **créateur de pack** ; vous pouvez aussi l'écrire à la main.
+Un pack, ce sont des **données** : un fichier `pack.json` qui décrit le pack (ses catégories, ses teintes, ses sprites), plus les fichiers qu'il liste (listes de mots en JSON, images PNG, matériaux des sprites en JSON). Les notions de domaine, de catégorie, de teinte et de paramètre sont expliquées dans [Packs de contenu](/docs/packs/#comment-les-objets-sont-composés). Aucun code. Le plus simple est de le faire dans l'application, avec le **créateur de pack** ; vous pouvez aussi l'écrire à la main.
 
 ## Le créateur de pack
 
@@ -17,7 +17,21 @@ La **langue du pack** (français ou anglais, par défaut celle de l'application)
 
 ### Listes de mots
 
-Une case par générateur (objets, PNJ, compétences, classes), qui contient la liste en JSON, dans la langue du pack. Les erreurs s'affichent pendant que vous écrivez. **Copier la liste de Base** part de la liste du Base de la langue du pack, le plus simple pour voir le format ; **Importer un fichier** charge un `.json`. Une case vide est laissée de côté.
+L'onglet a trois blocs, et le texte d'introduction rappelle que les listes vides ne sont pas incluses dans le pack.
+
+**Objets** se remplit avec des formulaires :
+
+- **Catégories** : **Ajouter une catégorie** demande un identifiant (en anglais, minuscules, chiffres et tirets, par exemple `sabre`), un **Parent** et, pour une racine, un **Type** ; l'**Emplacement** se choisit au niveau où il s'applique. Chaque catégorie a ses **Noms** (avec le **Genre** masculin ou féminin, et **Pluriel** pour un nom comme « Gants »), ses **Descriptions** (une par ligne, avec la [syntaxe des phrases](/docs/packs/#la-syntaxe-des-phrases)) et, si besoin, ses **Modèles de noms** (un par ligne, chacun avec `{base}`). Les identifiants déjà connus des packs installés sont proposés par autocomplétion, pour réutiliser les catégories standard.
+- **Aperçu** : sous chaque catégorie, tire quelques objets d'essai avec ses noms et descriptions. Une catégorie sans nom affiche « Rien à tirer : cette catégorie a besoin d'un nom ».
+- **Ligne de couverture** : « Pas encore de sprite pour : … » liste les catégories du pack qu'aucun sprite n'illustre encore. Elle n'empêche rien : un pack peut être sans sprites, et une catégorie sans sprite reçoit une image par type et emplacement.
+- **Teintes** : **Ajouter une teinte** demande un identifiant (`fire`, `rust`…) et les trois couleurs du dégradé (**Ombre**, **Milieu**, **Lumière**), puis ses **Adjectifs** (un par ligne ; un adjectif accordé s'écrit `masculin|féminin`, suivi des pluriels s'ils sont irréguliers), ses **Suffixes** et ses **Descriptions**.
+- **Modèles de noms** (repliés) : les modèles par rareté, utiles seulement pour la Base d'une langue. Les adjectifs et suffixes sans teinte restent dans le fichier brut (voir Avancé).
+
+**Partagé** contient les **Paramètres** : **Ajouter un paramètre** demande son nom (son **rôle dans la phrase** : `maker`, `place`…), puis ses expressions, une à une (**Nouvelle expression**). Chaque expression est un groupe nominal complet avec son article. Un pack sans langue n'a pas de textes : le formulaire demande d'en choisir une dans **Détails**.
+
+Les **PNJ**, les **compétences** et les **classes** restent des listes de mots en **JSON**, dans la langue du pack : les erreurs s'affichent pendant que vous écrivez. **Copier la liste de Base** part de la liste du Base de la langue du pack ; **Importer un fichier** charge un `.json`. Une case vide est laissée de côté.
+
+**Avancé (JSON)** montre les fichiers bruts `items.json` et `common.json` : importer, exporter ou copier ceux de Base. Ce que vous y changez apparaît dans les formulaires, et inversement.
 
 ![Les listes de mots d'un brouillon](../../assets/screens/fr/packs-creator-lists.png)
 
@@ -26,9 +40,9 @@ Une case par générateur (objets, PNJ, compétences, classes), qui contient la 
 Les sprites s'affichent 12 par page.
 
 - **Ajouter une image PNG** : au plus 1 Mo et 256 × 256 pixels. Une image ajoutée ainsi est **en niveaux de gris** ou **colorée**.
-- **Depuis mes sprites** : un sprite enregistré dans le [coloriseur](/docs/tools/), ajouté **avec ses masques**, son type et son emplacement.
+- **Depuis mes sprites** : un sprite enregistré dans le [coloriseur](/docs/tools/), ajouté **avec ses masques** et ses catégories.
 
-Pour chaque sprite : un identifiant, un libellé dans la langue du pack, le type et l'emplacement d'objet (qui servent aux images aléatoires des objets), et la sorte. **Modifier dans le coloriseur** ouvre un sprite en niveaux de gris ou avec masques dans le coloriseur ; **Enregistrer dans le brouillon** y renvoie ses matériaux.
+Pour chaque sprite : un identifiant, un libellé dans la langue du pack, les **Catégories** d'objets qu'il illustre (elles servent aux images aléatoires des objets) et la **Coloration** (niveaux de gris, avec masques ou colorée). **Modifier dans le coloriseur** ouvre un sprite en niveaux de gris ou avec masques dans le coloriseur ; **Enregistrer dans le brouillon** y renvoie ses matériaux.
 
 Depuis le coloriseur, **Ajouter à un brouillon de pack** ajoute directement le sprite en cours, avec ses masques.
 
@@ -45,7 +59,7 @@ Pour modifier un pack créé ici, utilisez **Modifier comme brouillon** sur sa c
 
 ### Traduire un pack
 
-Un pack n'a qu'une langue. Pour proposer votre pack en anglais et en français, **dupliquez**-le, changez la langue dans **Détails** et traduisez le nom, la description, les listes et les libellés. Publiez les deux packs ; chaque monde coche celui de sa langue.
+Un pack n'a qu'une langue. Pour proposer votre pack en anglais et en français, **dupliquez**-le, changez la langue dans **Détails** et traduisez le nom, la description, les noms, descriptions, adjectifs et paramètres, et les libellés. Les catégories et les teintes ne changent pas : leurs identifiants n'ont pas de langue. Publiez les deux packs ; chaque monde coche celui de sa langue. Si votre pack n'a que des images, des catégories et des teintes, laissez-le **sans langue** : un seul pack sert tous les mondes.
 
 ## Publier sur GitHub
 
@@ -65,7 +79,8 @@ Un dépôt minimal :
 mon-pack/
 ├── pack.json
 ├── generators/
-│   └── items.json
+│   ├── items.json
+│   └── common.json
 └── sprites/
     ├── epee.png
     └── epee.json
@@ -75,7 +90,7 @@ Et son `pack.json` :
 
 ```json
 {
-  "format": 1,
+  "format": 2,
   "id": "mon-pack",
   "language": "fr",
   "name": "Mon pack",
@@ -84,15 +99,33 @@ Et son `pack.json` :
   "author": "Votre nom",
   "license": "CC-BY-4.0",
   "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
-  "generators": {
-    "items": "generators/items.json"
+  "tints": {
+    "fire": {
+      "gradient": [
+        { "position": 0, "color": "#5a0a0a" },
+        { "position": 0.5, "color": "#f97316" },
+        { "position": 1, "color": "#fde047" }
+      ]
+    }
   },
+  "domains": {
+    "items": {
+      "kinds": {
+        "equipment": { "type": "equipment" },
+        "weapon": { "parent": "equipment", "slot": "weapon1" },
+        "sword": { "parent": "weapon" },
+        "rapier": { "parent": "sword" }
+      },
+      "texts": "generators/items.json"
+    }
+  },
+  "common": "generators/common.json",
   "sprites": [
     {
       "id": "epee",
       "label": "Épée",
-      "type": "equipment",
-      "slot": "weapon1",
+      "domain": "items",
+      "kinds": ["sword"],
       "kind": "masked",
       "image": "sprites/epee.png",
       "materials": "sprites/epee.json"
@@ -103,16 +136,69 @@ Et son `pack.json` :
 
 | Champ | Contenu |
 | --- | --- |
-| `format` | Toujours `1`. |
+| `format` | Toujours `2`. |
 | `id` | Minuscules, chiffres et tirets ; unique. |
-| `language` | La langue du pack : `fr` ou `en`. |
+| `language` | La langue du pack : `fr` ou `en`. Absent pour un pack neutre (sans `common` ni `texts`). |
 | `name`, `description` | Des textes, dans la langue du pack. |
 | `version`, `author`, `license` | Des textes. |
 | `licenseUrl`, `homepage` | Des liens **https** (`homepage` est facultatif). |
-| `generators` | Les fichiers `items`, `npcs`, `skills`, `classes` ; chacun est facultatif. |
+| `tints` | Les teintes du pack : un identifiant et un `gradient` (liste de `position` de 0 à 1 et de `color`). |
+| `domains` | Le contenu par domaine : `items`, et `npcs`, `skills`, `classes`. Chacun peut avoir `kinds` (l'arbre des catégories) et `texts` (le chemin de son fichier de langue). Un domaine inconnu de l'application est ignoré avec un avertissement, mais un champ inconnu dans un domaine connu est une erreur (pour repérer les fautes de frappe). |
+| `common` | Le chemin de `generators/common.json` (les paramètres, partagés par tous les domaines). |
 | `sprites` | La liste des sprites (voir ci-dessous). |
 
-Pour chaque sprite : `id`, `label` (le libellé, dans la langue du pack), `type` (`item`, `consumable` ou `equipment`), `slot` (`none` hors équipement, sinon `head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` ou `weapon2`), `kind` (`grayscale`, `masked` ou `colored`), `image`, et `materials` pour un sprite `masked` (le JSON exporté par le coloriseur).
+**Catégories** (`domains.items.kinds`) : chaque entrée a un `parent` facultatif. Seules les racines déclarent un `type` (`item`, `consumable` ou `equipment`) ; `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` ou `weapon2`) se déclare sur un niveau de la chaîne d'équipement. L'arbre n'a pas de cycle et sa racine déclare un `type` ; un `parent` déclaré dans un autre pack est permis. Les identifiants sont propres à chaque domaine (`items` `guard` et `npcs` `guard` sont différents). Les `npcs`, `skills` et `classes` ne contiennent pour l'instant que `texts`, vers les listes de mots simples.
+
+**Sprites** : `id`, `label` (dans la langue du pack), `domain` (`items`), `kinds` (les catégories illustrées), `kind` (la coloration : `grayscale`, `masked` ou `colored`), `image`, et `materials` pour un sprite `masked` (le JSON exporté par le coloriseur). Plus de `type` ni de `slot` dans les sprites : ils viennent de la catégorie.
+
+**`generators/items.json`** (liste de mots v2) :
+
+```json
+{
+  "version": 2,
+  "kinds": {
+    "weapon": { "descriptions": ["Une arme [fiable|redoutable], {g:forgé|forgée} par {maker}."] },
+    "sword": { "nouns": [{ "text": "Épée", "gender": "f" }, { "text": "Lame", "gender": "f" }] },
+    "rapier": { "nouns": [{ "text": "Rapière", "gender": "f" }] },
+    "gloves": { "nouns": [{ "text": "Gants", "gender": "m", "plural": true }] },
+    "potion": {
+      "nouns": [{ "text": "Potion", "gender": "f" }],
+      "names": { "common": ["{base} de {effect}"] }
+    }
+  },
+  "tints": {
+    "fire": {
+      "adjectives": { "rare": [{ "m": "ardent", "f": "ardente" }] },
+      "suffixes": { "rare": ["des braises"] },
+      "descriptions": ["Encore tiède au toucher, même après une nuit dehors."]
+    }
+  },
+  "adjectives": { "common": [{ "m": "usé", "f": "usée" }] },
+  "suffixes": { "rare": ["de vigueur"] },
+  "templates": { "common": ["{base} {adjective}", "{base}"] }
+}
+```
+
+- `version` : `2`.
+- `kinds` : par catégorie, `nouns` (`text`, `gender` `m` ou `f`, `plural` facultatif), `descriptions` (des phrases) et `names` (modèles de noms par rareté, prioritaires sur ceux de la langue).
+- `tints` : par teinte, `adjectives` et `suffixes` par rareté, et `descriptions`. Un adjectif accordé s'écrit `{ "m": …, "f": … }`, avec `mp` et `fp` pour les pluriels irréguliers.
+- `adjectives`, `suffixes` : ceux sans teinte, par rareté (`common`, `uncommon`, `rare`, `mythic`, `legendary`). Ils sont tirés avec ceux des teintes.
+- `templates` : les modèles de noms par rareté, avec `{base}` obligatoire (`{adjective}` et `{suffix}` facultatifs). Facultatifs : le Base de chaque langue les fournit ; à défaut, le nom est `{base}`.
+
+**`generators/common.json`** (paramètres, partagés par tous les domaines) :
+
+```json
+{
+  "version": 1,
+  "params": {
+    "maker": ["un forgeron nain", "les moines de {place}", "un apprenti [maladroit|pressé]"],
+    "place": ["Valombre", "la côte gelée"],
+    "effect": ["soin", "vigueur"]
+  }
+}
+```
+
+Chaque fichier a sa propre `version`, pour qu'un domaine évolue sans toucher aux autres. La validation d'un pack avertit seulement des paramètres qu'il n'utilise pas sans les définir, puisqu'un autre pack de la même langue peut les fournir.
 
 Les chemins sont **relatifs** à `pack.json` : pas de `/` au début, pas de `..`, pas de lien.
 

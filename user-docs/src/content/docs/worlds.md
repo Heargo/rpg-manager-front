@@ -37,6 +37,12 @@ Une fois la partie lancée, **Règles du monde** permet de tout ajuster. Les cha
 
 ![La page Règles du monde](../../assets/screens/fr/worlds-rules.png)
 
+### La langue du monde
+
+Le réglage **Langue du monde** (français ou anglais) se trouve dans la section des règles, dans l'assistant (étape **Règles**) comme dans **Règles du monde**. Un nouveau monde prend la langue de l'application ; un monde plus ancien, qui n'en a pas, est lu avec la langue de l'application. Elle est exportée avec le monde. Dans les **Outils**, sans monde, c'est la langue de l'application (ou celle réglée dans **Outils › Règles du monde**).
+
+Cette langue décide des **textes** des générateurs d'objets : noms, adjectifs, descriptions et paramètres ne viennent que des [packs](/docs/packs/#la-langue-du-monde) écrits dans cette langue. Un pack actif d'une autre langue reste autorisé, marqué « images, catégories et teintes uniquement » : seuls ses sprites, ses catégories et ses teintes servent. Un pack neutre est marqué « images ».
+
 ### Le combat
 
 La section **Combat** règle l'attribut de vie (0 = à terre), l'initiative, les actions par tour, la grille, le déplacement et les formules d'attaque de base et de défense. **Chaque étape du combat est facultative** : initiative, compteurs d'actions, validation des résultats par le MJ, défense et récompenses de fin de combat. Une étape désactivée cache ses réglages et disparaît des combats (voir [Combat](/docs/combat/)).
