@@ -1,6 +1,12 @@
 import { ItemRarity } from '../models/item';
 import { COMMON_TEXTS_VERSION } from '../generators/common-texts';
-import { Adjective, Noun, WORD_LIST_VERSION } from '../generators/word-list';
+import {
+  Adjective,
+  KindAdjective,
+  KindSuffix,
+  Noun,
+  WORD_LIST_VERSION,
+} from '../generators/word-list';
 import { GradientStop, ItemKindDef } from './pack';
 import { PackDraft } from './pack-draft';
 
@@ -226,6 +232,59 @@ export function setTintTexts(
   });
 }
 
+/** Sets the kinds a tint fits; no kind removes the limit (the tint fits any item). */
+export function setTintFits(
+  draft: PackDraft,
+  id: string,
+  kinds: string[],
+): PackDraft {
+  const { fits: _fits, ...tint } = draft.tints[id] ?? { gradient: [] };
+  return {
+    ...draft,
+    tints: {
+      ...draft.tints,
+      [id]: kinds.length > 0 ? { ...tint, fits: kinds } : tint,
+    },
+  };
+}
+
+/** Sets the adjectives and suffixes of a kind per rarity; each field given replaces the whole field, empty lists go. */
+export function setKindWords(
+  draft: PackDraft,
+  id: string,
+  words: {
+    adjectives?: PerRarity<KindAdjective>;
+    suffixes?: PerRarity<KindSuffix>;
+  },
+): PackDraft {
+  return editItems(draft, (list) => {
+    const current =
+      isRecord(list['kinds']) && isRecord(list['kinds'][id])
+        ? (list['kinds'][id] as Json)
+        : {};
+    const patch: Json = {};
+    if ('adjectives' in words)
+      patch['adjectives'] = prunePerRarity(words.adjectives);
+    if ('suffixes' in words) patch['suffixes'] = prunePerRarity(words.suffixes);
+    setIn(list, 'kinds', id, assign(current, patch));
+  });
+}
+
+/** Sets the top-level adjectives and suffixes of the language per rarity; each field given replaces the whole field. */
+export function setCommonWords(
+  draft: PackDraft,
+  words: { adjectives?: PerRarity<Adjective>; suffixes?: PerRarity<string> },
+): PackDraft {
+  return editItems(draft, (list) => {
+    for (const field of ['adjectives', 'suffixes'] as const) {
+      if (!(field in words)) continue;
+      const next = prunePerRarity(words[field] as PerRarity<unknown>);
+      if (next) list[field] = next;
+      else delete list[field];
+    }
+  });
+}
+
 // --- params and templates --------------------------------------------------------------------------------
 
 function editParams(
@@ -341,4 +400,32 @@ export function templatesOf(draft: PackDraft): PerRarity<string> {
   return isRecord(items) && isRecord(items['templates'])
     ? (items['templates'] as PerRarity<string>)
     : {};
+}
+
+/** The adjectives and suffixes of a kind in the draft's items word list, per rarity. */
+export function kindWordsOf(
+  draft: PackDraft,
+  id: string,
+): { adjectives: PerRarity<KindAdjective>; suffixes: PerRarity<KindSuffix> } {
+  const items = draft.generators.items;
+  const kinds =
+    isRecord(items) && isRecord(items['kinds']) ? items['kinds'] : {};
+  const texts = isRecord(kinds[id]) ? (kinds[id] as Json) : {};
+  return {
+    adjectives:
+      (texts['adjectives'] as PerRarity<KindAdjective> | undefined) ?? {},
+    suffixes: (texts['suffixes'] as PerRarity<KindSuffix> | undefined) ?? {},
+  };
+}
+
+/** The top-level adjectives and suffixes of the draft's items word list, per rarity. */
+export function commonWordsOf(draft: PackDraft): {
+  adjectives: PerRarity<Adjective>;
+  suffixes: PerRarity<string>;
+} {
+  const items = isRecord(draft.generators.items) ? draft.generators.items : {};
+  return {
+    adjectives: (items['adjectives'] as PerRarity<Adjective> | undefined) ?? {},
+    suffixes: (items['suffixes'] as PerRarity<string> | undefined) ?? {},
+  };
 }

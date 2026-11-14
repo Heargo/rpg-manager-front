@@ -35,6 +35,7 @@ import {
   KnownKeys,
   PackDraftFormBusiness,
 } from '../../../../core/business/pack-draft-form.business';
+import { CommonWordsEditorComponent } from '../../components/pack-draft/common-words-editor/common-words-editor.component';
 import { KindsEditorComponent } from '../../components/pack-draft/kinds-editor/kinds-editor.component';
 import { ParamsEditorComponent } from '../../components/pack-draft/params-editor/params-editor.component';
 import { TemplatesEditorComponent } from '../../components/pack-draft/templates-editor/templates-editor.component';
@@ -76,6 +77,7 @@ const SPRITES_PER_PAGE = 12;
     InputTextModule,
     MessageModule,
     MultiSelectModule,
+    CommonWordsEditorComponent,
     KindsEditorComponent,
     PanelModule,
     PaginatorModule,
@@ -240,6 +242,11 @@ const SPRITES_PER_PAGE = 12;
                     />
                     <h4>{{ 'packs.creator.tints.title' | translate }}</h4>
                     <app-tints-editor
+                      [draft]="current"
+                      [issues]="issues()"
+                      (changed)="edited($event)"
+                    />
+                    <app-common-words-editor
                       [draft]="current"
                       [issues]="issues()"
                       (changed)="edited($event)"

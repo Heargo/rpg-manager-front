@@ -23,7 +23,12 @@ import {
   PackDraftFormBusiness,
 } from '../../../../../core/business/pack-draft-form.business';
 import { LanguageBusiness } from '../../../../../core/business/language.business';
-import { Gender, Noun } from '../../../../../core/generators/word-list';
+import {
+  Gender,
+  KindAdjective,
+  KindSuffix,
+  Noun,
+} from '../../../../../core/generators/word-list';
 import {
   EQUIPMENT_SLOTS,
   EquipmentSlot,
@@ -38,11 +43,21 @@ import { kindLabel } from '../../../../../core/packs/kind-label';
 import { PackDraft } from '../../../../../core/packs/pack-draft';
 import {
   kindTextsOf,
+  kindWordsOf,
   removeKind,
   renameKind,
   setKind,
   setKindTexts,
+  setKindWords,
 } from '../../../../../core/packs/pack-draft-edits';
+
+import {
+  AdjectiveForms,
+  EMPTY_FORMS,
+  adjectiveOf,
+  suffixOf,
+  wordLine,
+} from '../words';
 
 interface NewNoun {
   text: string;
@@ -267,6 +282,122 @@ const lines = (text: string): string[] =>
                   }
                 </div>
               }
+              <div class="line">
+                <p-button
+                  data-test="toggle-words"
+                  severity="secondary"
+                  text
+                  [icon]="
+                    wordsOpen().has(id)
+                      ? 'pi pi-chevron-up'
+                      : 'pi pi-chevron-down'
+                  "
+                  [label]="'packs.creator.kinds.words' | translate"
+                  (onClick)="toggleWords(id)"
+                />
+              </div>
+              @if (wordsOpen().has(id)) {
+                <small class="hint">{{
+                  'packs.creator.kinds.wordsHint' | translate
+                }}</small>
+                @for (rarity of rarities; track rarity) {
+                  <div class="words">
+                    <span class="label">{{
+                      'item.rarity.' + rarity | translate
+                    }}</span>
+                    <div class="nouns">
+                      @for (
+                        adjective of wordsOf(id).adjectives[rarity] ?? [];
+                        track $index;
+                        let i = $index
+                      ) {
+                        <span class="chip">
+                          {{ line(adjective) }}
+                          <p-button
+                            severity="secondary"
+                            text
+                            size="small"
+                            icon="pi pi-times"
+                            [ariaLabel]="
+                              'packs.creator.kinds.remove' | translate
+                            "
+                            (onClick)="removeAdjective(id, rarity, i)"
+                          />
+                        </span>
+                      }
+                      @for (
+                        suffix of wordsOf(id).suffixes[rarity] ?? [];
+                        track $index;
+                        let i = $index
+                      ) {
+                        <span class="chip">
+                          {{ line(suffix) }}
+                          <p-button
+                            severity="secondary"
+                            text
+                            size="small"
+                            icon="pi pi-times"
+                            [ariaLabel]="
+                              'packs.creator.kinds.remove' | translate
+                            "
+                            (onClick)="removeSuffix(id, rarity, i)"
+                          />
+                        </span>
+                      }
+                    </div>
+                    <div class="line">
+                      @for (form of forms; track form) {
+                        <input
+                          pInputText
+                          type="text"
+                          [attr.data-test]="
+                            'kind-new-adjective-' + rarity + '-' + form
+                          "
+                          [attr.aria-label]="
+                            'packs.creator.words.' + form | translate
+                          "
+                          [placeholder]="
+                            'packs.creator.words.' + form | translate
+                          "
+                          [ngModel]="newAdjective(id, rarity)[form]"
+                          (ngModelChange)="
+                            setNewAdjective(id, rarity, form, $event)
+                          "
+                        />
+                      }
+                      <p-button
+                        [attr.data-test]="'add-kind-adjective-' + rarity"
+                        icon="pi pi-plus"
+                        severity="secondary"
+                        [label]="'packs.creator.words.addAdjective' | translate"
+                        [disabled]="!newAdjective(id, rarity).m.trim()"
+                        (onClick)="addAdjective(id, rarity)"
+                      />
+                    </div>
+                    <div class="line">
+                      <input
+                        pInputText
+                        type="text"
+                        [attr.data-test]="'kind-new-suffix-' + rarity"
+                        [attr.aria-label]="
+                          'packs.creator.words.suffix' | translate
+                        "
+                        [placeholder]="'packs.creator.words.suffix' | translate"
+                        [ngModel]="newSuffix(id, rarity)"
+                        (ngModelChange)="setNewSuffix(id, rarity, $event)"
+                      />
+                      <p-button
+                        [attr.data-test]="'add-kind-suffix-' + rarity"
+                        icon="pi pi-plus"
+                        severity="secondary"
+                        [label]="'packs.creator.words.addSuffix' | translate"
+                        [disabled]="!newSuffix(id, rarity).trim()"
+                        (onClick)="addSuffix(id, rarity)"
+                      />
+                    </div>
+                  </div>
+                }
+              }
               @if (previews()[id]; as drawn) {
                 <ul class="preview" data-test="preview-items">
                   @for (item of drawn; track $index) {
@@ -368,6 +499,11 @@ const lines = (text: string): string[] =>
     .rarity {
       margin-left: 0.5rem;
     }
+    .words {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
     .preview {
       margin: 0;
       padding-left: 1rem;
@@ -393,6 +529,11 @@ export class KindsEditorComponent {
   protected readonly uncovered = signal<string[]>([]);
   protected readonly previews = signal<Record<string, ItemDraft[]>>({});
   protected readonly namesOpen = signal<ReadonlySet<string>>(new Set());
+  protected readonly wordsOpen = signal<ReadonlySet<string>>(new Set());
+  protected readonly forms = ['m', 'f', 'mp', 'fp', 'tint'] as const;
+  protected readonly line = wordLine;
+  private readonly newAdjectives = signal<Record<string, AdjectiveForms>>({});
+  private readonly newSuffixes = signal<Record<string, string>>({});
   private readonly newNouns = signal<Record<string, NewNoun>>({});
   private loads = 0;
 
@@ -572,6 +713,99 @@ export class KindsEditorComponent {
       if (!next.delete(id)) next.add(id);
       return next;
     });
+  }
+
+  // --- the words --------------------------------------------------------------------------------------------
+
+  protected wordsOf(id: string) {
+    return kindWordsOf(this.draft(), id);
+  }
+
+  protected toggleWords(id: string): void {
+    this.wordsOpen.update((open) => {
+      const next = new Set(open);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
+  }
+
+  protected newAdjective(id: string, rarity: ItemRarity): AdjectiveForms {
+    return this.newAdjectives()[`${id}|${rarity}`] ?? EMPTY_FORMS;
+  }
+
+  protected setNewAdjective(
+    id: string,
+    rarity: ItemRarity,
+    form: keyof AdjectiveForms,
+    value: string,
+  ): void {
+    this.newAdjectives.update((all) => ({
+      ...all,
+      [`${id}|${rarity}`]: { ...this.newAdjective(id, rarity), [form]: value },
+    }));
+  }
+
+  protected addAdjective(id: string, rarity: ItemRarity): void {
+    const adjective = adjectiveOf(this.newAdjective(id, rarity));
+    if (!adjective) return;
+    const adjectives = {
+      ...this.wordsOf(id).adjectives,
+      [rarity]: [
+        ...(this.wordsOf(id).adjectives[rarity] ?? []),
+        adjective as KindAdjective,
+      ],
+    };
+    this.emit(setKindWords(this.draft(), id, { adjectives }));
+    this.newAdjectives.update((all) => ({
+      ...all,
+      [`${id}|${rarity}`]: EMPTY_FORMS,
+    }));
+  }
+
+  protected removeAdjective(
+    id: string,
+    rarity: ItemRarity,
+    index: number,
+  ): void {
+    const adjectives = {
+      ...this.wordsOf(id).adjectives,
+      [rarity]: (this.wordsOf(id).adjectives[rarity] ?? []).filter(
+        (_, i) => i !== index,
+      ),
+    };
+    this.emit(setKindWords(this.draft(), id, { adjectives }));
+  }
+
+  protected newSuffix(id: string, rarity: ItemRarity): string {
+    return this.newSuffixes()[`${id}|${rarity}`] ?? '';
+  }
+
+  protected setNewSuffix(id: string, rarity: ItemRarity, value: string): void {
+    this.newSuffixes.update((all) => ({ ...all, [`${id}|${rarity}`]: value }));
+  }
+
+  protected addSuffix(id: string, rarity: ItemRarity): void {
+    const suffix = suffixOf(this.newSuffix(id, rarity));
+    if (!suffix) return;
+    const suffixes = {
+      ...this.wordsOf(id).suffixes,
+      [rarity]: [
+        ...(this.wordsOf(id).suffixes[rarity] ?? []),
+        suffix as KindSuffix,
+      ],
+    };
+    this.emit(setKindWords(this.draft(), id, { suffixes }));
+    this.newSuffixes.update((all) => ({ ...all, [`${id}|${rarity}`]: '' }));
+  }
+
+  protected removeSuffix(id: string, rarity: ItemRarity, index: number): void {
+    const suffixes = {
+      ...this.wordsOf(id).suffixes,
+      [rarity]: (this.wordsOf(id).suffixes[rarity] ?? []).filter(
+        (_, i) => i !== index,
+      ),
+    };
+    this.emit(setKindWords(this.draft(), id, { suffixes }));
   }
 
   protected async preview(id: string): Promise<void> {

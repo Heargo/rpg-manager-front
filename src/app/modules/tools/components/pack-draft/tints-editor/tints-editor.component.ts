@@ -14,20 +14,25 @@ import { AutoCompleteModule } from '@openng/optimus-ui/autocomplete';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { ColorPickerModule } from '@openng/optimus-ui/colorpicker';
 import { MessageModule } from '@openng/optimus-ui/message';
+import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import {
   DraftIssue,
+  KnownKeys,
   PackDraftFormBusiness,
 } from '../../../../../core/business/pack-draft-form.business';
 import { Adjective } from '../../../../../core/generators/word-list';
 import { ITEM_RARITIES, ItemRarity } from '../../../../../core/models/item';
 import { GradientStop } from '../../../../../core/packs/pack';
+import { kindOptions } from '../../../../../core/packs/kind-label';
 import { KIND_ID } from '../../../../../core/packs/pack-kinds';
 import { PackDraft } from '../../../../../core/packs/pack-draft';
 import {
+  kindTextsOf,
   removeTint,
   renameTint,
   setTint,
+  setTintFits,
   setTintTexts,
   tintTextsOf,
 } from '../../../../../core/packs/pack-draft-edits';
@@ -70,6 +75,7 @@ const adjectiveLine = (adjective: Adjective): string =>
     ButtonModule,
     ColorPickerModule,
     MessageModule,
+    MultiSelectModule,
     TextareaModule,
   ],
   template: `
@@ -142,6 +148,22 @@ const adjectiveLine = (adjective: Adjective): string =>
               [severity]="issue.level === 'error' ? 'error' : 'warn'"
               >{{ issue.message }}</p-message
             >
+          }
+          @if (id) {
+            <label class="field">
+              {{ 'packs.creator.tints.fits' | translate }}
+              <p-multiselect
+                data-test="tint-fits"
+                [options]="kindChoices(id)"
+                optionLabel="label"
+                optionValue="value"
+                [ngModel]="draft().tints[id]?.fits ?? []"
+                (onChange)="setFits(id, $event.value)"
+                [showToggleAll]="false"
+                [filter]="true"
+                [placeholder]="'packs.creator.tints.fitsAny' | translate"
+              />
+            </label>
           }
           @if (id && !neutral()) {
             <small class="hint">{{
@@ -263,6 +285,7 @@ export class TintsEditorComponent {
   protected readonly adding = signal(false);
   protected readonly suggestions = signal<string[]>([]);
   private readonly known = signal<string[]>([]);
+  private readonly knownKinds = signal<KnownKeys['kinds']>([]);
   private loads = 0;
 
   protected readonly neutral = computed(
@@ -277,9 +300,11 @@ export class TintsEditorComponent {
     effect(() => {
       const draft = this.draft();
       const load = ++this.loads;
-      void this.form
-        .knownKeys(draft)
-        .then((keys) => load === this.loads && this.known.set(keys.tints));
+      void this.form.knownKeys(draft).then((keys) => {
+        if (load !== this.loads) return;
+        this.known.set(keys.tints);
+        this.knownKinds.set(keys.kinds);
+      });
     });
   }
 
@@ -361,6 +386,22 @@ export class TintsEditorComponent {
     if (!stops[at] || stops[at].color === color) return;
     stops[at].color = color;
     this.emit(setTint(this.draft(), id, stops));
+  }
+
+  protected kindChoices(id: string) {
+    const draft = this.draft();
+    const own = Object.keys(draft.kinds).map((kind) => ({
+      id: kind,
+      noun: kindTextsOf(draft, kind).nouns[0]?.text,
+    }));
+    return kindOptions(
+      [...own, ...this.knownKinds()],
+      draft.tints[id]?.fits ?? [],
+    );
+  }
+
+  protected setFits(id: string, kinds: string[] | null): void {
+    this.emit(setTintFits(this.draft(), id, kinds ?? []));
   }
 
   // --- the texts --------------------------------------------------------------------------------------------

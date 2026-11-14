@@ -1724,7 +1724,9 @@
         "namesHint": "Un par ligne, chacun avec {base}.",
         "preview": "Aperçu",
         "previewEmpty": "Rien à tirer : cette catégorie a besoin d'un nom.",
-        "uncovered": "Pas encore de sprite pour : {{ kinds }}"
+        "uncovered": "Pas encore de sprite pour : {{ kinds }}",
+        "words": "Adjectifs et suffixes",
+        "wordsHint": "Adjectifs (masculin / féminin / pluriels, teinte facultative) et suffixes de ce type, par rareté."
       },
       "tints": {
         "title": "Teintes",
@@ -1737,7 +1739,9 @@
         "adjectives": "Adjectifs",
         "adjectivesHint": "Un par ligne. Un adjectif accordé s'écrit masculin|féminin, suivi des pluriels s'ils sont irréguliers.",
         "suffixes": "Suffixes",
-        "descriptions": "Descriptions (une par ligne)"
+        "descriptions": "Descriptions (une par ligne)",
+        "fits": "Convient à",
+        "fitsAny": "Tout objet"
       },
       "params": {
         "title": "Paramètres",
@@ -1752,6 +1756,19 @@
       "templates": {
         "title": "Modèles de noms (utiles seulement pour une Base)",
         "hint": "Un par ligne, chacun avec {base}. Une catégorie peut avoir les siens."
+      },
+      "words": {
+        "common": "Adjectifs et suffixes communs",
+        "commonHint": "Adjectifs et suffixes que tout objet de la langue peut prendre, par rareté.",
+        "m": "Masculin",
+        "f": "Féminin",
+        "mp": "Masculin pluriel",
+        "fp": "Féminin pluriel",
+        "tint": "Teinte (facultatif)",
+        "suffix": "Nouveau suffixe",
+        "addAdjective": "Ajouter l’adjectif",
+        "addSuffix": "Ajouter le suffixe",
+        "remove": "Retirer"
       }
     },
     "createdHere": "Créé sur cet appareil",

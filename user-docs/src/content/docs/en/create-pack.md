@@ -21,10 +21,11 @@ The tab has three blocks, and its intro reminds you that empty lists are left ou
 
 **Items** is filled with forms:
 
-- **Kinds**: **Add a kind** asks for an id (English, lowercase letters, digits and dashes, for example `sabre`), a **Parent** and, for a root, a **Type**; the **Slot** is chosen on the level where it applies. Each kind has its **Nouns** (with the **Gender** masculine or feminine, and **Plural** for a noun such as "Gloves"), its **Descriptions** (one per line, using the [phrase syntax](/docs/en/packs/#the-phrase-syntax)) and, if needed, its **Name templates** (one per line, each with `{base}`). Ids already known from installed packs are offered by autocompletion, so you can reuse the standard kinds.
+- **Kinds**: **Add a kind** asks for an id (English, lowercase letters, digits and dashes, for example `sabre`), a **Parent** and, for a root, a **Type**; the **Slot** is chosen on the level where it applies. Each kind has its **Nouns** (with the **Gender** masculine or feminine, and **Plural** for a noun such as "Gloves"), its **Descriptions** (one per line, using the [phrase syntax](/docs/en/packs/#the-phrase-syntax)) and, if needed, its **Name templates** (one per line, each with `{base}`) and its **Adjectives** and **Suffixes** per rarity (collapsed). These words add up along the chain: a sword gets those of `sword`, `weapon` and `equipment`, plus the common words. Put "sharpened" on `weapon` rather than in the common words, so no hood is "sharpened". Ids already known from installed packs are offered by autocompletion, so you can reuse the standard kinds.
 - **Preview**: under each kind, draws a few trial items with its nouns and descriptions. A kind with no noun says "Nothing to draw: this kind needs a noun".
 - **Coverage line**: "No sprite yet for: …" lists the pack's kinds that no sprite illustrates yet. It blocks nothing: a pack can have no sprites, and a kind with no sprite gets an image by type and slot.
-- **Tints**: **Add a tint** asks for an id (`fire`, `rust`…) and the three colours of the gradient (**Shadow**, **Middle**, **Light**), then its **Adjectives** (one per line; a gendered adjective is written `masculine|feminine`, followed by the plurals if they are irregular), its **Suffixes** and its **Descriptions**.
+- **Tints**: **Add a tint** asks for an id (`fire`, `rust`…) and the three colours of the gradient (**Shadow**, **Middle**, **Light**), then its **Adjectives** (one per line; a gendered adjective is written `masculine|feminine`, followed by the plurals if they are irregular), its **Suffixes** and its **Descriptions**. **Fits kinds** picks the kinds the tint can colour (empty: all); its words and descriptions are only drawn for those items, and a tint description is drawn one time in two.
+- **Common adjectives and suffixes** (collapsed): words that fit any item ("ancient", "legendary"…), per rarity.
 - **Name templates** (collapsed): the templates per rarity, only needed for a language Base. Untinted adjectives and suffixes stay in the raw file (see Advanced).
 
 **Shared** holds the **Params**: **Add a param** asks for its name (its **role in the sentence**: `maker`, `place`…), then its phrases one by one (**New phrase**). Each phrase is a complete noun phrase with its article. A pack with no language has no texts: the form asks you to choose one in **Details**.
@@ -182,7 +183,7 @@ And its `pack.json`:
 - `version`: `2`.
 - `kinds`: per kind, `nouns` (`text`, `gender` `m` or `f`, optional `plural`), `descriptions` (phrases) and `names` (name templates per rarity, taking priority over the language's).
 - `tints`: per tint, `adjectives` and `suffixes` per rarity, and `descriptions`. A gendered adjective is written `{ "m": …, "f": … }`, with `mp` and `fp` for irregular plurals.
-- `adjectives`, `suffixes`: the untinted ones, per rarity (`common`, `uncommon`, `rare`, `mythic`, `legendary`). They are drawn together with the tinted ones.
+- `adjectives`, `suffixes`: the common words, for any item, per rarity (`common`, `uncommon`, `rare`, `mythic`, `legendary`). A kind can also have its own `adjectives` and `suffixes` (they add up along the chain), and an entry may carry a `tint`. In the manifest, a tint may have `fits`: the kinds it colours.
 - `templates`: name templates per rarity, `{base}` required (`{adjective}` and `{suffix}` optional). Optional: each language's Base provides them; otherwise the name is `{base}`.
 
 **`generators/common.json`** (params, shared by every domain):

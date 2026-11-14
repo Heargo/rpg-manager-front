@@ -266,9 +266,9 @@ Tickets in `archived/item-coherence/` (IC). Decisions from the user on 2026-11-1
 
 ## Phase 17: adjectives that fit the item (2026-11-14)
 
-Tickets in `item-adjectives/` (IA), follow-up of IC06's review. Decisions in the spec.
+Tickets in `archived/item-adjectives/` (IA), follow-up of IC06's review. Decisions in the spec.
 
 | # | Ticket | Blocked by |
 | - | --- | --- |
 | 119 | **IA01** Kind adjectives, tint fits and tint descriptions first (done) | none |
-| 120 | **IA02** Pack creator: kind adjectives, tint fits, common words | IA01 |
+| 120 | **IA02** Pack creator: kind adjectives, tint fits, common words (done) | IA01 |

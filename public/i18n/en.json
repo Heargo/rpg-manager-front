@@ -1724,7 +1724,9 @@
         "namesHint": "One per line, each with {base}.",
         "preview": "Preview",
         "previewEmpty": "Nothing to draw: this kind needs a noun.",
-        "uncovered": "No sprite yet for: {{ kinds }}"
+        "uncovered": "No sprite yet for: {{ kinds }}",
+        "words": "Adjectives and suffixes",
+        "wordsHint": "Adjectives (m / f / plural forms, optional tint) and suffixes of this kind, per rarity."
       },
       "tints": {
         "title": "Tints",
@@ -1737,7 +1739,9 @@
         "adjectives": "Adjectives",
         "adjectivesHint": "One per line. A gendered adjective is written masculine|feminine, with the plurals after if they are irregular.",
         "suffixes": "Suffixes",
-        "descriptions": "Descriptions (one per line)"
+        "descriptions": "Descriptions (one per line)",
+        "fits": "Fits kinds",
+        "fitsAny": "Any item"
       },
       "params": {
         "title": "Params",
@@ -1752,6 +1756,19 @@
       "templates": {
         "title": "Name templates (only needed for a Base)",
         "hint": "One per line, each with {base}. A kind can bring its own."
+      },
+      "words": {
+        "common": "Common adjectives and suffixes",
+        "commonHint": "Adjectives and suffixes any item of the language can take, per rarity.",
+        "m": "Masculine",
+        "f": "Feminine",
+        "mp": "Masculine plural",
+        "fp": "Feminine plural",
+        "tint": "Tint (optional)",
+        "suffix": "New suffix",
+        "addAdjective": "Add adjective",
+        "addSuffix": "Add suffix",
+        "remove": "Remove"
       }
     },
     "createdHere": "Created on this device",

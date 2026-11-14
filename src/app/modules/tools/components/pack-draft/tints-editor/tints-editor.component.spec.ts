@@ -1,3 +1,4 @@
+import { By } from '@angular/platform-browser';
 import { GRADIENT, draftOf, renderEditor } from '../../../../../../testing/pack-draft-editor';
 import { TintsEditorComponent } from './tints-editor.component';
 
@@ -61,5 +62,44 @@ describe('TintsEditorComponent', () => {
 
     expect(view.last().tints).toEqual({});
     expect(view.last().generators.items).not.toHaveProperty('tints');
+  });
+
+  const fitsHost = (view: Awaited<ReturnType<typeof renderEditor>>) =>
+    view.fixture.debugElement.query(By.css('[data-test="tint-fits"]'));
+
+  it('sets "Convient à" kinds: emits the tint with its fits', async () => {
+    const view = await renderEditor(
+      TintsEditorComponent,
+      draftOf({ kinds: { weapon: { type: 'item' } }, tints: { rust: { gradient: GRADIENT } } }),
+    );
+
+    fitsHost(view).triggerEventHandler('onChange', { value: ['weapon'] });
+
+    expect(view.last().tints['rust']).toEqual({ gradient: GRADIENT, fits: ['weapon'] });
+  });
+
+  it('offers the known kinds as "id — first noun" and shows the fits', async () => {
+    const view = await renderEditor(
+      TintsEditorComponent,
+      draftOf({
+        kinds: { weapon: { type: 'item' }, orb: { type: 'item' } },
+        tints: { rust: { gradient: GRADIENT, fits: ['weapon'] } },
+        generators: { items: { version: 2, kinds: { weapon: { nouns: [{ text: 'Blade' }] } } } },
+      }),
+    );
+
+    const labels = (fitsHost(view).componentInstance.options as any[]).map((o) => o.label ?? o);
+    expect(labels).toContain('weapon — Blade');
+    expect(fitsHost(view).componentInstance.options.length).toBe(2);
+    expect(view.$('tint-row-rust')!.textContent).toContain('Blade');
+  });
+
+  it('keeps "Convient à" on a neutral draft', async () => {
+    const view = await renderEditor(
+      TintsEditorComponent,
+      draftOf({ tints: { rust: { gradient: GRADIENT } } }, undefined),
+    );
+
+    expect(view.$('tint-fits')).not.toBeNull();
   });
 });

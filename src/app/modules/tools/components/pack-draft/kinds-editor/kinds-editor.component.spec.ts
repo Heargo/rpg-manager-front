@@ -79,4 +79,52 @@ describe('KindsEditorComponent', () => {
     expect(view.last().kinds).toEqual({});
     expect(items(view.last())).not.toHaveProperty('kinds');
   });
+
+  it('adds a kind adjective with its forms and a tint for a rarity', async () => {
+    const view = await renderEditor(
+      KindsEditorComponent,
+      draftOf({ kinds: { weapon: { type: 'item' } } }),
+    );
+
+    await view.click('toggle-words');
+    await view.type('kind-new-adjective-common-m', 'Affuté');
+    await view.type('kind-new-adjective-common-f', 'Affutée');
+    await view.type('kind-new-adjective-common-mp', 'Affutés');
+    await view.type('kind-new-adjective-common-fp', 'Affutées');
+    await view.type('kind-new-adjective-common-tint', 'steel');
+    await view.click('add-kind-adjective-common');
+
+    expect(items(view.last()).kinds.weapon.adjectives).toEqual({
+      common: [{ m: 'Affuté', f: 'Affutée', mp: 'Affutés', fp: 'Affutées', tint: 'steel' }],
+    });
+  });
+
+  it('adds a kind suffix for a rarity', async () => {
+    const view = await renderEditor(
+      KindsEditorComponent,
+      draftOf({ kinds: { weapon: { type: 'item' } } }),
+    );
+
+    await view.click('toggle-words');
+    await view.type('kind-new-suffix-rare', 'of the Duelist');
+    await view.click('add-kind-suffix-rare');
+
+    expect(items(view.last()).kinds.weapon.suffixes).toEqual({ rare: ['of the Duelist'] });
+  });
+
+  it('keeps the words hidden until toggled', async () => {
+    const view = await renderEditor(KindsEditorComponent, draftOf({ kinds: { weapon: { type: 'item' } } }));
+
+    expect(view.$('toggle-words')).not.toBeNull();
+    expect(view.$('kind-new-suffix-rare')).toBeNull();
+  });
+
+  it('hides the words of a neutral draft', async () => {
+    const view = await renderEditor(
+      KindsEditorComponent,
+      draftOf({ kinds: { weapon: { type: 'item' } } }, undefined),
+    );
+
+    expect(view.$('toggle-words')).toBeNull();
+  });
 });
