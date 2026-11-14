@@ -247,3 +247,19 @@ Tickets in `archived/encounters/` (E). Decisions from the user on 2026-11-14 are
 | # | Ticket | Blocked by |
 | - | --- | --- |
 | 109 | **E01** Story and merchant encounters (done) | none |
+
+## Phase 16: coherent generated items (2026-11-14)
+
+Tickets in `item-coherence/` (IC). Decisions from the user on 2026-11-14 are in the spec. Pure formats and the phrase engine first, then the pooled vocabulary the generator and the image build on, the creator form, the docs last.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 110 | **IC01** Manifest v2: kinds, tints, sprite kinds, neutral packs | none |
+| 111 | **IC02** Phrase engine: variants, params, agreement | none |
+| 112 | **IC03** Item word list v2 and the Base FR/EN lists | IC01, IC02 |
+| 113 | **IC04** The world has a language | none |
+| 114 | **IC05** Item vocabulary pooled from the active packs | IC01, IC03, IC04 |
+| 115 | **IC06** Item generator draws a kind; the item keeps its kind and tints | IC05 |
+| 116 | **IC07** Random image by kind and tint | IC05, IC06 |
+| 117 | **IC08** Pack creator: structured kinds, tints and params | IC01, IC03 |
+| 118 | **IC09** User docs: kinds, tints, phrases, naming conventions | IC01, IC03, IC06, IC07, IC08 |
