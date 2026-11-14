@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
@@ -41,10 +41,9 @@ import { Npc } from '../../models/npc';
       @if (catalogue.$world(); as world) {
         <app-npc-catalogue
           [world]="world"
-          [shownIds]="shownIds()"
+          [showDisabled]="table.$combatRunning()"
           [showControls]="!tool"
-          (show)="run(table.showNpc($event.id))"
-          (hide)="run(table.hideNpc($event.id))"
+          (show)="run(table.showOnTable($event.id))"
           (create)="openEditor()"
           (edit)="openEditor($event.id)"
           (duplicate)="run(catalogue.duplicate($event.id))"
@@ -82,9 +81,6 @@ export class NpcCataloguePageComponent {
   protected readonly catalogue = inject(NpcCatalogueBusiness);
   protected readonly tool = !!inject(ActivatedRoute).snapshot.data['tool'];
   protected readonly table = inject(TableBusiness);
-  protected readonly shownIds = computed(() =>
-    this.table.$npcs().map((npc) => npc.id),
-  );
   private readonly router = inject(Router);
   private readonly room = inject(RoomBusiness);
   private readonly messages = inject(MessageService);

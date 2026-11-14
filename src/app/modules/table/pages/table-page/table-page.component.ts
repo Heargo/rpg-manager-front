@@ -24,11 +24,13 @@ import {
 } from '@openng/optimus-ui/fileupload';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
+import { SelectButtonModule } from '@openng/optimus-ui/selectbutton';
 import { SplitterModule } from '@openng/optimus-ui/splitter';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { HostOfflineIconComponent } from '../../../../core/components/host-offline-icon/host-offline-icon.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
+import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterBusiness } from '../../../character/business/character.business';
 import { CombatBusiness } from '../../../combat/business/combat.business';
@@ -45,8 +47,8 @@ import { DiceOverlayComponent } from '../../../dice/components/dice-overlay/dice
 import { DiceRollerComponent } from '../../../dice/components/dice-roller/dice-roller.component';
 import { RoomBusiness } from '../../../room/business/room.business';
 import { TableBusiness } from '../../business/table.business';
-import { TableNpcsComponent } from '../../components/table-npcs/table-npcs.component';
-import { NOTES_MAX_LENGTH } from '../../models/table';
+import { TableNpcCardComponent } from '../../components/table-npc-card/table-npc-card.component';
+import { EncounterKind, NOTES_MAX_LENGTH } from '../../models/table';
 
 /** Below this width the game master's splitter becomes one column, with the players in a drawer. */
 const NARROW_QUERY = '(max-width: 960px)';
@@ -70,7 +72,7 @@ function readToolsOpen(): string[] {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CombatRollBannerComponent,
-    TableNpcsComponent,
+    TableNpcCardComponent,
     NgTemplateOutlet,
     FormsModule,
     RouterLink,
@@ -80,6 +82,7 @@ function readToolsOpen(): string[] {
     DrawerModule,
     DialogModule,
     SelectModule,
+    SelectButtonModule,
     MerchantShopComponent,
     FileUploadModule,
     MessageModule,
@@ -161,15 +164,24 @@ export class TablePageComponent {
     }
   }
 
-  /** Game master: who opening or closing a shop is for (null: every player). */
-  protected readonly shopTarget = signal<string | null>(null);
-  protected readonly shopTargets = computed(() => [
-    { name: null as string | null, playerId: null as string | null },
-    ...(this.characters.$characters() ?? []).map(({ name, playerId }) => ({
-      name,
-      playerId,
+  private readonly language = inject(LanguageBusiness);
+  protected readonly encounterKind = signal<'combat' | EncounterKind>('combat');
+  protected readonly encounterNpcId = signal<string | null>(null);
+  protected readonly encounterKinds = computed(() =>
+    (['combat', 'story', 'merchant'] as const).map((value) => ({
+      value,
+      label: this.language.t(`table.encounter.${value}`),
     })),
-  ]);
+  );
+  /** The NPCs a story encounter can use, or the merchants only for a merchant encounter. */
+  protected readonly encounterNpcs = computed(() =>
+    this.combat
+      .$npcs()
+      .filter(
+        (npc) =>
+          this.encounterKind() !== 'merchant' || npc.roles.includes('merchant'),
+      ),
+  );
   private readonly visitedNpcId = signal<string | null>(null);
   /** The shop the player is in; closes itself when the game master closes the shop. */
   protected readonly visitedShop = computed(() =>
@@ -202,11 +214,22 @@ export class TablePageComponent {
     this.visitedNpcId.set(null);
   }
 
-  protected setShop(change: { npcId: string; open: boolean }): void {
-    const target = this.shopTarget();
+  protected pickKind(kind: 'combat' | EncounterKind): void {
+    this.encounterKind.set(kind);
+    this.encounterNpcId.set(null);
+  }
+
+  protected startEncounter(): void {
+    const kind = this.encounterKind();
+    const npcId = this.encounterNpcId();
+    if (kind === 'combat' || !npcId) return;
     this.table
-      .setShop(change.npcId, change.open, target ? [target] : undefined)
+      .startEncounter(kind, npcId)
       .catch((error) => this.toastError(error));
+  }
+
+  protected endEncounter(): void {
+    this.table.endEncounter().catch((error) => this.toastError(error));
   }
 
   protected buy(inventoryId: string): void {

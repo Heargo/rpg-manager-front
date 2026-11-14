@@ -722,9 +722,21 @@
       "tooManyImages": "Too many quick images: remove some first.",
       "imageMissing": "This picture isn't on the host's device.",
       "gameMasterOnly": "Only the game master can do that.",
-      "tooManyNpcs": "Four NPCs are already on the table: hide one first."
+      "combatRunning": "A combat is running: end it first.",
+      "notMerchant": "This NPC isn't a merchant."
     },
-    "npcs": "NPCs"
+    "encounter": {
+      "title": "Encounter",
+      "kind": "Kind of encounter",
+      "combat": "Combat",
+      "story": "Story",
+      "merchant": "Merchant",
+      "npc": "NPC",
+      "npcPlaceholder": "Pick an NPC",
+      "start": "Start",
+      "end": "End",
+      "running": "{{name}} ({{kind}})"
+    }
   },
   "tools": {
     "sandbox": {
@@ -937,11 +949,7 @@
       "nothingToSell": "Nothing to sell."
     },
     "table": {
-      "open": "Open shop",
-      "close": "Close shop",
-      "visit": "Visit shop",
-      "target": "Open or close the shop for",
-      "everyone": "All players"
+      "visit": "Shop"
     }
   },
   "npc": {
@@ -963,7 +971,7 @@
       "create": "Add NPC",
       "copySuffix": "(copy)",
       "show": "Show on the table",
-      "hide": "Hide from the table"
+      "showDuringCombat": "Not during a combat"
     },
     "role": {
       "story": "Story",

@@ -81,11 +81,6 @@
     <div class="player-layout">
       <section class="illustration-area">
         <ng-container [ngTemplateOutlet]="illustration" />
-        <app-table-npcs
-          [npcs]="table.$npcs()"
-          [shopsOpen]="table.$shopsOpen()"
-          (visitShop)="visitShop($event)"
-        />
       </section>
       <aside class="player-side">
         <p-card>
@@ -136,6 +131,15 @@
       [combatantId]="myCombatant()?.combatantId"
       [skillId]="targeting.$skillId()"
       (targetPicked)="targeting.toggle($event)"
+    />
+  } @else if (table.$encounter(); as encounter) {
+    <app-table-npc-card
+      data-testid="encounter-card"
+      [npc]="encounter.npc"
+      [shopOpen]="
+        !table.$isGameMaster() && table.$shopsOpen().includes(encounter.npc.id)
+      "
+      (visitShop)="visitShop($event)"
     />
   } @else if (table.$scene()?.illustrationId; as imageId) {
     <app-stored-image
@@ -232,29 +236,6 @@
     } @else {
       <ng-container [ngTemplateOutlet]="illustration" />
     }
-    <p-select
-      class="shop-target"
-      data-testid="shop-target"
-      [options]="shopTargets()"
-      optionValue="playerId"
-      [ngModel]="shopTarget()"
-      (ngModelChange)="shopTarget.set($event)"
-      appendTo="body"
-      [ariaLabel]="'merchant.table.target' | transloco"
-    >
-      <ng-template #selectedItem let-target>
-        {{ target.name ?? ("merchant.table.everyone" | transloco) }}
-      </ng-template>
-      <ng-template #item let-target>
-        {{ target.name ?? ("merchant.table.everyone" | transloco) }}
-      </ng-template>
-    </p-select>
-    <app-table-npcs
-      [npcs]="table.$npcs()"
-      [shopsOpen]="table.$shopsOpen()"
-      [gameMaster]="true"
-      (setShop)="setShop($event)"
-    />
     <div class="scene-actions">
       <p-fileupload
         #uploader
@@ -329,12 +310,81 @@
       </p-accordion-content>
     </p-accordion-panel>
     <p-accordion-panel value="combat" data-testid="gm-tool" data-panel="combat">
-      <p-accordion-header>{{ "combat.title" | transloco }}</p-accordion-header>
+      <p-accordion-header>{{
+        "table.encounter.title" | transloco
+      }}</p-accordion-header>
       <p-accordion-content>
-        @if (combat.$state()?.grid) {
-          <app-combat-order [showRound]="false" />
+        @if (table.$encounter(); as running) {
+          <div class="encounter-running" data-testid="encounter-running">
+            <span>{{
+              "table.encounter.running"
+                | transloco
+                  : {
+                      name: running.npc.name,
+                      kind: ("table.encounter." + running.kind | transloco),
+                    }
+            }}</span>
+            <button
+              pButton
+              type="button"
+              data-action="end-encounter"
+              icon="pi pi-stop"
+              severity="secondary"
+              [label]="'table.encounter.end' | transloco"
+              (click)="endEncounter()"
+            ></button>
+          </div>
+        } @else {
+          @if (!combat.$state()) {
+            <p-selectbutton
+              class="encounter-kind"
+              data-testid="encounter-kind"
+              [options]="encounterKinds()"
+              optionLabel="label"
+              optionValue="value"
+              [allowEmpty]="false"
+              [ngModel]="encounterKind()"
+              (ngModelChange)="pickKind($event)"
+            />
+          }
+          @if (encounterKind() !== "combat" && !combat.$state()) {
+            <div class="encounter-start">
+              <p-select
+                data-testid="encounter-npc"
+                [options]="encounterNpcs()"
+                optionLabel="name"
+                optionValue="id"
+                appendTo="body"
+                [placeholder]="'table.encounter.npcPlaceholder' | transloco"
+                [ariaLabel]="'table.encounter.npc' | transloco"
+                [ngModel]="encounterNpcId()"
+                (ngModelChange)="encounterNpcId.set($event)"
+              >
+                <ng-template #item let-npc>
+                  <span
+                    data-testid="encounter-npc-option"
+                    [attr.data-name]="npc.name"
+                    >{{ npc.name }}</span
+                  >
+                </ng-template>
+              </p-select>
+              <button
+                pButton
+                type="button"
+                data-action="start-encounter"
+                icon="pi pi-play"
+                [label]="'table.encounter.start' | transloco"
+                [disabled]="!encounterNpcId()"
+                (click)="startEncounter()"
+              ></button>
+            </div>
+          } @else {
+            @if (combat.$state()?.grid) {
+              <app-combat-order [showRound]="false" />
+            }
+            <app-combat-gm-panel />
+          }
         }
-        <app-combat-gm-panel />
       </p-accordion-content>
     </p-accordion-panel>
     <p-accordion-panel value="notes" data-testid="gm-tool" data-panel="notes">

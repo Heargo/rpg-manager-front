@@ -115,30 +115,24 @@ describe('NpcCatalogueComponent', () => {
     expect(edited).toEqual([goblin]);
   });
 
-  it('offers Show on a hidden NPC and Hide on a shown one, and emits the NPC', async () => {
+  it('offers Show on every NPC and emits the NPC', async () => {
     const { fixture, q, component } = await setup();
-    fixture.componentRef.setInput('shownIds', ['n2']);
-    await fixture.whenStable();
-    expect(q('[data-action="show"]')).toHaveLength(2);
-    expect(q('[data-action="hide"]')).toHaveLength(1);
+    expect(q('[data-action="show"]')).toHaveLength(3);
+    expect(q('[data-action="hide"]')).toHaveLength(0);
 
     const shown: Npc[] = [];
-    const hidden: Npc[] = [];
     component.show.subscribe((n: Npc) => shown.push(n));
-    component.hide.subscribe((n: Npc) => hidden.push(n));
     q('[data-action="show"]')[0].click();
-    q('[data-action="hide"]')[0].click();
     await fixture.whenStable();
     expect(shown).toEqual([goblin]);
-    expect(hidden).toEqual([baker]);
   });
 
-  it('disables Show on the other NPCs once 4 are shown', async () => {
+  it('disables Show while a combat is running', async () => {
     const { fixture, q } = await setup();
-    fixture.componentRef.setInput('shownIds', ['n2', 'a', 'b', 'c']);
+    fixture.componentRef.setInput('showDisabled', true);
     await fixture.whenStable();
     const buttons = q('[data-action="show"]');
-    expect(buttons).toHaveLength(2);
+    expect(buttons).toHaveLength(3);
     buttons.forEach((b) => expect((b.querySelector('button') ?? b).hasAttribute('disabled')).toBe(true));
   });
 });

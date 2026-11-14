@@ -239,3 +239,11 @@ Tickets in `combat-ux-2/` (D), from trying C01–C09. Bugs first, the dice-scree
 | 105 | **D02** Recap banner above the dice screen, with bubbles (D03 merged in) (done) | none |
 | 106 | **D04** GM decides on the dice screen; it closes for everyone (done) | D02 |
 | 108 | **D05** Combat panel spacing, subtler reach area (done) | none |
+
+## Phase 15: encounters that are not a combat (2026-11-14)
+
+Tickets in `archived/encounters/` (E). Decisions from the user on 2026-11-14 are in the spec.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 109 | **E01** Story and merchant encounters (done) | none |

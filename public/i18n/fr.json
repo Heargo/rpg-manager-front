@@ -722,9 +722,21 @@
       "tooManyImages": "Trop d'images rapides : retirez-en d'abord.",
       "imageMissing": "Cette image n'est pas sur l'appareil de l'hôte.",
       "gameMasterOnly": "Seul le maître du jeu peut faire ça.",
-      "tooManyNpcs": "Quatre PNJ sont déjà sur la table : masquez-en un d'abord."
+      "combatRunning": "Un combat est en cours : terminez-le d'abord.",
+      "notMerchant": "Ce PNJ n'est pas un marchand."
     },
-    "npcs": "PNJ"
+    "encounter": {
+      "title": "Rencontre",
+      "kind": "Type de rencontre",
+      "combat": "Combat",
+      "story": "Histoire",
+      "merchant": "Marchand",
+      "npc": "PNJ",
+      "npcPlaceholder": "Choisir un PNJ",
+      "start": "Lancer",
+      "end": "Terminer",
+      "running": "{{name}} ({{kind}})"
+    }
   },
   "tools": {
     "sandbox": {
@@ -937,11 +949,7 @@
       "nothingToSell": "Rien à vendre."
     },
     "table": {
-      "open": "Ouvrir la boutique",
-      "close": "Fermer la boutique",
-      "visit": "Visiter la boutique",
-      "target": "Ouvrir ou fermer la boutique pour",
-      "everyone": "Tous les joueurs"
+      "visit": "Boutique"
     }
   },
   "npc": {
@@ -963,7 +971,7 @@
       "create": "Ajouter un PNJ",
       "copySuffix": "(copie)",
       "show": "Montrer sur la table",
-      "hide": "Retirer de la table"
+      "showDuringCombat": "Impossible pendant un combat"
     },
     "role": {
       "story": "Histoire",

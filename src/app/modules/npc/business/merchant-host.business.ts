@@ -64,6 +64,17 @@ export class MerchantHostBusiness {
     return () => stops.forEach((stop) => stop());
   }
 
+  /** Opens a merchant's shop for every player (a merchant encounter starts). */
+  openForEveryone(npcId: string): void {
+    this.opens.set(npcId, null);
+    this.publish();
+  }
+
+  /** Closes a merchant's shop for everyone (the encounter ends). */
+  closeForEveryone(npcId: string): void {
+    if (this.opens.delete(npcId)) this.publish();
+  }
+
   private async onOpen(payload: unknown, { from }: PeerContext): Promise<void> {
     assertGameMaster(from);
     const request = parseOpenRequest(payload);

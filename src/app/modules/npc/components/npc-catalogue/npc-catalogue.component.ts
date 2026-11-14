@@ -18,7 +18,6 @@ import { LanguageBusiness } from '../../../../core/business/language.business';
 import { World } from '../../../world/models/world';
 import { filterNpcs } from '../../helpers/npc.rules';
 import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
-import { TABLE_NPCS_MAX } from '../../../table/models/table';
 import { NpcCardComponent } from '../npc-card/npc-card.component';
 
 /** A world's NPC catalogue: search and filters, a card per NPC, with duplicate and delete. */
@@ -100,30 +99,20 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
                 (click)="edit.emit(npc)"
               ></button>
               @if (showControls()) {
-                @if (shownIds().includes(npc.id)) {
-                  <button
-                    pButton
-                    type="button"
-                    data-action="hide"
-                    icon="pi pi-eye-slash"
-                    severity="secondary"
-                    [text]="true"
-                    [attr.aria-label]="'npc.catalogue.hide' | transloco"
-                    (click)="hide.emit(npc)"
-                  ></button>
-                } @else {
-                  <button
-                    pButton
-                    type="button"
-                    data-action="show"
-                    icon="pi pi-eye"
-                    severity="secondary"
-                    [text]="true"
-                    [disabled]="shownIds().length >= maxShown"
-                    [attr.aria-label]="'npc.catalogue.show' | transloco"
-                    (click)="show.emit(npc)"
-                  ></button>
-                }
+                <button
+                  pButton
+                  type="button"
+                  data-action="show"
+                  icon="pi pi-eye"
+                  severity="secondary"
+                  [text]="true"
+                  [disabled]="showDisabled()"
+                  [attr.aria-label]="'npc.catalogue.show' | transloco"
+                  [attr.title]="
+                    showDisabled() ? ('npc.catalogue.showDuringCombat' | transloco) : null
+                  "
+                  (click)="show.emit(npc)"
+                ></button>
               }
               <button
                 pButton
@@ -196,18 +185,16 @@ export class NpcCatalogueComponent {
   private readonly language = inject(LanguageBusiness);
 
   readonly world = input.required<World>();
-  /** Ids of the NPCs on the table. */
-  readonly shownIds = input<string[]>([]);
+  /** "Show on the table" can't start an encounter (a combat is running). */
+  readonly showDisabled = input(false);
   /** Whether there is a table to show NPCs on (not in the sandbox tool). */
   readonly showControls = input(true);
-  protected readonly maxShown = TABLE_NPCS_MAX;
 
   readonly create = output<void>();
   readonly edit = output<Npc>();
   readonly duplicate = output<Npc>();
   readonly remove = output<Npc>();
   readonly show = output<Npc>();
-  readonly hide = output<Npc>();
 
   protected readonly search = signal('');
   protected readonly roles = signal<NpcRole[]>([]);

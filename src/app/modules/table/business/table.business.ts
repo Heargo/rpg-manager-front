@@ -6,8 +6,7 @@ import { PeerApiError } from '../../../core/p2p/helpers/peer-api-error';
 import { RoomBusiness } from '../../room/business/room.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
 import { MerchantBusiness } from '../../npc/business/merchant.business';
-import { PublicNpc } from '../../npc/models/npc';
-import { TableScene } from '../models/table';
+import { EncounterKind, TableEncounter, TableScene } from '../models/table';
 import { TableService } from '../services/table.service';
 
 export const NOTES_SAVE_DELAY_MS = 800;
@@ -23,7 +22,7 @@ export class TableBusiness {
   private readonly images = inject(ImageBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly merchants = inject(MerchantBusiness);
-  private readonly npcs = toSignal(this.service.watchNpcs(), {
+  private readonly encounter = toSignal(this.service.watchEncounter(), {
     initialValue: null,
   });
 
@@ -31,9 +30,13 @@ export class TableBusiness {
   readonly $scene = toSignal<TableScene | null>(this.service.watchScene(), {
     initialValue: null,
   });
-  /** The NPCs shown on the table, as the players see them. */
-  readonly $npcs = computed<PublicNpc[]>(() => this.npcs() ?? []);
+  /** The running story or merchant encounter, with the NPC as the players see it; null when there is none. */
+  readonly $encounter = computed<TableEncounter | null>(
+    () => this.encounter() ?? null,
+  );
   readonly $isGameMaster = this.room.$isHost;
+  /** Game master: a combat is running, so no story or merchant encounter can start. */
+  readonly $combatRunning = computed(() => !!this.session.$world()?.encounter);
   /** The shops open for this device's player (for the game master, every open shop). */
   readonly $shops = this.merchants.$shops;
   /** The merchants whose shop is open (see `$shops`). */
@@ -61,20 +64,22 @@ export class TableBusiness {
     return this.service.showIllustration(imageId);
   }
 
-  /** Game master: shows an NPC to everyone (4 at most). */
-  showNpc(npcId: string): Promise<void> {
-    return this.service.setNpc(npcId, true);
+  /** Game master: starts a story or merchant encounter with an NPC (it replaces the running one). */
+  startEncounter(kind: EncounterKind, npcId: string): Promise<void> {
+    return this.service.startEncounter(kind, npcId);
   }
 
-  hideNpc(npcId: string): Promise<void> {
-    return this.service.setNpc(npcId, false);
+  endEncounter(): Promise<void> {
+    return this.service.endEncounter();
   }
 
-  /** Game master: opens or closes a merchant's shop for the given players, or for everyone. */
-  setShop(npcId: string, open: boolean, playerIds?: string[]): Promise<void> {
-    return open
-      ? this.merchants.open(npcId, playerIds)
-      : this.merchants.close(npcId, playerIds);
+  /** Game master: shows an NPC to everyone, as a merchant encounter if it is a merchant, else a story one. */
+  showOnTable(npcId: string): Promise<void> {
+    const npc = this.session.$world()?.npcs.find((n) => n.id === npcId);
+    return this.startEncounter(
+      npc?.roles.includes('merchant') ? 'merchant' : 'story',
+      npcId,
+    );
   }
 
   buyFrom(npcId: string, inventoryId: string): Promise<unknown> {
