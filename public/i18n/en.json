@@ -83,7 +83,7 @@
       "title": "Joined worlds",
       "hostedBy": "Host: {{ name }}",
       "lastSeen": "last seen {{ date }}",
-      "rejoin": "Rejoin",
+      "rejoinHint": "An invite works only once: to come back to a world, ask the GM for a new one.",
       "openSheet": "Open character",
       "remove": "Remove from the list",
       "readOnly": "This is your saved copy of the character in \"{{ name }}\". It is read-only until you rejoin."

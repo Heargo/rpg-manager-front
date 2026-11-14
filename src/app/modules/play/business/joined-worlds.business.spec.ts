@@ -15,7 +15,6 @@ const entry = {
   roomId: 'r1',
   name: 'Harbour',
   hostName: 'Gm',
-  invite: 'https://app.example/join#abc',
   sheetWorld,
 };
 
@@ -53,9 +52,9 @@ describe('JoinedWorldsBusiness', () => {
   it('updates the same world on rejoin instead of adding a second one', async () => {
     await business.record(entry);
     vi.setSystemTime(5000);
-    await business.record({ ...entry, invite: 'https://app.example/join#fresh', hostName: 'Gm2' });
+    await business.record({ ...entry, hostName: 'Gm2' });
     expect(business.$worlds()).toEqual([
-      { ...entry, invite: 'https://app.example/join#fresh', hostName: 'Gm2', lastSeenAt: 5000 },
+      { ...entry, hostName: 'Gm2', lastSeenAt: 5000 },
     ]);
     expect(stored.size).toBe(1);
   });

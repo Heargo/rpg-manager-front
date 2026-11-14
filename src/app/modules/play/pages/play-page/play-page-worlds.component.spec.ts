@@ -4,17 +4,13 @@ import { Router } from '@angular/router';
 import { TranslocoService } from '@jsverse/transloco';
 import { ConfirmationService } from '@openng/optimus-ui/api';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
-import { encodeSignal } from '../../../../core/p2p/helpers/signal-codec';
-import { CHROME_OFFER } from '../../../../../testing/sdp-samples';
 import { PlayBusiness } from '../../business/play.business';
 import { PlayPageComponent } from './play-page.component';
 
-const offerCode = encodeSignal({ type: 'offer', sdp: CHROME_OFFER });
-
 /**
  * Contract: every world (own or joined) is an element `[data-test="world-entry"]` holding a
- * `[data-test="world-badge"]` (GM or Player). A joined entry has `[data-test="rejoin"]`, `[data-test="open-sheet"]`
- * and `[data-test="remove-joined"]` buttons.
+ * `[data-test="world-badge"]` (GM or Player). A joined entry has `[data-test="open-sheet"]` and
+ * `[data-test="remove-joined"]` buttons (no rejoin: an invite works once), and the list has a `[data-test="rejoin-hint"]`.
  */
 describe('PlayPageComponent worlds list', () => {
   const navigate = vi.fn(async () => true);
@@ -32,7 +28,6 @@ describe('PlayPageComponent worlds list', () => {
           roomId: 'r9',
           name: 'Harbour',
           hostName: 'Gm Anna',
-          invite: `https://app.example/join#${offerCode}`,
           lastSeenAt: 1000,
         },
       ]),
@@ -76,10 +71,10 @@ describe('PlayPageComponent worlds list', () => {
     expect(entry(fixture, 'Harbour').textContent).toContain('Gm Anna');
   });
 
-  it('rejoins a joined world with its saved invite', async () => {
+  it('offers no rejoin on a joined world: an invite works once, so it says to ask the GM for a new one', async () => {
     const fixture = await render();
-    (entry(fixture, 'Harbour').querySelector('[data-test="rejoin"]') as HTMLElement).click();
-    expect(navigate).toHaveBeenCalledWith(['/join'], { fragment: offerCode });
+    expect(entry(fixture, 'Harbour').querySelector('[data-test="rejoin"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="rejoin-hint"]')).not.toBeNull();
   });
 
   it('opens the character read-only from the local copy', async () => {
@@ -88,7 +83,7 @@ describe('PlayPageComponent worlds list', () => {
     expect(navigate).toHaveBeenCalledWith(['/play/joined', 'w9']);
   });
 
-  it('offers neither rejoin nor remove on the own world', async () => {
+  it('offers no remove on the own world', async () => {
     const fixture = await render();
     const own = entry(fixture, 'My Realm');
     expect(own.querySelector('[data-test="rejoin"]')).toBeNull();

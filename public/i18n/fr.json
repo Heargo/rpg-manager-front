@@ -83,7 +83,7 @@
       "title": "Mondes rejoints",
       "hostedBy": "Hôte : {{ name }}",
       "lastSeen": "vu pour la dernière fois {{ date }}",
-      "rejoin": "Rejoindre",
+      "rejoinHint": "Une invitation ne sert qu'une fois : pour revenir dans un monde, demandez-en une nouvelle au MJ.",
       "openSheet": "Ouvrir le personnage",
       "remove": "Retirer de la liste",
       "readOnly": "Ceci est votre copie enregistrée du personnage dans « {{ name }} ». Elle est en lecture seule jusqu'à ce que vous rejoigniez."

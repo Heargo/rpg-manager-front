@@ -89,7 +89,6 @@ export class RoomBusiness {
   private readonly invites = signal<PendingInvite[]>([]);
   private readonly me = signal<RoomMember | null>(null);
   private readonly restored = signal(false);
-  private readonly joinedInvite = signal<string | undefined>(undefined);
   private readonly ready: Promise<void>;
   private readonly mode = signal<JoinMode>('manual');
   /** Seq of the offer each pending invite holds in its box. */
@@ -115,8 +114,6 @@ export class RoomBusiness {
   readonly $isHost = computed(() => this.service.$role() === 'host');
   /** True after the room was reopened from storage: players have to be re-invited. */
   readonly $restored = this.restored.asReadonly();
-  /** The invite link (what follows `#`) the player last joined with, kept to rejoin the same room later. */
-  readonly $joinedInvite = this.joinedInvite.asReadonly();
   readonly $status = computed<RoomStatus>(() => {
     const role = this.service.$role();
     if (role === 'host') return 'hosting';
@@ -329,7 +326,6 @@ export class RoomBusiness {
       answeredSeq: 0,
     };
     this.attempt = attempt;
-    this.joinedInvite.set(buildInviteFragment(offerCode, boxId));
     this.mode.set(boxId ? 'mailbox' : 'manual');
     try {
       let offer = offerCode;

@@ -112,6 +112,9 @@
   <section>
     <h2>{{ "play.joined.title" | transloco }}</h2>
     @if (play.$joinedWorlds().length) {
+      <p class="hint" data-test="rejoin-hint">
+        {{ "play.joined.rejoinHint" | transloco }}
+      </p>
       <div class="grid">
         @for (world of play.$joinedWorlds(); track world.worldId) {
           <app-world-card
@@ -150,14 +153,6 @@
                 severity="secondary"
                 [label]="'play.joined.openSheet' | transloco"
                 (click)="openSheet(world.worldId)"
-              ></button>
-              <button
-                pButton
-                type="button"
-                data-test="rejoin"
-                icon="pi pi-sign-in"
-                [label]="'play.joined.rejoin' | transloco"
-                (click)="rejoin(world.invite)"
               ></button>
             </ng-container>
           </app-world-card>

@@ -118,13 +118,6 @@ export class PlayPageComponent implements OnInit {
     });
   }
 
-  /** Rejoins with the invite saved when the world was joined. */
-  protected async rejoin(invite: string): Promise<void> {
-    const hash = invite.indexOf('#');
-    const fragment = (hash >= 0 ? invite.slice(hash + 1) : invite).replace(/\s+/g, '');
-    if (fragment) await this.router.navigate(['/join'], { fragment });
-  }
-
   protected async openSheet(worldId: string): Promise<void> {
     await this.router.navigate(['/play/joined', worldId]);
   }
