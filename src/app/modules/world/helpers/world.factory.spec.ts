@@ -111,6 +111,17 @@ function worldWithImages(): World {
   };
 }
 
+describe('createWorld packs', () => {
+  it('keeps the active packs of the draft', () => {
+    const world = createWorld({ name: 'W', attributes: [], packs: ['base-fr', 'extra'] }, ids(), 0);
+    expect(world.packs).toEqual(['base-fr', 'extra']);
+  });
+
+  it('starts with no active pack when the draft names none', () => {
+    expect(createWorld({ name: 'W', attributes: [] }, ids(), 0).packs).toEqual([]);
+  });
+});
+
 describe('world images', () => {
   it('lists every image once', () => {
     expect(worldImageIds(worldWithImages()).sort()).toEqual(

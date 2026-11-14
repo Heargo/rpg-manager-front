@@ -1,0 +1,24 @@
+---
+title: Documentation
+description: La documentation de RPG Manager, l'aide de table pour vos jeux de rôle.
+template: splash
+hero:
+  tagline: L'aide de table pour vos parties de jeu de rôle, sans compte ni serveur de jeu.
+  image:
+    file: ../../assets/logo.svg
+  actions:
+    - text: Bien démarrer
+      link: /docs/getting-started/
+      icon: right-arrow
+    - text: Ouvrir l'application
+      link: /
+      icon: external
+      variant: minimal
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <LinkCard title="Préparer" href="/docs/worlds/" description="Mondes, objets, PNJ, classes et compétences." />
+  <LinkCard title="Jouer" href="/docs/rooms/" description="Héberger, la table, les personnages, le combat et les dés." />
+</CardGrid>

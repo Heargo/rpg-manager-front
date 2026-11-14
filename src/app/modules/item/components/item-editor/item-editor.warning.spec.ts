@@ -1,9 +1,9 @@
 import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
 import { TranslocoService } from '@jsverse/transloco';
-import en from '../../../../../../public/i18n/generators/en/items.json';
+import en from '../../../../../../public/packs/base-en/generators/items.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
-import { WordListService } from '../../../../core/services/word-list.service';
+import { PackBusiness } from '../../../../core/business/pack.business';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
 import { ItemEditorComponent } from './item-editor.component';
 
@@ -12,7 +12,7 @@ describe('ItemEditorComponent image warning', () => {
   it('shows the human-artists warning in English and French', async () => {
     TestBed.configureTestingModule({
       imports: [ItemEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: WordListService, useValue: { loadItemWords: async () => en } }],
+      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } }],
     });
     const fixture = TestBed.createComponent(ItemEditorComponent);
     fixture.componentRef.setInput('world', createSandboxWorld((key) => key));

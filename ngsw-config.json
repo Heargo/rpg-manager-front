@@ -13,7 +13,12 @@
           "/manifest.webmanifest",
           "/*.css",
           "/*.js",
-          "/i18n/**"
+          "/i18n/**",
+          "/packs/index.json",
+          "/packs/base-fr/pack.json",
+          "/packs/base-en/pack.json",
+          "/packs/base-fr/generators/**",
+          "/packs/base-en/generators/**"
         ]
       }
     },
@@ -23,9 +28,19 @@
       "updateMode": "prefetch",
       "resources": {
         "files": [
-          "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
+          "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)",
+          "/packs/base-fr/sprites/**",
+          "/packs/base-en/sprites/**"
         ]
       }
     }
+  ],
+  "navigationUrls": [
+    "/**",
+    "!/**/*.*",
+    "!/**/*__*",
+    "!/**/*__*/**",
+    "!/docs",
+    "!/docs/**"
   ]
 }

@@ -6,6 +6,7 @@ import { resolveSkillUse, rollOf } from '../../skill/helpers/skill-roll.rules';
 import { evaluateSkillAmount } from '../../skill/helpers/skill.rules';
 import { Skill } from '../../skill/models/skill';
 import { Npc } from '../../npc/models/npc';
+import { GridSize, placeUnplaced } from './combat-grid.rules';
 import {
   Character,
   CombatRules,
@@ -29,7 +30,8 @@ export type CombatError =
   | 'caster-not-found'
   | 'skill-not-known'
   | 'skill-not-active'
-  | 'target-not-found';
+  | 'target-not-found'
+  | 'badPositions';
 
 export type CombatResult<T> =
   { ok: true; encounter: T } | { ok: false; error: CombatError };
@@ -37,6 +39,8 @@ export type CombatResult<T> =
 export interface EncounterPicks {
   characterIds: string[];
   npcs: { npcId: string; count: number; side: Exclude<CombatSide, 'party'> }[];
+  /** Cells by slot key (`character:<id>`, `npc:<id>:<n>`); used with the grid on. */
+  positions?: Record<string, { x: number; y: number }>;
 }
 
 /** The dice of a roll; a one-sided die is not random, so it is just its only face. */
@@ -114,7 +118,9 @@ function combatantFrom(
     })),
     skills: sheet.skills.map((s) => ({ ...s })),
     cooldowns: {},
-    actions: world.combat.actionTypes.map((a) => ({ ...a, used: 0 })),
+    actions: world.combat.steps.actionCounters
+      ? world.combat.actionTypes.map((a) => ({ ...a, used: 0 }))
+      : [],
     effects: [],
     statuses: [],
     down: false,
@@ -153,6 +159,26 @@ export function startEncounter(
       same(a.name, world.combat.lifeAttribute),
   );
   if (!life) return { ok: false, error: 'life-attribute-required' };
+  const grid = world.combat.grid;
+  const positions = grid.enabled ? (picks.positions ?? {}) : {};
+  const given = Object.values(positions);
+  if (
+    given.some(
+      (c) =>
+        !Number.isInteger(c.x) ||
+        !Number.isInteger(c.y) ||
+        c.x < 0 ||
+        c.y < 0 ||
+        c.x >= grid.columns ||
+        c.y >= grid.rows,
+    ) ||
+    new Set(given.map((c) => `${c.x},${c.y}`)).size !== given.length
+  )
+    return { ok: false, error: 'badPositions' };
+  const at = (key: string) => {
+    const cell = positions[key];
+    return cell ? { position: { x: cell.x, y: cell.y } } : {};
+  };
   const combatants: Combatant[] = [];
   for (const id of picks.characterIds) {
     const character = world.characters.find((c) => c.id === id);
@@ -170,6 +196,7 @@ export function startEncounter(
         character.classBonuses,
       ),
     );
+    Object.assign(combatants[combatants.length - 1], at(`character:${id}`));
   }
   for (const pick of picks.npcs) {
     const npc = world.npcs.find((n) => n.id === pick.npcId);
@@ -185,6 +212,10 @@ export function startEncounter(
           { id: newId(), name, side: pick.side, npcId: npc.id },
           undefined,
         ),
+      );
+      Object.assign(
+        combatants[combatants.length - 1],
+        at(`npc:${npc.id}:${i}`),
       );
     }
   }
@@ -488,6 +519,7 @@ export function useSkill(
   skills: Skill[],
   rollsEnabled: boolean,
   random: RandomSource,
+  rules?: CombatRules,
 ): CombatResult<Encounter> {
   const caster = enc.combatants.find((c) => c.id === use.casterId);
   if (!caster) return { ok: false, error: 'caster-not-found' };
@@ -545,35 +577,46 @@ export function useSkill(
         }
       : withCost;
   };
+  const used = commit(enc, {
+    ...tickedAction(
+      {
+        ...enc,
+        combatants: enc.combatants.map((c) =>
+          c.id === caster.id ? paid(c) : c,
+        ),
+      },
+      caster.id,
+      skill.actionType,
+    ),
+    seq,
+    pending: [...enc.pending, ...pending],
+    log: [
+      ...enc.log,
+      {
+        kind: 'skill',
+        round: enc.round,
+        casterId: caster.id,
+        skillId: skill.id,
+        skillName: skill.name,
+        rolls,
+        total: pending[0]?.total ?? 0,
+        success: pending.every((p) => p.success),
+      },
+    ],
+  });
+  if (!rules || rules.steps.gmValidation) return { ok: true, encounter: used };
+  // No GM validation: each result lands at once, as if the GM applied the rolled amounts.
+  const ids = pending.map((p) => p.id);
+  const applied = ids.reduce(
+    (current, id) => applyPending(current, id, { defence: true, rules }),
+    used,
+  );
   return {
     ok: true,
-    encounter: commit(enc, {
-      ...tickedAction(
-        {
-          ...enc,
-          combatants: enc.combatants.map((c) =>
-            c.id === caster.id ? paid(c) : c,
-          ),
-        },
-        caster.id,
-        skill.actionType,
-      ),
-      seq,
-      pending: [...enc.pending, ...pending],
-      log: [
-        ...enc.log,
-        {
-          kind: 'skill',
-          round: enc.round,
-          casterId: caster.id,
-          skillId: skill.id,
-          skillName: skill.name,
-          rolls,
-          total: pending[0]?.total ?? 0,
-          success: pending.every((p) => p.success),
-        },
-      ],
-    }),
+    encounter: {
+      ...withoutUndo(applied),
+      ...(used.previous ? { previous: used.previous } : {}),
+    },
   };
 }
 
@@ -583,7 +626,7 @@ const defenceOf = (
   target: Combatant | undefined,
   rules: CombatRules,
 ): number => {
-  if (!target || !rules.defence) return 0;
+  if (!target || !rules.defence || !rules.steps.defence) return 0;
   const result = evaluateFormula(
     { preset: 'custom', expression: rules.defence },
     {
@@ -784,6 +827,14 @@ export function proposeRewards(enc: Encounter): RewardProposal {
   };
 }
 
+/** The rewards of a finished combat, none when the rewards step is off. */
+export function combatRewards(
+  enc: Encounter,
+  rules: CombatRules,
+): RewardProposal | null {
+  return rules.steps.rewards ? proposeRewards(enc) : null;
+}
+
 // --- host-side helpers ------------------------------------------------------
 
 /** Puts a token on a grid cell (not an undo step). Without a grid there is no position. */
@@ -800,6 +851,22 @@ export function moveCombatant(
   };
 }
 
+/** A player's move: the token goes to the cell and the movement counter ticks, as one undo step. The placed tokens keep their cells. */
+export function moveCounted(
+  enc: Encounter,
+  id: string,
+  position: { x: number; y: number },
+  grid: GridSize,
+  action?: string,
+): Encounter {
+  const placed = {
+    ...enc,
+    combatants: placeUnplaced(enc.combatants, grid),
+  };
+  const moved = moveCombatant(placed, id, position);
+  return commit(enc, action ? tickedAction(moved, id, action) : moved);
+}
+
 /** Sets the current value of the given attributes on a combatant (an undo step), e.g. after the character's record changed. */
 export function setCombatantCurrents(
   enc: Encounter,
@@ -813,6 +880,11 @@ export function setCombatantCurrents(
       c,
     ),
   );
+}
+
+/** The roll of a combat action the GM closed for everyone: not an undo step. */
+export function closeRoll(enc: Encounter, rollId: string): Encounter {
+  return { ...enc, closedRollId: rollId };
 }
 
 /** The encounter without its undo step (a fresh start). */

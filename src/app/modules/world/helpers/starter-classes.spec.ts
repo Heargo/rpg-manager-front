@@ -4,7 +4,7 @@ import { buildStarterClasses } from './starter-classes';
 
 const attributes = ['Life', 'Mana', 'Strength', 'Agility', 'Intelligence'].map((name) => ({ id: name, name }));
 
-const world = (actionTypes: { name: string; count: number }[]) =>
+const world = (actionTypes: { name: string; count: number; movement: boolean }[]) =>
   ({
     attributes,
     barAttributes: { life: 'Life', mana: 'Mana' },
@@ -18,7 +18,7 @@ const build = (w: World) => buildStarterClasses(w, 'en', (() => {
 
 describe('starter skills and action types', () => {
   it('names an action type of the world on every active skill, and none on a passive one', () => {
-    const { skills } = build(world([{ name: 'Attaque', count: 1 }, { name: 'Déplacement', count: 1 }]));
+    const { skills } = build(world([{ name: 'Attaque', count: 1, movement: false }, { name: 'Déplacement', count: 1, movement: true }]));
 
     const active = skills.filter((s) => s.type === 'active');
     expect(active.length).toBeGreaterThan(0);
@@ -27,7 +27,7 @@ describe('starter skills and action types', () => {
   });
 
   it('puts the damaging attacks on the first action type', () => {
-    const { skills } = build(world([{ name: 'Attaque', count: 1 }, { name: 'Déplacement', count: 1 }]));
+    const { skills } = build(world([{ name: 'Attaque', count: 1, movement: false }, { name: 'Déplacement', count: 1, movement: true }]));
 
     for (const name of ['Power Strike', 'Fireball', 'Quick Stab'])
       expect(skills.find((s) => s.name === name)?.actionType, name).toBe('Attaque');
@@ -38,5 +38,18 @@ describe('starter skills and action types', () => {
 
     expect(skills.find((s) => s.name === 'Shadow Step')?.actionType).toBe('Movement');
     expect(skills.find((s) => s.name === 'Power Strike')?.actionType).toBe('Action');
+  });
+
+  it('puts the movement skill on the first type flagged movement, whatever its name', () => {
+    const { skills } = build(
+      world([
+        { name: 'Strike', count: 1, movement: false },
+        { name: 'Sprint', count: 1, movement: true },
+        { name: 'Glide', count: 1, movement: true },
+      ]),
+    );
+
+    expect(skills.find((s) => s.name === 'Shadow Step')?.actionType).toBe('Sprint');
+    expect(skills.find((s) => s.name === 'Power Strike')?.actionType).toBe('Strike');
   });
 });

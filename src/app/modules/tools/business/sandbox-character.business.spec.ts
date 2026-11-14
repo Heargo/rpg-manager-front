@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { WordListService } from '../../../core/services/word-list.service';
+import { PackBusiness } from '../../../core/business/pack.business';
 import { provideTestTranslations } from '../../../../testing/test-providers';
-import en from '../../../../../public/i18n/generators/en/items.json';
+import en from '../../../../../public/packs/base-en/generators/items.json';
 import { SandboxCharacterBusiness } from './sandbox-character.business';
 
 async function settle(): Promise<void> {
@@ -19,8 +19,8 @@ describe('SandboxCharacterBusiness', () => {
       providers: [
         provideTestTranslations(),
         {
-          provide: WordListService,
-          useValue: { loadItemWords: async () => en },
+          provide: PackBusiness,
+          useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] },
         },
       ],
     });

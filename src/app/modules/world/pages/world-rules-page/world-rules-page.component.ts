@@ -94,6 +94,7 @@ export class WorldRulesPageComponent {
       startingSkillPoints: world?.startingSkillPoints,
       skillPointsPerLevel: world?.skillPointsPerLevel,
       offlineFeatures: world?.offlineFeatures,
+      packs: world?.packs,
       skillRollsEnabled: world?.skillRollsEnabled,
       sellAnywhere: world?.sellAnywhere,
       sellAnywhereRatio: world?.sellAnywhereRatio,
@@ -156,6 +157,7 @@ export class WorldRulesPageComponent {
       startingSkillPoints: fields.startingSkillPoints ?? 0,
       skillPointsPerLevel: fields.skillPointsPerLevel ?? 0,
       offlineFeatures: { ...world!.offlineFeatures, ...fields.offlineFeatures },
+      packs: fields.packs ?? world!.packs,
       skillRollsEnabled:
         fields.skillRollsEnabled ?? world!.skillRollsEnabled ?? true,
       sellAnywhere: fields.sellAnywhere ?? world!.sellAnywhere ?? true,

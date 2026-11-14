@@ -1,9 +1,9 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../public/i18n/generators/en/items.json';
+import en from '../../../../../public/packs/base-en/generators/items.json';
 import { provideTestTranslations } from '../../../../testing/test-providers';
-import { WordListService } from '../../../core/services/word-list.service';
+import { PackBusiness } from '../../../core/business/pack.business';
 import { SandboxCatalogueBusiness } from '../../tools/business/sandbox-catalogue.business';
 import { WorldLibraryBusiness } from '../../world/business/world-library.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
@@ -32,7 +32,7 @@ describe('saving an item from the editor', () => {
     TestBed.configureTestingModule({
       providers: [
         provideTestTranslations(),
-        { provide: WordListService, useValue: { loadItemWords: async () => en } },
+        { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } },
       ],
     });
   });

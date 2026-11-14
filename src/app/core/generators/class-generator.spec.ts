@@ -1,5 +1,5 @@
-import en from '../../../../public/i18n/generators/en/classes.json';
-import fr from '../../../../public/i18n/generators/fr/classes.json';
+import en from '../../../../public/packs/base-en/generators/classes.json';
+import fr from '../../../../public/packs/base-fr/generators/classes.json';
 import { validateClass } from '../../modules/class/helpers/class.rules';
 import { Skill } from '../../modules/skill/models/skill';
 import { ClassWordList, generateClass } from './class-generator';
@@ -17,7 +17,7 @@ const skills: Skill[] = ['a', 'b', 'c', 'd', 'e', 'f'].map((id, index) => ({
   effects: [{ kind: 'modify', attribute: 'Life', amount: 'skillLevel', duration: 0 }],
 }));
 
-/** `generateClass(source, attributes, skills, words)`: words come from `public/i18n/generators/<lang>/classes.json`. */
+/** `generateClass(source, attributes, skills, words)`: words come from `public/packs/base-<lang>/generators/classes.json`. */
 describe('generateClass', () => {
   it('gives the same class for the same seed', () => {
     const draw = () => generateClass(seededRandomSource('reroll-7'), attributes, skills, en as ClassWordList);

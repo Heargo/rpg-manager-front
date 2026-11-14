@@ -21,6 +21,8 @@ import {
 } from '../../world/models/world';
 import en from '../../../../../public/i18n/en.json';
 import fr from '../../../../../public/i18n/fr.json';
+import { DiceRollBusiness } from '../../dice/business/dice-roll.business';
+import { CombatRollsBusiness } from './combat-rolls.business';
 import { CombatBusiness } from './combat.business';
 
 /**
@@ -74,10 +76,17 @@ const ring: InventoryItem = {
 
 const rules = (mode: InitiativeMode): CombatRules => ({
   lifeAttribute: 'Life',
+  steps: {
+    initiative: true,
+    actionCounters: true,
+    gmValidation: true,
+    defence: true,
+    rewards: true,
+  },
   initiative: { mode, dice: { count: 1, faces: 1 }, formula: 'level' },
   actionTypes: [
-    { name: 'Action', count: 1 },
-    { name: 'Movement', count: 1 },
+    { name: 'Action', count: 1, movement: false },
+    { name: 'Movement', count: 1, movement: true },
   ],
   grid: { enabled: true, columns: 10, rows: 10 },
   movement: '6',
@@ -126,7 +135,7 @@ describe('combat (GM + players)', () => {
     await settle();
   }
 
-  async function setup(mode: InitiativeMode) {
+  async function setup(mode: InitiativeMode, extra: Partial<CombatRules> = {}) {
     globalThis.indexedDB = new IDBFactory();
     TestBed.configureTestingModule({ providers: [provideTestTranslations()] });
     net = createPeerNetwork();
@@ -142,7 +151,7 @@ describe('combat (GM + players)', () => {
       ],
       barAttributes: { life: 'Life', mana: 'Mana' },
       startingMoney: 0,
-      combat: rules(mode),
+      combat: { ...rules(mode), ...extra },
     });
     await gm.injector.get(RoomBusiness).hostRoom('Eldoria', world.id);
     await settle();
@@ -311,6 +320,93 @@ describe('combat (GM + players)', () => {
       ).toBe(1);
     });
 
+    describe('actions only on the own turn', () => {
+      const notYourTurn = {
+        code: 'rejected',
+        message: 'combat.errors.notYourTurn',
+      };
+
+      it('rejects a player skill off turn and changes nothing', async () => {
+        await startAll();
+        await combat(gm).endTurn();
+        await settle();
+
+        await expect(
+          combat(ada).useSkill({
+            casterId: adaId(),
+            skillId: fireballId,
+            targetIds: [goblinId()],
+          }),
+        ).rejects.toMatchObject(notYourTurn);
+        expect(state(gm).pending).toEqual([]);
+        expect(current('ada', 'Mana')).toBe(10);
+      });
+
+      it('rejects a player item off turn and changes nothing', async () => {
+        await startAll();
+        await combat(gm).endTurn();
+        await settle();
+
+        await expect(
+          combat(ada).useItem(adaId(), 'inv-potion'),
+        ).rejects.toMatchObject(notYourTurn);
+        expect(record('ada').inventory).toHaveLength(1);
+      });
+
+      it('rejects a player counter tick off turn and changes nothing', async () => {
+        await startAll();
+        await combat(gm).endTurn();
+        await settle();
+
+        await expect(
+          combat(ada).tickAction(adaId(), 'Action', 1),
+        ).rejects.toMatchObject(notYourTurn);
+        expect(
+          named(gm, 'Ada').actions.find((a) => a.name === 'Action')?.used,
+        ).toBe(0);
+      });
+
+      it('lets the player act on their own turn', async () => {
+        await startAll();
+
+        await combat(ada).tickAction(adaId(), 'Action', 1);
+        await combat(ada).useItem(adaId(), 'inv-potion');
+        await combat(ada).useSkill({
+          casterId: adaId(),
+          skillId: fireballId,
+          targetIds: [goblinId()],
+        });
+        await settle();
+
+        expect(state(gm).pending).toHaveLength(1);
+        expect(record('ada').inventory).toEqual([]);
+      });
+
+      it('lets the GM act for any combatant off turn', async () => {
+        await startAll();
+
+        await combat(gm).tickAction(bobId(), 'Action', 1);
+        await combat(gm).tickAction(goblinId(), 'Movement', 1);
+        await settle();
+
+        expect(
+          named(ada, 'Bob').actions.find((a) => a.name === 'Action')?.used,
+        ).toBe(1);
+        expect(
+          named(ada, 'Goblin').actions.find((a) => a.name === 'Movement')?.used,
+        ).toBe(1);
+      });
+
+      it('has the notYourTurn key in English and French', () => {
+        const lookup = (json: unknown) =>
+          (json as Record<string, Record<string, Record<string, unknown>>>)[
+            'combat'
+          ]['errors']['notYourTurn'];
+        expect(typeof lookup(en)).toBe('string');
+        expect(typeof lookup(fr)).toBe('string');
+      });
+    });
+
     it('moves a token: the player their own, the GM any', async () => {
       await startAll();
 
@@ -323,6 +419,120 @@ describe('combat (GM + players)', () => {
 
       expect(named(bob, 'Ada').position).toEqual({ x: 3, y: 4 });
       expect(named(bob, 'Goblin').position).toEqual({ x: 8, y: 8 });
+    });
+
+    describe('grid moves', () => {
+      const used = (d: Device, name: string, action: string) =>
+        named(d, name).actions.find((a) => a.name === action)?.used;
+      const rejected = (key: string) => ({
+        code: 'rejected',
+        message: `combat.errors.${key}`,
+      });
+
+      it('rejects a player move off turn and changes nothing', async () => {
+        await startAll();
+        await combat(gm).endTurn();
+        await settle();
+
+        await expect(
+          combat(ada).move(adaId(), { x: 1, y: 1 }),
+        ).rejects.toMatchObject(rejected('notYourTurn'));
+        expect(named(gm, 'Ada').position).toEqual({ x: 0, y: 0 });
+        expect(used(gm, 'Ada', 'Movement')).toBe(0);
+      });
+
+      it('moves a player on their turn to a reachable cell and ticks Movement', async () => {
+        await startAll();
+
+        await combat(ada).move(adaId(), { x: 3, y: 4 });
+        await settle();
+
+        expect(named(bob, 'Ada').position).toEqual({ x: 3, y: 4 });
+        expect(used(bob, 'Ada', 'Movement')).toBe(1);
+        expect(used(bob, 'Ada', 'Action')).toBe(0);
+      });
+
+      it('rejects a second move once Movement is at 0', async () => {
+        await startAll();
+        await combat(ada).move(adaId(), { x: 3, y: 4 });
+        await settle();
+
+        await expect(
+          combat(ada).move(adaId(), { x: 4, y: 4 }),
+        ).rejects.toMatchObject(rejected('noMovementLeft'));
+        expect(named(gm, 'Ada').position).toEqual({ x: 3, y: 4 });
+        expect(used(gm, 'Ada', 'Movement')).toBe(1);
+      });
+
+      it('rejects a cell beyond the movement allowance and a cell held by another token', async () => {
+        await startAll();
+
+        await expect(
+          combat(ada).move(adaId(), { x: 7, y: 0 }),
+        ).rejects.toMatchObject(rejected('outOfReach'));
+        await expect(
+          combat(ada).move(adaId(), { x: 0, y: 1 }),
+        ).rejects.toMatchObject(rejected('outOfReach'));
+        expect(named(gm, 'Ada').position).toEqual({ x: 0, y: 0 });
+        expect(used(gm, 'Ada', 'Movement')).toBe(0);
+      });
+
+      it('counts the reach from the current position, not from where the turn began', async () => {
+        await startAll();
+        await combat(ada).move(adaId(), { x: 6, y: 6 });
+        await combat(gm).tickAction(adaId(), 'Movement', 0);
+        await settle();
+
+        await combat(ada).move(adaId(), { x: 9, y: 9 });
+        await settle();
+
+        expect(named(gm, 'Ada').position).toEqual({ x: 9, y: 9 });
+        expect(used(gm, 'Ada', 'Movement')).toBe(1);
+      });
+
+      it('lets the GM move any token anywhere, off turn, without ticking', async () => {
+        await startAll();
+
+        await combat(gm).move(bobId(), { x: 5, y: 5 });
+        await combat(gm).move(goblinId(), { x: 0, y: 9 });
+        await combat(gm).move(adaId(), { x: 9, y: 9 });
+        await settle();
+
+        expect(named(ada, 'Bob').position).toEqual({ x: 5, y: 5 });
+        expect(named(ada, 'Goblin').position).toEqual({ x: 0, y: 9 });
+        expect(named(ada, 'Ada').position).toEqual({ x: 9, y: 9 });
+        for (const name of ['Ada', 'Bob', 'Goblin'])
+          expect(named(ada, name).actions).toEqual([
+            { name: 'Action', count: 1, used: 0, movement: false },
+            { name: 'Movement', count: 1, used: 0, movement: true },
+          ]);
+        await expect(
+          combat(gm).move(goblinId(), { x: 10, y: 0 }),
+        ).rejects.toMatchObject({ code: 'invalid' });
+      });
+
+      it('undoes the position and the counter together, in one step', async () => {
+        await startAll();
+        await combat(ada).move(adaId(), { x: 3, y: 4 });
+        await settle();
+
+        await combat(gm).undo();
+        await settle();
+
+        expect(named(bob, 'Ada').position).toEqual({ x: 0, y: 0 });
+        expect(used(bob, 'Ada', 'Movement')).toBe(0);
+      });
+
+      it('has the outOfReach and noMovementLeft keys in English and French', () => {
+        const lookup = (json: unknown, key: string) =>
+          (json as Record<string, Record<string, Record<string, unknown>>>)[
+            'combat'
+          ]['errors'][key];
+        for (const key of ['outOfReach', 'noMovementLeft']) {
+          expect(typeof lookup(en, key)).toBe('string');
+          expect(typeof lookup(fr, key)).toBe('string');
+        }
+      });
     });
 
     it('ends turns: the active player or the GM, the round goes up when the order wraps', async () => {
@@ -346,6 +556,66 @@ describe('combat (GM + players)', () => {
       await settle();
       expect(state(bob).round).toBe(2);
       expect(state(bob).activeId).toBe(adaId());
+    });
+
+    describe('placing the tokens at the start', () => {
+      const rejected = {
+        code: 'rejected',
+        message: 'combat.errors.badPositions',
+      };
+      const startWith = (positions: Record<string, { x: number; y: number }>) =>
+        combat(gm).start({
+          characterIds: [record('ada').id, record('bob').id],
+          npcs: [{ npcId: goblinNpc.id, count: 2, side: 'enemy' }],
+          positions,
+        });
+
+      it('puts the tokens where the GM placed them, on every device', async () => {
+        await startWith({
+          [`character:${record('ada').id}`]: { x: 4, y: 5 },
+          [`character:${record('bob').id}`]: { x: 2, y: 2 },
+          [`npc:${goblinNpc.id}:1`]: { x: 7, y: 7 },
+          [`npc:${goblinNpc.id}:2`]: { x: 8, y: 1 },
+        });
+        await settle();
+
+        for (const d of [gm, ada, bob]) {
+          expect(named(d, 'Ada').position).toEqual({ x: 4, y: 5 });
+          expect(named(d, 'Bob').position).toEqual({ x: 2, y: 2 });
+          expect(named(d, 'Goblin 1').position).toEqual({ x: 7, y: 7 });
+          expect(named(d, 'Goblin 2').position).toEqual({ x: 8, y: 1 });
+        }
+      });
+
+      it('rejects a cell out of bounds and starts nothing', async () => {
+        await expect(
+          startWith({ [`character:${record('ada').id}`]: { x: 10, y: 0 } }),
+        ).rejects.toMatchObject(rejected);
+        expect(combat(gm).$state()).toBeNull();
+      });
+
+      it('rejects two slots on one cell and starts nothing', async () => {
+        await expect(
+          startWith({
+            [`character:${record('ada').id}`]: { x: 3, y: 3 },
+            [`npc:${goblinNpc.id}:1`]: { x: 3, y: 3 },
+          }),
+        ).rejects.toMatchObject(rejected);
+        expect(combat(gm).$state()).toBeNull();
+      });
+
+      it('has the placement error and hint in English and French', () => {
+        for (const json of [en, fr]) {
+          const combatKeys = (
+            json as unknown as Record<
+              string,
+              Record<string, Record<string, unknown>>
+            >
+          )['combat'];
+          expect(typeof combatKeys['errors']['badPositions']).toBe('string');
+          expect(typeof combatKeys['start']['placeHint']).toBe('string');
+        }
+      });
     });
 
     describe('using a skill', () => {
@@ -651,7 +921,11 @@ describe('combat (GM + players)', () => {
           (json as Record<string, Record<string, Record<string, unknown>>>)[
             'combat'
           ]['errors'][key];
-        for (const key of ['notConsumable', 'unknownItem', 'initiativeNotTyped']) {
+        for (const key of [
+          'notConsumable',
+          'unknownItem',
+          'initiativeNotTyped',
+        ]) {
           expect(typeof lookup(en, key), `en ${key}`).toBe('string');
           expect(typeof lookup(fr, key), `fr ${key}`).toBe('string');
         }
@@ -740,12 +1014,12 @@ describe('combat (GM + players)', () => {
         code: 'rejected',
         message: 'combat.errors.initiativeNotTyped',
       });
-      await expect(
-        combat(gm).initiative(goblinId(), 20),
-      ).rejects.toMatchObject({
-        code: 'rejected',
-        message: 'combat.errors.initiativeNotTyped',
-      });
+      await expect(combat(gm).initiative(goblinId(), 20)).rejects.toMatchObject(
+        {
+          code: 'rejected',
+          message: 'combat.errors.initiativeNotTyped',
+        },
+      );
       expect(named(gm, 'Goblin').initiative).toBe(6);
     });
   });
@@ -771,6 +1045,377 @@ describe('combat (GM + players)', () => {
         'Bob',
       ]);
       expect(named(bob, 'Ada').initiative).toBe(15);
+    });
+  });
+
+  describe('placing the tokens with the grid off', () => {
+    it('ignores the positions', async () => {
+      await setup('free', { grid: { enabled: false, columns: 10, rows: 10 } });
+      await combat(gm).start({
+        characterIds: [record('ada').id],
+        npcs: [],
+        positions: { [`character:${record('ada').id}`]: { x: 99, y: 99 } },
+      });
+      await settle();
+      expect(named(gm, 'Ada').position).toBeUndefined();
+    });
+  });
+
+  describe('optional steps', () => {
+    const all = {
+      initiative: true,
+      actionCounters: true,
+      gmValidation: true,
+      defence: true,
+      rewards: true,
+    };
+    const without = (step: keyof typeof all) => ({ ...all, [step]: false });
+    const fireballAtGoblin = async () => {
+      await combat(ada).useSkill({
+        casterId: adaId(),
+        skillId: fireballId,
+        targetIds: [goblinId()],
+      });
+      await settle();
+    };
+
+    it('starts without a roll when the initiative step is off, and refuses a typed initiative', async () => {
+      await setup('rolled', { steps: without('initiative') });
+      await startAll();
+
+      expect(named(gm, 'Goblin').initiative).toBeUndefined();
+      expect(state(ada).combatants.map((c) => c.name)).toEqual([
+        'Ada',
+        'Bob',
+        'Goblin',
+      ]);
+      await expect(combat(ada).initiative(adaId(), 15)).rejects.toMatchObject({
+        code: 'rejected',
+        message: 'combat.errors.initiativeNotTyped',
+      });
+      await expect(combat(gm).initiative(goblinId(), 20)).rejects.toMatchObject(
+        {
+          code: 'rejected',
+          message: 'combat.errors.initiativeNotTyped',
+        },
+      );
+    });
+
+    it('shows the free order mode to every device when the initiative step is off', async () => {
+      await setup('typed', { steps: without('initiative') });
+      await startAll();
+
+      for (const device of [gm, ada, bob])
+        expect(combat(device).$initiativeMode()).toBe('free');
+    });
+
+    it('gives combatants no action counters when that step is off', async () => {
+      await setup('free', { steps: without('actionCounters') });
+      await startAll();
+
+      for (const device of [gm, ada, bob])
+        expect(state(device).combatants.map((c) => c.actions)).toEqual([
+          [],
+          [],
+          [],
+        ]);
+    });
+
+    it('applies a skill at once when GM validation is off: no pending result, the target loses life, the cost is taken', async () => {
+      await setup('free', { steps: without('gmValidation') });
+      await startAll();
+
+      await fireballAtGoblin();
+
+      for (const device of [gm, ada, bob])
+        expect(state(device).pending).toHaveLength(0);
+      expect(named(gm, 'Goblin').life?.current).toBe(5);
+      // Players only see an enemy's life bar (world visibility rules).
+      for (const device of [ada, bob])
+        expect(named(device, 'Goblin').lifeBar).toEqual({ percent: 50 });
+      expect(current('ada', 'Mana')).toBe(7);
+    });
+
+    it('takes the defence off an immediate hit while the defence step is on', async () => {
+      await setup('free', { steps: without('gmValidation'), defence: '2' });
+      await startAll();
+
+      await fireballAtGoblin();
+
+      expect(named(gm, 'Goblin').life?.current).toBe(7);
+    });
+
+    it('offers no defence when that step is off: the host ignores defence: true', async () => {
+      await setup('free', { steps: without('defence'), defence: '2' });
+      await startAll();
+      await fireballAtGoblin();
+      expect(state(gm).pending).toHaveLength(1);
+
+      await combat(gm).apply(state(gm).pending[0].id, { defence: true });
+      await settle();
+
+      expect(named(gm, 'Goblin').life?.current).toBe(5);
+    });
+
+    it('gives no rewards when that step is off: nothing to propose, the XP sent is ignored', async () => {
+      await setup('free', { steps: without('rewards') });
+      await startAll();
+      await combat(gm).edit(goblinId(), { kind: 'damage', amount: 15 });
+      expect(combat(gm).rewards()).toBeNull();
+
+      await combat(gm).end({
+        xp: [{ characterId: record('ada').id, amount: 20 }],
+      });
+      await settle();
+
+      expect(hostWorld().encounter).toBeUndefined();
+      expect(record('ada').xp).toBe(0);
+    });
+  });
+
+  describe('shared rolls', () => {
+    const dice = (d: Device) => d.injector.get(DiceRollBusiness);
+    const fireballAtGoblin = async () => {
+      await combat(ada).useSkill({
+        casterId: adaId(),
+        skillId: fireballId,
+        targetIds: [goblinId()],
+      });
+      await settle();
+    };
+
+    it('publishes one shared roll per skill use on every device, with the use values, the names and the pending ids', async () => {
+      await setup('free');
+      await startAll();
+
+      await fireballAtGoblin();
+
+      for (const device of [gm, ada, bob]) {
+        const rolls = dice(device).$tableRolls()!;
+        expect(rolls).toHaveLength(1);
+        expect(rolls[0]).toMatchObject({
+          by: { playerId: 'ada', name: 'Ada' },
+          count: 1,
+          sides: 1,
+          values: [1],
+          combat: {
+            caster: { name: 'Ada', side: 'party' },
+            skillName: 'Fireball',
+            targets: [{ name: 'Goblin', side: 'enemy' }],
+            pendingIds: [state(gm).pending[0].id],
+            total: 1,
+            success: true,
+          },
+        });
+      }
+    });
+
+    it('hands the roll to every device to throw, the caster own device included, once', async () => {
+      await setup('free');
+      await startAll();
+
+      await fireballAtGoblin();
+
+      const id = dice(gm).$tableRolls()![0].id;
+      for (const device of [ada, gm, bob]) {
+        expect(dice(device).takeUnseenTableRoll()?.id).toBe(id);
+        expect(dice(device).takeUnseenTableRoll()).toBeNull();
+      }
+    });
+
+    it('publishes the roll whatever the shared dice toggle', async () => {
+      await setup('free');
+      await startAll();
+      expect(dice(ada).$shareWithTable()).toBe(false);
+
+      await fireballAtGoblin();
+
+      expect(dice(bob).takeUnseenTableRoll()).not.toBeNull();
+    });
+
+    it('publishes nothing for a use that rolls no dice', async () => {
+      await setup('free');
+      await gm.injector
+        .get(WorldSessionBusiness)
+        .update((w) => ({ ...w, skillRollsEnabled: false }));
+      await startAll();
+
+      await fireballAtGoblin();
+
+      expect(state(gm).pending).toHaveLength(1);
+      for (const device of [gm, ada, bob]) {
+        expect(dice(device).$tableRolls()).toEqual([]);
+        expect(dice(device).takeUnseenTableRoll()).toBeNull();
+      }
+    });
+
+    it('publishes nothing for the initiative rolled at the start', async () => {
+      await setup('rolled');
+      await startAll();
+
+      for (const device of [gm, ada, bob]) {
+        expect(dice(device).$tableRolls()).toEqual([]);
+        expect(dice(device).takeUnseenTableRoll()).toBeNull();
+      }
+    });
+
+    describe('closing the roll of a combat action for everyone', () => {
+      /** Every device throws the roll, as the dice overlay does. */
+      const throwEverywhere = async () => {
+        for (const device of [gm, ada, bob]) {
+          device.injector.get(CombatRollsBusiness);
+          const roll = dice(device).takeUnseenTableRoll();
+          if (roll) dice(device).presentShared(roll);
+        }
+        await settle();
+      };
+      const rollId = () => dice(gm).$tableRolls()![0].id;
+
+      it('lets the GM close a roll: every device view carries it', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+        expect(state(gm).closedRollId).toBeUndefined();
+
+        await combat(gm).closeRoll(rollId());
+        await settle();
+
+        for (const device of [gm, ada, bob])
+          expect(state(device).closedRollId).toBe(rollId());
+      });
+
+      it('refuses a player closing a roll', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+
+        await expect(combat(ada).closeRoll(rollId())).rejects.toMatchObject({
+          code: 'forbidden',
+        });
+        await settle();
+
+        expect(state(gm).closedRollId).toBeUndefined();
+      });
+
+      it('closes the dice screen on every device when the GM closes the roll', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+        await throwEverywhere();
+        for (const device of [gm, ada, bob])
+          expect(dice(device).$current()?.id).toBe(rollId());
+
+        await combat(gm).closeRoll(rollId());
+        await settle();
+
+        for (const device of [gm, ada, bob])
+          expect(dice(device).$current()).toBeNull();
+      });
+
+      it('closes the dice screen on every device once every pending result is applied', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+        await throwEverywhere();
+        for (const device of [gm, ada, bob])
+          expect(dice(device).$current()?.id).toBe(rollId());
+
+        await combat(gm).apply(state(gm).pending[0].id);
+        await settle();
+
+        for (const device of [gm, ada, bob])
+          expect(dice(device).$current()).toBeNull();
+      });
+
+      it('closes the dice screen on every device once every pending result is dismissed', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+        await throwEverywhere();
+
+        await combat(gm).dismiss(state(gm).pending[0].id);
+        await settle();
+
+        for (const device of [gm, ada, bob])
+          expect(dice(device).$current()).toBeNull();
+      });
+
+      it('leaves a plain roll on the screen when a combat roll is closed', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+        await throwEverywhere();
+        dice(bob).presentShared({
+          id: 'plain-1',
+          by: { playerId: 'bob', name: 'Bob' },
+          count: 1,
+          sides: 6,
+          values: [4],
+          seed: 's',
+          at: Date.now(),
+        });
+        await settle();
+
+        await combat(gm).closeRoll(rollId());
+        await settle();
+
+        expect(dice(bob).$current()?.id).toBe('plain-1');
+        expect(dice(gm).$current()).toBeNull();
+      });
+    });
+
+    it('shows a hidden NPC roll as names, dice and total only, rolled for the host player', async () => {
+      await setup('free');
+      const orc = await gm.injector.get(NpcCatalogueBusiness).save({
+        ...goblinNpc,
+        id: undefined,
+        name: 'Orc',
+        portraitId: 'portrait-orc',
+        skills: [{ skillId: fireballId, level: 1 }],
+      });
+      await combat(gm).start({
+        characterIds: [record('ada').id],
+        npcs: [{ npcId: orc.id, count: 1, side: 'enemy' }],
+      });
+      await settle();
+
+      await combat(gm).useSkill({
+        casterId: named(gm, 'Orc').id,
+        skillId: fireballId,
+        targetIds: [adaId()],
+      });
+      await settle();
+
+      const [roll] = dice(ada).$tableRolls()!;
+      expect(roll).toMatchObject({
+        by: { name: 'Gm' },
+        values: [1],
+        combat: {
+          caster: { name: 'Orc', side: 'enemy', portraitId: 'portrait-orc' },
+          skillName: 'Fireball',
+          targets: [{ name: 'Ada', side: 'party' }],
+          total: 1,
+        },
+      });
+      expect(
+        Object.keys((roll as { combat?: object }).combat ?? {}).sort(),
+      ).toEqual([
+        'caster',
+        'pendingIds',
+        'skillName',
+        'success',
+        'targets',
+        'total',
+      ]);
+      const shared = (
+        roll as unknown as { combat: { caster: object; targets: object[] } }
+      ).combat;
+      for (const who of [shared.caster, ...shared.targets])
+        expect(
+          Object.keys(who)
+            .filter((k) => k !== 'portraitId')
+            .sort(),
+        ).toEqual(['name', 'side']);
     });
   });
 });

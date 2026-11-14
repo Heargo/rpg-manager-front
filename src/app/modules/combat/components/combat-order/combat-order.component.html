@@ -1,0 +1,108 @@
+@if (state(); as view) {
+  @if (showRound()) {
+    <div class="toolbar">
+      <strong data-field="round">{{
+        "combat.round" | transloco: { round: view.round }
+      }}</strong>
+    </div>
+  }
+  <div
+    class="order"
+    cdkDropList
+    [attr.aria-label]="'combat.order' | transloco"
+    (cdkDropListDropped)="drop($event)"
+  >
+    @for (combatant of view.combatants; track combatant.id) {
+      <div
+        class="combatant"
+        cdkDrag
+        data-testid="combatant"
+        [attr.data-name]="combatant.name"
+        [attr.data-active]="combatant.id === view.activeId ? 'true' : null"
+        [attr.data-down]="combatant.down ? 'true' : null"
+        [class.active]="combatant.id === view.activeId"
+        [class.down]="combatant.down"
+        [class.enemy]="combatant.side === 'enemy'"
+        [attr.data-selected]="selectedId() === combatant.id ? 'true' : null"
+      >
+        <div class="head">
+          <i
+            class="pi pi-bars handle"
+            cdkDragHandle
+            [attr.aria-label]="'combat.drag' | transloco"
+          ></i>
+          <strong class="name">{{ combatant.name }}</strong>
+          @if (combat.$initiativeMode() !== "free") {
+            <span class="initiative" data-field="initiative">
+              <i class="pi pi-bolt"></i>{{ combatant.initiative ?? "—" }}
+            </span>
+          }
+          @if (combat.$initiativeMode() === "typed") {
+            <span class="initiative-edit">
+              <p-inputnumber
+                data-testid="initiative-input"
+                size="small"
+                [ngModel]="initiativeOf(combatant.id)"
+                (ngModelChange)="setInitiativeDraft(combatant.id, $event)"
+                [placeholder]="'combat.initiative.label' | transloco"
+              />
+              <button
+                pButton
+                type="button"
+                data-action="initiative-set"
+                size="small"
+                severity="secondary"
+                icon="pi pi-check"
+                [ariaLabel]="'combat.initiative.set' | transloco"
+                (click)="setInitiative(combatant.id)"
+              ></button>
+            </span>
+          }
+          <p-progressbar
+            class="life"
+            data-field="life-bar"
+            [attr.data-percent]="combatant.lifeBar?.percent"
+            [value]="combatant.lifeBar?.percent ?? 0"
+            [showValue]="false"
+          />
+          @if (combatant.life; as life) {
+            <small class="life-text">{{ life.current }} / {{ life.max }}</small>
+          }
+          @if (combatant.down) {
+            <span class="down-tag">{{ "combat.down" | transloco }}</span>
+          }
+          <button
+            pButton
+            type="button"
+            data-action="select"
+            size="small"
+            severity="secondary"
+            [text]="true"
+            [icon]="
+              selectedId() === combatant.id ? 'pi pi-minus' : 'pi pi-plus'
+            "
+            [ariaLabel]="'combat.details' | transloco"
+            (click)="select(combatant.id)"
+          ></button>
+        </div>
+        @if (combatant.statuses.length) {
+          <div class="statuses">
+            @for (status of combatant.statuses; track status) {
+              <span class="status" data-field="status">
+                {{ status }}
+                <button
+                  type="button"
+                  class="remove-status"
+                  [attr.aria-label]="'combat.status.remove' | transloco"
+                  (click)="removeStatus(combatant.id, status)"
+                >
+                  <i class="pi pi-times"></i>
+                </button>
+              </span>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

@@ -9,7 +9,9 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { ConfirmationService } from '@openng/optimus-ui/api';
+import { ConfirmationService, MenuItem } from '@openng/optimus-ui/api';
+import { DialogModule } from '@openng/optimus-ui/dialog';
+import { Menu, MenuModule } from '@openng/optimus-ui/menu';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
@@ -38,7 +40,9 @@ import { ItemCardComponent } from '../item-card/item-card.component';
     FormsModule,
     TranslocoPipe,
     ButtonModule,
+    DialogModule,
     InputTextModule,
+    MenuModule,
     MultiSelectModule,
     SliderModule,
     CoinDisplayComponent,
@@ -125,7 +129,8 @@ import { ItemCardComponent } from '../item-card/item-card.component';
               [attr.data-rarity]="item.rarity"
               [attr.aria-selected]="selected()?.id === item.id"
               [class.selected]="selected()?.id === item.id"
-              (click)="select(item)"
+              (click)="openMenu($event, item, slotMenu)"
+              (contextmenu)="openMenu($event, item, slotMenu)"
             >
               <span class="art">
                 @if (item.imageId) {
@@ -153,59 +158,27 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         <p class="empty">{{ 'item.catalogue.empty' | transloco }}</p>
       }
 
-      @if (selected(); as current) {
-        <aside
-          class="panel"
-          data-field="slot-actions"
-          [attr.aria-label]="'item.catalogue.selected' | transloco"
-        >
-          <strong class="panel-name">{{ current.name }}</strong>
-          <div class="actions">
-            <button
-              pButton
-              type="button"
-              data-action="view"
-              icon="pi pi-eye"
-              severity="secondary"
-              [label]="'item.catalogue.view' | transloco"
-              (click)="viewing.set(!viewing())"
-            ></button>
-            @if (canGive()) {
-              <button
-                pButton
-                type="button"
-                data-action="give"
-                icon="pi pi-gift"
-                [label]="'item.catalogue.give' | transloco"
-                (click)="give.emit(current)"
-              ></button>
-            }
-            <button
-              pButton
-              type="button"
-              data-action="edit"
-              icon="pi pi-pencil"
-              severity="secondary"
-              [label]="'item.catalogue.edit' | transloco"
-              (click)="edit.emit(current)"
-            ></button>
-            <button
-              pButton
-              type="button"
-              data-action="delete"
-              icon="pi pi-trash"
-              severity="danger"
-              [text]="true"
-              [attr.aria-label]="'item.catalogue.delete' | transloco"
-              (click)="askDelete(current)"
-            ></button>
-          </div>
-          @if (viewing()) {
-            <app-item-card [item]="current" />
-          }
-        </aside>
-      }
     </div>
+
+    <p-menu
+      #slotMenu
+      [model]="menuModel()"
+      [popup]="true"
+      appendTo="body"
+      (onHide)="menuClosed()"
+    />
+    <p-dialog
+      [visible]="viewing() && !!selected()"
+      (visibleChange)="!$event && viewing.set(false)"
+      [modal]="true"
+      [dismissableMask]="true"
+      [header]="selected()?.name ?? ''"
+      [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
+    >
+      @if (viewing() && selected(); as current) {
+        <app-item-card [item]="current" />
+      }
+    </p-dialog>
   `,
   styles: `
     :host {
@@ -252,24 +225,6 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       flex: 1 1 24rem;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
-      gap: 0.5rem;
-    }
-    .panel {
-      flex: 1 1 16rem;
-      max-width: 24rem;
-      position: sticky;
-      top: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      padding: 0.75rem;
-      border: 1px solid var(--p-content-border-color);
-      border-radius: 0.5rem;
-      background: var(--p-content-background);
-    }
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
       gap: 0.5rem;
     }
     .slot {
@@ -419,9 +374,70 @@ export class ItemCatalogueComponent {
     () => this.world().items.find((i) => i.id === this.selectedId()) ?? null,
   );
 
-  protected select(item: Item): void {
-    if (this.selectedId() !== item.id) this.viewing.set(false);
+  /** The actions on the slot the menu was opened from. */
+  protected readonly menuModel = computed<MenuItem[]>(() => {
+    const item = this.selected();
+    if (!item) return [];
+    return [
+      {
+        label: this.language.t('item.catalogue.view'),
+        icon: 'pi pi-eye',
+        automationId: 'view',
+        command: () => this.viewing.set(true),
+      },
+      ...(this.canGive()
+        ? [
+            {
+              label: this.language.t('item.catalogue.give'),
+              icon: 'pi pi-gift',
+              automationId: 'give',
+              command: () => this.give.emit(item),
+            },
+          ]
+        : []),
+      {
+        label: this.language.t('item.catalogue.edit'),
+        icon: 'pi pi-pencil',
+        automationId: 'edit',
+        command: () => this.edit.emit(item),
+      },
+      { separator: true },
+      {
+        label: this.language.t('item.catalogue.delete'),
+        icon: 'pi pi-trash',
+        automationId: 'delete',
+        command: () => this.askDelete(item),
+      },
+    ];
+  });
+
+  private menuSlot: HTMLElement | null = null;
+
+  /** Opens the actions menu next to the slot (click, Enter, Space, the context-menu key or a right click). */
+  protected openMenu(event: Event, item: Item, menu: Menu): void {
+    event.preventDefault();
+    const slot = event.currentTarget as HTMLElement;
+    if (menu.visible && this.selectedId() === item.id) {
+      menu.hide();
+      return;
+    }
+    this.viewing.set(false);
     this.selectedId.set(item.id);
+    this.menuSlot = slot;
+    // Anchor to the slot even for a right click, so the menu sits by the item, not at the pointer.
+    const anchor = { currentTarget: slot, target: slot } as unknown as Event;
+    if (!menu.visible) {
+      menu.show(anchor);
+      return;
+    }
+    // Open on another slot: close, then reopen so the overlay is aligned again.
+    menu.hide();
+    setTimeout(() => menu.show(anchor));
+  }
+
+  /** Focus goes back to the slot the menu came from (Escape, outside click, after an action). */
+  protected menuClosed(): void {
+    if (!this.viewing()) this.menuSlot?.focus();
   }
 
   protected askDelete(item: Item): void {

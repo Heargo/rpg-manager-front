@@ -1,6 +1,14 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { LanguageBusiness } from '../../../../core/business/language.business';
+import { DOCS_ORIGIN } from '../../../../core/constants/docs-origin';
+import { docsUrl } from '../../../../core/helpers/docs-url';
 
 /** Full-width footer shared by the landing and the static pages. */
 @Component({
@@ -33,6 +41,13 @@ import { TranslocoPipe } from '@jsverse/transloco';
           <a routerLink="/privacy-policy" data-test="footer-privacy">{{
             'home.footerPrivacy' | transloco
           }}</a>
+          <a
+            [href]="helpUrl()"
+            target="_blank"
+            rel="noopener"
+            data-test="footer-help"
+            >{{ 'home.footerHelp' | transloco }}</a
+          >
         </nav>
         <p class="tagline">{{ 'home.footerTagline' | transloco }}</p>
       </div>
@@ -90,4 +105,11 @@ import { TranslocoPipe } from '@jsverse/transloco';
     }
   `,
 })
-export class SiteFooterComponent {}
+export class SiteFooterComponent {
+  private readonly language = inject(LanguageBusiness);
+  private readonly docsOrigin = inject(DOCS_ORIGIN);
+  /** The user documentation in the app language. */
+  protected readonly helpUrl = computed(
+    () => this.docsOrigin + docsUrl(this.language.$language()),
+  );
+}

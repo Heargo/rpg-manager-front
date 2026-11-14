@@ -1,0 +1,50 @@
+/*
+ * The app's colors (src/app/ui.preset.ts and src/styles.scss): the bordeaux primary and the paper surfaces, mapped
+ * onto Starlight's color variables. Only colors are overridden, Starlight keeps its own sizes, spacing and fonts.
+ * Dark is Starlight's default, light is `data-theme='light'`.
+ */
+
+:root {
+  /* dark: the app's surface scale inverted, primary lightened for contrast */
+  --sl-color-accent-low: #2d0404;
+  --sl-color-accent: #ef5252;
+  --sl-color-accent-high: #f8cdcd;
+  --sl-color-white: #f9f6ef;
+  --sl-color-gray-1: #f1ecda;
+  --sl-color-gray-2: #cbc4aa;
+  --sl-color-gray-3: #938e7b;
+  --sl-color-gray-4: #5f5c4f;
+  --sl-color-gray-5: #47443a;
+  --sl-color-gray-6: #1d1c16;
+  --sl-color-black: #12110d;
+
+  /* notes ("blue" asides) in paper tones, like the app's secondary surfaces */
+  --sl-color-blue-low: #323029;
+  --sl-color-blue: #cbc4aa;
+  --sl-color-blue-high: #f1ecda;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #fbe6e6;
+  --sl-color-accent: #7f1919;
+  --sl-color-accent-high: #400808;
+  --sl-color-white: #12110d;
+  --sl-color-gray-1: #1d1c16;
+  --sl-color-gray-2: #323029;
+  --sl-color-gray-3: #5f5c4f;
+  --sl-color-gray-4: #938e7b;
+  --sl-color-gray-5: #cbc4aa;
+  --sl-color-gray-6: #e5ddc0;
+  --sl-color-gray-7: #f9f6ef;
+  /* the app's page background (surface 50) */
+  --sl-color-black: #f1ecda;
+
+  --sl-color-blue-low: #e5ddc0;
+  --sl-color-blue: #5f5c4f;
+  --sl-color-blue-high: #1d1c16;
+}
+
+/* link cards on the navbar's lighter surface, not the page background */
+.sl-link-card {
+  background-color: var(--sl-color-bg-nav);
+}

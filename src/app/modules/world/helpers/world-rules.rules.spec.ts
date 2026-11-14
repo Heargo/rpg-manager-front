@@ -74,6 +74,7 @@ function setup(): { world: World; rules: WorldRules } {
     startingSkillPoints: world.startingSkillPoints,
     skillPointsPerLevel: world.skillPointsPerLevel,
     offlineFeatures: world.offlineFeatures,
+    packs: world.packs,
   };
   return { world, rules };
 }
@@ -96,6 +97,17 @@ describe('applyWorldRules', () => {
     expect(next.startingMoney).toBe(250);
     expect(next.statPointsPerLevel).toBe(1);
     expect(next.offlineFeatures.sell).toBe(true);
+  });
+
+  it('stores the active packs of the rules on the world', () => {
+    const { world, rules } = setup();
+    const next = applyWorldRules(world, { ...rules, packs: ['base-en', 'extra'] }, () => 'new');
+    expect(next.packs).toEqual(['base-en', 'extra']);
+  });
+
+  it('accepts an empty list of packs', () => {
+    const { world, rules } = setup();
+    expect(applyWorldRules(world, { ...rules, packs: [] }, () => 'new').packs).toEqual([]);
   });
 
   it('leaves existing sheets alone when only starting values change', () => {

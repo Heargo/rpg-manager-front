@@ -4,10 +4,14 @@
   "scripts": {
     "ng": "ng",
     "start": "node scripts/ng-with-env.mjs serve",
-    "build": "node scripts/ng-with-env.mjs build",
+    "build": "node scripts/ng-with-env.mjs build && npm run docs:build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
-    "test:watch": "ng test"
+    "test:watch": "ng test",
+    "sprites:sets": "esbuild scripts/generate-sprite-sets.ts --bundle --platform=node --format=esm --log-level=warning --outfile=node_modules/.cache/generate-sprite-sets.mjs && node node_modules/.cache/generate-sprite-sets.mjs",
+    "docs:dev": "npm --prefix user-docs install --no-audit --no-fund && npm --prefix user-docs run dev",
+    "docs:build": "npm --prefix user-docs install --no-audit --no-fund && npm --prefix user-docs run build",
+    "docs:screenshots": "npm --prefix user-docs install --no-audit --no-fund && npm --prefix user-docs run screenshots"
   },
   "prettier": {
     "overrides": [
@@ -35,6 +39,7 @@
     "@openng/icons": "^1.0.0",
     "@openng/optimus-ui": "^2.0.2",
     "@openng/optimus-ui-themes": "^2.0.2",
+    "fflate": "^0.8.3",
     "idb": "^8.0.4",
     "jsqr": "1.4.0",
     "qrcode": "^1.5.4",

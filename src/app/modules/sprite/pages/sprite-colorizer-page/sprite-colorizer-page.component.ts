@@ -1,28 +1,52 @@
+import { Pack, SPRITE_KINDS, SpriteKind } from '../../../../core/packs/pack';
 import {
+  BundledSprite,
+  PackBusiness,
+} from '../../../../core/business/pack.business';
+import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   effect,
   ElementRef,
   inject,
+  Injector,
+  input,
+  untracked,
   signal,
   viewChild,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { MessageService } from '@openng/optimus-ui/api';
+import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { ColorPickerModule } from '@openng/optimus-ui/colorpicker';
+import { DialogModule } from '@openng/optimus-ui/dialog';
+import { SelectModule } from '@openng/optimus-ui/select';
+import { MessageModule } from '@openng/optimus-ui/message';
+import { ToastModule } from '@openng/optimus-ui/toast';
+import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
+import { slugifyPackId } from '../../../../core/packs/pack-draft';
+import { EQUIPMENT_SLOTS, ITEM_TYPES, ItemSlot, ItemType } from '../../../../core/models/item';
+import { SpriteSetTags } from '../../models/sprite-set';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { SelectButtonModule } from '@openng/optimus-ui/selectbutton';
 import { SliderModule } from '@openng/optimus-ui/slider';
+import { TagModule } from '@openng/optimus-ui/tag';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { SpriteColorizerBusiness } from '../../business/sprite-colorizer.business';
+import { brushCursor } from '../../helpers/brush-cursor';
+import {
+  groupSpritesByPack,
+  searchSprites,
+} from '../../helpers/sprite-library';
 import { gradientColor } from '../../helpers/gradient-mapping';
 import { isBuiltInPreset } from '../../helpers/presets';
 import { shapeColor, shapeCss } from '../../helpers/shape-colors';
@@ -58,10 +82,15 @@ const toHex = (rgb: number[]) =>
     TranslocoPipe,
     ButtonModule,
     ColorPickerModule,
+    DialogModule,
+    SelectModule,
     InputNumberModule,
     InputTextModule,
     SelectButtonModule,
     SliderModule,
+    TagModule,
+    MessageModule,
+    ToastModule,
     ToggleSwitchModule,
     TooltipModule,
   ],
@@ -74,9 +103,57 @@ const toHex = (rgb: number[]) =>
   styleUrl: './sprite-colorizer-page.component.scss',
 })
 export class SpriteColorizerPageComponent {
+  /** The pack draft and the sprite in it to edit; bound from the query params. */
+  readonly draft = input<string>();
+  readonly sprite = input<string>();
+
+  private readonly creator = inject(PackCreatorBusiness);
+  private readonly router = inject(Router);
+  protected readonly addOpen = signal(false);
+  protected readonly addDraftId = signal<string | null>(null);
+  protected readonly addDetails = signal({
+    id: '',
+    label: '',
+    type: 'item' as ItemType,
+    slot: 'none' as ItemSlot,
+  });
+  protected readonly adding = signal(false);
+  protected readonly draftOptions = computed(() =>
+    this.creator.$drafts().map((d) => ({
+      label: d.details.name || this.language.t('packs.creator.untitled'),
+      value: d.id,
+    })),
+  );
+  protected readonly typeOptions = computed(() =>
+    ITEM_TYPES.map((value) => ({
+      value,
+      label: this.language.t(`item.type.${value}`),
+    })),
+  );
+  protected readonly slotOptions = computed(() => [
+    { value: 'none', label: this.language.t('packs.creator.slotNone') },
+    ...EQUIPMENT_SLOTS.map((value) => ({
+      value,
+      label: this.language.t(`item.slot.${value}`),
+    })),
+  ]);
+  protected readonly draftBanner = computed(() => {
+    const target = this.business.$draftTarget();
+    return target
+      ? this.language.t('sprite.draft.banner', {
+          sprite: target.spriteId,
+          draft: target.draftName,
+        })
+      : '';
+  });
   protected readonly business = inject(SpriteColorizerBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly packs = inject(PackBusiness);
+  private readonly bundled = signal<BundledSprite[]>([]);
+  private readonly bundledPacks = signal<Pick<Pack, 'id' | 'name'>[]>([]);
   private readonly messages = inject(MessageService);
+  private readonly confirmation = inject(ConfirmationService);
+  private readonly injector = inject(Injector);
 
   private readonly viewport = viewChild<ElementRef<HTMLElement>>('viewport');
   private readonly mainCanvas =
@@ -92,6 +169,80 @@ export class SpriteColorizerPageComponent {
   protected readonly editingId = signal<string | null>(null);
   protected readonly presetName = signal('');
   protected readonly pointer = signal<{ x: number; y: number } | null>(null);
+  protected readonly libraryOpen = signal(false);
+  protected readonly libraryQuery = signal('');
+  protected readonly libraryKind = signal<SpriteKind | null>(null);
+  protected readonly libraryKinds = computed(() => [
+    { value: null, label: this.language.t('sprite.library.allKinds') },
+    ...SPRITE_KINDS.map((kind) => ({
+      value: kind,
+      label: this.language.t('sprite.kind.' + kind),
+    })),
+  ]);
+  protected readonly libraryView = signal<'bundled' | 'mine'>('bundled');
+  protected readonly libraryViews = computed(() => [
+    { value: 'bundled', label: this.language.t('sprite.library.bundled') },
+    { value: 'mine', label: this.language.t('sprite.library.mine') },
+  ]);
+  protected readonly renamingSetId = signal<string | null>(null);
+  /** What a saved set can illustrate, for the random item images; '' = nothing. */
+  protected readonly setKinds = computed(() => [
+    { value: '', label: this.language.t('sprite.sets.kindNone') },
+    { value: 'item', label: this.language.t('item.type.item') },
+    { value: 'consumable', label: this.language.t('item.type.consumable') },
+    ...EQUIPMENT_SLOTS.map((slot) => ({
+      value: `equipment:${slot}`,
+      label: `${this.language.t('item.type.equipment')} · ${this.language.t('item.slot.' + slot)}`,
+    })),
+  ]);
+  /** The saved sets, with their date in the page's language. */
+  protected readonly savedSets = computed(() => {
+    const format = new Intl.DateTimeFormat(this.language.$language() ?? 'fr', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
+    return this.business.$savedSets().map((set) => ({
+      ...set,
+      date: format.format(set.updatedAt),
+      kind: !set.tags
+        ? ''
+        : set.tags.type === 'equipment'
+          ? `equipment:${set.tags.slot}`
+          : set.tags.type,
+    }));
+  });
+  protected readonly libraryGroups = computed(() => {
+    const lang = this.language.$language() ?? 'fr';
+    const found = searchSprites(
+      this.bundled(),
+      this.libraryQuery(),
+      lang,
+      this.libraryKind(),
+    );
+    return groupSpritesByPack(found, this.bundledPacks()).map(
+      (group) => ({
+        packId: group.packId,
+        name: group.name,
+        sprites: group.sprites.map((sprite) => ({
+          id: sprite.id,
+          label: sprite.label,
+          url: sprite.imageUrl,
+          kind: sprite.kind,
+        })),
+      }),
+    );
+  });
+  /** The pixel under a mouse or pen, for the brush outline. */
+  private readonly hovered = signal<{ x: number; y: number } | null>(null);
+  protected readonly brushCursor = computed(() =>
+    this.panMode()
+      ? null
+      : brushCursor(
+          this.business.$tool(),
+          this.business.$brush(),
+          this.hovered(),
+        ),
+  );
 
   protected readonly tools: { id: SpriteTool; icon: string; label: string }[] =
     [
@@ -136,6 +287,11 @@ export class SpriteColorizerPageComponent {
     return `${last.x},${last.y} ${at.x},${at.y} ${first.x},${first.y}`;
   });
 
+  protected onPointerLeave(): void {
+    this.pointer.set(null);
+    this.hovered.set(null);
+  }
+
   private drag: { kind: 'pan' | 'paint'; x: number; y: number } | null = null;
   private spaceHeld = false;
   private pending: Frame | null = null;
@@ -144,6 +300,26 @@ export class SpriteColorizerPageComponent {
   private shownImage: unknown = null;
 
   constructor() {
+    this.packs
+      .sprites()
+      .then((sprites) => this.bundled.set(sprites))
+      .catch(() => undefined);
+    this.packs
+      .load()
+      .then(() => this.bundledPacks.set(this.packs.$installed()))
+      .catch(() => undefined);
+    // Open the draft sprite named by the query params.
+    effect(() => {
+      const draft = this.draft();
+      const sprite = this.sprite();
+      if (draft && sprite)
+        untracked(() =>
+          this.loadSprite(
+            () => this.business.loadDraftSprite(draft, sprite),
+            'sprite.draft.loadFailed',
+          ),
+        );
+    });
     // Fit the sprite in the viewport when a new image arrives.
     effect(() => {
       const image = this.business.$image();
@@ -319,6 +495,7 @@ export class SpriteColorizerPageComponent {
   }
 
   protected onPointerDown(event: PointerEvent): void {
+    this.hovered.set(this.pixelAt(event));
     const target = event.currentTarget as HTMLElement;
     if (event.button === 1 || this.panMode() || this.spaceHeld) {
       this.drag = { kind: 'pan', x: event.clientX, y: event.clientY };
@@ -372,6 +549,7 @@ export class SpriteColorizerPageComponent {
   }
 
   protected onPointerMove(event: PointerEvent): void {
+    this.hovered.set(this.pixelAt(event));
     if (
       this.business.$tool() === 'polygon' &&
       this.business.$polygonVertices().length
@@ -391,7 +569,8 @@ export class SpriteColorizerPageComponent {
     if (at) this.business.strokeTo(at.x, at.y);
   }
 
-  protected onPointerUp(): void {
+  protected onPointerUp(event?: PointerEvent): void {
+    if (event?.pointerType === 'touch') this.hovered.set(null);
     if (this.drag?.kind === 'paint') this.business.endStroke();
     this.drag = null;
   }
@@ -450,6 +629,176 @@ export class SpriteColorizerPageComponent {
     } catch {
       this.toast(MessageLevel.Error, 'sprite.loadFailed');
     }
+  }
+
+  protected openLibrary(): void {
+    this.libraryQuery.set('');
+    this.libraryKind.set(null);
+    this.libraryOpen.set(true);
+    this.business.refreshSets().catch(() => undefined);
+  }
+
+  protected async saveSet(): Promise<void> {
+    try {
+      await this.business.saveSet(this.defaultSetName());
+      this.toast(MessageLevel.Success, 'sprite.sets.saved');
+    } catch {
+      this.toast(MessageLevel.Error, 'sprite.sets.saveFailed');
+    }
+  }
+
+  /** A saved set keeps its name; a bundled sprite is named after its label. */
+  private defaultSetName(): string {
+    const name = this.business.$fileName();
+    if (this.business.$currentSetId()) return name;
+    const sprite = this.bundled().find((s) => s.id === name);
+    if (!sprite) return name;
+    return sprite.label;
+  }
+
+  protected async openSet(id: string): Promise<void> {
+    this.libraryOpen.set(false);
+    await this.loadSprite(() => this.business.openSet(id));
+  }
+
+  protected startRenameSet(id: string): void {
+    this.renamingSetId.set(id);
+    afterNextRender(
+      () =>
+        document.querySelector<HTMLInputElement>('.saved-name-input')?.select(),
+      { injector: this.injector },
+    );
+  }
+
+  protected async renameSet(id: string, name: string): Promise<void> {
+    if (this.renamingSetId() !== id) return;
+    this.renamingSetId.set(null);
+    await this.business.renameSet(id, name);
+  }
+
+  protected setKind(id: string, kind: string): void {
+    const [type, slot] = kind.split(':');
+    const tags: SpriteSetTags | undefined = !kind
+      ? undefined
+      : type === 'equipment'
+        ? { type: 'equipment', slot: slot as SpriteSetTags['slot'] }
+        : { type: type as SpriteSetTags['type'], slot: 'none' };
+    void this.business.setSetTags(id, tags);
+  }
+
+  protected deleteSet(set: { id: string; name: string }): void {
+    this.confirmation.confirm({
+      header: this.language.t('sprite.sets.deleteTitle'),
+      message: this.language.t('sprite.sets.deleteMessage', { name: set.name }),
+      icon: 'pi pi-trash',
+      acceptButtonProps: {
+        label: this.language.t('sprite.sets.delete'),
+        severity: 'danger',
+      },
+      rejectButtonProps: {
+        label: this.language.t('common.cancel'),
+        severity: 'secondary',
+        text: true,
+      },
+      accept: () => void this.business.deleteSet(set.id),
+    });
+  }
+
+  protected async pickSprite(id: string): Promise<void> {
+    this.libraryOpen.set(false);
+    await this.loadSprite(() => this.business.loadLibrary(id));
+  }
+
+  protected loadDemo(): Promise<void> {
+    return this.loadSprite(() => this.business.loadDemo());
+  }
+
+  private async loadSprite(
+    load: () => Promise<void>,
+    failure = 'sprite.loadFailed',
+  ): Promise<void> {
+    try {
+      await load();
+    } catch (error) {
+      const refused =
+        error instanceof Error && error.message === 'sprite.coloredRefused';
+      this.toast(MessageLevel.Error, refused ? 'sprite.coloredRefused' : failure);
+    }
+  }
+
+  // Pack drafts
+
+  protected async saveToDraft(): Promise<void> {
+    try {
+      await this.business.saveToDraft();
+      this.toast(MessageLevel.Success, 'sprite.draft.saved');
+    } catch {
+      this.toast(MessageLevel.Error, 'sprite.draft.saveFailed');
+    }
+  }
+
+  protected backToDraft(): void {
+    const target = this.business.$draftTarget();
+    if (target) void this.router.navigate(['/tools/pack-creator', target.draftId]);
+  }
+
+  protected openAdd(): void {
+    const name = this.business.$fileName();
+    this.addDetails.set({
+      id: slugifyPackId(name),
+      label: name,
+      type: 'item',
+      slot: 'none',
+    });
+    this.addOpen.set(true);
+    void this.creator.loadDrafts().then(() => {
+      if (!this.addDraftId())
+        this.addDraftId.set(this.creator.$drafts()[0]?.id ?? null);
+    });
+    void this.business.openTags().then((tags) => {
+      if (tags) this.patchAdd(tags);
+    });
+  }
+
+  protected patchAdd(patch: Partial<ReturnType<typeof this.addDetails>>): void {
+    this.addDetails.update((d) => ({ ...d, ...patch }));
+  }
+
+  protected setAddType(type: ItemType): void {
+    this.patchAdd({ type, ...(type === 'equipment' ? {} : { slot: 'none' }) });
+  }
+
+  protected async newDraft(): Promise<void> {
+    const draft = await this.creator.createDraft();
+    this.addDraftId.set(draft.id);
+  }
+
+  protected async confirmAdd(): Promise<void> {
+    const draftId = this.addDraftId();
+    if (!draftId || this.adding()) return;
+    this.adding.set(true);
+    try {
+      await this.business.addCurrentToDraft(draftId, this.addDetails());
+      this.addOpen.set(false);
+      this.messages.add({
+        key: 'draft-added',
+        severity: MessageLevel.Success,
+        detail: this.language.t('sprite.draft.added'),
+        data: { draftId },
+      });
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : '';
+      this.messages.add({
+        severity: MessageLevel.Error,
+        detail: this.language.t('sprite.draft.addFailed', { reason }),
+      });
+    } finally {
+      this.adding.set(false);
+    }
+  }
+
+  protected openDraft(draftId: string): void {
+    void this.router.navigate(['/tools/pack-creator', draftId]);
   }
 
   protected async importJson(input: HTMLInputElement): Promise<void> {

@@ -1,4 +1,7 @@
+import 'fake-indexeddb/auto';
+import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
+import { extraPackService, provideExtraPack } from '../../../../../testing/extra-pack';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { WorldDraft } from '../../models/world';
 import { RuleFieldsComponent } from './rule-fields.component';
@@ -245,7 +248,33 @@ describe('RuleFieldsComponent combat settings', () => {
     first.value = 'Strike';
     first.dispatchEvent(new Event('input'));
     await settle();
-    expect(emitted.at(-1)!.combat!.actionTypes[0]).toEqual({ name: 'Strike', count: 1 });
+    expect(emitted.at(-1)!.combat!.actionTypes[0]).toEqual({ name: 'Strike', count: 1, movement: false });
+  });
+
+  it('shows a movement switch per action type, on for Movement and off for Action by default', async () => {
+    const { section } = await openCombat();
+    expect((section.querySelector('#action-type-movement-0') as HTMLInputElement).checked).toBe(false);
+    expect((section.querySelector('#action-type-movement-1') as HTMLInputElement).checked).toBe(true);
+  });
+
+  it('saves the movement flag of an action type in the rules', async () => {
+    const { section, emitted, settle } = await openCombat();
+    (section.querySelector('#action-type-movement-0') as HTMLInputElement).click();
+    await settle();
+    (section.querySelector('#action-type-movement-1') as HTMLInputElement).click();
+    await settle();
+    expect(emitted.at(-1)!.combat!.actionTypes).toEqual([
+      { name: 'Action', count: 1, movement: true },
+      { name: 'Movement', count: 1, movement: false },
+    ]);
+  });
+
+  it('adds a new action type that is not a movement one', async () => {
+    const { section, emitted, settle } = await openCombat();
+    (section.querySelector('[data-testid="combat-action-add"]') as HTMLElement).click();
+    await settle();
+    expect(emitted.at(-1)!.combat!.actionTypes[2]).toEqual({ name: '', count: 1, movement: false });
+    expect((section.querySelector('#action-type-movement-2') as HTMLInputElement).checked).toBe(false);
   });
 
   it('shows a live error for a broken or unknown-name formula, and none for a good one', async () => {
@@ -257,5 +286,166 @@ describe('RuleFieldsComponent combat settings', () => {
     expect(section.querySelector('[data-testid="combat-error-defence"]')).toBeNull();
     await type('#combat-movement', '4 +');
     expect(section.querySelector('[data-testid="combat-error-movement"]')).not.toBeNull();
+  });
+
+  describe('step switches', () => {
+    const steps = ['initiative', 'action-counters', 'gm-validation', 'defence', 'rewards'];
+    const toggle = (section: HTMLElement, step: string) =>
+      section.querySelector(`#combat-step-${step}`) as HTMLInputElement;
+
+    it('has one switch per step, all on by default', async () => {
+      const { section } = await openCombat();
+      for (const step of steps) expect(toggle(section, step).checked, step).toBe(true);
+    });
+
+    it('turns a step off in the draft', async () => {
+      const { section, emitted, settle } = await openCombat();
+      toggle(section, 'rewards').click();
+      await settle();
+      expect(emitted.at(-1)!.combat!.steps).toEqual({
+        initiative: true,
+        actionCounters: true,
+        gmValidation: true,
+        defence: true,
+        rewards: false,
+      });
+    });
+
+    it('hides the initiative settings while that step is off', async () => {
+      const { section, settle } = await openCombat();
+      toggle(section, 'initiative').click();
+      await settle();
+      for (const id of ['#combat-initiative-mode', '#combat-initiative-count', '#combat-initiative-faces', '#combat-initiative-formula'])
+        expect(section.querySelector(id), id).toBeNull();
+      expect(section.querySelector('#combat-movement')).not.toBeNull();
+    });
+
+    it('hides the action types while that step is off', async () => {
+      const { section, settle } = await openCombat();
+      toggle(section, 'action-counters').click();
+      await settle();
+      expect(section.querySelector('[data-testid="combat-action"]')).toBeNull();
+      expect(section.querySelector('[data-testid="combat-action-add"]')).toBeNull();
+    });
+
+    it('hides the defence formula while that step is off', async () => {
+      const { section, settle } = await openCombat();
+      toggle(section, 'defence').click();
+      await settle();
+      expect(section.querySelector('#combat-defence')).toBeNull();
+      expect(section.querySelector('#combat-basic-attack')).not.toBeNull();
+    });
+  });
+});
+
+/**
+ * Packs section: `[data-testid="rules-section-packs"]` holds one `[data-testid="pack-row"][data-pack="<id>"]` per installed
+ * pack (both Bases, then the downloaded ones) and per missing id of `draft.packs`. A row of an installed pack has its name, a
+ * `[data-testid="pack-language"]` tag (FR / EN) and a `p-checkbox` with inputId `pack-<id>`. A row of a missing pack shows
+ * `[data-testid="pack-missing"]` and, when the pack is official (in the registry), `[data-testid="pack-install"]`; otherwise
+ * `[data-testid="pack-remove"]` (Remove from the world).
+ */
+describe('RuleFieldsComponent packs', () => {
+  beforeEach(() => {
+    globalThis.indexedDB = new IDBFactory();
+    URL.createObjectURL = vi.fn(() => 'blob:fake');
+    URL.revokeObjectURL = vi.fn();
+  });
+
+  async function openPacks(packs: string[]) {
+    TestBed.configureTestingModule({
+      imports: [RuleFieldsComponent],
+      providers: [...TEST_PROVIDERS, provideExtraPack(extraPackService())],
+    });
+    const fixture = TestBed.createComponent(RuleFieldsComponent);
+    fixture.componentRef.setInput('draft', { ...base, packs });
+    fixture.componentRef.setInput('errors', {});
+    const emitted: WorldDraft[] = [];
+    fixture.componentInstance.draft.subscribe((value: WorldDraft) => emitted.push(value));
+    const el = fixture.nativeElement as HTMLElement;
+    const settle = async () => {
+      await fixture.whenStable();
+      await new Promise((resolve) => setTimeout(resolve));
+      await fixture.whenStable();
+    };
+    await vi.waitFor(async () => {
+      await settle();
+      expect(el.querySelector('[data-testid="pack-row"][data-pack="base-fr"]')).not.toBeNull();
+    });
+    const section = el.querySelector('[data-testid="rules-section-packs"]')!;
+    const row = (id: string) => section.querySelector<HTMLElement>(`[data-testid="pack-row"][data-pack="${id}"]`);
+    const box = (id: string) => section.querySelector<HTMLInputElement>(`#pack-${id}`)!;
+    return { el, emitted, settle, section, row, box };
+  }
+
+  it('lists both Bases with their language tag, the world packs ticked', async () => {
+    const { row, box } = await openPacks(['base-fr']);
+
+    expect(row('base-fr')!.textContent).toContain('Base (français)');
+    expect(row('base-fr')!.querySelector('[data-testid="pack-language"]')!.textContent).toContain('FR');
+    expect(row('base-en')!.querySelector('[data-testid="pack-language"]')!.textContent).toContain('EN');
+    expect(box('base-fr').checked).toBe(true);
+    expect(box('base-en').checked).toBe(false);
+  });
+
+  it('emits the draft with the pack added when it is ticked', async () => {
+    const { emitted, box, settle } = await openPacks(['base-fr']);
+
+    box('base-en').click();
+    await settle();
+
+    expect(emitted.at(-1)!.packs).toEqual(['base-fr', 'base-en']);
+  });
+
+  it('emits the draft without the pack when it is unticked', async () => {
+    const { emitted, box, settle } = await openPacks(['base-fr', 'base-en']);
+
+    box('base-fr').click();
+    await settle();
+
+    expect(emitted.at(-1)!.packs).toEqual(['base-en']);
+  });
+
+  it('allows an empty list of packs', async () => {
+    const { emitted, box, settle } = await openPacks(['base-fr']);
+
+    box('base-fr').click();
+    await settle();
+
+    expect(emitted.at(-1)!.packs).toEqual([]);
+  });
+
+  it('shows an official pack that is not installed as missing, with Install', async () => {
+    const { row } = await openPacks(['base-fr', 'extra']);
+
+    expect(row('extra')!.querySelector('[data-testid="pack-missing"]')).not.toBeNull();
+    expect(row('extra')!.querySelector('[data-testid="pack-install"]')).not.toBeNull();
+    expect(row('extra')!.querySelector('[data-testid="pack-remove"]')).toBeNull();
+  });
+
+  it('installs the missing official pack, then lists it ticked', async () => {
+    const { row, box, settle } = await openPacks(['base-fr', 'extra']);
+
+    row('extra')!.querySelector<HTMLElement>('[data-testid="pack-install"]')!.click();
+    await vi.waitFor(async () => {
+      await settle();
+      expect(row('extra')!.querySelector('[data-testid="pack-missing"]')).toBeNull();
+    });
+
+    expect(row('extra')!.textContent).toContain('Extra');
+    expect(row('extra')!.querySelector('[data-testid="pack-language"]')!.textContent).toContain('FR');
+    expect(box('extra').checked).toBe(true);
+  });
+
+  it('shows an unknown pack as missing, without Install, and removes it from the world', async () => {
+    const { row, emitted, settle } = await openPacks(['base-fr', 'ghost']);
+
+    expect(row('ghost')!.querySelector('[data-testid="pack-missing"]')).not.toBeNull();
+    expect(row('ghost')!.querySelector('[data-testid="pack-install"]')).toBeNull();
+
+    row('ghost')!.querySelector<HTMLElement>('[data-testid="pack-remove"]')!.click();
+    await settle();
+
+    expect(emitted.at(-1)!.packs).toEqual(['base-fr']);
   });
 });

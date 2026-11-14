@@ -8,6 +8,7 @@ import {
   untracked,
 } from '@angular/core';
 import { LanguageBusiness } from '../../../core/business/language.business';
+import { ProfileBusiness } from '../../../core/business/profile.business';
 import { cryptoRandomSource } from '../../../core/generators/random-source';
 import { applyCharacterAction } from '../../character/helpers/character-actions.rules';
 import { attributeStats } from '../../character/helpers/character-stats';
@@ -17,13 +18,14 @@ import {
   addStatus,
   applyPending,
   damageCombatant,
+  closeRoll,
   dismissPending,
   editAttribute,
   EncounterPicks,
   healCombatant,
   moveCombatant,
   nextTurn,
-  proposeRewards,
+  combatRewards,
   removeCombatant,
   removeStatus,
   reorderCombatants,
@@ -38,6 +40,8 @@ import {
   useSkill,
   withoutUndo,
 } from '../../combat/helpers/combat.rules';
+import { CombatRollsBusiness } from '../../combat/business/combat-rolls.business';
+import { skillUseRoll } from '../../combat/helpers/combat-roll.rules';
 import { skillSummary } from '../../combat/helpers/combat-skill-summary.rules';
 import { projectEncounter } from '../../combat/helpers/combat-view.rules';
 import {
@@ -50,6 +54,7 @@ import {
 import { sampleNpcs } from '../../npc/helpers/npc.rules';
 import { Skill } from '../../skill/models/skill';
 import { SandboxWorldBusiness } from '../../world/business/sandbox-world.business';
+import { effectiveInitiativeMode } from '../../world/helpers/world-combat.rules';
 import { Character, InventoryItem, World } from '../../world/models/world';
 import { SandboxCharacterBusiness } from './sandbox-character.business';
 
@@ -63,6 +68,8 @@ export class SandboxCombatBusiness implements CombatTable {
   private readonly hero = inject(SandboxCharacterBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly random = cryptoRandomSource();
+  private readonly rolls = inject(CombatRollsBusiness);
+  private readonly profile = inject(ProfileBusiness);
 
   /** The hero with the active skills of their class (a fresh sheet knows none), changed by combat. */
   private readonly sheet = linkedSignal<Character | undefined>(() => {
@@ -84,6 +91,11 @@ export class SandboxCombatBusiness implements CombatTable {
     const sheet = this.sheet();
     return {
       ...world,
+      // The sandbox always shows the encounter on a grid, so the tool lets you try it.
+      combat: {
+        ...world.combat,
+        grid: { ...world.combat.grid, enabled: true },
+      },
       characters: sheet ? [sheet] : [],
       encounter: this.encounter() ?? undefined,
     };
@@ -100,8 +112,9 @@ export class SandboxCombatBusiness implements CombatTable {
   readonly $characters = computed(() => this.world().characters);
   readonly $npcs = computed(() => this.world().npcs);
   readonly $skills = computed(() => this.world().skills);
-  readonly $initiativeMode = computed(
-    () => this.world().combat.initiative.mode,
+  readonly $grid = computed(() => this.world().combat.grid);
+  readonly $initiativeMode = computed(() =>
+    effectiveInitiativeMode(this.world().combat),
   );
 
   constructor() {
@@ -150,7 +163,7 @@ export class SandboxCombatBusiness implements CombatTable {
 
   rewards() {
     const encounter = this.encounter();
-    return encounter ? proposeRewards(encounter) : null;
+    return encounter ? combatRewards(encounter, this.world().combat) : null;
   }
 
   money(amount: number): string {
@@ -170,7 +183,7 @@ export class SandboxCombatBusiness implements CombatTable {
     if (!result.ok) throw new Error(`combat.errors.${result.error}`);
     this.encounter.set(
       withoutUndo(
-        world.combat.initiative.mode === 'rolled'
+        effectiveInitiativeMode(world.combat) === 'rolled'
           ? rollInitiative(result.encounter, world.combat, this.random)
           : result.encounter,
       ),
@@ -218,13 +231,18 @@ export class SandboxCombatBusiness implements CombatTable {
   async dismiss(pendingId: string): Promise<void> {
     this.change((enc) => dismissPending(enc, pendingId));
   }
+  async closeRoll(rollId: string): Promise<void> {
+    this.change((enc) => closeRoll(enc, rollId));
+  }
   async undo(): Promise<void> {
     this.change((enc) => undo(enc));
   }
   async end(rewards?: CombatRewards): Promise<void> {
     const world = this.world();
     let sheet = this.sheet();
-    for (const { characterId, amount } of rewards?.xp ?? []) {
+    for (const { characterId, amount } of world.combat.steps.rewards
+      ? (rewards?.xp ?? [])
+      : []) {
       if (!sheet || sheet.id !== characterId || amount < 1) continue;
       const result = applyCharacterAction(
         world.attributes,
@@ -254,8 +272,30 @@ export class SandboxCombatBusiness implements CombatTable {
         world.skills,
         world.skillRollsEnabled ?? true,
         this.random,
+        world.combat,
       );
       if (!result.ok) throw new Error(`combat.errors.${result.error}`);
+      const roll = skillUseRoll(
+        enc,
+        result.encounter,
+        use,
+        world.skills,
+        world,
+      );
+      if (roll)
+        this.rolls.present({
+          id: crypto.randomUUID(),
+          by: {
+            playerId: this.profile.$profile().playerId,
+            name: roll.combat.caster.name,
+          },
+          count: roll.values.length,
+          sides: roll.sides,
+          values: roll.values,
+          seed: crypto.randomUUID(),
+          at: Date.now(),
+          combat: roll.combat,
+        });
       return result.encounter;
     });
   }

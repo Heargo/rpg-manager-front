@@ -61,6 +61,8 @@ export interface Skill {
   success?: SkillSuccess;
   /** Active only: the name of the world's combat action type its use ticks (none or unknown = the first one). */
   actionType?: string;
+  /** Active only: how far it reaches on the combat grid, in cells (a positive whole number; none = no range shown). */
+  range?: number;
   effects: SkillEffect[];
 }
 

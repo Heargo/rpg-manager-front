@@ -32,6 +32,7 @@ describe('saving the world rules (GM + player)', () => {
       startingSkillPoints: world.startingSkillPoints,
       skillPointsPerLevel: world.skillPointsPerLevel,
       offlineFeatures: world.offlineFeatures,
+      packs: world.packs,
       ...changes,
     };
   };
@@ -75,6 +76,14 @@ describe('saving the world rules (GM + player)', () => {
 
     expect(session().$world()).toMatchObject({ startingStatPoints: 9, startingMoney: 250, maxLevel: 15 });
     expect(ada.injector.get(WorldInfoBusiness).$info()).toMatchObject({ startingStatPoints: 9, startingMoney: 250, maxLevel: 15 });
+  });
+
+  it('stores the active packs and republishes them in world/info', async () => {
+    await session().saveRules(rules({ packs: ['base-fr', 'extra'] }));
+    await settle();
+
+    expect(session().$world()!.packs).toEqual(['base-fr', 'extra']);
+    expect(ada.injector.get(WorldInfoBusiness).$info()).toMatchObject({ packs: ['base-fr', 'extra'] });
   });
 
   it('gives players their recomputed sheet', async () => {

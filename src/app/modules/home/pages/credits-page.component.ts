@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { TagModule } from '@openng/optimus-ui/tag';
+import { PackBusiness } from '../../../core/business/pack.business';
 import { SiteFooterComponent } from '../components/site-footer/site-footer.component';
 
 /** Libraries actually listed in package.json, with their licences. */
@@ -71,6 +72,38 @@ export const CREDIT_LIBRARIES = [
           >{{ 'credits.sampleHeroSuffix' | transloco }}
         </p>
       </div>
+      <div class="card illustration" data-test="sprites">
+        <p>
+          {{ 'credits.spritesPrefix' | transloco }}
+          <a [href]="spritesPackUrl" target="_blank" rel="noopener noreferrer"
+            >Fantasy items pack</a
+          >
+          {{ 'credits.spritesBy' | transloco }}
+          <a [href]="ccByUrl" target="_blank" rel="noopener noreferrer"
+            >CC BY 4.0</a
+          >{{ 'credits.spritesSuffix' | transloco }}
+        </p>
+      </div>
+      @if (packs().length) {
+        <h2>{{ 'credits.packsTitle' | transloco }}</h2>
+        <div class="card" data-test="packs">
+          <p>{{ 'credits.packsIntro' | transloco }}</p>
+          <ul>
+            @for (pack of packs(); track pack.id) {
+              <li>
+                {{ pack.name }} {{ 'credits.packBy' | transloco }}
+                {{ pack.author }},
+                <a
+                  [href]="pack.licenseUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >{{ pack.license }}</a
+                >
+              </li>
+            }
+          </ul>
+        </div>
+      }
       <h2>{{ 'credits.aiTitle' | transloco }}</h2>
       <div class="card" data-test="ai">
         <p>{{ 'credits.ai' | transloco }}</p>
@@ -95,6 +128,9 @@ export const CREDIT_LIBRARIES = [
       padding: 0;
       list-style: none;
     }
+    .card + .illustration {
+      margin-top: 0.75rem;
+    }
     .lib {
       display: flex;
       flex-direction: column;
@@ -105,6 +141,17 @@ export const CREDIT_LIBRARIES = [
   `,
 })
 export class CreditsPageComponent {
+  private readonly packBusiness = inject(PackBusiness);
+  /** Installed packs other than Base, with their name. */
+  protected readonly packs = computed(() => {
+    return this.packBusiness.$installed().filter((p) => !p.builtIn);
+  });
   protected readonly libraries = CREDIT_LIBRARIES;
+  constructor() {
+    void this.packBusiness.load().catch(() => undefined);
+  }
+
   protected readonly yuumeiUrl = 'https://www.yuumeiart.com/';
+  protected readonly spritesPackUrl = 'https://fscibe.itch.io/fantasy-items-pack';
+  protected readonly ccByUrl = 'https://creativecommons.org/licenses/by/4.0/';
 }

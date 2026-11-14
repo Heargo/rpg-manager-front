@@ -7,9 +7,9 @@ const world = {
   attributes: [{ name: 'Life' }, { name: 'Mana' }],
   combat: {
     actionTypes: [
-      { name: 'Action', count: 1 },
-      { name: 'Movement', count: 1 },
-      { name: 'Reaction', count: 2 },
+      { name: 'Action', count: 1, movement: false },
+      { name: 'Movement', count: 1, movement: true },
+      { name: 'Reaction', count: 2, movement: false },
     ],
   },
 } as unknown as World;

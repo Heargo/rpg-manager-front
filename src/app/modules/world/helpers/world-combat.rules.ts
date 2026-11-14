@@ -1,18 +1,30 @@
 import { normalizeName, validateFormula } from '../../../core/helpers/formula';
-import { CombatRules, INITIATIVE_MODES } from '../models/world';
+import { CombatRules, INITIATIVE_MODES, InitiativeMode } from '../models/world';
 
 /** The spec's default combat settings; the life attribute is the world's life bar when it has one. */
 export function defaultCombatRules(lifeName?: string): CombatRules {
   return {
     ...(lifeName === undefined ? {} : { lifeAttribute: lifeName }),
+    steps: {
+      initiative: true,
+      actionCounters: true,
+      gmValidation: true,
+      defence: true,
+      rewards: true,
+    },
     initiative: { mode: 'rolled', dice: { count: 1, faces: 20 }, formula: '0' },
     actionTypes: [
-      { name: 'Action', count: 1 },
-      { name: 'Movement', count: 1 },
+      { name: 'Action', count: 1, movement: false },
+      { name: 'Movement', count: 1, movement: true },
     ],
     grid: { enabled: false, columns: 10, rows: 10 },
     movement: '6',
   };
+}
+
+/** The initiative mode in play: free order when the initiative step is off. */
+export function effectiveInitiativeMode(combat: CombatRules): InitiativeMode {
+  return combat.steps.initiative ? combat.initiative.mode : 'free';
 }
 
 export const COMBAT_DICE_MAX_COUNT = 100;
@@ -52,27 +64,29 @@ export function validateCombatRules(
     errors.combatLifeAttribute = 'world.errors.combatLifeUnknown';
 
   const { dice } = combat.initiative;
-  if (
+  const diceInvalid =
     !Number.isInteger(dice.count) ||
     dice.count < 1 ||
     dice.count > COMBAT_DICE_MAX_COUNT ||
     !Number.isInteger(dice.faces) ||
     dice.faces < 2 ||
-    dice.faces > COMBAT_DICE_MAX_FACES
-  )
-    errors.combatInitiative = 'world.errors.combatDiceInvalid';
-  else if (!isCombatFormulaValid(combat.initiative.formula, names))
-    errors.combatInitiative = 'world.errors.formulaInvalid';
+    dice.faces > COMBAT_DICE_MAX_FACES;
+  if (combat.steps.initiative) {
+    if (diceInvalid) errors.combatInitiative = 'world.errors.combatDiceInvalid';
+    else if (!isCombatFormulaValid(combat.initiative.formula, names))
+      errors.combatInitiative = 'world.errors.formulaInvalid';
+  }
 
   const actionNames = combat.actionTypes.map((action) =>
     normalizeName(action.name.trim()),
   );
   if (
-    combat.actionTypes.some(
+    combat.steps.actionCounters &&
+    (combat.actionTypes.some(
       (action, i) =>
         !actionNames[i] || !Number.isInteger(action.count) || action.count < 1,
     ) ||
-    new Set(actionNames).size !== actionNames.length
+      new Set(actionNames).size !== actionNames.length)
   )
     errors.combatActionTypes = 'world.errors.combatActionTypes';
 
@@ -89,7 +103,11 @@ export function validateCombatRules(
     errors.combatMovement = 'world.errors.formulaInvalid';
   if (combat.basicAttack && !isCombatFormulaValid(combat.basicAttack, names))
     errors.combatBasicAttack = 'world.errors.formulaInvalid';
-  if (combat.defence && !isCombatFormulaValid(combat.defence, names))
+  if (
+    combat.steps.defence &&
+    combat.defence &&
+    !isCombatFormulaValid(combat.defence, names)
+  )
     errors.combatDefence = 'world.errors.formulaInvalid';
   return errors;
 }
@@ -115,6 +133,18 @@ export function combatImportProblems(
     typeof dice['faces'] !== 'number'
   )
     problems.push('world.combat.initiative is invalid');
+  const steps = value['steps'];
+  if (
+    !isRecord(steps) ||
+    ![
+      'initiative',
+      'actionCounters',
+      'gmValidation',
+      'defence',
+      'rewards',
+    ].every((key) => typeof steps[key] === 'boolean')
+  )
+    problems.push('world.combat.steps is invalid');
   const actions = value['actionTypes'];
   if (
     !Array.isArray(actions) ||
@@ -122,7 +152,8 @@ export function combatImportProblems(
       (action) =>
         isRecord(action) &&
         typeof action['name'] === 'string' &&
-        typeof action['count'] === 'number',
+        typeof action['count'] === 'number' &&
+        typeof action['movement'] === 'boolean',
     )
   )
     problems.push('world.combat.actionTypes is invalid');
@@ -133,6 +164,8 @@ export function combatImportProblems(
     typeof grid['columns'] !== 'number' ||
     typeof grid['rows'] !== 'number'
   )
+    problems.push('world.combat.grid is invalid');
+  else if (grid['imageId'] !== undefined && typeof grid['imageId'] !== 'string')
     problems.push('world.combat.grid is invalid');
   if (typeof value['movement'] !== 'string')
     problems.push('world.combat.movement must be a string');

@@ -89,7 +89,7 @@ The app is in English and French, switchable at runtime (no reload, so live peer
 - Optimus UI's built-in texts come from the `optimus` block of each language file.
 - Dates: the `localDate` pipe (`core/pipes/local-date.pipe.ts`, `Intl` in the active language), not Angular's `DatePipe` (fixed locale).
 - Confirmations: `ConfirmationService.confirm()` with translated header, message and button labels; the dialog lives in `app.html`.
-- Data that depends on the language (generator word lists) lives in `public/i18n/generators/<lang>/`, loaded by its own service, not through Transloco.
+- Data that depends on the language (generator word lists) lives in the Base pack of the language (`public/packs/base-<lang>/generators/<generator>.json`, listed by `public/packs/base-<lang>/pack.json`; a pack has one language), loaded by `PackService` through `PackBusiness`, not through Transloco.
 - Supported languages are listed in `core/constants/languages.ts`; adding one means a new JSON file per folder and an entry there.
 
 ## Local storage

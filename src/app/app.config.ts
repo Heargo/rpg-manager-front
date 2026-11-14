@@ -14,7 +14,7 @@ import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
 import { translocoSettings } from './core/i18n/transloco-config';
 import { LanguageBusiness } from './core/business/language.business';
 import { DebugLogBusiness } from './core/business/debug-log.business';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
 import { provideOptimus } from '@openng/optimus-ui/config';
@@ -28,7 +28,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
-    provideRouter(routes),
+    provideRouter(routes, withComponentInputBinding()),
     // HttpClient only loads the app's own static files (translations, word lists): there is no backend.
     provideHttpClient(withFetch()),
     provideTransloco({

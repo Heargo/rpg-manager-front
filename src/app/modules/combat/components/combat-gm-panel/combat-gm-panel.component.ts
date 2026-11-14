@@ -1,11 +1,4 @@
 import {
-  CdkDrag,
-  CdkDragDrop,
-  CdkDragHandle,
-  CdkDropList,
-  moveItemInArray,
-} from '@angular/cdk/drag-drop';
-import {
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -19,11 +12,22 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
-import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
+import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
+import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { MessageLevel } from '../../../../core/models/toast-level';
+import { DiceRollBusiness } from '../../../dice/business/dice-roll.business';
+import { CombatSelectionBusiness } from '../../business/combat-selection.business';
 import { CombatBusiness } from '../../business/combat.business';
+import { CombatRollsBusiness } from '../../business/combat-rolls.business';
+import {
+  setupTokens,
+  startPicks,
+  startSlots,
+} from '../../helpers/combat-start.rules';
+import { Cell } from '../../helpers/combat-grid.rules';
 import { PendingResultView } from '../../models/combat';
 import { CombatActionsComponent } from '../combat-actions/combat-actions.component';
+import { CombatSetupGridComponent } from '../combat-setup-grid/combat-setup-grid.component';
 
 /** The game master's combat panel: start an encounter, run the turns, resolve skill results, end with the rewards. */
 @Component({
@@ -31,41 +35,74 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    CdkDropList,
-    CdkDrag,
-    CdkDragHandle,
     TranslocoPipe,
     ButtonModule,
     DialogModule,
     InputNumberModule,
     InputTextModule,
-    ProgressBarModule,
+    MultiSelectModule,
+    StoredImageComponent,
     CombatActionsComponent,
+    CombatSetupGridComponent,
   ],
   templateUrl: './combat-gm-panel.component.html',
   styleUrl: './combat-gm-panel.component.scss',
 })
 export class CombatGmPanelComponent {
   protected readonly combat = inject(CombatBusiness);
+  private readonly selection = inject(CombatSelectionBusiness);
+  private readonly rolls = inject(CombatRollsBusiness);
+  private readonly dice = inject(DiceRollBusiness);
   private readonly messages = inject(MessageService);
 
   protected readonly state = this.combat.$state;
   protected readonly encounter = this.combat.$encounter;
+  /** The pending results whose roll has landed: until then the dice are still moving. */
+  protected readonly landedPending = computed(
+    () =>
+      this.state()?.pending.filter(
+        (p) =>
+          !this.rolls.isLanding(p.id) &&
+          // On the open dice screen the roll is decided there.
+          !this.rolls.pendingIdsOf(this.dice.$current()?.id).includes(p.id),
+      ) ?? [],
+  );
 
   // Start form
   protected readonly chosen = signal<string[]>([]);
+  protected readonly chosenNpcs = signal<string[]>([]);
   protected readonly counts = signal<Record<string, number>>({});
   protected readonly canStart = computed(
-    () =>
-      this.chosen().length > 0 ||
-      Object.values(this.counts()).some((count) => count > 0),
+    () => this.chosen().length > 0 || this.chosenNpcs().length > 0,
+  );
+  protected readonly pickedNpcs = computed(() =>
+    this.combat.$npcs().filter((npc) => this.chosenNpcs().includes(npc.id)),
+  );
+
+  protected readonly placed = signal<Record<string, Cell>>({});
+  /** One future token per pick, shown on the setup grid while the world's grid is on. */
+  protected readonly slots = computed(() =>
+    this.combat.$grid()
+      ? startSlots(
+          startPicks(
+            this.chosen(),
+            this.chosenNpcs(),
+            this.counts(),
+            this.combat.$npcs(),
+          ),
+          this.combat.$characters(),
+          this.combat.$npcs(),
+        )
+      : [],
   );
 
   // Running encounter
-  protected readonly selectedId = signal<string | null>(null);
   protected readonly amount = signal<number | null>(1);
   protected readonly status = signal('');
-  protected readonly initiatives = signal<Record<string, number | null>>({});
+  protected readonly selected = computed(() => {
+    const id = this.selection.$selectedId();
+    return this.encounter()?.combatants.find((c) => c.id === id);
+  });
   protected readonly editing = signal<{ id: string; amounts: number[] } | null>(
     null,
   );
@@ -87,69 +124,70 @@ export class CombatGmPanelComponent {
     return this.combat.rewards();
   });
 
-  protected toggleCharacter(id: string): void {
-    this.chosen.update((ids) =>
-      ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id],
+  protected pickCharacters(ids: string[] | null): void {
+    this.chosen.set(ids ?? []);
+    this.prunePlaced();
+  }
+
+  /** Forgets the cells of tokens that are no longer picked. */
+  private prunePlaced(): void {
+    const keys = new Set(this.slots().map((s) => s.key));
+    this.placed.update((p) =>
+      Object.fromEntries(Object.entries(p).filter(([key]) => keys.has(key))),
     );
+  }
+
+  protected pickNpcs(ids: string[] | null): void {
+    const picked = ids ?? [];
+    this.chosenNpcs.set(picked);
+    this.counts.update((counts) =>
+      Object.fromEntries(
+        Object.entries(counts).filter(([id]) => picked.includes(id)),
+      ),
+    );
+    this.prunePlaced();
   }
 
   protected countOf(npcId: string): number {
-    return this.counts()[npcId] ?? 0;
+    return this.counts()[npcId] ?? 1;
   }
 
-  protected changeCount(npcId: string, by: number): void {
-    this.counts.update((counts) => ({
-      ...counts,
-      [npcId]: Math.max(0, Math.min(20, (counts[npcId] ?? 0) + by)),
-    }));
+  protected setCount(npcId: string, value: number | null): void {
+    this.counts.update((counts) => ({ ...counts, [npcId]: value ?? 1 }));
+    this.prunePlaced();
+  }
+
+  protected initial(name: string): string {
+    return name.charAt(0).toUpperCase();
   }
 
   protected async start(): Promise<void> {
-    const npcs = this.combat
-      .$npcs()
-      .filter((npc) => this.countOf(npc.id) > 0)
-      .map((npc) => ({
-        npcId: npc.id,
-        count: this.countOf(npc.id),
-        side: npc.roles.includes('enemy')
-          ? ('enemy' as const)
-          : ('ally' as const),
-      }));
-    const started = await this.run(() =>
-      this.combat.start({ characterIds: this.chosen(), npcs }),
+    const picks = startPicks(
+      this.chosen(),
+      this.chosenNpcs(),
+      this.counts(),
+      this.combat.$npcs(),
+      this.startPositions(),
     );
+    const started = await this.run(() => this.combat.start(picks));
     if (started) {
       this.chosen.set([]);
+      this.chosenNpcs.set([]);
       this.counts.set({});
+      this.placed.set({});
     }
   }
 
-  /** What a drop on the turn order calls: the new order, by combatant id. */
-  reorder(ids: string[]): Promise<boolean> {
-    return this.run(() => this.combat.reorder(ids));
-  }
-
-  protected drop(event: CdkDragDrop<unknown>): void {
-    const ids = (this.state()?.combatants ?? []).map((c) => c.id);
-    moveItemInArray(ids, event.previousIndex, event.currentIndex);
-    void this.reorder(ids);
-  }
-
-  protected select(id: string): void {
-    this.selectedId.update((current) => (current === id ? null : id));
-  }
-
-  protected initiativeOf(id: string): number | null {
-    return this.initiatives()[id] ?? null;
-  }
-
-  protected setInitiativeDraft(id: string, value: number | null): void {
-    this.initiatives.update((drafts) => ({ ...drafts, [id]: value }));
-  }
-
-  protected setInitiative(id: string): void {
-    const value = this.initiativeOf(id);
-    if (value !== null) void this.run(() => this.combat.initiative(id, value));
+  /** The cell shown for every token, or none without a grid. */
+  private startPositions(): Record<string, Cell> | undefined {
+    const grid = this.combat.$grid();
+    if (!grid || !this.slots().length) return undefined;
+    return Object.fromEntries(
+      setupTokens(this.slots(), this.placed(), grid).map((t) => [
+        t.key,
+        { x: t.x, y: t.y },
+      ]),
+    );
   }
 
   protected damage(id: string): void {
@@ -171,12 +209,6 @@ export class CombatGmPanelComponent {
       await this.run(() => this.combat.edit(id, { kind: 'add-status', status }))
     )
       this.status.set('');
-  }
-
-  protected removeStatus(id: string, status: string): void {
-    void this.run(() =>
-      this.combat.edit(id, { kind: 'remove-status', status }),
-    );
   }
 
   protected nextTurn(): void {
@@ -237,6 +269,10 @@ export class CombatGmPanelComponent {
 
   // End
   protected openEnd(): void {
+    if (!this.combat.rewards()) {
+      void this.confirmEnd();
+      return;
+    }
     const names = new Map(this.combat.$characters().map((c) => [c.id, c.name]));
     this.endXp.set(
       (this.combat.rewards()?.xp.perCharacter ?? []).map((entry) => ({
@@ -262,7 +298,7 @@ export class CombatGmPanelComponent {
     }));
     if (await this.run(() => this.combat.end({ xp }))) {
       this.endOpen.set(false);
-      this.selectedId.set(null);
+      this.selection.clear();
     }
   }
 

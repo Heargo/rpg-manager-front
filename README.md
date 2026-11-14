@@ -49,10 +49,13 @@ Then open http://localhost:4200. The dev server has no TURN relay (it uses publi
 
 | Command | Does |
 | --- | --- |
-| `npm start` | Dev server with live reload |
+| `npm start` | Dev server with live reload, plus the user documentation's dev server on port 4321 that the app's Help links open (`SKIP_DOCS=1` to leave it out) |
 | `npm test` | Unit tests (Vitest), single run |
 | `npm run test:watch` | Unit tests in watch mode |
-| `npm run build` | Production build in `dist/panel` (with the service worker) |
+| `npm run build` | Production build in `dist/panel` (with the service worker), the user documentation in `dist/panel/browser/docs` |
+| `npm run docs:dev` | The user documentation (Starlight, `user-docs/`) at http://localhost:4321/docs/ |
+| `npm run docs:build` | Builds only the user documentation |
+| `npm run docs:screenshots` | Retakes every screenshot of the documentation with Playwright (starts the dev server on port 4200, or reuses one) |
 
 To try the installed, offline app, build and serve `dist/panel/browser` with any static server (for example `npx http-server dist/panel/browser`).
 
@@ -83,6 +86,7 @@ The contact form needs a [Web3Forms](https://web3forms.com/) access key, read at
 | `src/app/core/` | Shared pieces: peer-to-peer layer (`p2p/`), random generators, images, language, profile |
 | `public/i18n/` | English and French texts, and the word lists for item names |
 | `netlify/functions/` | The only server code: hands out TURN credentials |
+| `user-docs/` | The user documentation (Starlight, French and English), served at `/docs` |
 | `docs/rules.md` | How the code is organised (component → business → service), conventions, test commands |
 | `docs/adr/` | Decisions and why: UI library, manual WebRTC signalling, TURN relay |
 | `.scratch/` | Specs and tickets; `.scratch/ROADMAP.md` is the development order |

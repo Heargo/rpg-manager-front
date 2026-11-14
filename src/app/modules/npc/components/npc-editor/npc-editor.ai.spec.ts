@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslocoService } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
-import npcNames from '../../../../../../public/i18n/generators/en/npcs.json';
+import npcNames from '../../../../../../public/packs/base-en/generators/npcs.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
-import { WordListService } from '../../../../core/services/word-list.service';
+import { PackBusiness } from '../../../../core/business/pack.business';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
 import { World } from '../../../world/models/world';
 import { NpcEditorComponent } from './npc-editor.component';
@@ -28,7 +28,7 @@ describe('NpcEditorComponent AI prompt and Random', () => {
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
     TestBed.configureTestingModule({
       imports: [NpcEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: WordListService, useValue: { loadNpcNames: async () => npcNames } }],
+      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => npcNames, packsFor: async () => ['base-en'], $installed: () => [] } }],
     });
     const toast = vi.spyOn(TestBed.inject(MessageService), 'add');
     const fixture = TestBed.createComponent(NpcEditorComponent);

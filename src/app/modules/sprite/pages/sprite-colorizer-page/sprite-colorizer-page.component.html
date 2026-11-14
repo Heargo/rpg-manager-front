@@ -26,10 +26,17 @@
         (onClick)="imageInput.click()"
       />
       <p-button
+        icon="pi pi-th-large"
+        [label]="'sprite.library.open' | transloco"
+        [ariaLabel]="'sprite.library.open' | transloco"
+        severity="secondary"
+        (onClick)="openLibrary()"
+      />
+      <p-button
         icon="pi pi-sparkles"
         [label]="'sprite.demo' | transloco"
         severity="secondary"
-        (onClick)="business.loadDemo()"
+        (onClick)="loadDemo()"
       />
       <p-button
         icon="pi pi-undo"
@@ -56,6 +63,22 @@
         (onClick)="business.downloadPng()"
       />
       <p-button
+        icon="pi pi-save"
+        [ariaLabel]="'sprite.sets.save' | transloco"
+        [pTooltip]="'sprite.sets.saveHint' | transloco"
+        [label]="'sprite.sets.save' | transloco"
+        severity="secondary"
+        [disabled]="!business.$document()"
+        (onClick)="saveSet()"
+      />
+      <p-button
+        icon="pi pi-plus"
+        [label]="'sprite.draft.add' | transloco"
+        severity="secondary"
+        [disabled]="!business.$document()"
+        (onClick)="openAdd()"
+      />
+      <p-button
         icon="pi pi-file-export"
         [ariaLabel]="'sprite.exportJson' | transloco"
         [pTooltip]="'sprite.exportJson' | transloco"
@@ -74,6 +97,25 @@
       />
     </div>
   </header>
+
+  @if (business.$draftTarget()) {
+    <p-message severity="info" data-test="draft-banner" class="draft-banner">
+      <div class="row">
+        <span>{{ draftBanner() }}</span>
+        <p-button
+          icon="pi pi-save"
+          [label]="'sprite.draft.save' | transloco"
+          (onClick)="saveToDraft()"
+        />
+        <p-button
+          icon="pi pi-arrow-left"
+          severity="secondary"
+          [label]="'sprite.draft.back' | transloco"
+          (onClick)="backToDraft()"
+        />
+      </div>
+    </p-message>
+  }
 
   <div class="layout">
     <main class="stage">
@@ -131,9 +173,9 @@
         (wheel)="onWheel($event)"
         (pointerdown)="onPointerDown($event)"
         (pointermove)="onPointerMove($event)"
-        (pointerup)="onPointerUp()"
-        (pointercancel)="onPointerUp()"
-        (pointerleave)="pointer.set(null)"
+        (pointerup)="onPointerUp($event)"
+        (pointercancel)="onPointerUp($event)"
+        (pointerleave)="onPointerLeave()"
         (dblclick)="onDoubleClick($event)"
         (contextmenu)="$event.preventDefault()"
       >
@@ -161,6 +203,14 @@
                     [class.first]="$first"
                   />
                 }
+              }
+              @if (brushCursor(); as cursor) {
+                <path
+                  class="brush"
+                  [attr.d]="cursor.outline"
+                  [attr.stroke-width]="1 / zoom()"
+                  [attr.stroke-dasharray]="3 / zoom() + ' ' + 3 / zoom()"
+                />
               }
             </svg>
           </div>
@@ -584,3 +634,243 @@
     </aside>
   </div>
 </div>
+<p-dialog
+  [header]="'sprite.library.title' | transloco"
+  [visible]="libraryOpen()"
+  (visibleChange)="libraryOpen.set($event)"
+  [modal]="true"
+  [dismissableMask]="true"
+  [style]="{ width: 'min(48rem, calc(100vw - 2rem))' }"
+>
+  @if (libraryOpen()) {
+    <div class="library">
+      <p-selectbutton
+        class="library-tabs"
+        [options]="libraryViews()"
+        optionLabel="label"
+        optionValue="value"
+        [allowEmpty]="false"
+        [ngModel]="libraryView()"
+        (ngModelChange)="libraryView.set($event)"
+      />
+      @if (libraryView() === "mine") {
+        <ul class="saved-sets">
+          @for (set of savedSets(); track set.id) {
+            <li class="saved-set" data-test="saved-set">
+              @if (renamingSetId() === set.id) {
+                <input
+                  pInputText
+                  class="saved-name-input"
+                  [value]="set.name"
+                  [attr.aria-label]="'sprite.sets.rename' | transloco"
+                  (keydown.enter)="renameSet(set.id, $any($event.target).value)"
+                  (keydown.escape)="renamingSetId.set(null)"
+                  (blur)="renameSet(set.id, $any($event.target).value)"
+                />
+              } @else {
+                <span class="saved-name">{{ set.name }}</span>
+              }
+              <span class="saved-date">{{ set.date }}</span>
+              <p-select
+                class="saved-kind"
+                data-test="set-kind"
+                [options]="setKinds()"
+                optionLabel="label"
+                optionValue="value"
+                appendTo="body"
+                [ariaLabel]="'sprite.sets.kind' | transloco"
+                [pTooltip]="'sprite.sets.kindHint' | transloco"
+                [ngModel]="set.kind"
+                (ngModelChange)="setKind(set.id, $event)"
+              />
+              <span class="row tight">
+                <p-button
+                  icon="pi pi-folder-open"
+                  size="small"
+                  [text]="true"
+                  [ariaLabel]="'sprite.sets.open' | transloco"
+                  [pTooltip]="'sprite.sets.open' | transloco"
+                  (onClick)="openSet(set.id)"
+                />
+                <p-button
+                  icon="pi pi-pencil"
+                  size="small"
+                  [text]="true"
+                  severity="secondary"
+                  [ariaLabel]="'sprite.sets.rename' | transloco"
+                  [pTooltip]="'sprite.sets.rename' | transloco"
+                  (onClick)="startRenameSet(set.id)"
+                />
+                <p-button
+                  icon="pi pi-trash"
+                  size="small"
+                  [text]="true"
+                  severity="danger"
+                  [ariaLabel]="'sprite.sets.delete' | transloco"
+                  [pTooltip]="'sprite.sets.delete' | transloco"
+                  (onClick)="deleteSet(set)"
+                />
+              </span>
+            </li>
+          } @empty {
+            <li class="library-empty">{{ "sprite.sets.empty" | transloco }}</li>
+          }
+        </ul>
+      } @else {
+        <input
+          pInputText
+          type="search"
+          data-test="library-search"
+          class="library-search"
+          [placeholder]="'sprite.library.search' | transloco"
+          [attr.aria-label]="'sprite.library.search' | transloco"
+          [value]="libraryQuery()"
+          (input)="libraryQuery.set($any($event.target).value)"
+        />
+        <p-select
+          class="library-kind"
+          data-test="library-kind"
+          [options]="libraryKinds()"
+          optionLabel="label"
+          optionValue="value"
+          appendTo="body"
+          [ariaLabel]="'sprite.library.kindFilter' | transloco"
+          [ngModel]="libraryKind()"
+          (ngModelChange)="libraryKind.set($event)"
+        />
+        @for (group of libraryGroups(); track group.packId) {
+          <h3 class="library-pack" data-test="library-pack">
+            {{ group.name }}
+          </h3>
+          <ul class="library-grid">
+            @for (sprite of group.sprites; track sprite.id) {
+              <li>
+                <button
+                  type="button"
+                  class="library-sprite"
+                  data-test="library-sprite"
+                  (click)="pickSprite(sprite.id)"
+                >
+                  <img
+                    [src]="sprite.url"
+                    alt=""
+                    loading="lazy"
+                    width="64"
+                    height="64"
+                  />
+                  <span>{{ sprite.label }}</span>
+                </button>
+                <p-tag
+                  data-test="library-kind-badge"
+                  severity="secondary"
+                  [value]="'sprite.kind.' + sprite.kind | transloco"
+                />
+              </li>
+            }
+          </ul>
+        } @empty {
+          <p class="library-empty">{{ "sprite.library.empty" | transloco }}</p>
+        }
+        <p class="library-credit">{{ "sprite.library.credit" | transloco }}</p>
+      }
+    </div>
+  }
+</p-dialog>
+
+<p-toast key="draft-added" position="bottom-right">
+  <ng-template #message let-message>
+    <div class="row">
+      <span>{{ message.detail }}</span>
+      <p-button
+        size="small"
+        [label]="'sprite.draft.open' | transloco"
+        (onClick)="openDraft(message.data.draftId)"
+      />
+    </div>
+  </ng-template>
+</p-toast>
+
+<p-dialog
+  [header]="'sprite.draft.addTitle' | transloco"
+  [visible]="addOpen()"
+  (visibleChange)="addOpen.set($event)"
+  [modal]="true"
+  [dismissableMask]="true"
+  [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
+>
+  @if (addOpen()) {
+    <div class="add-form">
+      <label>
+        {{ "sprite.draft.chooseDraft" | transloco }}
+        <p-select
+          data-test="add-draft-select"
+          [options]="draftOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="addDraftId()"
+          (ngModelChange)="addDraftId.set($event)"
+          appendTo="body"
+        />
+      </label>
+      <button
+        pButton
+        type="button"
+        data-test="add-new-draft"
+        icon="pi pi-plus"
+        severity="secondary"
+        size="small"
+        [label]="'sprite.draft.newDraft' | transloco"
+        (click)="newDraft()"
+      ></button>
+      <label>
+        {{ "sprite.draft.spriteId" | transloco }}
+        <input
+          pInputText
+          type="text"
+          data-test="add-sprite-id"
+          [ngModel]="addDetails().id"
+          (ngModelChange)="patchAdd({ id: $event })"
+        />
+      </label>
+      <label>
+        {{ "sprite.draft.label" | transloco }}
+        <input
+          pInputText
+          type="text"
+          [ngModel]="addDetails().label"
+          (ngModelChange)="patchAdd({ label: $event })"
+        />
+      </label>
+      <label>
+        {{ "sprite.draft.type" | transloco }}
+        <p-select
+          [options]="typeOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="addDetails().type"
+          (ngModelChange)="setAddType($event)"
+          appendTo="body"
+        />
+      </label>
+      <label>
+        {{ "sprite.draft.slot" | transloco }}
+        <p-select
+          [options]="slotOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="addDetails().slot"
+          (ngModelChange)="patchAdd({ slot: $event })"
+          appendTo="body"
+        />
+      </label>
+      <button
+        pButton
+        type="button"
+        data-test="add-confirm"
+        [label]="'sprite.draft.confirm' | transloco"
+        [disabled]="!addDraftId() || !addDetails().id || adding()"
+        (click)="confirmAdd()"
+      ></button>
+    </div>
+  }
+</p-dialog>

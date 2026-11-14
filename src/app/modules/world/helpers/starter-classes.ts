@@ -506,6 +506,7 @@ export function buildStarterClasses(
   const at = language === 'fr' ? 1 : 0;
   const actionTypes = (world.combat?.actionTypes ?? []).map((a) => a.name);
   const movementType =
+    world.combat?.actionTypes.find((a) => a.movement)?.name ??
     actionTypes.find((name) =>
       ['movement', 'déplacement', 'deplacement', 'mouvement'].includes(name.trim().toLocaleLowerCase()),
     ) ?? actionTypes[0];

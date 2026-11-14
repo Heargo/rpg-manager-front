@@ -1,5 +1,5 @@
-import en from '../../../../public/i18n/generators/en/items.json';
-import fr from '../../../../public/i18n/generators/fr/items.json';
+import en from '../../../../public/packs/base-en/generators/items.json';
+import fr from '../../../../public/packs/base-fr/generators/items.json';
 import { BASE_KEYS, WordList } from './word-list';
 import { generateItemName } from './name-generator';
 import { seededRandomSource } from './random-source';

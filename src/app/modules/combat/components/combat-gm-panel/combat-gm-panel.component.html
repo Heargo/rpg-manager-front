@@ -32,10 +32,10 @@
     ></button>
   </div>
 
-  @if (view.pending.length) {
+  @if (landedPending().length) {
     <section class="pending-list">
       <h3>{{ "combat.pending.title" | transloco }}</h3>
-      @for (pending of view.pending; track pending.id) {
+      @for (pending of landedPending(); track pending.id) {
         <div class="pending" data-testid="pending">
           <div class="text">
             <strong>
@@ -145,170 +145,80 @@
     </section>
   }
 
-  <div
-    class="order"
-    cdkDropList
-    [attr.aria-label]="'combat.order' | transloco"
-    (cdkDropListDropped)="drop($event)"
-  >
-    @for (combatant of view.combatants; track combatant.id) {
-      <div
-        class="combatant"
-        cdkDrag
-        data-testid="combatant"
-        [attr.data-name]="combatant.name"
-        [attr.data-active]="combatant.id === view.activeId ? 'true' : null"
-        [attr.data-down]="combatant.down ? 'true' : null"
-        [class.active]="combatant.id === view.activeId"
-        [class.down]="combatant.down"
-        [class.enemy]="combatant.side === 'enemy'"
-      >
-        <div class="head">
-          <i
-            class="pi pi-bars handle"
-            cdkDragHandle
-            [attr.aria-label]="'combat.drag' | transloco"
-          ></i>
-          <strong class="name">{{ combatant.name }}</strong>
-          <span class="initiative" data-field="initiative">
-            <i class="pi pi-bolt"></i>{{ combatant.initiative ?? "—" }}
-          </span>
-          <span class="initiative-edit">
-            <p-inputnumber
-              data-testid="initiative-input"
-              size="small"
-              [ngModel]="initiativeOf(combatant.id)"
-              (ngModelChange)="setInitiativeDraft(combatant.id, $event)"
-              [placeholder]="'combat.initiative.label' | transloco"
-            />
-            <button
-              pButton
-              type="button"
-              data-action="initiative-set"
-              size="small"
-              severity="secondary"
-              icon="pi pi-check"
-              [ariaLabel]="'combat.initiative.set' | transloco"
-              (click)="setInitiative(combatant.id)"
-            ></button>
-          </span>
-          <p-progressbar
-            class="life"
-            data-field="life-bar"
-            [attr.data-percent]="combatant.lifeBar?.percent"
-            [value]="combatant.lifeBar?.percent ?? 0"
-            [showValue]="false"
-          />
-          @if (combatant.life; as life) {
-            <small class="life-text">{{ life.current }} / {{ life.max }}</small>
-          }
-          @if (combatant.down) {
-            <span class="down-tag">{{ "combat.down" | transloco }}</span>
-          }
-          <button
-            pButton
-            type="button"
-            data-action="select"
-            size="small"
-            severity="secondary"
-            [text]="true"
-            [icon]="
-              selectedId() === combatant.id ? 'pi pi-minus' : 'pi pi-plus'
-            "
-            [ariaLabel]="'combat.details' | transloco"
-            (click)="select(combatant.id)"
-          ></button>
-        </div>
-        @if (combatant.statuses.length) {
-          <div class="statuses">
-            @for (status of combatant.statuses; track status) {
-              <span class="status" data-field="status">
-                {{ status }}
-                <button
-                  type="button"
-                  class="remove-status"
-                  [attr.aria-label]="'combat.status.remove' | transloco"
-                  (click)="removeStatus(combatant.id, status)"
-                >
-                  <i class="pi pi-times"></i>
-                </button>
-              </span>
-            }
-          </div>
-        }
+  @if (active(); as current) {
+    <div
+      class="active-row"
+      data-testid="active-row"
+      [attr.data-name]="current.name"
+    >
+      <app-combat-actions
+        [combatantId]="current.id"
+        [characterId]="current.characterId"
+        [sheetSkills]="current.skills"
+        [level]="current.level"
+        [attributes]="current.attributes"
+        [actions]="current.actions"
+      />
+    </div>
+  }
 
-        @if (combatant.id === view.activeId && active(); as current) {
-          <div
-            class="active-row"
-            data-testid="active-row"
-            [attr.data-name]="combatant.name"
-          >
-            <app-combat-actions
-              [combatantId]="current.id"
-              [characterId]="current.characterId"
-              [sheetSkills]="current.skills"
-              [level]="current.level"
-              [attributes]="current.attributes"
-              [actions]="current.actions"
-            />
-          </div>
-        }
-
-        @if (selectedId() === combatant.id) {
-          <div class="details">
-            <div class="row">
-              <p-inputnumber
-                data-testid="manual-amount"
-                [ngModel]="amount()"
-                (ngModelChange)="amount.set($event)"
-                [min]="0"
-                [showButtons]="true"
-              />
-              <button
-                pButton
-                type="button"
-                data-action="damage"
-                size="small"
-                severity="danger"
-                icon="pi pi-bolt"
-                [label]="'combat.manual.damage' | transloco"
-                (click)="damage(combatant.id)"
-              ></button>
-              <button
-                pButton
-                type="button"
-                data-action="heal"
-                size="small"
-                icon="pi pi-heart"
-                [label]="'combat.manual.heal' | transloco"
-                (click)="heal(combatant.id)"
-              ></button>
-            </div>
-            <div class="row">
-              <input
-                pInputText
-                data-testid="manual-status"
-                [value]="status()"
-                (input)="status.set($any($event.target).value)"
-                [placeholder]="'combat.status.placeholder' | transloco"
-                maxlength="100"
-              />
-              <button
-                pButton
-                type="button"
-                data-action="add-status"
-                size="small"
-                severity="secondary"
-                icon="pi pi-plus"
-                [label]="'combat.status.add' | transloco"
-                (click)="addStatus(combatant.id)"
-              ></button>
-            </div>
-          </div>
-        }
+  @if (selected(); as picked) {
+    <div
+      class="details"
+      data-testid="selected-edits"
+      [attr.data-name]="picked.name"
+    >
+      <h4>{{ picked.name }}</h4>
+      <div class="row">
+        <p-inputnumber
+          data-testid="manual-amount"
+          [ngModel]="amount()"
+          (ngModelChange)="amount.set($event)"
+          [min]="0"
+          [showButtons]="true"
+        />
+        <button
+          pButton
+          type="button"
+          data-action="damage"
+          size="small"
+          severity="danger"
+          icon="pi pi-bolt"
+          [label]="'combat.manual.damage' | transloco"
+          (click)="damage(picked.id)"
+        ></button>
+        <button
+          pButton
+          type="button"
+          data-action="heal"
+          size="small"
+          icon="pi pi-heart"
+          [label]="'combat.manual.heal' | transloco"
+          (click)="heal(picked.id)"
+        ></button>
       </div>
-    }
-  </div>
+      <div class="row">
+        <input
+          pInputText
+          data-testid="manual-status"
+          [value]="status()"
+          (input)="status.set($any($event.target).value)"
+          [placeholder]="'combat.status.placeholder' | transloco"
+          maxlength="100"
+        />
+        <button
+          pButton
+          type="button"
+          data-action="add-status"
+          size="small"
+          severity="secondary"
+          icon="pi pi-plus"
+          [label]="'combat.status.add' | transloco"
+          (click)="addStatus(picked.id)"
+        ></button>
+      </div>
+    </div>
+  }
 
   <p-dialog
     [visible]="endOpen()"
@@ -376,66 +286,106 @@
   <div class="start-form" data-testid="start-form">
     <h3>{{ "combat.start.title" | transloco }}</h3>
     <h4>{{ "combat.start.characters" | transloco }}</h4>
-    @for (character of combat.$characters(); track character.id) {
-      <div
-        class="pick"
-        data-testid="start-character"
-        [attr.data-name]="character.name"
+    @if (combat.$characters().length) {
+      <p-multiselect
+        class="start-select"
+        data-testid="start-characters"
+        [options]="combat.$characters()"
+        optionLabel="name"
+        optionValue="id"
+        display="chip"
+        [filter]="true"
+        [showToggleAll]="false"
+        [ngModel]="chosen()"
+        (ngModelChange)="pickCharacters($event)"
+        [placeholder]="'combat.start.placeholder' | transloco"
       >
-        <span>{{ character.name }}</span>
-        <button
-          pButton
-          type="button"
-          data-action="toggle-character"
-          size="small"
-          [outlined]="!chosen().includes(character.id)"
-          [icon]="
-            chosen().includes(character.id) ? 'pi pi-check' : 'pi pi-plus'
-          "
-          [label]="
-            (chosen().includes(character.id)
-              ? 'combat.start.picked'
-              : 'combat.start.pick'
-            ) | transloco
-          "
-          [attr.aria-pressed]="chosen().includes(character.id)"
-          (click)="toggleCharacter(character.id)"
-        ></button>
-      </div>
-    } @empty {
+        <ng-template #item let-option>
+          <div
+            class="option"
+            data-testid="start-option"
+            [attr.data-name]="option.name"
+          >
+            @if (option.portraitId; as portraitId) {
+              <app-stored-image
+                class="portrait"
+                [imageId]="portraitId"
+                [alt]="option.name"
+              >
+                <span class="initial">{{ initial(option.name) }}</span>
+              </app-stored-image>
+            } @else {
+              <span class="initial portrait">{{ initial(option.name) }}</span>
+            }
+            <span>{{ option.name }}</span>
+          </div>
+        </ng-template>
+      </p-multiselect>
+    } @else {
       <p class="hint">{{ "combat.start.noCharacters" | transloco }}</p>
     }
     <h4>{{ "combat.start.npcs" | transloco }}</h4>
-    @for (npc of combat.$npcs(); track npc.id) {
-      <div class="pick" data-testid="start-npc" [attr.data-name]="npc.name">
-        <span>{{ npc.name }}</span>
-        <span class="count">
-          <button
-            pButton
-            type="button"
-            data-action="npc-minus"
-            size="small"
-            severity="secondary"
-            icon="pi pi-minus"
-            [ariaLabel]="'combat.start.fewer' | transloco"
-            [disabled]="countOf(npc.id) === 0"
-            (click)="changeCount(npc.id, -1)"
-          ></button>
-          <strong data-field="npc-count">{{ countOf(npc.id) }}</strong>
-          <button
-            pButton
-            type="button"
-            data-action="npc-plus"
-            size="small"
-            severity="secondary"
-            icon="pi pi-plus"
-            [ariaLabel]="'combat.start.more' | transloco"
-            (click)="changeCount(npc.id, 1)"
-          ></button>
-        </span>
-      </div>
-    } @empty {
+    @if (combat.$npcs().length) {
+      <p-multiselect
+        class="start-select"
+        data-testid="start-npcs"
+        [options]="combat.$npcs()"
+        optionLabel="name"
+        optionValue="id"
+        display="chip"
+        [filter]="true"
+        [showToggleAll]="false"
+        [ngModel]="chosenNpcs()"
+        (ngModelChange)="pickNpcs($event)"
+        [placeholder]="'combat.start.placeholder' | transloco"
+      >
+        <ng-template #item let-option>
+          <div
+            class="option"
+            data-testid="start-option"
+            [attr.data-name]="option.name"
+          >
+            @if (option.portraitId; as portraitId) {
+              <app-stored-image
+                class="portrait"
+                [imageId]="portraitId"
+                [alt]="option.name"
+              >
+                <span class="initial">{{ initial(option.name) }}</span>
+              </app-stored-image>
+            } @else {
+              <span class="initial portrait">{{ initial(option.name) }}</span>
+            }
+            <span>{{ option.name }}</span>
+          </div>
+        </ng-template>
+      </p-multiselect>
+      @for (npc of pickedNpcs(); track npc.id) {
+        <div class="pick" data-testid="start-npc" [attr.data-name]="npc.name">
+          <span>{{ npc.name }}</span>
+          <p-inputnumber
+            data-testid="npc-count"
+            [showButtons]="true"
+            [min]="1"
+            [max]="20"
+            [ngModel]="countOf(npc.id)"
+            (ngModelChange)="setCount(npc.id, $event)"
+            [ariaLabel]="'combat.start.count' | transloco"
+          />
+        </div>
+      }
+    } @else {
       <p class="hint">{{ "combat.start.noNpcs" | transloco }}</p>
+    }
+    @if (slots().length) {
+      <app-combat-setup-grid
+        [slots]="slots()"
+        [positions]="placed()"
+        (positionsChange)="placed.set($event)"
+      />
+      <p class="hint" data-testid="place-hint">
+        {{ "combat.start.placeHint" | transloco }}
+      </p>
     }
     <button
       pButton

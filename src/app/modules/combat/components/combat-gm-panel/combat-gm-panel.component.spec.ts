@@ -1,33 +1,44 @@
+import { Component } from '@angular/core';
 import {
   click,
   combatTable,
   mount,
+  pickStart,
+  pickTarget,
   typeNumber,
 } from '../../../../../testing/combat-table';
 import { settle } from '../../../../../testing/game-device';
+import { DiceRollBusiness } from '../../../dice/business/dice-roll.business';
+import { NpcCatalogueBusiness } from '../../../npc/business/npc-catalogue.business';
+import { CombatSelectionBusiness } from '../../business/combat-selection.business';
+import { CombatOrderComponent } from '../combat-order/combat-order.component';
 import { CombatGmPanelComponent } from './combat-gm-panel.component';
 
+/** The order and the panel side by side, as the table shows them. */
+@Component({
+  selector: 'app-test-host',
+  imports: [CombatOrderComponent, CombatGmPanelComponent],
+  template: '<app-combat-order /><app-combat-gm-panel />',
+})
+class HostComponent {}
+
 /**
- * Contract: `app-combat-gm-panel` (no inputs) runs on the GM's device (host) against the real `CombatBusiness`. Elements are found by
+ * Contract: `app-combat-gm-panel` (no inputs) runs on the GM's device (host) against the real `CombatBusiness`; the turn order rows live in
+ * `app-combat-order` (mounted next to it in these tests, selection shared through `CombatSelectionBusiness`). Elements are found by
  * `data-testid` / `data-action`; buttons are clicked, p-inputNumber fields are typed into (their wrapper carries the testid).
  *
- * - No encounter: `[data-testid="start-form"]` with one `[data-testid="start-character"]` per world character (`data-name`, toggled by clicking its
- *   `[data-action="toggle-character"]`), one `[data-testid="start-npc"]` per catalogue NPC (`data-name`, `[data-action="npc-plus"]` adds one to the count,
- *   `[data-action="npc-minus"]` removes one, `[data-field="npc-count"]` shows it) and `[data-action="start"]`.
- * - Encounter: `[data-testid="combatant"]` rows in turn order (`data-name`, `data-active="true"` on the active one, `data-down="true"` when down) with
- *   `[data-field="life-bar"]` (`data-percent`), `[data-field="initiative"]`, `[data-field="status"]` (one per status), and a round label `[data-field="round"]`.
- * - The active row also carries `[data-testid="active-row"]`: `[data-testid="action-counter"]` (`data-action-name`, `data-used`, `data-count`; click its
- *   `[data-action="tick"]` to use one), `[data-testid="skill"]` (`data-name`, `data-available="false"` when on cooldown or unaffordable; text = the preview
- *   "5 damage, 3 Mana, cooldown 2"; `[data-action="use-skill"]`) and `[data-testid="item"]` (`data-name`, `[data-action="use-item"]`).
- * - Targeting: after `use-skill`, `[data-testid="target"]` per combatant (`data-name`, click to pick) and `[data-action="confirm-skill"]`.
- * - `[data-testid="pending"]` per pending result (text names the caster, the skill and the target) with `[data-action="apply"]`, `[data-action="dismiss"]`,
- *   `[data-action="edit"]` (shows `[data-testid="edit-amount"]`, a number input, and `[data-action="apply-edited"]`).
- * - Any row: `[data-action="select"]` expands it, showing `[data-testid="manual-amount"]` (number), `[data-action="damage"]`, `[data-action="heal"]`,
- *   `[data-testid="manual-status"]` (text input), `[data-action="add-status"]`.
- * - `[data-action="initiative-set"]` inside a row, with `[data-testid="initiative-input"]` (number) in the row, sets that combatant's initiative.
- * - Toolbar: `[data-action="next-turn"]`, `[data-action="undo"]`, `[data-action="end"]`. The component method `reorder(ids)` is what a drag drop calls.
- * - End dialog (rendered anywhere in the document): `[data-testid="end-dialog"]` with `[data-testid="reward-xp"]` per character (`data-name`, number input,
- *   proposed value), `[data-field="reward-money"]`, `[data-testid="reward-loot"]` per item, `[data-action="confirm-end"]`.
+ * - No encounter: `[data-testid="start-form"]` (unchanged: two multi-selects, NPC counts, Start). With the world's grid on and at least one pick, it also holds
+ *   `app-combat-setup-grid` (`[data-testid="setup-grid"]`, tokens `[data-testid="setup-token"]` with `data-key`, `data-x`, `data-y`) and a hint
+ *   `[data-testid="place-hint"]`; Start sends the shown cell of every token. Without the grid, or without a pick, none of that.
+ * - Encounter: toolbar `[data-action="next-turn"]`, `[data-action="undo"]`, `[data-action="end"]` and a round label `[data-field="round"]`; no combatant rows.
+ * - `[data-testid="active-row"]` (`data-name` = the active combatant), outside the rows: tabs, skills, items, targeting (unchanged).
+ * - `[data-testid="pending"]` per pending result, listed once its roll has landed (`CombatRollsBusiness.isLanding(id)` is false: the GM's dice came to
+ *   rest, or 6 s passed); while it lands the result is hidden. It is also hidden while its roll is on the GM's open dice screen
+ *   (`DiceRollBusiness.$current()` has the roll's id): it is decided there (`app-combat-roll-decision`). Listed when the screen shows another roll or none.
+ * - Selected combatant (picked with `[data-action="select"]` in the order): `[data-testid="selected-edits"]` (`data-name`) holds
+ *   `[data-testid="manual-amount"]`, `[data-action="damage"]`, `[data-action="heal"]`, `[data-testid="manual-status"]`, `[data-action="add-status"]`.
+ *   Nothing selected: no such block. It goes away when the encounter ends.
+ * - End dialog: unchanged.
  */
 const row = (el: HTMLElement, name: string) =>
   el.querySelector<HTMLElement>(
@@ -42,11 +53,11 @@ const clean = (el: Element | null) =>
 
 describe('CombatGmPanelComponent', () => {
   let table: Awaited<ReturnType<typeof combatTable>>;
-  let mounted: Awaited<ReturnType<typeof mount<CombatGmPanelComponent>>>;
+  let mounted: Awaited<ReturnType<typeof mount<HostComponent>>>;
   let el: HTMLElement;
 
   const open = async () => {
-    mounted = await mount(CombatGmPanelComponent, table.gm);
+    mounted = await mount(HostComponent, table.gm);
     el = mounted.el;
   };
 
@@ -63,21 +74,19 @@ describe('CombatGmPanelComponent', () => {
     expect(el.querySelector('[data-testid="start-form"]')).not.toBeNull();
     expect(el.querySelector('[data-testid="combatant"]')).toBeNull();
 
-    await click(
-      el.querySelector(
-        '[data-testid="start-character"][data-name="Ada"] [data-action="toggle-character"]',
-      ),
-    );
-    await click(
-      el.querySelector(
-        '[data-testid="start-character"][data-name="Bob"] [data-action="toggle-character"]',
-      ),
-    );
+    await pickStart(el, 'start-characters', 'Ada');
+    await pickStart(el, 'start-characters', 'Bob');
+    await pickStart(el, 'start-npcs', 'Goblin');
     const goblin = '[data-testid="start-npc"][data-name="Goblin"]';
-    await click(el.querySelector(`${goblin} [data-action="npc-plus"]`));
-    await click(el.querySelector(`${goblin} [data-action="npc-plus"]`));
-    expect(clean(el.querySelector(`${goblin} [data-field="npc-count"]`))).toBe(
-      '2',
+    expect(el.querySelector(goblin)).not.toBeNull();
+    expect(
+      el.querySelector<HTMLInputElement>(
+        `${goblin} [data-testid="npc-count"] input`,
+      )!.value,
+    ).toBe('1');
+    await typeNumber(
+      el.querySelector(`${goblin} [data-testid="npc-count"]`)!,
+      2,
     );
     await click(el.querySelector('[data-action="start"]'));
 
@@ -86,70 +95,43 @@ describe('CombatGmPanelComponent', () => {
     expect(el.querySelector('[data-testid="start-form"]')).toBeNull();
   });
 
-  it('shows the turn order with the active row, life bar, initiative, statuses and round', async () => {
-    await table.start();
-    await table
-      .combat(table.gm)
-      .initiative(table.named(table.gm, 'Bob').id, 12);
-    await table.combat(table.gm).edit(table.named(table.gm, 'Goblin').id, {
-      kind: 'add-status',
-      status: 'Burning',
-    });
-    await table.combat(table.gm).edit(table.named(table.gm, 'Goblin').id, {
-      kind: 'damage',
-      amount: 4,
-    });
-    await settle();
+  it('starts with the default count of one copy per picked NPC', async () => {
     await open();
-
-    expect(names(el)).toEqual(['Bob', 'Ada', 'Goblin']);
-    expect(row(el, 'Ada').dataset['active']).toBe('true');
-    expect(row(el, 'Bob').dataset['active']).not.toBe('true');
-    expect(
-      clean(row(el, 'Bob').querySelector('[data-field="initiative"]')),
-    ).toContain('12');
-    expect(
-      row(el, 'Goblin')
-        .querySelector('[data-field="life-bar"]')!
-        .getAttribute('data-percent'),
-    ).toBe('60');
-    expect(
-      clean(row(el, 'Goblin').querySelector('[data-field="status"]')),
-    ).toContain('Burning');
-    expect(clean(el.querySelector('[data-field="round"]'))).toContain('1');
+    await pickStart(el, 'start-npcs', 'Goblin');
+    await click(el.querySelector('[data-action="start"]'));
+    expect(names(el)).toEqual(['Goblin']);
   });
 
-  it('types an initiative for a combatant', async () => {
-    await table.start();
+  it('drops the count row of an NPC that is unpicked', async () => {
     await open();
-    const goblin = row(el, 'Goblin');
-
-    await typeNumber(
-      goblin.querySelector('[data-testid="initiative-input"]')!,
-      30,
-    );
-    await click(goblin.querySelector('[data-action="initiative-set"]'));
-
-    expect(table.named(table.ada, 'Goblin').initiative).toBe(30);
-    expect(names(el)[0]).toBe('Goblin');
+    await pickStart(el, 'start-npcs', 'Goblin');
+    expect(el.querySelector('[data-testid="start-npc"]')).not.toBeNull();
+    await pickStart(el, 'start-npcs', 'Goblin');
+    expect(el.querySelector('[data-testid="start-npc"]')).toBeNull();
   });
 
-  it('reorders the turn order by hand', async () => {
-    await table.start();
+  it('disables Start while nothing is picked', async () => {
     await open();
-    const ids = ['Goblin', 'Bob', 'Ada'].map(
-      (n) => table.named(table.gm, n).id,
-    );
+    const start = () =>
+      el.querySelector<HTMLButtonElement>('[data-action="start"]')!;
+    expect(start().disabled).toBe(true);
+    await pickStart(el, 'start-characters', 'Ada');
+    expect(start().disabled).toBe(false);
+    await pickStart(el, 'start-characters', 'Ada');
+    expect(start().disabled).toBe(true);
+  });
 
-    mounted.ref.instance.reorder(ids);
+  it('shows the hint instead of the NPC multi-select when the catalogue is empty', async () => {
+    await table.gm.injector
+      .get(NpcCatalogueBusiness)
+      .remove(table.goblinNpc.id);
     await settle();
-
-    expect(table.state(table.bob).combatants.map((c) => c.name)).toEqual([
-      'Goblin',
-      'Bob',
-      'Ada',
-    ]);
-    expect(names(el)).toEqual(['Goblin', 'Bob', 'Ada']);
+    await open();
+    expect(el.querySelector('[data-testid="start-npcs"]')).toBeNull();
+    expect(el.querySelector('[data-testid="start-characters"]')).not.toBeNull();
+    expect(clean(el.querySelector('.hint'))).toContain(
+      'No NPC in the catalogue yet.',
+    );
   });
 
   it('expands the active row with counters, skills and items, and ticks a counter', async () => {
@@ -158,17 +140,10 @@ describe('CombatGmPanelComponent', () => {
     const active = el.querySelector<HTMLElement>('[data-testid="active-row"]')!;
 
     expect(active.dataset['name']).toBe('Ada');
-    const counters = Array.from(
-      active.querySelectorAll<HTMLElement>('[data-testid="action-counter"]'),
-    ).map((c) => [
-      c.dataset['actionName'],
-      c.dataset['used'],
-      c.dataset['count'],
-    ]);
-    expect(counters).toEqual([
-      ['Action', '0', '1'],
-      ['Movement', '0', '1'],
-    ]);
+    const tabs = Array.from(
+      active.querySelectorAll<HTMLElement>('[role="tab"]'),
+    ).map((t) => clean(t));
+    expect(tabs).toEqual(['Action (1/1)', 'Movement (1/1)']);
     const skill = active.querySelector<HTMLElement>('[data-testid="skill"]')!;
     expect(skill.dataset['name']).toBe('Fireball');
     expect(clean(skill)).toContain('5 damage, 3 Mana, cooldown 2');
@@ -176,11 +151,7 @@ describe('CombatGmPanelComponent', () => {
       active.querySelector('[data-testid="item"]')!.getAttribute('data-name'),
     ).toBe('Potion');
 
-    await click(
-      active.querySelector(
-        '[data-testid="action-counter"][data-action-name="Action"] [data-action="tick"]',
-      ),
-    );
+    await click(active.querySelector('[data-action="tick"]'));
     expect(
       table.named(table.ada, 'Ada').actions.find((a) => a.name === 'Action')!
         .used,
@@ -204,14 +175,30 @@ describe('CombatGmPanelComponent', () => {
   });
 
   describe('using a skill', () => {
-    const cast = async () => {
+    const castOnly = async () => {
       await click(
         el.querySelector('[data-testid="skill"] [data-action="use-skill"]'),
       );
-      await click(
-        el.querySelector('[data-testid="target"][data-name="Goblin"]'),
-      );
+      await pickTarget(el, 'Goblin');
       await click(el.querySelector('[data-action="confirm-skill"]'));
+    };
+    /** The GM's device throws the roll of the use and its dice come to rest. */
+    const land = async () => {
+      const dice = table.gm.injector.get(DiceRollBusiness);
+      const roll = dice.takeUnseenTableRoll();
+      if (roll) dice.presentShared(roll);
+      dice.markSettled();
+      await settle();
+    };
+    /** The GM's dice screen is closed (Escape before D04, a failed 3D load): the panel is where the result waits. */
+    const closeScreen = async () => {
+      table.gm.injector.get(DiceRollBusiness).close();
+      await settle();
+    };
+    const cast = async () => {
+      await castOnly();
+      await land();
+      await closeScreen();
     };
 
     beforeEach(async () => {
@@ -233,6 +220,62 @@ describe('CombatGmPanelComponent', () => {
           .querySelector('[data-testid="skill"]')!
           .getAttribute('data-available'),
       ).toBe('false');
+    });
+
+    it('hides the pending result while the roll is landing, then shows apply, edit and dismiss', async () => {
+      await castOnly();
+
+      expect(table.state(table.gm).pending).toHaveLength(1);
+      expect(el.querySelector('[data-testid="pending"]')).toBeNull();
+      expect(el.querySelector('[data-action="apply"]')).toBeNull();
+
+      await land();
+      await closeScreen();
+
+      expect(el.querySelectorAll('[data-testid="pending"]')).toHaveLength(1);
+      for (const action of ['apply', 'edit', 'dismiss'])
+        expect(
+          el.querySelector(`[data-testid="pending"] [data-action="${action}"]`),
+        ).not.toBeNull();
+    });
+
+    it('does not list a pending result whose roll is on the open dice screen: it is decided there', async () => {
+      await castOnly();
+
+      await land();
+
+      const dice = table.gm.injector.get(DiceRollBusiness);
+      expect(dice.$current()).not.toBeNull();
+      expect(table.state(table.gm).pending).toHaveLength(1);
+      expect(el.querySelector('[data-testid="pending"]')).toBeNull();
+    });
+
+    it('lists the pending result when the dice screen shows another roll', async () => {
+      await castOnly();
+      await land();
+      table.gm.injector.get(DiceRollBusiness).presentShared({
+        id: 'plain-1',
+        by: { playerId: 'gm', name: 'Gm' },
+        count: 1,
+        sides: 6,
+        values: [4],
+        seed: 's',
+        at: Date.now(),
+      });
+      await settle();
+
+      expect(el.querySelectorAll('[data-testid="pending"]')).toHaveLength(1);
+    });
+
+    it('lists the pending result again when the dice screen is closed', async () => {
+      await castOnly();
+      await land();
+      expect(el.querySelector('[data-testid="pending"]')).toBeNull();
+
+      table.gm.injector.get(DiceRollBusiness).close();
+      await settle();
+
+      expect(el.querySelectorAll('[data-testid="pending"]')).toHaveLength(1);
     });
 
     it('applies a pending result in one tap', async () => {
@@ -272,45 +315,82 @@ describe('CombatGmPanelComponent', () => {
     });
   });
 
-  it('applies damage, heal and a status by hand to any combatant', async () => {
+  it('applies damage, heal and a status by hand to the selected combatant', async () => {
     await table.start();
     await open();
+    expect(el.querySelector('[data-testid="selected-edits"]')).toBeNull();
     await click(row(el, 'Goblin').querySelector('[data-action="select"]'));
-    const goblin = row(el, 'Goblin');
+    const edits = () =>
+      el.querySelector<HTMLElement>('[data-testid="selected-edits"]')!;
+    expect(edits().dataset['name']).toBe('Goblin');
+    expect(
+      row(el, 'Goblin').querySelector('[data-testid="manual-amount"]'),
+    ).toBeNull();
 
-    await typeNumber(goblin.querySelector('[data-testid="manual-amount"]')!, 6);
-    await click(goblin.querySelector('[data-action="damage"]'));
+    await typeNumber(
+      edits().querySelector('[data-testid="manual-amount"]')!,
+      6,
+    );
+    await click(edits().querySelector('[data-action="damage"]'));
     expect(table.named(table.gm, 'Goblin').life?.current).toBe(4);
 
     await typeNumber(
-      row(el, 'Goblin').querySelector('[data-testid="manual-amount"]')!,
+      edits().querySelector('[data-testid="manual-amount"]')!,
       2,
     );
-    await click(row(el, 'Goblin').querySelector('[data-action="heal"]'));
+    await click(edits().querySelector('[data-action="heal"]'));
     expect(table.named(table.gm, 'Goblin').life?.current).toBe(6);
 
-    const status = row(el, 'Goblin').querySelector(
-      '[data-testid="manual-status"]',
-    )!;
+    const status = edits().querySelector('[data-testid="manual-status"]')!;
     const input = (
       status.tagName === 'INPUT' ? status : status.querySelector('input')!
     ) as HTMLInputElement;
     input.value = 'Stunned';
     input.dispatchEvent(new Event('input', { bubbles: true }));
-    await click(row(el, 'Goblin').querySelector('[data-action="add-status"]'));
+    await click(edits().querySelector('[data-action="add-status"]'));
     expect(table.named(table.ada, 'Goblin').statuses).toEqual(['Stunned']);
   });
 
-  it('marks a combatant at 0 life as down', async () => {
+  it('follows the selection to another combatant and drops it when unselected', async () => {
     await table.start();
-    await table.combat(table.gm).edit(table.named(table.gm, 'Goblin').id, {
-      kind: 'damage',
-      amount: 10,
-    });
     await open();
+    await click(row(el, 'Goblin').querySelector('[data-action="select"]'));
+    await click(row(el, 'Bob').querySelector('[data-action="select"]'));
+    expect(
+      el.querySelector<HTMLElement>('[data-testid="selected-edits"]')!.dataset[
+        'name'
+      ],
+    ).toBe('Bob');
 
-    expect(row(el, 'Goblin').dataset['down']).toBe('true');
-    expect(row(el, 'Ada').dataset['down']).not.toBe('true');
+    await click(row(el, 'Bob').querySelector('[data-action="select"]'));
+    expect(el.querySelector('[data-testid="selected-edits"]')).toBeNull();
+  });
+
+  it('drops the manual edits when the encounter ends', async () => {
+    await table.start();
+    await open();
+    await click(row(el, 'Goblin').querySelector('[data-action="select"]'));
+    expect(el.querySelector('[data-testid="selected-edits"]')).not.toBeNull();
+
+    await table.combat(table.gm).end({ xp: [] });
+    await settle();
+
+    expect(el.querySelector('[data-testid="selected-edits"]')).toBeNull();
+    expect(
+      table.gm.injector.get(CombatSelectionBusiness).$selectedId(),
+    ).toBeNull();
+  });
+
+  it('shows the toolbar, the round and the active actions but no combatant rows on its own', async () => {
+    await table.start();
+    mounted?.destroy();
+    mounted = await mount(CombatGmPanelComponent, table.gm);
+    el = mounted.el;
+
+    expect(el.querySelector('[data-action="next-turn"]')).not.toBeNull();
+    expect(el.querySelector('[data-field="round"]')).not.toBeNull();
+    expect(el.querySelector('[data-testid="active-row"]')).not.toBeNull();
+    expect(el.querySelector('[data-testid="combatant"]')).toBeNull();
   });
 
   it('undoes the last change and goes to the next turn', async () => {
@@ -318,10 +398,14 @@ describe('CombatGmPanelComponent', () => {
     await open();
     await click(row(el, 'Goblin').querySelector('[data-action="select"]'));
     await typeNumber(
-      row(el, 'Goblin').querySelector('[data-testid="manual-amount"]')!,
+      el.querySelector(
+        '[data-testid="selected-edits"] [data-testid="manual-amount"]',
+      )!,
       6,
     );
-    await click(row(el, 'Goblin').querySelector('[data-action="damage"]'));
+    await click(
+      el.querySelector('[data-testid="selected-edits"] [data-action="damage"]'),
+    );
     expect(table.named(table.gm, 'Goblin').life?.current).toBe(4);
 
     await click(el.querySelector('[data-action="undo"]'));
@@ -363,5 +447,146 @@ describe('CombatGmPanelComponent', () => {
     expect(table.combat(table.bob).$state()).toBeNull();
     expect(table.record('ada').xp).toBe(20);
     expect(table.record('bob').xp).toBe(20);
+  });
+
+  describe('optional steps', () => {
+    const steps = (off: string) => ({
+      initiative: off !== 'initiative',
+      actionCounters: off !== 'actionCounters',
+      gmValidation: off !== 'gmValidation',
+      defence: off !== 'defence',
+      rewards: off !== 'rewards',
+    });
+
+    it('shows no counters on the active row when the action counters step is off', async () => {
+      table.destroy();
+      table = await combatTable('free', { steps: steps('actionCounters') });
+      await table.start();
+      await open();
+
+      expect(el.querySelector('[role="tab"]')).toBeNull();
+      expect(el.querySelector('[data-testid="active-row"]')).not.toBeNull();
+    });
+
+    it('ends at once, with no rewards dialog and no XP, when the rewards step is off', async () => {
+      table.destroy();
+      table = await combatTable('free', { steps: steps('rewards') });
+      await table.start();
+      await table.combat(table.gm).edit(table.named(table.gm, 'Goblin').id, {
+        kind: 'damage',
+        amount: 10,
+      });
+      await open();
+
+      await click(el.querySelector('[data-action="end"]'));
+      const dialog = document.body.querySelector('[data-testid="end-dialog"]');
+      if (dialog)
+        await click(dialog.querySelector('[data-action="confirm-end"]'));
+
+      expect(
+        dialog?.querySelector('[data-testid="reward-xp"]') ?? null,
+      ).toBeNull();
+      expect(table.combat(table.bob).$state()).toBeNull();
+      expect(table.record('ada').xp).toBe(0);
+    });
+  });
+});
+
+describe('CombatGmPanelComponent start form with a grid', () => {
+  let table: Awaited<ReturnType<typeof combatTable>>;
+  let mounted: Awaited<ReturnType<typeof mount<HostComponent>>>;
+  let el: HTMLElement;
+
+  const tokens = () =>
+    Array.from(
+      el.querySelectorAll<HTMLElement>('[data-testid="setup-token"]'),
+    ).map((t) => [
+      t.dataset['name'] ?? t.dataset['key'],
+      t.dataset['x'],
+      t.dataset['y'],
+    ]);
+  const keys = () =>
+    Array.from(
+      el.querySelectorAll<HTMLElement>('[data-testid="setup-token"]'),
+    ).map((t) => t.dataset['key']);
+
+  beforeEach(async () => {
+    table = await combatTable('free', {
+      grid: { enabled: true, columns: 10, rows: 10 },
+    });
+    mounted = await mount(HostComponent, table.gm);
+    el = mounted.el;
+  });
+  afterEach(() => {
+    mounted?.destroy();
+    table.destroy();
+  });
+
+  it('shows no setup grid until something is picked', async () => {
+    expect(el.querySelector('[data-testid="setup-grid"]')).toBeNull();
+    expect(el.querySelector('[data-testid="place-hint"]')).toBeNull();
+    await pickStart(el, 'start-characters', 'Ada');
+    expect(el.querySelector('[data-testid="setup-grid"]')).not.toBeNull();
+    expect(clean(el.querySelector('[data-testid="place-hint"]'))).toBe(
+      'Drag the tokens to place them',
+    );
+  });
+
+  it('shows a token per pick, the party on the left and the enemies on the right', async () => {
+    await pickStart(el, 'start-characters', 'Ada');
+    await pickStart(el, 'start-characters', 'Bob');
+    await pickStart(el, 'start-npcs', 'Goblin');
+    await typeNumber(
+      el.querySelector('[data-testid="start-npc"] [data-testid="npc-count"]')!,
+      2,
+    );
+    expect(tokens()).toEqual([
+      ['Ada', '0', '0'],
+      ['Bob', '0', '1'],
+      [expect.stringContaining('Goblin'), '9', '0'],
+      [expect.stringContaining('Goblin'), '9', '1'],
+    ]);
+    expect(keys()).toEqual([
+      `character:${table.record('ada').id}`,
+      `character:${table.record('bob').id}`,
+      `npc:${table.goblinNpc.id}:1`,
+      `npc:${table.goblinNpc.id}:2`,
+    ]);
+  });
+
+  it('drops the token of an unpicked character', async () => {
+    await pickStart(el, 'start-characters', 'Ada');
+    await pickStart(el, 'start-characters', 'Bob');
+    await pickStart(el, 'start-characters', 'Ada');
+    expect(keys()).toEqual([`character:${table.record('bob').id}`]);
+    expect(tokens()).toEqual([['Bob', '0', '0']]);
+  });
+
+  it('starts with the shown cells', async () => {
+    await pickStart(el, 'start-characters', 'Ada');
+    await pickStart(el, 'start-characters', 'Bob');
+    await pickStart(el, 'start-npcs', 'Goblin');
+    await click(el.querySelector('[data-action="start"]'));
+
+    const position = (name: string) => table.named(table.gm, name).position;
+    expect(position('Ada')).toEqual({ x: 0, y: 0 });
+    expect(position('Bob')).toEqual({ x: 0, y: 1 });
+    expect(position('Goblin')).toEqual({ x: 9, y: 0 });
+    expect(table.named(table.ada, 'Goblin').position).toEqual({ x: 9, y: 0 });
+  });
+});
+
+describe('CombatGmPanelComponent start form without a grid', () => {
+  it('has no setup grid and starts without positions', async () => {
+    const table = await combatTable('free');
+    const mounted = await mount(HostComponent, table.gm);
+    const el = mounted.el;
+    await pickStart(el, 'start-characters', 'Ada');
+    expect(el.querySelector('[data-testid="setup-grid"]')).toBeNull();
+    expect(el.querySelector('[data-testid="place-hint"]')).toBeNull();
+    await click(el.querySelector('[data-action="start"]'));
+    expect(table.named(table.gm, 'Ada').position).toBeUndefined();
+    mounted.destroy();
+    table.destroy();
   });
 });

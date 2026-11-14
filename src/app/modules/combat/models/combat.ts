@@ -32,7 +32,12 @@ export interface Combatant {
   skills: SheetSkill[];
   /** Turns left before a skill can be used again, by skill id (absent = ready). */
   cooldowns: Record<string, number>;
-  actions: { name: string; count: number; used: number }[];
+  actions: {
+    name: string;
+    count: number;
+    used: number;
+    movement: boolean;
+  }[];
   effects: CombatEffect[];
   statuses: string[];
   initiative?: number;
@@ -104,6 +109,8 @@ export interface EncounterState {
 }
 
 export interface Encounter extends EncounterState {
+  /** The combat roll the GM closed for everyone (not an undo step). */
+  closedRollId?: string;
   /** The state before the last change, for one-step undo. */
   previous?: EncounterState;
 }
@@ -120,7 +127,14 @@ export interface CombatantView {
   down: boolean;
   initiative?: number;
   position?: { x: number; y: number };
-  actions: { name: string; count: number; used: number }[];
+  /** Cells it can move per turn, when the world has a grid. */
+  movement?: number;
+  actions: {
+    name: string;
+    count: number;
+    used: number;
+    movement: boolean;
+  }[];
   level?: number;
   description?: string;
   lifeBar?: { percent: number };
@@ -133,11 +147,15 @@ export interface CombatantView {
 export interface CombatView {
   /** How the world sets initiative, so a player knows whether to type theirs. */
   initiativeMode?: InitiativeMode;
+  /** The world's grid, when it is on. */
+  grid?: { columns: number; rows: number; imageId?: string };
   round: number;
   activeId?: string;
   combatants: CombatantView[];
   pending: PendingResultView[];
   log: CombatLogEntry[];
+  /** The combat roll the GM closed for everyone. */
+  closedRollId?: string;
 }
 
 export const COMBAT_ROUTES = {
@@ -148,6 +166,7 @@ export const COMBAT_ROUTES = {
   edit: 'combat/edit',
   apply: 'combat/apply',
   dismiss: 'combat/dismiss',
+  closeRoll: 'combat/close-roll',
   undo: 'combat/undo',
   end: 'combat/end',
   initiative: 'combat/initiative',

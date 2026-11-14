@@ -126,11 +126,18 @@
     </div>
   }
 </div>
-<app-dice-overlay />
+<app-combat-roll-banner />
+<app-dice-overlay><app-combat-roll-decision diceActions /></app-dice-overlay>
 
 <!-- What everyone sees in the middle of the table. -->
 <ng-template #illustration>
-  @if (table.$scene()?.illustrationId; as imageId) {
+  @if (combat.$state()?.grid) {
+    <app-combat-grid
+      [combatantId]="myCombatant()?.combatantId"
+      [skillId]="targeting.$skillId()"
+      (targetPicked)="targeting.toggle($event)"
+    />
+  } @else if (table.$scene()?.illustrationId; as imageId) {
     <app-stored-image
       class="illustration"
       [imageId]="imageId"
@@ -220,11 +227,11 @@
 <!-- Game master: the illustration and the quick images. -->
 <ng-template #scenePanel>
   <div class="scene">
-    <section class="combat">
-      <h2>{{ "combat.title" | transloco }}</h2>
-      <app-combat-gm-panel />
-    </section>
-    <ng-container [ngTemplateOutlet]="illustration" />
+    @if (combat.$state() && !combat.$state()?.grid) {
+      <app-combat-order />
+    } @else {
+      <ng-container [ngTemplateOutlet]="illustration" />
+    }
     <p-select
       class="shop-target"
       data-testid="shop-target"
@@ -307,36 +314,55 @@
   </div>
 </ng-template>
 
-<!-- Game master: notes and dice. -->
+<!-- Game master: dice, combat and notes. -->
 <ng-template #toolsPanel>
-  <div class="tools">
-    <section class="notes">
-      <div class="notes-header">
-        <h2>
-          <label for="gm-notes">{{ "table.notes.title" | transloco }}</label>
-        </h2>
-        <small
-          class="hint"
-          [class.error]="table.$notesState() === 'error'"
-          aria-live="polite"
-        >
-          {{ "table.notes." + table.$notesState() | transloco }}
-        </small>
-      </div>
-      <textarea
-        pTextarea
-        id="gm-notes"
-        [maxlength]="notesMaxLength"
-        [ngModel]="notes()"
-        (ngModelChange)="editNotes($event)"
-        [placeholder]="'table.notes.placeholder' | transloco"
-      ></textarea>
-    </section>
-    <section>
-      <h2>{{ "dice.title" | transloco }}</h2>
-      <app-dice-roller />
-    </section>
-  </div>
+  <p-accordion
+    class="tools"
+    [multiple]="true"
+    [value]="toolsOpen()"
+    (valueChange)="setToolsOpen($event)"
+  >
+    <p-accordion-panel value="dice" data-testid="gm-tool" data-panel="dice">
+      <p-accordion-header>{{ "dice.title" | transloco }}</p-accordion-header>
+      <p-accordion-content>
+        <app-dice-roller />
+      </p-accordion-content>
+    </p-accordion-panel>
+    <p-accordion-panel value="combat" data-testid="gm-tool" data-panel="combat">
+      <p-accordion-header>{{ "combat.title" | transloco }}</p-accordion-header>
+      <p-accordion-content>
+        @if (combat.$state()?.grid) {
+          <app-combat-order [showRound]="false" />
+        }
+        <app-combat-gm-panel />
+      </p-accordion-content>
+    </p-accordion-panel>
+    <p-accordion-panel value="notes" data-testid="gm-tool" data-panel="notes">
+      <p-accordion-header>
+        <span class="notes-header">
+          <span>{{ "table.notes.title" | transloco }}</span>
+          <small
+            class="hint"
+            [class.error]="table.$notesState() === 'error'"
+            aria-live="polite"
+          >
+            {{ "table.notes." + table.$notesState() | transloco }}
+          </small>
+        </span>
+      </p-accordion-header>
+      <p-accordion-content>
+        <textarea
+          pTextarea
+          id="gm-notes"
+          [attr.aria-label]="'table.notes.title' | transloco"
+          [maxlength]="notesMaxLength"
+          [ngModel]="notes()"
+          (ngModelChange)="editNotes($event)"
+          [placeholder]="'table.notes.placeholder' | transloco"
+        ></textarea>
+      </p-accordion-content>
+    </p-accordion-panel>
+  </p-accordion>
 </ng-template>
 
 <p-dialog

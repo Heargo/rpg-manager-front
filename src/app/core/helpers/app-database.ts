@@ -1,8 +1,8 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
 
 export const APP_DATABASE_NAME = 'rpg-manager';
-/** v1: worlds, images. v2: hostedRoom, joinedRooms. v3: playerCopies. v4: joinedWorlds (replaces joinedRooms). */
-const APP_DATABASE_VERSION = 4;
+/** v1: worlds, images. v2: hostedRoom, joinedRooms. v3: playerCopies. v4: joinedWorlds (replaces joinedRooms). v5: spriteSets. v6: packs, packFiles. v7: packDrafts. v8: packs, packFiles and packDrafts emptied (packs are one language now). */
+const APP_DATABASE_VERSION = 8;
 
 export interface StoredImage {
   /** SHA-256 of the bytes, hex. */
@@ -25,6 +25,14 @@ export interface AppDatabaseSchema extends DBSchema {
   joinedWorlds: { key: string; value: { worldId: string } & Record<string, unknown> };
   /** The player's own copy of their character, by room id. Typed by the character feature. */
   playerCopies: { key: string; value: { roomId: string; character: Record<string, unknown>; queue?: unknown[] } };
+  /** Sprites and materials saved in the sprite colorizer, by id. Typed by the sprite feature. */
+  spriteSets: { key: string; value: { id: string } & Record<string, unknown> };
+  /** Official packs downloaded on this device, by pack id. Typed by `PackStorageService`. */
+  packs: { key: string; value: { id: string } & Record<string, unknown> };
+  /** The files of downloaded packs, by `<packId>/<path>`. Typed by `PackStorageService`. */
+  packFiles: { key: string; value: unknown };
+  /** The pack creator's drafts, by draft id. Typed by `PackDraftStorageService`. */
+  packDrafts: { key: string; value: { id: string } & Record<string, unknown> };
 }
 
 export type AppDatabase = IDBPDatabase<AppDatabaseSchema>;
@@ -32,7 +40,7 @@ export type AppDatabase = IDBPDatabase<AppDatabaseSchema>;
 /** Opens (and creates or upgrades) the app database. Each storage service keeps its own connection. */
 export function openAppDatabase(name = APP_DATABASE_NAME): Promise<AppDatabase> {
   return openDB<AppDatabaseSchema>(name, APP_DATABASE_VERSION, {
-    upgrade(db) {
+    upgrade(db, oldVersion, _newVersion, tx) {
       if (!db.objectStoreNames.contains('worlds')) db.createObjectStore('worlds', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('images')) db.createObjectStore('images', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('hostedRoom')) db.createObjectStore('hostedRoom');
@@ -41,6 +49,13 @@ export function openAppDatabase(name = APP_DATABASE_NAME): Promise<AppDatabase> 
       if (stores.contains('joinedRooms')) (db as unknown as IDBDatabase).deleteObjectStore('joinedRooms');
       if (!db.objectStoreNames.contains('joinedWorlds')) db.createObjectStore('joinedWorlds', { keyPath: 'worldId' });
       if (!db.objectStoreNames.contains('playerCopies')) db.createObjectStore('playerCopies', { keyPath: 'roomId' });
+      if (!db.objectStoreNames.contains('spriteSets')) db.createObjectStore('spriteSets', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains('packs')) db.createObjectStore('packs', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains('packFiles')) db.createObjectStore('packFiles');
+      if (!db.objectStoreNames.contains('packDrafts')) db.createObjectStore('packDrafts', { keyPath: 'id' });
+      // v8: the two-language pack format is gone; stored packs and drafts in it are dropped.
+      if (oldVersion > 0 && oldVersion < 8)
+        for (const store of ['packs', 'packFiles', 'packDrafts'] as const) void tx.objectStore(store).clear();
     },
   });
 }

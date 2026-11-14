@@ -48,7 +48,9 @@
     "skillCatalogue": "Catalogue de compétences",
     "classCatalogue": "Catalogue de classes",
     "spriteColorizer": "Colorisation de sprites",
-    "combat": "Combat"
+    "combat": "Combat",
+    "help": "Aide",
+    "packs": "Packs de contenu"
   },
   "play": {
     "title": "Mondes",
@@ -135,6 +137,12 @@
       "starterClassesHint": "Guerrier, Mage et Voleur, chacun avec un arbre de compétences construit sur vos attributs, sont ajoutés au monde. Vous pourrez les modifier ou les supprimer ensuite.",
       "offlineTitle": "Quand l'hôte est hors ligne",
       "offlineHint": "Les joueurs peuvent toujours lire leur fiche. Choisissez ce qu'ils peuvent encore faire ; les changements sont vérifiés au retour de l'hôte.",
+      "packsTitle": "Packs",
+      "packsHint": "Les packs de contenu utilisés par ce monde. Un pack est dans une seule langue.",
+      "packMissing": "Manquant",
+      "packInstall": "Installer",
+      "packRemove": "Retirer du monde",
+      "packInstallFailed": "Le pack n'a pas pu être installé.",
       "formula": "Progression",
       "cap": "Plafond du maximum (avant équipement)",
       "step": "Pas",
@@ -264,12 +272,21 @@
         "actionTypes": "Actions par tour",
         "actionName": "Nom de l'action",
         "addAction": "Ajouter un type d'action",
+        "actionMovement": "Action de déplacement",
         "removeAction": "Retirer ce type d'action",
         "grid": "Utiliser une grille",
         "gridSize": "Taille de la grille (colonnes × lignes)",
         "movement": "Déplacement par tour (formule)",
         "basicAttack": "Dégâts de l'attaque de base (formule, facultatif)",
-        "defence": "Défense (formule, facultatif)"
+        "defence": "Défense (formule, facultatif)",
+        "gridMap": "Image de la carte de la grille",
+        "steps": {
+          "initiative": "Initiative (ordre des tours)",
+          "actionCounters": "Compteurs d'actions",
+          "gmValidation": "Validation des résultats de compétence par le MJ",
+          "defence": "Défense",
+          "rewards": "Récompenses de fin de combat"
+        }
       }
     }
   },
@@ -483,8 +500,7 @@
       "toolIntro": "Un catalogue d'exemple sur les attributs par défaut. Rien n'est enregistré.",
       "create": "Nouvel objet",
       "edit": "Modifier",
-      "view": "Voir",
-      "selected": "Objet sélectionné"
+      "view": "Voir"
     },
     "errors": {
       "invalid": "Cet objet ne peut pas être donné.",
@@ -519,7 +535,8 @@
         "price": "Le prix doit être de 0 ou plus.",
         "modifiers": "Les modificateurs sont des entiers sur les attributs de ce monde.",
         "json": "Ce JSON n'est pas un objet valide."
-      }
+      },
+      "randomImage": "Image aléatoire"
     }
   },
   "dice": {
@@ -786,7 +803,8 @@
     "toolsText": "Dés, générateur d'objets et fiche de personnage, toujours prêts.",
     "footerBrand": "RPG Manager",
     "footerTagline": "Pas de compte, pas de serveur : vos données restent dans votre navigateur.",
-    "footerNav": "Liens du site"
+    "footerNav": "Liens du site",
+    "footerHelp": "Aide"
   },
   "credits": {
     "title": "Crédits",
@@ -799,7 +817,13 @@
     "aiContact": "Me contacter",
     "illustrationsTitle": "Illustrations",
     "sampleHeroPrefix": "Portrait du héros d'exemple : illustration de",
-    "sampleHeroSuffix": "."
+    "sampleHeroSuffix": ".",
+    "spritesPrefix": "Sprites d’objets du coloriseur :",
+    "spritesBy": "de Florian Sciberras, sous licence",
+    "spritesSuffix": ". L’application les recolore ; les originaux sont en niveaux de gris.",
+    "packsTitle": "Packs de contenu",
+    "packsIntro": "Packs installés sur cet appareil.",
+    "packBy": "par"
   },
   "contact": {
     "title": "Contact",
@@ -1077,7 +1101,8 @@
         "successValue": "Réussit quand le total atteint",
         "successFormula": "Réussit quand ceci vaut 0 ou plus",
         "kind": "Type d'effet",
-        "attribute": "Attribut visé"
+        "attribute": "Attribut visé",
+        "range": "Portée (cases)"
       },
       "issue": {
         "name": "Donnez un nom à la compétence.",
@@ -1090,7 +1115,8 @@
         "roll_count": "Lancez de 1 à 100 dés.",
         "roll_faces": "Un dé a de 2 à 1000 faces.",
         "success_value": "Le seuil est un nombre entier.",
-        "success_formula": "La formule de réussite n'est pas valide (roll, skillLevel, level, noms d'attributs, target_<attribut>)."
+        "success_formula": "La formule de réussite n'est pas valide (roll, skillLevel, level, noms d'attributs, target_<attribut>).",
+        "range": "La portée est un nombre entier de cases, 1 ou plus, sur une compétence active."
       },
       "help": {
         "description": "Affichée dans le catalogue et sur la fiche.",
@@ -1107,7 +1133,8 @@
         "successMode": "Quand la compétence fonctionne : toujours, au-dessus d'un total, ou par formule.",
         "successValue": "Le total des dés nécessaire pour réussir.",
         "successFormula": "Une formule ; la compétence réussit quand elle donne 0 ou plus.",
-        "effects": "Ce que fait la compétence quand elle fonctionne. Chaque montant est une formule."
+        "effects": "Ce que fait la compétence quand elle fonctionne. Chaque montant est une formule.",
+        "range": "Jusqu'où elle porte sur la grille de combat ; vide, aucune portée n'est affichée."
       },
       "sections": {
         "identity": "Identité",
@@ -1362,6 +1389,58 @@
       "name": "Nom du préréglage",
       "save": "Enregistrer comme préréglage",
       "delete": "Supprimer le préréglage"
+    },
+    "kind": {
+      "grayscale": "Niveaux de gris",
+      "masked": "Avec masques",
+      "colored": "Coloré"
+    },
+    "coloredRefused": "Un sprite coloré ne peut pas être ouvert dans le colorisateur.",
+    "library": {
+      "allKinds": "Tous les types",
+      "kindFilter": "Filtrer par type",
+      "open": "Bibliothèque de sprites",
+      "title": "Bibliothèque de sprites",
+      "search": "Chercher un sprite",
+      "empty": "Aucun sprite ne correspond.",
+      "credit": "Fantasy items pack de Florian Sciberras (CC BY 4.0).",
+      "bundled": "Fournis",
+      "mine": "Mes sprites"
+    },
+    "sets": {
+      "save": "Enregistrer",
+      "saveHint": "Enregistrer le sprite et ses matériaux sur cet appareil",
+      "saved": "Sprite enregistré sur cet appareil.",
+      "saveFailed": "Le sprite n’a pas pu être enregistré.",
+      "open": "Ouvrir",
+      "rename": "Renommer",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer ce sprite ?",
+      "deleteMessage": "« {{name}} » et ses matériaux seront supprimés de cet appareil.",
+      "empty": "Aucun sprite enregistré. Ouvrez-en un, définissez ses matériaux et cliquez sur Enregistrer.",
+      "kind": "Type d’objet",
+      "kindNone": "Pas utilisé pour les objets",
+      "kindHint": "Les images aléatoires des objets de ce type peuvent utiliser ce sprite"
+    },
+    "draft": {
+      "banner": "Sprite « {{ sprite }} » du brouillon « {{ draft }} »",
+      "save": "Enregistrer dans le brouillon",
+      "saved": "Enregistré dans le brouillon.",
+      "saveFailed": "Le brouillon n'a pas pu être enregistré.",
+      "back": "Retour au brouillon",
+      "loadFailed": "Ce sprite du brouillon n'a pas pu être ouvert.",
+      "add": "Ajouter à un brouillon de pack",
+      "addTitle": "Ajouter à un brouillon de pack",
+      "chooseDraft": "Brouillon",
+      "newDraft": "Nouveau brouillon",
+      "spriteId": "Id",
+      "label": "Libellé",
+      "type": "Type",
+      "slot": "Emplacement",
+      "confirm": "Ajouter",
+      "added": "Sprite ajouté au brouillon.",
+      "addFailed": "Le sprite n'a pas pu être ajouté : {{ reason }}",
+      "open": "Ouvrir le brouillon"
     }
   },
   "combat": {
@@ -1374,6 +1453,9 @@
       "invalid": "Cette demande n'est pas valide.",
       "gameMasterOnly": "Seul le maître du jeu peut faire cela.",
       "notYours": "Ce combattant n'est pas le vôtre.",
+      "notYourTurn": "Ce n'est pas votre tour.",
+      "outOfReach": "Case hors de portée",
+      "noMovementLeft": "Plus de déplacement ce tour",
       "noEncounter": "Aucun combat n'est en cours.",
       "alreadyStarted": "Un combat est déjà en cours.",
       "life-attribute-required": "Le combat demande un attribut de vie dans les règles de combat du monde.",
@@ -1383,7 +1465,8 @@
       "caster-not-found": "Ce combattant n'est pas dans le combat.",
       "skill-not-known": "Ce combattant ne connaît pas cette compétence.",
       "skill-not-active": "Seules les compétences actives s'utilisent en combat.",
-      "target-not-found": "Cette cible n'est pas dans le combat."
+      "target-not-found": "Cette cible n'est pas dans le combat.",
+      "badPositions": "Placement invalide"
     },
     "order": "Ordre des tours",
     "round": "Round {{round}}",
@@ -1396,17 +1479,17 @@
     "details": "Détails",
     "roll": "{{caster}} a lancé {{rolls}} (total {{total}}) pour {{skill}}",
     "waitingGm": "En attente du MJ…",
+    "waitingTurn": "En attente de {{name}}",
     "start": {
       "title": "Lancer une rencontre",
       "characters": "Personnages",
       "npcs": "PNJ",
-      "pick": "Ajouter",
-      "picked": "Inclus",
-      "fewer": "Un de moins",
-      "more": "Un de plus",
+      "placeholder": "Choisir…",
+      "count": "Nombre d’exemplaires",
       "action": "Lancer la rencontre",
       "noCharacters": "Aucun personnage dans ce monde pour l'instant.",
-      "noNpcs": "Aucun PNJ dans le catalogue pour l'instant."
+      "noNpcs": "Aucun PNJ dans le catalogue pour l'instant.",
+      "placeHint": "Glissez les pions pour les placer"
     },
     "initiative": {
       "label": "Initiative",
@@ -1417,10 +1500,12 @@
       "damage": "{{amount}} dégâts",
       "heal": "{{amount}} soins",
       "modify": "{{amount}} {{attribute}} pendant {{duration}} tours",
-      "cooldown": "récupération {{turns}}"
+      "cooldown": "récupération {{turns}}",
+      "range": "portée {{ cells }}"
     },
     "actions": {
       "use": "Utiliser",
+      "giveBack": "Rendre une action",
       "skills": "Compétences",
       "useSkill": "Utiliser",
       "items": "Objets",
@@ -1428,6 +1513,16 @@
       "pickTargets": "Choisissez les cibles de {{skill}}",
       "confirm": "Confirmer",
       "cancel": "Annuler"
+    },
+    "targets": {
+      "enemies": "Ennemis",
+      "allies": "Alliés",
+      "placeholder": "Cibles"
+    },
+    "banner": {
+      "label": "Dernier jet de combat",
+      "success": "Réussite",
+      "failure": "Échec"
     },
     "pending": {
       "title": "Résultats à appliquer",
@@ -1437,6 +1532,9 @@
       "apply": "Appliquer",
       "edit": "Modifier",
       "dismiss": "Écarter"
+    },
+    "decision": {
+      "deciding": "Le MJ décide…"
     },
     "manual": {
       "damage": "Dégâts",
@@ -1455,6 +1553,130 @@
       "loot": "Butin",
       "confirm": "Terminer la rencontre",
       "hint": "L'argent et le butin sont à distribuer à la table."
+    },
+    "grid": {
+      "label": "Grille de combat",
+      "reachLegend": "Déplacement possible"
     }
+  },
+  "packs": {
+    "choiceLabel": "Pack",
+    "choiceRandom": "Aléatoire",
+    "title": "Packs de contenu",
+    "intro": "Sprites et listes de mots à ajouter à l'application. Téléchargez un pack pour l'utiliser dans un monde, puis il fonctionne hors ligne.",
+    "alwaysOn": "Toujours disponible",
+    "download": "Télécharger",
+    "downloaded": "Téléchargé",
+    "downloading": "Téléchargement...",
+    "author": "Auteur",
+    "license": "Licence",
+    "size": "Taille",
+    "language": "Langue",
+    "remove": "Supprimer de l'appareil",
+    "details": "Détails",
+    "removeTitle": "Supprimer ce pack ?",
+    "removeMessage": "Les fichiers de {{ name }} seront supprimés de cet appareil. Vous pourrez le télécharger de nouveau plus tard.",
+    "removeAccept": "Supprimer",
+    "removeReject": "Garder",
+    "errorTitle": "Erreur de pack",
+    "loadFailed": "La liste des packs n'a pas pu être chargée.",
+    "detailsSprites": "Sprites",
+    "detailsNoSprites": "Téléchargez le pack pour voir ses sprites.",
+    "detailsGenerators": "Listes de mots",
+    "detailsNoGenerators": "Aucune liste de mots.",
+    "licenseLink": "Lire la licence",
+    "generator": {
+      "items": "Objets",
+      "npcs": "PNJ",
+      "skills": "Compétences",
+      "classes": "Classes"
+    },
+    "add": "Ajouter un pack",
+    "linkLabel": "Lien vers le pack",
+    "linkPlaceholder": "https://github.com/auteur/depot ou un lien vers pack.json",
+    "check": "Vérifier",
+    "install": "Installer",
+    "update": "Mettre à jour",
+    "confirm": "Confirmer",
+    "cancel": "Annuler",
+    "version": "Version",
+    "source": "Source",
+    "officialTitle": "Packs officiels",
+    "unofficialTitle": "Packs ajoutés ou créés",
+    "duplicate": "Dupliquer",
+    "warning": "Contenu non vérifié par les auteurs de l'application",
+    "wordLists": "Listes de mots : {{ count }}",
+    "updateVersions": "Remplacer {{ name }} version {{ from }} par la version {{ to }} ?",
+    "link": {
+      "empty": "Saisissez un lien.",
+      "invalid": "Ce lien n'est pas valide.",
+      "notHttps": "Le lien doit commencer par https://.",
+      "notRepository": "Ce lien GitHub n'est ni un dépôt, ni un dossier d'un dépôt, ni un fichier pack.json.",
+      "notJson": "Le lien doit pointer vers un fichier pack.json ou un dépôt GitHub."
+    },
+    "creator": {
+      "title": "Créateur de pack",
+      "intro": "Créez votre pack : détails, listes de mots et sprites. Les brouillons sont enregistrés sur cet appareil.",
+      "create": "Créer un pack",
+      "newDraft": "Nouveau brouillon",
+      "updated": "Modifié le",
+      "open": "Ouvrir",
+      "delete": "Supprimer",
+      "empty": "Aucun brouillon pour l'instant.",
+      "untitled": "Pack sans titre",
+      "deleteTitle": "Supprimer ce brouillon ?",
+      "deleteMessage": "Le brouillon {{ name }} sera supprimé de cet appareil.",
+      "deleteAccept": "Supprimer",
+      "deleteReject": "Garder",
+      "editTitle": "Modifier un pack",
+      "backToDrafts": "Retour aux brouillons",
+      "notFound": "Ce brouillon n'existe pas.",
+      "tabs": {
+        "details": "Détails",
+        "lists": "Listes de mots",
+        "sprites": "Sprites",
+        "publish": "Publier"
+      },
+      "name": "Nom",
+      "language": "Langue du pack",
+      "packId": "Identifiant du pack",
+      "packIdHint": "Lettres minuscules, chiffres et tirets ; tiré du nom tant que vous ne le modifiez pas.",
+      "idWarning": {
+        "official": "Cet identifiant est celui d'un pack officiel : il ne peut pas être installé.",
+        "link": "Un pack ajouté depuis un lien utilise déjà cet identifiant : il ne peut pas être installé."
+      },
+      "description": "Description",
+      "version": "Version",
+      "author": "Auteur",
+      "license": "Licence",
+      "licenseUrl": "Lien de la licence",
+      "homepage": "Page d'accueil (facultatif)",
+      "listsIntro": "Pour chaque générateur, collez ou importez une liste de mots en JSON, ou partez de celle de la Base de la langue du pack. Une liste vide n'est pas incluse dans le pack.",
+      "importFile": "Importer un fichier",
+      "copyBase": "Copier la liste de Base",
+      "clear": "Vider",
+      "invalidJson": "Ce texte n'est pas du JSON valide.",
+      "spritesIntro": "Ajoutez des images PNG (1 Mo et 256 x 256 au plus) ou des sprites enregistrés dans le coloriseur de sprites.",
+      "addPng": "Ajouter une image PNG",
+      "fromMine": "Depuis mes sprites",
+      "addSet": "Ajouter",
+      "noSets": "Aucun sprite enregistré pour l'instant.",
+      "noSprites": "Aucun sprite pour l'instant.",
+      "spriteId": "Identifiant",
+      "label": "Libellé",
+      "spriteType": "Type",
+      "spriteSlot": "Emplacement",
+      "spriteKind": "Genre",
+      "slotNone": "Aucun",
+      "removeSprite": "Retirer",
+      "duplicateId": "Un autre sprite a cet identifiant.",
+      "publishIntro": "Installez le pack sur cet appareil pour l'utiliser tout de suite, ou exportez-le en .zip pour le partager.",
+      "installDevice": "Installer sur cet appareil",
+      "export": "Exporter",
+      "installed": "Pack installé sur cet appareil",
+      "editInColorizer": "Modifier dans le coloriseur"
+    },
+    "createdHere": "Créé sur cet appareil",
+    "editAsDraft": "Modifier comme brouillon"
   }
 }

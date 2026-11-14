@@ -1,5 +1,5 @@
-import en from '../../../../public/i18n/generators/en/skills.json';
-import fr from '../../../../public/i18n/generators/fr/skills.json';
+import en from '../../../../public/packs/base-en/generators/skills.json';
+import fr from '../../../../public/packs/base-fr/generators/skills.json';
 import { validateSkill } from '../../modules/skill/helpers/skill.rules';
 import { SKILL_TARGETS } from '../../modules/skill/models/skill';
 import { generateSkill, SkillWordList } from './skill-generator';
@@ -7,7 +7,7 @@ import { seededRandomSource } from './random-source';
 
 const attributes = ['Strength', 'Agility', 'Life', 'Mana', 'Charisma'];
 
-/** `generateSkill(source, attributes, words)`: words come from `public/i18n/generators/<lang>/skills.json`. */
+/** `generateSkill(source, attributes, words)`: words come from `public/packs/base-<lang>/generators/skills.json`. */
 describe('generateSkill', () => {
   it('gives the same skill for the same seed', () => {
     const draw = () => generateSkill(seededRandomSource('reroll-42'), attributes, en as SkillWordList);

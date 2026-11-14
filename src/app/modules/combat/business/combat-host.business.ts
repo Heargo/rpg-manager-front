@@ -5,19 +5,23 @@ import { PeerContext, SELF_PEER } from '../../../core/p2p/peer-api.service';
 import { attributeStats } from '../../character/helpers/character-stats';
 import { applyCharacterAction } from '../../character/helpers/character-actions.rules';
 import { CharacterHostBusiness } from '../../character/business/character-host.business';
+import { DiceHostBusiness } from '../../dice/business/dice-host.business';
 import { RoomHostBusiness } from '../../room/business/room-host.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
+import { effectiveInitiativeMode } from '../../world/helpers/world-combat.rules';
 import { World } from '../../world/models/world';
 import {
   addCombatant,
   addStatus,
   applyPending,
+  closeRoll,
   damageCombatant,
   dismissPending,
   editAttribute,
   EncounterPicks,
   healCombatant,
   moveCombatant,
+  moveCounted,
   nextTurn,
   removeCombatant,
   removeStatus,
@@ -33,6 +37,8 @@ import {
   useSkill,
   withoutUndo,
 } from '../helpers/combat.rules';
+import { Cell, canMoveTo, placeUnplaced } from '../helpers/combat-grid.rules';
+import { skillUseRoll, SkillUseRoll } from '../helpers/combat-roll.rules';
 import { projectEncounter } from '../helpers/combat-view.rules';
 import { CombatEdit, CombatRewards, Encounter } from '../models/combat';
 import { CombatService } from '../services/combat.service';
@@ -86,7 +92,24 @@ function parsePicks(payload: unknown): EncounterPicks {
         side: side(n['side']),
       };
     }),
+    ...(p['positions'] === undefined
+      ? {}
+      : { positions: parsePositions(p['positions']) }),
   };
+}
+
+function parsePositions(value: unknown): Record<string, Cell> {
+  const entries = Object.entries(body(value));
+  if (entries.length > 200) throw invalid();
+  return Object.fromEntries(
+    entries.map(([key, cell]) => {
+      const c = body(cell);
+      return [
+        key,
+        { x: whole(c['x'], -1000, 1000), y: whole(c['y'], -1000, 1000) },
+      ];
+    }),
+  );
 }
 
 function side(value: unknown): 'ally' | 'enemy' {
@@ -135,6 +158,7 @@ export class CombatHostBusiness {
   private readonly service = inject(CombatService);
   private readonly session = inject(WorldSessionBusiness);
   private readonly roomHost = inject(RoomHostBusiness);
+  private readonly dice = inject(DiceHostBusiness);
   private readonly characters = inject(CharacterHostBusiness);
   private readonly random = cryptoRandomSource();
 
@@ -151,19 +175,31 @@ export class CombatHostBusiness {
       });
     const own = (
       route: Parameters<CombatService['serve']>[0],
-      run: (p: Payload, world: World, enc: Encounter) => World,
+      run: (
+        p: Payload,
+        world: World,
+        enc: Encounter,
+        context: PeerContext,
+      ) => World,
+      onTurnOnly = false,
+      after?: () => void,
     ) =>
       this.service.serve(route, async (payload, context) => {
         await this.change(payload, (p, world, enc) => {
-          this.assertOwnerOrGameMaster(
-            context,
-            world,
-            enc,
-            text(p['combatantId'] ?? p['casterId']),
-          );
-          return run(p, world, enc);
+          const combatantId = text(p['combatantId'] ?? p['casterId']);
+          this.assertOwnerOrGameMaster(context, world, enc, combatantId);
+          if (
+            onTurnOnly &&
+            context.from !== SELF_PEER &&
+            enc.combatants[enc.turn]?.id !== combatantId
+          )
+            throw new PeerApiError('rejected', 'combat.errors.notYourTurn');
+          return run(p, world, enc, context);
         });
+        after?.();
       });
+    // The dice of the skill use being handled, published to the table once the use is saved.
+    let announcement: { playerId?: string; roll: SkillUseRoll } | null = null;
     const stops = [
       this.service.serve('start', async (payload, { from }) => {
         this.assertGameMaster(from);
@@ -217,13 +253,19 @@ export class CombatHostBusiness {
       gm('dismiss', (p, world, enc) =>
         this.with(world, dismissPending(enc, text(p['pendingId']))),
       ),
+      gm('closeRoll', (p, world, enc) =>
+        this.with(world, closeRoll(enc, text(p['rollId']))),
+      ),
       gm('undo', (_p, world, enc) => this.with(world, undo(enc))),
       this.service.serve('end', async (payload, { from }) => {
         this.assertGameMaster(from);
         await this.finish(parseRewards(body(payload)['rewards']));
       }),
       own('initiative', (p, world, enc) => {
-        if (world.combat.initiative.mode === 'rolled')
+        if (
+          !world.combat.steps.initiative ||
+          world.combat.initiative.mode === 'rolled'
+        )
           throw new PeerApiError(
             'rejected',
             'combat.errors.initiativeNotTyped',
@@ -237,52 +279,113 @@ export class CombatHostBusiness {
           ),
         );
       }),
-      own('useSkill', (p, world, enc) => {
-        const result = useSkill(
-          enc,
-          {
-            casterId: text(p['casterId']),
-            skillId: text(p['skillId']),
-            targetIds: list(p['targetIds'], text, 20),
-          },
-          world.skills,
-          world.skillRollsEnabled ?? true,
-          this.random,
-        );
-        if (!result.ok)
-          throw new PeerApiError('rejected', `combat.errors.${result.error}`);
-        return this.with(world, result.encounter);
-      }),
-      own('useItem', (p, world, enc) =>
-        this.useItem(
-          world,
-          enc,
-          text(p['combatantId']),
-          text(p['inventoryId']),
-        ),
+      own(
+        'useSkill',
+        (p, world, enc) => {
+          const result = useSkill(
+            enc,
+            {
+              casterId: text(p['casterId']),
+              skillId: text(p['skillId']),
+              targetIds: list(p['targetIds'], text, 20),
+            },
+            world.skills,
+            world.skillRollsEnabled ?? true,
+            this.random,
+            world.combat,
+          );
+          if (!result.ok)
+            throw new PeerApiError('rejected', `combat.errors.${result.error}`);
+          const roll = skillUseRoll(
+            enc,
+            result.encounter,
+            {
+              casterId: text(p['casterId']),
+              skillId: text(p['skillId']),
+              targetIds: list(p['targetIds'], text, 20),
+            },
+            world.skills,
+            world,
+          );
+          const characterId = enc.combatants.find(
+            (c) => c.id === text(p['casterId']),
+          )?.characterId;
+          announcement = roll
+            ? {
+                playerId: world.characters.find((c) => c.id === characterId)
+                  ?.playerId,
+                roll,
+              }
+            : null;
+          return this.with(world, result.encounter);
+        },
+        true,
+        () => {
+          const made = announcement;
+          announcement = null;
+          if (made)
+            this.dice.announce({
+              playerId: made.playerId,
+              values: made.roll.values,
+              sides: made.roll.sides,
+              combat: made.roll.combat,
+            });
+        },
       ),
-      own('move', (p, world, enc) => {
+      own(
+        'useItem',
+        (p, world, enc) =>
+          this.useItem(
+            world,
+            enc,
+            text(p['combatantId']),
+            text(p['inventoryId']),
+          ),
+        true,
+      ),
+      own('move', (p, world, enc, context) => {
         const position = body(p['position']);
         const grid = world.combat.grid;
         const x = whole(position['x'], 0, 1000);
         const y = whole(position['y'], 0, 1000);
         if (grid.enabled && (x >= grid.columns || y >= grid.rows))
           throw invalid();
+        const id = text(p['combatantId']);
+        if (context.from === SELF_PEER)
+          return this.with(
+            world,
+            moveCombatant(
+              {
+                ...enc,
+                combatants: placeUnplaced(enc.combatants, world.combat.grid),
+              },
+              id,
+              { x, y },
+            ),
+          );
+        if (enc.combatants[enc.turn]?.id !== id)
+          throw new PeerApiError('rejected', 'combat.errors.notYourTurn');
+        const check = canMoveTo(enc, world.combat, id, { x, y });
+        if (!check.ok)
+          throw new PeerApiError('rejected', `combat.errors.${check.error}`);
         return this.with(
           world,
-          moveCombatant(enc, text(p['combatantId']), { x, y }),
+          moveCounted(enc, id, { x, y }, world.combat.grid, check.tickAction),
         );
       }),
-      own('tickAction', (p, world, enc) =>
-        this.with(
-          world,
-          setActionUsed(
-            enc,
-            text(p['combatantId']),
-            text(p['action']),
-            whole(p['used'], 0, 100),
+      own(
+        'tickAction',
+        (p, world, enc) =>
+          this.with(
+            world,
+            setActionUsed(
+              enc,
+              text(p['combatantId']),
+              text(p['action']),
+              whole(p['used'], 0, 100),
+            ),
           ),
-        ),
+        true,
       ),
       this.service.serve('endTurn', async (_payload, context) => {
         await this.change({}, (_p, world, enc) => {
@@ -371,7 +474,7 @@ export class CombatHostBusiness {
       if (!result.ok)
         throw new PeerApiError('rejected', `combat.errors.${result.error}`);
       const rolled =
-        world.combat.initiative.mode === 'rolled'
+        effectiveInitiativeMode(world.combat) === 'rolled'
           ? rollInitiative(result.encounter, world.combat, this.random)
           : result.encounter;
       return this.with(world, withoutUndo(rolled));
@@ -385,7 +488,9 @@ export class CombatHostBusiness {
       if (!world.encounter)
         throw new PeerApiError('rejected', 'combat.errors.noEncounter');
       let characters = world.characters;
-      for (const { characterId, amount } of rewards?.xp ?? []) {
+      for (const { characterId, amount } of world.combat.steps.rewards
+        ? (rewards?.xp ?? [])
+        : []) {
         if (amount < 1) continue;
         const character = characters.find((c) => c.id === characterId);
         if (!character) throw invalid();

@@ -1,10 +1,10 @@
 import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
 import { TranslocoService } from '@jsverse/transloco';
-import npcNames from '../../../../../../public/i18n/generators/en/npcs.json';
+import npcNames from '../../../../../../public/packs/base-en/generators/npcs.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { ImageBusiness } from '../../../../core/business/image.business';
-import { WordListService } from '../../../../core/services/word-list.service';
+import { PackBusiness } from '../../../../core/business/pack.business';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
 import { Npc } from '../../models/npc';
 import { NpcEditorComponent } from './npc-editor.component';
@@ -26,7 +26,7 @@ describe('NpcEditorComponent portrait', () => {
       imports: [NpcEditorComponent],
       providers: [
         ...TEST_PROVIDERS,
-        { provide: WordListService, useValue: { loadNpcNames: async () => npcNames } },
+        { provide: PackBusiness, useValue: { wordList: async () => npcNames, packsFor: async () => ['base-en'], $installed: () => [] } },
         { provide: ImageBusiness, useValue: { storeUpload, url: async () => 'blob:portrait' } },
       ],
     });

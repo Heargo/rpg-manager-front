@@ -4,13 +4,15 @@ import { TestBed } from '@angular/core/testing';
 import { ImageBusiness } from '../../../core/business/image.business';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
 import { WorldImportError, WorldLibraryBusiness } from './world-library.business';
-import en from '../../../../../public/i18n/generators/en/items.json';
-import { WordListService } from '../../../core/services/word-list.service';
+import en from '../../../../../public/packs/base-en/generators/items.json';
+import { PackBusiness } from '../../../core/business/pack.business';
+import { LanguageBusiness } from '../../../core/business/language.business';
+import { WorldStorageService } from '../services/world-storage.service';
 import { provideTestTranslations } from '../../../../testing/test-providers';
 
 const TEST_WORLD_PROVIDERS = [
   provideTestTranslations(),
-  { provide: WordListService, useValue: { loadItemWords: async () => en } },
+  { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } },
 ];
 
 describe('WorldLibraryBusiness (IndexedDB)', () => {
@@ -143,5 +145,31 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
 
   it('creates an empty catalogue without the option', async () => {
     expect((await library.create({ name: 'Bare', attributes: [] })).items).toEqual([]);
+  });
+
+  describe('active packs', () => {
+    it.each([
+      ['fr', ['base-fr']],
+      ['en', ['base-en']],
+    ])('a new world in the %s app has the Base of that language active', async (lang, packs) => {
+      TestBed.inject(LanguageBusiness).setLanguage(lang as 'fr' | 'en');
+
+      const world = await library.create({ name: 'Eldoria', attributes: [] });
+
+      expect(world.packs).toEqual(packs);
+    });
+
+    it('keeps the packs the draft names', async () => {
+      const world = await library.create({ name: 'Eldoria', attributes: [], packs: ['base-en', 'extra'] });
+      expect(world.packs).toEqual(['base-en', 'extra']);
+    });
+
+    it('reads a stored world without packs as having none', async () => {
+      const stored = await library.create({ name: 'Old', attributes: [] });
+      const { packs: _packs, ...legacy } = stored;
+      await TestBed.inject(WorldStorageService).put(legacy as typeof stored);
+
+      expect((await library.get(stored.id))?.packs).toEqual([]);
+    });
   });
 });

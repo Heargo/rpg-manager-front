@@ -3,6 +3,8 @@ import {
   createSeed,
   seededRandomSource,
 } from '../../../core/generators/random-source';
+import { PackChoiceBusiness } from '../../../core/business/pack-choice.business';
+import { RANDOM_PACK } from '../../../core/packs/pack-choice';
 import { NpcNamesBusiness } from './npc-names.business';
 import { Item, World } from '../../world/models/world';
 import {
@@ -32,6 +34,8 @@ import { buildNpcPrompt } from '../helpers/npc-ai-prompt';
 @Injectable({ providedIn: 'root' })
 export class NpcEditorBusiness {
   private readonly names = inject(NpcNamesBusiness);
+  private readonly packChoice = inject(PackChoiceBusiness);
+  readonly packOptions = this.packChoice.options('npcs');
 
   empty(world: World): Npc {
     return emptyNpc(world);
@@ -102,11 +106,15 @@ export class NpcEditorBusiness {
     seed: string,
     world: World,
     classId?: string,
+    pack: string = RANDOM_PACK,
   ): Promise<Omit<Npc, 'id'>> {
     return generateNpc(
       world,
       seededRandomSource(seed),
-      await this.names.names(),
+      await this.names.names(
+        undefined,
+        await this.packChoice.resolve('npcs', pack, seed),
+      ),
       classId,
     );
   }

@@ -3,6 +3,7 @@ import {
   combatTable,
   Device,
   mount,
+  pickTarget,
   typeNumber,
 } from '../../../../../testing/combat-table';
 import { settle } from '../../../../../testing/game-device';
@@ -14,8 +15,8 @@ import { CombatPlayerViewComponent } from './combat-player-view.component';
  * - `[data-testid="your-turn"]` banner only while the player's own combatant is the active one; `[data-action="end-turn"]` likewise.
  * - Own skills `[data-testid="skill"]` (`data-name`, text with the preview "5 damage, 3 Mana, cooldown 2", `[data-action="use-skill"]`), own items
  *   `[data-testid="item"]` (`data-name`, `[data-action="use-item"]`) and counters `[data-testid="action-counter"]` (`data-action-name`, `data-used`, `data-count`,
- *   `[data-action="tick"]`), shown outside the turn too.
- * - Targeting: after `use-skill`, `[data-testid="target"]` per combatant (`data-name`), then `[data-action="confirm-skill"]`. The roll then shows in
+ *   `[data-action="tick"]`), shown only on the player's turn; off turn no `app-combat-actions` and `[data-testid="waiting-turn"]` "Waiting for <active name>" (FR "En attente de").
+ * - Targeting: after `use-skill`, `[data-testid="targets"]` multi-select (options `[data-testid="target"]`, see `pickTarget`), then `[data-action="confirm-skill"]`. The roll then shows in
  *   `[data-testid="roll"]` (the rolls and the skill name) and `[data-testid="waiting-gm"]` while one of the player's results is pending.
  * - Typed initiative: `[data-testid="initiative-input"]` (number) and `[data-action="initiative-set"]` when the world's mode is `typed`.
  * - No GM controls: no `apply`, `dismiss`, `edit`, `undo`, `next-turn`, `end` actions.
@@ -95,9 +96,7 @@ describe('CombatPlayerViewComponent', () => {
       expect(
         el.querySelector('[data-testid="item"]')!.getAttribute('data-name'),
       ).toBe('Potion');
-      expect(
-        el.querySelectorAll('[data-testid="action-counter"]'),
-      ).toHaveLength(2);
+      expect(el.querySelectorAll('[role="tab"]')).toHaveLength(2);
       mounted.destroy();
 
       await open(table.bob, 'Bob', 'bob');
@@ -105,15 +104,38 @@ describe('CombatPlayerViewComponent', () => {
       expect(el.querySelector('[data-testid="item"]')).toBeNull();
     });
 
-    it('keeps the skills readable outside the turn', async () => {
+    it('shows no actions off turn, but a line naming the active combatant', async () => {
       await table.combat(table.gm).endTurn();
       await settle();
       await open(table.ada, 'Ada', 'ada');
 
       expect(el.querySelector('[data-testid="your-turn"]')).toBeNull();
-      expect(
-        el.querySelector('[data-testid="skill"]')!.getAttribute('data-name'),
-      ).toBe('Fireball');
+      expect(el.querySelector('app-combat-actions')).toBeNull();
+      expect(el.querySelector('[data-testid="skill"]')).toBeNull();
+      expect(clean(el.querySelector('[data-testid="waiting-turn"]'))).toContain(
+        'Waiting for Bob',
+      );
+      expect(orderNames()).toEqual(['Ada', 'Bob', 'Goblin']);
+    });
+
+    it('shows the actions and no waiting line on the own turn', async () => {
+      await open(table.ada, 'Ada', 'ada');
+
+      expect(el.querySelector('app-combat-actions')).not.toBeNull();
+      expect(el.querySelector('[data-testid="waiting-turn"]')).toBeNull();
+    });
+
+    it('brings the actions back when the turn comes round', async () => {
+      await open(table.bob, 'Bob', 'bob');
+      expect(clean(el.querySelector('[data-testid="waiting-turn"]'))).toContain(
+        'Waiting for Ada',
+      );
+
+      await table.combat(table.gm).endTurn();
+      await settle();
+
+      expect(el.querySelector('[data-testid="waiting-turn"]')).toBeNull();
+      expect(el.querySelector('app-combat-actions')).not.toBeNull();
     });
 
     it('offers no GM controls', async () => {
@@ -139,13 +161,10 @@ describe('CombatPlayerViewComponent', () => {
       await open(table.ada, 'Ada', 'ada');
 
       await click(
-        el.querySelector(
-          '[data-testid="action-counter"][data-action-name="Movement"] [data-action="tick"]',
-        ),
-      );
-      await click(
         el.querySelector('[data-testid="item"] [data-action="use-item"]'),
       );
+      await click(el.querySelectorAll('[role="tab"]')[1]);
+      await click(el.querySelector('[data-action="tick"]'));
 
       expect(
         table.named(table.gm, 'Ada').actions.find((a) => a.name === 'Movement')!
@@ -161,9 +180,7 @@ describe('CombatPlayerViewComponent', () => {
       await click(
         el.querySelector('[data-testid="skill"] [data-action="use-skill"]'),
       );
-      await click(
-        el.querySelector('[data-testid="target"][data-name="Goblin"]'),
-      );
+      await pickTarget(el, 'Goblin');
       await click(el.querySelector('[data-action="confirm-skill"]'));
 
       expect(table.state(table.gm).pending).toHaveLength(1);
@@ -189,9 +206,7 @@ describe('CombatPlayerViewComponent', () => {
       await click(
         el.querySelector('[data-testid="skill"] [data-action="use-skill"]'),
       );
-      await click(
-        el.querySelector('[data-testid="target"][data-name="Goblin"]'),
-      );
+      await pickTarget(el, 'Goblin');
       await click(el.querySelector('[data-action="confirm-skill"]'));
 
       await table.combat(table.gm).apply(table.state(table.gm).pending[0].id);
@@ -217,6 +232,37 @@ describe('CombatPlayerViewComponent', () => {
       await click(el.querySelector('[data-action="initiative-set"]'));
 
       expect(table.named(table.bob, 'Ada').initiative).toBe(15);
+    });
+  });
+
+  describe('optional steps', () => {
+    const all = {
+      initiative: true,
+      actionCounters: true,
+      gmValidation: true,
+      defence: true,
+      rewards: true,
+    };
+
+    it('offers no typed initiative when the initiative step is off, even in typed mode', async () => {
+      table = await combatTable('typed', {
+        steps: { ...all, initiative: false },
+      });
+      await table.start();
+      await open(table.ada, 'Ada', 'ada');
+
+      expect(el.querySelector('[data-testid="initiative-input"]')).toBeNull();
+      expect(el.querySelector('[data-action="initiative-set"]')).toBeNull();
+    });
+
+    it('shows no action counters when that step is off', async () => {
+      table = await combatTable('free', {
+        steps: { ...all, actionCounters: false },
+      });
+      await table.start();
+      await open(table.ada, 'Ada', 'ada');
+
+      expect(el.querySelector('[role="tab"]')).toBeNull();
     });
   });
 });

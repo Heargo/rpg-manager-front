@@ -2,8 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { routesTools } from '../../tools.routes';
 import { settle } from '../../../../../testing/game-device';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
-import { WordListService } from '../../../../core/services/word-list.service';
-import en from '../../../../../../public/i18n/generators/en/items.json';
+import { PackBusiness } from '../../../../core/business/pack.business';
+import en from '../../../../../../public/packs/base-en/generators/items.json';
 import { CombatSandboxToolPageComponent } from './combat-sandbox-tool-page.component';
 
 /**
@@ -18,8 +18,8 @@ describe('CombatSandboxToolPageComponent', () => {
       providers: [
         ...TEST_PROVIDERS,
         {
-          provide: WordListService,
-          useValue: { loadItemWords: async () => en },
+          provide: PackBusiness,
+          useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] },
         },
       ],
     });

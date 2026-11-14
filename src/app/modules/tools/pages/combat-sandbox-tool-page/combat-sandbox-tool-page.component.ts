@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  effect,
   inject,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -10,6 +12,14 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CombatBusiness } from '../../../combat/business/combat.business';
+import { CombatRollsBusiness } from '../../../combat/business/combat-rolls.business';
+import { CombatRollBannerComponent } from '../../../combat/components/combat-roll-banner/combat-roll-banner.component';
+import { DiceOverlayComponent } from '../../../dice/components/dice-overlay/dice-overlay.component';
+import { CombatSelectionBusiness } from '../../../combat/business/combat-selection.business';
+import { CombatTargetingBusiness } from '../../../combat/business/combat-targeting.business';
+import { CombatRollDecisionComponent } from '../../../combat/components/combat-roll-decision/combat-roll-decision.component';
+import { CombatGridComponent } from '../../../combat/components/combat-grid/combat-grid.component';
+import { CombatOrderComponent } from '../../../combat/components/combat-order/combat-order.component';
 import { CombatGmPanelComponent } from '../../../combat/components/combat-gm-panel/combat-gm-panel.component';
 import { CombatPlayerViewComponent } from '../../../combat/components/combat-player-view/combat-player-view.component';
 import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
@@ -23,9 +33,19 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
     ButtonModule,
     CardModule,
     CombatGmPanelComponent,
+    CombatRollBannerComponent,
+    DiceOverlayComponent,
+    CombatRollDecisionComponent,
+    CombatOrderComponent,
+    CombatGridComponent,
     CombatPlayerViewComponent,
   ],
-  providers: [{ provide: CombatBusiness, useClass: SandboxCombatBusiness }],
+  providers: [
+    { provide: CombatBusiness, useClass: SandboxCombatBusiness },
+    CombatSelectionBusiness,
+    // Its own instance, following the sandbox encounter instead of the room's.
+    CombatRollsBusiness,
+  ],
   template: `
     <div class="main-container combat-tool">
       <header>
@@ -43,9 +63,16 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
           ></button>
         }
       </header>
+      <app-combat-roll-banner />
+      <app-combat-grid
+        data-testid="sandbox-grid"
+        [skillId]="targeting.$skillId()"
+        (targetPicked)="targeting.toggle($event)"
+      />
       <div class="views">
         <p-card [header]="'tools.combat.gm' | transloco">
           <div data-testid="sandbox-gm">
+            <app-combat-order [showRound]="false" />
             <app-combat-gm-panel />
           </div>
         </p-card>
@@ -64,6 +91,9 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
         </p-card>
       </div>
     </div>
+    <app-dice-overlay
+      ><app-combat-roll-decision diceActions
+    /></app-dice-overlay>
   `,
   styles: `
     .combat-tool {
@@ -94,6 +124,16 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
 })
 export class CombatSandboxToolPageComponent {
   protected readonly combat = inject(CombatBusiness);
+  protected readonly targeting = inject(CombatTargetingBusiness);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** An aimed skill never outlives the encounter nor the page. */
+  private readonly clearTargeting = (() => {
+    this.destroyRef.onDestroy(() => this.targeting.clear());
+    effect(() => {
+      if (!this.combat.$state()) this.targeting.clear();
+    });
+  })();
   private readonly messages = inject(MessageService);
 
   /** The sample character and the first enemy of the sandbox catalogue. */

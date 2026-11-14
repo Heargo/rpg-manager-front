@@ -62,10 +62,17 @@ const ring: InventoryItem = {
 
 const rules = (mode: InitiativeMode): CombatRules => ({
   lifeAttribute: 'Life',
+  steps: {
+    initiative: true,
+    actionCounters: true,
+    gmValidation: true,
+    defence: true,
+    rewards: true,
+  },
   initiative: { mode, dice: { count: 1, faces: 1 }, formula: 'level' },
   actionTypes: [
-    { name: 'Action', count: 1 },
-    { name: 'Movement', count: 1 },
+    { name: 'Action', count: 1, movement: false },
+    { name: 'Movement', count: 1, movement: true },
   ],
   grid: { enabled: false, columns: 10, rows: 10 },
   movement: '6',
@@ -79,8 +86,12 @@ export type Device = ReturnType<typeof gameDevice>;
  * players Ada (skill Fireball: 5 damage to one enemy, 3 Mana, cooldown 2; a Potion) and Bob. The catalogue has one enemy, Goblin
  * (level 5, 40 XP, 7 money, loot a Ring). No encounter yet.
  */
-export async function combatTable(mode: InitiativeMode) {
+export async function combatTable(
+  mode: InitiativeMode,
+  extra: Partial<CombatRules> = {},
+) {
   globalThis.indexedDB = new IDBFactory();
+  TestBed.resetTestingModule();
   TestBed.configureTestingModule({ providers: TEST_PROVIDERS });
   const net = createPeerNetwork();
   const gm = gameDevice(net, 'gm', 'Gm');
@@ -96,7 +107,7 @@ export async function combatTable(mode: InitiativeMode) {
     ],
     barAttributes: { life: 'Life', mana: 'Mana' },
     startingMoney: 0,
-    combat: rules(mode),
+    combat: { ...rules(mode), ...extra },
   });
   await gm.injector.get(RoomBusiness).hostRoom('Eldoria', world.id);
   await settle();
@@ -238,4 +249,22 @@ export async function typeNumber(host: Element, value: number) {
 export async function click(el: Element | null) {
   (el as HTMLElement).click();
   await settle();
+}
+
+/** Opens the target multi-select under `host` (`[data-testid="targets"]`) and clicks the option named `name` (the overlay is in the document). */
+export async function pickTarget(host: Element, name: string) {
+  await click(host.querySelector('[data-testid="targets"]'));
+  await click(
+    document.querySelector(`[data-testid="target"][data-name="${name}"]`),
+  );
+}
+
+/** Opens the start-form multi-select `testid` (`start-characters` or `start-npcs`) under `host` and clicks the option named `name` (the overlay is in the document). */
+export async function pickStart(host: Element, testid: string, name: string) {
+  await click(host.querySelector(`[data-testid="${testid}"]`));
+  await click(
+    document.querySelector(
+      `[data-testid="start-option"][data-name="${name}"]`,
+    ),
+  );
 }

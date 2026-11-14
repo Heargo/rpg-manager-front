@@ -51,7 +51,6 @@ Tickets across specs: `p2p-rooms/` (P), `legacy-parity/` (L), `ui-feedback/` (U)
 | - | --- | --- | --- |
 | 17 | **L08** Item catalogue (GM) | Search/filter, give to player, default items import. | L03 |
 | 18 | **L09** Item editor (form, JSON, generate) | Uses L10 generators. **Milestone C: legacy parity for gameplay.** | L08, L10 |
-| 18b | **L12** On-device AI item generation | Split from L09 (2026-11-07): Chrome Prompt API tier, feature-detected. | L09 |
 
 ## Phase 5: resilience
 
@@ -168,3 +167,75 @@ Tickets in `ui-feedback-3/` (G). Bugs and small visual fixes first, then the sha
 | 74 | **G09** Skill editor: readable form, variables help | G11 |
 | 75 | **G10** Formula presets for skills | G09 |
 | 76 | **G12** Skill form: modern layout | G09 |
+
+## Phase 11: UI feedback round 4 (2026-11-13)
+
+Tickets in `ui-feedback-4/` (H). Colorizer bugs first, then the bundled sprites and what builds on them, the catalogue and combat changes, the user documentation last (screenshots need the finished features).
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 77 | **H01** Sprite colorizer: no page scroll while working | none |
+| 78 | **H02** Sprite colorizer: brush size on the canvas | none |
+| 79 | **H03** Bundled grayscale sprites, demo axe, credits | none |
+| 80 | **H04** Saved sprites and masks (sprite sets) | H03 |
+| 81 | **H05** Random item images from sprite sets | H04 |
+| 82 | **H06** Item catalogue: context menu on the clicked item | none |
+| 83 | **H07** Optional combat steps in World rules | none |
+| 84 | **H08** User documentation: Starlight site, theme, /docs | none |
+| 85 | **H09** Doc screenshots with Playwright | H08 |
+| 86 | **H10** Documentation content per module | H08, H09 |
+
+## Phase 12: content packs (2026-11-13)
+
+Tickets in `content-packs/` (K). Status: validated (2026-11-13), every ticket ready-for-agent; answers in the spec (Decisions). Model and Base pack first (no visible change), then sprite kinds and the official lazy path, the pack choice in generators, unofficial packs from a link, the pack creator (reuses their validation), docs last.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 87 | **K01** Pack model, validation and the Base pack (done) | none |
+| 88 | **K02** Sprite kinds: grayscale, masked, colored (done) | K01 |
+| 89 | **K03** Official packs: registry and lazy loading (done) | K01 |
+| 90 | **K04** Pack choice next to the seed (done) | K01, K02 |
+| 91 | **K05** Unofficial packs from a link or GitHub repository (done) | K03 |
+| 92 | **K07** Pack creator (done) | K02, K05 |
+| 92b | **K08** Pack creator: the colorizer link (split from K07) (done) | K07 |
+| 93 | **K06** Documentation: using and creating packs (done) | K04, K05, K07, K08 |
+| 94 | **K09** Duplicate a pack and Packs page redesign (user request) (done) | none |
+
+## Phase 13: combat made easy (2026-11-13)
+
+Tickets in `combat-ux/` (C). Status: proposed (2026-11-13); the user's answers are in the spec (Decisions), the rest is marked "assumed". Small rule fixes first, then the turn actions, the start form and the GM layout, grid moves and placement, the shared rolls last (they sit on the new layout).
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 95 | **C01** Initiative input only when it can be typed (done) | none |
+| 96 | **C02** Player actions only on their own turn (done) | none |
+| 97 | **C03** Action tabs replace the counters (done) | C02 |
+| 98 | **C04** Target picking as a multi-select (done) | none |
+| 99 | **C05** Start form: characters and NPCs multi-selects (done) | none |
+| 100 | **C06** GM table: collapsible Dice, Combat, Notes (done) | C05 |
+| 101 | **C07** Grid moves: GM anywhere, players on their turn (done) | C02 |
+| 102 | **C08** Place tokens before starting (done) | C05, C07 |
+| 103 | **C09** Shared combat rolls and recap banner (done) | C06 |
+
+## Phase 14: one language per pack (2026-11-13)
+
+Tickets in `pack-languages/` (PL). Decisions from the user on 2026-11-13 are in the spec. Format first, then the creator and the world's choice side by side, then the generators and the docs.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 104 | **PL01** Pack format: one language, Base split in two (done) | none |
+| 105 | **PL02** Pack creator and duplicate in one language (folded into PL01) | PL01 |
+| 106 | **PL03** Active packs in the world rules (done) | PL01 |
+| 107 | **PL04** Generators and sprites use the world's packs (done) | PL03 |
+| 108 | **PL05** User docs: one language per pack, packs per world (done) | PL01, PL04 |
+
+## Phase 14: combat feedback round (2026-11-14)
+
+Tickets in `combat-ux-2/` (D), from trying C01–C09. Bugs first, the dice-screen flow after the banner fix it builds on, polish last.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 104 | **D01** NPC tokens can't be dragged before starting (done) | none |
+| 105 | **D02** Recap banner above the dice screen, with bubbles (D03 merged in) (done) | none |
+| 106 | **D04** GM decides on the dice screen; it closes for everyone (done) | D02 |
+| 108 | **D05** Combat panel spacing, subtler reach area (done) | none |

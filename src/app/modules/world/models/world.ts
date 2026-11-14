@@ -20,8 +20,19 @@ export interface WorldAttribute {
 export const INITIATIVE_MODES = ['rolled', 'typed', 'free'] as const;
 export type InitiativeMode = (typeof INITIATIVE_MODES)[number];
 
+/** The optional steps of a combat; all on by default (World rules, Combat section). */
+export interface CombatSteps {
+  initiative: boolean;
+  actionCounters: boolean;
+  gmValidation: boolean;
+  defence: boolean;
+  rewards: boolean;
+}
+
 /** How a world runs combat (the rules page's Combat section, the wizard). Formulas read `level` and attribute maxima by name. */
 export interface CombatRules {
+  /** Which steps of a combat are played; a step that is off is skipped. */
+  steps: CombatSteps;
   /** Name of the attribute that is the life (0 = down); combat cannot start without one. */
   lifeAttribute?: string;
   initiative: {
@@ -32,8 +43,14 @@ export interface CombatRules {
     formula: string;
   };
   /** What a combatant can do on its turn, each with how many per turn. */
-  actionTypes: { name: string; count: number }[];
-  grid: { enabled: boolean; columns: number; rows: number };
+  actionTypes: { name: string; count: number; movement: boolean }[];
+  grid: {
+    enabled: boolean;
+    columns: number;
+    rows: number;
+    /** The map drawn under the grid (an image id). */
+    imageId?: string;
+  };
   /** Movement per turn (formula). */
   movement: string;
   /** Damage of a basic attack (formula), none when omitted. */
@@ -59,6 +76,8 @@ export interface WorldRules {
   startingSkillPoints: number;
   skillPointsPerLevel: number;
   offlineFeatures: OfflineFeatures;
+  /** Ids of the active packs (no validation: an empty list is allowed); kept as is when omitted. */
+  packs?: string[];
   /** Active skills roll dice when used (default on when omitted). */
   skillRollsEnabled?: boolean;
   /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
@@ -166,6 +185,8 @@ export interface World {
   skillPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
+  /** Ids of the active packs; a stored world without them reads as none. */
+  packs: string[];
   /** Active skills roll dice when used (default on when omitted). */
   skillRollsEnabled?: boolean;
   /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
@@ -228,6 +249,8 @@ export interface WorldDraft {
   skillPointsPerLevel?: number;
   startingMoney?: number;
   offlineFeatures?: Partial<OfflineFeatures>;
+  /** Ids of the active packs; the Base of the app language when the library creates the world without. */
+  packs?: string[];
   skillRollsEnabled?: boolean;
   /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
   sellAnywhere?: boolean;
@@ -258,6 +281,8 @@ export interface WorldInfo {
   skillPointsPerLevel: number;
   startingMoney: number;
   offlineFeatures: OfflineFeatures;
+  /** Ids of the world's active packs. */
+  packs: string[];
   skillRollsEnabled?: boolean;
   sellAnywhere?: boolean;
   sellAnywhereRatio?: number;

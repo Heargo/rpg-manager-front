@@ -48,7 +48,9 @@
     "skillCatalogue": "Skill catalogue",
     "classCatalogue": "Class catalogue",
     "spriteColorizer": "Sprite colorizer",
-    "combat": "Combat"
+    "combat": "Combat",
+    "help": "Help",
+    "packs": "Content packs"
   },
   "play": {
     "title": "Worlds",
@@ -135,6 +137,12 @@
       "starterClassesHint": "Warrior, Mage and Rogue, each with a skill tree built on your attributes, are added to the world. You can edit or delete them afterwards.",
       "offlineTitle": "When the host is offline",
       "offlineHint": "Players can always read their sheet. Choose what else they can still do; changes are checked when the host is back.",
+      "packsTitle": "Packs",
+      "packsHint": "The content packs this world uses. A pack is in a single language.",
+      "packMissing": "Missing",
+      "packInstall": "Install",
+      "packRemove": "Remove from the world",
+      "packInstallFailed": "The pack could not be installed.",
       "formula": "Growth",
       "cap": "Cap of the max (before gear)",
       "step": "Step",
@@ -264,12 +272,21 @@
         "actionTypes": "Actions per turn",
         "actionName": "Action name",
         "addAction": "Add an action type",
+        "actionMovement": "Movement action",
         "removeAction": "Remove this action type",
         "grid": "Use a grid",
         "gridSize": "Grid size (columns × rows)",
         "movement": "Movement per turn (formula)",
         "basicAttack": "Basic attack damage (formula, optional)",
-        "defence": "Defence (formula, optional)"
+        "defence": "Defence (formula, optional)",
+        "gridMap": "Grid map image",
+        "steps": {
+          "initiative": "Initiative (turn order)",
+          "actionCounters": "Action counters",
+          "gmValidation": "GM validation of skill results",
+          "defence": "Defence",
+          "rewards": "Rewards at the end"
+        }
       }
     }
   },
@@ -483,8 +500,7 @@
       "toolIntro": "A sample catalogue on the default attributes. Nothing is saved.",
       "create": "New item",
       "edit": "Edit",
-      "view": "View",
-      "selected": "Selected item"
+      "view": "View"
     },
     "errors": {
       "invalid": "This item can't be given.",
@@ -519,7 +535,8 @@
         "price": "The price must be 0 or more.",
         "modifiers": "Modifiers must be whole numbers on the attributes of this world.",
         "json": "This is not valid JSON for an item."
-      }
+      },
+      "randomImage": "Random image"
     }
   },
   "dice": {
@@ -786,7 +803,8 @@
     "toolsText": "Dice, item generator and character sheet, ready any time.",
     "footerBrand": "RPG Manager",
     "footerTagline": "No account, no server: your data stays in your browser.",
-    "footerNav": "Site links"
+    "footerNav": "Site links",
+    "footerHelp": "Help"
   },
   "credits": {
     "title": "Credits",
@@ -799,7 +817,13 @@
     "aiContact": "Get in touch",
     "illustrationsTitle": "Illustrations",
     "sampleHeroPrefix": "Sample hero portrait: art by",
-    "sampleHeroSuffix": "."
+    "sampleHeroSuffix": ".",
+    "spritesPrefix": "Item sprites of the sprite colorizer:",
+    "spritesBy": "by Florian Sciberras, licensed under",
+    "spritesSuffix": ". The app recolours them; the originals are grayscale.",
+    "packsTitle": "Content packs",
+    "packsIntro": "Packs installed on this device.",
+    "packBy": "by"
   },
   "contact": {
     "title": "Contact",
@@ -1077,7 +1101,8 @@
         "successValue": "Succeeds when the total reaches",
         "successFormula": "Succeeds when this is 0 or more",
         "kind": "Effect type",
-        "attribute": "Target attribute"
+        "attribute": "Target attribute",
+        "range": "Range (cells)"
       },
       "issue": {
         "name": "Give the skill a name.",
@@ -1090,7 +1115,8 @@
         "roll_count": "Roll 1 to 100 dice.",
         "roll_faces": "Dice have 2 to 1000 faces.",
         "success_value": "The threshold is a whole number.",
-        "success_formula": "The success formula is not valid (roll, skillLevel, level, attribute names, target_<attribute>)."
+        "success_formula": "The success formula is not valid (roll, skillLevel, level, attribute names, target_<attribute>).",
+        "range": "The range is a whole number of cells, 1 or more, on an active skill."
       },
       "help": {
         "description": "Shown in the catalogue and on the sheet.",
@@ -1107,7 +1133,8 @@
         "successMode": "When the skill works: always, above a total, or by formula.",
         "successValue": "The dice total needed to succeed.",
         "successFormula": "A formula; the skill succeeds when it gives 0 or more.",
-        "effects": "What the skill does when it works. Each amount is a formula."
+        "effects": "What the skill does when it works. Each amount is a formula.",
+        "range": "How far it reaches on the combat grid; empty shows no range."
       },
       "sections": {
         "identity": "Identity",
@@ -1362,6 +1389,58 @@
       "name": "Preset name",
       "save": "Save as preset",
       "delete": "Delete preset"
+    },
+    "kind": {
+      "grayscale": "Grayscale",
+      "masked": "Masked",
+      "colored": "Colored"
+    },
+    "coloredRefused": "Colored sprites cannot be opened in the colorizer.",
+    "library": {
+      "allKinds": "All kinds",
+      "kindFilter": "Filter by kind",
+      "open": "Sprite library",
+      "title": "Sprite library",
+      "search": "Search a sprite",
+      "empty": "No sprite matches.",
+      "credit": "Fantasy items pack by Florian Sciberras (CC BY 4.0).",
+      "bundled": "Bundled",
+      "mine": "My sprites"
+    },
+    "sets": {
+      "save": "Save",
+      "saveHint": "Save the sprite and its materials on this device",
+      "saved": "Sprite saved on this device.",
+      "saveFailed": "The sprite could not be saved.",
+      "open": "Open",
+      "rename": "Rename",
+      "delete": "Delete",
+      "deleteTitle": "Delete this sprite?",
+      "deleteMessage": "\"{{name}}\" and its materials will be deleted from this device.",
+      "empty": "No saved sprite yet. Open one, set its materials and press Save.",
+      "kind": "Item kind",
+      "kindNone": "Not used for items",
+      "kindHint": "Random item images of this kind can use this sprite"
+    },
+    "draft": {
+      "banner": "Sprite \"{{ sprite }}\" of the draft \"{{ draft }}\"",
+      "save": "Save to the draft",
+      "saved": "Saved to the draft.",
+      "saveFailed": "The draft could not be saved.",
+      "back": "Back to the draft",
+      "loadFailed": "This draft sprite could not be opened.",
+      "add": "Add to a pack draft",
+      "addTitle": "Add to a pack draft",
+      "chooseDraft": "Draft",
+      "newDraft": "New draft",
+      "spriteId": "Id",
+      "label": "Label",
+      "type": "Type",
+      "slot": "Slot",
+      "confirm": "Add",
+      "added": "Sprite added to the draft.",
+      "addFailed": "The sprite could not be added: {{ reason }}",
+      "open": "Open the draft"
     }
   },
   "combat": {
@@ -1374,6 +1453,9 @@
       "invalid": "This request isn't valid.",
       "gameMasterOnly": "Only the game master can do that.",
       "notYours": "This isn't your combatant.",
+      "notYourTurn": "This isn't your turn.",
+      "outOfReach": "That cell is out of reach",
+      "noMovementLeft": "No movement left this turn",
       "noEncounter": "There is no encounter in progress.",
       "alreadyStarted": "An encounter is already in progress.",
       "life-attribute-required": "Combat needs a life attribute in the world's combat rules.",
@@ -1383,7 +1465,8 @@
       "caster-not-found": "This combatant isn't in the encounter.",
       "skill-not-known": "This combatant doesn't know that skill.",
       "skill-not-active": "Only active skills can be used in combat.",
-      "target-not-found": "This target isn't in the encounter."
+      "target-not-found": "This target isn't in the encounter.",
+      "badPositions": "Invalid placement"
     },
     "order": "Turn order",
     "round": "Round {{round}}",
@@ -1396,17 +1479,17 @@
     "details": "Details",
     "roll": "{{caster}} rolled {{rolls}} (total {{total}}) for {{skill}}",
     "waitingGm": "Waiting for the GM…",
+    "waitingTurn": "Waiting for {{name}}",
     "start": {
       "title": "Start an encounter",
       "characters": "Characters",
       "npcs": "NPCs",
-      "pick": "Add",
-      "picked": "In",
-      "fewer": "One fewer",
-      "more": "One more",
+      "placeholder": "Pick…",
+      "count": "Number of copies",
       "action": "Start the encounter",
       "noCharacters": "No character in this world yet.",
-      "noNpcs": "No NPC in the catalogue yet."
+      "noNpcs": "No NPC in the catalogue yet.",
+      "placeHint": "Drag the tokens to place them"
     },
     "initiative": {
       "label": "Initiative",
@@ -1417,10 +1500,12 @@
       "damage": "{{amount}} damage",
       "heal": "{{amount}} healing",
       "modify": "{{amount}} {{attribute}} for {{duration}} turns",
-      "cooldown": "cooldown {{turns}}"
+      "cooldown": "cooldown {{turns}}",
+      "range": "range {{ cells }}"
     },
     "actions": {
       "use": "Use",
+      "giveBack": "Give one back",
       "skills": "Skills",
       "useSkill": "Use",
       "items": "Items",
@@ -1428,6 +1513,16 @@
       "pickTargets": "Pick the targets of {{skill}}",
       "confirm": "Confirm",
       "cancel": "Cancel"
+    },
+    "targets": {
+      "enemies": "Enemies",
+      "allies": "Allies",
+      "placeholder": "Targets"
+    },
+    "banner": {
+      "label": "Last combat roll",
+      "success": "Success",
+      "failure": "Failure"
     },
     "pending": {
       "title": "Results to apply",
@@ -1437,6 +1532,9 @@
       "apply": "Apply",
       "edit": "Edit",
       "dismiss": "Dismiss"
+    },
+    "decision": {
+      "deciding": "The GM is deciding…"
     },
     "manual": {
       "damage": "Damage",
@@ -1455,6 +1553,130 @@
       "loot": "Loot",
       "confirm": "End the encounter",
       "hint": "The money and the loot are for you to hand out at the table."
+    },
+    "grid": {
+      "label": "Combat grid",
+      "reachLegend": "Can move here"
     }
+  },
+  "packs": {
+    "choiceLabel": "Pack",
+    "choiceRandom": "Random",
+    "title": "Content packs",
+    "intro": "Sprites and word lists you can add to the app. Download a pack to use it in a world, then it works offline.",
+    "alwaysOn": "Always available",
+    "download": "Download",
+    "downloaded": "Downloaded",
+    "downloading": "Downloading...",
+    "author": "Author",
+    "license": "License",
+    "size": "Size",
+    "language": "Language",
+    "remove": "Remove from device",
+    "details": "Details",
+    "removeTitle": "Remove this pack?",
+    "removeMessage": "The files of {{ name }} will be deleted from this device. You can download it again later.",
+    "removeAccept": "Remove",
+    "removeReject": "Keep",
+    "errorTitle": "Pack error",
+    "loadFailed": "The list of packs could not be loaded.",
+    "detailsSprites": "Sprites",
+    "detailsNoSprites": "Download the pack to see its sprites.",
+    "detailsGenerators": "Word lists",
+    "detailsNoGenerators": "No word list.",
+    "licenseLink": "Read the license",
+    "generator": {
+      "items": "Items",
+      "npcs": "NPCs",
+      "skills": "Skills",
+      "classes": "Classes"
+    },
+    "add": "Add a pack",
+    "linkLabel": "Link to the pack",
+    "linkPlaceholder": "https://github.com/owner/repository or a pack.json link",
+    "check": "Check",
+    "install": "Install",
+    "update": "Update",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "version": "Version",
+    "source": "Source",
+    "officialTitle": "Official packs",
+    "unofficialTitle": "Added or created packs",
+    "duplicate": "Duplicate",
+    "warning": "Content not checked by the app's authors",
+    "wordLists": "Word lists: {{ count }}",
+    "updateVersions": "Replace {{ name }} version {{ from }} with version {{ to }}?",
+    "link": {
+      "empty": "Enter a link.",
+      "invalid": "This is not a valid link.",
+      "notHttps": "The link must start with https://.",
+      "notRepository": "This GitHub link is not a repository, a folder of a repository or a pack.json file.",
+      "notJson": "The link must point to a pack.json file or a GitHub repository."
+    },
+    "creator": {
+      "title": "Pack creator",
+      "intro": "Make your own pack: details, word lists and sprites. Drafts are saved on this device.",
+      "create": "Create a pack",
+      "newDraft": "New draft",
+      "updated": "Updated",
+      "open": "Open",
+      "delete": "Delete",
+      "empty": "No draft yet.",
+      "untitled": "Untitled pack",
+      "deleteTitle": "Delete this draft?",
+      "deleteMessage": "The draft {{ name }} will be deleted from this device.",
+      "deleteAccept": "Delete",
+      "deleteReject": "Keep",
+      "editTitle": "Edit a pack",
+      "backToDrafts": "Back to the drafts",
+      "notFound": "This draft does not exist.",
+      "tabs": {
+        "details": "Details",
+        "lists": "Word lists",
+        "sprites": "Sprites",
+        "publish": "Publish"
+      },
+      "name": "Name",
+      "language": "Language of the pack",
+      "packId": "Pack id",
+      "packIdHint": "Lowercase letters, digits and dashes; made from the name until you change it.",
+      "idWarning": {
+        "official": "This id belongs to an official pack: it cannot be installed.",
+        "link": "A pack added from a link already uses this id: it cannot be installed."
+      },
+      "description": "Description",
+      "version": "Version",
+      "author": "Author",
+      "license": "License",
+      "licenseUrl": "License link",
+      "homepage": "Home page (optional)",
+      "listsIntro": "For each generator, paste or import a JSON word list, or start from the Base of the pack's language. An empty list is left out of the pack.",
+      "importFile": "Import a file",
+      "copyBase": "Copy Base's list",
+      "clear": "Clear",
+      "invalidJson": "This text is not valid JSON.",
+      "spritesIntro": "Add PNG images (at most 1 MB and 256 x 256) or sprites saved in the sprite colorizer.",
+      "addPng": "Add a PNG image",
+      "fromMine": "From my sprites",
+      "addSet": "Add",
+      "noSets": "No saved sprite yet.",
+      "noSprites": "No sprite yet.",
+      "spriteId": "Id",
+      "label": "Label",
+      "spriteType": "Type",
+      "spriteSlot": "Slot",
+      "spriteKind": "Kind",
+      "slotNone": "None",
+      "removeSprite": "Remove",
+      "duplicateId": "Another sprite has this id.",
+      "publishIntro": "Install the pack on this device to use it now, or export it as a .zip to share.",
+      "installDevice": "Install on this device",
+      "export": "Export",
+      "installed": "Pack installed on this device",
+      "editInColorizer": "Edit in the colorizer"
+    },
+    "createdHere": "Created on this device",
+    "editAsDraft": "Edit as a draft"
   }
 }

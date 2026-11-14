@@ -79,6 +79,7 @@ export class CharacterService {
   }
 
   publishCharacters(characters: Character[]): void {
+    if (this.api.$role() !== 'host') return;
     this.api.publish(CHARACTER_TOPICS.list, characters);
   }
 }

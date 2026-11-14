@@ -4,6 +4,27 @@ import { SpriteImage } from '../models/sprite';
 /** Browser plumbing: decode an image file, encode PNG, trigger a download. */
 @Injectable({ providedIn: 'root' })
 export class SpriteFileService {
+  /** Downloads an image of the app (a bundled sprite) and decodes it. */
+  async fetchImage(url: string): Promise<SpriteImage> {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Cannot load ${url}`);
+    return this.decode(await response.blob());
+  }
+
+  /** Downloads a file of the app (a bundled sprite) as is. */
+  async fetchBlob(url: string): Promise<Blob> {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Cannot load ${url}`);
+    return response.blob();
+  }
+
+  /** Downloads a text file of the app (a bundled sprite set). */
+  async fetchText(url: string): Promise<string> {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Cannot load ${url}`);
+    return response.text();
+  }
+
   async decode(file: Blob): Promise<SpriteImage> {
     const bitmap = await createImageBitmap(file, { premultiplyAlpha: 'none' });
     const canvas = document.createElement('canvas');

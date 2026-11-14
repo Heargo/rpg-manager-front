@@ -87,6 +87,13 @@ export function validateSkill(
       !skill.actionType.trim())
   )
     issues.push({ field: 'actionType', code: 'invalid' });
+  if (
+    skill.range !== undefined &&
+    (skill.type !== 'active' ||
+      !Number.isInteger(skill.range) ||
+      skill.range < 1)
+  )
+    issues.push({ field: 'range', code: 'invalid' });
   skill.effects.forEach((effect, index) => {
     if (
       validateFormula(
@@ -306,6 +313,7 @@ export function parseSkillJson(
         ))) &&
     (record['actionType'] === undefined ||
       typeof record['actionType'] === 'string') &&
+    (record['range'] === undefined || typeof record['range'] === 'number') &&
     Array.isArray(record['effects']) &&
     record['effects'].every(
       (effect) =>

@@ -16,6 +16,9 @@ h4 {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+  margin-block: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--p-content-border-color);
 }
 .spacer {
   flex: 1;
@@ -66,85 +69,6 @@ h4 {
   align-items: center;
   gap: 0.5rem;
 }
-.order {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.combatant {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--p-content-border-color);
-  border-radius: var(--p-content-border-radius);
-  background: var(--p-content-background);
-}
-.combatant.active {
-  border-color: var(--p-primary-color);
-  box-shadow: 0 0 0 1px var(--p-primary-color);
-}
-.combatant.enemy .name {
-  color: var(--p-red-400);
-}
-.combatant.down {
-  opacity: 0.6;
-}
-.combatant.down .name {
-  text-decoration: line-through;
-}
-.head {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-.handle {
-  cursor: grab;
-  color: var(--p-text-muted-color);
-}
-.name {
-  min-width: 6rem;
-}
-.initiative {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  color: var(--p-text-muted-color);
-}
-.life {
-  flex: 1;
-  min-width: 5rem;
-}
-.life-text {
-  color: var(--p-text-muted-color);
-}
-.down-tag {
-  color: var(--p-red-400);
-  font-weight: 600;
-}
-.statuses {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-}
-.status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  background: var(--p-surface-200);
-  color: var(--p-surface-900);
-  font-size: 0.85rem;
-}
-.remove-status {
-  border: 0;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  padding: 0;
-}
 .details {
   display: flex;
   flex-direction: column;
@@ -165,9 +89,25 @@ h4 {
   color: var(--p-text-muted-color);
   margin: 0;
 }
-.initiative-edit {
+.start-select {
+  width: 100%;
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.portrait {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  overflow: hidden;
+  flex: none;
+}
+.initial {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  width: 10rem;
+  justify-content: center;
+  background: var(--p-content-border-color);
 }

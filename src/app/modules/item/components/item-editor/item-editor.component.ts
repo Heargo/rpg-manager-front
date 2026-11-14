@@ -18,10 +18,12 @@ import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
+import { PackChoiceBusiness } from '../../../../core/business/pack-choice.business';
 import { ImageBusiness } from '../../../../core/business/image.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
 import { ImagePickerComponent } from '../../../../core/components/image-picker/image-picker.component';
+import { RandomItemImageBusiness } from '../../../sprite/business/random-item-image.business';
 import {
   EQUIPMENT_SLOTS,
   ITEM_RARITIES,
@@ -101,6 +103,17 @@ function toDraft(item: Item | undefined): ItemDraft {
                 (picked)="upload($event)"
                 (removed)="imageId.set(undefined)"
               />
+              <button
+                pButton
+                type="button"
+                data-action="random-image"
+                icon="pi pi-sparkles"
+                severity="secondary"
+                size="small"
+                [loading]="drawingImage()"
+                [label]="'item.editor.randomImage' | transloco"
+                (click)="randomImage()"
+              ></button>
             </div>
             <div class="field">
               <label for="item-name">{{
@@ -251,6 +264,20 @@ function toDraft(item: Item | undefined): ItemDraft {
                   (input)="seed.set($any($event.target).value)"
                 />
               </div>
+              <div class="field">
+                <label for="item-pack">{{
+                  'packs.choiceLabel' | transloco
+                }}</label>
+                <p-select
+                  inputId="item-pack"
+                  data-field="pack"
+                  [options]="packOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  [ngModel]="pack()"
+                  (ngModelChange)="pack.set($event ?? 'random')"
+                />
+              </div>
               <button
                 pButton
                 type="button"
@@ -308,6 +335,9 @@ function toDraft(item: Item | undefined): ItemDraft {
       flex-direction: column;
       gap: 0.75rem;
     }
+    [data-action='random-image'] {
+      align-self: flex-start;
+    }
     .row,
     .seed,
     .modifiers {
@@ -342,7 +372,9 @@ function toDraft(item: Item | undefined): ItemDraft {
 })
 export class ItemEditorComponent {
   private readonly editor = inject(ItemEditorBusiness);
+  private readonly packChoice = inject(PackChoiceBusiness);
   private readonly images = inject(ImageBusiness);
+  private readonly randomImages = inject(RandomItemImageBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly messages = inject(MessageService);
 
@@ -364,6 +396,9 @@ export class ItemEditorComponent {
   });
   protected readonly imageId = linkedSignal(() => this.item()?.imageId);
   protected readonly seed = signal(this.editor.newSeed());
+  protected readonly pack = signal('random');
+  protected readonly packOptions = this.packChoice.options('items');
+  protected readonly drawingImage = signal(false);
 
   protected readonly attributeNames = computed(() =>
     this.world().attributes.map((attribute) => attribute.name),
@@ -432,8 +467,31 @@ export class ItemEditorComponent {
     const draft = await this.editor.generate(
       this.seed(),
       this.attributeNames(),
+      this.pack(),
     );
     this.setDraft(draft);
+    await this.drawImage(
+      this.seed(),
+      await this.editor.packFor(this.seed(), this.pack()),
+    );
+  }
+
+  /** A new random image for the item as it is now (its name, type and slot pick the sprite). */
+  protected async randomImage(): Promise<void> {
+    const seed = this.editor.newSeed();
+    return this.drawImage(seed, await this.editor.packFor(seed, this.pack()));
+  }
+
+  /** Keeps the current image when no sprite can be drawn (offline, nothing bundled). */
+  private async drawImage(seed: string, pack?: string): Promise<void> {
+    this.drawingImage.set(true);
+    try {
+      this.imageId.set(await this.randomImages.create(this.draft(), seed, pack));
+    } catch {
+      /* the item keeps its image */
+    } finally {
+      this.drawingImage.set(false);
+    }
   }
 
   protected reroll(): Promise<void> {

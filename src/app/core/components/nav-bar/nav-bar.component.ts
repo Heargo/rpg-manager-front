@@ -8,6 +8,8 @@ import { Router } from '@angular/router';
 import { ConfirmationService, MenuItem } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { AvatarModule } from '@openng/optimus-ui/avatar';
+import { DOCS_ORIGIN } from '../../constants/docs-origin';
+import { docsUrl } from '../../helpers/docs-url';
 import { MenubarModule } from '@openng/optimus-ui/menubar';
 import { TieredMenu } from '@openng/optimus-ui/tieredmenu';
 import { LanguageBusiness } from '../../business/language.business';
@@ -43,6 +45,11 @@ const SPRITE_COLORIZER: MenuItem = {
   icon: 'pi pi-palette',
   routerLink: '/tools/sprite-colorizer',
 };
+const PACKS: MenuItem = {
+  label: 'nav.packs',
+  icon: 'pi pi-th-large',
+  routerLink: '/tools/packs',
+};
 const ITEM_GENERATOR: MenuItem = {
   label: 'nav.itemGenerator',
   icon: 'pi pi-sparkles',
@@ -60,6 +67,7 @@ const TOOLS: MenuItem = {
   icon: 'pi pi-wrench',
   items: [
     SPRITE_COLORIZER,
+    PACKS,
     ITEM_GENERATOR,
     {
       label: 'nav.characterSheet',
@@ -79,7 +87,7 @@ const TOOLS: MenuItem = {
 const ROOM_TOOLS: MenuItem = {
   label: 'nav.tools',
   icon: 'pi pi-wrench',
-  items: [SPRITE_COLORIZER, ITEM_GENERATOR, EXTERNAL_TOOLS],
+  items: [SPRITE_COLORIZER, PACKS, ITEM_GENERATOR, EXTERNAL_TOOLS],
 };
 
 const OUT_OF_ROOM_ITEMS: MenuItem[] = [
@@ -144,6 +152,7 @@ const ROOM_ITEMS: MenuItem[] = [
 })
 export class NavBarComponent {
   protected readonly profileBusiness = inject(ProfileBusiness);
+  private readonly docsOrigin = inject(DOCS_ORIGIN);
   private readonly languageBusiness = inject(LanguageBusiness);
   private readonly room = inject(RoomBusiness);
   private readonly confirmation = inject(ConfirmationService);
@@ -164,6 +173,13 @@ export class NavBarComponent {
       label: this.languageBusiness.t('nav.profile'),
       icon: 'pi pi-user',
       routerLink: '/profile',
+    },
+    {
+      label: this.languageBusiness.t('nav.help'),
+      icon: 'pi pi-question-circle',
+      // A new tab: leaving the app would close a hosted room.
+      url: this.docsOrigin + docsUrl(this.languageBusiness.$language()),
+      target: '_blank',
     },
     { separator: true },
     this.languageItem(),

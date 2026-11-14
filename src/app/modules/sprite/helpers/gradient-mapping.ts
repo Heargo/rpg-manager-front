@@ -1,4 +1,4 @@
-import { GradientStop, SpriteImage } from '../models/sprite';
+import { GradientStop, SpriteDocument, SpriteImage } from '../models/sprite';
 import { luminance } from './luminance';
 
 export type Rgb = [number, number, number];
@@ -70,5 +70,18 @@ export function mapGradient(
     data: new Uint8ClampedArray(image.data),
   };
   mapGradientInto(out, image, mask, stops);
+  return out;
+}
+
+/** The sprite with every visible material through its gradient; alpha kept. */
+export function renderSprite(image: SpriteImage, doc: SpriteDocument): SpriteImage {
+  const out: SpriteImage = {
+    width: image.width,
+    height: image.height,
+    data: new Uint8ClampedArray(image.data),
+  };
+  for (const layer of doc.layers) {
+    if (layer.visible) mapGradientInto(out, image, layer.mask, layer.gradient.stops);
+  }
   return out;
 }

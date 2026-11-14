@@ -30,5 +30,6 @@ export function skillSummary(
     parts.push(`${preview.cost.amount} ${preview.cost.attribute}`);
   if (preview.cooldown)
     parts.push(t('combat.skill.cooldown', { turns: preview.cooldown }));
+  if (skill.range) parts.push(t('combat.skill.range', { cells: skill.range }));
   return parts.join(', ');
 }

@@ -21,11 +21,10 @@ const potion = item('potion', 'Healing Potion', 'rare');
 /**
  * Hooks the template must expose: an inventory grid of `[data-field="slot"]` buttons, one per item, each with
  * `[data-rarity="<rarity>"]`, the name, `[data-field="slot-price"]`, and either an `app-stored-image` (item has an
- * imageId) or a `[data-field="slot-kind-icon"]`. Selecting (clicking) a slot shows one `[data-field="slot-actions"]`
- * panel with `[data-action]` buttons `view` (shows an `app-item-card` of the item), `give` (only when `canGive`),
- * `edit` and `delete`; none are shown before a selection. The toolbar keeps `add-defaults` and
- * `[data-field="search"]`.
- * Adapted from the card contract: the per-card `app-item-card` list and per-card action buttons are replaced.
+ * imageId) or a `[data-field="slot-kind-icon"]`. Clicking a slot (or the context-menu key / right click on it) opens a
+ * popup menu anchored to the slot (appended to the body) with items `[data-automationid]` = `view` (a dialog with an
+ * `app-item-card` of the item), `give` (only when `canGive`), `edit` and `delete`; none exist before. The toolbar
+ * keeps `add-defaults` and `[data-field="search"]`.
  */
 describe('ItemCatalogueComponent', () => {
   const world: World = {
@@ -49,8 +48,21 @@ describe('ItemCatalogueComponent', () => {
 
   async function select(ctx: Awaited<ReturnType<typeof setup>>, index: number) {
     ctx.q('[data-field="slot"]')[index].click();
-    await ctx.fixture.whenStable();
+    await settle(ctx);
   }
+
+  async function settle(ctx: Awaited<ReturnType<typeof setup>>) {
+    for (let i = 0; i < 3; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await ctx.fixture.whenStable();
+    }
+  }
+
+  /** Menu entries live in the body (the popup is appended there). */
+  const entry = (action: string) => document.body.querySelector<HTMLElement>(`[data-automationid="${action}"]`);
+  const menuOpen = () => document.body.querySelector('.p-menu-overlay, .p-menu') !== null && entry('edit') !== null;
+
+  afterEach(() => document.body.querySelectorAll('.p-menu, .p-dialog-mask').forEach((n) => n.remove()));
 
   it('shows one inventory slot per catalogue item, with name and price', async () => {
     const { q, el } = await setup(true);
@@ -88,23 +100,34 @@ describe('ItemCatalogueComponent', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Iron Sword');
   });
 
-  it('shows no actions until a slot is selected', async () => {
+  it('opens no menu until a slot is clicked, then one next to that slot', async () => {
     const ctx = await setup(true);
-    expect(ctx.q('[data-field="slot-actions"]')).toHaveLength(0);
-    expect(ctx.q('[data-action="edit"]')).toHaveLength(0);
+    expect(entry('edit')).toBeNull();
     await select(ctx, 0);
-    expect(ctx.q('[data-field="slot-actions"]')).toHaveLength(1);
-    expect(ctx.q('[data-action="view"]')).toHaveLength(1);
-    expect(ctx.q('[data-action="edit"]')).toHaveLength(1);
+    expect(menuOpen()).toBe(true);
+    expect(entry('view')).not.toBeNull();
+    expect(entry('give')).not.toBeNull();
+    expect(entry('delete')).not.toBeNull();
+    expect(ctx.q('[data-field="slot-actions"]')).toHaveLength(0);
   });
 
-  it('view shows the item card of the selected item', async () => {
+  it('opens the menu with the context-menu key or a right click on the slot', async () => {
+    const ctx = await setup(true);
+    const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+    ctx.q('[data-field="slot"]')[1].dispatchEvent(event);
+    await settle(ctx);
+    expect(event.defaultPrevented).toBe(true);
+    expect(menuOpen()).toBe(true);
+  });
+
+  it('view shows the item card of the clicked item in a dialog', async () => {
     const ctx = await setup(true);
     await select(ctx, 1);
-    ctx.q('[data-action="view"]')[0].click();
-    await ctx.fixture.whenStable();
-    expect(ctx.q('app-item-card')).toHaveLength(1);
-    expect(ctx.q('app-item-card')[0].textContent).toContain('Healing Potion');
+    entry('view')!.click();
+    await settle(ctx);
+    const cards = document.body.querySelectorAll('app-item-card');
+    expect(cards).toHaveLength(1);
+    expect(cards[0].textContent).toContain('Healing Potion');
   });
 
   it('emits the item to give when the GM can give', async () => {
@@ -112,25 +135,26 @@ describe('ItemCatalogueComponent', () => {
     const given: Item[] = [];
     ctx.component.give.subscribe((i: Item) => given.push(i));
     await select(ctx, 0);
-    ctx.q('[data-action="give"]')[0].click();
-    await ctx.fixture.whenStable();
+    entry('give')!.click();
+    await settle(ctx);
     expect(given).toEqual([sword]);
   });
 
   it('hides give on a world nobody plays in (sandbox)', async () => {
     const ctx = await setup(false);
     await select(ctx, 0);
-    expect(ctx.q('[data-action="give"]')).toHaveLength(0);
-    expect(ctx.q('[data-action="delete"]')).toHaveLength(1);
+    expect(entry('give')).toBeNull();
+    expect(entry('delete')).not.toBeNull();
   });
 
-  it('emits the item to edit', async () => {
+  it('emits the item of the slot clicked last', async () => {
     const ctx = await setup(true);
     const edited: Item[] = [];
     ctx.component.edit.subscribe((i: Item) => edited.push(i));
+    await select(ctx, 1);
     await select(ctx, 0);
-    ctx.q('[data-action="edit"]')[0].click();
-    await ctx.fixture.whenStable();
+    entry('edit')!.click();
+    await settle(ctx);
     expect(edited).toEqual([sword]);
   });
 
@@ -143,8 +167,8 @@ describe('ItemCatalogueComponent', () => {
     ctx.component.remove.subscribe((i: Item) => removed.push(i));
 
     await select(ctx, 1);
-    ctx.q('[data-action="delete"]')[0].click();
-    await ctx.fixture.whenStable();
+    entry('delete')!.click();
+    await settle(ctx);
     expect(confirm).toHaveBeenCalledTimes(1);
     expect(removed).toEqual([]);
 

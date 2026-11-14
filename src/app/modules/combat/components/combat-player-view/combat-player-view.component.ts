@@ -108,15 +108,22 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
         </p>
       }
 
-      <app-combat-actions
-        [class.actions-bar]="docked()"
-        [combatantId]="combatantId()"
-        [characterId]="characterId()"
-        [sheetSkills]="character()?.skills ?? []"
-        [level]="character()?.level ?? 1"
-        [attributes]="me()?.attributes ?? []"
-        [actions]="me()?.actions ?? []"
-      />
+      @if (myTurn()) {
+        <app-combat-actions
+          [class.actions-bar]="docked()"
+          [combatantId]="combatantId()"
+          [characterId]="characterId()"
+          [sheetSkills]="character()?.skills ?? []"
+          [level]="character()?.level ?? 1"
+          [attributes]="me()?.attributes ?? []"
+          [actions]="me()?.actions ?? []"
+        />
+      } @else {
+        <p class="waiting" data-testid="waiting-turn">
+          <i class="pi pi-hourglass"></i>
+          {{ 'combat.waitingTurn' | transloco: { name: activeName() } }}
+        </p>
+      }
     }
   `,
   styles: `
@@ -213,6 +220,10 @@ export class CombatPlayerViewComponent {
   protected readonly myTurn = computed(
     () => this.state()?.activeId === this.combatantId(),
   );
+  protected readonly activeName = computed(() => {
+    const state = this.state();
+    return state?.combatants.find((c) => c.id === state.activeId)?.name ?? '';
+  });
   /** One of the player's results is still with the GM. */
   protected readonly waiting = computed(() =>
     (this.state()?.pending ?? []).some(

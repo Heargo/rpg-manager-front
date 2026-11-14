@@ -79,6 +79,7 @@ describe('NavBarComponent out of a room', () => {
     const { el } = await render('idle');
     expect(subLabels(el, 'Tools')).toEqual([
       'Sprite colorizer',
+      'Content packs',
       'Item generator',
       'Character sheet',
       'Combat',
@@ -100,7 +101,7 @@ describe.each([
 
   it('keeps the character sheet and world rules sandboxes out of the Tools submenu', async () => {
     const { el } = await render(status, isHost);
-    expect(subLabels(el, 'Tools')).toEqual(['Sprite colorizer', 'Item generator', 'External tools']);
+    expect(subLabels(el, 'Tools')).toEqual(['Sprite colorizer', 'Content packs', 'Item generator', 'External tools']);
   });
 
   it('shows the Close the world button after the menu and before the avatar', async () => {
@@ -175,4 +176,22 @@ describe('NavBarComponent French labels', () => {
     TestBed.inject(ApplicationRef).tick();
     expect(rootLabels(el)).toEqual(['Mondes', 'Dés', 'Catalogues', 'Outils']);
   });
+});
+
+describe('NavBarComponent help', () => {
+  for (const status of ['idle', 'connected'] as RoomStatus[]) {
+    it(`puts Help in the avatar menu, opening the documentation in the app language in a new tab (${status})`, async () => {
+      const { el, fixture } = await render(status);
+      TestBed.inject(LanguageBusiness).setLanguage('en');
+      await fixture.whenStable();
+      (el.querySelector('p-avatar') as HTMLElement).click();
+      await fixture.whenStable();
+      const help = Array.from(document.body.querySelectorAll<HTMLAnchorElement>('a')).find(
+        (a) => text(a) === 'Help',
+      );
+      expect(help).toBeDefined();
+      expect(help!.getAttribute('href')).toBe('/docs/en/');
+      expect(help!.getAttribute('target')).toBe('_blank');
+    });
+  }
 });

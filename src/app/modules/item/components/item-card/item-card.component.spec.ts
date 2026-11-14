@@ -9,8 +9,8 @@ import {
   ITEM_TYPES,
 } from '../../../../core/models/item';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
-import en from '../../../../../../public/i18n/generators/en/items.json';
-import fr from '../../../../../../public/i18n/generators/fr/items.json';
+import en from '../../../../../../public/packs/base-en/generators/items.json';
+import fr from '../../../../../../public/packs/base-fr/generators/items.json';
 import { ItemCardComponent } from './item-card.component';
 
 describe('ItemCardComponent', () => {

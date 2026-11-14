@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
+import { AccordionModule } from '@openng/optimus-ui/accordion';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { DialogModule } from '@openng/optimus-ui/dialog';
@@ -31,10 +32,15 @@ import { StoredImageComponent } from '../../../../core/components/stored-image/s
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterBusiness } from '../../../character/business/character.business';
 import { CombatBusiness } from '../../../combat/business/combat.business';
+import { CombatTargetingBusiness } from '../../../combat/business/combat-targeting.business';
+import { CombatRollBannerComponent } from '../../../combat/components/combat-roll-banner/combat-roll-banner.component';
+import { CombatGridComponent } from '../../../combat/components/combat-grid/combat-grid.component';
+import { CombatOrderComponent } from '../../../combat/components/combat-order/combat-order.component';
 import { CombatGmPanelComponent } from '../../../combat/components/combat-gm-panel/combat-gm-panel.component';
 import { CombatPlayerViewComponent } from '../../../combat/components/combat-player-view/combat-player-view.component';
 import { CharacterSummaryComponent } from '../../../character/components/character-summary/character-summary.component';
 import { MerchantShopComponent } from '../../../npc/components/merchant-shop/merchant-shop.component';
+import { CombatRollDecisionComponent } from '../../../combat/components/combat-roll-decision/combat-roll-decision.component';
 import { DiceOverlayComponent } from '../../../dice/components/dice-overlay/dice-overlay.component';
 import { DiceRollerComponent } from '../../../dice/components/dice-roller/dice-roller.component';
 import { RoomBusiness } from '../../../room/business/room.business';
@@ -45,11 +51,25 @@ import { NOTES_MAX_LENGTH } from '../../models/table';
 /** Below this width the game master's splitter becomes one column, with the players in a drawer. */
 const NARROW_QUERY = '(max-width: 960px)';
 
+const TOOLS_KEY = 'rpg-table-gm-tools';
+const TOOLS = ['dice', 'combat', 'notes'];
+
+function readToolsOpen(): string[] {
+  try {
+    const stored = JSON.parse(localStorage.getItem(TOOLS_KEY) ?? 'null');
+    if (Array.isArray(stored)) return stored.map(String);
+  } catch {
+    // missing or bad value: all open
+  }
+  return TOOLS;
+}
+
 /** The game table: the game master's tools (players, illustration, quick images, notes, dice) or a player's view. */
 @Component({
   selector: 'app-table-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CombatRollBannerComponent,
     TableNpcsComponent,
     NgTemplateOutlet,
     FormsModule,
@@ -70,9 +90,13 @@ const NARROW_QUERY = '(max-width: 960px)';
     HostOfflineIconComponent,
     CharacterSummaryComponent,
     CombatGmPanelComponent,
+    CombatOrderComponent,
+    AccordionModule,
+    CombatGridComponent,
     CombatPlayerViewComponent,
     DiceRollerComponent,
     DiceOverlayComponent,
+    CombatRollDecisionComponent,
   ],
   templateUrl: './table-page.component.html',
   styleUrl: './table-page.component.scss',
@@ -82,6 +106,16 @@ export class TablePageComponent {
   protected readonly table = inject(TableBusiness);
   protected readonly characters = inject(CharacterBusiness);
   protected readonly combat = inject(CombatBusiness);
+  protected readonly targeting = inject(CombatTargetingBusiness);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** An aimed skill never outlives the encounter nor the page. */
+  private readonly clearTargeting = (() => {
+    this.destroyRef.onDestroy(() => this.targeting.clear());
+    effect(() => {
+      if (!this.combat.$state()) this.targeting.clear();
+    });
+  })();
   private readonly messages = inject(MessageService);
   private readonly router = inject(Router);
 
@@ -99,6 +133,8 @@ export class TablePageComponent {
   protected readonly notesMaxLength = NOTES_MAX_LENGTH;
   protected readonly narrow = signal(false);
   protected readonly playersOpen = signal(false);
+  /** The game master's tool panels left open, remembered on this device (all open by default). */
+  protected readonly toolsOpen = signal<string[]>(readToolsOpen());
   protected readonly uploading = signal(false);
   private readonly selectedId = signal<string | null>(null);
   /** What the game master typed; null until they type, so the saved notes show first. */
@@ -114,6 +150,16 @@ export class TablePageComponent {
     );
   });
   private readonly ready = signal(false);
+
+  protected setToolsOpen(value: unknown): void {
+    const open = Array.isArray(value) ? value.map(String) : [];
+    this.toolsOpen.set(open);
+    try {
+      localStorage.setItem(TOOLS_KEY, JSON.stringify(open));
+    } catch {
+      // private mode: not remembered
+    }
+  }
 
   /** Game master: who opening or closing a shop is for (null: every player). */
   protected readonly shopTarget = signal<string | null>(null);

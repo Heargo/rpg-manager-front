@@ -9,7 +9,7 @@ import { SELF_PEER } from '../../../core/p2p/peer-api.service';
 import { PeerId } from '../../../core/p2p/room-transport';
 import { RoomHostBusiness } from '../../room/business/room-host.business';
 import { addSharedRoll, isValidRollRequest } from '../helpers/shared-roll';
-import { SharedRoll } from '../models/dice-api';
+import { SharedCombatRoll, SharedRoll } from '../models/dice-api';
 import { DiceService } from '../services/dice.service';
 
 /**
@@ -49,6 +49,36 @@ export class DiceHostBusiness {
     this.rolls = addSharedRoll(this.rolls, roll);
     this.service.publishRolls(this.rolls);
     return roll;
+  }
+
+  /**
+   * Publishes dice the host already drew for a combat action (the values the result uses), for `playerId` or, without
+   * one, the host's player.
+   */
+  announce(input: {
+    playerId?: string;
+    values: number[];
+    sides: number;
+    combat: SharedCombatRoll;
+  }): void {
+    const members = this.roomHost.$state()?.members ?? [];
+    const member = input.playerId
+      ? members.find((entry) => entry.playerId === input.playerId)
+      : members.find((entry) => entry.isHost);
+    const by = member ?? members.find((entry) => entry.isHost);
+    if (!by) return;
+    const roll: SharedRoll = {
+      id: crypto.randomUUID(),
+      by: { playerId: by.playerId, name: by.name },
+      count: input.values.length,
+      sides: input.sides,
+      values: input.values,
+      seed: createSeed(this.random),
+      at: Date.now(),
+      combat: input.combat,
+    };
+    this.rolls = addSharedRoll(this.rolls, roll);
+    this.service.publishRolls(this.rolls);
   }
 
   private roller(from: PeerId): SharedRoll['by'] {

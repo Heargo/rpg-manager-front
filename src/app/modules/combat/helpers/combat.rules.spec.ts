@@ -13,6 +13,7 @@ import {
   addCombatant,
   addStatus,
   applyPending,
+  combatRewards,
   damageCombatant,
   dismissPending,
   editAttribute,
@@ -297,13 +298,13 @@ describe('startEncounter', () => {
   it('starts every action counter unused, from the world action types', () => {
     const { enc } = start({
       actionTypes: [
-        { name: 'Action', count: 2 },
-        { name: 'Bonus', count: 1 },
+        { name: 'Action', count: 2, movement: false },
+        { name: 'Bonus', count: 1, movement: false },
       ],
     });
     expect(by(enc, 'Aria').actions).toEqual([
-      { name: 'Action', count: 2, used: 0 },
-      { name: 'Bonus', count: 1, used: 0 },
+      { name: 'Action', count: 2, used: 0, movement: false },
+      { name: 'Bonus', count: 1, used: 0, movement: false },
     ]);
   });
 
@@ -448,6 +449,7 @@ describe('turns and rounds', () => {
       name: 'Action',
       count: 1,
       used: 1,
+      movement: false,
     });
     enc = nextTurn(enc);
     expect(by(enc, 'Bram').actions[0].used).toBe(0);
@@ -912,5 +914,165 @@ describe('a skill effect reading the target', () => {
     expect(result.encounter.pending[0]).toMatchObject({
       effects: [{ kind: 'damage', attribute: 'Life', amount: 14 }],
     });
+  });
+});
+
+describe('optional combat steps', () => {
+  const all = {
+    initiative: true,
+    actionCounters: true,
+    gmValidation: true,
+    defence: true,
+    rewards: true,
+  };
+  const off = (step: keyof typeof all, extra: Partial<CombatRules> = {}) => ({
+    steps: { ...all, [step]: false },
+    ...extra,
+  });
+  const fireballAt = (rules: Partial<CombatRules>) => {
+    const { enc, world } = start({ defence: 'Armor', ...rules });
+    const next = ok(
+      useSkill(
+        enc,
+        {
+          casterId: by(enc, 'Aria').id,
+          skillId: 'fireball',
+          targetIds: [by(enc, 'Goblin 1').id],
+        },
+        skills,
+        true,
+        scripted(0, 0),
+        world.combat,
+      ),
+    ).encounter;
+    return { enc: next, world };
+  };
+
+  it('creates combatants without action counters when that step is off', () => {
+    const { enc } = start(off('actionCounters'));
+    expect(enc.combatants.map((c) => c.actions)).toEqual([[], [], [], [], []]);
+  });
+
+  it('keeps the action counters when the step is on', () => {
+    const { enc } = start({ steps: all });
+    expect(by(enc, 'Aria').actions).toEqual([
+      { name: 'Action', count: 1, used: 0, movement: false },
+      { name: 'Movement', count: 1, used: 0, movement: true },
+    ]);
+  });
+
+  it('posts a pending result when GM validation is on', () => {
+    const { enc } = fireballAt({ steps: all });
+    expect(enc.pending).toHaveLength(1);
+    expect(attr(by(enc, 'Goblin 1'), 'Life').current).toBe(13);
+  });
+
+  it('applies a skill at once when GM validation is off: no pending, cost, cooldown and log kept, defence taken off', () => {
+    const { enc } = fireballAt(off('gmValidation'));
+    expect(enc.pending).toEqual([]);
+    // 2d6 = 2, 12 + 2 = 14 damage, minus 3 armor defence
+    expect(attr(by(enc, 'Goblin 1'), 'Life').current).toBe(2);
+    expect(attr(by(enc, 'Aria'), 'Mana').current).toBe(0);
+    expect(by(enc, 'Aria').cooldowns['fireball']).toBe(2);
+    expect(enc.log.map((l) => l.kind)).toEqual(['skill', 'apply']);
+  });
+
+  it('applies at once without defence when both GM validation and defence are off', () => {
+    const { enc } = fireballAt({
+      steps: { ...all, gmValidation: false, defence: false },
+    });
+    expect(enc.pending).toEqual([]);
+    expect(attr(by(enc, 'Goblin 1'), 'Life').current).toBe(0);
+    expect(by(enc, 'Goblin 1').down).toBe(true);
+  });
+
+  it('ignores the defence option and suggests none when the defence step is off', () => {
+    const { enc, world } = fireballAt({ steps: all });
+    const id = enc.pending[0].id;
+    expect(suggestDefence(enc, id, world.combat)).toBe(3);
+    const noDefence = { ...world.combat, steps: { ...all, defence: false } };
+    expect(suggestDefence(enc, id, noDefence)).toBe(0);
+    const applied = applyPending(enc, id, { defence: true, rules: noDefence });
+    expect(attr(by(applied, 'Goblin 1'), 'Life').current).toBe(0);
+  });
+
+  it('proposes no rewards when the rewards step is off', () => {
+    const { enc, world } = start({ steps: { ...all, rewards: false } });
+    const beaten = damageCombatant(enc, by(enc, 'Goblin 1').id, 13);
+    expect(combatRewards(beaten, world.combat)).toBeNull();
+  });
+
+  it('proposes the rewards when the step is on', () => {
+    const { enc, world } = start({ steps: all });
+    const beaten = damageCombatant(enc, by(enc, 'Goblin 1').id, 13);
+    expect(combatRewards(beaten, world.combat)?.xp.total).toBe(30);
+    expect(combatRewards(beaten, world.combat)?.money).toBe(7);
+  });
+});
+
+describe('startEncounter with positions', () => {
+  const gridRules = { grid: { enabled: true, columns: 4, rows: 3 } };
+  const place = (
+    positions: Record<string, { x: number; y: number }>,
+    rules: Partial<CombatRules> = gridRules,
+  ) => {
+    const w = { ...build().world };
+    w.combat = { ...w.combat, ...rules };
+    return startEncounter(w, { ...picks, positions }, newId);
+  };
+
+  it('puts each combatant on the cell of its slot', () => {
+    const result = place({
+      'character:aria': { x: 3, y: 2 },
+      'character:bram': { x: 1, y: 1 },
+      'npc:goblin:1': { x: 0, y: 0 },
+      'npc:goblin:3': { x: 2, y: 0 },
+    });
+    const enc = ok(result).encounter;
+    expect(by(enc, 'Aria').position).toEqual({ x: 3, y: 2 });
+    expect(by(enc, 'Bram').position).toEqual({ x: 1, y: 1 });
+    expect(by(enc, 'Goblin 1').position).toEqual({ x: 0, y: 0 });
+    expect(by(enc, 'Goblin 2').position).toBeUndefined();
+    expect(by(enc, 'Goblin 3').position).toEqual({ x: 2, y: 0 });
+  });
+
+  it('ignores unknown slot keys', () => {
+    const enc = ok(
+      place({
+        'character:ghost': { x: 1, y: 1 },
+        'npc:goblin:9': { x: 2, y: 2 },
+      }),
+    ).encounter;
+    expect(enc.combatants.every((c) => c.position === undefined)).toBe(true);
+  });
+
+  it('refuses a cell out of bounds', () => {
+    expect(place({ 'character:aria': { x: 4, y: 0 } })).toEqual({
+      ok: false,
+      error: 'badPositions',
+    });
+    expect(place({ 'character:aria': { x: 0, y: -1 } })).toEqual({
+      ok: false,
+      error: 'badPositions',
+    });
+  });
+
+  it('refuses two slots on one cell', () => {
+    expect(
+      place({
+        'character:aria': { x: 1, y: 1 },
+        'npc:goblin:2': { x: 1, y: 1 },
+      }),
+    ).toEqual({ ok: false, error: 'badPositions' });
+  });
+
+  it('ignores the positions when the grid is off', () => {
+    const enc = ok(
+      place(
+        { 'character:aria': { x: 99, y: 99 } },
+        { grid: { enabled: false, columns: 4, rows: 3 } },
+      ),
+    ).encounter;
+    expect(enc.combatants.every((c) => c.position === undefined)).toBe(true);
   });
 });

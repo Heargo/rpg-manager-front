@@ -6,6 +6,7 @@ import { CharacterBusiness } from '../../character/business/character.business';
 import { Npc } from '../../npc/models/npc';
 import { RoomBusiness } from '../../room/business/room.business';
 import { Skill } from '../../skill/models/skill';
+import { effectiveInitiativeMode } from '../../world/helpers/world-combat.rules';
 import { WorldInfoBusiness } from '../../world/business/world-info.business';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
 import {
@@ -15,7 +16,7 @@ import {
 } from '../../world/models/world';
 import {
   EncounterPicks,
-  proposeRewards,
+  combatRewards,
   RewardProposal,
   skillAvailability,
 } from '../helpers/combat.rules';
@@ -76,6 +77,16 @@ export class CombatBusiness {
     this.room.$isHost() ? (this.session.$world()?.npcs ?? []) : [],
   );
 
+  /** The world's grid while it is on (game master's start form), null otherwise. */
+  readonly $grid = computed<{
+    columns: number;
+    rows: number;
+    imageId?: string;
+  } | null>(() => {
+    const grid = this.session.$world()?.combat.grid;
+    return this.room.$isHost() && grid?.enabled ? grid : null;
+  });
+
   /** The skills a device can read: the whole catalogue for the game master, the player's own once loaded. */
   readonly $skills = computed<Skill[]>(() =>
     this.room.$isHost()
@@ -85,7 +96,7 @@ export class CombatBusiness {
 
   readonly $initiativeMode = computed<InitiativeMode | undefined>(() =>
     this.room.$isHost()
-      ? this.session.$world()?.combat.initiative.mode
+      ? effectiveInitiativeMode(this.session.$world()!.combat)
       : this.watched()?.initiativeMode,
   );
 
@@ -139,7 +150,8 @@ export class CombatBusiness {
   /** Game master: what the defeated enemies give. */
   rewards(): RewardProposal | null {
     const encounter = this.$encounter();
-    return encounter ? proposeRewards(encounter) : null;
+    const rules = this.session.$world()?.combat;
+    return encounter && rules ? combatRewards(encounter, rules) : null;
   }
 
   /** An amount of copper as text. */
@@ -179,6 +191,9 @@ export class CombatBusiness {
   }
   dismiss(pendingId: string): Promise<void> {
     return this.service.call('dismiss', { pendingId });
+  }
+  closeRoll(rollId: string): Promise<void> {
+    return this.service.call('closeRoll', { rollId });
   }
   undo(): Promise<void> {
     return this.service.call('undo');
