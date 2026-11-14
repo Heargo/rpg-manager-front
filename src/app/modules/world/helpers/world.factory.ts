@@ -64,6 +64,7 @@ export function createWorld(
     startingMoney: draft.startingMoney ?? 0,
     offlineFeatures: { ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures },
     packs: [...(draft.packs ?? [])],
+    language: draft.language ?? 'en',
     skillRollsEnabled: draft.skillRollsEnabled ?? true,
     sellAnywhere: draft.sellAnywhere ?? true,
     sellAnywhereRatio: draft.sellAnywhereRatio ?? 1,

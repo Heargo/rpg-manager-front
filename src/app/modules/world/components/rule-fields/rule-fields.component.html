@@ -279,6 +279,22 @@
     <fieldset class="offline">
       <legend>{{ "world.fields.packsTitle" | translate }}</legend>
       <p class="hint">{{ "world.fields.packsHint" | translate }}</p>
+      <div class="field">
+        <label for="world-language">{{
+          "world.fields.language" | translate
+        }}</label>
+        <p-select
+          inputId="world-language"
+          name="world-language"
+          data-testid="world-language-select"
+          [options]="languageOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="worldLanguage()"
+          (ngModelChange)="patch({ language: $event })"
+          appendTo="body"
+        />
+      </div>
       @for (pack of installedPacks(); track pack.id) {
         <div class="toggle" data-testid="pack-row" [attr.data-pack]="pack.id">
           <p-checkbox
@@ -294,6 +310,11 @@
               [value]="pack.language.toUpperCase()"
               severity="secondary"
             />
+          }
+          @if (packNote(pack); as note) {
+            <small class="hint" data-testid="pack-note">{{
+              note | translate
+            }}</small>
           }
         </div>
       }

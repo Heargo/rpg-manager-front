@@ -1,7 +1,8 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
-import { extraPackService, provideExtraPack } from '../../../../../testing/extra-pack';
+import { EXTRA_REGISTRY, extraPackService, provideExtraPack } from '../../../../../testing/extra-pack';
+import { PackBusiness } from '../../../../core/business/pack.business';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { WorldDraft } from '../../models/world';
 import { RuleFieldsComponent } from './rule-fields.component';
@@ -447,5 +448,116 @@ describe('RuleFieldsComponent packs', () => {
     await settle();
 
     expect(emitted.at(-1)!.packs).toEqual(['base-fr']);
+  });
+});
+
+/**
+ * Language: `p-select[data-testid="world-language-select"]` (options "Français" / "English") shows `draft.language` and
+ * emits the draft with the new `language`. In the packs section, a row whose pack has another language than the draft's
+ * gets `[data-testid="pack-note"]` "images, kinds and tints only"; a neutral pack gets the note "images" (and no language tag).
+ */
+describe('RuleFieldsComponent language', () => {
+  const NEUTRAL_ENTRY = {
+    id: 'neon',
+    name: 'Neon',
+    description: 'Des choses brillantes',
+    author: 'Ann Author',
+    license: 'CC0-1.0',
+    licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
+    size: 10,
+    sprites: 1,
+  };
+  const NEUTRAL_MANIFEST = {
+    format: 2,
+    id: 'neon',
+    name: 'Neon',
+    description: 'Des choses brillantes',
+    version: '1.0.0',
+    author: 'Ann Author',
+    license: 'CC0-1.0',
+    licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
+    domains: { items: { kinds: { trinket: { type: 'item' } } } },
+    sprites: [{ id: 'spark', label: 'Etincelle', domain: 'items', kinds: ['trinket'], kind: 'grayscale', image: 'sprites/spark.png' }],
+  };
+
+  beforeEach(() => {
+    globalThis.indexedDB = new IDBFactory();
+    URL.createObjectURL = vi.fn(() => 'blob:fake');
+    URL.revokeObjectURL = vi.fn();
+  });
+
+  async function openLanguage(language: 'fr' | 'en', packs: string[]) {
+    const service = extraPackService();
+    service.loadRegistry.mockImplementation(async () => ({
+      format: 1,
+      packs: [...EXTRA_REGISTRY.packs, NEUTRAL_ENTRY],
+    }));
+    const manifest = service.loadManifest.getMockImplementation() as (id: string) => Promise<unknown>;
+    service.loadManifest.mockImplementation(async (id: string) =>
+      id === 'neon' ? structuredClone(NEUTRAL_MANIFEST) : manifest(id),
+    );
+    TestBed.configureTestingModule({ imports: [RuleFieldsComponent], providers: [...TEST_PROVIDERS, provideExtraPack(service)] });
+    const packBusiness = TestBed.inject(PackBusiness);
+    await packBusiness.enable('extra');
+    await packBusiness.enable('neon');
+    const fixture = TestBed.createComponent(RuleFieldsComponent);
+    fixture.componentRef.setInput('draft', { ...base, packs, language });
+    fixture.componentRef.setInput('errors', {});
+    const emitted: WorldDraft[] = [];
+    fixture.componentInstance.draft.subscribe((value: WorldDraft) => emitted.push(value));
+    const el = fixture.nativeElement as HTMLElement;
+    const settle = async () => {
+      await fixture.whenStable();
+      await new Promise((resolve) => setTimeout(resolve));
+      await fixture.whenStable();
+    };
+    await vi.waitFor(async () => {
+      await settle();
+      expect(el.querySelector('[data-testid="pack-row"][data-pack="neon"]')).not.toBeNull();
+    });
+    const note = (id: string) =>
+      el.querySelector(`[data-testid="pack-row"][data-pack="${id}"] [data-testid="pack-note"]`)?.textContent?.trim();
+    return { el, emitted, settle, note };
+  }
+
+  it('shows the draft language in the select', async () => {
+    const { el } = await openLanguage('en', ['base-en']);
+
+    expect(el.querySelector('[data-testid="world-language-select"] .p-select-label')!.textContent!.trim()).toBe('English');
+  });
+
+  it('emits the draft with the new language when it is changed', async () => {
+    const { el, emitted, settle } = await openLanguage('en', ['base-en']);
+
+    (el.querySelector('[data-testid="world-language-select"]') as HTMLElement).click();
+    await settle();
+    const option = Array.from(document.querySelectorAll('li[role="option"]')).find(
+      (item) => item.textContent?.trim() === 'Français',
+    ) as HTMLElement;
+    option.click();
+    await settle();
+
+    expect(emitted.at(-1)!.language).toBe('fr');
+  });
+
+  it('tags a pack in another language than the world as images, kinds and tints only', async () => {
+    const { note } = await openLanguage('en', ['base-en', 'base-fr', 'extra']);
+
+    expect(note('base-fr')).toBe('images, kinds and tints only');
+    expect(note('extra')).toBe('images, kinds and tints only');
+  });
+
+  it('does not tag a pack in the language of the world', async () => {
+    const { note } = await openLanguage('fr', ['base-fr', 'extra']);
+
+    expect(note('base-fr')).toBeUndefined();
+    expect(note('extra')).toBeUndefined();
+  });
+
+  it('tags a neutral pack as images, without a language tag', async () => {
+    const { el, note } = await openLanguage('fr', ['base-fr', 'neon']);
+
+    expect(note('neon')).toBe('images');
+    expect(el.querySelector('[data-testid="pack-row"][data-pack="neon"] [data-testid="pack-language"]')).toBeNull();
   });
 });

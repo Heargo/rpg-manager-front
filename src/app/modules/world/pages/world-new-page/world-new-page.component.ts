@@ -51,7 +51,8 @@ import {
   attributeFormulaErrors,
   WORLD_NAME_MAX_LENGTH,
 } from '../../helpers/world-draft.rules';
-import { basePackId } from '../../../../core/business/pack.business';
+import { basePackId, packLanguageOf } from '../../../../core/business/pack.business';
+import { PackLanguage } from '../../../../core/packs/pack';
 import { RuleFieldsComponent } from '../../components/rule-fields/rule-fields.component';
 import { CombatRules, OfflineFeatures, WorldDraft } from '../../models/world';
 
@@ -154,6 +155,10 @@ export class WorldNewPageComponent {
   protected readonly packs = signal<string[]>([
     basePackId(this.language.$language()),
   ]);
+  /** The language of the world: the app language to start with. */
+  protected readonly worldLanguage = signal<PackLanguage>(
+    packLanguageOf(this.language.$language()),
+  );
   protected readonly creating = signal(false);
   private nextKey = 100;
 
@@ -185,6 +190,7 @@ export class WorldNewPageComponent {
     startingMoney: this.startingMoney(),
     offlineFeatures: this.offline(),
     packs: this.packs(),
+    language: this.worldLanguage(),
     skillRollsEnabled: this.skillRollsEnabled(),
     sellAnywhere: this.sellAnywhere(),
     sellAnywhereRatio: this.sellAnywhereRatio(),
@@ -393,6 +399,7 @@ export class WorldNewPageComponent {
     this.skillPointsPerLevel.set(draft.skillPointsPerLevel ?? 1);
     this.offline.set({ ...DEFAULT_OFFLINE_FEATURES, ...draft.offlineFeatures });
     this.packs.set(draft.packs ?? []);
+    if (draft.language) this.worldLanguage.set(draft.language);
     this.skillRollsEnabled.set(draft.skillRollsEnabled ?? true);
     this.sellAnywhere.set(draft.sellAnywhere ?? true);
     this.sellAnywhereRatio.set(draft.sellAnywhereRatio ?? 1);

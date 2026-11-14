@@ -257,7 +257,7 @@ Tickets in `item-coherence/` (IC). Decisions from the user on 2026-11-14 are in 
 | 110 | **IC01** Manifest v2: kinds, tints, sprite kinds, neutral packs (done) | none |
 | 111 | **IC02** Phrase engine: variants, params, agreement (done) | none |
 | 112 | **IC03** Item word list v2 and the Base FR/EN lists (done) | IC01, IC02 |
-| 113 | **IC04** The world has a language | none |
+| 113 | **IC04** The world has a language (done) | none |
 | 114 | **IC05** Item vocabulary pooled from the active packs | IC01, IC03, IC04 |
 | 115 | **IC06** Item generator draws a kind; the item keeps its kind and tints | IC05 |
 | 116 | **IC07** Random image by kind and tint | IC05, IC06 |

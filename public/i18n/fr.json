@@ -90,6 +90,10 @@
     }
   },
   "world": {
+    "packs": {
+      "otherLanguage": "images, catégories et teintes uniquement",
+      "neutral": "images"
+    },
     "created": "« {{ name }} » est prêt",
     "new": {
       "title": "Nouveau monde",
@@ -137,6 +141,7 @@
       "starterClassesHint": "Guerrier, Mage et Voleur, chacun avec un arbre de compétences construit sur vos attributs, sont ajoutés au monde. Vous pourrez les modifier ou les supprimer ensuite.",
       "offlineTitle": "Quand l'hôte est hors ligne",
       "offlineHint": "Les joueurs peuvent toujours lire leur fiche. Choisissez ce qu'ils peuvent encore faire ; les changements sont vérifiés au retour de l'hôte.",
+      "language": "Langue du monde",
       "packsTitle": "Packs",
       "packsHint": "Les packs de contenu utilisés par ce monde. Un pack est dans une seule langue.",
       "packMissing": "Manquant",

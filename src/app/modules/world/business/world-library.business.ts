@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { ImageBusiness } from '../../../core/business/image.business';
-import { basePackId } from '../../../core/business/pack.business';
+import { basePackId, packLanguageOf } from '../../../core/business/pack.business';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { WordListBusiness } from '../../../core/business/word-list.business';
 import { seededRandomSource } from '../../../core/generators/random-source';
@@ -33,16 +33,18 @@ export class WorldLibraryBusiness {
     this.worlds.set((await this.storage.list()).map(summarizeWorld));
   }
 
-  /** A stored world without `packs` reads as having none. */
+  /** A stored world without `packs` reads as having none, without `language` as the app language. */
   async get(id: string): Promise<World | undefined> {
     const world = await this.storage.get(id);
-    return world && { ...world, packs: world.packs ?? [] };
+    const appLanguage = packLanguageOf(this.language.$language());
+    return world && { ...world, packs: world.packs ?? [], language: world.language ?? appLanguage };
   }
 
   /** Creates a world, optionally with the default items and the starter classes and skills built on its own attributes (in the active language). */
   async create(draft: WorldDraft, options: { starterItems?: boolean; starterClasses?: boolean } = {}): Promise<World> {
+    const appLanguage = packLanguageOf(this.language.$language());
     let world = createWorld(
-      { ...draft, packs: draft.packs ?? [basePackId(this.language.$language())] },
+      { ...draft, packs: draft.packs ?? [basePackId(this.language.$language())], language: draft.language ?? appLanguage },
       () => crypto.randomUUID(), Date.now());
     if (options.starterItems) {
       const words = await this.wordLists.itemWords();

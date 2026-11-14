@@ -136,6 +136,22 @@ describe('WorldRulesPageComponent', () => {
     expect(saved.offlineFeatures.equip).toBe(true);
   });
 
+  it('saves the language picked in the language select', async () => {
+    const { world, el, saveRules, click, settle } = await open();
+    await click('rules-tab-rules');
+    const select = el.querySelector('[data-testid="world-language-select"]') as HTMLElement;
+    expect(select.querySelector('.p-select-label')!.textContent!.trim()).toBe(world.language === 'fr' ? 'Français' : 'English');
+    select.click();
+    await settle();
+    const target = world.language === 'fr' ? 'English' : 'Français';
+    (Array.from(document.querySelectorAll('li[role="option"]')).find((i) => i.textContent?.trim() === target) as HTMLElement).click();
+    await settle();
+    await click('rules-save');
+
+    const saved = (saveRules.mock.calls as unknown as [any][])[0][0];
+    expect(saved.language).toBe(world.language === 'fr' ? 'en' : 'fr');
+  });
+
   it('shows the Skills roll dice setting on, and saves it once switched off', async () => {
     const { el, saveRules, click, settle } = await open();
     await click('rules-tab-rules');

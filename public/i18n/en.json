@@ -90,6 +90,10 @@
     }
   },
   "world": {
+    "packs": {
+      "otherLanguage": "images, kinds and tints only",
+      "neutral": "images"
+    },
     "created": "\"{{ name }}\" is ready",
     "new": {
       "title": "New world",
@@ -137,6 +141,7 @@
       "starterClassesHint": "Warrior, Mage and Rogue, each with a skill tree built on your attributes, are added to the world. You can edit or delete them afterwards.",
       "offlineTitle": "When the host is offline",
       "offlineHint": "Players can always read their sheet. Choose what else they can still do; changes are checked when the host is back.",
+      "language": "World language",
       "packsTitle": "Packs",
       "packsHint": "The content packs this world uses. A pack is in a single language.",
       "packMissing": "Missing",

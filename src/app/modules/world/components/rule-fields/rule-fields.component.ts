@@ -194,6 +194,18 @@ export class RuleFieldsComponent {
       .catch(() => this.officialIds.set([]));
   }
 
+  protected readonly languageOptions = [
+    { label: 'Français', value: 'fr' },
+    { label: 'English', value: 'en' },
+  ];
+  protected readonly worldLanguage = computed(() => this.draft().language ?? this.language.$language());
+
+  /** The note under a pack: another language than the world's, or no language at all. */
+  protected packNote(pack: { language?: string }): string | null {
+    if (!pack.language) return 'world.packs.neutral';
+    return pack.language === this.worldLanguage() ? null : 'world.packs.otherLanguage';
+  }
+
   protected setPack(id: string, on: boolean): void {
     const rest = this.packIds().filter((pack) => pack !== id);
     this.patch({ packs: on ? [...rest, id] : rest });

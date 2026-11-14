@@ -172,4 +172,38 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
       expect((await library.get(stored.id))?.packs).toEqual([]);
     });
   });
+
+  describe('language', () => {
+    it.each(['fr', 'en'] as const)('a new world in the %s app has that language', async (lang) => {
+      TestBed.inject(LanguageBusiness).setLanguage(lang);
+
+      expect((await library.create({ name: 'Eldoria', attributes: [] })).language).toBe(lang);
+    });
+
+    it('keeps the language the draft names', async () => {
+      TestBed.inject(LanguageBusiness).setLanguage('fr');
+
+      const world = await library.create({ name: 'Eldoria', attributes: [], language: 'en' });
+
+      expect(world.language).toBe('en');
+      expect((await library.get(world.id))?.language).toBe('en');
+    });
+
+    it('reads a stored world without a language as the app language', async () => {
+      TestBed.inject(LanguageBusiness).setLanguage('en');
+      const stored = await library.create({ name: 'Old', attributes: [], language: 'fr' });
+      const { language: _language, ...legacy } = stored;
+      await TestBed.inject(WorldStorageService).put(legacy as typeof stored);
+
+      expect((await library.get(stored.id))?.language).toBe('en');
+    });
+
+    it('keeps the language through export and import', async () => {
+      const world = await library.create({ name: 'Eldoria', attributes: [], language: 'en' });
+
+      const imported = await library.importWorld(await (await library.exportWorld(world.id)).text());
+
+      expect(imported.language).toBe('en');
+    });
+  });
 });

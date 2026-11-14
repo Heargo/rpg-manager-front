@@ -1,7 +1,7 @@
 import { effect, inject, Injectable, linkedSignal } from '@angular/core';
 import { ActivePacksBusiness } from '../../../core/business/active-packs.business';
 import { LanguageBusiness } from '../../../core/business/language.business';
-import { basePackId } from '../../../core/business/pack.business';
+import { basePackId, packLanguageOf } from '../../../core/business/pack.business';
 import { createSandboxWorld, SANDBOX_WORLD_ID } from '../helpers/default-world';
 // Static on purpose: the sandbox world only loads in the lazy Tools chunks, never in the initial bundle.
 import { buildStarterClasses } from '../helpers/starter-classes';
@@ -28,6 +28,7 @@ export class SandboxWorldBusiness {
     return {
       ...world,
       packs: [basePackId(this.language.$language())],
+      language: packLanguageOf(this.language.$language()),
       ...buildStarterClasses(
         world,
         this.language.$language(),
@@ -40,11 +41,12 @@ export class SandboxWorldBusiness {
 
   constructor() {
     // The tools' generators follow the sandbox packs, unless a game world is open (it has its own packs).
+    this.publishPacks();
     effect(() => this.publishPacks());
   }
 
   private publishPacks(): void {
-    if (!this.session.$world()) this.activePacks.set(this.world().packs ?? []);
+    if (!this.session.$world()) this.activePacks.set(this.world().packs ?? [], this.world().language);
   }
 
   /** Applies edited rules to the sandbox world, in memory. */

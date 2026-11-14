@@ -1,3 +1,4 @@
+import { PackLanguage } from '../../../core/packs/pack';
 import { AttributeFormula } from '../../../core/helpers/formula';
 import { ItemDraft, ItemModifier } from '../../../core/models/item';
 import { LevelCurve } from '../../character/helpers/level.rules';
@@ -78,6 +79,8 @@ export interface WorldRules {
   offlineFeatures: OfflineFeatures;
   /** Ids of the active packs (no validation: an empty list is allowed); kept as is when omitted. */
   packs?: string[];
+  /** The language of the world; kept as is when omitted. */
+  language?: PackLanguage;
   /** Active skills roll dice when used (default on when omitted). */
   skillRollsEnabled?: boolean;
   /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
@@ -187,6 +190,8 @@ export interface World {
   offlineFeatures: OfflineFeatures;
   /** Ids of the active packs; a stored world without them reads as none. */
   packs: string[];
+  /** The language the generators read; a stored world without it reads as the app language. */
+  language: PackLanguage;
   /** Active skills roll dice when used (default on when omitted). */
   skillRollsEnabled?: boolean;
   /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
@@ -251,6 +256,8 @@ export interface WorldDraft {
   offlineFeatures?: Partial<OfflineFeatures>;
   /** Ids of the active packs; the Base of the app language when the library creates the world without. */
   packs?: string[];
+  /** The app language when the library creates the world without. */
+  language?: PackLanguage;
   skillRollsEnabled?: boolean;
   /** Selling anywhere (the sheet's Sell) is allowed (default on when omitted). */
   sellAnywhere?: boolean;

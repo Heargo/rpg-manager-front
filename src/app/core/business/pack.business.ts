@@ -44,6 +44,10 @@ export const BASE_PACK_IDS = ['base-fr', 'base-en'] as const;
 export const basePackId = (lang: string): string =>
   lang === 'fr' ? 'base-fr' : 'base-en';
 
+/** The pack language matching an app language code. */
+export const packLanguageOf = (lang: string): PackLanguage =>
+  lang === 'fr' ? 'fr' : 'en';
+
 export const isBasePack = (id: string): boolean =>
   (BASE_PACK_IDS as readonly string[]).includes(id);
 
