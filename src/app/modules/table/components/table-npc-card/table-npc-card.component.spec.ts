@@ -69,4 +69,20 @@ describe('TableNpcCardComponent', () => {
     const { card } = await render({ id: 'm1', name: 'Mira', merchant: true }, true);
     expect(card!.querySelector('[data-action="toggle-shop"]')).toBeNull();
   });
+
+  it('offers the eye button to the game master only, and emits the npc id', async () => {
+    const player = await render({ id: 'n1', name: 'Grok' });
+    expect(player.card!.querySelector('[data-action="view-sheet"]')).toBeNull();
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ imports: [TableNpcCardComponent], providers: TEST_PROVIDERS });
+    const fixture = TestBed.createComponent(TableNpcCardComponent);
+    fixture.componentRef.setInput('npc', { id: 'n1', name: 'Grok' });
+    fixture.componentRef.setInput('canView', true);
+    const viewed: string[] = [];
+    fixture.componentInstance.view.subscribe((id: string) => viewed.push(id));
+    await fixture.whenStable();
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('[data-action="view-sheet"]')!.click();
+    expect(viewed).toEqual(['n1']);
+  });
 });

@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { MessageService } from '@openng/optimus-ui/api';
@@ -9,6 +14,7 @@ import { RoomBusiness } from '../../../room/business/room.business';
 import { TableBusiness } from '../../../table/business/table.business';
 import { NpcCatalogueBusiness } from '../../business/npc-catalogue.business';
 import { NpcCatalogueComponent } from '../../components/npc-catalogue/npc-catalogue.component';
+import { NpcSheetDialogComponent } from '../../components/npc-sheet-dialog/npc-sheet-dialog.component';
 import { Npc } from '../../models/npc';
 
 /** The NPC catalogue: the hosted world's for the game master, or the sandbox world's in the Tools. */
@@ -21,6 +27,7 @@ import { Npc } from '../../models/npc';
     ButtonModule,
     MessageModule,
     NpcCatalogueComponent,
+    NpcSheetDialogComponent,
   ],
   template: `
     <div class="main-container catalogue">
@@ -44,11 +51,13 @@ import { Npc } from '../../models/npc';
           [showDisabled]="table.$combatRunning()"
           [showControls]="!tool"
           (show)="run(table.showOnTable($event.id))"
+          (view)="viewedNpcId.set($event.id)"
           (create)="openEditor()"
           (edit)="openEditor($event.id)"
           (duplicate)="run(catalogue.duplicate($event.id))"
           (remove)="run(catalogue.remove($event.id))"
         />
+        <app-npc-sheet-dialog [(npcId)]="viewedNpcId" />
       } @else {
         <p-message severity="info">{{
           'npc.catalogue.notHosting' | transloco
@@ -81,6 +90,8 @@ export class NpcCataloguePageComponent {
   protected readonly catalogue = inject(NpcCatalogueBusiness);
   protected readonly tool = !!inject(ActivatedRoute).snapshot.data['tool'];
   protected readonly table = inject(TableBusiness);
+  /** The NPC whose sheet is open. */
+  protected readonly viewedNpcId = signal<string | null>(null);
   private readonly router = inject(Router);
   private readonly room = inject(RoomBusiness);
   private readonly messages = inject(MessageService);

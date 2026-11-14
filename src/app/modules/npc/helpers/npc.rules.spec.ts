@@ -1,6 +1,12 @@
-import { Item } from '../../world/models/world';
+import { InventoryItem, Item } from '../../world/models/world';
+import { createWorld } from '../../world/helpers/world.factory';
 import { Npc } from '../models/npc';
-import { duplicateNpc, filterNpcs, validateNpc } from './npc.rules';
+import {
+  duplicateNpc,
+  filterNpcs,
+  npcSheetView,
+  validateNpc,
+} from './npc.rules';
 
 const sword: Item = { id: 'sword', name: 'Iron Sword', description: '', rarity: 'common', type: 'equipment', slot: 'weapon1', price: 10, modifiers: [] };
 
@@ -117,5 +123,79 @@ describe('filterNpcs', () => {
 
   it('combines the filters', () => {
     expect(names(filterNpcs(all, { ...none, roles: ['story'], minLevel: 6 }))).toEqual(['King Arthur']);
+  });
+});
+
+describe('npcSheetView', () => {
+  const base = createWorld(
+    {
+      name: 'Eldoria',
+      attributes: [
+        { name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
+        { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } },
+      ],
+      barAttributes: { life: 'Life', mana: 'Mana' },
+    },
+    (() => {
+      let n = 0;
+      return () => `a${++n}`;
+    })(),
+    1,
+  );
+  const [life, mana] = base.attributes;
+  const ring: InventoryItem = {
+    id: 'e1',
+    equipped: true,
+    position: 0,
+    item: {
+      id: 'ring',
+      name: 'Ring',
+      description: '',
+      rarity: 'common',
+      type: 'equipment',
+      slot: 'ring',
+      price: 1,
+      modifiers: [
+        { attribute: 'Life', value: 6 },
+        { attribute: 'Mana', value: 2 },
+      ],
+    },
+  };
+  const npc: Npc = {
+    id: 'n1',
+    name: 'Grok',
+    statPoints: 0,
+    skillPoints: 0,
+    xp: 0,
+    level: 1,
+    money: 0,
+    updatedAt: 0,
+    skills: [],
+    // Stored currents from the editor, before the ring was equipped.
+    attributes: [
+      { attributeId: life.id, level: 0, current: 10 },
+      { attributeId: mana.id, level: 0, current: 5 },
+    ],
+    inventory: [ring],
+    roles: ['enemy'],
+    description: '',
+    xpReward: 0,
+    loot: [],
+  };
+  const world = { ...base, npcs: [npc] };
+
+  it('shows the NPC as a sheet with its bars full, equipment included', () => {
+    const view = npcSheetView(world, 'n1')!;
+    expect(view.character.name).toBe('Grok');
+    expect(view.character.attributes).toEqual([
+      { attributeId: life.id, level: 0, current: 16 },
+      { attributeId: mana.id, level: 0, current: 7 },
+    ]);
+    expect(view.world).toBe(world);
+    expect(view.classView).toEqual({ characterClass: null, skills: [] });
+  });
+
+  it('is null for an NPC that is gone', () => {
+    expect(npcSheetView(world, 'nope')).toBeNull();
   });
 });

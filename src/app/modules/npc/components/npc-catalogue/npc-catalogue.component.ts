@@ -98,18 +98,30 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
                 [attr.aria-label]="'npc.catalogue.edit' | transloco"
                 (click)="edit.emit(npc)"
               ></button>
+              <button
+                pButton
+                type="button"
+                data-action="view"
+                icon="pi pi-eye"
+                severity="secondary"
+                [text]="true"
+                [attr.aria-label]="'npc.catalogue.view' | transloco"
+                [attr.title]="'npc.catalogue.view' | transloco"
+                (click)="view.emit(npc)"
+              ></button>
               @if (showControls()) {
                 <button
                   pButton
                   type="button"
                   data-action="show"
-                  icon="pi pi-eye"
+                  icon="pi pi-megaphone"
                   severity="secondary"
                   [text]="true"
                   [disabled]="showDisabled()"
                   [attr.aria-label]="'npc.catalogue.show' | transloco"
                   [attr.title]="
-                    showDisabled() ? ('npc.catalogue.showDuringCombat' | transloco) : null
+                    (showDisabled() ? 'npc.catalogue.showDuringCombat' : 'npc.catalogue.show')
+                      | transloco
                   "
                   (click)="show.emit(npc)"
                 ></button>
@@ -195,6 +207,8 @@ export class NpcCatalogueComponent {
   readonly duplicate = output<Npc>();
   readonly remove = output<Npc>();
   readonly show = output<Npc>();
+  /** Open the NPC's sheet. */
+  readonly view = output<Npc>();
 
   protected readonly search = signal('');
   protected readonly roles = signal<NpcRole[]>([]);

@@ -53,7 +53,7 @@ describe('toPublicNpc', () => {
 
   it('applies the enemy defaults: level and a life bar without numbers', () => {
     expect(toPublicNpc(npc(['enemy']), world)).toEqual({
-      id: 'n1', name: 'Grok', portraitId: 'p'.repeat(64), level: 3, lifeBar: { percent: 40 },
+      id: 'n1', name: 'Grok', portraitId: 'p'.repeat(64), level: 3, lifeBar: { percent: 100 },
     });
   });
 
@@ -66,7 +66,7 @@ describe('toPublicNpc', () => {
   it('shows the union of the ticks of every role', () => {
     const projection = toPublicNpc(npc(['story', 'enemy']), world);
     expect(projection).toEqual({
-      id: 'n1', name: 'Grok', portraitId: 'p'.repeat(64), description: 'A grumpy ogre.', level: 3, lifeBar: { percent: 40 },
+      id: 'n1', name: 'Grok', portraitId: 'p'.repeat(64), description: 'A grumpy ogre.', level: 3, lifeBar: { percent: 100 },
     });
   });
 
@@ -76,9 +76,9 @@ describe('toPublicNpc', () => {
     });
     expect(toPublicNpc(npc(['enemy']), { ...world, npcVisibility: visibility })).toEqual({
       id: 'n1', name: 'Grok', portraitId: 'p'.repeat(64),
-      life: { current: 4, max: 10 },
+      life: { current: 10, max: 10 },
       attributes: [
-        { name: 'Life', current: 4, max: 10 },
+        { name: 'Life', current: 10, max: 10 },
         { name: 'Strength', current: 5, max: 5 },
       ],
       equipment: [{ name: 'Iron Helm' }],

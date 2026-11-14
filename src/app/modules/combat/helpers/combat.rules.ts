@@ -6,6 +6,7 @@ import { resolveSkillUse, rollOf } from '../../skill/helpers/skill-roll.rules';
 import { evaluateSkillAmount } from '../../skill/helpers/skill.rules';
 import { Skill } from '../../skill/models/skill';
 import { Npc } from '../../npc/models/npc';
+import { npcStats } from '../../npc/helpers/npc.rules';
 import { GridSize, placeUnplaced } from './combat-grid.rules';
 import {
   Character,
@@ -100,13 +101,16 @@ function combatantFrom(
     Partial<Pick<Combatant, 'characterId' | 'npcId'>>,
   bonuses: Character['classBonuses'],
 ): Combatant {
-  const stats = attributeStats(
-    world.attributes,
-    sheet,
-    world.barAttributes,
-    world.skills,
-    bonuses ?? [],
-  );
+  // A catalogue NPC starts full, its equipment and class included.
+  const stats = extra.npcId
+    ? npcStats(sheet as Npc, world)
+    : attributeStats(
+        world.attributes,
+        sheet,
+        world.barAttributes,
+        world.skills,
+        bonuses ?? [],
+      );
   const npc = sheet as Partial<Npc>;
   return {
     ...extra,

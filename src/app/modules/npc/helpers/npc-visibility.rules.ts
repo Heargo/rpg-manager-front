@@ -1,9 +1,6 @@
 import { Skill } from '../../skill/models/skill';
-import {
-  attributeStats,
-  barStats,
-} from '../../character/helpers/character-stats';
-import { classBonusesOf } from '../../character/helpers/class-view.rules';
+import { barStats } from '../../character/helpers/character-stats';
+import { npcStats } from './npc.rules';
 import { World } from '../../world/models/world';
 import {
   Npc,
@@ -49,7 +46,7 @@ export function toPublicNpc(
   npc: Npc,
   world: Pick<World, 'attributes' | 'barAttributes' | 'npcVisibility' | 'classes'> & { skills?: Skill[] },
 ): PublicNpc {
-  const stats = attributeStats(world.attributes, npc, world.barAttributes, world.skills ?? [], classBonusesOf(npc, world.classes));
+  const stats = npcStats(npc, world);
   const life = barStats(stats, world.barAttributes).life;
   const when = <T>(field: keyof NpcVisibility, value: T): T | undefined =>
     npc.roles.some((role) => world.npcVisibility[role][field])

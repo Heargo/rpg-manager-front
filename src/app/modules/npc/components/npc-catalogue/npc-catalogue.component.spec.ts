@@ -135,4 +135,17 @@ describe('NpcCatalogueComponent', () => {
     expect(buttons).toHaveLength(3);
     buttons.forEach((b) => expect((b.querySelector('button') ?? b).hasAttribute('disabled')).toBe(true));
   });
+
+  it('opens the sheet of an NPC from the eye button, even in the sandbox', async () => {
+    const { fixture, q, component } = await setup();
+    fixture.componentRef.setInput('showControls', false);
+    await fixture.whenStable();
+    expect(q('[data-action="view"]')).toHaveLength(3);
+
+    const viewed: Npc[] = [];
+    component.view.subscribe((n: Npc) => viewed.push(n));
+    q('[data-action="view"]')[0].click();
+    await fixture.whenStable();
+    expect(viewed).toEqual([goblin]);
+  });
 });

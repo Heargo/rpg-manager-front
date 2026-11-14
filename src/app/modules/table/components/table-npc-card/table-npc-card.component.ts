@@ -24,7 +24,23 @@ import { PublicNpc } from '../../../npc/models/npc';
         <span class="initial">{{ npc().name.charAt(0).toUpperCase() }}</span>
       </app-stored-image>
       <div class="body">
-        <h3>{{ npc().name }}</h3>
+        <div class="title">
+          <h3>{{ npc().name }}</h3>
+          @if (canView()) {
+            <button
+              pButton
+              type="button"
+              data-action="view-sheet"
+              icon="pi pi-eye"
+              severity="secondary"
+              size="small"
+              [text]="true"
+              [attr.aria-label]="'npc.catalogue.view' | transloco"
+              [attr.title]="'npc.catalogue.view' | transloco"
+              (click)="view.emit(npc().id)"
+            ></button>
+          }
+        </div>
         @if (npc().level !== undefined) {
           <span data-field="level">{{
             'character.sheet.levelBadge' | transloco: { level: npc().level }
@@ -109,6 +125,11 @@ import { PublicNpc } from '../../../npc/models/npc';
       align-items: flex-start;
       min-width: 0;
     }
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
     h3 {
       font-size: 1.5rem;
     }
@@ -136,6 +157,10 @@ export class TableNpcCardComponent {
   readonly npc = input.required<PublicNpc>();
   /** The merchant's shop is open for this player. */
   readonly shopOpen = input(false);
+  /** The game master can open the NPC's full sheet. */
+  readonly canView = input(false);
+  /** The game master opens the NPC's full sheet. */
+  readonly view = output<string>();
   /** A player goes to the open shop. */
   readonly visitShop = output<string>();
 }

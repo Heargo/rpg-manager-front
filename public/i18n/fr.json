@@ -972,7 +972,8 @@
       "create": "Ajouter un PNJ",
       "copySuffix": "(copie)",
       "show": "Montrer sur la table",
-      "showDuringCombat": "Impossible pendant un combat"
+      "showDuringCombat": "Impossible pendant un combat",
+      "view": "Voir la fiche"
     },
     "role": {
       "story": "Histoire",
@@ -1033,6 +1034,9 @@
       "learnFromClass": "Apprendre selon la classe",
       "removeSkill": "Retirer la compétence",
       "randomClass": "Classe au hasard"
+    },
+    "sheet": {
+      "title": "Fiche du PNJ"
     }
   },
   "skill": {

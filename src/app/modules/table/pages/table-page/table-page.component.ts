@@ -42,6 +42,7 @@ import { CombatGmPanelComponent } from '../../../combat/components/combat-gm-pan
 import { CombatPlayerViewComponent } from '../../../combat/components/combat-player-view/combat-player-view.component';
 import { CharacterSummaryComponent } from '../../../character/components/character-summary/character-summary.component';
 import { MerchantShopComponent } from '../../../npc/components/merchant-shop/merchant-shop.component';
+import { NpcSheetDialogComponent } from '../../../npc/components/npc-sheet-dialog/npc-sheet-dialog.component';
 import { CombatRollDecisionComponent } from '../../../combat/components/combat-roll-decision/combat-roll-decision.component';
 import { DiceOverlayComponent } from '../../../dice/components/dice-overlay/dice-overlay.component';
 import { DiceRollerComponent } from '../../../dice/components/dice-roller/dice-roller.component';
@@ -73,6 +74,7 @@ function readToolsOpen(): string[] {
   imports: [
     CombatRollBannerComponent,
     TableNpcCardComponent,
+    NpcSheetDialogComponent,
     NgTemplateOutlet,
     FormsModule,
     RouterLink,
@@ -135,6 +137,8 @@ export class TablePageComponent {
 
   protected readonly notesMaxLength = NOTES_MAX_LENGTH;
   protected readonly narrow = signal(false);
+  /** Game master: the encounter NPC whose sheet is open. */
+  protected readonly viewedNpcId = signal<string | null>(null);
   protected readonly playersOpen = signal(false);
   /** The game master's tool panels left open, remembered on this device (all open by default). */
   protected readonly toolsOpen = signal<string[]>(readToolsOpen());

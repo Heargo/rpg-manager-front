@@ -972,7 +972,8 @@
       "create": "Add NPC",
       "copySuffix": "(copy)",
       "show": "Show on the table",
-      "showDuringCombat": "Not during a combat"
+      "showDuringCombat": "Not during a combat",
+      "view": "View the sheet"
     },
     "role": {
       "story": "Story",
@@ -1033,6 +1034,9 @@
       "learnFromClass": "Learn from the class",
       "removeSkill": "Remove the skill",
       "randomClass": "Random class"
+    },
+    "sheet": {
+      "title": "NPC sheet"
     }
   },
   "skill": {

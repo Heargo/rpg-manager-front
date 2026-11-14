@@ -122,6 +122,9 @@
   }
 </div>
 <app-combat-roll-banner />
+@if (table.$isGameMaster()) {
+  <app-npc-sheet-dialog [(npcId)]="viewedNpcId" />
+}
 <app-dice-overlay><app-combat-roll-decision diceActions /></app-dice-overlay>
 
 <!-- What everyone sees in the middle of the table. -->
@@ -139,7 +142,9 @@
       [shopOpen]="
         !table.$isGameMaster() && table.$shopsOpen().includes(encounter.npc.id)
       "
+      [canView]="table.$isGameMaster()"
       (visitShop)="visitShop($event)"
+      (view)="viewedNpcId.set($event)"
     />
   } @else if (table.$scene()?.illustrationId; as imageId) {
     <app-stored-image

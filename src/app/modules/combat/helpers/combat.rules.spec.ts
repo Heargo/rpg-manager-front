@@ -287,6 +287,38 @@ describe('startEncounter', () => {
     expect(by(enc, 'Goblin 1').level).toBe(2);
   });
 
+  it('starts each NPC copy at full life and mana, its equipment included', () => {
+    const { world, goblin } = build();
+    const amulet: InventoryItem = {
+      id: 'inv2',
+      equipped: true,
+      position: 1,
+      item: {
+        ...potion.item,
+        id: 'amulet',
+        name: 'Amulet',
+        type: 'equipment',
+        slot: 'head',
+        modifiers: [
+          { attribute: 'Life', value: 7 },
+          { attribute: 'Mana', value: 4 },
+        ],
+      },
+    };
+    const geared = { ...goblin, inventory: [...goblin.inventory, amulet] };
+    const { enc } = start({}, { ...world, npcs: [geared] });
+    expect(attr(by(enc, 'Goblin 1'), 'Life')).toEqual({
+      name: 'Life',
+      current: 20,
+      max: 20,
+    });
+    expect(attr(by(enc, 'Goblin 1'), 'Mana')).toEqual({
+      name: 'Mana',
+      current: 9,
+      max: 9,
+    });
+  });
+
   it('gives each copy its own values: hurting one leaves the others and the catalogue alone', () => {
     const { enc, world } = start();
     const hurt = damageCombatant(enc, by(enc, 'Goblin 1').id, 5);
