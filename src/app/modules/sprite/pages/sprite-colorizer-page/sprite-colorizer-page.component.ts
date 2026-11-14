@@ -29,6 +29,8 @@ import { SelectModule } from '@openng/optimus-ui/select';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { ToastModule } from '@openng/optimus-ui/toast';
 import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
+import { PackDraftFormBusiness } from '../../../../core/business/pack-draft-form.business';
+import { KindKey, kindOptions } from '../../../../core/packs/kind-label';
 import { slugifyPackId } from '../../../../core/packs/pack-draft';
 import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -108,6 +110,7 @@ export class SpriteColorizerPageComponent {
   readonly sprite = input<string>();
 
   private readonly creator = inject(PackCreatorBusiness);
+  private readonly form = inject(PackDraftFormBusiness);
   private readonly router = inject(Router);
   protected readonly addOpen = signal(false);
   protected readonly addDraftId = signal<string | null>(null);
@@ -123,15 +126,13 @@ export class SpriteColorizerPageComponent {
       value: d.id,
     })),
   );
-  /** The Base item kinds, then the kinds of the saved sets, to tag sprites with (raw ids for now). */
-  private readonly baseItemKinds = signal<string[]>([]);
+  /** The kinds of the installed packs, then those of the saved sets, to tag sprites with (`id — first noun`). */
+  private readonly knownKinds = signal<KindKey[]>([]);
   protected readonly itemKindOptions = computed(() =>
-    [
-      ...new Set([
-        ...this.baseItemKinds(),
-        ...this.business.$savedSets().flatMap((s) => s.tags?.kinds ?? []),
-      ]),
-    ].map((value) => ({ value, label: value })),
+    kindOptions(
+      this.knownKinds(),
+      this.business.$savedSets().flatMap((s) => s.tags?.kinds ?? []),
+    ),
   );
   protected readonly draftBanner = computed(() => {
     const target = this.business.$draftTarget();
@@ -281,8 +282,8 @@ export class SpriteColorizerPageComponent {
   private shownImage: unknown = null;
 
   constructor() {
-    void this.creator.baseItemKinds().then(
-      (kinds) => this.baseItemKinds.set(kinds),
+    void this.form.knownKeys().then(
+      (known) => this.knownKinds.set(known.kinds),
       () => undefined,
     );
     this.packs

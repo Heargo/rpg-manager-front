@@ -1675,7 +1675,7 @@
       "license": "License",
       "licenseUrl": "License link",
       "homepage": "Home page (optional)",
-      "listsIntro": "For each generator, paste or import a JSON word list, or start from the Base of the pack's language. An empty list is left out of the pack.",
+      "listsIntro": "Build the pack's items with the forms: kinds, tints and shared params. NPCs, skills and classes are still JSON word lists: paste or import one, or start from the Base of the pack's language. The raw JSON of the items and params is under Advanced. An empty list is left out of the pack.",
       "importFile": "Import a file",
       "copyBase": "Copy Base's list",
       "clear": "Clear",
@@ -1696,7 +1696,63 @@
       "installDevice": "Install on this device",
       "export": "Export",
       "installed": "Pack installed on this device",
-      "editInColorizer": "Edit in the colorizer"
+      "editInColorizer": "Edit in the colorizer",
+      "lists": {
+        "items": "Items",
+        "shared": "Shared",
+        "advanced": "Advanced (JSON)",
+        "advancedHint": "The raw files of the pack: import, export or copy Base's. Changes here show up in the forms above."
+      },
+      "kinds": {
+        "title": "Kinds",
+        "add": "Add a kind",
+        "id": "Kind id",
+        "parent": "Parent",
+        "type": "Type",
+        "slot": "Slot",
+        "remove": "Remove",
+        "kebab": "Lowercase letters, digits and dashes.",
+        "nouns": "Nouns",
+        "newNoun": "New noun",
+        "gender": "Gender",
+        "masculine": "Masculine",
+        "feminine": "Feminine",
+        "plural": "Plural",
+        "addNoun": "Add",
+        "descriptions": "Descriptions (one per line)",
+        "names": "Name templates",
+        "namesHint": "One per line, each with {base}.",
+        "preview": "Preview",
+        "previewEmpty": "Nothing to draw: this kind needs a noun.",
+        "uncovered": "No sprite yet for: {{ kinds }}"
+      },
+      "tints": {
+        "title": "Tints",
+        "add": "Add a tint",
+        "id": "Tint id",
+        "remove": "Remove",
+        "shadow": "Shadow",
+        "mid": "Middle",
+        "light": "Light",
+        "adjectives": "Adjectives",
+        "adjectivesHint": "One per line. A gendered adjective is written masculine|feminine, with the plurals after if they are irregular.",
+        "suffixes": "Suffixes",
+        "descriptions": "Descriptions (one per line)"
+      },
+      "params": {
+        "title": "Params",
+        "add": "Add a param",
+        "name": "Param name",
+        "newEntry": "New phrase",
+        "addEntry": "Add",
+        "remove": "Remove",
+        "removeEntry": "Remove",
+        "neutral": "Texts need a pack with a language: choose one in Details."
+      },
+      "templates": {
+        "title": "Name templates (only needed for a Base)",
+        "hint": "One per line, each with {base}. A kind can bring its own."
+      }
     },
     "createdHere": "Created on this device",
     "editAsDraft": "Edit as a draft"

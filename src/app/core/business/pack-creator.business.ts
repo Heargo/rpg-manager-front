@@ -100,12 +100,6 @@ export class PackCreatorBusiness {
     );
   }
 
-  /** The ids of the Base items kinds (both Bases share one tree), to pick a sprite's kinds from. */
-  async baseItemKinds(): Promise<string[]> {
-    const base = await this.packs.manifest(basePackId(this.language.$language()));
-    return Object.keys(base.domains?.items?.kinds ?? {});
-  }
-
   /** The app language as a pack language, for a draft that has none yet. */
   private draftLanguage(): PackLanguage {
     return this.language.$language() === 'fr' ? 'fr' : 'en';

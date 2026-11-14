@@ -10,6 +10,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -22,12 +23,23 @@ import {
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
+import { PanelModule } from '@openng/optimus-ui/panel';
 import { PaginatorModule } from '@openng/optimus-ui/paginator';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
+import {
+  DraftIssue,
+  KnownKeys,
+  PackDraftFormBusiness,
+} from '../../../../core/business/pack-draft-form.business';
+import { KindsEditorComponent } from '../../components/pack-draft/kinds-editor/kinds-editor.component';
+import { ParamsEditorComponent } from '../../components/pack-draft/params-editor/params-editor.component';
+import { TemplatesEditorComponent } from '../../components/pack-draft/templates-editor/templates-editor.component';
+import { TintsEditorComponent } from '../../components/pack-draft/tints-editor/tints-editor.component';
+import { kindOptions } from '../../../../core/packs/kind-label';
 import { SUPPORTED_LANGUAGES } from '../../../../core/constants/languages';
 import { downloadBlob } from '../../../../core/helpers/download';
 import { MessageLevel } from '../../../../core/models/toast-level';
@@ -56,6 +68,7 @@ const SPRITES_PER_PAGE = 12;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
+    NgTemplateOutlet,
     RouterLink,
     TranslatePipe,
     ButtonModule,
@@ -63,8 +76,13 @@ const SPRITES_PER_PAGE = 12;
     InputTextModule,
     MessageModule,
     MultiSelectModule,
+    KindsEditorComponent,
+    PanelModule,
     PaginatorModule,
+    ParamsEditorComponent,
     SelectModule,
+    TemplatesEditorComponent,
+    TintsEditorComponent,
     TabsModule,
     TextareaModule,
   ],
@@ -210,7 +228,117 @@ const SPRITES_PER_PAGE = 12;
             <p-tabpanel value="lists">
               @if (tab() === 'lists') {
                 <p class="hint">{{ 'packs.creator.listsIntro' | translate }}</p>
-                @for (generator of generators; track generator) {
+                <!-- Advanced comes before the other generators in the DOM and after them on screen (CSS order). -->
+                <div class="lists">
+                  <section class="list">
+                    <h3>{{ 'packs.creator.lists.items' | translate }}</h3>
+                    <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
+                    <app-kinds-editor
+                      [draft]="current"
+                      [issues]="issues()"
+                      (changed)="edited($event)"
+                    />
+                    <h4>{{ 'packs.creator.tints.title' | translate }}</h4>
+                    <app-tints-editor
+                      [draft]="current"
+                      [issues]="issues()"
+                      (changed)="edited($event)"
+                    />
+                    <p-panel
+                      [header]="'packs.creator.templates.title' | translate"
+                      [toggleable]="true"
+                      [collapsed]="true"
+                    >
+                      <app-templates-editor
+                        [draft]="current"
+                        [issues]="issues()"
+                        (changed)="edited($event)"
+                      />
+                    </p-panel>
+                  </section>
+                  <section class="list">
+                    <h3>{{ 'packs.creator.lists.shared' | translate }}</h3>
+                    <h4>{{ 'packs.creator.params.title' | translate }}</h4>
+                    <app-params-editor
+                      [draft]="current"
+                      [issues]="issues()"
+                      (changed)="edited($event)"
+                    />
+                  </section>
+                  <section class="list advanced">
+                    <p-panel
+                      [header]="'packs.creator.lists.advanced' | translate"
+                      [toggleable]="true"
+                      [collapsed]="true"
+                    >
+                      <p class="hint">
+                        {{ 'packs.creator.lists.advancedHint' | translate }}
+                      </p>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          json;
+                          context: { $implicit: 'items' }
+                        "
+                      />
+                      <section class="list">
+                        <h3>common.json</h3>
+                        <textarea
+                          pTextarea
+                          class="json"
+                          rows="6"
+                          data-test="common-json"
+                          aria-label="common.json"
+                          [ngModel]="commonText()"
+                          (ngModelChange)="setCommonText($event)"
+                        ></textarea>
+                        @if (commonErrors(); as errors) {
+                          <ul class="errors" data-test="common-error">
+                            @for (error of errors; track error) {
+                              <li>{{ error }}</li>
+                            }
+                          </ul>
+                        }
+                        <div class="actions">
+                          <p-fileupload
+                            mode="basic"
+                            accept=".json,application/json"
+                            [auto]="true"
+                            [customUpload]="true"
+                            chooseIcon="pi pi-upload"
+                            [chooseLabel]="
+                              'packs.creator.importFile' | translate
+                            "
+                            (uploadHandler)="importCommon($event)"
+                          />
+                          <p-button
+                            severity="secondary"
+                            icon="pi pi-copy"
+                            [label]="'packs.creator.copyBase' | translate"
+                            (onClick)="copyBaseCommon()"
+                          />
+                          <p-button
+                            severity="secondary"
+                            outlined
+                            icon="pi pi-times"
+                            [label]="'packs.creator.clear' | translate"
+                            (onClick)="setCommonText('')"
+                          />
+                        </div>
+                      </section>
+                    </p-panel>
+                  </section>
+                  <div class="list others">
+                    @for (generator of otherGenerators; track generator) {
+                      <ng-container
+                        *ngTemplateOutlet="
+                          json;
+                          context: { $implicit: generator }
+                        "
+                      />
+                    }
+                  </div>
+                </div>
+                <ng-template #json let-generator>
                   <section class="list">
                     <h3>
                       {{ 'packs.generator.' + generator | translate }}
@@ -261,7 +389,7 @@ const SPRITES_PER_PAGE = 12;
                       />
                     </div>
                   </section>
-                }
+                </ng-template>
               }
             </p-tabpanel>
             <p-tabpanel value="sprites">
@@ -479,6 +607,16 @@ const SPRITES_PER_PAGE = 12;
       flex-direction: column;
       gap: 0.25rem;
     }
+    .lists {
+      display: flex;
+      flex-direction: column;
+    }
+    .lists .others {
+      order: 1;
+    }
+    .lists .advanced {
+      order: 2;
+    }
     .list {
       margin-bottom: 1.5rem;
     }
@@ -532,13 +670,16 @@ export class PackDraftPageComponent {
   readonly draftId = input.required<string>();
 
   private readonly creator = inject(PackCreatorBusiness);
+  private readonly form = inject(PackDraftFormBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly messages = inject(MessageService);
   private readonly pending = inject(PendingTasks);
   private readonly router = inject(Router);
 
   protected readonly languageOptions = [...SUPPORTED_LANGUAGES];
-  protected readonly generators = PACK_GENERATORS;
+  protected readonly otherGenerators = PACK_GENERATORS.filter(
+    (generator) => generator !== 'items',
+  );
   protected readonly tab = signal<Tab>('details');
   protected readonly draft = signal<PackDraft | null>(null);
   protected readonly missing = signal(false);
@@ -574,15 +715,23 @@ export class PackDraftPageComponent {
     { text: string; errors: string[] | null }
   >();
 
-  /** The Base items kinds, then the draft's own, to pick a sprite's kinds from. */
-  private readonly baseItemKinds = signal<string[]>([]);
+  /** The kinds, tints and params of the installed packs and of the draft. */
+  private readonly known = signal<KnownKeys>({
+    kinds: [],
+    tints: [],
+    params: [],
+  });
+  /** The validation messages of the draft, each with the field it is about. */
+  protected readonly issues = signal<DraftIssue[]>([]);
+  /** The text of `common.json` as typed. */
+  protected readonly commonText = signal('');
+  private issueLoads = 0;
+  /** The kinds a sprite can have, as `id — first noun`. */
   protected readonly itemKindOptions = computed(() =>
-    [
-      ...new Set([
-        ...this.baseItemKinds(),
-        ...Object.keys(this.draft()?.kinds ?? {}),
-      ]),
-    ].map((value) => ({ value, label: value })),
+    kindOptions(
+      this.known().kinds,
+      this.draft()?.sprites.flatMap((s) => s.kinds) ?? [],
+    ),
   );
 
   constructor() {
@@ -596,10 +745,20 @@ export class PackDraftPageComponent {
       const id = this.draft()?.details.id ?? '';
       void this.creator.idWarning(id).then((w) => this.idWarning.set(w));
     });
-    void this.creator.baseItemKinds().then(
-      (kinds) => this.baseItemKinds.set(kinds),
-      () => undefined,
-    );
+    effect(() => {
+      const draft = this.draft();
+      if (!draft) return;
+      const load = ++this.issueLoads;
+      void this.form.knownKeys(draft).then(
+        (known) => load === this.issueLoads && this.known.set(known),
+        () => undefined,
+      );
+      if (this.tab() === 'lists')
+        void this.form.issues(draft).then(
+          (issues) => load === this.issueLoads && this.issues.set(issues),
+          () => undefined,
+        );
+    });
     void this.creator.listSpriteSets().then(
       (sets) => this.spriteSets.set(sets),
       () => undefined,
@@ -629,10 +788,16 @@ export class PackDraftPageComponent {
             typeof value === 'string' ? value : JSON.stringify(value, null, 2);
       }
       this.texts.set(texts);
+      this.commonText.set(this.stringify(draft.common));
       this.draft.set(draft);
     } catch (error) {
       this.fail(error);
     }
+  }
+
+  private stringify(value: unknown): string {
+    if (value === undefined) return '';
+    return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
   }
 
   /** Opens a sprite in the colorizer, after the pending edits are written. */
@@ -713,6 +878,68 @@ export class PackDraftPageComponent {
       else generators[generator] = value;
       return { ...d, generators };
     });
+  }
+
+  /** A structured editor changed the draft: the JSON texts of the Advanced panel follow. */
+  protected edited(draft: PackDraft): void {
+    this.change(() => draft);
+    this.texts.update((t) => {
+      const next = { ...t };
+      const items = draft.generators.items;
+      if (items === undefined) delete next['items'];
+      else next['items'] = this.stringify(items);
+      return next;
+    });
+    this.commonText.set(this.stringify(draft.common));
+  }
+
+  protected setCommonText(text: string): void {
+    this.commonText.set(text);
+    const empty = text.trim() === '';
+    let value: unknown = text;
+    if (!empty) {
+      try {
+        value = JSON.parse(text);
+      } catch {
+        // Kept as text, like the word lists: the editor shows the error.
+      }
+    }
+    this.change((d) => {
+      const { common: _common, ...rest } = d;
+      return empty ? rest : { ...rest, common: value };
+    });
+  }
+
+  /** The problems of `common.json` as typed, or null when it is empty or valid. */
+  protected commonErrors(): string[] | null {
+    const text = this.commonText();
+    if (text.trim() === '') return null;
+    try {
+      const problems = this.creator.commonErrors(JSON.parse(text));
+      return problems.length ? problems : null;
+    } catch {
+      return [this.language.t('packs.creator.invalidJson')];
+    }
+  }
+
+  protected async importCommon(event: FileUploadHandlerEvent): Promise<void> {
+    const file = event.files[0];
+    if (!file) return;
+    try {
+      this.setCommonText(await file.text());
+    } catch (error) {
+      this.fail(error);
+    }
+  }
+
+  protected async copyBaseCommon(): Promise<void> {
+    try {
+      await this.flush();
+      const value = await this.creator.copyBaseCommon(this.draftId());
+      this.setCommonText(JSON.stringify(value, null, 2));
+    } catch (error) {
+      this.fail(error);
+    }
   }
 
   /** The problems of a list as typed, or null when it is empty or valid. */

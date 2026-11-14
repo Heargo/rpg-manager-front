@@ -1675,7 +1675,7 @@
       "license": "Licence",
       "licenseUrl": "Lien de la licence",
       "homepage": "Page d'accueil (facultatif)",
-      "listsIntro": "Pour chaque générateur, collez ou importez une liste de mots en JSON, ou partez de celle de la Base de la langue du pack. Une liste vide n'est pas incluse dans le pack.",
+      "listsIntro": "Construisez les objets du pack avec les formulaires : catégories, teintes et paramètres partagés. Les PNJ, compétences et classes restent des listes de mots en JSON : collez ou importez-en une, ou partez de celle de la Base de la langue du pack. Le JSON brut des objets et des paramètres est dans Avancé. Une liste vide n'est pas incluse dans le pack.",
       "importFile": "Importer un fichier",
       "copyBase": "Copier la liste de Base",
       "clear": "Vider",
@@ -1696,7 +1696,63 @@
       "installDevice": "Installer sur cet appareil",
       "export": "Exporter",
       "installed": "Pack installé sur cet appareil",
-      "editInColorizer": "Modifier dans le coloriseur"
+      "editInColorizer": "Modifier dans le coloriseur",
+      "lists": {
+        "items": "Objets",
+        "shared": "Partagé",
+        "advanced": "Avancé (JSON)",
+        "advancedHint": "Les fichiers bruts du pack : importer, exporter ou copier ceux de Base. Les changements apparaissent dans les formulaires ci-dessus."
+      },
+      "kinds": {
+        "title": "Catégories",
+        "add": "Ajouter une catégorie",
+        "id": "Id de la catégorie",
+        "parent": "Parent",
+        "type": "Type",
+        "slot": "Emplacement",
+        "remove": "Retirer",
+        "kebab": "Lettres minuscules, chiffres et tirets.",
+        "nouns": "Noms",
+        "newNoun": "Nouveau nom",
+        "gender": "Genre",
+        "masculine": "Masculin",
+        "feminine": "Féminin",
+        "plural": "Pluriel",
+        "addNoun": "Ajouter",
+        "descriptions": "Descriptions (une par ligne)",
+        "names": "Modèles de noms",
+        "namesHint": "Un par ligne, chacun avec {base}.",
+        "preview": "Aperçu",
+        "previewEmpty": "Rien à tirer : cette catégorie a besoin d'un nom.",
+        "uncovered": "Pas encore de sprite pour : {{ kinds }}"
+      },
+      "tints": {
+        "title": "Teintes",
+        "add": "Ajouter une teinte",
+        "id": "Id de la teinte",
+        "remove": "Retirer",
+        "shadow": "Ombre",
+        "mid": "Milieu",
+        "light": "Lumière",
+        "adjectives": "Adjectifs",
+        "adjectivesHint": "Un par ligne. Un adjectif accordé s'écrit masculin|féminin, suivi des pluriels s'ils sont irréguliers.",
+        "suffixes": "Suffixes",
+        "descriptions": "Descriptions (une par ligne)"
+      },
+      "params": {
+        "title": "Paramètres",
+        "add": "Ajouter un paramètre",
+        "name": "Nom du paramètre",
+        "newEntry": "Nouvelle expression",
+        "addEntry": "Ajouter",
+        "remove": "Retirer",
+        "removeEntry": "Retirer",
+        "neutral": "Les textes demandent un pack avec une langue : choisissez-en une dans Détails."
+      },
+      "templates": {
+        "title": "Modèles de noms (utiles seulement pour une Base)",
+        "hint": "Un par ligne, chacun avec {base}. Une catégorie peut avoir les siens."
+      }
     },
     "createdHere": "Créé sur cet appareil",
     "editAsDraft": "Modifier comme brouillon"
