@@ -11,7 +11,23 @@ const odd = { id: 'odd', actionType: 'Teleport' };
 
 describe('actionTabs', () => {
   it('makes one tab per action type, in order, with what is left', () => {
-    expect(actionTabs(actions, []).map(({ name, count, used, left, movement }: { name: string; count: number; used: number; left: number; movement: boolean }) => ({ name, count, used, left, movement }))).toEqual([
+    expect(
+      actionTabs(actions, []).map(
+        ({
+          name,
+          count,
+          used,
+          left,
+          movement,
+        }: {
+          name: string;
+          count: number;
+          used: number;
+          left: number;
+          movement: boolean;
+        }) => ({ name, count, used, left, movement }),
+      ),
+    ).toEqual([
       { name: 'Action', count: 2, used: 1, left: 1, movement: false },
       { name: 'Movement', count: 1, used: 1, left: 0, movement: true },
     ]);

@@ -1,7 +1,8 @@
 import { Skill } from '../../skill/models/skill';
 import { CombatTargetingBusiness } from './combat-targeting.business';
 
-const skill = (target: Skill['target']): Skill => ({ id: 's', target, effects: [] }) as unknown as Skill;
+const skill = (target: Skill['target']): Skill =>
+  ({ id: 's', target, effects: [] }) as unknown as Skill;
 
 function aiming(target: Skill['target'], targets: string[] = []) {
   const business = new CombatTargetingBusiness();

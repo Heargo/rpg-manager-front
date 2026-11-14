@@ -1,4 +1,9 @@
-import { click, combatTable, mount, pickTarget } from '../../../../../testing/combat-table';
+import {
+  click,
+  combatTable,
+  mount,
+  pickTarget,
+} from '../../../../../testing/combat-table';
 import { settle } from '../../../../../testing/game-device';
 import { SkillCatalogueBusiness } from '../../../skill/business/skill-catalogue.business';
 import { CombatTargetingBusiness } from '../../business/combat-targeting.business';
@@ -38,7 +43,11 @@ describe('CombatActionsComponent tabs', () => {
       ).id;
       await table.gm.injector
         .get(CharacterBusiness)
-        .act(table.record('ada').id, { kind: 'set-skill', skillId: dashId, level: 1 });
+        .act(table.record('ada').id, {
+          kind: 'set-skill',
+          skillId: dashId,
+          level: 1,
+        });
       sheetSkills.push({ skillId: dashId, level: 1 });
       await settle();
     }
@@ -56,14 +65,19 @@ describe('CombatActionsComponent tabs', () => {
     return ada;
   }
 
-  const tabs = () => Array.from(mounted.el.querySelectorAll('[role="tab"]')) as HTMLElement[];
+  const tabs = () =>
+    Array.from(mounted.el.querySelectorAll('[role="tab"]')) as HTMLElement[];
   const names = (testid: string) =>
-    Array.from(mounted.el.querySelectorAll(`[data-testid="${testid}"]`)).map((e) => e.getAttribute('data-name'));
+    Array.from(mounted.el.querySelectorAll(`[data-testid="${testid}"]`)).map(
+      (e) => e.getAttribute('data-name'),
+    );
 
   it('shows one tab per action type labelled with what is left', async () => {
     table = await combatTable('free');
     await open('gm');
-    expect(tabs().map((t) => t.textContent!.replace(/\s+/g, ' ').trim())).toEqual(['Action (1/1)', 'Movement (1/1)']);
+    expect(
+      tabs().map((t) => t.textContent!.replace(/\s+/g, ' ').trim()),
+    ).toEqual(['Action (1/1)', 'Movement (1/1)']);
   });
 
   it('lists the first tab skills and the items, and the other tab skills once selected', async () => {
@@ -93,7 +107,8 @@ describe('CombatActionsComponent tabs', () => {
   it('lets the GM give one back with the minus button', async () => {
     table = await combatTable('free');
     await open('gm');
-    const minus = () => mounted.el.querySelector<HTMLButtonElement>('[data-action="untick"]')!;
+    const minus = () =>
+      mounted.el.querySelector<HTMLButtonElement>('[data-action="untick"]')!;
     expect(minus().disabled).toBe(true);
     await click(mounted.el.querySelector('[data-action="tick"]'));
     expect(minus().disabled).toBe(false);
@@ -112,7 +127,13 @@ describe('CombatActionsComponent tabs', () => {
 
   it('shows flat lists and no tabs when the action counters step is off', async () => {
     table = await combatTable('free', {
-      steps: { initiative: true, actionCounters: false, gmValidation: true, defence: true, rewards: true },
+      steps: {
+        initiative: true,
+        actionCounters: false,
+        gmValidation: true,
+        defence: true,
+        rewards: true,
+      },
     });
     await open('gm');
     expect(tabs()).toEqual([]);
@@ -133,7 +154,9 @@ describe('CombatActionsComponent target multi-select', () => {
   afterEach(() => {
     mounted?.destroy();
     table?.destroy();
-    document.body.querySelectorAll('.p-multiselect-overlay').forEach((e) => e.remove());
+    document.body
+      .querySelectorAll('.p-multiselect-overlay')
+      .forEach((e) => e.remove());
   });
 
   async function aim(skillName: string, extra?: Record<string, unknown>) {
@@ -152,7 +175,11 @@ describe('CombatActionsComponent target multi-select', () => {
     ).id;
     await table.gm.injector
       .get(CharacterBusiness)
-      .act(table.record('ada').id, { kind: 'set-skill', skillId: id, level: 1 });
+      .act(table.record('ada').id, {
+        kind: 'set-skill',
+        skillId: id,
+        level: 1,
+      });
     await settle();
     await table.start();
     const ada = table.named(table.gm, 'Ada');
@@ -164,17 +191,27 @@ describe('CombatActionsComponent target multi-select', () => {
       attributes: ada.attributes,
       actions: ada.actions,
     });
-    await click(mounted.el.querySelector('[data-testid="skill"] [data-action="use-skill"]'));
+    await click(
+      mounted.el.querySelector(
+        '[data-testid="skill"] [data-action="use-skill"]',
+      ),
+    );
   }
 
   const open = () => click(mounted.el.querySelector('[data-testid="targets"]'));
   const text = (e: Element) => e.textContent!.replace(/\s+/g, ' ').trim();
   const groups = () =>
-    Array.from(document.querySelectorAll('.p-multiselect-option-group')).map(text);
+    Array.from(document.querySelectorAll('.p-multiselect-option-group')).map(
+      text,
+    );
   const options = () =>
-    Array.from(document.querySelectorAll('[data-testid="target"]')).map((e) => e.getAttribute('data-name'));
-  const chips = () => Array.from(mounted.el.querySelectorAll('.p-multiselect-chip')).map(text);
-  const casting = () => table.gm.injector.get(CombatTargetingBusiness).$casting();
+    Array.from(document.querySelectorAll('[data-testid="target"]')).map((e) =>
+      e.getAttribute('data-name'),
+    );
+  const chips = () =>
+    Array.from(mounted.el.querySelectorAll('.p-multiselect-chip')).map(text);
+  const casting = () =>
+    table.gm.injector.get(CombatTargetingBusiness).$casting();
 
   it('replaces the target buttons with a multi-select', async () => {
     table = await combatTable('free');
@@ -210,13 +247,17 @@ describe('CombatActionsComponent target multi-select', () => {
     expect(casting()?.targets).toEqual([goblin.id]);
     expect(chips()).toEqual(['Goblin']);
     await click(mounted.el.querySelector('[data-action="confirm-skill"]'));
-    expect(table.state(table.gm).pending.map((p) => p.targetId)).toEqual([goblin.id]);
+    expect(table.state(table.gm).pending.map((p) => p.targetId)).toEqual([
+      goblin.id,
+    ]);
   });
 
   it('follows a pick made on the grid', async () => {
     table = await combatTable('free');
     await aim('Zap', { target: 'one-enemy' });
-    table.gm.injector.get(CombatTargetingBusiness).toggle(table.named(table.gm, 'Goblin').id);
+    table.gm.injector
+      .get(CombatTargetingBusiness)
+      .toggle(table.named(table.gm, 'Goblin').id);
     await settle();
     expect(chips()).toEqual(['Goblin']);
   });

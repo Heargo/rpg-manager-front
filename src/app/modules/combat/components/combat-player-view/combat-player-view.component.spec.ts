@@ -245,7 +245,9 @@ describe('CombatPlayerViewComponent', () => {
     };
 
     it('offers no typed initiative when the initiative step is off, even in typed mode', async () => {
-      table = await combatTable('typed', { steps: { ...all, initiative: false } });
+      table = await combatTable('typed', {
+        steps: { ...all, initiative: false },
+      });
       await table.start();
       await open(table.ada, 'Ada', 'ada');
 
@@ -254,7 +256,9 @@ describe('CombatPlayerViewComponent', () => {
     });
 
     it('shows no action counters when that step is off', async () => {
-      table = await combatTable('free', { steps: { ...all, actionCounters: false } });
+      table = await combatTable('free', {
+        steps: { ...all, actionCounters: false },
+      });
       await table.start();
       await open(table.ada, 'Ada', 'ada');
 

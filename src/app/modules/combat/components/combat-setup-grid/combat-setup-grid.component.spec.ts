@@ -32,21 +32,34 @@ describe('CombatSetupGridComponent', () => {
   let el: HTMLElement;
   let emitted: Record<string, Cell>[];
 
-  const setGrid = (grid: { enabled: boolean; columns: number; rows: number; imageId?: string }) =>
+  const setGrid = (grid: {
+    enabled: boolean;
+    columns: number;
+    rows: number;
+    imageId?: string;
+  }) =>
     table.gm.injector.get(WorldSessionBusiness).update((w) => ({
       ...w,
       combat: { ...w.combat, grid },
     }));
 
   const open = async (inputs: Record<string, unknown> = {}) => {
-    mounted = await mount(CombatSetupGridComponent, table.gm, { slots, ...inputs });
+    mounted = await mount(CombatSetupGridComponent, table.gm, {
+      slots,
+      ...inputs,
+    });
     el = mounted.el;
     emitted = [];
     mounted.ref.instance.positionsChange.subscribe((p) => emitted.push(p));
   };
   const token = (key: string) =>
-    el.querySelector<HTMLElement>(`[data-testid="setup-token"][data-key="${key}"]`)!;
-  const at = (key: string) => [token(key).dataset['x'], token(key).dataset['y']];
+    el.querySelector<HTMLElement>(
+      `[data-testid="setup-token"][data-key="${key}"]`,
+    )!;
+  const at = (key: string) => [
+    token(key).dataset['x'],
+    token(key).dataset['y'],
+  ];
 
   beforeEach(async () => {
     table = await combatTable('free');
@@ -86,7 +99,9 @@ describe('CombatSetupGridComponent', () => {
     await settle();
     await open();
     expect(
-      el.querySelector<HTMLElement>('[data-testid="grid-map"]')!.dataset['imageId'],
+      el.querySelector<HTMLElement>('[data-testid="grid-map"]')!.dataset[
+        'imageId'
+      ],
     ).toBe('map-1');
   });
 
@@ -130,7 +145,12 @@ describe('CombatSetupGridComponent', () => {
     const pointer = (target: Element, type: string, x: number, y: number) =>
       target.dispatchEvent(
         Object.assign(
-          new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y }),
+          new MouseEvent(type, {
+            bubbles: true,
+            cancelable: true,
+            clientX: x,
+            clientY: y,
+          }),
           { pointerId: 1 },
         ),
       );
@@ -158,9 +178,18 @@ describe('CombatSetupGridComponent', () => {
 
     it('moves with pointer events like a token with an initial', async () => {
       await openWithPortrait();
-      const board = el.querySelector<HTMLElement>('[data-testid="setup-grid"]')!;
+      const board = el.querySelector<HTMLElement>(
+        '[data-testid="setup-grid"]',
+      )!;
       board.getBoundingClientRect = () =>
-        ({ left: 0, top: 0, width: 600, height: 400, right: 600, bottom: 400 }) as DOMRect;
+        ({
+          left: 0,
+          top: 0,
+          width: 600,
+          height: 400,
+          right: 600,
+          bottom: 400,
+        }) as DOMRect;
 
       pointer(token('character:bob'), 'pointerdown', 50, 150);
       pointer(token('character:bob'), 'pointermove', 250, 250);

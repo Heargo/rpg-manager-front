@@ -10,7 +10,9 @@ const npcs = [
 
 describe('startPicks', () => {
   it('builds the payload with the characters and the NPCs with their counts', () => {
-    expect(startPicks(['a', 'b'], ['gob', 'elf'], { gob: 3, elf: 2 }, npcs)).toEqual({
+    expect(
+      startPicks(['a', 'b'], ['gob', 'elf'], { gob: 3, elf: 2 }, npcs),
+    ).toEqual({
       characterIds: ['a', 'b'],
       npcs: [
         { npcId: 'gob', count: 3, side: 'enemy' },
@@ -68,7 +70,12 @@ describe('startPicks with positions', () => {
 
 describe('startSlots', () => {
   it('has a slot per character and per NPC copy, with stable keys', () => {
-    const picks = startPicks(['ada', 'bob'], ['gob', 'elf'], { gob: 2 }, gobNpcs);
+    const picks = startPicks(
+      ['ada', 'bob'],
+      ['gob', 'elf'],
+      { gob: 2 },
+      gobNpcs,
+    );
     const slots = startSlots(picks, characters, gobNpcs);
     expect(slots.map((s) => [s.key, s.side])).toEqual([
       ['character:ada', 'party'],
@@ -146,7 +153,11 @@ describe('setupTokens', () => {
   });
 
   it('ignores chosen cells of slots that no longer exist', () => {
-    const shown = setupTokens(slots, { 'character:ghost': { x: 0, y: 0 } }, grid);
+    const shown = setupTokens(
+      slots,
+      { 'character:ghost': { x: 0, y: 0 } },
+      grid,
+    );
     expect(shown.map((t) => t.key)).toEqual(slots.map((s) => s.key));
     expect(cells(shown)['character:ada']).toEqual({ x: 0, y: 0 });
   });

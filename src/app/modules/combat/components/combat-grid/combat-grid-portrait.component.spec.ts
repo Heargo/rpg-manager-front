@@ -17,7 +17,12 @@ describe('CombatGridComponent token with a portrait', () => {
   const pointer = (target: Element, type: string, x: number, y: number) =>
     target.dispatchEvent(
       Object.assign(
-        new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y }),
+        new MouseEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          clientX: x,
+          clientY: y,
+        }),
         { pointerId: 1 },
       ),
     );
@@ -59,7 +64,14 @@ describe('CombatGridComponent token with a portrait', () => {
   it('moves with pointer events like a token with an initial', async () => {
     const board = el.querySelector<HTMLElement>('[data-testid="grid"]')!;
     board.getBoundingClientRect = () =>
-      ({ left: 0, top: 0, width: 1000, height: 1000, right: 1000, bottom: 1000 }) as DOMRect;
+      ({
+        left: 0,
+        top: 0,
+        width: 1000,
+        height: 1000,
+        right: 1000,
+        bottom: 1000,
+      }) as DOMRect;
 
     pointer(token(), 'pointerdown', 50, 50);
     pointer(token(), 'pointermove', 250, 350);

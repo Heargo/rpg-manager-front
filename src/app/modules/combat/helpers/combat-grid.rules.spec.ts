@@ -59,7 +59,15 @@ describe('reachableCells', () => {
 describe('cellsInRange', () => {
   it('includes occupied cells and stays in the grid', () => {
     expect(key(cellsInRange({ x: 9, y: 9 }, 2, grid))).toEqual([
-      '7,7', '7,8', '7,9', '8,7', '8,8', '8,9', '9,7', '9,8', '9,9',
+      '7,7',
+      '7,8',
+      '7,9',
+      '8,7',
+      '8,8',
+      '8,9',
+      '9,7',
+      '9,8',
+      '9,9',
     ]);
   });
 });
@@ -85,7 +93,11 @@ describe('combatantsInRange', () => {
 describe('occupiedCells', () => {
   it('lists the positions of the placed combatants only', () => {
     expect(
-      occupiedCells([{ position: { x: 1, y: 2 } }, {}, { position: { x: 0, y: 0 } }]),
+      occupiedCells([
+        { position: { x: 1, y: 2 } },
+        {},
+        { position: { x: 0, y: 0 } },
+      ]),
     ).toEqual([
       { x: 1, y: 2 },
       { x: 0, y: 0 },
@@ -94,7 +106,11 @@ describe('occupiedCells', () => {
 });
 
 describe('placeUnplaced', () => {
-  const who = (id: string, side: 'party' | 'ally' | 'enemy', position?: { x: number; y: number }) => ({
+  const who = (
+    id: string,
+    side: 'party' | 'ally' | 'enemy',
+    position?: { x: number; y: number },
+  ) => ({
     id,
     side,
     ...(position ? { position } : {}),
@@ -102,7 +118,12 @@ describe('placeUnplaced', () => {
 
   it('puts party and allies from the left edge and enemies from the right edge', () => {
     const placed = placeUnplaced(
-      [who('ada', 'party'), who('bob', 'ally'), who('gob', 'enemy'), who('orc', 'enemy')],
+      [
+        who('ada', 'party'),
+        who('bob', 'ally'),
+        who('gob', 'enemy'),
+        who('orc', 'enemy'),
+      ],
       grid,
     );
     expect(placed.map((c) => c.position)).toEqual([
@@ -115,7 +136,11 @@ describe('placeUnplaced', () => {
 
   it('keeps the cells already taken and skips them', () => {
     const placed = placeUnplaced(
-      [who('ada', 'party', { x: 0, y: 0 }), who('bob', 'party'), who('gob', 'enemy', { x: 9, y: 0 })],
+      [
+        who('ada', 'party', { x: 0, y: 0 }),
+        who('bob', 'party'),
+        who('gob', 'enemy', { x: 9, y: 0 }),
+      ],
       grid,
     );
     expect(placed[0].position).toEqual({ x: 0, y: 0 });
@@ -126,7 +151,14 @@ describe('placeUnplaced', () => {
   it('moves on to the next column once an edge column is full', () => {
     const small = { columns: 4, rows: 2 };
     const placed = placeUnplaced(
-      [who('a', 'party'), who('b', 'party'), who('c', 'party'), who('e', 'enemy'), who('f', 'enemy'), who('g', 'enemy')],
+      [
+        who('a', 'party'),
+        who('b', 'party'),
+        who('c', 'party'),
+        who('e', 'enemy'),
+        who('f', 'enemy'),
+        who('g', 'enemy'),
+      ],
       small,
     );
     expect(placed.map((c) => c.position)).toEqual([
@@ -147,8 +179,16 @@ describe('placeUnplaced', () => {
  */
 describe('canMoveTo', () => {
   const rules = (actionCounters = true) =>
-    ({ movement: '2', grid: { enabled: true, ...grid }, steps: { actionCounters } }) as never;
-  const combatant = (id: string, position: { x: number; y: number }, actions: { name: string; count: number; used: number; movement: boolean }[]) => ({
+    ({
+      movement: '2',
+      grid: { enabled: true, ...grid },
+      steps: { actionCounters },
+    }) as never;
+  const combatant = (
+    id: string,
+    position: { x: number; y: number },
+    actions: { name: string; count: number; used: number; movement: boolean }[],
+  ) => ({
     id,
     position,
     level: 1,
@@ -162,33 +202,60 @@ describe('canMoveTo', () => {
   ];
   const enc = (actions = walk(0)) =>
     ({
-      combatants: [combatant('a', { x: 3, y: 3 }, actions), combatant('b', { x: 4, y: 3 }, [])],
+      combatants: [
+        combatant('a', { x: 3, y: 3 }, actions),
+        combatant('b', { x: 4, y: 3 }, []),
+      ],
     }) as never;
 
   it('accepts a reachable cell and names the first movement type to tick', () => {
-    expect(canMoveTo(enc(), rules(), 'a', { x: 5, y: 5 })).toEqual({ ok: true, tickAction: 'Walk' });
+    expect(canMoveTo(enc(), rules(), 'a', { x: 5, y: 5 })).toEqual({
+      ok: true,
+      tickAction: 'Walk',
+    });
   });
 
   it('counts the reach from the current position', () => {
-    expect(canMoveTo(enc(), rules(), 'a', { x: 6, y: 3 })).toEqual({ ok: false, error: 'outOfReach' });
-    expect(canMoveTo(enc(), rules(), 'a', { x: 1, y: 1 })).toEqual({ ok: true, tickAction: 'Walk' });
+    expect(canMoveTo(enc(), rules(), 'a', { x: 6, y: 3 })).toEqual({
+      ok: false,
+      error: 'outOfReach',
+    });
+    expect(canMoveTo(enc(), rules(), 'a', { x: 1, y: 1 })).toEqual({
+      ok: true,
+      tickAction: 'Walk',
+    });
   });
 
   it('refuses a cell held by another combatant', () => {
-    expect(canMoveTo(enc(), rules(), 'a', { x: 4, y: 3 })).toEqual({ ok: false, error: 'outOfReach' });
+    expect(canMoveTo(enc(), rules(), 'a', { x: 4, y: 3 })).toEqual({
+      ok: false,
+      error: 'outOfReach',
+    });
   });
 
   it('refuses when the first movement type has no use left, even if a later one has', () => {
-    expect(canMoveTo(enc(walk(1)), rules(), 'a', { x: 5, y: 5 })).toEqual({ ok: false, error: 'noMovementLeft' });
+    expect(canMoveTo(enc(walk(1)), rules(), 'a', { x: 5, y: 5 })).toEqual({
+      ok: false,
+      error: 'noMovementLeft',
+    });
   });
 
   it('checks only the reach when the combatant has no movement type', () => {
-    const plainActions = [{ name: 'Action', count: 1, used: 1, movement: false }];
-    expect(canMoveTo(enc(plainActions), rules(), 'a', { x: 5, y: 5 })).toEqual({ ok: true });
-    expect(canMoveTo(enc(plainActions), rules(), 'a', { x: 9, y: 9 })).toEqual({ ok: false, error: 'outOfReach' });
+    const plainActions = [
+      { name: 'Action', count: 1, used: 1, movement: false },
+    ];
+    expect(canMoveTo(enc(plainActions), rules(), 'a', { x: 5, y: 5 })).toEqual({
+      ok: true,
+    });
+    expect(canMoveTo(enc(plainActions), rules(), 'a', { x: 9, y: 9 })).toEqual({
+      ok: false,
+      error: 'outOfReach',
+    });
   });
 
   it('checks only the reach when the action counters are off', () => {
-    expect(canMoveTo(enc(walk(1)), rules(false), 'a', { x: 5, y: 5 })).toEqual({ ok: true });
+    expect(canMoveTo(enc(walk(1)), rules(false), 'a', { x: 5, y: 5 })).toEqual({
+      ok: true,
+    });
   });
 });

@@ -318,7 +318,12 @@ describe('projectEncounter', () => {
       ...encounter([]),
       combatants: [
         combatant({ id: 'e1', name: 'Goblin', npcId: 'npc-1' }),
-        combatant({ id: 'p', name: 'Ada', side: 'party', characterId: 'char-1' }),
+        combatant({
+          id: 'p',
+          name: 'Ada',
+          side: 'party',
+          characterId: 'char-1',
+        }),
       ],
       pending: [
         {
@@ -332,7 +337,12 @@ describe('projectEncounter', () => {
           success: true,
           effects: [
             { kind: 'damage' as const, attribute, amount: 12 },
-            { kind: 'modify' as const, attribute: 'Mana', amount: -2, duration: 3 },
+            {
+              kind: 'modify' as const,
+              attribute: 'Mana',
+              amount: -2,
+              duration: 3,
+            },
           ],
         },
       ],
@@ -393,4 +403,3 @@ describe('projectEncounter', () => {
     });
   });
 });
-

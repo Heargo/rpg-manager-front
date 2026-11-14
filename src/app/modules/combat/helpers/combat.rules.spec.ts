@@ -1038,7 +1038,10 @@ describe('startEncounter with positions', () => {
 
   it('ignores unknown slot keys', () => {
     const enc = ok(
-      place({ 'character:ghost': { x: 1, y: 1 }, 'npc:goblin:9': { x: 2, y: 2 } }),
+      place({
+        'character:ghost': { x: 1, y: 1 },
+        'npc:goblin:9': { x: 2, y: 2 },
+      }),
     ).encounter;
     expect(enc.combatants.every((c) => c.position === undefined)).toBe(true);
   });
@@ -1056,7 +1059,10 @@ describe('startEncounter with positions', () => {
 
   it('refuses two slots on one cell', () => {
     expect(
-      place({ 'character:aria': { x: 1, y: 1 }, 'npc:goblin:2': { x: 1, y: 1 } }),
+      place({
+        'character:aria': { x: 1, y: 1 },
+        'npc:goblin:2': { x: 1, y: 1 },
+      }),
     ).toEqual({ ok: false, error: 'badPositions' });
   });
 
