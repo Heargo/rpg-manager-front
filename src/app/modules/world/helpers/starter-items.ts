@@ -1,6 +1,6 @@
 import { generateItem } from '../../../core/generators/item-generator';
 import { RandomSource } from '../../../core/generators/random-source';
-import { WordList } from '../../../core/generators/word-list';
+import { ItemVocabulary } from '../../../core/generators/item-vocabulary';
 import { EQUIPMENT_SLOTS, ItemDraft, ItemRarity, ItemType } from '../../../core/models/item';
 
 export interface StarterItemOptions {
@@ -15,9 +15,9 @@ export interface StarterItemOptions {
  * applies (a fixed list would name attributes the world doesn't have). Same source state → same items.
  * One common piece per equipment slot, a few better ones, potions for the bar attributes, and misc items.
  */
-export function generateStarterItems(source: RandomSource, words: WordList, options: StarterItemOptions): ItemDraft[] {
+export function generateStarterItems(source: RandomSource, vocabulary: ItemVocabulary, options: StarterItemOptions): ItemDraft[] {
   const draw = (type: ItemType, rarity: ItemRarity, attributes = options.attributes, slot?: (typeof EQUIPMENT_SLOTS)[number]) =>
-    generateItem(source, words, { attributes, rarity, type, slot });
+    generateItem(source, vocabulary, { attributes, rarity, type, slot });
 
   const potionAttributes = options.barAttributes.length ? options.barAttributes : options.attributes;
   return [

@@ -244,3 +244,28 @@ describe('checkPhrase', () => {
     expect(checkPhrase('{snake_case}').errors.length).toBeGreaterThan(0);
   });
 });
+
+describe('plural agreement', () => {
+  it('picks the plural option of a four-option {g:m|f|mp|fp}', () => {
+    const phrase = '{g:beau|belle|beaux|belles}';
+    expect(expandPhrase(fixed, phrase, { gender: 'm' })).toBe('beau');
+    expect(expandPhrase(fixed, phrase, { gender: 'f' })).toBe('belle');
+    expect(expandPhrase(fixed, phrase, { gender: 'm', plural: true })).toBe('beaux');
+    expect(expandPhrase(fixed, phrase, { gender: 'f', plural: true })).toBe('belles');
+    expect(expandPhrase(fixed, phrase, { plural: true })).toBe('beaux');
+  });
+
+  it('adds an s to a two-option {g:m|f} in the plural, except after s or x', () => {
+    expect(expandPhrase(fixed, '{g:grand|grande}', { gender: 'm', plural: true })).toBe('grands');
+    expect(expandPhrase(fixed, '{g:grand|grande}', { gender: 'f', plural: true })).toBe('grandes');
+    expect(expandPhrase(fixed, '{g:gris|grise}', { gender: 'm', plural: true })).toBe('gris');
+    expect(expandPhrase(fixed, '{g:heureux|heureuse}', { gender: 'm', plural: true })).toBe('heureux');
+  });
+
+  it('checks both arities of {g:...}', () => {
+    expect(checkPhrase('{g:a|b|c|d}').errors).toEqual([]);
+    expect(checkPhrase('{g:a|b}').errors).toEqual([]);
+    expect(checkPhrase('{g:a|b|c}').errors.length).toBeGreaterThan(0);
+    expect(checkPhrase('{g:a|b|c|d|e}').errors.length).toBeGreaterThan(0);
+  });
+});

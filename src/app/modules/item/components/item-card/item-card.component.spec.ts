@@ -8,13 +8,13 @@ import {
   ITEM_TYPES,
 } from '../../../../core/models/item';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
-import { baseWordList } from '../../../../../testing/base-words';
+import { baseItemVocabulary } from '../../../../../testing/base-vocabulary';
 import { ItemCardComponent } from './item-card.component';
 
 describe('ItemCardComponent', () => {
   it.each([
-    ['en', baseWordList('en')],
-    ['fr', baseWordList('fr')],
+    ['en', baseItemVocabulary('en')],
+    ['fr', baseItemVocabulary('fr')],
   ])(
     'renders every rarity, type and slot in %s without a missing translation',
     async (lang, words) => {
@@ -58,7 +58,7 @@ describe('ItemCardComponent', () => {
     });
     TestBed.inject(TranslateService).use('en');
     const fixture = TestBed.createComponent(ItemCardComponent);
-    const item = generateItem(seededRandomSource('slot'), baseWordList('en'), {
+    const item = generateItem(seededRandomSource('slot'), baseItemVocabulary('en'), {
       attributes: ['Life'],
       type: 'equipment',
       slot: 'ring',
@@ -79,7 +79,7 @@ describe('ItemCardComponent', () => {
     });
     TestBed.inject(TranslateService).use('en');
     const fixture = TestBed.createComponent(ItemCardComponent);
-    const item = generateItem(seededRandomSource('slot'), baseWordList('en'), {
+    const item = generateItem(seededRandomSource('slot'), baseItemVocabulary('en'), {
       attributes: ['Life'],
       type: 'consumable',
     });

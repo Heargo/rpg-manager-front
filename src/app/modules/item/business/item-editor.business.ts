@@ -35,16 +35,7 @@ export class ItemEditorBusiness {
     return this.generator.newSeed();
   }
 
-  generate(
-    seed: string,
-    attributeNames: readonly string[],
-    pack?: string,
-  ): Promise<ItemDraft> {
-    return this.generator.generateFor(seed, attributeNames, pack);
-  }
-
-  /** The pack a seed draws from for a choice (a pack id or `'random'`). */
-  packFor(seed: string, pack: string): Promise<string> {
-    return this.generator.packFor(seed, pack);
+  generate(seed: string, attributeNames: readonly string[]): Promise<ItemDraft> {
+    return this.generator.generateFor(seed, attributeNames);
   }
 }

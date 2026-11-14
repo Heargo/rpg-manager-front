@@ -1,4 +1,4 @@
-import { baseWordList } from '../../../../testing/base-words';
+import { baseItemVocabulary } from '../../../../testing/base-vocabulary';
 import { seededRandomSource } from '../../../core/generators/random-source';
 import { EQUIPMENT_SLOTS } from '../../../core/models/item';
 import { WorldDraft } from '../models/world';
@@ -93,7 +93,7 @@ describe('validateWorldDraft', () => {
 });
 
 describe('generateStarterItems', () => {
-  const words = baseWordList('en');
+  const words = baseItemVocabulary('en');
   const options = { attributes: ['Life', 'Mana', 'Strength'], barAttributes: ['Life', 'Mana'] };
 
   it('covers every equipment slot, potions for each bar, and misc items', () => {

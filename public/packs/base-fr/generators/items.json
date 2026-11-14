@@ -13,8 +13,7 @@
       "descriptions": [
         "L'odeur est pire que le goût. En général.",
         "À utiliser avant le combat, pas après.",
-        "Le favori des voyageurs, vendu dans toutes les tavernes.",
-        "L'étiquette est à moitié déchirée, mais la couleur semble bonne."
+        "Le favori des voyageurs, vendu dans toutes les tavernes."
       ]
     },
     "item": {
@@ -185,7 +184,8 @@
       "nouns": [
         {
           "text": "Gants",
-          "gender": "m"
+          "gender": "m",
+          "plural": true
         }
       ]
     },
@@ -193,7 +193,8 @@
       "nouns": [
         {
           "text": "Gantelets",
-          "gender": "m"
+          "gender": "m",
+          "plural": true
         }
       ]
     },
@@ -201,7 +202,8 @@
       "nouns": [
         {
           "text": "Brassards",
-          "gender": "m"
+          "gender": "m",
+          "plural": true
         }
       ]
     },
@@ -209,7 +211,8 @@
       "nouns": [
         {
           "text": "Mitaines",
-          "gender": "f"
+          "gender": "f",
+          "plural": true
         }
       ]
     },
@@ -217,7 +220,8 @@
       "nouns": [
         {
           "text": "Jambières",
-          "gender": "f"
+          "gender": "f",
+          "plural": true
         }
       ]
     },
@@ -225,7 +229,8 @@
       "nouns": [
         {
           "text": "Chausses",
-          "gender": "f"
+          "gender": "f",
+          "plural": true
         }
       ]
     },
@@ -233,7 +238,8 @@
       "nouns": [
         {
           "text": "Braies",
-          "gender": "f"
+          "gender": "f",
+          "plural": true
         }
       ]
     },
@@ -241,7 +247,8 @@
       "nouns": [
         {
           "text": "Cuissards",
-          "gender": "m"
+          "gender": "m",
+          "plural": true
         }
       ]
     },
@@ -249,7 +256,8 @@
       "nouns": [
         {
           "text": "Bottes",
-          "gender": "f"
+          "gender": "f",
+          "plural": true
         }
       ]
     },
@@ -257,7 +265,8 @@
       "nouns": [
         {
           "text": "Sandales",
-          "gender": "f"
+          "gender": "f",
+          "plural": true
         }
       ]
     },
@@ -265,7 +274,8 @@
       "nouns": [
         {
           "text": "Solerets",
-          "gender": "m"
+          "gender": "m",
+          "plural": true
         }
       ]
     },
@@ -273,7 +283,8 @@
       "nouns": [
         {
           "text": "Chaussures",
-          "gender": "f"
+          "gender": "f",
+          "plural": true
         }
       ]
     },
@@ -348,7 +359,9 @@
           "gender": "m"
         }
       ],
-      "descriptions": ["Les marques de coups racontent {event}."]
+      "descriptions": [
+        "{g:Il|Elle} garde les traces de {event}."
+      ]
     },
     "buckler": {
       "nouns": [
@@ -451,12 +464,19 @@
       ],
       "descriptions": [
         "Brassée par {maker}, selon une recette que personne ne confirme.",
-        "Un vendeur de {place} jure qu'elle a sauvé {owner}."
+        "Un vendeur de {place} jure qu'elle a sauvé {owner}.",
+        "L'étiquette est à moitié déchirée, mais la couleur semble bonne."
       ],
       "names": {
-        "common": ["{base} de {effect}"],
-        "uncommon": ["{base} de {effect}"],
-        "rare": ["{base} de {effect}"]
+        "common": [
+          "{base} de {effect}"
+        ],
+        "uncommon": [
+          "{base} de {effect}"
+        ],
+        "rare": [
+          "{base} de {effect}"
+        ]
       }
     },
     "elixir": {
@@ -467,9 +487,15 @@
         }
       ],
       "names": {
-        "common": ["{base} de {effect}"],
-        "uncommon": ["{base} de {effect}"],
-        "rare": ["{base} de {effect}"]
+        "common": [
+          "{base} de {effect}"
+        ],
+        "uncommon": [
+          "{base} de {effect}"
+        ],
+        "rare": [
+          "{base} de {effect}"
+        ]
       }
     },
     "brew": {
@@ -488,9 +514,15 @@
         }
       ],
       "names": {
-        "common": ["{base} de {effect}"],
-        "uncommon": ["{base} de {effect}"],
-        "rare": ["{base} de {effect}"]
+        "common": [
+          "{base} de {effect}"
+        ],
+        "uncommon": [
+          "{base} de {effect}"
+        ],
+        "rare": [
+          "{base} de {effect}"
+        ]
       }
     },
     "ration": {
@@ -521,8 +553,8 @@
       "descriptions": [
         "Une arme [fiable|redoutable], forgée par {maker}.",
         "On dit que l'arme a appartenu à {owner}.",
-        "Elle a survécu à {event}, et ça se voit.",
-        "Le fil garde la trace de {material}."
+        "{g:Il|Elle} a survécu à {event}, et ça se voit.",
+        "{g:Il|Elle} est {g:façonné|façonnée} dans {material}."
       ]
     }
   },
@@ -536,7 +568,9 @@
           }
         ]
       },
-      "descriptions": ["La rouille a mangé les bords, mais le cœur tient bon."]
+      "descriptions": [
+        "La rouille a mangé les bords, mais le cœur tient bon."
+      ]
     },
     "steel": {
       "adjectives": {
@@ -581,9 +615,13 @@
         ]
       },
       "suffixes": {
-        "rare": ["des braises"]
+        "rare": [
+          "des braises"
+        ]
       },
-      "descriptions": ["Encore tiède au toucher, même après une nuit dehors."]
+      "descriptions": [
+        "Encore tiède au toucher, même après une nuit dehors."
+      ]
     },
     "ice": {
       "adjectives": {
@@ -595,9 +633,13 @@
         ]
       },
       "suffixes": {
-        "rare": ["des marées"]
+        "rare": [
+          "des marées"
+        ]
       },
-      "descriptions": ["Un givre léger ne fond jamais tout à fait."]
+      "descriptions": [
+        "Un givre léger ne fond jamais tout à fait."
+      ]
     },
     "arcane": {
       "adjectives": {
@@ -614,7 +656,9 @@
           }
         ]
       },
-      "descriptions": ["Des motifs pâles bougent quand on ne les regarde pas."]
+      "descriptions": [
+        "Des motifs pâles bougent quand on ne les regarde pas."
+      ]
     },
     "shadow": {
       "adjectives": {
@@ -626,10 +670,16 @@
         ]
       },
       "suffixes": {
-        "mythic": ["de la lune silencieuse"],
-        "legendary": ["de la nuit sans fin"]
+        "mythic": [
+          "de la lune silencieuse"
+        ],
+        "legendary": [
+          "de la nuit sans fin"
+        ]
       },
-      "descriptions": ["La lumière semble s'y perdre."]
+      "descriptions": [
+        "La lumière semble s'y perdre."
+      ]
     }
   },
   "adjectives": {
@@ -692,7 +742,9 @@
       },
       {
         "m": "de maître",
-        "f": "de maître"
+        "f": "de maître",
+        "mp": "de maître",
+        "fp": "de maître"
       }
     ],
     "mythic": [
@@ -710,7 +762,9 @@
       },
       {
         "m": "en écailles de wyrm",
-        "f": "en écailles de wyrm"
+        "f": "en écailles de wyrm",
+        "mp": "en écailles de wyrm",
+        "fp": "en écailles de wyrm"
       }
     ],
     "legendary": [
@@ -737,16 +791,45 @@
     ]
   },
   "suffixes": {
-    "uncommon": ["de vigueur", "du renard"],
-    "rare": ["de vigueur", "du renard", "de l'ours", "de célérité"],
-    "mythic": ["de l'étoile déchue", "du wyrm", "des dix tempêtes"],
-    "legendary": ["des anciens rois", "de la première aube", "du dernier héros"]
+    "uncommon": [
+      "de vigueur",
+      "du renard"
+    ],
+    "rare": [
+      "de vigueur",
+      "du renard",
+      "de l'ours",
+      "de célérité"
+    ],
+    "mythic": [
+      "de l'étoile déchue",
+      "du wyrm",
+      "des dix tempêtes"
+    ],
+    "legendary": [
+      "des anciens rois",
+      "de la première aube",
+      "du dernier héros"
+    ]
   },
   "templates": {
-    "common": ["{base} {adjective}", "{base}"],
-    "uncommon": ["{base} {adjective}"],
-    "rare": ["{base} {adjective}", "{base} {suffix}"],
-    "mythic": ["{base} {adjective} {suffix}", "{base} {suffix}"],
-    "legendary": ["{base} {adjective} {suffix}"]
+    "common": [
+      "{base} {adjective}",
+      "{base}"
+    ],
+    "uncommon": [
+      "{base} {adjective}"
+    ],
+    "rare": [
+      "{base} {adjective}",
+      "{base} {suffix}"
+    ],
+    "mythic": [
+      "{base} {adjective} {suffix}",
+      "{base} {suffix}"
+    ],
+    "legendary": [
+      "{base} {adjective} {suffix}"
+    ]
   }
 }

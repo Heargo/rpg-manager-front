@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { PackBusiness } from '../../../core/business/pack.business';
 import { provideTestTranslations } from '../../../../testing/test-providers';
-import { baseWordSources } from '../../../../testing/base-words';
+import { baseItemVocabulary } from '../../../../testing/base-vocabulary';
+import { ItemVocabularyBusiness } from '../../../core/business/item-vocabulary.business';
 import { SandboxCharacterBusiness } from './sandbox-character.business';
 
 async function settle(): Promise<void> {
@@ -20,8 +21,9 @@ describe('SandboxCharacterBusiness', () => {
         provideTestTranslations(),
         {
           provide: PackBusiness,
-          useValue: { ...baseWordSources('en'), packsFor: async () => ['base-en'], $installed: () => [] },
+          useValue: { packsFor: async () => ['base-en'], $installed: () => [] },
         },
+        { provide: ItemVocabularyBusiness, useValue: { vocabulary: async () => baseItemVocabulary('en') } },
       ],
     });
     sandbox = TestBed.inject(SandboxCharacterBusiness);

@@ -1,10 +1,5 @@
 import { KIND_ID } from '../packs/pack-kinds';
-import {
-  EQUIPMENT_SLOTS,
-  ITEM_RARITIES,
-  ItemRarity,
-  ItemType,
-} from '../models/item';
+import { ITEM_RARITIES, ItemRarity } from '../models/item';
 import {
   checkLanguageFile,
   isRecord,
@@ -28,10 +23,17 @@ export interface Noun {
   text: string;
   /** Grammatical gender, for languages where adjectives agree. Defaults to `m`. */
   gender?: Gender;
+  /** A plural noun ("Gants"): its adjectives take the plural form. */
+  plural?: boolean;
 }
 
-/** One form for every gender (English), or one per gender (French). */
-export type Adjective = string | Record<Gender, string>;
+/**
+ * One form for every gender (English), or one per gender (French); `mp` / `fp` are the plural forms when
+ * they are not the singular plus `s`.
+ */
+export type Adjective =
+  | string
+  | ({ m: string; f: string } & { mp?: string; fp?: string });
 
 type PerRarity<T> = Partial<Record<ItemRarity, T[]>>;
 
@@ -58,25 +60,6 @@ export interface ItemWordList {
   templates?: PerRarity<string>;
 }
 
-/** What an item's name is built around: its equipment slot, or its type when it isn't equipment. */
-export const BASE_KEYS = [...EQUIPMENT_SLOTS, 'item', 'consumable'] as const;
-export type BaseKey = (typeof BASE_KEYS)[number];
-
-/**
- * The shape the item generator still draws from (interim, until the generator works on kinds): nouns per slot or
- * type, descriptions per type. Built from an `ItemWordList` by `WordListBusiness`.
- */
-export interface WordList {
-  version: 1;
-  /** Name patterns per rarity, using `{base}`, `{adjective}` and `{suffix}`; word order is the language's. */
-  templates: Record<ItemRarity, string[]>;
-  bases: Record<BaseKey, Noun[]>;
-  adjectives: Record<ItemRarity, Adjective[]>;
-  /** Phrases after the noun ("of Vigor", "des anciens rois"); may be empty for low rarities. */
-  suffixes: Record<ItemRarity, string[]>;
-  descriptions: Record<ItemType, string[]>;
-}
-
 export type ItemWordListValidation =
   | { ok: true; value: ItemWordList; warnings: string[] }
   | { ok: false; errors: string[] };
@@ -90,6 +73,8 @@ const noun: Section = (value, path, context) => {
     value['gender'] !== 'f'
   )
     context.error(`${path}.gender must be "m" or "f"`);
+  else if (value['plural'] !== undefined && typeof value['plural'] !== 'boolean')
+    context.error(`${path}.plural must be true or false`);
 };
 
 export function isAdjective(value: unknown): value is Adjective {
@@ -97,13 +82,15 @@ export function isAdjective(value: unknown): value is Adjective {
     nonEmptyString(value) ||
     (isRecord(value) &&
       nonEmptyString(value['m']) &&
-      nonEmptyString(value['f']))
+      nonEmptyString(value['f']) &&
+      (value['mp'] === undefined || nonEmptyString(value['mp'])) &&
+      (value['fp'] === undefined || nonEmptyString(value['fp'])))
   );
 }
 
 const adjective: Section = (value, path, context) => {
   if (!isAdjective(value))
-    context.error(`${path} must be a string or { "m": …, "f": … }`);
+    context.error(`${path} must be a string or { "m": …, "f": …, "mp"?: …, "fp"?: … }`);
 };
 
 const perRarity = (entry: Section): Section =>

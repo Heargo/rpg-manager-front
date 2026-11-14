@@ -13,8 +13,7 @@
       "descriptions": [
         "Smells worse than it tastes. Mostly.",
         "Best used before the fight, not after.",
-        "A traveller's favourite, sold in every tavern.",
-        "The label is half torn, but the colour looks right."
+        "A traveller's favourite, sold in every tavern."
       ]
     },
     "item": {
@@ -164,84 +163,96 @@
     "glove": {
       "nouns": [
         {
-          "text": "Gloves"
+          "text": "Gloves",
+          "plural": true
         }
       ]
     },
     "gauntlets": {
       "nouns": [
         {
-          "text": "Gauntlets"
+          "text": "Gauntlets",
+          "plural": true
         }
       ]
     },
     "bracers": {
       "nouns": [
         {
-          "text": "Bracers"
+          "text": "Bracers",
+          "plural": true
         }
       ]
     },
     "mittens": {
       "nouns": [
         {
-          "text": "Wraps"
+          "text": "Wraps",
+          "plural": true
         }
       ]
     },
     "greaves": {
       "nouns": [
         {
-          "text": "Greaves"
+          "text": "Greaves",
+          "plural": true
         }
       ]
     },
     "hose": {
       "nouns": [
         {
-          "text": "Leggings"
+          "text": "Leggings",
+          "plural": true
         }
       ]
     },
     "breeches": {
       "nouns": [
         {
-          "text": "Trousers"
+          "text": "Trousers",
+          "plural": true
         }
       ]
     },
     "cuisses": {
       "nouns": [
         {
-          "text": "Tassets"
+          "text": "Tassets",
+          "plural": true
         }
       ]
     },
     "boots": {
       "nouns": [
         {
-          "text": "Boots"
+          "text": "Boots",
+          "plural": true
         }
       ]
     },
     "sandals": {
       "nouns": [
         {
-          "text": "Sandals"
+          "text": "Sandals",
+          "plural": true
         }
       ]
     },
     "sabatons": {
       "nouns": [
         {
-          "text": "Sabatons"
+          "text": "Sabatons",
+          "plural": true
         }
       ]
     },
     "shoes": {
       "nouns": [
         {
-          "text": "Shoes"
+          "text": "Shoes",
+          "plural": true
         }
       ]
     },
@@ -307,7 +318,9 @@
           "text": "Shield"
         }
       ],
-      "descriptions": ["The dents tell the story of {event}."]
+      "descriptions": [
+        "It still bears the marks of {event}."
+      ]
     },
     "buckler": {
       "nouns": [
@@ -398,12 +411,19 @@
       ],
       "descriptions": [
         "Brewed by {maker}, from a recipe nobody will confirm.",
-        "A seller from {place} swears it saved {owner}."
+        "A seller from {place} swears it saved {owner}.",
+        "The label is half torn, but the colour looks right."
       ],
       "names": {
-        "common": ["{base} of {effect}"],
-        "uncommon": ["{base} of {effect}"],
-        "rare": ["{base} of {effect}"]
+        "common": [
+          "{base} of {effect}"
+        ],
+        "uncommon": [
+          "{base} of {effect}"
+        ],
+        "rare": [
+          "{base} of {effect}"
+        ]
       }
     },
     "elixir": {
@@ -413,9 +433,15 @@
         }
       ],
       "names": {
-        "common": ["{base} of {effect}"],
-        "uncommon": ["{base} of {effect}"],
-        "rare": ["{base} of {effect}"]
+        "common": [
+          "{base} of {effect}"
+        ],
+        "uncommon": [
+          "{base} of {effect}"
+        ],
+        "rare": [
+          "{base} of {effect}"
+        ]
       }
     },
     "brew": {
@@ -432,9 +458,15 @@
         }
       ],
       "names": {
-        "common": ["{base} of {effect}"],
-        "uncommon": ["{base} of {effect}"],
-        "rare": ["{base} of {effect}"]
+        "common": [
+          "{base} of {effect}"
+        ],
+        "uncommon": [
+          "{base} of {effect}"
+        ],
+        "rare": [
+          "{base} of {effect}"
+        ]
       }
     },
     "ration": {
@@ -463,25 +495,33 @@
         "A [reliable|fearsome] weapon, forged by {maker}.",
         "They say it once belonged to {owner}.",
         "It survived {event}, and it shows.",
-        "The edge still carries the marks of {material}."
+        "It is shaped from {material}."
       ]
     }
   },
   "tints": {
     "rust": {
       "adjectives": {
-        "common": ["Rusty"]
+        "common": [
+          "Rusty"
+        ]
       },
-      "descriptions": ["Rust has eaten the edges, but the core holds."]
+      "descriptions": [
+        "Rust has eaten the edges, but the core holds."
+      ]
     },
     "steel": {
       "adjectives": {
-        "uncommon": ["Tempered"]
+        "uncommon": [
+          "Tempered"
+        ]
       }
     },
     "silver": {
       "adjectives": {
-        "rare": ["Silvered"]
+        "rare": [
+          "Silvered"
+        ]
       },
       "descriptions": [
         "A pale, almost lunar sheen runs over the whole surface."
@@ -489,56 +529,124 @@
     },
     "gold": {
       "adjectives": {
-        "legendary": ["Sovereign"]
+        "legendary": [
+          "Sovereign"
+        ]
       }
     },
     "fire": {
       "adjectives": {
-        "rare": ["Blazing"]
+        "rare": [
+          "Blazing"
+        ]
       },
       "suffixes": {
-        "rare": ["of Embers"]
+        "rare": [
+          "of Embers"
+        ]
       },
-      "descriptions": ["Still warm to the touch, even after a night outside."]
+      "descriptions": [
+        "Still warm to the touch, even after a night outside."
+      ]
     },
     "ice": {
       "adjectives": {
-        "rare": ["Frosted"]
+        "rare": [
+          "Frosted"
+        ]
       },
       "suffixes": {
-        "rare": ["of the Tides"]
+        "rare": [
+          "of the Tides"
+        ]
       },
-      "descriptions": ["A thin frost never quite melts away."]
+      "descriptions": [
+        "A thin frost never quite melts away."
+      ]
     },
     "arcane": {
       "adjectives": {
-        "rare": ["Arcane"],
-        "mythic": ["Celestial"]
+        "rare": [
+          "Arcane"
+        ],
+        "mythic": [
+          "Celestial"
+        ]
       },
-      "descriptions": ["Pale patterns shift when you aren't looking."]
+      "descriptions": [
+        "Pale patterns shift when you aren't looking."
+      ]
     },
     "shadow": {
       "adjectives": {
-        "mythic": ["Phantom"]
+        "mythic": [
+          "Phantom"
+        ]
       },
       "suffixes": {
-        "mythic": ["of the Silent Moon"],
-        "legendary": ["of the Endless Night"]
+        "mythic": [
+          "of the Silent Moon"
+        ],
+        "legendary": [
+          "of the Endless Night"
+        ]
       },
-      "descriptions": ["Light seems to get lost in it."]
+      "descriptions": [
+        "Light seems to get lost in it."
+      ]
     }
   },
   "adjectives": {
-    "common": ["Worn", "Plain", "Simple", "Patched", "Sturdy"],
-    "uncommon": ["Fine", "Polished", "Reinforced", "Keen", "Balanced"],
-    "rare": ["Enchanted", "Runed", "Gleaming", "Masterwork"],
-    "mythic": ["Dread", "Starforged", "Ancient", "Wyrmscale"],
-    "legendary": ["Eternal", "Godforged", "Fabled", "Worldbreaker", "Undying"]
+    "common": [
+      "Worn",
+      "Plain",
+      "Simple",
+      "Patched",
+      "Sturdy"
+    ],
+    "uncommon": [
+      "Fine",
+      "Polished",
+      "Reinforced",
+      "Keen",
+      "Balanced"
+    ],
+    "rare": [
+      "Enchanted",
+      "Runed",
+      "Gleaming",
+      "Masterwork"
+    ],
+    "mythic": [
+      "Dread",
+      "Starforged",
+      "Ancient",
+      "Wyrmscale"
+    ],
+    "legendary": [
+      "Eternal",
+      "Godforged",
+      "Fabled",
+      "Worldbreaker",
+      "Undying"
+    ]
   },
   "suffixes": {
-    "uncommon": ["of Vigor", "of the Fox"],
-    "rare": ["of Vigor", "of the Fox", "of the Bear", "of Swiftness"],
-    "mythic": ["of the Fallen Star", "of the Wyrm", "of Ten Storms"],
+    "uncommon": [
+      "of Vigor",
+      "of the Fox"
+    ],
+    "rare": [
+      "of Vigor",
+      "of the Fox",
+      "of the Bear",
+      "of Swiftness"
+    ],
+    "mythic": [
+      "of the Fallen Star",
+      "of the Wyrm",
+      "of Ten Storms"
+    ],
     "legendary": [
       "of the Ancient Kings",
       "of the First Dawn",
@@ -546,10 +654,23 @@
     ]
   },
   "templates": {
-    "common": ["{adjective} {base}", "{base}"],
-    "uncommon": ["{adjective} {base}"],
-    "rare": ["{adjective} {base}", "{base} {suffix}"],
-    "mythic": ["{adjective} {base} {suffix}", "{base} {suffix}"],
-    "legendary": ["{adjective} {base} {suffix}"]
+    "common": [
+      "{adjective} {base}",
+      "{base}"
+    ],
+    "uncommon": [
+      "{adjective} {base}"
+    ],
+    "rare": [
+      "{adjective} {base}",
+      "{base} {suffix}"
+    ],
+    "mythic": [
+      "{adjective} {base} {suffix}",
+      "{base} {suffix}"
+    ],
+    "legendary": [
+      "{adjective} {base} {suffix}"
+    ]
   }
 }

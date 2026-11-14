@@ -12,6 +12,8 @@ export interface PhraseContext {
   params?: Record<string, readonly string[]>;
   /** Picks the option of `{g:masc|fem}`. Defaults to `m`. */
   gender?: Gender;
+  /** Picks the plural option of `{g:…}`. */
+  plural?: boolean;
   /** Replacements for `{base}`, `{adjective}` and `{suffix}`. */
   values?: Partial<Record<ValueName, string>>;
 }
@@ -21,7 +23,7 @@ type Node =
   | { kind: 'variant'; options: Node[][] }
   | { kind: 'param'; name: string }
   | { kind: 'value'; name: ValueName }
-  | { kind: 'gender'; masculine: string; feminine: string };
+  | { kind: 'gender'; options: string[] };
 
 interface Parsed {
   nodes: Node[];
@@ -103,11 +105,11 @@ function parse(phrase: string): Parsed {
         return undefined;
       }
       const options = content.slice(colon + 1).split('|');
-      if (options.length !== 2) {
-        errors.push(`{g:...} needs exactly two options, got ${options.length}`);
+      if (options.length !== 2 && options.length !== 4) {
+        errors.push(`{g:...} needs two or four options, got ${options.length}`);
         return undefined;
       }
-      return { kind: 'gender', masculine: options[0], feminine: options[1] };
+      return { kind: 'gender', options };
     }
     if (isValueName(content)) return { kind: 'value', name: content };
     if (!PARAM_NAME.test(content)) {
@@ -184,7 +186,7 @@ function render(
         part = render(source, pick(source, node.options), context, depth);
         break;
       case 'gender':
-        part = (context.gender ?? 'm') === 'f' ? node.feminine : node.masculine;
+        part = genderOption(node.options, context);
         break;
       case 'value':
         part = context.values?.[node.name];
@@ -202,4 +204,17 @@ function render(
     out += part;
   }
   return out;
+}
+
+/** The plural of a singular form: an `s`, unless it already ends in `s` or `x`. */
+export function pluralForm(text: string): string {
+  return /[sx]$/.test(text) ? text : `${text}s`;
+}
+
+function genderOption(options: readonly string[], context: PhraseContext): string {
+  const feminine = (context.gender ?? 'm') === 'f';
+  if (options.length === 4)
+    return options[(context.plural ? 2 : 0) + (feminine ? 1 : 0)];
+  const form = feminine ? options[1] : options[0];
+  return context.plural ? pluralForm(form) : form;
 }

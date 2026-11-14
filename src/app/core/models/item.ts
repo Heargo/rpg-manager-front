@@ -35,4 +35,8 @@ export interface ItemDraft {
   slot: ItemSlot;
   price: number;
   modifiers: ItemModifier[];
+  /** The kind the item was drawn from, when it has one. */
+  kind?: string;
+  /** The tints of the adjective, then of the suffix, that named the item. */
+  tints?: string[];
 }

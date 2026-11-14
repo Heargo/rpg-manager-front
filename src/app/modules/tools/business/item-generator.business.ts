@@ -1,8 +1,6 @@
 import { computed, inject, Injectable, resource, signal } from '@angular/core';
 import { LanguageBusiness } from '../../../core/business/language.business';
-import { WordListBusiness } from '../../../core/business/word-list.business';
-import { PackChoiceBusiness } from '../../../core/business/pack-choice.business';
-import { RANDOM_PACK } from '../../../core/packs/pack-choice';
+import { ItemVocabularyBusiness } from '../../../core/business/item-vocabulary.business';
 import { generateItem } from '../../../core/generators/item-generator';
 import {
   createSeed,
@@ -24,18 +22,14 @@ export const SEED_MAX_LENGTH = 32;
  */
 @Injectable({ providedIn: 'root' })
 export class ItemGeneratorBusiness {
-  private readonly words = inject(WordListBusiness);
+  private readonly vocabulary = inject(ItemVocabularyBusiness);
   private readonly language = inject(LanguageBusiness);
-  private readonly packChoice = inject(PackChoiceBusiness);
   private readonly sandbox = inject(SandboxWorldBusiness);
 
   readonly $rarity = signal<ItemRarity | null>(null);
   readonly $type = signal<ItemType | null>(null);
   readonly $slot = signal<EquipmentSlot | null>(null);
   readonly $seed = signal(createSeed());
-  /** A pack id, or `'random'` to let the seed pick among the packs with items. */
-  readonly $pack = signal<string>(RANDOM_PACK);
-  readonly $packOptions = this.packChoice.options('items');
   /** The sandbox world's attributes, which item modifiers are drawn on. */
   readonly $attributeNames = computed(() =>
     this.sandbox.$world().attributes.map((attribute) => attribute.name),
@@ -52,16 +46,12 @@ export class ItemGeneratorBusiness {
       type: this.$type() ?? undefined,
       slot: (this.$slotEnabled() && this.$slot()) || undefined,
       lang: this.language.$language(),
-      pack: this.$pack(),
       attributes: this.$attributeNames(),
     }),
-    loader: async ({ params: { seed, lang, pack, ...options } }) =>
+    loader: async ({ params: { seed, lang: _lang, ...options } }) =>
       generateItem(
         seededRandomSource(seed),
-        await this.words.itemWords(
-          lang,
-          await this.packChoice.resolve('items', pack, seed),
-        ),
+        await this.vocabulary.vocabulary(),
         options,
       ),
   });
@@ -81,23 +71,12 @@ export class ItemGeneratorBusiness {
   async generateFor(
     seed: string,
     attributes: readonly string[],
-    pack: string = RANDOM_PACK,
   ): Promise<ItemDraft> {
     return generateItem(
       seededRandomSource(seed),
-      await this.words.itemWords(
-        undefined,
-        await this.packChoice.resolve('items', pack, seed),
-      ),
-      {
-        attributes,
-      },
+      await this.vocabulary.vocabulary(),
+      { attributes },
     );
-  }
-
-  /** The pack a seed draws items from for a choice. */
-  packFor(seed: string, pack: string): Promise<string> {
-    return this.packChoice.resolve('items', pack, seed);
   }
 
   reroll(): void {

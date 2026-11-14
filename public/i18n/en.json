@@ -540,6 +540,8 @@
         "slot": "A slot is needed for equipment and only for equipment.",
         "price": "The price must be 0 or more.",
         "modifiers": "Modifiers must be whole numbers on the attributes of this world.",
+        "kind": "The kind must be text.",
+        "tints": "The tints must be a list of text.",
         "json": "This is not valid JSON for an item."
       },
       "randomImage": "Random image"

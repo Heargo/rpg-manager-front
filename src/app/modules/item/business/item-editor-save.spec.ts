@@ -1,7 +1,8 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
-import { baseWordSources } from '../../../../testing/base-words';
+import { baseItemVocabulary } from '../../../../testing/base-vocabulary';
+import { ItemVocabularyBusiness } from '../../../core/business/item-vocabulary.business';
 import { provideTestTranslations } from '../../../../testing/test-providers';
 import { PackBusiness } from '../../../core/business/pack.business';
 import { SandboxCatalogueBusiness } from '../../tools/business/sandbox-catalogue.business';
@@ -32,7 +33,7 @@ describe('saving an item from the editor', () => {
     TestBed.configureTestingModule({
       providers: [
         provideTestTranslations(),
-        { provide: PackBusiness, useValue: { ...baseWordSources('en'), packsFor: async () => ['base-en'], $installed: () => [] } },
+        { provide: PackBusiness, useValue: { packsFor: async () => ['base-en'], $installed: () => [] } }, { provide: ItemVocabularyBusiness, useValue: { vocabulary: async () => baseItemVocabulary('en') } },
       ],
     });
   });

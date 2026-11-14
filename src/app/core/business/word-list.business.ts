@@ -5,70 +5,16 @@ import {
   isClassWordList,
   isSkillWordList,
 } from '../generators/pack-word-lists';
-import { validateCommonTexts } from '../generators/common-texts';
-import { toWordList } from '../generators/item-words-adapter';
-import { validateItemWordList, WordList } from '../generators/word-list';
 import { basePackId, PackBusiness } from './pack.business';
 import { LanguageBusiness } from './language.business';
 
 const FALLBACK_BASE = 'base-en';
 
-/** Item word lists for the generators, per pack, cached; falls back to the Base of the language, then to base-en when a list is missing or invalid. */
+/** Skill and class word lists for the generators, per pack, cached; falls back to the Base of the language, then to base-en when a list is missing or invalid. */
 @Injectable({ providedIn: 'root' })
 export class WordListBusiness {
   private readonly service = inject(PackBusiness);
   private readonly languageBusiness = inject(LanguageBusiness);
-  private readonly cache = new Map<string, Promise<WordList>>();
-
-  /** Word list for the given language (the active one by default). */
-  itemWords(
-    lang: string = this.languageBusiness.$language(),
-    packId: string = basePackId(lang),
-  ): Promise<WordList> {
-    const key = packId;
-    let words = this.cache.get(key);
-    if (!words) {
-      words = this.load(lang, packId);
-      this.cache.set(key, words);
-      // A failed load shouldn't stay cached: retry next time.
-      words.catch(() => this.cache.delete(key));
-    }
-    return words;
-  }
-
-  private async load(lang: string, packId: string): Promise<WordList> {
-    try {
-      const params = await this.params(packId);
-      const result = validateItemWordList(
-        await this.service.wordList('items', packId),
-        Object.keys(params),
-      );
-      if (result.ok) {
-        const kinds = await this.service.itemKinds(packId);
-        return toWordList(result.value, kinds.own, kinds.fallback, params);
-      }
-      console.warn(`Item word list "${lang}" is invalid:`, result.errors);
-    } catch (error) {
-      console.warn(`Item word list "${lang}" could not be loaded:`, error);
-    }
-    if (packId !== basePackId(lang)) return this.itemWords(lang);
-    if (packId === FALLBACK_BASE)
-      throw new Error('The default item word list is unavailable');
-    return this.itemWords('en', FALLBACK_BASE);
-  }
-
-  /** The params of the pack's `common.json`; none when it has no valid one. */
-  private async params(packId: string): Promise<Record<string, string[]>> {
-    try {
-      const result = validateCommonTexts(
-        await this.service.commonTexts(packId),
-      );
-      return result.ok ? (result.value.params ?? {}) : {};
-    } catch {
-      return {};
-    }
-  }
-
   private readonly skillCache = new Map<string, Promise<SkillWordList>>();
   private readonly classCache = new Map<string, Promise<ClassWordList>>();
 

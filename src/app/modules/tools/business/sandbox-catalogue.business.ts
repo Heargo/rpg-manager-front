@@ -6,7 +6,7 @@ import {
   resource,
 } from '@angular/core';
 import { LanguageBusiness } from '../../../core/business/language.business';
-import { WordListBusiness } from '../../../core/business/word-list.business';
+import { ItemVocabularyBusiness } from '../../../core/business/item-vocabulary.business';
 import { seededRandomSource } from '../../../core/generators/random-source';
 import {
   ItemInput,
@@ -24,7 +24,7 @@ import { Item } from '../../world/models/world';
 @Injectable({ providedIn: 'root' })
 export class SandboxCatalogueBusiness {
   private readonly sandbox = inject(SandboxWorldBusiness);
-  private readonly words = inject(WordListBusiness);
+  private readonly words = inject(ItemVocabularyBusiness);
   private readonly language = inject(LanguageBusiness);
 
   private readonly defaults = resource({
@@ -36,7 +36,7 @@ export class SandboxCatalogueBusiness {
       const barIds = [world.barAttributes.life, world.barAttributes.mana];
       return generateStarterItems(
         seededRandomSource(world.id),
-        await this.words.itemWords(lang),
+        await this.words.vocabulary(),
         {
           attributes: world.attributes.map((attribute) => attribute.name),
           barAttributes: world.attributes

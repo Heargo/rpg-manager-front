@@ -18,7 +18,6 @@ import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
-import { PackChoiceBusiness } from '../../../../core/business/pack-choice.business';
 import { ImageBusiness } from '../../../../core/business/image.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
@@ -50,7 +49,7 @@ const EMPTY_DRAFT: ItemDraft = {
 
 function toDraft(item: Item | undefined): ItemDraft {
   if (!item) return EMPTY_DRAFT;
-  const { name, description, rarity, type, slot, price, modifiers } = item;
+  const { name, description, rarity, type, slot, price, modifiers, kind, tints } = item;
   return {
     name,
     description,
@@ -59,6 +58,8 @@ function toDraft(item: Item | undefined): ItemDraft {
     slot,
     price,
     modifiers: modifiers.map((modifier) => ({ ...modifier })),
+    ...(kind !== undefined ? { kind } : {}),
+    ...(tints !== undefined ? { tints: [...tints] } : {}),
   };
 }
 
@@ -264,20 +265,6 @@ function toDraft(item: Item | undefined): ItemDraft {
                   (input)="seed.set($any($event.target).value)"
                 />
               </div>
-              <div class="field">
-                <label for="item-pack">{{
-                  'packs.choiceLabel' | translate
-                }}</label>
-                <p-select
-                  inputId="item-pack"
-                  data-field="pack"
-                  [options]="packOptions()"
-                  optionLabel="label"
-                  optionValue="value"
-                  [ngModel]="pack()"
-                  (ngModelChange)="pack.set($event ?? 'random')"
-                />
-              </div>
               <button
                 pButton
                 type="button"
@@ -372,7 +359,6 @@ function toDraft(item: Item | undefined): ItemDraft {
 })
 export class ItemEditorComponent {
   private readonly editor = inject(ItemEditorBusiness);
-  private readonly packChoice = inject(PackChoiceBusiness);
   private readonly images = inject(ImageBusiness);
   private readonly randomImages = inject(RandomItemImageBusiness);
   private readonly language = inject(LanguageBusiness);
@@ -396,8 +382,6 @@ export class ItemEditorComponent {
   });
   protected readonly imageId = linkedSignal(() => this.item()?.imageId);
   protected readonly seed = signal(this.editor.newSeed());
-  protected readonly pack = signal('random');
-  protected readonly packOptions = this.packChoice.options('items');
   protected readonly drawingImage = signal(false);
 
   protected readonly attributeNames = computed(() =>
@@ -467,26 +451,21 @@ export class ItemEditorComponent {
     const draft = await this.editor.generate(
       this.seed(),
       this.attributeNames(),
-      this.pack(),
     );
     this.setDraft(draft);
-    await this.drawImage(
-      this.seed(),
-      await this.editor.packFor(this.seed(), this.pack()),
-    );
+    await this.drawImage(this.seed());
   }
 
   /** A new random image for the item as it is now (its name, type and slot pick the sprite). */
-  protected async randomImage(): Promise<void> {
-    const seed = this.editor.newSeed();
-    return this.drawImage(seed, await this.editor.packFor(seed, this.pack()));
+  protected randomImage(): Promise<void> {
+    return this.drawImage(this.editor.newSeed());
   }
 
   /** Keeps the current image when no sprite can be drawn (offline, nothing bundled). */
-  private async drawImage(seed: string, pack?: string): Promise<void> {
+  private async drawImage(seed: string): Promise<void> {
     this.drawingImage.set(true);
     try {
-      this.imageId.set(await this.randomImages.create(this.draft(), seed, pack));
+      this.imageId.set(await this.randomImages.create(this.draft(), seed));
     } catch {
       /* the item keeps its image */
     } finally {

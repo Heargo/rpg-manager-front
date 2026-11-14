@@ -3,7 +3,8 @@ import { routesTools } from '../../tools.routes';
 import { settle } from '../../../../../testing/game-device';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { PackBusiness } from '../../../../core/business/pack.business';
-import { baseWordSources } from '../../../../../testing/base-words';
+import { baseItemVocabulary } from '../../../../../testing/base-vocabulary';
+import { ItemVocabularyBusiness } from '../../../../core/business/item-vocabulary.business';
 import { CombatSandboxToolPageComponent } from './combat-sandbox-tool-page.component';
 
 /**
@@ -19,8 +20,9 @@ describe('CombatSandboxToolPageComponent', () => {
         ...TEST_PROVIDERS,
         {
           provide: PackBusiness,
-          useValue: { ...baseWordSources('en'), packsFor: async () => ['base-en'], $installed: () => [] },
+          useValue: { packsFor: async () => ['base-en'], $installed: () => [] },
         },
+        { provide: ItemVocabularyBusiness, useValue: { vocabulary: async () => baseItemVocabulary('en') } },
       ],
     });
     const fixture = TestBed.createComponent(CombatSandboxToolPageComponent);

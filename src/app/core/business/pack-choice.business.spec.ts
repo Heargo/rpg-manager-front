@@ -11,11 +11,11 @@ import { WorldSessionBusiness } from '../../modules/world/business/world-session
 import { PackChoiceContent, PackChoiceBusiness } from './pack-choice.business';
 import { LanguageBusiness } from './language.business';
 import { PackBusiness } from './pack.business';
-import { WordListBusiness } from './word-list.business';
+import { ItemVocabularyBusiness } from './item-vocabulary.business';
 
 describe('generators use the packs of the open world', () => {
   let packs: PackBusiness;
-  let words: WordListBusiness;
+  let vocabulary: ItemVocabularyBusiness;
   let choice: PackChoiceBusiness;
 
   beforeEach(async () => {
@@ -32,7 +32,7 @@ describe('generators use the packs of the open world', () => {
     });
     TestBed.configureTestingModule({ providers: [provideTestTranslations(), provideExtraPack(service)] });
     packs = TestBed.inject(PackBusiness);
-    words = TestBed.inject(WordListBusiness);
+    vocabulary = TestBed.inject(ItemVocabularyBusiness);
     choice = TestBed.inject(PackChoiceBusiness);
     TestBed.inject(LanguageBusiness).setLanguage('fr');
     await packs.enable('extra');
@@ -54,7 +54,7 @@ describe('generators use the packs of the open world', () => {
   it('without a world, gives the Base of the app language alone', async () => {
     expect(await spritePacks()).toEqual(['base-fr']);
     await selectValues('items', ['random', 'base-fr']);
-    expect((await words.itemWords()).bases.weapon1[0].text).toBe('Épée');
+    expect((await vocabulary.vocabulary()).nouns('sword')[0].text).toBe('Épée');
   });
 
   it('without a world, a downloaded pack stays out even in its own language', async () => {
@@ -69,11 +69,10 @@ describe('generators use the packs of the open world', () => {
     await selectValues('items', ['random', 'base-en', 'extra']);
   });
 
-  it('with a world, gives the word list of a pack in another language than the app', async () => {
+  it('with a world, pools the item vocabulary of its packs, the later pack winning', async () => {
     await openWorldWithPacks(['base-en', 'extra']);
 
-    expect((await words.itemWords('en', 'extra')).bases.weapon1[0].text).toBe('Zircon');
-    expect((await words.itemWords('fr', 'base-en')).bases.weapon1[0].text).toBe('Sword');
+    expect((await vocabulary.vocabulary()).nouns('sword').map((n) => n.text)).toEqual(['Zircon']);
   });
 
   it('skips an active pack that is not installed', async () => {

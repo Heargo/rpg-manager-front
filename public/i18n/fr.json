@@ -540,6 +540,8 @@
         "slot": "Un emplacement est requis pour l'équipement, et seulement pour lui.",
         "price": "Le prix doit être de 0 ou plus.",
         "modifiers": "Les modificateurs sont des entiers sur les attributs de ce monde.",
+        "kind": "Le type précis doit être du texte.",
+        "tints": "Les teintes doivent être une liste de textes.",
         "json": "Ce JSON n'est pas un objet valide."
       },
       "randomImage": "Image aléatoire"

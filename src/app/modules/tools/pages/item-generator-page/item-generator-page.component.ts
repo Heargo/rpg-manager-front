@@ -113,19 +113,6 @@ import {
               spellcheck="false"
             />
           </div>
-          <div class="field">
-            <label for="gen-pack">{{ 'packs.choiceLabel' | translate }}</label>
-            <p-select
-              inputId="gen-pack"
-              data-field="pack"
-              [options]="generator.$packOptions()"
-              optionLabel="label"
-              optionValue="value"
-              [ngModel]="generator.$pack()"
-              [ngModelOptions]="{ standalone: true }"
-              (ngModelChange)="generator.$pack.set($event ?? 'random')"
-            />
-          </div>
           <p-button
             icon="pi pi-refresh"
             [label]="'tools.itemGenerator.reroll' | translate"
