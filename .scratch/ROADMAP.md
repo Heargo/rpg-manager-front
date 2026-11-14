@@ -236,6 +236,6 @@ Tickets in `combat-ux-2/` (D), from trying C01–C09. Bugs first, the dice-scree
 | # | Ticket | Blocked by |
 | - | --- | --- |
 | 104 | **D01** NPC tokens can't be dragged before starting (done) | none |
-| 105 | **D02** Recap banner above the dice screen, with bubbles (D03 merged in) | none |
+| 105 | **D02** Recap banner above the dice screen, with bubbles (D03 merged in) (done) | none |
 | 106 | **D04** GM decides on the dice screen; it closes for everyone | D02 |
 | 108 | **D05** Combat panel spacing, subtler reach area | none |

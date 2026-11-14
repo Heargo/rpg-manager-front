@@ -1,3 +1,4 @@
+import { CombatSide } from '../../combat/models/combat';
 /** A roll the host drew for someone at the table; everyone replays it from the seed and lands on the values. */
 export interface SharedRoll {
   id: string;
@@ -12,11 +13,22 @@ export interface SharedRoll {
   combat?: SharedCombatRoll;
 }
 
+/** Who takes part in a combat roll: the name, the side and the public portrait id (never attributes). */
+export interface CombatRollWho {
+  name: string;
+  side: CombatSide;
+  portraitId?: string;
+}
+
+/** Stacking of the dice overlay, and of the combat recap banner that must stay above it. */
+export const DICE_OVERLAY_Z_INDEX = 1200;
+export const COMBAT_BANNER_Z_INDEX = 1300;
+
 /** What a combat action adds to its shared roll. */
 export interface SharedCombatRoll {
-  casterName: string;
+  caster: CombatRollWho;
   skillName: string;
-  targetNames: string[];
+  targets: CombatRollWho[];
   /** The results waiting for the GM (none when the GM validation is off). */
   pendingIds: string[];
   total: number;

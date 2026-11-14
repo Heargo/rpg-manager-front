@@ -271,13 +271,19 @@ export class SandboxCombatBusiness implements CombatTable {
         world.combat,
       );
       if (!result.ok) throw new Error(`combat.errors.${result.error}`);
-      const roll = skillUseRoll(enc, result.encounter, use, world.skills);
+      const roll = skillUseRoll(
+        enc,
+        result.encounter,
+        use,
+        world.skills,
+        world,
+      );
       if (roll)
         this.rolls.present({
           id: crypto.randomUUID(),
           by: {
             playerId: this.profile.$profile().playerId,
-            name: roll.combat.casterName,
+            name: roll.combat.caster.name,
           },
           count: roll.values.length,
           sides: roll.sides,

@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ButtonModule } from '@openng/optimus-ui/button';
+import { DICE_OVERLAY_Z_INDEX } from '../../models/dice-api';
 import { DiceRollBusiness } from '../../business/dice-roll.business';
 
 type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
@@ -78,7 +79,7 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
     .overlay {
       position: fixed;
       inset: 0;
-      z-index: 1200;
+      z-index: ${DICE_OVERLAY_Z_INDEX};
       background: color-mix(in srgb, var(--p-surface-900) 35%, transparent);
     }
     canvas {

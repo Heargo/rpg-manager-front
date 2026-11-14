@@ -11,7 +11,7 @@ import {
   DiceRollBusiness,
   TABLE_ROLL_FRESH_MS,
 } from '../../dice/business/dice-roll.business';
-import { SharedRoll } from '../../dice/models/dice-api';
+import { CombatRollWho, SharedRoll } from '../../dice/models/dice-api';
 import { CombatBusiness } from './combat.business';
 
 /** A roll that never reached the end of its throw (no 3D, slow device) counts as landed after this long. */
@@ -20,9 +20,9 @@ export const LANDING_FALLBACK_MS = 6000;
 export const BANNER_FADE_MS = 4000;
 
 export interface CombatBanner {
-  casterName: string;
+  caster: CombatRollWho;
   skillName: string;
-  targetNames: string[];
+  targets: CombatRollWho[];
   /** Only once the dice have landed on this device. */
   result?: { values: number[]; total: number; success: boolean };
 }
@@ -56,9 +56,9 @@ export class CombatRollsBusiness {
     if (!followed || followed.gone) return null;
     const { combat, values } = followed.roll;
     return {
-      casterName: combat.casterName,
+      caster: combat.caster,
       skillName: combat.skillName,
-      targetNames: combat.targetNames,
+      targets: combat.targets,
       ...(followed.landed
         ? {
             result: { values, total: combat.total, success: combat.success },

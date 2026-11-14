@@ -605,7 +605,12 @@ describe('combat (GM + players)', () => {
 
       it('has the placement error and hint in English and French', () => {
         for (const json of [en, fr]) {
-          const combatKeys = (json as unknown as Record<string, Record<string, Record<string, unknown>>>)['combat'];
+          const combatKeys = (
+            json as unknown as Record<
+              string,
+              Record<string, Record<string, unknown>>
+            >
+          )['combat'];
           expect(typeof combatKeys['errors']['badPositions']).toBe('string');
           expect(typeof combatKeys['start']['placeHint']).toBe('string');
         }
@@ -915,7 +920,11 @@ describe('combat (GM + players)', () => {
           (json as Record<string, Record<string, Record<string, unknown>>>)[
             'combat'
           ]['errors'][key];
-        for (const key of ['notConsumable', 'unknownItem', 'initiativeNotTyped']) {
+        for (const key of [
+          'notConsumable',
+          'unknownItem',
+          'initiativeNotTyped',
+        ]) {
           expect(typeof lookup(en, key), `en ${key}`).toBe('string');
           expect(typeof lookup(fr, key), `fr ${key}`).toBe('string');
         }
@@ -1004,12 +1013,12 @@ describe('combat (GM + players)', () => {
         code: 'rejected',
         message: 'combat.errors.initiativeNotTyped',
       });
-      await expect(
-        combat(gm).initiative(goblinId(), 20),
-      ).rejects.toMatchObject({
-        code: 'rejected',
-        message: 'combat.errors.initiativeNotTyped',
-      });
+      await expect(combat(gm).initiative(goblinId(), 20)).rejects.toMatchObject(
+        {
+          code: 'rejected',
+          message: 'combat.errors.initiativeNotTyped',
+        },
+      );
       expect(named(gm, 'Goblin').initiative).toBe(6);
     });
   });
@@ -1074,15 +1083,21 @@ describe('combat (GM + players)', () => {
       await startAll();
 
       expect(named(gm, 'Goblin').initiative).toBeUndefined();
-      expect(state(ada).combatants.map((c) => c.name)).toEqual(['Ada', 'Bob', 'Goblin']);
+      expect(state(ada).combatants.map((c) => c.name)).toEqual([
+        'Ada',
+        'Bob',
+        'Goblin',
+      ]);
       await expect(combat(ada).initiative(adaId(), 15)).rejects.toMatchObject({
         code: 'rejected',
         message: 'combat.errors.initiativeNotTyped',
       });
-      await expect(combat(gm).initiative(goblinId(), 20)).rejects.toMatchObject({
-        code: 'rejected',
-        message: 'combat.errors.initiativeNotTyped',
-      });
+      await expect(combat(gm).initiative(goblinId(), 20)).rejects.toMatchObject(
+        {
+          code: 'rejected',
+          message: 'combat.errors.initiativeNotTyped',
+        },
+      );
     });
 
     it('shows the free order mode to every device when the initiative step is off', async () => {
@@ -1098,7 +1113,11 @@ describe('combat (GM + players)', () => {
       await startAll();
 
       for (const device of [gm, ada, bob])
-        expect(state(device).combatants.map((c) => c.actions)).toEqual([[], [], []]);
+        expect(state(device).combatants.map((c) => c.actions)).toEqual([
+          [],
+          [],
+          [],
+        ]);
     });
 
     it('applies a skill at once when GM validation is off: no pending result, the target loses life, the cost is taken', async () => {
@@ -1107,10 +1126,12 @@ describe('combat (GM + players)', () => {
 
       await fireballAtGoblin();
 
-      for (const device of [gm, ada, bob]) expect(state(device).pending).toHaveLength(0);
+      for (const device of [gm, ada, bob])
+        expect(state(device).pending).toHaveLength(0);
       expect(named(gm, 'Goblin').life?.current).toBe(5);
       // Players only see an enemy's life bar (world visibility rules).
-      for (const device of [ada, bob]) expect(named(device, 'Goblin').lifeBar).toEqual({ percent: 50 });
+      for (const device of [ada, bob])
+        expect(named(device, 'Goblin').lifeBar).toEqual({ percent: 50 });
       expect(current('ada', 'Mana')).toBe(7);
     });
 
@@ -1177,9 +1198,9 @@ describe('combat (GM + players)', () => {
           sides: 1,
           values: [1],
           combat: {
-            casterName: 'Ada',
+            caster: { name: 'Ada', side: 'party' },
             skillName: 'Fireball',
-            targetNames: ['Goblin'],
+            targets: [{ name: 'Goblin', side: 'enemy' }],
             pendingIds: [state(gm).pending[0].id],
             total: 1,
             success: true,
@@ -1243,6 +1264,7 @@ describe('combat (GM + players)', () => {
         ...goblinNpc,
         id: undefined,
         name: 'Orc',
+        portraitId: 'portrait-orc',
         skills: [{ skillId: fireballId, level: 1 }],
       });
       await combat(gm).start({
@@ -1263,20 +1285,30 @@ describe('combat (GM + players)', () => {
         by: { name: 'Gm' },
         values: [1],
         combat: {
-          casterName: 'Orc',
+          caster: { name: 'Orc', side: 'enemy', portraitId: 'portrait-orc' },
           skillName: 'Fireball',
-          targetNames: ['Ada'],
+          targets: [{ name: 'Ada', side: 'party' }],
           total: 1,
         },
       });
-      expect(Object.keys((roll as { combat?: object }).combat ?? {}).sort()).toEqual([
-        'casterName',
+      expect(
+        Object.keys((roll as { combat?: object }).combat ?? {}).sort(),
+      ).toEqual([
+        'caster',
         'pendingIds',
         'skillName',
         'success',
-        'targetNames',
+        'targets',
         'total',
       ]);
+      const shared = (roll as unknown as { combat: { caster: object; targets: object[] } })
+        .combat;
+      for (const who of [shared.caster, ...shared.targets])
+        expect(
+          Object.keys(who)
+            .filter((k) => k !== 'portraitId')
+            .sort(),
+        ).toEqual(['name', 'side']);
     });
   });
 });

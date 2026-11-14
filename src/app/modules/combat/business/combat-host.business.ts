@@ -301,6 +301,7 @@ export class CombatHostBusiness {
               targetIds: list(p['targetIds'], text, 20),
             },
             world.skills,
+            world,
           );
           const characterId = enc.combatants.find(
             (c) => c.id === text(p['casterId']),

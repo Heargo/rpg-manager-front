@@ -6,7 +6,7 @@ import { CombatRollsBusiness } from './combat-rolls.business';
 /**
  * Contract: `CombatRollsBusiness` (root, `CombatRollsBusiness` listed in `GAME_DEVICE` of `src/testing/game-device.ts`) follows the latest combat
  * shared roll of `DiceRollBusiness.$tableRolls()` (the ones carrying `combat`) on its own device.
- * - `$banner()`: null, or `{ casterName, skillName, targetNames, result? }`; `result` (`{ values, total, success }`) only once the roll has landed.
+ * - `$banner()`: null, or `{ caster, skillName, targets, result? }` (`caster` and each target: `{ name, side, portraitId? }`); `result` (`{ values, total, success }`) only once the roll has landed.
  * - `isLanding(pendingId)`: true from the roll's arrival until it landed. Landed = `DiceRollBusiness` shows that roll id and `$settled()`,
  *   or 6 s after the roll arrived. A pending id that belongs to no roll is not landing.
  * - The banner stays while any of the roll's `pendingIds` is still pending, then goes 4 s after the last one is resolved; with no pending
@@ -72,9 +72,9 @@ describe('CombatRollsBusiness', () => {
 
     for (const d of [table.gm, table.ada, table.bob]) {
       expect(rollsOf(d).$banner()).toEqual({
-        casterName: 'Ada',
+        caster: { name: 'Ada', side: 'party' },
         skillName: 'Fireball',
-        targetNames: ['Goblin'],
+        targets: [{ name: 'Goblin', side: 'enemy' }],
       });
     }
     expect(rollsOf(table.gm).isLanding(pendingId())).toBe(true);
