@@ -40,6 +40,7 @@ import { CombatGmPanelComponent } from '../../../combat/components/combat-gm-pan
 import { CombatPlayerViewComponent } from '../../../combat/components/combat-player-view/combat-player-view.component';
 import { CharacterSummaryComponent } from '../../../character/components/character-summary/character-summary.component';
 import { MerchantShopComponent } from '../../../npc/components/merchant-shop/merchant-shop.component';
+import { CombatRollDecisionComponent } from '../../../combat/components/combat-roll-decision/combat-roll-decision.component';
 import { DiceOverlayComponent } from '../../../dice/components/dice-overlay/dice-overlay.component';
 import { DiceRollerComponent } from '../../../dice/components/dice-roller/dice-roller.component';
 import { RoomBusiness } from '../../../room/business/room.business';
@@ -95,6 +96,7 @@ function readToolsOpen(): string[] {
     CombatPlayerViewComponent,
     DiceRollerComponent,
     DiceOverlayComponent,
+    CombatRollDecisionComponent,
   ],
   templateUrl: './table-page.component.html',
   styleUrl: './table-page.component.scss',

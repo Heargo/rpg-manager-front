@@ -109,6 +109,8 @@ export interface EncounterState {
 }
 
 export interface Encounter extends EncounterState {
+  /** The combat roll the GM closed for everyone (not an undo step). */
+  closedRollId?: string;
   /** The state before the last change, for one-step undo. */
   previous?: EncounterState;
 }
@@ -152,6 +154,8 @@ export interface CombatView {
   combatants: CombatantView[];
   pending: PendingResultView[];
   log: CombatLogEntry[];
+  /** The combat roll the GM closed for everyone. */
+  closedRollId?: string;
 }
 
 export const COMBAT_ROUTES = {
@@ -162,6 +166,7 @@ export const COMBAT_ROUTES = {
   edit: 'combat/edit',
   apply: 'combat/apply',
   dismiss: 'combat/dismiss',
+  closeRoll: 'combat/close-roll',
   undo: 'combat/undo',
   end: 'combat/end',
   initiative: 'combat/initiative',

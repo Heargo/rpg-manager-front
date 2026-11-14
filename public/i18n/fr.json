@@ -1532,6 +1532,9 @@
       "edit": "Modifier",
       "dismiss": "Écarter"
     },
+    "decision": {
+      "deciding": "Le MJ décide…"
+    },
     "manual": {
       "damage": "Dégâts",
       "heal": "Soins"

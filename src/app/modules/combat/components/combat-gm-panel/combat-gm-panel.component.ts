@@ -15,6 +15,7 @@ import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { MessageLevel } from '../../../../core/models/toast-level';
+import { DiceRollBusiness } from '../../../dice/business/dice-roll.business';
 import { CombatSelectionBusiness } from '../../business/combat-selection.business';
 import { CombatBusiness } from '../../business/combat.business';
 import { CombatRollsBusiness } from '../../business/combat-rolls.business';
@@ -51,6 +52,7 @@ export class CombatGmPanelComponent {
   protected readonly combat = inject(CombatBusiness);
   private readonly selection = inject(CombatSelectionBusiness);
   private readonly rolls = inject(CombatRollsBusiness);
+  private readonly dice = inject(DiceRollBusiness);
   private readonly messages = inject(MessageService);
 
   protected readonly state = this.combat.$state;
@@ -58,7 +60,12 @@ export class CombatGmPanelComponent {
   /** The pending results whose roll has landed: until then the dice are still moving. */
   protected readonly landedPending = computed(
     () =>
-      this.state()?.pending.filter((p) => !this.rolls.isLanding(p.id)) ?? [],
+      this.state()?.pending.filter(
+        (p) =>
+          !this.rolls.isLanding(p.id) &&
+          // On the open dice screen the roll is decided there.
+          !this.rolls.pendingIdsOf(this.dice.$current()?.id).includes(p.id),
+      ) ?? [],
   );
 
   // Start form

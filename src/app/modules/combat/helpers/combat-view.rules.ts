@@ -56,6 +56,9 @@ export function projectEncounter(
       full ? result : projectPending(result, encounter, world),
     ),
     log: encounter.log,
+    ...(encounter.closedRollId !== undefined && {
+      closedRollId: encounter.closedRollId,
+    }),
   };
 }
 

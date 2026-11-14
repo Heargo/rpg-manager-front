@@ -22,6 +22,7 @@ import {
 import en from '../../../../../public/i18n/en.json';
 import fr from '../../../../../public/i18n/fr.json';
 import { DiceRollBusiness } from '../../dice/business/dice-roll.business';
+import { CombatRollsBusiness } from './combat-rolls.business';
 import { CombatBusiness } from './combat.business';
 
 /**
@@ -1258,6 +1259,111 @@ describe('combat (GM + players)', () => {
       }
     });
 
+    describe('closing the roll of a combat action for everyone', () => {
+      /** Every device throws the roll, as the dice overlay does. */
+      const throwEverywhere = async () => {
+        for (const device of [gm, ada, bob]) {
+          device.injector.get(CombatRollsBusiness);
+          const roll = dice(device).takeUnseenTableRoll();
+          if (roll) dice(device).presentShared(roll);
+        }
+        await settle();
+      };
+      const rollId = () => dice(gm).$tableRolls()![0].id;
+
+      it('lets the GM close a roll: every device view carries it', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+        expect(state(gm).closedRollId).toBeUndefined();
+
+        await combat(gm).closeRoll(rollId());
+        await settle();
+
+        for (const device of [gm, ada, bob])
+          expect(state(device).closedRollId).toBe(rollId());
+      });
+
+      it('refuses a player closing a roll', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+
+        await expect(combat(ada).closeRoll(rollId())).rejects.toMatchObject({
+          code: 'forbidden',
+        });
+        await settle();
+
+        expect(state(gm).closedRollId).toBeUndefined();
+      });
+
+      it('closes the dice screen on every device when the GM closes the roll', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+        await throwEverywhere();
+        for (const device of [gm, ada, bob])
+          expect(dice(device).$current()?.id).toBe(rollId());
+
+        await combat(gm).closeRoll(rollId());
+        await settle();
+
+        for (const device of [gm, ada, bob])
+          expect(dice(device).$current()).toBeNull();
+      });
+
+      it('closes the dice screen on every device once every pending result is applied', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+        await throwEverywhere();
+        for (const device of [gm, ada, bob])
+          expect(dice(device).$current()?.id).toBe(rollId());
+
+        await combat(gm).apply(state(gm).pending[0].id);
+        await settle();
+
+        for (const device of [gm, ada, bob])
+          expect(dice(device).$current()).toBeNull();
+      });
+
+      it('closes the dice screen on every device once every pending result is dismissed', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+        await throwEverywhere();
+
+        await combat(gm).dismiss(state(gm).pending[0].id);
+        await settle();
+
+        for (const device of [gm, ada, bob])
+          expect(dice(device).$current()).toBeNull();
+      });
+
+      it('leaves a plain roll on the screen when a combat roll is closed', async () => {
+        await setup('free');
+        await startAll();
+        await fireballAtGoblin();
+        await throwEverywhere();
+        dice(bob).presentShared({
+          id: 'plain-1',
+          by: { playerId: 'bob', name: 'Bob' },
+          count: 1,
+          sides: 6,
+          values: [4],
+          seed: 's',
+          at: Date.now(),
+        });
+        await settle();
+
+        await combat(gm).closeRoll(rollId());
+        await settle();
+
+        expect(dice(bob).$current()?.id).toBe('plain-1');
+        expect(dice(gm).$current()).toBeNull();
+      });
+    });
+
     it('shows a hidden NPC roll as names, dice and total only, rolled for the host player', async () => {
       await setup('free');
       const orc = await gm.injector.get(NpcCatalogueBusiness).save({
@@ -1301,8 +1407,9 @@ describe('combat (GM + players)', () => {
         'targets',
         'total',
       ]);
-      const shared = (roll as unknown as { combat: { caster: object; targets: object[] } })
-        .combat;
+      const shared = (
+        roll as unknown as { combat: { caster: object; targets: object[] } }
+      ).combat;
       for (const who of [shared.caster, ...shared.targets])
         expect(
           Object.keys(who)

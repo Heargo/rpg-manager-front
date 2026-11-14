@@ -882,6 +882,11 @@ export function setCombatantCurrents(
   );
 }
 
+/** The roll of a combat action the GM closed for everyone: not an undo step. */
+export function closeRoll(enc: Encounter, rollId: string): Encounter {
+  return { ...enc, closedRollId: rollId };
+}
+
 /** The encounter without its undo step (a fresh start). */
 export function withoutUndo(enc: Encounter): Encounter {
   const { previous: _previous, ...rest } = enc;

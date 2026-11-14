@@ -33,7 +33,8 @@ class HostComponent {}
  * - Encounter: toolbar `[data-action="next-turn"]`, `[data-action="undo"]`, `[data-action="end"]` and a round label `[data-field="round"]`; no combatant rows.
  * - `[data-testid="active-row"]` (`data-name` = the active combatant), outside the rows: tabs, skills, items, targeting (unchanged).
  * - `[data-testid="pending"]` per pending result, listed once its roll has landed (`CombatRollsBusiness.isLanding(id)` is false: the GM's dice came to
- *   rest, or 6 s passed); while it lands the result is hidden.
+ *   rest, or 6 s passed); while it lands the result is hidden. It is also hidden while its roll is on the GM's open dice screen
+ *   (`DiceRollBusiness.$current()` has the roll's id): it is decided there (`app-combat-roll-decision`). Listed when the screen shows another roll or none.
  * - Selected combatant (picked with `[data-action="select"]` in the order): `[data-testid="selected-edits"]` (`data-name`) holds
  *   `[data-testid="manual-amount"]`, `[data-action="damage"]`, `[data-action="heal"]`, `[data-testid="manual-status"]`, `[data-action="add-status"]`.
  *   Nothing selected: no such block. It goes away when the encounter ends.
@@ -83,7 +84,10 @@ describe('CombatGmPanelComponent', () => {
         `${goblin} [data-testid="npc-count"] input`,
       )!.value,
     ).toBe('1');
-    await typeNumber(el.querySelector(`${goblin} [data-testid="npc-count"]`)!, 2);
+    await typeNumber(
+      el.querySelector(`${goblin} [data-testid="npc-count"]`)!,
+      2,
+    );
     await click(el.querySelector('[data-action="start"]'));
 
     expect(names(el)).toEqual(['Ada', 'Bob', 'Goblin 1', 'Goblin 2']);
@@ -108,7 +112,8 @@ describe('CombatGmPanelComponent', () => {
 
   it('disables Start while nothing is picked', async () => {
     await open();
-    const start = () => el.querySelector<HTMLButtonElement>('[data-action="start"]')!;
+    const start = () =>
+      el.querySelector<HTMLButtonElement>('[data-action="start"]')!;
     expect(start().disabled).toBe(true);
     await pickStart(el, 'start-characters', 'Ada');
     expect(start().disabled).toBe(false);
@@ -124,7 +129,9 @@ describe('CombatGmPanelComponent', () => {
     await open();
     expect(el.querySelector('[data-testid="start-npcs"]')).toBeNull();
     expect(el.querySelector('[data-testid="start-characters"]')).not.toBeNull();
-    expect(clean(el.querySelector('.hint'))).toContain('No NPC in the catalogue yet.');
+    expect(clean(el.querySelector('.hint'))).toContain(
+      'No NPC in the catalogue yet.',
+    );
   });
 
   it('expands the active row with counters, skills and items, and ticks a counter', async () => {
@@ -144,9 +151,7 @@ describe('CombatGmPanelComponent', () => {
       active.querySelector('[data-testid="item"]')!.getAttribute('data-name'),
     ).toBe('Potion');
 
-    await click(
-      active.querySelector('[data-action="tick"]'),
-    );
+    await click(active.querySelector('[data-action="tick"]'));
     expect(
       table.named(table.ada, 'Ada').actions.find((a) => a.name === 'Action')!
         .used,
@@ -185,9 +190,15 @@ describe('CombatGmPanelComponent', () => {
       dice.markSettled();
       await settle();
     };
+    /** The GM's dice screen is closed (Escape before D04, a failed 3D load): the panel is where the result waits. */
+    const closeScreen = async () => {
+      table.gm.injector.get(DiceRollBusiness).close();
+      await settle();
+    };
     const cast = async () => {
       await castOnly();
       await land();
+      await closeScreen();
     };
 
     beforeEach(async () => {
@@ -219,12 +230,52 @@ describe('CombatGmPanelComponent', () => {
       expect(el.querySelector('[data-action="apply"]')).toBeNull();
 
       await land();
+      await closeScreen();
 
       expect(el.querySelectorAll('[data-testid="pending"]')).toHaveLength(1);
       for (const action of ['apply', 'edit', 'dismiss'])
         expect(
           el.querySelector(`[data-testid="pending"] [data-action="${action}"]`),
         ).not.toBeNull();
+    });
+
+    it('does not list a pending result whose roll is on the open dice screen: it is decided there', async () => {
+      await castOnly();
+
+      await land();
+
+      const dice = table.gm.injector.get(DiceRollBusiness);
+      expect(dice.$current()).not.toBeNull();
+      expect(table.state(table.gm).pending).toHaveLength(1);
+      expect(el.querySelector('[data-testid="pending"]')).toBeNull();
+    });
+
+    it('lists the pending result when the dice screen shows another roll', async () => {
+      await castOnly();
+      await land();
+      table.gm.injector.get(DiceRollBusiness).presentShared({
+        id: 'plain-1',
+        by: { playerId: 'gm', name: 'Gm' },
+        count: 1,
+        sides: 6,
+        values: [4],
+        seed: 's',
+        at: Date.now(),
+      });
+      await settle();
+
+      expect(el.querySelectorAll('[data-testid="pending"]')).toHaveLength(1);
+    });
+
+    it('lists the pending result again when the dice screen is closed', async () => {
+      await castOnly();
+      await land();
+      expect(el.querySelector('[data-testid="pending"]')).toBeNull();
+
+      table.gm.injector.get(DiceRollBusiness).close();
+      await settle();
+
+      expect(el.querySelectorAll('[data-testid="pending"]')).toHaveLength(1);
     });
 
     it('applies a pending result in one tap', async () => {
@@ -272,13 +323,21 @@ describe('CombatGmPanelComponent', () => {
     const edits = () =>
       el.querySelector<HTMLElement>('[data-testid="selected-edits"]')!;
     expect(edits().dataset['name']).toBe('Goblin');
-    expect(row(el, 'Goblin').querySelector('[data-testid="manual-amount"]')).toBeNull();
+    expect(
+      row(el, 'Goblin').querySelector('[data-testid="manual-amount"]'),
+    ).toBeNull();
 
-    await typeNumber(edits().querySelector('[data-testid="manual-amount"]')!, 6);
+    await typeNumber(
+      edits().querySelector('[data-testid="manual-amount"]')!,
+      6,
+    );
     await click(edits().querySelector('[data-action="damage"]'));
     expect(table.named(table.gm, 'Goblin').life?.current).toBe(4);
 
-    await typeNumber(edits().querySelector('[data-testid="manual-amount"]')!, 2);
+    await typeNumber(
+      edits().querySelector('[data-testid="manual-amount"]')!,
+      2,
+    );
     await click(edits().querySelector('[data-action="heal"]'));
     expect(table.named(table.gm, 'Goblin').life?.current).toBe(6);
 
@@ -298,7 +357,9 @@ describe('CombatGmPanelComponent', () => {
     await click(row(el, 'Goblin').querySelector('[data-action="select"]'));
     await click(row(el, 'Bob').querySelector('[data-action="select"]'));
     expect(
-      el.querySelector<HTMLElement>('[data-testid="selected-edits"]')!.dataset['name'],
+      el.querySelector<HTMLElement>('[data-testid="selected-edits"]')!.dataset[
+        'name'
+      ],
     ).toBe('Bob');
 
     await click(row(el, 'Bob').querySelector('[data-action="select"]'));
@@ -315,7 +376,9 @@ describe('CombatGmPanelComponent', () => {
     await settle();
 
     expect(el.querySelector('[data-testid="selected-edits"]')).toBeNull();
-    expect(table.gm.injector.get(CombatSelectionBusiness).$selectedId()).toBeNull();
+    expect(
+      table.gm.injector.get(CombatSelectionBusiness).$selectedId(),
+    ).toBeNull();
   });
 
   it('shows the toolbar, the round and the active actions but no combatant rows on its own', async () => {
@@ -335,10 +398,14 @@ describe('CombatGmPanelComponent', () => {
     await open();
     await click(row(el, 'Goblin').querySelector('[data-action="select"]'));
     await typeNumber(
-      el.querySelector('[data-testid="selected-edits"] [data-testid="manual-amount"]')!,
+      el.querySelector(
+        '[data-testid="selected-edits"] [data-testid="manual-amount"]',
+      )!,
       6,
     );
-    await click(el.querySelector('[data-testid="selected-edits"] [data-action="damage"]'));
+    await click(
+      el.querySelector('[data-testid="selected-edits"] [data-action="damage"]'),
+    );
     expect(table.named(table.gm, 'Goblin').life?.current).toBe(4);
 
     await click(el.querySelector('[data-action="undo"]'));
@@ -413,9 +480,12 @@ describe('CombatGmPanelComponent', () => {
 
       await click(el.querySelector('[data-action="end"]'));
       const dialog = document.body.querySelector('[data-testid="end-dialog"]');
-      if (dialog) await click(dialog.querySelector('[data-action="confirm-end"]'));
+      if (dialog)
+        await click(dialog.querySelector('[data-action="confirm-end"]'));
 
-      expect(dialog?.querySelector('[data-testid="reward-xp"]') ?? null).toBeNull();
+      expect(
+        dialog?.querySelector('[data-testid="reward-xp"]') ?? null,
+      ).toBeNull();
       expect(table.combat(table.bob).$state()).toBeNull();
       expect(table.record('ada').xp).toBe(0);
     });
@@ -428,13 +498,17 @@ describe('CombatGmPanelComponent start form with a grid', () => {
   let el: HTMLElement;
 
   const tokens = () =>
-    Array.from(el.querySelectorAll<HTMLElement>('[data-testid="setup-token"]')).map(
-      (t) => [t.dataset['name'] ?? t.dataset['key'], t.dataset['x'], t.dataset['y']],
-    );
+    Array.from(
+      el.querySelectorAll<HTMLElement>('[data-testid="setup-token"]'),
+    ).map((t) => [
+      t.dataset['name'] ?? t.dataset['key'],
+      t.dataset['x'],
+      t.dataset['y'],
+    ]);
   const keys = () =>
-    Array.from(el.querySelectorAll<HTMLElement>('[data-testid="setup-token"]')).map(
-      (t) => t.dataset['key'],
-    );
+    Array.from(
+      el.querySelectorAll<HTMLElement>('[data-testid="setup-token"]'),
+    ).map((t) => t.dataset['key']);
 
   beforeEach(async () => {
     table = await combatTable('free', {

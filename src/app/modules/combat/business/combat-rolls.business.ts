@@ -43,6 +43,8 @@ export class CombatRollsBusiness {
   private readonly injector = inject(Injector);
   private readonly local = signal<SharedRoll | null>(null);
   private readonly followed = signal<Followed | null>(null);
+  /** Combat rolls whose pending results were seen in the view. */
+  private readonly seen = new Set<string>();
   private landingTimer?: ReturnType<typeof setTimeout>;
   private fadeTimer?: ReturnType<typeof setTimeout>;
 
@@ -77,7 +79,39 @@ export class CombatRollsBusiness {
     );
   }
 
+  /** The pending results a combat roll made (empty when none, or unknown). */
+  pendingIdsOf(rollId: string | undefined): string[] {
+    if (!rollId) return [];
+    const followed = this.followed();
+    const roll =
+      followed?.roll.id === rollId
+        ? followed.roll
+        : this.dice.$tableRolls()?.find((r) => r.id === rollId);
+    return roll?.combat?.pendingIds ?? [];
+  }
+
+  /** True once the dice of this roll came to rest on this device. */
+  hasLanded(rollId: string): boolean {
+    const followed = this.followed();
+    return followed?.roll.id === rollId && followed.landed;
+  }
+
   constructor() {
+    // A combat roll closes on every device when the GM closed it, or when all its results are resolved.
+    effect(() => {
+      const shown = this.dice.$current();
+      const view = this.injector.get(CombatBusiness).$state();
+      if (!shown?.combat || !view) return;
+      const pendingIds = this.pendingIdsOf(shown.id);
+      // The view may lag the roll: resolved only once its results were seen listed.
+      if (pendingIds.some((id) => view.pending.some((p) => p.id === id)))
+        this.seen.add(shown.id);
+      const resolved =
+        this.seen.has(shown.id) &&
+        pendingIds.every((id) => !view.pending.some((p) => p.id === id));
+      if (view.closedRollId === shown.id || resolved)
+        untracked(() => this.dice.close());
+    });
     effect(() => {
       const roll = this.latest();
       untracked(() => {

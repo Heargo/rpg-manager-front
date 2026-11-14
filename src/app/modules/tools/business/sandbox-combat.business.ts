@@ -18,6 +18,7 @@ import {
   addStatus,
   applyPending,
   damageCombatant,
+  closeRoll,
   dismissPending,
   editAttribute,
   EncounterPicks,
@@ -229,6 +230,9 @@ export class SandboxCombatBusiness implements CombatTable {
   }
   async dismiss(pendingId: string): Promise<void> {
     this.change((enc) => dismissPending(enc, pendingId));
+  }
+  async closeRoll(rollId: string): Promise<void> {
+    this.change((enc) => closeRoll(enc, rollId));
   }
   async undo(): Promise<void> {
     this.change((enc) => undo(enc));

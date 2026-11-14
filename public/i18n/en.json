@@ -1532,6 +1532,9 @@
       "edit": "Edit",
       "dismiss": "Dismiss"
     },
+    "decision": {
+      "deciding": "The GM is deciding…"
+    },
     "manual": {
       "damage": "Damage",
       "heal": "Heal"

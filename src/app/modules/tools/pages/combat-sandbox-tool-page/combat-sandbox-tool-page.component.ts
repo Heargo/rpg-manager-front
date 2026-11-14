@@ -17,6 +17,7 @@ import { CombatRollBannerComponent } from '../../../combat/components/combat-rol
 import { DiceOverlayComponent } from '../../../dice/components/dice-overlay/dice-overlay.component';
 import { CombatSelectionBusiness } from '../../../combat/business/combat-selection.business';
 import { CombatTargetingBusiness } from '../../../combat/business/combat-targeting.business';
+import { CombatRollDecisionComponent } from '../../../combat/components/combat-roll-decision/combat-roll-decision.component';
 import { CombatGridComponent } from '../../../combat/components/combat-grid/combat-grid.component';
 import { CombatOrderComponent } from '../../../combat/components/combat-order/combat-order.component';
 import { CombatGmPanelComponent } from '../../../combat/components/combat-gm-panel/combat-gm-panel.component';
@@ -34,6 +35,7 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
     CombatGmPanelComponent,
     CombatRollBannerComponent,
     DiceOverlayComponent,
+    CombatRollDecisionComponent,
     CombatOrderComponent,
     CombatGridComponent,
     CombatPlayerViewComponent,
@@ -89,7 +91,9 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
         </p-card>
       </div>
     </div>
-    <app-dice-overlay />
+    <app-dice-overlay
+      ><app-combat-roll-decision diceActions
+    /></app-dice-overlay>
   `,
   styles: `
     .combat-tool {

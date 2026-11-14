@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { combatTable, Device } from '../../../../testing/combat-table';
 import { DiceRollBusiness } from '../../dice/business/dice-roll.business';
+import { CombatService } from '../services/combat.service';
 import { CombatRollsBusiness } from './combat-rolls.business';
 
 /**
@@ -168,5 +169,33 @@ describe('CombatRollsBusiness', () => {
     await pump(200);
 
     expect(rollsOf(table.gm).$banner()).toBeNull();
+  });
+
+  it('keeps the dice screen open when the roll arrives before the view that lists its pending results, then closes it once they are resolved', async () => {
+    await begin();
+    const service = table.gm.injector.get(CombatService);
+    const publishState = service.publishState.bind(service);
+    let held: Parameters<CombatService['publishState']>[0];
+    const spy = vi.spyOn(service, 'publishState').mockImplementation((view) => {
+      held = view;
+    });
+    await cast();
+    expect(table.state(table.bob).pending).toEqual([]);
+
+    await land(table.bob);
+
+    expect(diceOf(table.bob).$current()?.id).toBe(
+      diceOf(table.bob).$tableRolls()![0].id,
+    );
+
+    spy.mockRestore();
+    publishState(held!);
+    await pump();
+    expect(table.state(table.bob).pending).toHaveLength(1);
+    expect(diceOf(table.bob).$current()).not.toBeNull();
+
+    await run(table.combat(table.gm).apply(pendingId()));
+
+    expect(diceOf(table.bob).$current()).toBeNull();
   });
 });

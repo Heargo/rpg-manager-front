@@ -192,6 +192,9 @@ export class CombatBusiness {
   dismiss(pendingId: string): Promise<void> {
     return this.service.call('dismiss', { pendingId });
   }
+  closeRoll(rollId: string): Promise<void> {
+    return this.service.call('closeRoll', { rollId });
+  }
   undo(): Promise<void> {
     return this.service.call('undo');
   }

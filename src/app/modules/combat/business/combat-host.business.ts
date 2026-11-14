@@ -14,6 +14,7 @@ import {
   addCombatant,
   addStatus,
   applyPending,
+  closeRoll,
   damageCombatant,
   dismissPending,
   editAttribute,
@@ -251,6 +252,9 @@ export class CombatHostBusiness {
       }),
       gm('dismiss', (p, world, enc) =>
         this.with(world, dismissPending(enc, text(p['pendingId']))),
+      ),
+      gm('closeRoll', (p, world, enc) =>
+        this.with(world, closeRoll(enc, text(p['rollId']))),
       ),
       gm('undo', (_p, world, enc) => this.with(world, undo(enc))),
       this.service.serve('end', async (payload, { from }) => {

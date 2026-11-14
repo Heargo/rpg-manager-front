@@ -20,7 +20,7 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
   selector: 'app-dice-overlay',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslocoPipe, ButtonModule],
-  host: { '(document:keydown.escape)': 'close()' },
+  host: { '(document:keydown.escape)': 'escape()' },
   template: `
     @if (dice.$current(); as roll) {
       <div
@@ -59,17 +59,23 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
           <div class="actions">
             @if (!roll.combat && (!roll.shared || roll.shared.mine)) {
               <p-button
+                data-action="again-dice"
                 icon="pi pi-refresh"
                 [label]="'dice.again' | transloco"
                 (onClick)="again()"
               />
             }
-            <p-button
-              icon="pi pi-times"
-              [label]="'dice.close' | transloco"
-              severity="secondary"
-              (onClick)="close()"
-            />
+            @if (roll.combat) {
+              <ng-content select="[diceActions]" />
+            } @else {
+              <p-button
+                data-action="close-dice"
+                icon="pi pi-times"
+                [label]="'dice.close' | transloco"
+                severity="secondary"
+                (onClick)="close()"
+              />
+            }
           </div>
         </div>
       </div>
@@ -194,6 +200,11 @@ export class DiceOverlayComponent {
     this.dice
       .rollAgain()
       .catch((error) => console.error('Roll again failed', error));
+  }
+
+  /** A combat roll is decided in the slot: Escape leaves it. */
+  protected escape(): void {
+    if (!this.dice.$current()?.combat) this.close();
   }
 
   protected close(): void {
