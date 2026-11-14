@@ -556,6 +556,61 @@ describe('combat (GM + players)', () => {
       expect(state(bob).activeId).toBe(adaId());
     });
 
+    describe('placing the tokens at the start', () => {
+      const rejected = {
+        code: 'rejected',
+        message: 'combat.errors.badPositions',
+      };
+      const startWith = (positions: Record<string, { x: number; y: number }>) =>
+        combat(gm).start({
+          characterIds: [record('ada').id, record('bob').id],
+          npcs: [{ npcId: goblinNpc.id, count: 2, side: 'enemy' }],
+          positions,
+        });
+
+      it('puts the tokens where the GM placed them, on every device', async () => {
+        await startWith({
+          [`character:${record('ada').id}`]: { x: 4, y: 5 },
+          [`character:${record('bob').id}`]: { x: 2, y: 2 },
+          [`npc:${goblinNpc.id}:1`]: { x: 7, y: 7 },
+          [`npc:${goblinNpc.id}:2`]: { x: 8, y: 1 },
+        });
+        await settle();
+
+        for (const d of [gm, ada, bob]) {
+          expect(named(d, 'Ada').position).toEqual({ x: 4, y: 5 });
+          expect(named(d, 'Bob').position).toEqual({ x: 2, y: 2 });
+          expect(named(d, 'Goblin 1').position).toEqual({ x: 7, y: 7 });
+          expect(named(d, 'Goblin 2').position).toEqual({ x: 8, y: 1 });
+        }
+      });
+
+      it('rejects a cell out of bounds and starts nothing', async () => {
+        await expect(
+          startWith({ [`character:${record('ada').id}`]: { x: 10, y: 0 } }),
+        ).rejects.toMatchObject(rejected);
+        expect(combat(gm).$state()).toBeNull();
+      });
+
+      it('rejects two slots on one cell and starts nothing', async () => {
+        await expect(
+          startWith({
+            [`character:${record('ada').id}`]: { x: 3, y: 3 },
+            [`npc:${goblinNpc.id}:1`]: { x: 3, y: 3 },
+          }),
+        ).rejects.toMatchObject(rejected);
+        expect(combat(gm).$state()).toBeNull();
+      });
+
+      it('has the placement error and hint in English and French', () => {
+        for (const json of [en, fr]) {
+          const combatKeys = (json as unknown as Record<string, Record<string, Record<string, unknown>>>)['combat'];
+          expect(typeof combatKeys['errors']['badPositions']).toBe('string');
+          expect(typeof combatKeys['start']['placeHint']).toBe('string');
+        }
+      });
+    });
+
     describe('using a skill', () => {
       it('rolls on the host and posts a pending result; the cost is taken on the character record', async () => {
         await startAll();
@@ -979,6 +1034,19 @@ describe('combat (GM + players)', () => {
         'Bob',
       ]);
       expect(named(bob, 'Ada').initiative).toBe(15);
+    });
+  });
+
+  describe('placing the tokens with the grid off', () => {
+    it('ignores the positions', async () => {
+      await setup('free', { grid: { enabled: false, columns: 10, rows: 10 } });
+      await combat(gm).start({
+        characterIds: [record('ada').id],
+        npcs: [],
+        positions: { [`character:${record('ada').id}`]: { x: 99, y: 99 } },
+      });
+      await settle();
+      expect(named(gm, 'Ada').position).toBeUndefined();
     });
   });
 

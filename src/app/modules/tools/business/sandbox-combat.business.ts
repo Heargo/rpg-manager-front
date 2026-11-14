@@ -106,6 +106,7 @@ export class SandboxCombatBusiness implements CombatTable {
   readonly $characters = computed(() => this.world().characters);
   readonly $npcs = computed(() => this.world().npcs);
   readonly $skills = computed(() => this.world().skills);
+  readonly $grid = computed(() => this.world().combat.grid);
   readonly $initiativeMode = computed(() =>
     effectiveInitiativeMode(this.world().combat),
   );

@@ -1464,7 +1464,8 @@
       "caster-not-found": "This combatant isn't in the encounter.",
       "skill-not-known": "This combatant doesn't know that skill.",
       "skill-not-active": "Only active skills can be used in combat.",
-      "target-not-found": "This target isn't in the encounter."
+      "target-not-found": "This target isn't in the encounter.",
+      "badPositions": "Invalid placement"
     },
     "order": "Turn order",
     "round": "Round {{round}}",
@@ -1486,7 +1487,8 @@
       "count": "Number of copies",
       "action": "Start the encounter",
       "noCharacters": "No character in this world yet.",
-      "noNpcs": "No NPC in the catalogue yet."
+      "noNpcs": "No NPC in the catalogue yet.",
+      "placeHint": "Drag the tokens to place them"
     },
     "initiative": {
       "label": "Initiative",

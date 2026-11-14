@@ -17,9 +17,15 @@ import { StoredImageComponent } from '../../../../core/components/stored-image/s
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CombatSelectionBusiness } from '../../business/combat-selection.business';
 import { CombatBusiness } from '../../business/combat.business';
-import { startPicks } from '../../helpers/combat-start.rules';
+import {
+  setupTokens,
+  startPicks,
+  startSlots,
+} from '../../helpers/combat-start.rules';
+import { Cell } from '../../helpers/combat-grid.rules';
 import { PendingResultView } from '../../models/combat';
 import { CombatActionsComponent } from '../combat-actions/combat-actions.component';
+import { CombatSetupGridComponent } from '../combat-setup-grid/combat-setup-grid.component';
 
 /** The game master's combat panel: start an encounter, run the turns, resolve skill results, end with the rewards. */
 @Component({
@@ -35,6 +41,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
     MultiSelectModule,
     StoredImageComponent,
     CombatActionsComponent,
+    CombatSetupGridComponent,
   ],
   templateUrl: './combat-gm-panel.component.html',
   styleUrl: './combat-gm-panel.component.scss',
@@ -56,6 +63,23 @@ export class CombatGmPanelComponent {
   );
   protected readonly pickedNpcs = computed(() =>
     this.combat.$npcs().filter((npc) => this.chosenNpcs().includes(npc.id)),
+  );
+
+  protected readonly placed = signal<Record<string, Cell>>({});
+  /** One future token per pick, shown on the setup grid while the world's grid is on. */
+  protected readonly slots = computed(() =>
+    this.combat.$grid()
+      ? startSlots(
+          startPicks(
+            this.chosen(),
+            this.chosenNpcs(),
+            this.counts(),
+            this.combat.$npcs(),
+          ),
+          this.combat.$characters(),
+          this.combat.$npcs(),
+        )
+      : [],
   );
 
   // Running encounter
@@ -86,6 +110,19 @@ export class CombatGmPanelComponent {
     return this.combat.rewards();
   });
 
+  protected pickCharacters(ids: string[] | null): void {
+    this.chosen.set(ids ?? []);
+    this.prunePlaced();
+  }
+
+  /** Forgets the cells of tokens that are no longer picked. */
+  private prunePlaced(): void {
+    const keys = new Set(this.slots().map((s) => s.key));
+    this.placed.update((p) =>
+      Object.fromEntries(Object.entries(p).filter(([key]) => keys.has(key))),
+    );
+  }
+
   protected pickNpcs(ids: string[] | null): void {
     const picked = ids ?? [];
     this.chosenNpcs.set(picked);
@@ -94,6 +131,7 @@ export class CombatGmPanelComponent {
         Object.entries(counts).filter(([id]) => picked.includes(id)),
       ),
     );
+    this.prunePlaced();
   }
 
   protected countOf(npcId: string): number {
@@ -102,6 +140,7 @@ export class CombatGmPanelComponent {
 
   protected setCount(npcId: string, value: number | null): void {
     this.counts.update((counts) => ({ ...counts, [npcId]: value ?? 1 }));
+    this.prunePlaced();
   }
 
   protected initial(name: string): string {
@@ -114,13 +153,27 @@ export class CombatGmPanelComponent {
       this.chosenNpcs(),
       this.counts(),
       this.combat.$npcs(),
+      this.startPositions(),
     );
     const started = await this.run(() => this.combat.start(picks));
     if (started) {
       this.chosen.set([]);
       this.chosenNpcs.set([]);
       this.counts.set({});
+      this.placed.set({});
     }
+  }
+
+  /** The cell shown for every token, or none without a grid. */
+  private startPositions(): Record<string, Cell> | undefined {
+    const grid = this.combat.$grid();
+    if (!grid || !this.slots().length) return undefined;
+    return Object.fromEntries(
+      setupTokens(this.slots(), this.placed(), grid).map((t) => [
+        t.key,
+        { x: t.x, y: t.y },
+      ]),
+    );
   }
 
   protected damage(id: string): void {

@@ -26,7 +26,9 @@ class HostComponent {}
  * `app-combat-order` (mounted next to it in these tests, selection shared through `CombatSelectionBusiness`). Elements are found by
  * `data-testid` / `data-action`; buttons are clicked, p-inputNumber fields are typed into (their wrapper carries the testid).
  *
- * - No encounter: `[data-testid="start-form"]` (unchanged: two multi-selects, NPC counts, Start).
+ * - No encounter: `[data-testid="start-form"]` (unchanged: two multi-selects, NPC counts, Start). With the world's grid on and at least one pick, it also holds
+ *   `app-combat-setup-grid` (`[data-testid="setup-grid"]`, tokens `[data-testid="setup-token"]` with `data-key`, `data-x`, `data-y`) and a hint
+ *   `[data-testid="place-hint"]`; Start sends the shown cell of every token. Without the grid, or without a pick, none of that.
  * - Encounter: toolbar `[data-action="next-turn"]`, `[data-action="undo"]`, `[data-action="end"]` and a round label `[data-field="round"]`; no combatant rows.
  * - `[data-testid="active-row"]` (`data-name` = the active combatant), outside the rows: tabs, skills, items, targeting (unchanged).
  * - `[data-testid="pending"]` per pending result (unchanged).
@@ -387,5 +389,100 @@ describe('CombatGmPanelComponent', () => {
       expect(table.combat(table.bob).$state()).toBeNull();
       expect(table.record('ada').xp).toBe(0);
     });
+  });
+});
+
+describe('CombatGmPanelComponent start form with a grid', () => {
+  let table: Awaited<ReturnType<typeof combatTable>>;
+  let mounted: Awaited<ReturnType<typeof mount<HostComponent>>>;
+  let el: HTMLElement;
+
+  const tokens = () =>
+    Array.from(el.querySelectorAll<HTMLElement>('[data-testid="setup-token"]')).map(
+      (t) => [t.dataset['name'] ?? t.dataset['key'], t.dataset['x'], t.dataset['y']],
+    );
+  const keys = () =>
+    Array.from(el.querySelectorAll<HTMLElement>('[data-testid="setup-token"]')).map(
+      (t) => t.dataset['key'],
+    );
+
+  beforeEach(async () => {
+    table = await combatTable('free', {
+      grid: { enabled: true, columns: 10, rows: 10 },
+    });
+    mounted = await mount(HostComponent, table.gm);
+    el = mounted.el;
+  });
+  afterEach(() => {
+    mounted?.destroy();
+    table.destroy();
+  });
+
+  it('shows no setup grid until something is picked', async () => {
+    expect(el.querySelector('[data-testid="setup-grid"]')).toBeNull();
+    expect(el.querySelector('[data-testid="place-hint"]')).toBeNull();
+    await pickStart(el, 'start-characters', 'Ada');
+    expect(el.querySelector('[data-testid="setup-grid"]')).not.toBeNull();
+    expect(clean(el.querySelector('[data-testid="place-hint"]'))).toBe(
+      'Drag the tokens to place them',
+    );
+  });
+
+  it('shows a token per pick, the party on the left and the enemies on the right', async () => {
+    await pickStart(el, 'start-characters', 'Ada');
+    await pickStart(el, 'start-characters', 'Bob');
+    await pickStart(el, 'start-npcs', 'Goblin');
+    await typeNumber(
+      el.querySelector('[data-testid="start-npc"] [data-testid="npc-count"]')!,
+      2,
+    );
+    expect(tokens()).toEqual([
+      ['Ada', '0', '0'],
+      ['Bob', '0', '1'],
+      [expect.stringContaining('Goblin'), '9', '0'],
+      [expect.stringContaining('Goblin'), '9', '1'],
+    ]);
+    expect(keys()).toEqual([
+      `character:${table.record('ada').id}`,
+      `character:${table.record('bob').id}`,
+      `npc:${table.goblinNpc.id}:1`,
+      `npc:${table.goblinNpc.id}:2`,
+    ]);
+  });
+
+  it('drops the token of an unpicked character', async () => {
+    await pickStart(el, 'start-characters', 'Ada');
+    await pickStart(el, 'start-characters', 'Bob');
+    await pickStart(el, 'start-characters', 'Ada');
+    expect(keys()).toEqual([`character:${table.record('bob').id}`]);
+    expect(tokens()).toEqual([['Bob', '0', '0']]);
+  });
+
+  it('starts with the shown cells', async () => {
+    await pickStart(el, 'start-characters', 'Ada');
+    await pickStart(el, 'start-characters', 'Bob');
+    await pickStart(el, 'start-npcs', 'Goblin');
+    await click(el.querySelector('[data-action="start"]'));
+
+    const position = (name: string) => table.named(table.gm, name).position;
+    expect(position('Ada')).toEqual({ x: 0, y: 0 });
+    expect(position('Bob')).toEqual({ x: 0, y: 1 });
+    expect(position('Goblin')).toEqual({ x: 9, y: 0 });
+    expect(table.named(table.ada, 'Goblin').position).toEqual({ x: 9, y: 0 });
+  });
+});
+
+describe('CombatGmPanelComponent start form without a grid', () => {
+  it('has no setup grid and starts without positions', async () => {
+    const table = await combatTable('free');
+    const mounted = await mount(HostComponent, table.gm);
+    const el = mounted.el;
+    await pickStart(el, 'start-characters', 'Ada');
+    expect(el.querySelector('[data-testid="setup-grid"]')).toBeNull();
+    expect(el.querySelector('[data-testid="place-hint"]')).toBeNull();
+    await click(el.querySelector('[data-action="start"]'));
+    expect(table.named(table.gm, 'Ada').position).toBeUndefined();
+    mounted.destroy();
+    table.destroy();
   });
 });

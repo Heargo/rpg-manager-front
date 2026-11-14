@@ -214,7 +214,7 @@ Tickets in `combat-ux/` (C). Status: proposed (2026-11-13); the user's answers a
 | 99 | **C05** Start form: characters and NPCs multi-selects (done) | none |
 | 100 | **C06** GM table: collapsible Dice, Combat, Notes (done) | C05 |
 | 101 | **C07** Grid moves: GM anywhere, players on their turn (done) | C02 |
-| 102 | **C08** Place tokens before starting | C05, C07 |
+| 102 | **C08** Place tokens before starting (done) | C05, C07 |
 | 103 | **C09** Shared combat rolls and recap banner | C06 |
 
 ## Phase 14: one language per pack (2026-11-13)

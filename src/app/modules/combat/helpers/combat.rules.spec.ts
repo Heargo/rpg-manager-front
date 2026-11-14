@@ -1009,3 +1009,64 @@ describe('optional combat steps', () => {
     expect(combatRewards(beaten, world.combat)?.money).toBe(7);
   });
 });
+
+describe('startEncounter with positions', () => {
+  const gridRules = { grid: { enabled: true, columns: 4, rows: 3 } };
+  const place = (
+    positions: Record<string, { x: number; y: number }>,
+    rules: Partial<CombatRules> = gridRules,
+  ) => {
+    const w = { ...build().world };
+    w.combat = { ...w.combat, ...rules };
+    return startEncounter(w, { ...picks, positions }, newId);
+  };
+
+  it('puts each combatant on the cell of its slot', () => {
+    const result = place({
+      'character:aria': { x: 3, y: 2 },
+      'character:bram': { x: 1, y: 1 },
+      'npc:goblin:1': { x: 0, y: 0 },
+      'npc:goblin:3': { x: 2, y: 0 },
+    });
+    const enc = ok(result).encounter;
+    expect(by(enc, 'Aria').position).toEqual({ x: 3, y: 2 });
+    expect(by(enc, 'Bram').position).toEqual({ x: 1, y: 1 });
+    expect(by(enc, 'Goblin 1').position).toEqual({ x: 0, y: 0 });
+    expect(by(enc, 'Goblin 2').position).toBeUndefined();
+    expect(by(enc, 'Goblin 3').position).toEqual({ x: 2, y: 0 });
+  });
+
+  it('ignores unknown slot keys', () => {
+    const enc = ok(
+      place({ 'character:ghost': { x: 1, y: 1 }, 'npc:goblin:9': { x: 2, y: 2 } }),
+    ).encounter;
+    expect(enc.combatants.every((c) => c.position === undefined)).toBe(true);
+  });
+
+  it('refuses a cell out of bounds', () => {
+    expect(place({ 'character:aria': { x: 4, y: 0 } })).toEqual({
+      ok: false,
+      error: 'badPositions',
+    });
+    expect(place({ 'character:aria': { x: 0, y: -1 } })).toEqual({
+      ok: false,
+      error: 'badPositions',
+    });
+  });
+
+  it('refuses two slots on one cell', () => {
+    expect(
+      place({ 'character:aria': { x: 1, y: 1 }, 'npc:goblin:2': { x: 1, y: 1 } }),
+    ).toEqual({ ok: false, error: 'badPositions' });
+  });
+
+  it('ignores the positions when the grid is off', () => {
+    const enc = ok(
+      place(
+        { 'character:aria': { x: 99, y: 99 } },
+        { grid: { enabled: false, columns: 4, rows: 3 } },
+      ),
+    ).encounter;
+    expect(enc.combatants.every((c) => c.position === undefined)).toBe(true);
+  });
+});

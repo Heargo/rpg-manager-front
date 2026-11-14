@@ -297,7 +297,7 @@
         [filter]="true"
         [showToggleAll]="false"
         [ngModel]="chosen()"
-        (ngModelChange)="chosen.set($event ?? [])"
+        (ngModelChange)="pickCharacters($event)"
         [placeholder]="'combat.start.placeholder' | transloco"
       >
         <ng-template #item let-option>
@@ -376,6 +376,16 @@
       }
     } @else {
       <p class="hint">{{ "combat.start.noNpcs" | transloco }}</p>
+    }
+    @if (slots().length) {
+      <app-combat-setup-grid
+        [slots]="slots()"
+        [positions]="placed()"
+        (positionsChange)="placed.set($event)"
+      />
+      <p class="hint" data-testid="place-hint">
+        {{ "combat.start.placeHint" | transloco }}
+      </p>
     }
     <button
       pButton

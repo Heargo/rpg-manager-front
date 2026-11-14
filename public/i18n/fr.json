@@ -1464,7 +1464,8 @@
       "caster-not-found": "Ce combattant n'est pas dans le combat.",
       "skill-not-known": "Ce combattant ne connaît pas cette compétence.",
       "skill-not-active": "Seules les compétences actives s'utilisent en combat.",
-      "target-not-found": "Cette cible n'est pas dans le combat."
+      "target-not-found": "Cette cible n'est pas dans le combat.",
+      "badPositions": "Placement invalide"
     },
     "order": "Ordre des tours",
     "round": "Round {{round}}",
@@ -1486,7 +1487,8 @@
       "count": "Nombre d’exemplaires",
       "action": "Lancer la rencontre",
       "noCharacters": "Aucun personnage dans ce monde pour l'instant.",
-      "noNpcs": "Aucun PNJ dans le catalogue pour l'instant."
+      "noNpcs": "Aucun PNJ dans le catalogue pour l'instant.",
+      "placeHint": "Glissez les pions pour les placer"
     },
     "initiative": {
       "label": "Initiative",

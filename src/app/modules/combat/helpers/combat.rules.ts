@@ -30,7 +30,8 @@ export type CombatError =
   | 'caster-not-found'
   | 'skill-not-known'
   | 'skill-not-active'
-  | 'target-not-found';
+  | 'target-not-found'
+  | 'badPositions';
 
 export type CombatResult<T> =
   { ok: true; encounter: T } | { ok: false; error: CombatError };
@@ -38,6 +39,8 @@ export type CombatResult<T> =
 export interface EncounterPicks {
   characterIds: string[];
   npcs: { npcId: string; count: number; side: Exclude<CombatSide, 'party'> }[];
+  /** Cells by slot key (`character:<id>`, `npc:<id>:<n>`); used with the grid on. */
+  positions?: Record<string, { x: number; y: number }>;
 }
 
 /** The dice of a roll; a one-sided die is not random, so it is just its only face. */
@@ -156,6 +159,26 @@ export function startEncounter(
       same(a.name, world.combat.lifeAttribute),
   );
   if (!life) return { ok: false, error: 'life-attribute-required' };
+  const grid = world.combat.grid;
+  const positions = grid.enabled ? (picks.positions ?? {}) : {};
+  const given = Object.values(positions);
+  if (
+    given.some(
+      (c) =>
+        !Number.isInteger(c.x) ||
+        !Number.isInteger(c.y) ||
+        c.x < 0 ||
+        c.y < 0 ||
+        c.x >= grid.columns ||
+        c.y >= grid.rows,
+    ) ||
+    new Set(given.map((c) => `${c.x},${c.y}`)).size !== given.length
+  )
+    return { ok: false, error: 'badPositions' };
+  const at = (key: string) => {
+    const cell = positions[key];
+    return cell ? { position: { x: cell.x, y: cell.y } } : {};
+  };
   const combatants: Combatant[] = [];
   for (const id of picks.characterIds) {
     const character = world.characters.find((c) => c.id === id);
@@ -173,6 +196,7 @@ export function startEncounter(
         character.classBonuses,
       ),
     );
+    Object.assign(combatants[combatants.length - 1], at(`character:${id}`));
   }
   for (const pick of picks.npcs) {
     const npc = world.npcs.find((n) => n.id === pick.npcId);
@@ -188,6 +212,10 @@ export function startEncounter(
           { id: newId(), name, side: pick.side, npcId: npc.id },
           undefined,
         ),
+      );
+      Object.assign(
+        combatants[combatants.length - 1],
+        at(`npc:${npc.id}:${i}`),
       );
     }
   }

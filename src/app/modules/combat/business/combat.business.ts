@@ -77,6 +77,16 @@ export class CombatBusiness {
     this.room.$isHost() ? (this.session.$world()?.npcs ?? []) : [],
   );
 
+  /** The world's grid while it is on (game master's start form), null otherwise. */
+  readonly $grid = computed<{
+    columns: number;
+    rows: number;
+    imageId?: string;
+  } | null>(() => {
+    const grid = this.session.$world()?.combat.grid;
+    return this.room.$isHost() && grid?.enabled ? grid : null;
+  });
+
   /** The skills a device can read: the whole catalogue for the game master, the player's own once loaded. */
   readonly $skills = computed<Skill[]>(() =>
     this.room.$isHost()

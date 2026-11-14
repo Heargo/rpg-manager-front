@@ -35,7 +35,7 @@ import {
   useSkill,
   withoutUndo,
 } from '../helpers/combat.rules';
-import { canMoveTo, placeUnplaced } from '../helpers/combat-grid.rules';
+import { Cell, canMoveTo, placeUnplaced } from '../helpers/combat-grid.rules';
 import { projectEncounter } from '../helpers/combat-view.rules';
 import { CombatEdit, CombatRewards, Encounter } from '../models/combat';
 import { CombatService } from '../services/combat.service';
@@ -89,7 +89,24 @@ function parsePicks(payload: unknown): EncounterPicks {
         side: side(n['side']),
       };
     }),
+    ...(p['positions'] === undefined
+      ? {}
+      : { positions: parsePositions(p['positions']) }),
   };
+}
+
+function parsePositions(value: unknown): Record<string, Cell> {
+  const entries = Object.entries(body(value));
+  if (entries.length > 200) throw invalid();
+  return Object.fromEntries(
+    entries.map(([key, cell]) => {
+      const c = body(cell);
+      return [
+        key,
+        { x: whole(c['x'], -1000, 1000), y: whole(c['y'], -1000, 1000) },
+      ];
+    }),
+  );
 }
 
 function side(value: unknown): 'ally' | 'enemy' {
