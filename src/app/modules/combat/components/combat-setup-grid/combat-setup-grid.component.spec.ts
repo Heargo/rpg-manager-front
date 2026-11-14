@@ -1,3 +1,4 @@
+import { ImageStorageService } from '../../../../core/services/image-storage.service';
 import { combatTable, mount } from '../../../../../testing/combat-table';
 import { settle } from '../../../../../testing/game-device';
 import { WorldSessionBusiness } from '../../../world/business/world-session.business';
@@ -124,5 +125,51 @@ describe('CombatSetupGridComponent', () => {
     await settle();
     expect(at('character:ada')).toEqual(['0', '0']);
     expect(emitted).toEqual([]);
+  });
+  describe('a token with a portrait', () => {
+    const pointer = (target: Element, type: string, x: number, y: number) =>
+      target.dispatchEvent(
+        Object.assign(
+          new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y }),
+          { pointerId: 1 },
+        ),
+      );
+
+    const openWithPortrait = async () => {
+      URL.createObjectURL = () => 'blob:portrait';
+      const id = await table.gm.injector
+        .get(ImageStorageService)
+        .put(new Blob(['png'], { type: 'image/png' }));
+      await open({
+        slots: slots.map((s) => (s.portraitId ? { ...s, portraitId: id } : s)),
+      });
+      await settle();
+    };
+
+    it('renders an image that cannot start a native drag, and cancels dragstart on the token', async () => {
+      await openWithPortrait();
+
+      const img = token('character:bob').querySelector('img')!;
+      expect(img.getAttribute('draggable')).toBe('false');
+      const event = new Event('dragstart', { bubbles: true, cancelable: true });
+      img.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it('moves with pointer events like a token with an initial', async () => {
+      await openWithPortrait();
+      const board = el.querySelector<HTMLElement>('[data-testid="setup-grid"]')!;
+      board.getBoundingClientRect = () =>
+        ({ left: 0, top: 0, width: 600, height: 400, right: 600, bottom: 400 }) as DOMRect;
+
+      pointer(token('character:bob'), 'pointerdown', 50, 150);
+      pointer(token('character:bob'), 'pointermove', 250, 250);
+      pointer(token('character:bob'), 'pointerup', 250, 250);
+      await settle();
+
+      expect(at('character:bob')).toEqual(['2', '2']);
+      expect(emitted).toHaveLength(1);
+      expect(emitted[0]['character:bob']).toEqual({ x: 2, y: 2 });
+    });
   });
 });
