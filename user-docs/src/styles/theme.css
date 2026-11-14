@@ -1,13 +1,10 @@
 /*
- * The app's look (src/app/ui.preset.ts and src/styles.scss): the bordeaux primary, the paper surfaces and the
- * Recursive font, mapped onto Starlight's variables. Dark is Starlight's default, light is `data-theme='light'`.
+ * The app's colors (src/app/ui.preset.ts and src/styles.scss): the bordeaux primary and the paper surfaces, mapped
+ * onto Starlight's color variables. Only colors are overridden, Starlight keeps its own sizes, spacing and fonts.
+ * Dark is Starlight's default, light is `data-theme='light'`.
  */
 
 :root {
-  --sl-font: 'Recursive', system-ui, sans-serif;
-  --sl-font-mono: 'Recursive', ui-monospace, monospace;
-  font-variation-settings: 'MONO' 0, 'CASL' 0;
-
   /* dark: the app's surface scale inverted, primary lightened for contrast */
   --sl-color-accent-low: #2d0404;
   --sl-color-accent: #ef5252;
@@ -47,13 +44,7 @@
   --sl-color-blue-high: #1d1c16;
 }
 
-/* code samples keep a real monospace */
-code,
-pre {
-  font-variation-settings: 'MONO' 1;
-}
-
-/* buttons like the app's: rounded, the primary filled */
-.sl-link-button {
-  border-radius: 6px;
+/* link cards on the navbar's lighter surface, not the page background */
+.sl-link-card {
+  background-color: var(--sl-color-bg-nav);
 }

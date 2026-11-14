@@ -17,16 +17,6 @@ export default defineConfig({
         en: { label: 'English', lang: 'en' },
       },
       customCss: ['./src/styles/theme.css'],
-      head: [
-        { tag: 'link', attrs: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
-        {
-          tag: 'link',
-          attrs: {
-            rel: 'stylesheet',
-            href: 'https://fonts.googleapis.com/css2?family=Recursive:wght@300..1000&display=swap',
-          },
-        },
-      ],
       sidebar: [
         {
           label: 'Commencer',

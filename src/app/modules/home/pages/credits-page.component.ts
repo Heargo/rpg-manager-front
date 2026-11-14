@@ -72,9 +72,13 @@ export const CREDIT_LIBRARIES = [
           >{{ 'credits.sampleHeroSuffix' | transloco }}
         </p>
       </div>
-      <div class="card" data-test="sprites">
+      <div class="card illustration" data-test="sprites">
         <p>
           {{ 'credits.spritesPrefix' | transloco }}
+          <a [href]="spritesPackUrl" target="_blank" rel="noopener noreferrer"
+            >Fantasy items pack</a
+          >
+          {{ 'credits.spritesBy' | transloco }}
           <a [href]="ccByUrl" target="_blank" rel="noopener noreferrer"
             >CC BY 4.0</a
           >{{ 'credits.spritesSuffix' | transloco }}
@@ -124,6 +128,9 @@ export const CREDIT_LIBRARIES = [
       padding: 0;
       list-style: none;
     }
+    .card + .illustration {
+      margin-top: 0.75rem;
+    }
     .lib {
       display: flex;
       flex-direction: column;
@@ -145,5 +152,6 @@ export class CreditsPageComponent {
   }
 
   protected readonly yuumeiUrl = 'https://www.yuumeiart.com/';
+  protected readonly spritesPackUrl = 'https://fscibe.itch.io/fantasy-items-pack';
   protected readonly ccByUrl = 'https://creativecommons.org/licenses/by/4.0/';
 }

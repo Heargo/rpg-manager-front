@@ -16,9 +16,9 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 <CardGrid>
-  <Card title="Prepare" icon="pencil">Worlds, items, NPCs, classes and skills.</Card>
-  <Card title="Play" icon="rocket">Hosting, the table, characters, combat and dice.</Card>
+  <LinkCard title="Prepare" href="/docs/en/worlds/" description="Worlds, items, NPCs, classes and skills." />
+  <LinkCard title="Play" href="/docs/en/rooms/" description="Hosting, the table, characters, combat and dice." />
 </CardGrid>

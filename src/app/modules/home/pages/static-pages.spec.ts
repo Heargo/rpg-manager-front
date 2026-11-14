@@ -61,6 +61,7 @@ describe('static pages', () => {
       expect(sprites.textContent).toContain('Florian Sciberras');
       expect(sprites.textContent).toContain('CC BY 4.0');
       expect(sprites.textContent).not.toMatch(/credits\./);
+      expect(sprites.querySelector('a[href="https://fscibe.itch.io/fantasy-items-pack"]')).not.toBeNull();
       expect(sprites.querySelector('a[href="https://creativecommons.org/licenses/by/4.0/"]')).not.toBeNull();
     }
   });
