@@ -4,11 +4,15 @@ import {
   computed,
   input,
   output,
+  signal,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ButtonModule } from '@openng/optimus-ui/button';
+import { DialogModule } from '@openng/optimus-ui/dialog';
 import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
+import { ItemDraft } from '../../../../core/models/item';
+import { ItemCardComponent } from '../../../item/components/item-card/item-card.component';
 import { InventoryItem } from '../../../world/models/world';
 import { PublicShop } from '../../models/merchant';
 import { sellPrice } from '../../helpers/merchant.rules';
@@ -20,7 +24,9 @@ import { sellPrice } from '../../helpers/merchant.rules';
   imports: [
     TranslocoPipe,
     ButtonModule,
+    DialogModule,
     CoinDisplayComponent,
+    ItemCardComponent,
     StoredImageComponent,
   ],
   template: `
@@ -47,6 +53,18 @@ import { sellPrice } from '../../helpers/merchant.rules';
             data-field="price"
             [copper]="entry.price"
           />
+          <button
+            pButton
+            type="button"
+            data-action="details"
+            icon="pi pi-eye"
+            size="small"
+            [text]="true"
+            [rounded]="true"
+            severity="secondary"
+            [attr.aria-label]="'merchant.shop.details' | transloco"
+            (click)="viewed.set(entry.item)"
+          ></button>
           <button
             pButton
             type="button"
@@ -81,6 +99,18 @@ import { sellPrice } from '../../helpers/merchant.rules';
           <button
             pButton
             type="button"
+            data-action="details"
+            icon="pi pi-eye"
+            size="small"
+            [text]="true"
+            [rounded]="true"
+            severity="secondary"
+            [attr.aria-label]="'merchant.shop.details' | transloco"
+            (click)="viewed.set(entry.item)"
+          ></button>
+          <button
+            pButton
+            type="button"
             data-action="sell"
             icon="pi pi-wallet"
             size="small"
@@ -93,6 +123,20 @@ import { sellPrice } from '../../helpers/merchant.rules';
         <p class="empty">{{ 'merchant.shop.nothingToSell' | transloco }}</p>
       }
     </section>
+
+    <p-dialog
+      [visible]="!!viewed()"
+      (visibleChange)="!$event && viewed.set(null)"
+      [modal]="true"
+      [dismissableMask]="true"
+      appendTo="body"
+      [header]="'merchant.shop.details' | transloco"
+      [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
+    >
+      @if (viewed(); as item) {
+        <app-item-card [item]="item" />
+      }
+    </p-dialog>
   `,
   styles: `
     :host {
@@ -146,6 +190,9 @@ export class MerchantShopComponent {
   readonly buy = output<string>();
   /** Emits the inventory id. */
   readonly sell = output<string>();
+
+  /** The item whose details dialog is open, from the stock or the player's bag. */
+  protected readonly viewed = signal<ItemDraft | null>(null);
 
   /** The player's unequipped items, with what the merchant pays for each. */
   protected readonly sellable = computed(() =>

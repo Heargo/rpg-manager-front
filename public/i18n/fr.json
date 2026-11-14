@@ -947,7 +947,8 @@
       "sell": "Vendre au marchand",
       "sellAction": "Vendre",
       "noStock": "Rien à vendre.",
-      "nothingToSell": "Rien à vendre."
+      "nothingToSell": "Rien à vendre.",
+      "details": "Détails"
     },
     "table": {
       "visit": "Boutique"

@@ -9,14 +9,26 @@ import { MerchantShopComponent } from './merchant-shop.component';
  * (the player's copper) and `inventory` (the player's InventoryItem[]). Renders `[data-testid="shop-money"]`,
  * one `[data-testid="shop-stock-item"]` per stock entry (name, price, `[data-action="buy"]`, disabled when `money` is below the
  * price), one `[data-testid="shop-sell-item"]` per unequipped inventory item (name, what the merchant pays: price x `sellRatio`,
- * `[data-action="sell"]`). Outputs `buy` and `sell` emit the stock id / inventory id.
+ * `[data-action="sell"]`). Every row has a `[data-action="details"]` eye button that opens the item's card in a dialog. Outputs `buy` and `sell` emit the stock id / inventory id.
  */
 const item = (id: string, price: number) => ({
-  id, name: id, description: '', rarity: 'common' as const, type: 'item' as const, slot: 'none' as const, price, modifiers: [],
+  id,
+  name: id,
+  description: '',
+  rarity: 'common' as const,
+  type: 'item' as const,
+  slot: 'none' as const,
+  price,
+  modifiers: [],
 });
 const shop: PublicShop = {
-  npcId: 'm1', name: 'Mira', sellRatio: 0.5,
-  stock: [{ id: 'inv-potion', item: item('Potion', 20), price: 30 }, { id: 'inv-crown', item: item('Crown', 500), price: 750 }],
+  npcId: 'm1',
+  name: 'Mira',
+  sellRatio: 0.5,
+  stock: [
+    { id: 'inv-potion', item: item('Potion', 20), price: 30 },
+    { id: 'inv-crown', item: item('Crown', 500), price: 750 },
+  ],
 };
 const owned: InventoryItem[] = [
   { id: 'inv-gem', item: item('Gem', 14), equipped: false, position: 0 },
@@ -24,7 +36,10 @@ const owned: InventoryItem[] = [
 ];
 
 async function render(money: number) {
-  TestBed.configureTestingModule({ imports: [MerchantShopComponent], providers: TEST_PROVIDERS });
+  TestBed.configureTestingModule({
+    imports: [MerchantShopComponent],
+    providers: TEST_PROVIDERS,
+  });
   const fixture = TestBed.createComponent(MerchantShopComponent);
   fixture.componentRef.setInput('shop', shop);
   fixture.componentRef.setInput('money', money);
@@ -35,7 +50,14 @@ async function render(money: number) {
   fixture.componentInstance.sell.subscribe((id: string) => sold.push(id));
   await fixture.whenStable();
   const el = fixture.nativeElement as HTMLElement;
-  return { el, bought, sold, rows: (name: string) => Array.from(el.querySelectorAll<HTMLElement>(`[data-testid="${name}"]`)) };
+  return {
+    el,
+    fixture,
+    bought,
+    sold,
+    rows: (name: string) =>
+      Array.from(el.querySelectorAll<HTMLElement>(`[data-testid="${name}"]`)),
+  };
 }
 
 describe('MerchantShopComponent', () => {
@@ -48,16 +70,20 @@ describe('MerchantShopComponent', () => {
     expect(stock[0].textContent).toContain('Potion');
     expect(stock[0].textContent).toContain('30');
     expect(stock[1].textContent).toContain('Crown');
-    const crownCoins = Array.from(stock[1].querySelectorAll('app-coin-display [data-coin]')).map((coin) => [
-      coin.getAttribute('data-coin'),
-      coin.textContent!.trim(),
+    const crownCoins = Array.from(
+      stock[1].querySelectorAll('app-coin-display [data-coin]'),
+    ).map((coin) => [coin.getAttribute('data-coin'), coin.textContent!.trim()]);
+    expect(crownCoins).toEqual([
+      ['silver', '7'],
+      ['copper', '50'],
     ]);
-    expect(crownCoins).toEqual([['silver', '7'], ['copper', '50']]);
   });
 
   it('emits buy for an affordable item and disables an unaffordable one', async () => {
     const { rows, bought } = await render(100);
-    const [potion, crown] = rows('shop-stock-item').map((row) => row.querySelector('[data-action="buy"]') as HTMLButtonElement);
+    const [potion, crown] = rows('shop-stock-item').map(
+      (row) => row.querySelector('[data-action="buy"]') as HTMLButtonElement,
+    );
     expect(crown.disabled).toBe(true);
     expect(potion.disabled).toBe(false);
     potion.click();
@@ -70,7 +96,27 @@ describe('MerchantShopComponent', () => {
     expect(items).toHaveLength(1);
     expect(items[0].textContent).toContain('Gem');
     expect(items[0].textContent).toContain('7');
-    (items[0].querySelector('[data-action="sell"]') as HTMLButtonElement).click();
+    (
+      items[0].querySelector('[data-action="sell"]') as HTMLButtonElement
+    ).click();
     expect(sold).toEqual(['inv-gem']);
+  });
+
+  it('opens the item card from the eye button of a stock row and of a sell row', async () => {
+    const { rows, fixture } = await render(100);
+    const open = async (row: HTMLElement) => {
+      (
+        row.querySelector('[data-action="details"]') as HTMLButtonElement
+      ).click();
+      await fixture.whenStable();
+      return document.body.querySelector('app-item-card');
+    };
+    expect(document.body.querySelector('app-item-card')).toBeNull();
+    expect((await open(rows('shop-stock-item')[1]))?.textContent).toContain(
+      'Crown',
+    );
+    expect((await open(rows('shop-sell-item')[0]))?.textContent).toContain(
+      'Gem',
+    );
   });
 });

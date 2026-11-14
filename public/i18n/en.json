@@ -947,7 +947,8 @@
       "sell": "Sell to the merchant",
       "sellAction": "Sell",
       "noStock": "Nothing for sale.",
-      "nothingToSell": "Nothing to sell."
+      "nothingToSell": "Nothing to sell.",
+      "details": "Details"
     },
     "table": {
       "visit": "Shop"
