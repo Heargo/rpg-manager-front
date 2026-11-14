@@ -9,7 +9,7 @@ import {
   untracked,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -25,7 +25,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
   host: { '[class.docked]': 'docked()' },
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputNumberModule,
     CombatActionsComponent,
@@ -33,7 +33,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
   ],
   template: `
     @if (state(); as encounter) {
-      <ol class="order" [attr.aria-label]="'combat.order' | transloco">
+      <ol class="order" [attr.aria-label]="'combat.order' | translate">
         @for (combatant of encounter.combatants; track combatant.id) {
           <li
             data-testid="order-item"
@@ -58,7 +58,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
                 {{ combatant.name }}
                 @if (combatant.level !== undefined) {
                   <small data-field="level">{{
-                    'combat.levelShort' | transloco: { level: combatant.level }
+                    'combat.levelShort' | translate: { level: combatant.level }
                   }}</small>
                 }
               </button>
@@ -73,13 +73,13 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
       @if (myTurn()) {
         <div class="banner" data-testid="your-turn">
           <i class="pi pi-flag"></i>
-          <strong>{{ 'combat.yourTurn' | transloco }}</strong>
+          <strong>{{ 'combat.yourTurn' | translate }}</strong>
           <button
             pButton
             type="button"
             data-action="end-turn"
             icon="pi pi-step-forward"
-            [label]="'combat.endTurn' | transloco"
+            [label]="'combat.endTurn' | translate"
             (click)="endTurn()"
           ></button>
         </div>
@@ -88,7 +88,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
       @if (encounter.initiativeMode === 'typed') {
         <div class="initiative">
           <label for="player-initiative">{{
-            'combat.initiative.yours' | transloco
+            'combat.initiative.yours' | translate
           }}</label>
           <p-inputnumber
             inputId="player-initiative"
@@ -102,7 +102,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
             type="button"
             data-action="initiative-set"
             icon="pi pi-check"
-            [label]="'combat.initiative.set' | transloco"
+            [label]="'combat.initiative.set' | translate"
             [disabled]="initiative() === null"
             (click)="setInitiative()"
           ></button>
@@ -114,7 +114,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
           <i class="pi pi-sparkles"></i>
           {{
             'combat.roll'
-              | transloco
+              | translate
                 : {
                     caster: last.caster,
                     skill: last.skill,
@@ -126,7 +126,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
       }
       @if (waiting()) {
         <p class="waiting" data-testid="waiting-gm">
-          <i class="pi pi-hourglass"></i> {{ 'combat.waitingGm' | transloco }}
+          <i class="pi pi-hourglass"></i> {{ 'combat.waitingGm' | translate }}
         </p>
       }
 
@@ -143,7 +143,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
       } @else {
         <p class="waiting" data-testid="waiting-turn">
           <i class="pi pi-hourglass"></i>
-          {{ 'combat.waitingTurn' | transloco: { name: activeName() } }}
+          {{ 'combat.waitingTurn' | translate: { name: activeName() } }}
         </p>
       }
     }

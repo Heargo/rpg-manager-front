@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService, MenuItem } from '@openng/optimus-ui/api';
 import { BadgeModule } from '@openng/optimus-ui/badge';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -71,7 +71,7 @@ const ITEM_ICONS: Record<string, string> = {
   imports: [
     NgTemplateOutlet,
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     BadgeModule,
     ButtonModule,
     ContextMenuModule,

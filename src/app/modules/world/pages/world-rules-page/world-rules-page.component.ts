@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -56,7 +56,7 @@ const PRESETS: readonly (FormulaPreset | 'custom')[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputNumberModule,
     InputTextModule,

@@ -5,7 +5,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { CardBarComponent } from '../../../../core/components/card-bar/card-bar.component';
@@ -22,7 +22,7 @@ import { PublicNpc } from '../../../npc/models/npc';
   selector: 'app-table-npc-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     TagModule,
     CardBarComponent,
@@ -45,7 +45,7 @@ import { PublicNpc } from '../../../npc/models/npc';
                 <p-tag
                   [severity]="severity()"
                   [value]="
-                    'character.sheet.levelBadge' | transloco: { level: n.level }
+                    'character.sheet.levelBadge' | translate: { level: n.level }
                   "
                 />
               </span>
@@ -60,8 +60,8 @@ import { PublicNpc } from '../../../npc/models/npc';
                 size="small"
                 [rounded]="true"
                 [text]="true"
-                [attr.aria-label]="'npc.catalogue.view' | transloco"
-                [attr.title]="'npc.catalogue.view' | transloco"
+                [attr.aria-label]="'npc.catalogue.view' | translate"
+                [attr.title]="'npc.catalogue.view' | translate"
                 (click)="view.emit(n.id)"
               ></button>
             }
@@ -73,7 +73,7 @@ import { PublicNpc } from '../../../npc/models/npc';
               kind="life"
               data-field="life-bar"
               [attr.data-percent]="bar.percent"
-              [name]="'npc.card.life' | transloco"
+              [name]="'npc.card.life' | translate"
               [percent]="bar.percent"
               [current]="n.life?.current"
               [max]="n.life?.max"
@@ -89,7 +89,7 @@ import { PublicNpc } from '../../../npc/models/npc';
       }
       @if (n.attributes?.length) {
         <section class="box">
-          <h4>{{ 'npc.card.attributes' | transloco }}</h4>
+          <h4>{{ 'npc.card.attributes' | translate }}</h4>
           <ul class="attributes">
             @for (attribute of n.attributes; track attribute.name) {
               <li data-field="attribute">
@@ -102,7 +102,7 @@ import { PublicNpc } from '../../../npc/models/npc';
       }
       @if (n.equipment; as items) {
         <section class="box">
-          <h4>{{ 'npc.card.equipment' | transloco }}</h4>
+          <h4>{{ 'npc.card.equipment' | translate }}</h4>
           @if (items.length) {
             <ul data-field="equipment">
               @for (item of items; track $index) {
@@ -111,7 +111,7 @@ import { PublicNpc } from '../../../npc/models/npc';
             </ul>
           } @else {
             <p class="muted" data-field="equipment">
-              {{ 'npc.card.noEquipment' | transloco }}
+              {{ 'npc.card.noEquipment' | translate }}
             </p>
           }
         </section>
@@ -123,7 +123,7 @@ import { PublicNpc } from '../../../npc/models/npc';
           class="shop"
           data-action="visit-shop"
           icon="pi pi-shop"
-          [label]="'merchant.table.visit' | transloco"
+          [label]="'merchant.table.visit' | translate"
           (click)="visitShop.emit(n.id)"
         ></button>
       }

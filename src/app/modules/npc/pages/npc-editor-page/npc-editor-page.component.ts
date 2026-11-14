@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -17,7 +17,7 @@ import { Npc } from '../../models/npc';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     MessageModule,
     NpcEditorComponent,
@@ -25,12 +25,12 @@ import { Npc } from '../../models/npc';
   template: `
     <div class="main-container editor">
       <header>
-        <h1>{{ 'npc.editor.title' | transloco }}</h1>
+        <h1>{{ 'npc.editor.title' | translate }}</h1>
         @if (tool) {
           <p class="hint">
             {{
               (npcId ? 'npc.editor.toolIntroEdit' : 'npc.editor.toolIntro')
-                | transloco
+                | translate
             }}
           </p>
         }
@@ -38,21 +38,21 @@ import { Npc } from '../../models/npc';
           icon="pi pi-arrow-left"
           severity="secondary"
           [text]="true"
-          [label]="'npc.editor.back' | transloco"
+          [label]="'npc.editor.back' | translate"
           [routerLink]="listPath"
         />
       </header>
       @if (catalogue.$world(); as world) {
         @if (npcId && !npc()) {
           <p-message severity="warn">{{
-            'npc.editor.notFound' | transloco
+            'npc.editor.notFound' | translate
           }}</p-message>
         } @else {
           <app-npc-editor [world]="world" [npc]="npc()" (save)="save($event)" />
         }
       } @else {
         <p-message severity="info">{{
-          'npc.editor.notHosting' | transloco
+          'npc.editor.notHosting' | translate
         }}</p-message>
       }
     </div>

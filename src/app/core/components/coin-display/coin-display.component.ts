@@ -4,21 +4,21 @@ import {
   computed,
   input,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { coinDisplayParts } from '../../helpers/money.rules';
 
 /** An amount of copper as gold, silver and copper with their coin icons. */
 @Component({
   selector: 'app-coin-display',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslatePipe],
   template: `
     @for (part of parts(); track part.coin) {
       <span class="coin" [attr.data-coin]="part.coin">
         {{ part.amount }}
         <img
           [src]="'assets/icons/money/' + part.coin + '-coin.svg'"
-          [alt]="'coin.' + part.coin | transloco"
+          [alt]="'coin.' + part.coin | translate"
         />
       </span>
     }

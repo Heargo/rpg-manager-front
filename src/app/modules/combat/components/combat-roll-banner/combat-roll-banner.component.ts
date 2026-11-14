@@ -1,6 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { COMBAT_BANNER_Z_INDEX } from '../../../dice/models/dice-api';
 import { CombatRollsBusiness } from '../../business/combat-rolls.business';
@@ -12,7 +12,7 @@ const MAX_TARGET_BUBBLES = 4;
 @Component({
   selector: 'app-combat-roll-banner',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgTemplateOutlet, TranslocoPipe, StoredImageComponent],
+  imports: [NgTemplateOutlet, TranslatePipe, StoredImageComponent],
   host: { '[style.z-index]': 'zIndex' },
   template: `
     @if (rolls.$banner(); as banner) {
@@ -20,7 +20,7 @@ const MAX_TARGET_BUBBLES = 4;
         class="banner"
         data-testid="roll-banner"
         aria-live="polite"
-        [attr.aria-label]="'combat.banner.label' | transloco"
+        [attr.aria-label]="'combat.banner.label' | translate"
       >
         <span class="who">
           <ng-container
@@ -64,7 +64,7 @@ const MAX_TARGET_BUBBLES = 4;
                   (result.success
                     ? 'combat.banner.success'
                     : 'combat.banner.failure'
-                  ) | transloco
+                  ) | translate
                 }}</span
               >
             </span>

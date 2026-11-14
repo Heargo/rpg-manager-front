@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -68,7 +68,7 @@ function toDraft(item: Item | undefined): ItemDraft {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputNumberModule,
     InputTextModule,
@@ -82,10 +82,10 @@ function toDraft(item: Item | undefined): ItemDraft {
   template: `
     <p-tabs value="form">
       <p-tablist>
-        <p-tab value="form">{{ 'item.editor.tabForm' | transloco }}</p-tab>
-        <p-tab value="json">{{ 'item.editor.tabJson' | transloco }}</p-tab>
+        <p-tab value="form">{{ 'item.editor.tabForm' | translate }}</p-tab>
+        <p-tab value="json">{{ 'item.editor.tabJson' | translate }}</p-tab>
         <p-tab value="generate">{{
-          'item.editor.tabGenerate' | transloco
+          'item.editor.tabGenerate' | translate
         }}</p-tab>
       </p-tablist>
       <p-tabpanels>
@@ -93,7 +93,7 @@ function toDraft(item: Item | undefined): ItemDraft {
           <div class="form">
             <div class="field image">
               <label for="item-image">{{
-                'item.fields.image' | transloco
+                'item.fields.image' | translate
               }}</label>
               <app-image-picker
                 inputId="item-image"
@@ -111,13 +111,13 @@ function toDraft(item: Item | undefined): ItemDraft {
                 severity="secondary"
                 size="small"
                 [loading]="drawingImage()"
-                [label]="'item.editor.randomImage' | transloco"
+                [label]="'item.editor.randomImage' | translate"
                 (click)="randomImage()"
               ></button>
             </div>
             <div class="field">
               <label for="item-name">{{
-                'item.fields.name' | transloco
+                'item.fields.name' | translate
               }}</label>
               <input
                 pInputText
@@ -130,7 +130,7 @@ function toDraft(item: Item | undefined): ItemDraft {
             </div>
             <div class="field">
               <label for="item-description">{{
-                'item.fields.description' | transloco
+                'item.fields.description' | translate
               }}</label>
               <textarea
                 pTextarea
@@ -144,7 +144,7 @@ function toDraft(item: Item | undefined): ItemDraft {
             <div class="row">
               <div class="field">
                 <label for="item-rarity">{{
-                  'item.fields.rarity' | transloco
+                  'item.fields.rarity' | translate
                 }}</label>
                 <p-select
                   inputId="item-rarity"
@@ -157,7 +157,7 @@ function toDraft(item: Item | undefined): ItemDraft {
               </div>
               <div class="field">
                 <label for="item-type">{{
-                  'item.fields.type' | transloco
+                  'item.fields.type' | translate
                 }}</label>
                 <p-select
                   inputId="item-type"
@@ -171,7 +171,7 @@ function toDraft(item: Item | undefined): ItemDraft {
               @if (draft().type === 'equipment') {
                 <div class="field">
                   <label for="item-slot">{{
-                    'item.fields.slot' | transloco
+                    'item.fields.slot' | translate
                   }}</label>
                   <p-select
                     inputId="item-slot"
@@ -185,7 +185,7 @@ function toDraft(item: Item | undefined): ItemDraft {
               }
               <div class="field">
                 <label for="item-price">{{
-                  'item.fields.price' | transloco
+                  'item.fields.price' | translate
                 }}</label>
                 <app-coin-input
                   id="item-price"
@@ -196,7 +196,7 @@ function toDraft(item: Item | undefined): ItemDraft {
               </div>
             </div>
             <fieldset class="modifiers">
-              <legend>{{ 'item.modifiers' | transloco }}</legend>
+              <legend>{{ 'item.modifiers' | translate }}</legend>
               @for (name of attributeNames(); track name) {
                 <div class="field">
                   <label [for]="'item-mod-' + name">{{ name }}</label>
@@ -215,7 +215,7 @@ function toDraft(item: Item | undefined): ItemDraft {
 
         <p-tabpanel value="json">
           <div class="form">
-            <p class="hint">{{ 'item.editor.jsonHint' | transloco }}</p>
+            <p class="hint">{{ 'item.editor.jsonHint' | translate }}</p>
             <textarea
               pTextarea
               data-field="json"
@@ -238,21 +238,21 @@ function toDraft(item: Item | undefined): ItemDraft {
                 icon="pi pi-copy"
                 severity="secondary"
                 [text]="true"
-                [label]="'ai.copyPrompt' | transloco"
+                [label]="'ai.copyPrompt' | translate"
                 (click)="copyAiPrompt()"
               ></button>
-              <small class="hint">{{ 'ai.copyPromptHint' | transloco }}</small>
+              <small class="hint">{{ 'ai.copyPromptHint' | translate }}</small>
             </div>
           </div>
         </p-tabpanel>
 
         <p-tabpanel value="generate">
           <div class="form">
-            <p class="hint">{{ 'item.editor.generateHint' | transloco }}</p>
+            <p class="hint">{{ 'item.editor.generateHint' | translate }}</p>
             <div class="seed">
               <div class="field">
                 <label for="item-seed">{{
-                  'tools.itemGenerator.seed' | transloco
+                  'tools.itemGenerator.seed' | translate
                 }}</label>
                 <input
                   pInputText
@@ -266,7 +266,7 @@ function toDraft(item: Item | undefined): ItemDraft {
               </div>
               <div class="field">
                 <label for="item-pack">{{
-                  'packs.choiceLabel' | transloco
+                  'packs.choiceLabel' | translate
                 }}</label>
                 <p-select
                   inputId="item-pack"
@@ -283,7 +283,7 @@ function toDraft(item: Item | undefined): ItemDraft {
                 type="button"
                 data-action="generate-seed"
                 icon="pi pi-sparkles"
-                [label]="'common.generateFromSeed' | transloco"
+                [label]="'common.generateFromSeed' | translate"
                 (click)="generate()"
               ></button>
               <button
@@ -292,7 +292,7 @@ function toDraft(item: Item | undefined): ItemDraft {
                 data-action="reroll"
                 icon="pi pi-refresh"
                 severity="secondary"
-                [label]="'tools.itemGenerator.reroll' | transloco"
+                [label]="'tools.itemGenerator.reroll' | translate"
                 (click)="reroll()"
               ></button>
             </div>
@@ -311,7 +311,7 @@ function toDraft(item: Item | undefined): ItemDraft {
         data-action="random"
         icon="pi pi-sparkles"
         severity="secondary"
-        [label]="'common.random' | transloco"
+        [label]="'common.random' | translate"
         (click)="reroll()"
       ></button>
       <button
@@ -319,7 +319,7 @@ function toDraft(item: Item | undefined): ItemDraft {
         type="button"
         data-action="save"
         icon="pi pi-save"
-        [label]="'item.editor.save' | transloco"
+        [label]="'item.editor.save' | translate"
         (click)="submit()"
       ></button>
     </div>

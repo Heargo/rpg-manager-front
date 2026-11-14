@@ -18,7 +18,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Skill } from '../../../skill/models/skill';
 import {
   BoardCell,
@@ -58,7 +58,7 @@ const ARROWS: Record<string, BoardCell> = {
   selector: 'app-tree-board',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     CdkDrag,
     CdkDropList,
     CdkDragPreview,
@@ -134,11 +134,11 @@ const ARROWS: Record<string, BoardCell> = {
                   <span class="badges">
                     <span class="badge">{{
                       'class.editor.node.maxLevel'
-                        | transloco: { count: node.maxLevel }
+                        | translate: { count: node.maxLevel }
                     }}</span>
                     <span class="badge level">{{
                       'class.editor.node.level'
-                        | transloco: { count: node.minLevel }
+                        | translate: { count: node.minLevel }
                     }}</span>
                   </span>
                 </div>
@@ -166,7 +166,7 @@ const ARROWS: Record<string, BoardCell> = {
             tabindex="-1"
             aria-hidden="true"
             [attr.data-connector]="node.skillId"
-            [attr.title]="'class.editor.connectHint' | transloco"
+            [attr.title]="'class.editor.connectHint' | translate"
             [style.left.px]="node.x + geometry.nodeWidth / 2 - 22"
             [style.top.px]="node.y + geometry.nodeHeight - 30"
             (cdkDragMoved)="moveLink(node.skillId, $event)"

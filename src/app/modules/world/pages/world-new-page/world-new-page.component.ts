@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CheckboxModule } from '@openng/optimus-ui/checkbox';
@@ -81,7 +81,7 @@ import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
   imports: [
     FormsModule,
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     CheckboxModule,
     FileUploadModule,

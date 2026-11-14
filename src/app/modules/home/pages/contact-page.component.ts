@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -11,7 +11,7 @@ import { ContactBusiness } from '../business/contact.business';
   selector: 'app-contact-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputTextModule,
     MessageModule,
@@ -22,14 +22,14 @@ import { ContactBusiness } from '../business/contact.business';
   template: `
     <main class="page">
       <header class="page-header">
-        <h1>{{ 'contact.title' | transloco }}</h1>
-        <p class="lead">{{ 'contact.intro' | transloco }}</p>
+        <h1>{{ 'contact.title' | translate }}</h1>
+        <p class="lead">{{ 'contact.intro' | translate }}</p>
       </header>
       @if (!contact.available) {
         <div class="card unavailable">
           <p-message data-test="contact-unavailable" severity="info">
             <i class="pi pi-info-circle" aria-hidden="true"></i>
-            {{ 'contact.unavailable' | transloco }}
+            {{ 'contact.unavailable' | translate }}
           </p-message>
         </div>
       } @else {
@@ -38,7 +38,7 @@ import { ContactBusiness } from '../business/contact.business';
           (submit)="$event.preventDefault(); contact.submit()"
           novalidate
         >
-          <label for="contact-name">{{ 'contact.name' | transloco }}</label>
+          <label for="contact-name">{{ 'contact.name' | translate }}</label>
           <input
             pInputText
             id="contact-name"
@@ -49,10 +49,10 @@ import { ContactBusiness } from '../business/contact.business';
           />
           @if (contact.submitted() && !contact.nameValid()) {
             <small class="error">{{
-              'contact.nameRequired' | transloco
+              'contact.nameRequired' | translate
             }}</small>
           }
-          <label for="contact-email">{{ 'contact.email' | transloco }}</label>
+          <label for="contact-email">{{ 'contact.email' | translate }}</label>
           <input
             pInputText
             id="contact-email"
@@ -64,11 +64,11 @@ import { ContactBusiness } from '../business/contact.business';
           />
           @if (contact.submitted() && !contact.emailValid()) {
             <small class="error">{{
-              'contact.emailInvalid' | transloco
+              'contact.emailInvalid' | translate
             }}</small>
           }
           <label for="contact-message">{{
-            'contact.message' | transloco
+            'contact.message' | translate
           }}</label>
           <textarea
             pTextarea
@@ -80,7 +80,7 @@ import { ContactBusiness } from '../business/contact.business';
           ></textarea>
           @if (contact.submitted() && !contact.messageValid()) {
             <small class="error">{{
-              'contact.messageRequired' | transloco
+              'contact.messageRequired' | translate
             }}</small>
           }
           <div>
@@ -90,18 +90,18 @@ import { ContactBusiness } from '../business/contact.business';
               data-test="contact-submit"
               [disabled]="contact.status() === 'sending'"
             >
-              {{ 'contact.send' | transloco }}
+              {{ 'contact.send' | translate }}
             </button>
           </div>
           @if (contact.status() === 'success') {
             <p-message data-test="contact-success" severity="success">
               <i class="pi pi-check-circle" aria-hidden="true"></i>
-              {{ 'contact.success' | transloco }}
+              {{ 'contact.success' | translate }}
             </p-message>
           }
           @if (contact.status() === 'error') {
             <p-message data-test="contact-error" severity="error">
-              {{ 'contact.error' | transloco }}
+              {{ 'contact.error' | translate }}
             </p-message>
           }
         </form>

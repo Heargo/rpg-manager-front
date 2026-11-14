@@ -4,7 +4,7 @@ import {
   computed,
   input,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { levelRarity } from '../../../character/helpers/level.rules';
@@ -16,7 +16,7 @@ import { Npc } from '../../models/npc';
 @Component({
   selector: 'app-npc-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, TagModule, StoredImageComponent],
+  imports: [TranslatePipe, TagModule, StoredImageComponent],
   template: `
     @let n = npc();
     <article class="card" [attr.aria-labelledby]="'npc-name-' + n.id">
@@ -35,7 +35,7 @@ import { Npc } from '../../models/npc';
           <p-tag
             [severity]="severity()"
             [value]="
-              'character.sheet.levelBadge' | transloco: { level: n.level }
+              'character.sheet.levelBadge' | translate: { level: n.level }
             "
           />
         </span>
@@ -45,7 +45,7 @@ import { Npc } from '../../models/npc';
           <span data-testid="npc-role" [attr.data-role]="role">
             <p-tag
               severity="secondary"
-              [value]="'npc.role.' + role | transloco"
+              [value]="'npc.role.' + role | translate"
             />
           </span>
         }

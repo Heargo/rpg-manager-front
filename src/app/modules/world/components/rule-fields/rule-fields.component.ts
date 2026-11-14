@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { CheckboxModule } from '@openng/optimus-ui/checkbox';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
@@ -63,7 +63,7 @@ const OFFLINE_FEATURES = Object.keys(
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     InputNumberModule,
     InputTextModule,
     SelectModule,

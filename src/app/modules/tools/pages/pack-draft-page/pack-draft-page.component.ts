@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import {
@@ -57,7 +57,7 @@ const SPRITES_PER_PAGE = 12;
   imports: [
     FormsModule,
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     FileUploadModule,
     InputTextModule,
@@ -70,32 +70,32 @@ const SPRITES_PER_PAGE = 12;
   template: `
     <div class="main-container draft">
       <header>
-        <h1>{{ 'packs.creator.editTitle' | transloco }}</h1>
+        <h1>{{ 'packs.creator.editTitle' | translate }}</h1>
         <a routerLink="/tools/pack-creator">{{
-          'packs.creator.backToDrafts' | transloco
+          'packs.creator.backToDrafts' | translate
         }}</a>
       </header>
       @if (draft(); as current) {
         <p-tabs [value]="tab()" (valueChange)="tab.set($any($event))">
           <p-tablist>
             <p-tab value="details">{{
-              'packs.creator.tabs.details' | transloco
+              'packs.creator.tabs.details' | translate
             }}</p-tab>
             <p-tab value="lists">{{
-              'packs.creator.tabs.lists' | transloco
+              'packs.creator.tabs.lists' | translate
             }}</p-tab>
             <p-tab value="sprites">{{
-              'packs.creator.tabs.sprites' | transloco
+              'packs.creator.tabs.sprites' | translate
             }}</p-tab>
             <p-tab value="publish">{{
-              'packs.creator.tabs.publish' | transloco
+              'packs.creator.tabs.publish' | translate
             }}</p-tab>
           </p-tablist>
           <p-tabpanels>
             <p-tabpanel value="details">
               <div class="form">
                 <label for="draft-language">{{
-                  'packs.creator.language' | transloco
+                  'packs.creator.language' | translate
                 }}</label>
                 <p-select
                   inputId="draft-language"
@@ -107,7 +107,7 @@ const SPRITES_PER_PAGE = 12;
                   (ngModelChange)="patchDetails({ language: $event })"
                 />
                 <label for="draft-name">{{
-                  'packs.creator.name' | transloco
+                  'packs.creator.name' | translate
                 }}</label>
                 <input
                   pInputText
@@ -118,7 +118,7 @@ const SPRITES_PER_PAGE = 12;
                   (ngModelChange)="setName($event)"
                 />
                 <label for="draft-id">{{
-                  'packs.creator.packId' | transloco
+                  'packs.creator.packId' | translate
                 }}</label>
                 <div class="stack">
                   <input
@@ -130,16 +130,16 @@ const SPRITES_PER_PAGE = 12;
                     (ngModelChange)="patchDetails({ id: $event })"
                   />
                   <small class="hint">{{
-                    'packs.creator.packIdHint' | transloco
+                    'packs.creator.packIdHint' | translate
                   }}</small>
                   @if (idWarning(); as warning) {
                     <p-message data-test="draft-id-warning" severity="warn">{{
-                      'packs.creator.idWarning.' + warning | transloco
+                      'packs.creator.idWarning.' + warning | translate
                     }}</p-message>
                   }
                 </div>
                 <label for="draft-description">{{
-                  'packs.creator.description' | transloco
+                  'packs.creator.description' | translate
                 }}</label>
                 <textarea
                   pTextarea
@@ -150,7 +150,7 @@ const SPRITES_PER_PAGE = 12;
                   (ngModelChange)="patchDetails({ description: $event })"
                 ></textarea>
                 <label for="draft-version">{{
-                  'packs.creator.version' | transloco
+                  'packs.creator.version' | translate
                 }}</label>
                 <input
                   pInputText
@@ -161,7 +161,7 @@ const SPRITES_PER_PAGE = 12;
                   (ngModelChange)="patchDetails({ version: $event })"
                 />
                 <label for="draft-author">{{
-                  'packs.creator.author' | transloco
+                  'packs.creator.author' | translate
                 }}</label>
                 <input
                   pInputText
@@ -172,7 +172,7 @@ const SPRITES_PER_PAGE = 12;
                   (ngModelChange)="patchDetails({ author: $event })"
                 />
                 <label for="draft-license">{{
-                  'packs.creator.license' | transloco
+                  'packs.creator.license' | translate
                 }}</label>
                 <input
                   pInputText
@@ -183,7 +183,7 @@ const SPRITES_PER_PAGE = 12;
                   (ngModelChange)="patchDetails({ license: $event })"
                 />
                 <label for="draft-license-url">{{
-                  'packs.creator.licenseUrl' | transloco
+                  'packs.creator.licenseUrl' | translate
                 }}</label>
                 <input
                   pInputText
@@ -194,7 +194,7 @@ const SPRITES_PER_PAGE = 12;
                   (ngModelChange)="patchDetails({ licenseUrl: $event })"
                 />
                 <label for="draft-homepage">{{
-                  'packs.creator.homepage' | transloco
+                  'packs.creator.homepage' | translate
                 }}</label>
                 <input
                   pInputText
@@ -208,11 +208,11 @@ const SPRITES_PER_PAGE = 12;
             </p-tabpanel>
             <p-tabpanel value="lists">
               @if (tab() === 'lists') {
-                <p class="hint">{{ 'packs.creator.listsIntro' | transloco }}</p>
+                <p class="hint">{{ 'packs.creator.listsIntro' | translate }}</p>
                 @for (generator of generators; track generator) {
                   <section class="list">
                     <h3>
-                      {{ 'packs.generator.' + generator | transloco }}
+                      {{ 'packs.generator.' + generator | translate }}
                     </h3>
                     <textarea
                       pTextarea
@@ -220,7 +220,7 @@ const SPRITES_PER_PAGE = 12;
                       rows="6"
                       [attr.data-test]="'wordlist-' + generator"
                       [attr.aria-label]="
-                        'packs.generator.' + generator | transloco
+                        'packs.generator.' + generator | translate
                       "
                       [ngModel]="text(generator)"
                       (ngModelChange)="setText(generator, $event)"
@@ -242,20 +242,20 @@ const SPRITES_PER_PAGE = 12;
                         [auto]="true"
                         [customUpload]="true"
                         chooseIcon="pi pi-upload"
-                        [chooseLabel]="'packs.creator.importFile' | transloco"
+                        [chooseLabel]="'packs.creator.importFile' | translate"
                         (uploadHandler)="importFile(generator, $event)"
                       />
                       <p-button
                         severity="secondary"
                         icon="pi pi-copy"
-                        [label]="'packs.creator.copyBase' | transloco"
+                        [label]="'packs.creator.copyBase' | translate"
                         (onClick)="copyBase(generator)"
                       />
                       <p-button
                         severity="secondary"
                         outlined
                         icon="pi pi-times"
-                        [label]="'packs.creator.clear' | transloco"
+                        [label]="'packs.creator.clear' | translate"
                         (onClick)="setText(generator, '')"
                       />
                     </div>
@@ -266,7 +266,7 @@ const SPRITES_PER_PAGE = 12;
             <p-tabpanel value="sprites">
               @if (tab() === 'sprites') {
                 <p class="hint">
-                  {{ 'packs.creator.spritesIntro' | transloco }}
+                  {{ 'packs.creator.spritesIntro' | translate }}
                 </p>
                 <div class="actions">
                   <p-fileupload
@@ -275,7 +275,7 @@ const SPRITES_PER_PAGE = 12;
                     [auto]="true"
                     [customUpload]="true"
                     chooseIcon="pi pi-image"
-                    [chooseLabel]="'packs.creator.addPng' | transloco"
+                    [chooseLabel]="'packs.creator.addPng' | translate"
                     (uploadHandler)="addPng($event)"
                   />
                   <p-select
@@ -284,14 +284,14 @@ const SPRITES_PER_PAGE = 12;
                     optionValue="id"
                     [ngModel]="chosenSet()"
                     (ngModelChange)="chosenSet.set($event)"
-                    [placeholder]="'packs.creator.fromMine' | transloco"
-                    [emptyMessage]="'packs.creator.noSets' | transloco"
-                    [ariaLabel]="'packs.creator.fromMine' | transloco"
+                    [placeholder]="'packs.creator.fromMine' | translate"
+                    [emptyMessage]="'packs.creator.noSets' | translate"
+                    [ariaLabel]="'packs.creator.fromMine' | translate"
                   />
                   <p-button
                     severity="secondary"
                     icon="pi pi-plus"
-                    [label]="'packs.creator.addSet' | transloco"
+                    [label]="'packs.creator.addSet' | translate"
                     [disabled]="!chosenSet()"
                     (onClick)="addSet()"
                   />
@@ -322,7 +322,7 @@ const SPRITES_PER_PAGE = 12;
                       />
                       <div class="sprite-form">
                         <label>
-                          {{ 'packs.creator.spriteId' | transloco }}
+                          {{ 'packs.creator.spriteId' | translate }}
                           <input
                             pInputText
                             type="text"
@@ -334,11 +334,11 @@ const SPRITES_PER_PAGE = 12;
                         </label>
                         @if (duplicateId(entry.sprite.id)) {
                           <small class="error">{{
-                            'packs.creator.duplicateId' | transloco
+                            'packs.creator.duplicateId' | translate
                           }}</small>
                         }
                         <label>
-                          {{ 'packs.creator.label' | transloco }}
+                          {{ 'packs.creator.label' | translate }}
                           <input
                             pInputText
                             type="text"
@@ -349,7 +349,7 @@ const SPRITES_PER_PAGE = 12;
                           />
                         </label>
                         <label>
-                          {{ 'packs.creator.spriteType' | transloco }}
+                          {{ 'packs.creator.spriteType' | translate }}
                           <p-select
                             [options]="typeOptions()"
                             optionLabel="label"
@@ -361,7 +361,7 @@ const SPRITES_PER_PAGE = 12;
                           />
                         </label>
                         <label>
-                          {{ 'packs.creator.spriteSlot' | transloco }}
+                          {{ 'packs.creator.spriteSlot' | translate }}
                           <p-select
                             [options]="slotOptions()"
                             optionLabel="label"
@@ -373,7 +373,7 @@ const SPRITES_PER_PAGE = 12;
                           />
                         </label>
                         <label>
-                          {{ 'packs.creator.spriteKind' | transloco }}
+                          {{ 'packs.creator.spriteKind' | translate }}
                           <p-select
                             [options]="kindOptions(entry.sprite)"
                             optionLabel="label"
@@ -389,31 +389,31 @@ const SPRITES_PER_PAGE = 12;
                         <p-button
                           severity="secondary"
                           icon="pi pi-palette"
-                          [label]="'packs.creator.editInColorizer' | transloco"
+                          [label]="'packs.creator.editInColorizer' | translate"
                           (onClick)="editInColorizer(entry.sprite.id)"
                         />
                       }
                       <p-button
                         severity="danger"
                         icon="pi pi-trash"
-                        [label]="'packs.creator.removeSprite' | transloco"
+                        [label]="'packs.creator.removeSprite' | translate"
                         (onClick)="removeSprite(entry.index)"
                       />
                     </li>
                   } @empty {
                     <li class="hint">
-                      {{ 'packs.creator.noSprites' | transloco }}
+                      {{ 'packs.creator.noSprites' | translate }}
                     </li>
                   }
                 </ul>
               }
             </p-tabpanel>
             <p-tabpanel value="publish">
-              <p class="hint">{{ 'packs.creator.publishIntro' | transloco }}</p>
+              <p class="hint">{{ 'packs.creator.publishIntro' | translate }}</p>
               <div class="actions">
                 <p-button
                   icon="pi pi-download"
-                  [label]="'packs.creator.installDevice' | transloco"
+                  [label]="'packs.creator.installDevice' | translate"
                   [loading]="publishing() === 'install'"
                   [disabled]="publishing() !== null"
                   (onClick)="install()"
@@ -421,7 +421,7 @@ const SPRITES_PER_PAGE = 12;
                 <p-button
                   severity="secondary"
                   icon="pi pi-file-export"
-                  [label]="'packs.creator.export' | transloco"
+                  [label]="'packs.creator.export' | translate"
                   [loading]="publishing() === 'export'"
                   [disabled]="publishing() !== null"
                   (onClick)="export()"
@@ -438,7 +438,7 @@ const SPRITES_PER_PAGE = 12;
           </p-tabpanels>
         </p-tabs>
       } @else if (missing()) {
-        <p class="hint">{{ 'packs.creator.notFound' | transloco }}</p>
+        <p class="hint">{{ 'packs.creator.notFound' | translate }}</p>
       }
     </div>
   `,

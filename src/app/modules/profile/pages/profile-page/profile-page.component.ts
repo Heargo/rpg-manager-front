@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { AvatarModule } from '@openng/optimus-ui/avatar';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -18,7 +18,7 @@ import { MessageLevel } from '../../../../core/models/toast-level';
   templateUrl: './profile-page.component.html',
   styleUrls: ['./profile-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [FormsModule, TranslocoPipe, AvatarModule, ButtonModule, CardModule, InputTextModule, MessageModule],
+  imports: [FormsModule, TranslatePipe, AvatarModule, ButtonModule, CardModule, InputTextModule, MessageModule],
 })
 export class ProfilePageComponent {
   protected readonly profileBusiness = inject(ProfileBusiness);

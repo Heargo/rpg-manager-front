@@ -1,22 +1,22 @@
 <div class="main-container wizard">
   <header class="wizard-header">
     <a routerLink="/play" class="back"
-      ><i class="pi pi-arrow-left"></i> {{ "play.title" | transloco }}</a
+      ><i class="pi pi-arrow-left"></i> {{ "play.title" | translate }}</a
     >
-    <h1>{{ "world.new.title" | transloco }}</h1>
+    <h1>{{ "world.new.title" | translate }}</h1>
   </header>
 
   <div class="layout">
     <p-stepper [(value)]="step" [linear]="true" class="steps">
       <p-step-list>
         <p-step [value]="1">{{
-          "world.new.steps.identity" | transloco
+          "world.new.steps.identity" | translate
         }}</p-step>
         <p-step [value]="2" [disabled]="!stepValid()[1]">{{
-          "world.new.steps.attributes" | transloco
+          "world.new.steps.attributes" | translate
         }}</p-step>
         <p-step [value]="3" [disabled]="!stepValid()[1] || !stepValid()[2]">{{
-          "world.new.steps.rules" | transloco
+          "world.new.steps.rules" | translate
         }}</p-step>
       </p-step-list>
       <p-step-panels>
@@ -25,30 +25,30 @@
           <ng-template #content>
             <div class="panel">
               <label for="world-name">{{
-                "world.fields.name" | transloco
+                "world.fields.name" | translate
               }}</label>
               <input
                 pInputText
                 id="world-name"
                 [maxlength]="nameMax"
-                [placeholder]="'world.fields.namePlaceholder' | transloco"
+                [placeholder]="'world.fields.namePlaceholder' | translate"
                 [ngModel]="name()"
                 (ngModelChange)="name.set($event)"
               />
               <label for="world-description">{{
-                "world.fields.description" | transloco
+                "world.fields.description" | translate
               }}</label>
               <textarea
                 pTextarea
                 id="world-description"
                 rows="4"
                 [placeholder]="
-                  'world.fields.descriptionPlaceholder' | transloco
+                  'world.fields.descriptionPlaceholder' | translate
                 "
                 [ngModel]="description()"
                 (ngModelChange)="description.set($event)"
               ></textarea>
-              <span class="label">{{ "world.fields.image" | transloco }}</span>
+              <span class="label">{{ "world.fields.image" | translate }}</span>
               <p-fileupload
                 mode="basic"
                 accept="image/*"
@@ -58,7 +58,7 @@
                   (imageId()
                     ? 'world.fields.changeImage'
                     : 'world.fields.chooseImage'
-                  ) | transloco
+                  ) | translate
                 "
                 chooseIcon="pi pi-image"
                 [disabled]="uploading()"
@@ -67,7 +67,7 @@
               <app-image-warning />
               <div class="actions">
                 <p-button
-                  [label]="'world.new.next' | transloco"
+                  [label]="'world.new.next' | translate"
                   icon="pi pi-arrow-right"
                   iconPos="right"
                   [disabled]="!stepValid()[1]"
@@ -82,16 +82,16 @@
         <p-step-panel [value]="2">
           <ng-template #content>
             <div class="panel">
-              <p class="hint">{{ "world.new.attributesHint" | transloco }}</p>
-              <p class="hint">{{ "world.new.formulaHint" | transloco }}</p>
+              <p class="hint">{{ "world.new.attributesHint" | translate }}</p>
+              <p class="hint">{{ "world.new.formulaHint" | translate }}</p>
               <div class="attributes" role="table">
                 <div class="row head" aria-hidden="true">
-                  <span>{{ "world.fields.attributeName" | transloco }}</span>
-                  <span>{{ "world.new.columns.base" | transloco }}</span>
-                  <span>{{ "world.new.columns.progression" | transloco }}</span>
-                  <span>{{ "world.fields.step" | transloco }}</span>
-                  <span>{{ "world.new.columns.cap" | transloco }}</span>
-                  <span>{{ "world.new.columns.max" | transloco }}</span>
+                  <span>{{ "world.fields.attributeName" | translate }}</span>
+                  <span>{{ "world.new.columns.base" | translate }}</span>
+                  <span>{{ "world.new.columns.progression" | translate }}</span>
+                  <span>{{ "world.fields.step" | translate }}</span>
+                  <span>{{ "world.new.columns.cap" | translate }}</span>
+                  <span>{{ "world.new.columns.max" | translate }}</span>
                   <span class="bar-toggles"></span>
                   <span class="remove"></span>
                 </div>
@@ -110,9 +110,9 @@
                         pInputText
                         class="name"
                         [maxlength]="attributeMax"
-                        [placeholder]="'world.fields.attributeName' | transloco"
+                        [placeholder]="'world.fields.attributeName' | translate"
                         [ariaLabel]="
-                          ('world.fields.attributeName' | transloco) +
+                          ('world.fields.attributeName' | translate) +
                           ' ' +
                           (i + 1)
                         "
@@ -131,9 +131,9 @@
                         "
                         [step]="1"
                         inputStyleClass="number"
-                        [pTooltip]="'world.fields.baseValue' | transloco"
+                        [pTooltip]="'world.fields.baseValue' | translate"
                         [ariaLabel]="
-                          ('world.fields.baseValue' | transloco) + ' ' + (i + 1)
+                          ('world.fields.baseValue' | translate) + ' ' + (i + 1)
                         "
                       />
                       <p-select
@@ -143,15 +143,15 @@
                         [ngModel]="attribute.formula.preset"
                         (ngModelChange)="setPreset(attribute.key, $event)"
                         [ariaLabel]="
-                          ('world.fields.formula' | transloco) + ' ' + (i + 1)
+                          ('world.fields.formula' | translate) + ' ' + (i + 1)
                         "
                         appendTo="body"
                       >
                         <ng-template #selectedItem let-preset>{{
-                          "world.formula.presets." + preset | transloco
+                          "world.formula.presets." + preset | translate
                         }}</ng-template>
                         <ng-template #item let-preset>{{
-                          "world.formula.presets." + preset | transloco
+                          "world.formula.presets." + preset | translate
                         }}</ng-template>
                       </p-select>
                       @if (stepOf(attribute.formula) !== null) {
@@ -163,9 +163,9 @@
                           [minFractionDigits]="0"
                           [maxFractionDigits]="2"
                           inputStyleClass="number"
-                          [pTooltip]="'world.fields.step' | transloco"
+                          [pTooltip]="'world.fields.step' | translate"
                           [ariaLabel]="
-                            ('world.fields.step' | transloco) + ' ' + (i + 1)
+                            ('world.fields.step' | translate) + ' ' + (i + 1)
                           "
                         />
                       } @else {
@@ -179,9 +179,9 @@
                         placeholder="∞"
                         [attr.data-testid]="'formula-cap-' + i"
                         [attr.aria-invalid]="capErrors()[i] ? 'true' : null"
-                        [pTooltip]="'world.fields.cap' | transloco"
+                        [pTooltip]="'world.fields.cap' | translate"
                         [ariaLabel]="
-                          ('world.fields.cap' | transloco) + ' ' + (i + 1)
+                          ('world.fields.cap' | translate) + ' ' + (i + 1)
                         "
                         [ngModel]="attribute.cap ?? null"
                         [ngModelOptions]="{ standalone: true }"
@@ -205,7 +205,7 @@
                         @if (previews()[i].levels) {
                           {{
                             "world.formula.max"
-                              | transloco
+                              | translate
                                 : {
                                     from: previews()[i].first,
                                     to: previews()[i].last,
@@ -219,7 +219,7 @@
                             <app-formula-chart
                               [values]="previews()[i].chart"
                               [cap]="previews()[i].cap"
-                              [label]="'formula.chart.maxLabel' | transloco"
+                              [label]="'formula.chart.maxLabel' | translate"
                             />
                           </span>
                         }
@@ -230,8 +230,8 @@
                           class="bar-toggle"
                           [attr.data-testid]="'bar-life-' + i"
                           [attr.aria-pressed]="lifeBar() === attribute.key"
-                          [attr.aria-label]="'world.fields.lifeBar' | transloco"
-                          [pTooltip]="'world.fields.lifeBar' | transloco"
+                          [attr.aria-label]="'world.fields.lifeBar' | translate"
+                          [pTooltip]="'world.fields.lifeBar' | translate"
                           (click)="setBar('life', attribute.key)"
                         >
                           <i class="pi pi-heart"></i>
@@ -241,8 +241,8 @@
                           class="bar-toggle"
                           [attr.data-testid]="'bar-mana-' + i"
                           [attr.aria-pressed]="manaBar() === attribute.key"
-                          [attr.aria-label]="'world.fields.manaBar' | transloco"
-                          [pTooltip]="'world.fields.manaBar' | transloco"
+                          [attr.aria-label]="'world.fields.manaBar' | translate"
+                          [pTooltip]="'world.fields.manaBar' | translate"
                           (click)="setBar('mana', attribute.key)"
                         >
                           <i class="pi pi-bolt"></i>
@@ -254,7 +254,7 @@
                         severity="secondary"
                         [text]="true"
                         [rounded]="true"
-                        [ariaLabel]="'world.new.removeAttribute' | transloco"
+                        [ariaLabel]="'world.new.removeAttribute' | translate"
                         (onClick)="removeAttribute(attribute.key)"
                       />
                       @if (capErrors()[i]; as capError) {
@@ -263,7 +263,7 @@
                           role="alert"
                           [attr.data-testid]="'formula-cap-error-' + i"
                           >{{
-                            capError | transloco: { base: attribute.baseValue }
+                            capError | translate: { base: attribute.baseValue }
                           }}</small
                         >
                       }
@@ -280,9 +280,9 @@
                           spellcheck="false"
                           [attr.data-testid]="'formula-expression-' + i"
                           [attr.aria-label]="
-                            'world.fields.expression' | transloco
+                            'world.fields.expression' | translate
                           "
-                          [placeholder]="'world.fields.expression' | transloco"
+                          [placeholder]="'world.fields.expression' | translate"
                           [value]="expressionText(attribute.formula)"
                           (input)="
                             setExpression(
@@ -292,7 +292,7 @@
                           "
                         />
                         <small class="hint">{{
-                          "world.formula.helpShort" | transloco
+                          "world.formula.helpShort" | translate
                         }}</small>
                         @if (formulaErrors()[i]; as formulaError) {
                           <small
@@ -302,7 +302,7 @@
                           >
                             {{
                               formulaErrorKey(formulaError)
-                                | transloco
+                                | translate
                                   : {
                                       position: formulaError.position + 1,
                                       level: formulaError.level,
@@ -317,29 +317,29 @@
               </div>
               <p-button
                 icon="pi pi-plus"
-                [label]="'world.new.addAttribute' | transloco"
+                [label]="'world.new.addAttribute' | translate"
                 severity="secondary"
                 [text]="true"
                 (onClick)="addAttribute()"
               />
               @if (errors().attributes; as error) {
                 <p-message severity="error" size="small" variant="simple">{{
-                  error | transloco
+                  error | translate
                 }}</p-message>
               }
 
-              <p class="hint">{{ "world.new.barsHint" | transloco }}</p>
+              <p class="hint">{{ "world.new.barsHint" | translate }}</p>
 
               <div class="actions">
                 <p-button
-                  [label]="'world.new.back' | transloco"
+                  [label]="'world.new.back' | translate"
                   severity="secondary"
                   [text]="true"
                   (onClick)="step.set(1)"
                 />
                 <p-button
                   data-testid="attributes-next"
-                  [label]="'world.new.next' | transloco"
+                  [label]="'world.new.next' | translate"
                   icon="pi pi-arrow-right"
                   iconPos="right"
                   [disabled]="!stepValid()[2]"
@@ -369,9 +369,9 @@
                   (ngModelChange)="starterItems.set($event)"
                 />
                 <label for="starter-items">
-                  {{ "world.fields.starterItems" | transloco }}
+                  {{ "world.fields.starterItems" | translate }}
                   <small>{{
-                    "world.fields.starterItemsHint" | transloco
+                    "world.fields.starterItemsHint" | translate
                   }}</small>
                 </label>
               </div>
@@ -384,22 +384,22 @@
                   (ngModelChange)="starterClasses.set($event)"
                 />
                 <label for="starter-classes">
-                  {{ "world.fields.starterClasses" | transloco }}
+                  {{ "world.fields.starterClasses" | translate }}
                   <small>{{
-                    "world.fields.starterClassesHint" | transloco
+                    "world.fields.starterClassesHint" | translate
                   }}</small>
                 </label>
               </div>
 
               <div class="actions">
                 <p-button
-                  [label]="'world.new.back' | transloco"
+                  [label]="'world.new.back' | translate"
                   severity="secondary"
                   [text]="true"
                   (onClick)="step.set(2)"
                 />
                 <p-button
-                  [label]="'world.new.create' | transloco"
+                  [label]="'world.new.create' | translate"
                   icon="pi pi-check"
                   [loading]="creating()"
                   [disabled]="!canCreate()"
@@ -413,15 +413,15 @@
     </p-stepper>
 
     <aside class="preview">
-      <span class="label">{{ "world.new.preview" | transloco }}</span>
+      <span class="label">{{ "world.new.preview" | translate }}</span>
       <app-world-card
-        [name]="name().trim() || ('world.fields.namePlaceholder' | transloco)"
+        [name]="name().trim() || ('world.fields.namePlaceholder' | translate)"
         [description]="description()"
         [imageId]="imageId()"
       >
         <span meta>{{
           "world.new.attributeCount"
-            | transloco: { count: attributeNames().length }
+            | translate: { count: attributeNames().length }
         }}</span>
         <div actions class="chips">
           @for (attribute of attributeNames(); track attribute) {

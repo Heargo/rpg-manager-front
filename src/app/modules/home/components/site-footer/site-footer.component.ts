@@ -5,7 +5,7 @@ import {
   inject,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { DOCS_ORIGIN } from '../../../../core/constants/docs-origin';
 import { docsUrl } from '../../../../core/helpers/docs-url';
@@ -14,7 +14,7 @@ import { docsUrl } from '../../../../core/helpers/docs-url';
 @Component({
   selector: 'app-site-footer',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe],
+  imports: [RouterLink, TranslatePipe],
   template: `
     <footer>
       <div class="inner">
@@ -29,27 +29,27 @@ import { docsUrl } from '../../../../core/helpers/docs-url';
               d="M158.5 248.4L512.0 44.3L865.5 248.4L569.4 304.0L454.6 304.0ZM107.0 295.7L409.6 352.5L232.8 688.4L107.0 724.8ZM917.0 295.7L917.0 724.8L791.2 688.4L614.4 352.5ZM149.9 770.6L256.0 740.0L768.0 740.0L874.1 770.6L512.0 979.7ZM468.9 360.0L555.1 360.0L725.6 684.0L298.4 684.0Z"
             />
           </svg>
-          {{ 'home.footerBrand' | transloco }}
+          {{ 'home.footerBrand' | translate }}
         </span>
-        <nav [attr.aria-label]="'home.footerNav' | transloco">
+        <nav [attr.aria-label]="'home.footerNav' | translate">
           <a routerLink="/credits" data-test="footer-credits">{{
-            'home.footerCredits' | transloco
+            'home.footerCredits' | translate
           }}</a>
           <a routerLink="/contact" data-test="footer-contact">{{
-            'home.footerContact' | transloco
+            'home.footerContact' | translate
           }}</a>
           <a routerLink="/privacy-policy" data-test="footer-privacy">{{
-            'home.footerPrivacy' | transloco
+            'home.footerPrivacy' | translate
           }}</a>
           <a
             [href]="helpUrl()"
             target="_blank"
             rel="noopener"
             data-test="footer-help"
-            >{{ 'home.footerHelp' | transloco }}</a
+            >{{ 'home.footerHelp' | translate }}</a
           >
         </nav>
-        <p class="tagline">{{ 'home.footerTagline' | transloco }}</p>
+        <p class="tagline">{{ 'home.footerTagline' | translate }}</p>
       </div>
     </footer>
   `,

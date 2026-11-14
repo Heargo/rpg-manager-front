@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
@@ -10,13 +10,13 @@ import { CharacterBusiness } from '../../business/character.business';
 @Component({
   selector: 'app-character-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, ButtonModule, CardModule, StoredImageComponent],
+  imports: [RouterLink, TranslatePipe, ButtonModule, CardModule, StoredImageComponent],
   template: `
-    <p-card [header]="'character.list.title' | transloco">
+    <p-card [header]="'character.list.title' | translate">
       @if (characters.$needsCharacter()) {
         <div class="cta">
-          <p>{{ 'character.list.needOne' | transloco }}</p>
-          <p-button icon="pi pi-user-plus" [label]="'character.create.title' | transloco" routerLink="/room/character" />
+          <p>{{ 'character.list.needOne' | translate }}</p>
+          <p-button icon="pi pi-user-plus" [label]="'character.create.title' | translate" routerLink="/room/character" />
         </div>
       }
       @if (characters.$characters(); as list) {
@@ -38,7 +38,7 @@ import { CharacterBusiness } from '../../business/character.business';
             }
           </ul>
         } @else {
-          <p class="hint">{{ 'character.list.empty' | transloco }}</p>
+          <p class="hint">{{ 'character.list.empty' | translate }}</p>
         }
       }
     </p-card>

@@ -3,10 +3,10 @@
     <form class="flex-col profile-form" (ngSubmit)="save()">
       <div class="flex-row middle profile-header">
         <p-avatar [label]="profileBusiness.$initial()" size="xlarge" shape="circle" />
-        <h1>{{ 'profile.title' | transloco }}</h1>
+        <h1>{{ 'profile.title' | translate }}</h1>
       </div>
 
-      <label for="profile-name">{{ 'profile.name' | transloco }}</label>
+      <label for="profile-name">{{ 'profile.name' | translate }}</label>
       <input
         pInputText
         id="profile-name"
@@ -18,29 +18,29 @@
         aria-describedby="profile-name-hint"
       />
       @if (isValid()) {
-        <small id="profile-name-hint">{{ 'profile.nameHint' | transloco }}</small>
+        <small id="profile-name-hint">{{ 'profile.nameHint' | translate }}</small>
       } @else {
         <p-message id="profile-name-hint" severity="error" size="small" variant="simple">
-          {{ 'profile.nameRequired' | transloco }}
+          {{ 'profile.nameRequired' | translate }}
         </p-message>
       }
 
-      <p-button type="submit" [label]="'profile.save' | transloco" [disabled]="!isValid() || !isDirty()" />
+      <p-button type="submit" [label]="'profile.save' | translate" [disabled]="!isValid() || !isDirty()" />
 
       <div class="flex-col player-id">
-        <span>{{ 'profile.playerId' | transloco }}</span>
+        <span>{{ 'profile.playerId' | translate }}</span>
         <code>{{ profileBusiness.$profile().playerId }}</code>
-        <small>{{ 'profile.playerIdHint' | transloco }}</small>
+        <small>{{ 'profile.playerIdHint' | translate }}</small>
       </div>
     </form>
 
     <section class="flex-col debug-log" aria-labelledby="debug-log-title">
-      <h2 id="debug-log-title">{{ 'profile.debugLog.title' | transloco }}</h2>
-      <small>{{ 'profile.debugLog.hint' | transloco: { count: debugLog.$count() } }}</small>
+      <h2 id="debug-log-title">{{ 'profile.debugLog.title' | translate }}</h2>
+      <small>{{ 'profile.debugLog.hint' | translate: { count: debugLog.$count() } }}</small>
       <div class="flex-row debug-log-actions">
         <p-button
           icon="pi pi-download"
-          [label]="'profile.debugLog.export' | transloco"
+          [label]="'profile.debugLog.export' | translate"
           [loading]="exporting()"
           (onClick)="exportLog()"
           data-testid="export-debug-log"
@@ -49,7 +49,7 @@
           icon="pi pi-trash"
           severity="secondary"
           [outlined]="true"
-          [label]="'profile.debugLog.clear' | transloco"
+          [label]="'profile.debugLog.clear' | translate"
           (onClick)="clearLog()"
           data-testid="clear-debug-log"
         />

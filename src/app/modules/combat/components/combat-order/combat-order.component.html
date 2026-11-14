@@ -2,14 +2,14 @@
   @if (showRound()) {
     <div class="toolbar">
       <strong data-field="round">{{
-        "combat.round" | transloco: { round: view.round }
+        "combat.round" | translate: { round: view.round }
       }}</strong>
     </div>
   }
   <div
     class="order"
     cdkDropList
-    [attr.aria-label]="'combat.order' | transloco"
+    [attr.aria-label]="'combat.order' | translate"
     (cdkDropListDropped)="drop($event)"
   >
     @for (combatant of view.combatants; track combatant.id) {
@@ -29,12 +29,12 @@
           <i
             class="pi pi-bars handle"
             cdkDragHandle
-            [attr.aria-label]="'combat.drag' | transloco"
+            [attr.aria-label]="'combat.drag' | translate"
           ></i>
           <strong class="name">{{ combatant.name }}</strong>
           @if (combatant.level !== undefined) {
             <small class="level" data-field="level">{{
-              "combat.levelShort" | transloco: { level: combatant.level }
+              "combat.levelShort" | translate: { level: combatant.level }
             }}</small>
           }
           @if (combat.$initiativeMode() !== "free") {
@@ -49,7 +49,7 @@
                 size="small"
                 [ngModel]="initiativeOf(combatant.id)"
                 (ngModelChange)="setInitiativeDraft(combatant.id, $event)"
-                [placeholder]="'combat.initiative.label' | transloco"
+                [placeholder]="'combat.initiative.label' | translate"
               />
               <button
                 pButton
@@ -58,7 +58,7 @@
                 size="small"
                 severity="secondary"
                 icon="pi pi-check"
-                [ariaLabel]="'combat.initiative.set' | transloco"
+                [ariaLabel]="'combat.initiative.set' | translate"
                 (click)="setInitiative(combatant.id)"
               ></button>
             </span>
@@ -74,7 +74,7 @@
             <small class="life-text">{{ life.current }} / {{ life.max }}</small>
           }
           @if (combatant.down) {
-            <span class="down-tag">{{ "combat.down" | transloco }}</span>
+            <span class="down-tag">{{ "combat.down" | translate }}</span>
           }
           <button
             pButton
@@ -86,7 +86,7 @@
             [icon]="
               selectedId() === combatant.id ? 'pi pi-minus' : 'pi pi-plus'
             "
-            [ariaLabel]="'combat.details' | transloco"
+            [ariaLabel]="'combat.details' | translate"
             (click)="select(combatant.id)"
           ></button>
         </div>
@@ -98,7 +98,7 @@
                 <button
                   type="button"
                   class="remove-status"
-                  [attr.aria-label]="'combat.status.remove' | transloco"
+                  [attr.aria-label]="'combat.status.remove' | translate"
                   (click)="removeStatus(combatant.id, status)"
                 >
                   <i class="pi pi-times"></i>

@@ -5,7 +5,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { LocalDatePipe } from '../../../../core/pipes/local-date.pipe';
 import { differingFields } from '../../../room/helpers/player-copy.rules';
@@ -27,7 +27,7 @@ const FIELDS = [
 @Component({
   selector: 'app-pick-a-save-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, ButtonModule, LocalDatePipe],
+  imports: [TranslatePipe, ButtonModule, LocalDatePipe],
   templateUrl: './pick-a-save-dialog.component.html',
   styleUrl: './pick-a-save-dialog.component.scss',
 })

@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
@@ -23,7 +23,7 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputTextModule,
     SelectModule,
@@ -34,8 +34,8 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
         pInputText
         data-field="search"
         type="search"
-        [attr.aria-label]="'skill.catalogue.search' | transloco"
-        [placeholder]="'skill.catalogue.search' | transloco"
+        [attr.aria-label]="'skill.catalogue.search' | translate"
+        [placeholder]="'skill.catalogue.search' | translate"
         [value]="search()"
         (input)="search.set($any($event.target).value)"
         autocomplete="off"
@@ -48,14 +48,14 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
         [showClear]="true"
         [ngModel]="type()"
         (ngModelChange)="type.set($event ?? undefined)"
-        [placeholder]="'skill.catalogue.type' | transloco"
+        [placeholder]="'skill.catalogue.type' | translate"
       />
       <button
         pButton
         type="button"
         data-action="create"
         icon="pi pi-plus"
-        [label]="'skill.catalogue.create' | transloco"
+        [label]="'skill.catalogue.create' | translate"
         (click)="create.emit()"
       ></button>
     </div>
@@ -68,7 +68,7 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
               <div class="line">
                 <strong data-field="skill-name">{{ skill.name }}</strong>
                 <span class="tag" data-field="skill-type">{{
-                  'skill.type.' + skill.type | transloco
+                  'skill.type.' + skill.type | translate
                 }}</span>
                 @if (skill.cost) {
                   <span class="meta" data-field="skill-cost"
@@ -78,7 +78,7 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
                 @if (skill.type === 'active' && skill.cooldown !== undefined) {
                   <span class="meta" data-field="skill-cooldown">{{
                     'skill.catalogue.cooldown'
-                      | transloco: { turns: skill.cooldown }
+                      | translate: { turns: skill.cooldown }
                   }}</span>
                 }
               </div>
@@ -94,7 +94,7 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
                 icon="pi pi-pencil"
                 severity="secondary"
                 [text]="true"
-                [attr.aria-label]="'skill.catalogue.edit' | transloco"
+                [attr.aria-label]="'skill.catalogue.edit' | translate"
                 (click)="edit.emit(skill)"
               ></button>
               <button
@@ -104,7 +104,7 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
                 icon="pi pi-copy"
                 severity="secondary"
                 [text]="true"
-                [attr.aria-label]="'skill.catalogue.duplicate' | transloco"
+                [attr.aria-label]="'skill.catalogue.duplicate' | translate"
                 (click)="duplicate.emit(skill)"
               ></button>
               <button
@@ -114,7 +114,7 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
                 icon="pi pi-trash"
                 severity="danger"
                 [text]="true"
-                [attr.aria-label]="'skill.catalogue.delete' | transloco"
+                [attr.aria-label]="'skill.catalogue.delete' | translate"
                 (click)="askDelete(skill)"
               ></button>
             </div>
@@ -122,7 +122,7 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
         }
       </ul>
     } @else {
-      <p class="hint">{{ 'skill.catalogue.empty' | transloco }}</p>
+      <p class="hint">{{ 'skill.catalogue.empty' | translate }}</p>
     }
   `,
   styles: `

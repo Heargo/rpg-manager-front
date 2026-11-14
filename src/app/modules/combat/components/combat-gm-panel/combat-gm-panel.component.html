@@ -1,7 +1,7 @@
 @if (state(); as view) {
   <div class="toolbar">
     <strong data-field="round">{{
-      "combat.round" | transloco: { round: view.round }
+      "combat.round" | translate: { round: view.round }
     }}</strong>
     <span class="spacer"></span>
     <button
@@ -10,7 +10,7 @@
       data-action="undo"
       severity="secondary"
       icon="pi pi-undo"
-      [label]="'combat.undo' | transloco"
+      [label]="'combat.undo' | translate"
       (click)="undo()"
     ></button>
     <button
@@ -18,7 +18,7 @@
       type="button"
       data-action="next-turn"
       icon="pi pi-step-forward"
-      [label]="'combat.nextTurn' | transloco"
+      [label]="'combat.nextTurn' | translate"
       (click)="nextTurn()"
     ></button>
     <button
@@ -27,21 +27,21 @@
       data-action="end"
       severity="danger"
       icon="pi pi-flag"
-      [label]="'combat.end.action' | transloco"
+      [label]="'combat.end.action' | translate"
       (click)="openEnd()"
     ></button>
   </div>
 
   @if (landedPending().length) {
     <section class="pending-list">
-      <h3>{{ "combat.pending.title" | transloco }}</h3>
+      <h3>{{ "combat.pending.title" | translate }}</h3>
       @for (pending of landedPending(); track pending.id) {
         <div class="pending" data-testid="pending">
           <div class="text">
             <strong>
               {{
                 "combat.pending.line"
-                  | transloco
+                  | translate
                     : {
                         caster: nameOf(pending.casterId),
                         skill: skillNameOf(pending),
@@ -53,7 +53,7 @@
               @if (pending.rolls.length) {
                 {{
                   "combat.pending.rolled"
-                    | transloco
+                    | translate
                       : {
                           rolls: pending.rolls.join(" + "),
                           total: pending.total,
@@ -64,7 +64,7 @@
               @for (effect of pending.effects; track $index) {
                 {{
                   "combat.skill." + effect.kind
-                    | transloco
+                    | translate
                       : {
                           amount: effect.amount,
                           attribute: effect.attribute,
@@ -73,7 +73,7 @@
                 }}{{ $last ? "" : ", " }}
               }
               @if (!pending.success) {
-                · {{ "combat.pending.failed" | transloco }}
+                · {{ "combat.pending.failed" | translate }}
               }
             </small>
           </div>
@@ -93,7 +93,7 @@
                 data-action="apply-edited"
                 size="small"
                 icon="pi pi-check"
-                [label]="'combat.pending.apply' | transloco"
+                [label]="'combat.pending.apply' | translate"
                 (click)="applyEdited()"
               ></button>
               <button
@@ -102,7 +102,7 @@
                 size="small"
                 severity="secondary"
                 [text]="true"
-                [label]="'combat.actions.cancel' | transloco"
+                [label]="'combat.actions.cancel' | translate"
                 (click)="editing.set(null)"
               ></button>
             </div>
@@ -114,7 +114,7 @@
                 data-action="apply"
                 size="small"
                 icon="pi pi-check"
-                [label]="'combat.pending.apply' | transloco"
+                [label]="'combat.pending.apply' | translate"
                 (click)="apply(pending.id)"
               ></button>
               <button
@@ -124,7 +124,7 @@
                 size="small"
                 severity="secondary"
                 icon="pi pi-pencil"
-                [label]="'combat.pending.edit' | transloco"
+                [label]="'combat.pending.edit' | translate"
                 (click)="edit(pending)"
               ></button>
               <button
@@ -135,7 +135,7 @@
                 severity="secondary"
                 [text]="true"
                 icon="pi pi-times"
-                [label]="'combat.pending.dismiss' | transloco"
+                [label]="'combat.pending.dismiss' | translate"
                 (click)="dismiss(pending.id)"
               ></button>
             </div>
@@ -184,7 +184,7 @@
           size="small"
           severity="danger"
           icon="pi pi-bolt"
-          [label]="'combat.manual.damage' | transloco"
+          [label]="'combat.manual.damage' | translate"
           (click)="damage(picked.id)"
         ></button>
         <button
@@ -193,7 +193,7 @@
           data-action="heal"
           size="small"
           icon="pi pi-heart"
-          [label]="'combat.manual.heal' | transloco"
+          [label]="'combat.manual.heal' | translate"
           (click)="heal(picked.id)"
         ></button>
       </div>
@@ -203,7 +203,7 @@
           data-testid="manual-status"
           [value]="status()"
           (input)="status.set($any($event.target).value)"
-          [placeholder]="'combat.status.placeholder' | transloco"
+          [placeholder]="'combat.status.placeholder' | translate"
           maxlength="100"
         />
         <button
@@ -213,7 +213,7 @@
           size="small"
           severity="secondary"
           icon="pi pi-plus"
-          [label]="'combat.status.add' | transloco"
+          [label]="'combat.status.add' | translate"
           (click)="addStatus(picked.id)"
         ></button>
       </div>
@@ -225,11 +225,11 @@
     (visibleChange)="endOpen.set($event)"
     [modal]="true"
     [draggable]="false"
-    [header]="'combat.end.title' | transloco"
+    [header]="'combat.end.title' | translate"
     [style]="{ width: 'min(32rem, calc(100vw - 2rem))' }"
   >
     <div class="end-dialog" data-testid="end-dialog">
-      <h4>{{ "combat.end.xp" | transloco }}</h4>
+      <h4>{{ "combat.end.xp" | translate }}</h4>
       @for (entry of endXp(); track entry.characterId; let i = $index) {
         <label class="reward">
           <span>{{ entry.name }}</span>
@@ -246,11 +246,11 @@
         <p data-field="reward-money">
           {{
             "combat.end.money"
-              | transloco: { amount: combat.money(rewards.money) }
+              | translate: { amount: combat.money(rewards.money) }
           }}
         </p>
         @if (rewards.loot.length) {
-          <h4>{{ "combat.end.loot" | transloco }}</h4>
+          <h4>{{ "combat.end.loot" | translate }}</h4>
           <ul>
             @for (loot of rewards.loot; track $index) {
               <li data-testid="reward-loot">
@@ -261,14 +261,14 @@
           </ul>
         }
       }
-      <p class="hint">{{ "combat.end.hint" | transloco }}</p>
+      <p class="hint">{{ "combat.end.hint" | translate }}</p>
       <div class="buttons">
         <button
           pButton
           type="button"
           severity="secondary"
           [text]="true"
-          [label]="'combat.actions.cancel' | transloco"
+          [label]="'combat.actions.cancel' | translate"
           (click)="endOpen.set(false)"
         ></button>
         <button
@@ -276,7 +276,7 @@
           type="button"
           data-action="confirm-end"
           icon="pi pi-check"
-          [label]="'combat.end.confirm' | transloco"
+          [label]="'combat.end.confirm' | translate"
           (click)="confirmEnd()"
         ></button>
       </div>
@@ -284,8 +284,8 @@
   </p-dialog>
 } @else {
   <div class="start-form" data-testid="start-form">
-    <h3>{{ "combat.start.title" | transloco }}</h3>
-    <h4>{{ "combat.start.characters" | transloco }}</h4>
+    <h3>{{ "combat.start.title" | translate }}</h3>
+    <h4>{{ "combat.start.characters" | translate }}</h4>
     @if (combat.$characters().length) {
       <p-multiselect
         class="start-select"
@@ -298,7 +298,7 @@
         [showToggleAll]="false"
         [ngModel]="chosen()"
         (ngModelChange)="pickCharacters($event)"
-        [placeholder]="'combat.start.placeholder' | transloco"
+        [placeholder]="'combat.start.placeholder' | translate"
       >
         <ng-template #item let-option>
           <div
@@ -322,9 +322,9 @@
         </ng-template>
       </p-multiselect>
     } @else {
-      <p class="hint">{{ "combat.start.noCharacters" | transloco }}</p>
+      <p class="hint">{{ "combat.start.noCharacters" | translate }}</p>
     }
-    <h4>{{ "combat.start.npcs" | transloco }}</h4>
+    <h4>{{ "combat.start.npcs" | translate }}</h4>
     @if (combat.$npcs().length) {
       <p-multiselect
         class="start-select"
@@ -337,7 +337,7 @@
         [showToggleAll]="false"
         [ngModel]="chosenNpcs()"
         (ngModelChange)="pickNpcs($event)"
-        [placeholder]="'combat.start.placeholder' | transloco"
+        [placeholder]="'combat.start.placeholder' | translate"
       >
         <ng-template #item let-option>
           <div
@@ -370,12 +370,12 @@
             [max]="20"
             [ngModel]="countOf(npc.id)"
             (ngModelChange)="setCount(npc.id, $event)"
-            [ariaLabel]="'combat.start.count' | transloco"
+            [ariaLabel]="'combat.start.count' | translate"
           />
         </div>
       }
     } @else {
-      <p class="hint">{{ "combat.start.noNpcs" | transloco }}</p>
+      <p class="hint">{{ "combat.start.noNpcs" | translate }}</p>
     }
     @if (slots().length) {
       <app-combat-setup-grid
@@ -384,7 +384,7 @@
         (positionsChange)="placed.set($event)"
       />
       <p class="hint" data-testid="place-hint">
-        {{ "combat.start.placeHint" | transloco }}
+        {{ "combat.start.placeHint" | translate }}
       </p>
     }
     <button
@@ -392,7 +392,7 @@
       type="button"
       data-action="start"
       icon="pi pi-play"
-      [label]="'combat.start.action' | transloco"
+      [label]="'combat.start.action' | translate"
       [disabled]="!canStart()"
       (click)="start()"
     ></button>

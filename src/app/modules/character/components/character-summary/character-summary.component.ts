@@ -5,7 +5,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { BadgeModule } from '@openng/optimus-ui/badge';
 import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
 import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
@@ -18,7 +18,7 @@ import { CharacterBusiness } from '../../business/character.business';
   selector: 'app-character-summary',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     BadgeModule,
     ProgressBarModule,
     CoinDisplayComponent,
@@ -38,7 +38,7 @@ import { CharacterBusiness } from '../../business/character.business';
         <h2>{{ c.name }}</h2>
         @if (characters.playerName(c.playerId); as player) {
           <small>{{
-            'character.sheet.playedBy' | transloco: { name: player }
+            'character.sheet.playedBy' | translate: { name: player }
           }}</small>
         }
       </div>
@@ -60,7 +60,7 @@ import { CharacterBusiness } from '../../business/character.business';
 
     <dl class="facts">
       <div>
-        <dt>{{ 'character.sheet.statPoints' | transloco }}</dt>
+        <dt>{{ 'character.sheet.statPoints' | translate }}</dt>
         <dd>
           @if (c.statPoints > 0) {
             <p-badge [value]="c.statPoints" severity="info" />
@@ -70,7 +70,7 @@ import { CharacterBusiness } from '../../business/character.business';
         </dd>
       </div>
       <div>
-        <dt>{{ 'character.sheet.money' | transloco }}</dt>
+        <dt>{{ 'character.sheet.money' | translate }}</dt>
         <dd><app-coin-display [copper]="c.money" /></dd>
       </div>
     </dl>
@@ -79,8 +79,8 @@ import { CharacterBusiness } from '../../business/character.business';
       <table class="attributes">
         <thead>
           <tr>
-            <th scope="col">{{ 'character.sheet.attribute' | transloco }}</th>
-            <th scope="col">{{ 'character.sheet.value' | transloco }}</th>
+            <th scope="col">{{ 'character.sheet.attribute' | translate }}</th>
+            <th scope="col">{{ 'character.sheet.value' | translate }}</th>
           </tr>
         </thead>
         <tbody>

@@ -5,7 +5,7 @@ import {
   model,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import {
   COINS,
@@ -18,7 +18,7 @@ import {
 @Component({
   selector: 'app-coin-input',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, InputNumberModule, TranslocoPipe],
+  imports: [FormsModule, InputNumberModule, TranslatePipe],
   template: `
     @for (coin of coins; track coin) {
       <label class="coin">
@@ -26,14 +26,14 @@ import {
           [min]="0"
           [step]="1"
           [name]="coin"
-          [ariaLabel]="'coin.' + coin | transloco"
+          [ariaLabel]="'coin.' + coin | translate"
           [ngModel]="split()[coin]"
           [ngModelOptions]="{ standalone: true }"
           (ngModelChange)="set(coin, $event)"
         />
         <img
           [src]="'assets/icons/money/' + coin + '-coin.svg'"
-          [alt]="'coin.' + coin | transloco"
+          [alt]="'coin.' + coin | translate"
         />
       </label>
     }

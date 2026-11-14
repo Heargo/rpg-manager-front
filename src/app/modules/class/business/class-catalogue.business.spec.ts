@@ -12,7 +12,7 @@ import { SandboxWorldBusiness } from '../../world/business/sandbox-world.busines
 import { SandboxClassCatalogueBusiness } from '../../tools/business/sandbox-class-catalogue.business';
 import { SkillCatalogueBusiness } from '../../skill/business/skill-catalogue.business';
 import { SandboxSkillCatalogueBusiness } from '../../tools/business/sandbox-skill-catalogue.business';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslateService } from '@ngx-translate/core';
 import { validateClass } from '../helpers/class.rules';
 import { validateSkill } from '../../skill/helpers/skill.rules';
 import { CharacterClass } from '../models/class';
@@ -163,7 +163,7 @@ describe('SandboxClassCatalogueBusiness (Tools)', () => {
     ['en', ['Warrior', 'Mage', 'Rogue']],
     ['fr', ['Guerrier', 'Mage', 'Voleur']],
   ])('has valid starter classes, charged on Mana, in %s', (language, names) => {
-    TestBed.inject(TranslocoService).setActiveLang(language);
+    TestBed.inject(TranslateService).use(language);
     const world = TestBed.inject(SandboxWorldBusiness).$world();
     const attributes = world.attributes.map((a) => a.name);
     expect(world.classes.map((c) => c.name)).toEqual(names);

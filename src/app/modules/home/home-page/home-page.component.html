@@ -3,14 +3,14 @@
     <section class="content main-container" data-test="content">
       <div class="intro">
         <div class="text">
-          <h2 class="heading">{{ "home.heading" | transloco }}</h2>
-          <p class="lead" data-test="pitch">{{ "home.pitch" | transloco }}</p>
+          <h2 class="heading">{{ "home.heading" | translate }}</h2>
+          <p class="lead" data-test="pitch">{{ "home.pitch" | translate }}</p>
           <div class="actions">
             <a routerLink="/play" data-test="cta-play" class="cta primary">{{
-              "home.ctaPlay" | transloco
+              "home.ctaPlay" | translate
             }}</a>
             <a routerLink="/tools/links" data-test="cta-tools" class="cta">{{
-              "home.ctaTools" | transloco
+              "home.ctaTools" | translate
             }}</a>
           </div>
         </div>
@@ -20,20 +20,20 @@
             src="images/landing-screenshot.webp"
             width="776"
             height="1102"
-            [alt]="'home.screenshotAlt' | transloco"
+            [alt]="'home.screenshotAlt' | translate"
           />
         </div>
       </div>
       <ul
         class="highlights"
         data-test="highlights"
-        [attr.aria-label]="'home.highlightsLabel' | transloco"
+        [attr.aria-label]="'home.highlightsLabel' | translate"
       >
         @for (item of highlights; track item.key) {
           <li class="card" data-test="highlight">
             <i class="pi {{ item.icon }}" aria-hidden="true"></i>
-            <h3>{{ "home." + item.key + "Title" | transloco }}</h3>
-            <p>{{ "home." + item.key + "Text" | transloco }}</p>
+            <h3>{{ "home." + item.key + "Title" | translate }}</h3>
+            <p>{{ "home." + item.key + "Text" | translate }}</p>
           </li>
         }
       </ul>

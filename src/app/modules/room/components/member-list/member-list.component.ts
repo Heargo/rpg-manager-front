@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AvatarModule } from '@openng/optimus-ui/avatar';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { TagModule } from '@openng/optimus-ui/tag';
@@ -9,7 +9,7 @@ import { RoomMember } from '../../models/room';
 @Component({
   selector: 'app-member-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, AvatarModule, ButtonModule, TagModule, TooltipModule],
+  imports: [TranslatePipe, AvatarModule, ButtonModule, TagModule, TooltipModule],
   template: `
     <ul class="members">
       @for (member of members(); track member.playerId) {
@@ -18,14 +18,14 @@ import { RoomMember } from '../../models/room';
           <span class="name">
             {{ member.name }}
             @if (member.playerId === myPlayerId()) {
-              <small>({{ 'room.members.you' | transloco }})</small>
+              <small>({{ 'room.members.you' | translate }})</small>
             }
           </span>
           @if (member.isHost) {
-            <p-tag [value]="'room.members.host' | transloco" severity="info" />
+            <p-tag [value]="'room.members.host' | translate" severity="info" />
           }
           <p-tag
-            [value]="(member.online ? 'room.members.online' : 'room.members.offline') | transloco"
+            [value]="(member.online ? 'room.members.online' : 'room.members.offline') | translate"
             [severity]="member.online ? 'success' : 'secondary'"
           />
           @if (canKick() && !member.isHost && !member.online) {
@@ -33,7 +33,7 @@ import { RoomMember } from '../../models/room';
               icon="pi pi-user-plus"
               size="small"
               severity="secondary"
-              [label]="'room.members.reinvite' | transloco"
+              [label]="'room.members.reinvite' | translate"
               (onClick)="reinvite.emit(member.playerId)"
             />
           }
@@ -43,8 +43,8 @@ import { RoomMember } from '../../models/room';
               severity="danger"
               [text]="true"
               [rounded]="true"
-              [ariaLabel]="'room.members.kick' | transloco"
-              [pTooltip]="'room.members.kick' | transloco"
+              [ariaLabel]="'room.members.kick' | translate"
+              [pTooltip]="'room.members.kick' | translate"
               (onClick)="kick.emit(member.playerId)"
             />
           }

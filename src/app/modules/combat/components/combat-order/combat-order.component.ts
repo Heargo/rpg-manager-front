@@ -13,7 +13,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -31,7 +31,7 @@ import { CombatBusiness } from '../../business/combat.business';
     CdkDropList,
     CdkDrag,
     CdkDragHandle,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputNumberModule,
     ProgressBarModule,

@@ -5,7 +5,7 @@ import {
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
@@ -30,7 +30,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     CardModule,
     InputTextModule,
@@ -42,11 +42,11 @@ import {
   template: `
     <div class="main-container generator">
       <header>
-        <h1>{{ 'tools.itemGenerator.title' | transloco }}</h1>
+        <h1>{{ 'tools.itemGenerator.title' | translate }}</h1>
         <p class="hint">
           {{
             'tools.itemGenerator.intro'
-              | transloco
+              | translate
                 : { attributes: generator.$attributeNames().join(', ') }
           }}
         </p>
@@ -56,7 +56,7 @@ import {
         <div class="options">
           <div class="field">
             <label for="gen-rarity">{{
-              'item.fields.rarity' | transloco
+              'item.fields.rarity' | translate
             }}</label>
             <p-select
               inputId="gen-rarity"
@@ -64,26 +64,26 @@ import {
               optionLabel="label"
               optionValue="value"
               [showClear]="true"
-              [placeholder]="'tools.itemGenerator.random' | transloco"
+              [placeholder]="'tools.itemGenerator.random' | translate"
               [ngModel]="generator.$rarity()"
               (ngModelChange)="generator.$rarity.set($event ?? null)"
             />
           </div>
           <div class="field">
-            <label for="gen-type">{{ 'item.fields.type' | transloco }}</label>
+            <label for="gen-type">{{ 'item.fields.type' | translate }}</label>
             <p-select
               inputId="gen-type"
               [options]="types()"
               optionLabel="label"
               optionValue="value"
               [showClear]="true"
-              [placeholder]="'tools.itemGenerator.random' | transloco"
+              [placeholder]="'tools.itemGenerator.random' | translate"
               [ngModel]="generator.$type()"
               (ngModelChange)="generator.$type.set($event ?? null)"
             />
           </div>
           <div class="field">
-            <label for="gen-slot">{{ 'item.fields.slot' | transloco }}</label>
+            <label for="gen-slot">{{ 'item.fields.slot' | translate }}</label>
             <p-select
               inputId="gen-slot"
               [options]="slots()"
@@ -91,7 +91,7 @@ import {
               optionValue="value"
               [showClear]="true"
               [disabled]="!generator.$slotEnabled()"
-              [placeholder]="'tools.itemGenerator.random' | transloco"
+              [placeholder]="'tools.itemGenerator.random' | translate"
               [ngModel]="generator.$slot()"
               (ngModelChange)="generator.$slot.set($event ?? null)"
             />
@@ -100,7 +100,7 @@ import {
         <form class="seed" (ngSubmit)="generator.setSeed(seedText.value)">
           <div class="field">
             <label for="gen-seed">{{
-              'tools.itemGenerator.seed' | transloco
+              'tools.itemGenerator.seed' | translate
             }}</label>
             <input
               #seedText
@@ -114,7 +114,7 @@ import {
             />
           </div>
           <div class="field">
-            <label for="gen-pack">{{ 'packs.choiceLabel' | transloco }}</label>
+            <label for="gen-pack">{{ 'packs.choiceLabel' | translate }}</label>
             <p-select
               inputId="gen-pack"
               data-field="pack"
@@ -128,18 +128,18 @@ import {
           </div>
           <p-button
             icon="pi pi-refresh"
-            [label]="'tools.itemGenerator.reroll' | transloco"
+            [label]="'tools.itemGenerator.reroll' | translate"
             (onClick)="generator.reroll()"
           />
         </form>
         <small class="hint">{{
-          'tools.itemGenerator.seedHint' | transloco
+          'tools.itemGenerator.seedHint' | translate
         }}</small>
       </p-card>
 
       @if (generator.$failed()) {
         <p-message severity="error">{{
-          'tools.itemGenerator.failed' | transloco
+          'tools.itemGenerator.failed' | translate
         }}</p-message>
       } @else if (generator.$item(); as item) {
         <app-item-card [item]="item" />

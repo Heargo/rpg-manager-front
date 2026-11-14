@@ -5,7 +5,7 @@ import {
   inject,
   model,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { CharacterSheetComponent } from '../../../character/components/character-sheet/character-sheet.component';
 import { NpcCatalogueBusiness } from '../../business/npc-catalogue.business';
@@ -14,14 +14,14 @@ import { NpcCatalogueBusiness } from '../../business/npc-catalogue.business';
 @Component({
   selector: 'app-npc-sheet-dialog',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, DialogModule, CharacterSheetComponent],
+  imports: [TranslatePipe, DialogModule, CharacterSheetComponent],
   template: `
     <p-dialog
       [visible]="!!sheet()"
       (visibleChange)="!$event && npcId.set(null)"
       [modal]="true"
       [dismissableMask]="true"
-      [header]="'npc.sheet.title' | transloco"
+      [header]="'npc.sheet.title' | translate"
       [style]="{ width: 'min(56rem, calc(100vw - 1rem))' }"
     >
       @if (sheet(); as s) {

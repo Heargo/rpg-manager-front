@@ -91,7 +91,7 @@ The contact form needs a [Web3Forms](https://web3forms.com/) access key, read at
 | `docs/adr/` | Decisions and why: UI library, manual WebRTC signalling, TURN relay |
 | `.scratch/` | Specs and tickets; `.scratch/ROADMAP.md` is the development order |
 
-Built with Angular 22 (zoneless, signals), [Optimus UI](docs/adr/0001-replace-primeng-with-optimus-ui.md), Transloco, three.js and Rapier for the dice.
+Built with Angular 22 (zoneless, signals), [Optimus UI](docs/adr/0001-replace-primeng-with-optimus-ui.md), ngx-translate, three.js and Rapier for the dice.
 
 ## Contributing
 

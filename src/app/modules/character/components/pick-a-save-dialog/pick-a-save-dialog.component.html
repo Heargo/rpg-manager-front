@@ -1,18 +1,18 @@
-<p class="intro">{{ "character.pickASave.intro" | transloco }}</p>
+<p class="intro">{{ "character.pickASave.intro" | translate }}</p>
 
 <table class="versions">
   <thead>
     <tr>
-      <th scope="col">{{ "character.pickASave.field" | transloco }}</th>
-      <th scope="col">{{ "character.pickASave.host" | transloco }}</th>
-      <th scope="col">{{ "character.pickASave.player" | transloco }}</th>
+      <th scope="col">{{ "character.pickASave.field" | translate }}</th>
+      <th scope="col">{{ "character.pickASave.host" | translate }}</th>
+      <th scope="col">{{ "character.pickASave.player" | translate }}</th>
     </tr>
   </thead>
   <tbody>
     @for (row of rows(); track row.field) {
       <tr [attr.data-field]="row.field" [class.differs]="row.differs">
         <th scope="row">
-          {{ "character.pickASave.fields." + row.field | transloco }}
+          {{ "character.pickASave.fields." + row.field | translate }}
         </th>
         <td class="host-value">
           @if (row.field === "updatedAt") {
@@ -35,7 +35,7 @@
 
 @if (conflict().queued.length > 0) {
   <section class="queued">
-    <h3>{{ "character.pickASave.queued" | transloco }}</h3>
+    <h3>{{ "character.pickASave.queued" | translate }}</h3>
     <ul>
       @for (action of conflict().queued; track $index) {
         <li>
@@ -51,13 +51,13 @@
     data-action="keep-host"
     severity="secondary"
     icon="pi pi-check"
-    [label]="'character.pickASave.keepHost' | transloco"
+    [label]="'character.pickASave.keepHost' | translate"
     (click)="keepHost.emit()"
   />
   <p-button
     data-action="use-player"
     icon="pi pi-user"
-    [label]="'character.pickASave.usePlayer' | transloco"
+    [label]="'character.pickASave.usePlayer' | translate"
     (click)="usePlayer.emit()"
   />
 </div>

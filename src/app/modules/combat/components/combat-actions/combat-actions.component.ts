@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
@@ -32,7 +32,7 @@ import { CombatAttribute } from '../../models/combat';
   selector: 'app-combat-actions',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     FormsModule,
     ButtonModule,
     TabsModule,
@@ -73,7 +73,7 @@ import { CombatAttribute } from '../../models/combat';
                     size="small"
                     severity="secondary"
                     icon="pi pi-minus"
-                    [attr.aria-label]="'combat.actions.giveBack' | transloco"
+                    [attr.aria-label]="'combat.actions.giveBack' | translate"
                     [disabled]="tab.used === 0"
                     (click)="untick(tab)"
                   ></button>
@@ -85,7 +85,7 @@ import { CombatAttribute } from '../../models/combat';
                   size="small"
                   severity="secondary"
                   icon="pi pi-check"
-                  [label]="'combat.actions.use' | transloco"
+                  [label]="'combat.actions.use' | translate"
                   [disabled]="tab.left === 0"
                   (click)="tick(tab)"
                 ></button>
@@ -105,7 +105,7 @@ import { CombatAttribute } from '../../models/combat';
 
     <ng-template #lists let-skills="skills" let-showItems="items" let-off="off">
       @if (skills.length) {
-        <h4>{{ 'combat.actions.skills' | transloco }}</h4>
+        <h4>{{ 'combat.actions.skills' | translate }}</h4>
         <ul class="skills">
           @for (entry of skills; track entry.skill.id) {
             <li
@@ -124,7 +124,7 @@ import { CombatAttribute } from '../../models/combat';
                 data-action="use-skill"
                 size="small"
                 icon="pi pi-bolt"
-                [label]="'combat.actions.useSkill' | transloco"
+                [label]="'combat.actions.useSkill' | translate"
                 [disabled]="off"
                 [severity]="entry.available ? 'primary' : 'secondary'"
                 (click)="pick(entry.skill)"
@@ -135,7 +135,7 @@ import { CombatAttribute } from '../../models/combat';
       }
 
       @if (showItems && items().length) {
-        <h4>{{ 'combat.actions.items' | transloco }}</h4>
+        <h4>{{ 'combat.actions.items' | translate }}</h4>
         <ul class="items">
           @for (entry of items(); track entry.id) {
             <li
@@ -151,7 +151,7 @@ import { CombatAttribute } from '../../models/combat';
                 size="small"
                 severity="secondary"
                 icon="pi pi-heart"
-                [label]="'combat.actions.useItem' | transloco"
+                [label]="'combat.actions.useItem' | translate"
                 [disabled]="off"
                 (click)="useItem(entry.id)"
               ></button>
@@ -165,7 +165,7 @@ import { CombatAttribute } from '../../models/combat';
       <div class="targeting">
         <h4>
           {{
-            'combat.actions.pickTargets' | transloco: { skill: cast.skill.name }
+            'combat.actions.pickTargets' | translate: { skill: cast.skill.name }
           }}
         </h4>
         <p-multiselect
@@ -184,10 +184,10 @@ import { CombatAttribute } from '../../models/combat';
           [disabled]="!picking(cast.skill)"
           [ngModel]="cast.targets"
           (ngModelChange)="targeting.set($event ?? [])"
-          [placeholder]="'combat.targets.placeholder' | transloco"
+          [placeholder]="'combat.targets.placeholder' | translate"
         >
           <ng-template #group let-group>
-            {{ 'combat.targets.' + group.id | transloco }}
+            {{ 'combat.targets.' + group.id | translate }}
           </ng-template>
           <ng-template #item let-option>
             <div
@@ -223,7 +223,7 @@ import { CombatAttribute } from '../../models/combat';
             type="button"
             data-action="confirm-skill"
             icon="pi pi-check"
-            [label]="'combat.actions.confirm' | transloco"
+            [label]="'combat.actions.confirm' | translate"
             [disabled]="!cast.targets.length || busy()"
             (click)="confirm()"
           ></button>
@@ -233,7 +233,7 @@ import { CombatAttribute } from '../../models/combat';
             data-action="cancel-skill"
             severity="secondary"
             [text]="true"
-            [label]="'combat.actions.cancel' | transloco"
+            [label]="'combat.actions.cancel' | translate"
             (click)="targeting.clear()"
           ></button>
         </div>

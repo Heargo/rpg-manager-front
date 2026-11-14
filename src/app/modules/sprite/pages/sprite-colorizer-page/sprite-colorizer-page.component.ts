@@ -20,7 +20,7 @@ import {
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { ColorPickerModule } from '@openng/optimus-ui/colorpicker';
@@ -79,7 +79,7 @@ const toHex = (rgb: number[]) =>
   imports: [
     DecimalPipe,
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     ColorPickerModule,
     DialogModule,

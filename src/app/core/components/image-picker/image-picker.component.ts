@@ -4,7 +4,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { ImageWarningComponent } from '../image-warning/image-warning.component';
 import { StoredImageComponent } from '../stored-image/stored-image.component';
@@ -14,7 +14,7 @@ import { StoredImageComponent } from '../stored-image/stored-image.component';
   selector: 'app-image-picker',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     StoredImageComponent,
     ImageWarningComponent,
@@ -40,7 +40,7 @@ import { StoredImageComponent } from '../stored-image/stored-image.component';
           severity="secondary"
           icon="pi pi-pencil"
           data-action="change-image"
-          [label]="'common.image.change' | transloco"
+          [label]="'common.image.change' | translate"
           (click)="file.click()"
         ></button>
         <button
@@ -49,7 +49,7 @@ import { StoredImageComponent } from '../stored-image/stored-image.component';
           severity="secondary"
           icon="pi pi-trash"
           [attr.data-action]="removeAction()"
-          [label]="'common.image.remove' | transloco"
+          [label]="'common.image.remove' | translate"
           (click)="removed.emit()"
         ></button>
       </div>
@@ -63,7 +63,7 @@ import { StoredImageComponent } from '../stored-image/stored-image.component';
           type="button"
           icon="pi pi-upload"
           data-action="choose-image"
-          [label]="'common.image.choose' | transloco"
+          [label]="'common.image.choose' | translate"
           (click)="file.click()"
         ></button>
       </div>

@@ -13,7 +13,7 @@
     <span data-testid="character-level" [attr.data-rarity]="levelRarityName()">
       <p-tag
         [severity]="levelSeverity()"
-        [value]="'character.sheet.levelBadge' | transloco: { level: c.level }"
+        [value]="'character.sheet.levelBadge' | translate: { level: c.level }"
       />
     </span>
   </div>
@@ -43,11 +43,11 @@
         data-testid="xp-progress"
         [value]="p.percent"
         [showValue]="false"
-        [attr.aria-label]="'character.sheet.xp' | transloco"
+        [attr.aria-label]="'character.sheet.xp' | translate"
       />
       @if (p.maxed) {
         <span data-testid="xp-text">{{
-          "character.sheet.maxLevel" | transloco
+          "character.sheet.maxLevel" | translate
         }}</span>
       } @else {
         <span data-testid="xp-text"

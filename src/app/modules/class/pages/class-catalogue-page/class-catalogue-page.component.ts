@@ -5,7 +5,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -22,7 +22,7 @@ import { CharacterClass } from '../../models/class';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     MessageModule,
     ClassCatalogueComponent,
@@ -31,15 +31,15 @@ import { CharacterClass } from '../../models/class';
   template: `
     <div class="main-container catalogue">
       <header>
-        <h1>{{ 'class.catalogue.title' | transloco }}</h1>
+        <h1>{{ 'class.catalogue.title' | translate }}</h1>
         @if (tool) {
-          <p class="hint">{{ 'class.catalogue.toolIntro' | transloco }}</p>
+          <p class="hint">{{ 'class.catalogue.toolIntro' | translate }}</p>
         } @else {
           <p-button
             icon="pi pi-arrow-left"
             severity="secondary"
             [text]="true"
-            [label]="'class.catalogue.back' | transloco"
+            [label]="'class.catalogue.back' | translate"
             routerLink="/room"
           />
         }
@@ -50,7 +50,7 @@ import { CharacterClass } from '../../models/class';
             icon="pi pi-arrow-left"
             severity="secondary"
             [text]="true"
-            [label]="'class.editor.back' | transloco"
+            [label]="'class.editor.back' | translate"
             (onClick)="editing.set(null)"
           />
           <app-class-editor
@@ -72,7 +72,7 @@ import { CharacterClass } from '../../models/class';
         }
       } @else {
         <p-message severity="info">{{
-          'class.catalogue.notHosting' | transloco
+          'class.catalogue.notHosting' | translate
         }}</p-message>
       }
     </div>

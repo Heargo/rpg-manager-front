@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
 import { ItemCatalogueComponent } from '../../../item/components/item-catalogue/item-catalogue.component';
@@ -11,7 +11,7 @@ import { SandboxCatalogueBusiness } from '../../business/sandbox-catalogue.busin
   selector: 'app-item-catalogue-tool-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     MessageModule,
     SkeletonModule,
     ItemCatalogueComponent,
@@ -19,12 +19,12 @@ import { SandboxCatalogueBusiness } from '../../business/sandbox-catalogue.busin
   template: `
     <div class="main-container tool">
       <header>
-        <h1>{{ 'item.catalogue.title' | transloco }}</h1>
-        <p class="hint">{{ 'item.catalogue.toolIntro' | transloco }}</p>
+        <h1>{{ 'item.catalogue.title' | translate }}</h1>
+        <p class="hint">{{ 'item.catalogue.toolIntro' | translate }}</p>
       </header>
       @if (sandbox.$failed()) {
         <p-message severity="error">{{
-          'tools.itemGenerator.failed' | transloco
+          'tools.itemGenerator.failed' | translate
         }}</p-message>
       } @else if (sandbox.$loading()) {
         <p-skeleton height="12rem" />

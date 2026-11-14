@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { RoomBusiness } from '../../../modules/room/business/room.business';
 
@@ -7,15 +7,15 @@ import { RoomBusiness } from '../../../modules/room/business/room.business';
 @Component({
   selector: 'app-host-offline-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, TooltipModule],
+  imports: [TranslatePipe, TooltipModule],
   template: `
     @if (room.$status() === 'host-offline') {
       <span
         class="host-offline-icon"
         role="img"
         tabindex="0"
-        [attr.aria-label]="'room.hostOfflineTooltip' | transloco"
-        [pTooltip]="'room.hostOfflineTooltip' | transloco"
+        [attr.aria-label]="'room.hostOfflineTooltip' | translate"
+        [pTooltip]="'room.hostOfflineTooltip' | translate"
         tooltipPosition="bottom"
       >
         <i class="pi pi-wifi" aria-hidden="true"></i>

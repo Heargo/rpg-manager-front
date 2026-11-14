@@ -8,7 +8,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { DICE_OVERLAY_Z_INDEX } from '../../models/dice-api';
 import { DiceRollBusiness } from '../../business/dice-roll.business';
@@ -19,7 +19,7 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
 @Component({
   selector: 'app-dice-overlay',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, ButtonModule],
+  imports: [TranslatePipe, ButtonModule],
   host: { '(document:keydown.escape)': 'escape()' },
   template: `
     @if (dice.$current(); as roll) {
@@ -27,12 +27,12 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
         class="overlay"
         role="dialog"
         aria-modal="true"
-        [attr.aria-label]="'dice.title' | transloco"
+        [attr.aria-label]="'dice.title' | translate"
       >
         <canvas
           #canvas
           (click)="skip()"
-          [attr.aria-label]="'dice.skip' | transloco"
+          [attr.aria-label]="'dice.skip' | translate"
         ></canvas>
         @if (loading()) {
           <div class="loading"><i class="pi pi-spin pi-spinner"></i></div>
@@ -41,7 +41,7 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
           <div class="values" aria-live="polite">
             @if (roll.shared && !roll.shared.mine) {
               <span class="by">{{
-                'dice.rolledBy' | transloco: { name: roll.shared.name }
+                'dice.rolledBy' | translate: { name: roll.shared.name }
               }}</span>
             }
             @if (dice.$settled()) {
@@ -53,7 +53,7 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
                 roll.total
               }}</strong>
             } @else {
-              <span class="hint">{{ 'dice.rolling' | transloco }}</span>
+              <span class="hint">{{ 'dice.rolling' | translate }}</span>
             }
           </div>
           <div class="actions">
@@ -61,7 +61,7 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
               <p-button
                 data-action="again-dice"
                 icon="pi pi-refresh"
-                [label]="'dice.again' | transloco"
+                [label]="'dice.again' | translate"
                 (onClick)="again()"
               />
             }
@@ -71,7 +71,7 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
               <p-button
                 data-action="close-dice"
                 icon="pi pi-times"
-                [label]="'dice.close' | transloco"
+                [label]="'dice.close' | translate"
                 severity="secondary"
                 (onClick)="close()"
               />

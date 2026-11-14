@@ -6,7 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { DialogModule } from '@openng/optimus-ui/dialog';
@@ -35,7 +35,7 @@ import { CombatSetupGridComponent } from '../combat-setup-grid/combat-setup-grid
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     DialogModule,
     InputNumberModule,

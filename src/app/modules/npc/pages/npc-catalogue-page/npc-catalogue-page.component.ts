@@ -5,7 +5,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -23,7 +23,7 @@ import { Npc } from '../../models/npc';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     MessageModule,
     NpcCatalogueComponent,
@@ -32,15 +32,15 @@ import { Npc } from '../../models/npc';
   template: `
     <div class="main-container catalogue">
       <header>
-        <h1>{{ 'npc.catalogue.title' | transloco }}</h1>
+        <h1>{{ 'npc.catalogue.title' | translate }}</h1>
         @if (tool) {
-          <p class="hint">{{ 'npc.catalogue.toolIntro' | transloco }}</p>
+          <p class="hint">{{ 'npc.catalogue.toolIntro' | translate }}</p>
         } @else {
           <p-button
             icon="pi pi-arrow-left"
             severity="secondary"
             [text]="true"
-            [label]="'npc.catalogue.back' | transloco"
+            [label]="'npc.catalogue.back' | translate"
             routerLink="/room"
           />
         }
@@ -57,7 +57,7 @@ import { Npc } from '../../models/npc';
         <app-npc-sheet-dialog [(npcId)]="viewedNpcId" />
       } @else {
         <p-message severity="info">{{
-          'npc.catalogue.notHosting' | transloco
+          'npc.catalogue.notHosting' | translate
         }}</p-message>
       }
     </div>

@@ -5,7 +5,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -22,7 +22,7 @@ import { Skill } from '../../models/skill';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     MessageModule,
     SkillCatalogueComponent,
@@ -31,15 +31,15 @@ import { Skill } from '../../models/skill';
   template: `
     <div class="main-container catalogue">
       <header>
-        <h1>{{ 'skill.catalogue.title' | transloco }}</h1>
+        <h1>{{ 'skill.catalogue.title' | translate }}</h1>
         @if (tool) {
-          <p class="hint">{{ 'skill.catalogue.toolIntro' | transloco }}</p>
+          <p class="hint">{{ 'skill.catalogue.toolIntro' | translate }}</p>
         } @else {
           <p-button
             icon="pi pi-arrow-left"
             severity="secondary"
             [text]="true"
-            [label]="'skill.catalogue.back' | transloco"
+            [label]="'skill.catalogue.back' | translate"
             routerLink="/room"
           />
         }
@@ -50,7 +50,7 @@ import { Skill } from '../../models/skill';
             icon="pi pi-arrow-left"
             severity="secondary"
             [text]="true"
-            [label]="'skill.editor.back' | transloco"
+            [label]="'skill.editor.back' | translate"
             (onClick)="editing.set(null)"
           />
           <app-skill-editor
@@ -69,7 +69,7 @@ import { Skill } from '../../models/skill';
         }
       } @else {
         <p-message severity="info">{{
-          'skill.catalogue.notHosting' | transloco
+          'skill.catalogue.notHosting' | translate
         }}</p-message>
       }
     </div>

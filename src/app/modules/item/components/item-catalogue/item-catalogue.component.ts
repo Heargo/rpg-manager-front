@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService, MenuItem } from '@openng/optimus-ui/api';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { Menu, MenuModule } from '@openng/optimus-ui/menu';
@@ -38,7 +38,7 @@ import { ItemCardComponent } from '../item-card/item-card.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     DialogModule,
     InputTextModule,
@@ -55,8 +55,8 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         pInputText
         data-field="search"
         type="search"
-        [attr.aria-label]="'item.catalogue.search' | transloco"
-        [placeholder]="'item.catalogue.search' | transloco"
+        [attr.aria-label]="'item.catalogue.search' | translate"
+        [placeholder]="'item.catalogue.search' | translate"
         [value]="search()"
         (input)="search.set($any($event.target).value)"
         autocomplete="off"
@@ -67,7 +67,7 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         optionValue="value"
         [ngModel]="rarities()"
         (ngModelChange)="rarities.set($event ?? [])"
-        [placeholder]="'item.fields.rarity' | transloco"
+        [placeholder]="'item.fields.rarity' | translate"
         [showToggleAll]="false"
         display="chip"
       />
@@ -77,12 +77,12 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         optionValue="value"
         [ngModel]="types()"
         (ngModelChange)="types.set($event ?? [])"
-        [placeholder]="'item.fields.type' | transloco"
+        [placeholder]="'item.fields.type' | translate"
         [showToggleAll]="false"
         display="chip"
       />
       <div class="price-filter">
-        <span class="price-label">{{ 'item.catalogue.price' | transloco }}</span>
+        <span class="price-label">{{ 'item.catalogue.price' | translate }}</span>
         <p-slider
           [range]="true"
           [min]="bounds().min"
@@ -90,11 +90,11 @@ import { ItemCardComponent } from '../item-card/item-card.component';
           [step]="100"
           [ngModel]="range()"
           (ngModelChange)="priceRange.set($event)"
-          [attr.aria-label]="'item.catalogue.price' | transloco"
+          [attr.aria-label]="'item.catalogue.price' | translate"
         />
         <span class="price-ends">
           <app-coin-display [copper]="range()[0]" />
-          <span class="price-to">{{ 'item.catalogue.priceTo' | transloco }}</span>
+          <span class="price-to">{{ 'item.catalogue.priceTo' | translate }}</span>
           <app-coin-display [copper]="range()[1]" />
         </span>
       </div>
@@ -103,7 +103,7 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         type="button"
         data-action="create"
         icon="pi pi-plus-circle"
-        [label]="'item.catalogue.create' | transloco"
+        [label]="'item.catalogue.create' | translate"
         (click)="create.emit()"
       ></button>
       <button
@@ -112,7 +112,7 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         data-action="add-defaults"
         icon="pi pi-plus"
         severity="secondary"
-        [label]="'item.catalogue.addDefaults' | transloco"
+        [label]="'item.catalogue.addDefaults' | translate"
         (click)="addDefaults.emit()"
       ></button>
     </div>
@@ -155,7 +155,7 @@ import { ItemCardComponent } from '../item-card/item-card.component';
           }
         </div>
       } @else {
-        <p class="empty">{{ 'item.catalogue.empty' | transloco }}</p>
+        <p class="empty">{{ 'item.catalogue.empty' | translate }}</p>
       }
 
     </div>

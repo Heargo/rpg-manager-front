@@ -5,7 +5,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
@@ -24,7 +24,7 @@ import {
   selector: 'app-character-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     ProgressBarModule,
     TagModule,
     CoinDisplayComponent,

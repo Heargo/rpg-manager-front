@@ -9,7 +9,7 @@ import { EXTRA_ITEMS } from '../../../testing/extra-pack';
 import { NEON_LINK, neonProviders, neonWorld } from '../../../testing/unofficial-pack';
 import { SpriteSet } from '../../modules/sprite/models/sprite-set';
 import { SpriteSetStorageService } from '../../modules/sprite/services/sprite-set-storage.service';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslateService } from '@ngx-translate/core';
 import { openWorldWithPacks } from '../../../testing/active-packs';
 import { provideTestTranslations } from '../../../testing/test-providers';
 import { openAppDatabase } from '../helpers/app-database';
@@ -443,7 +443,7 @@ describe('PackCreatorBusiness', () => {
 
     it('follows the language of the pack, not the app: -copie for a French pack in an English app', async () => {
       const s = setup();
-      TestBed.inject(TranslocoService).setActiveLang('en');
+      TestBed.inject(TranslateService).use('en');
       await s.packs.install(await s.packs.prepare(NEON_LINK));
 
       const draft = await s.creator.duplicate('neon');
@@ -454,7 +454,7 @@ describe('PackCreatorBusiness', () => {
 
     it('uses -copy and (copy) for an English pack, even in a French app', async () => {
       const s = setup();
-      TestBed.inject(TranslocoService).setActiveLang('fr');
+      TestBed.inject(TranslateService).use('fr');
       const mine = await validDraft(s, { id: 'mine-en', language: 'en', name: 'Mine' });
       await s.creator.install(mine.id);
 

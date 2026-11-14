@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslateService } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
@@ -48,7 +48,7 @@ describe('ClassEditorComponent AI prompt', () => {
 
   it('copies the prompt in the active language', async () => {
     const { el, fixture, settle } = await setup();
-    TestBed.inject(TranslocoService).setActiveLang('fr');
+    TestBed.inject(TranslateService).use('fr');
     await settle();
     fixture.detectChanges();
     el.querySelector<HTMLElement>('[data-action="copy-ai-prompt"]')!.click();

@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   standalone: true,
   selector: 'app-not-found',
-  imports: [TranslocoPipe],
+  imports: [TranslatePipe],
   templateUrl: './not-found.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./not-found.component.scss'],

@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslateService } from '@ngx-translate/core';
 import en from '../../../../../../public/packs/base-en/generators/items.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { PackBusiness } from '../../../../core/business/pack.business';
@@ -19,7 +19,7 @@ describe('ItemEditorComponent image warning', () => {
     await fixture.whenStable();
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('[data-testid="image-warning"]')!.textContent).toContain('human artists');
-    TestBed.inject(TranslocoService).setActiveLang('fr');
+    TestBed.inject(TranslateService).use('fr');
     await fixture.whenStable();
     fixture.detectChanges();
     expect(el.querySelector('[data-testid="image-warning"]')!.textContent).toContain('artistes humains');

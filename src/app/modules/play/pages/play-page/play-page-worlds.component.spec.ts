@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslateService } from '@ngx-translate/core';
 import { ConfirmationService } from '@openng/optimus-ui/api';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { PlayBusiness } from '../../business/play.business';
@@ -58,7 +58,7 @@ describe('PlayPageComponent worlds list', () => {
   it('is titled "Worlds", and "Mondes" in French', async () => {
     const fixture = await render();
     expect(el(fixture).querySelector('h1')?.textContent?.trim()).toBe('Worlds');
-    TestBed.inject(TranslocoService).setActiveLang('fr');
+    TestBed.inject(TranslateService).use('fr');
     fixture.detectChanges();
     await fixture.whenStable();
     expect(el(fixture).querySelector('h1')?.textContent?.trim()).toBe('Mondes');

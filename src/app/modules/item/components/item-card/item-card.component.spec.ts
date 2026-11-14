@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslateService } from '@ngx-translate/core';
 import { generateItem } from '../../../../core/generators/item-generator';
 import { seededRandomSource } from '../../../../core/generators/random-source';
 import { WordList } from '../../../../core/generators/word-list';
@@ -24,7 +24,7 @@ describe('ItemCardComponent', () => {
         imports: [ItemCardComponent],
         providers: TEST_PROVIDERS,
       });
-      TestBed.inject(TranslocoService).setActiveLang(lang);
+      TestBed.inject(TranslateService).use(lang);
       const fixture = TestBed.createComponent(ItemCardComponent);
       const source = seededRandomSource('cards');
       const combos = ITEM_RARITIES.flatMap((rarity) => [
@@ -58,7 +58,7 @@ describe('ItemCardComponent', () => {
       imports: [ItemCardComponent],
       providers: TEST_PROVIDERS,
     });
-    TestBed.inject(TranslocoService).setActiveLang('en');
+    TestBed.inject(TranslateService).use('en');
     const fixture = TestBed.createComponent(ItemCardComponent);
     const item = generateItem(seededRandomSource('slot'), en as WordList, {
       attributes: ['Life'],
@@ -79,7 +79,7 @@ describe('ItemCardComponent', () => {
       imports: [ItemCardComponent],
       providers: TEST_PROVIDERS,
     });
-    TestBed.inject(TranslocoService).setActiveLang('en');
+    TestBed.inject(TranslateService).use('en');
     const fixture = TestBed.createComponent(ItemCardComponent);
     const item = generateItem(seededRandomSource('slot'), en as WordList, {
       attributes: ['Life'],

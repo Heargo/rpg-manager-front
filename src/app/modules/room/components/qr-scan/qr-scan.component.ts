@@ -12,7 +12,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -28,7 +28,7 @@ import { QrScanError, QrScanSession } from '../../services/qr-scanner.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     DialogModule,
     MessageModule,
@@ -41,7 +41,7 @@ import { QrScanError, QrScanSession } from '../../services/qr-scanner.service';
       [closable]="true"
       [closeOnEscape]="true"
       [draggable]="false"
-      [header]="'room.scan.title' | transloco"
+      [header]="'room.scan.title' | translate"
       [style]="{ width: 'min(32rem, calc(100vw - 2rem))' }"
       (visibleChange)="!$event && close()"
     >
@@ -51,7 +51,7 @@ import { QrScanError, QrScanSession } from '../../services/qr-scanner.service';
             (place() === 'join-entry'
               ? 'room.scan.hintInvite'
               : 'room.scan.hintAnswer'
-            ) | transloco
+            ) | translate
           }}
         </p>
         <video
@@ -59,14 +59,14 @@ import { QrScanError, QrScanSession } from '../../services/qr-scanner.service';
           muted
           playsinline
           [hidden]="!!fallback()"
-          [attr.aria-label]="'room.scan.video' | transloco"
+          [attr.aria-label]="'room.scan.video' | translate"
         ></video>
         @if (fallback(); as reason) {
           <p-message severity="warn" size="small" variant="simple">{{
             (reason === 'denied' ? 'room.scan.denied' : 'room.scan.noCamera')
-              | transloco
+              | translate
           }}</p-message>
-          <label for="scan-paste">{{ 'room.scan.paste' | transloco }}</label>
+          <label for="scan-paste">{{ 'room.scan.paste' | translate }}</label>
           <textarea
             pTextarea
             id="scan-paste"
@@ -80,7 +80,7 @@ import { QrScanError, QrScanSession } from '../../services/qr-scanner.service';
             type="button"
             data-test="scan-use"
             icon="pi pi-check"
-            [label]="'room.scan.use' | transloco"
+            [label]="'room.scan.use' | translate"
             [disabled]="!pasted().trim()"
             (click)="use()"
           ></button>
@@ -96,7 +96,7 @@ import { QrScanError, QrScanSession } from '../../services/qr-scanner.service';
             icon="pi pi-times"
             severity="secondary"
             [text]="true"
-            [label]="'room.scan.close' | transloco"
+            [label]="'room.scan.close' | translate"
             (click)="close()"
           ></button>
         </div>

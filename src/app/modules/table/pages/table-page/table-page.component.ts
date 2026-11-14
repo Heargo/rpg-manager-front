@@ -10,7 +10,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { AccordionModule } from '@openng/optimus-ui/accordion';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -78,7 +78,7 @@ function readToolsOpen(): string[] {
     NgTemplateOutlet,
     FormsModule,
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     CardModule,
     DrawerModule,

@@ -1,12 +1,12 @@
 <div class="main-container play">
   <header class="play-header">
-    <h1>{{ "play.title" | transloco }}</h1>
+    <h1>{{ "play.title" | translate }}</h1>
     <div class="header-actions">
       <label
         class="p-button p-button-secondary p-button-text import"
         for="world-import"
       >
-        <i class="pi pi-upload"></i> {{ "play.worlds.import" | transloco }}
+        <i class="pi pi-upload"></i> {{ "play.worlds.import" | translate }}
       </label>
       <input
         id="world-import"
@@ -17,7 +17,7 @@
       />
       <p-button
         icon="pi pi-plus"
-        [label]="'play.worlds.new' | transloco"
+        [label]="'play.worlds.new' | translate"
         routerLink="/worlds/new"
       />
     </div>
@@ -26,8 +26,8 @@
   @if (play.$roomStatus() !== "idle") {
     <p-message severity="info" icon="pi pi-users">
       <span class="room-banner">
-        {{ "play.activeRoom" | transloco: { name: play.$roomName() ?? "" } }}
-        <a routerLink="/room">{{ "play.backToRoom" | transloco }}</a>
+        {{ "play.activeRoom" | translate: { name: play.$roomName() ?? "" } }}
+        <a routerLink="/room">{{ "play.backToRoom" | translate }}</a>
       </span>
     </p-message>
   }
@@ -36,7 +36,7 @@
   }
 
   <section>
-    <h2>{{ "play.worlds.title" | transloco }}</h2>
+    <h2>{{ "play.worlds.title" | translate }}</h2>
     <p-dataview [value]="play.$worlds()" layout="grid" [emptyMessage]="' '">
       <ng-template #grid let-worlds>
         <div class="grid">
@@ -52,11 +52,11 @@
                   data-test="world-badge"
                   severity="warn"
                   icon="pi pi-crown"
-                  [value]="'play.badge.gm' | transloco"
+                  [value]="'play.badge.gm' | translate"
                 />
                 {{
                   "play.worlds.characters"
-                    | transloco: { count: world.characterCount }
+                    | translate: { count: world.characterCount }
                 }}
                 ·
                 {{ world.updatedAt | localDate }}
@@ -66,26 +66,26 @@
                   icon="pi pi-trash"
                   severity="danger"
                   [text]="true"
-                  [ariaLabel]="'play.worlds.delete' | transloco"
+                  [ariaLabel]="'play.worlds.delete' | translate"
                   (onClick)="deleteWorld(world.id, world.name)"
                 />
                 <p-button
                   icon="pi pi-download"
                   severity="secondary"
                   [text]="true"
-                  [ariaLabel]="'play.worlds.export' | transloco"
+                  [ariaLabel]="'play.worlds.export' | translate"
                   (onClick)="exportWorld(world.id)"
                 />
                 @if (play.$hostedWorldId() === world.id) {
                   <p-button
                     icon="pi pi-arrow-right"
-                    [label]="'play.worlds.openRoom' | transloco"
+                    [label]="'play.worlds.openRoom' | translate"
                     routerLink="/room"
                   />
                 } @else {
                   <p-button
                     icon="pi pi-crown"
-                    [label]="'play.worlds.host' | transloco"
+                    [label]="'play.worlds.host' | translate"
                     [loading]="busyWorld() === world.id"
                     (onClick)="host(world.id)"
                   />
@@ -98,10 +98,10 @@
       <ng-template #emptymessage>
         <div class="empty">
           <i class="pi pi-globe"></i>
-          <p>{{ "play.worlds.empty" | transloco }}</p>
+          <p>{{ "play.worlds.empty" | translate }}</p>
           <p-button
             icon="pi pi-plus"
-            [label]="'play.worlds.new' | transloco"
+            [label]="'play.worlds.new' | translate"
             routerLink="/worlds/new"
           />
         </div>
@@ -110,28 +110,28 @@
   </section>
 
   <section>
-    <h2>{{ "play.joined.title" | transloco }}</h2>
+    <h2>{{ "play.joined.title" | translate }}</h2>
     @if (play.$joinedWorlds().length) {
       <p class="hint" data-test="rejoin-hint">
-        {{ "play.joined.rejoinHint" | transloco }}
+        {{ "play.joined.rejoinHint" | translate }}
       </p>
       <div class="grid">
         @for (world of play.$joinedWorlds(); track world.worldId) {
           <app-world-card
             data-test="world-entry"
             [name]="world.name"
-            [description]="'play.joined.hostedBy' | transloco: { name: world.hostName }"
+            [description]="'play.joined.hostedBy' | translate: { name: world.hostName }"
           >
             <span meta>
               <p-tag
                 data-test="world-badge"
                 severity="info"
                 icon="pi pi-user"
-                [value]="'play.badge.player' | transloco"
+                [value]="'play.badge.player' | translate"
               />
               {{
                 "play.joined.lastSeen"
-                  | transloco: { date: (world.lastSeenAt | localDate: "dateTime") }
+                  | translate: { date: (world.lastSeenAt | localDate: "dateTime") }
               }}
             </span>
             <ng-container actions>
@@ -142,7 +142,7 @@
                 icon="pi pi-trash"
                 severity="danger"
                 [text]="true"
-                [attr.aria-label]="'play.joined.remove' | transloco"
+                [attr.aria-label]="'play.joined.remove' | translate"
                 (click)="removeJoined(world.worldId, world.name)"
               ></button>
               <button
@@ -151,7 +151,7 @@
                 data-test="open-sheet"
                 icon="pi pi-id-card"
                 severity="secondary"
-                [label]="'play.joined.openSheet' | transloco"
+                [label]="'play.joined.openSheet' | translate"
                 (click)="openSheet(world.worldId)"
               ></button>
             </ng-container>
@@ -159,16 +159,16 @@
         }
       </div>
     } @else {
-      <p class="hint">{{ "play.rooms.empty" | transloco }}</p>
+      <p class="hint">{{ "play.rooms.empty" | translate }}</p>
     }
   </section>
 
   <div class="columns">
-    <p-card [header]="'room.start.joinTitle' | transloco">
+    <p-card [header]="'room.start.joinTitle' | translate">
       <form class="stack" (ngSubmit)="join()">
-        <p class="hint">{{ "room.start.joinHint" | transloco }}</p>
+        <p class="hint">{{ "room.start.joinHint" | translate }}</p>
         <label for="invite-code">{{
-          "room.start.inviteCode" | transloco
+          "room.start.inviteCode" | translate
         }}</label>
         <textarea
           pTextarea
@@ -181,7 +181,7 @@
           <p-button
             type="submit"
             icon="pi pi-sign-in"
-            [label]="'room.start.join' | transloco"
+            [label]="'room.start.join' | translate"
             [disabled]="!inviteInput().trim()"
           />
           <button
@@ -190,7 +190,7 @@
             data-test="scan"
             icon="pi pi-camera"
             severity="secondary"
-            [label]="'room.scan.button' | transloco"
+            [label]="'room.scan.button' | translate"
             (click)="scanning.set(true)"
           ></button>
         </div>

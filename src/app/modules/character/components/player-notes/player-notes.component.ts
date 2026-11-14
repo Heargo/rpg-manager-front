@@ -5,7 +5,7 @@ import {
   linkedSignal,
   output,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { CHARACTER_NOTES_MAX_LENGTH } from '../../models/character-api';
@@ -14,9 +14,9 @@ import { CHARACTER_NOTES_MAX_LENGTH } from '../../models/character-api';
 @Component({
   selector: 'app-player-notes',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, ButtonModule, TextareaModule],
+  imports: [TranslatePipe, ButtonModule, TextareaModule],
   template: `
-    <label for="player-notes">{{ 'character.notes.title' | transloco }}</label>
+    <label for="player-notes">{{ 'character.notes.title' | translate }}</label>
     <textarea
       pTextarea
       id="player-notes"
@@ -24,18 +24,18 @@ import { CHARACTER_NOTES_MAX_LENGTH } from '../../models/character-api';
       [attr.maxlength]="maxLength"
       [readOnly]="readOnly()"
       [value]="draft()"
-      [placeholder]="'character.notes.placeholder' | transloco"
+      [placeholder]="'character.notes.placeholder' | translate"
       (input)="draft.set($any($event.target).value)"
     ></textarea>
     @if (readOnly()) {
-      <small class="hint">{{ 'character.notes.readOnly' | transloco }}</small>
+      <small class="hint">{{ 'character.notes.readOnly' | translate }}</small>
     } @else {
       <button
         pButton
         type="button"
         data-action="save-notes"
         icon="pi pi-save"
-        [label]="'character.notes.save' | transloco"
+        [label]="'character.notes.save' | translate"
         (click)="save.emit(draft())"
       ></button>
     }

@@ -6,7 +6,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { Skill } from '../../../skill/models/skill';
 import { BoardGeometry, linkRoute } from '../../helpers/tree-board.rules';
@@ -29,7 +29,7 @@ const BULGE = 36;
 @Component({
   selector: 'app-skill-tree',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslatePipe],
   template: `
     <div
       class="tree"
@@ -78,7 +78,7 @@ const BULGE = 36;
             <span class="name">{{ node.name }}</span>
             <span class="level" data-field="level">{{
               'class.tree.level'
-                | transloco: { level: node.level, max: node.maxLevel }
+                | translate: { level: node.level, max: node.maxLevel }
             }}</span>
           </div>
         </div>

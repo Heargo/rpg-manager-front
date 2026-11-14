@@ -1,7 +1,7 @@
 <div class="main-container rules">
   <header>
-    <h1>{{ "world.rules.title" | transloco }}</h1>
-    <p class="hint">{{ "world.rules.intro" | transloco }}</p>
+    <h1>{{ "world.rules.title" | translate }}</h1>
+    <p class="hint">{{ "world.rules.intro" | translate }}</p>
   </header>
 
   @if (world()) {
@@ -12,7 +12,7 @@
           data-testid="rules-tab-attributes"
           [attr.data-invalid]="invalidTabs().attributes ? 'true' : null"
           ><button type="button">
-            {{ "world.rules.tabs.attributes" | transloco }}
+            {{ "world.rules.tabs.attributes" | translate }}
           </button></p-tab
         >
         <p-tab
@@ -20,26 +20,26 @@
           data-testid="rules-tab-rules"
           [attr.data-invalid]="invalidTabs().rules ? 'true' : null"
           ><button type="button">
-            {{ "world.rules.tabs.rules" | transloco }}
+            {{ "world.rules.tabs.rules" | translate }}
           </button></p-tab
         >
         <p-tab value="offline" data-testid="rules-tab-offline"
           ><button type="button">
-            {{ "world.rules.tabs.offline" | transloco }}
+            {{ "world.rules.tabs.offline" | translate }}
           </button></p-tab
         >
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="attributes">
           <section class="attributes-section">
-            <h2>{{ "world.rules.attributes" | transloco }}</h2>
+            <h2>{{ "world.rules.attributes" | translate }}</h2>
             <div class="attributes" role="table">
               <div class="row head" aria-hidden="true">
-                <span>{{ "world.fields.attributeName" | transloco }}</span>
-                <span>{{ "world.new.columns.base" | transloco }}</span>
-                <span>{{ "world.new.columns.progression" | transloco }}</span>
-                <span>{{ "world.fields.step" | transloco }}</span>
-                <span>{{ "world.new.columns.cap" | transloco }}</span>
+                <span>{{ "world.fields.attributeName" | translate }}</span>
+                <span>{{ "world.new.columns.base" | translate }}</span>
+                <span>{{ "world.new.columns.progression" | translate }}</span>
+                <span>{{ "world.fields.step" | translate }}</span>
+                <span>{{ "world.new.columns.cap" | translate }}</span>
                 <span class="remove"></span>
               </div>
               @for (
@@ -58,9 +58,9 @@
                       class="name"
                       [attr.data-testid]="'attribute-name-' + i"
                       [maxlength]="attributeMax"
-                      [placeholder]="'world.fields.attributeName' | transloco"
+                      [placeholder]="'world.fields.attributeName' | translate"
                       [ariaLabel]="
-                        ('world.fields.attributeName' | transloco) +
+                        ('world.fields.attributeName' | translate) +
                         ' ' +
                         (i + 1)
                       "
@@ -77,7 +77,7 @@
                       [step]="1"
                       inputStyleClass="number"
                       [ariaLabel]="
-                        ('world.fields.baseValue' | transloco) + ' ' + (i + 1)
+                        ('world.fields.baseValue' | translate) + ' ' + (i + 1)
                       "
                     />
                     <p-select
@@ -87,15 +87,15 @@
                       [ngModel]="attribute.formula.preset"
                       (ngModelChange)="setPreset(attribute.key, $event)"
                       [ariaLabel]="
-                        ('world.fields.formula' | transloco) + ' ' + (i + 1)
+                        ('world.fields.formula' | translate) + ' ' + (i + 1)
                       "
                       appendTo="body"
                     >
                       <ng-template #selectedItem let-preset>{{
-                        "world.formula.presets." + preset | transloco
+                        "world.formula.presets." + preset | translate
                       }}</ng-template>
                       <ng-template #item let-preset>{{
-                        "world.formula.presets." + preset | transloco
+                        "world.formula.presets." + preset | translate
                       }}</ng-template>
                     </p-select>
                     @if (stepOf(attribute.formula) !== null) {
@@ -108,7 +108,7 @@
                         [maxFractionDigits]="2"
                         inputStyleClass="number"
                         [ariaLabel]="
-                          ('world.fields.step' | transloco) + ' ' + (i + 1)
+                          ('world.fields.step' | translate) + ' ' + (i + 1)
                         "
                       />
                     } @else {
@@ -123,7 +123,7 @@
                       [attr.data-testid]="'formula-cap-' + i"
                       [attr.aria-invalid]="capErrors()[i] ? 'true' : null"
                       [ariaLabel]="
-                        ('world.fields.cap' | transloco) + ' ' + (i + 1)
+                        ('world.fields.cap' | translate) + ' ' + (i + 1)
                       "
                       [ngModel]="attribute.cap ?? null"
                       [ngModelOptions]="{ standalone: true }"
@@ -136,7 +136,7 @@
                       severity="secondary"
                       [text]="true"
                       [rounded]="true"
-                      [ariaLabel]="'world.new.removeAttribute' | transloco"
+                      [ariaLabel]="'world.new.removeAttribute' | translate"
                       (onClick)="askRemove(attribute)"
                     />
                     @if (capErrors()[i]; as capError) {
@@ -145,7 +145,7 @@
                         role="alert"
                         [attr.data-testid]="'formula-cap-error-' + i"
                         >{{
-                          capError | transloco: { base: attribute.baseValue }
+                          capError | translate: { base: attribute.baseValue }
                         }}</small
                       >
                     }
@@ -162,9 +162,9 @@
                         spellcheck="false"
                         [attr.data-testid]="'formula-expression-' + i"
                         [attr.aria-label]="
-                          'world.fields.expression' | transloco
+                          'world.fields.expression' | translate
                         "
-                        [placeholder]="'world.fields.expression' | transloco"
+                        [placeholder]="'world.fields.expression' | translate"
                         [value]="expressionText(attribute.formula)"
                         (input)="
                           setExpression(
@@ -174,7 +174,7 @@
                         "
                       />
                       <small class="hint">{{
-                        "world.formula.helpShort" | transloco
+                        "world.formula.helpShort" | translate
                       }}</small>
                       @if (formulaErrors()[i]; as formulaError) {
                         <small
@@ -184,7 +184,7 @@
                         >
                           {{
                             formulaErrorKey(formulaError)
-                              | transloco
+                              | translate
                                 : {
                                     position: formulaError.position + 1,
                                     level: formulaError.level,
@@ -200,7 +200,7 @@
             <p-button
               data-testid="attribute-add"
               icon="pi pi-plus"
-              [label]="'world.new.addAttribute' | transloco"
+              [label]="'world.new.addAttribute' | translate"
               severity="secondary"
               [text]="true"
               (onClick)="addAttribute()"
@@ -211,7 +211,7 @@
                 severity="error"
                 size="small"
                 variant="simple"
-                >{{ error | transloco }}</p-message
+                >{{ error | translate }}</p-message
               >
             }
           </section>
@@ -240,7 +240,7 @@
       <p-button
         data-testid="rules-save"
         icon="pi pi-check"
-        [label]="'world.rules.save' | transloco"
+        [label]="'world.rules.save' | translate"
         [loading]="saving()"
         [disabled]="!canSave()"
         (onClick)="save()"
@@ -248,7 +248,7 @@
     </div>
   } @else {
     <p-message severity="info">{{
-      "world.rules.notHosting" | transloco
+      "world.rules.notHosting" | translate
     }}</p-message>
   }
 </div>

@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslateService } from '@ngx-translate/core';
 import npcNames from '../../../../../../public/packs/base-en/generators/npcs.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { ImageBusiness } from '../../../../core/business/image.business';
@@ -81,7 +81,7 @@ describe('NpcEditorComponent portrait', () => {
   it('shows the human-artists warning next to the picker, in English and French', async () => {
     const { el, fixture, settle } = await setup();
     expect(el.querySelector('[data-testid="image-warning"]')!.textContent).toContain('human artists');
-    TestBed.inject(TranslocoService).setActiveLang('fr');
+    TestBed.inject(TranslateService).use('fr');
     await settle();
     fixture.detectChanges();
     expect(el.querySelector('[data-testid="image-warning"]')!.textContent).toContain('artistes humains');

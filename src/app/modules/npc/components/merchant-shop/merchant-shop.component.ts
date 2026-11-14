@@ -6,7 +6,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
@@ -22,7 +22,7 @@ import { sellPrice } from '../../helpers/merchant.rules';
   selector: 'app-merchant-shop',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     DialogModule,
     CoinDisplayComponent,
@@ -33,13 +33,13 @@ import { sellPrice } from '../../helpers/merchant.rules';
     <header class="head">
       <h3>{{ shop().name }}</h3>
       <span class="money" data-testid="shop-money">
-        {{ 'merchant.shop.money' | transloco }}
+        {{ 'merchant.shop.money' | translate }}
         <app-coin-display [copper]="money()" />
       </span>
     </header>
 
     <section>
-      <h4>{{ 'merchant.shop.buy' | transloco }}</h4>
+      <h4>{{ 'merchant.shop.buy' | translate }}</h4>
       @for (entry of shop().stock; track entry.id) {
         <div class="row" data-testid="shop-stock-item">
           <app-stored-image
@@ -62,7 +62,7 @@ import { sellPrice } from '../../helpers/merchant.rules';
             [text]="true"
             [rounded]="true"
             severity="secondary"
-            [attr.aria-label]="'merchant.shop.details' | transloco"
+            [attr.aria-label]="'merchant.shop.details' | translate"
             (click)="viewed.set(entry.item)"
           ></button>
           <button
@@ -71,18 +71,18 @@ import { sellPrice } from '../../helpers/merchant.rules';
             data-action="buy"
             icon="pi pi-shopping-cart"
             size="small"
-            [label]="'merchant.shop.buyAction' | transloco"
+            [label]="'merchant.shop.buyAction' | translate"
             [disabled]="money() < entry.price"
             (click)="buy.emit(entry.id)"
           ></button>
         </div>
       } @empty {
-        <p class="empty">{{ 'merchant.shop.noStock' | transloco }}</p>
+        <p class="empty">{{ 'merchant.shop.noStock' | translate }}</p>
       }
     </section>
 
     <section>
-      <h4>{{ 'merchant.shop.sell' | transloco }}</h4>
+      <h4>{{ 'merchant.shop.sell' | translate }}</h4>
       @for (entry of sellable(); track entry.id) {
         <div class="row" data-testid="shop-sell-item">
           <app-stored-image
@@ -105,7 +105,7 @@ import { sellPrice } from '../../helpers/merchant.rules';
             [text]="true"
             [rounded]="true"
             severity="secondary"
-            [attr.aria-label]="'merchant.shop.details' | transloco"
+            [attr.aria-label]="'merchant.shop.details' | translate"
             (click)="viewed.set(entry.item)"
           ></button>
           <button
@@ -115,12 +115,12 @@ import { sellPrice } from '../../helpers/merchant.rules';
             icon="pi pi-wallet"
             size="small"
             severity="secondary"
-            [label]="'merchant.shop.sellAction' | transloco"
+            [label]="'merchant.shop.sellAction' | translate"
             (click)="sell.emit(entry.id)"
           ></button>
         </div>
       } @empty {
-        <p class="empty">{{ 'merchant.shop.nothingToSell' | transloco }}</p>
+        <p class="empty">{{ 'merchant.shop.nothingToSell' | translate }}</p>
       }
     </section>
 
@@ -130,7 +130,7 @@ import { sellPrice } from '../../helpers/merchant.rules';
       [modal]="true"
       [dismissableMask]="true"
       appendTo="body"
-      [header]="'merchant.shop.details' | transloco"
+      [header]="'merchant.shop.details' | translate"
       [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
     >
       @if (viewed(); as item) {

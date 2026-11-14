@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { JoinedWorldsBusiness } from '../../../play/business/joined-worlds.business';
@@ -23,7 +23,7 @@ import { CharacterSheetComponent } from '../../components/character-sheet/charac
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     MessageModule,
     CharacterSheetComponent,
@@ -32,7 +32,7 @@ import { CharacterSheetComponent } from '../../components/character-sheet/charac
     <div class="main-container sheet-page">
       <p-button
         icon="pi pi-arrow-left"
-        [label]="'play.title' | transloco"
+        [label]="'play.title' | translate"
         [text]="true"
         routerLink="/play"
       />
@@ -43,7 +43,7 @@ import { CharacterSheetComponent } from '../../components/character-sheet/charac
             icon="pi pi-lock"
             data-test="joined-readonly"
             >{{
-              'play.joined.readOnly' | transloco: { name: joined.name }
+              'play.joined.readOnly' | translate: { name: joined.name }
             }}</p-message
           >
           <app-character-sheet
@@ -52,7 +52,7 @@ import { CharacterSheetComponent } from '../../components/character-sheet/charac
             [canPlay]="false"
           />
         } @else if (loaded()) {
-          <p class="hint">{{ 'character.sheet.notFound' | transloco }}</p>
+          <p class="hint">{{ 'character.sheet.notFound' | translate }}</p>
         }
       }
     </div>

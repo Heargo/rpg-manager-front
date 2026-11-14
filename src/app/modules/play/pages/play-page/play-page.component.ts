@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
@@ -33,7 +33,7 @@ import { PlayBusiness } from '../../business/play.business';
     LocalDatePipe,
     FormsModule,
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     CardModule,
     DataViewModule,

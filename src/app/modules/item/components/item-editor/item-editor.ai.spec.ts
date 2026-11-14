@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslateService } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import en from '../../../../../../public/packs/base-en/generators/items.json';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
@@ -58,7 +58,7 @@ describe('ItemEditorComponent AI prompt and Random', () => {
 
   it('copies the prompt in the active language', async () => {
     const { el, fixture, settle } = await setup();
-    TestBed.inject(TranslocoService).setActiveLang('fr');
+    TestBed.inject(TranslateService).use('fr');
     await settle();
     fixture.detectChanges();
     el.querySelector<HTMLElement>('[data-action="copy-ai-prompt"]')!.click();
@@ -74,7 +74,7 @@ describe('ItemEditorComponent AI prompt and Random', () => {
     expect(random.textContent).toContain('Random');
     expect(random.querySelector('.pi-sparkles') ?? (random.className.includes('pi-sparkles') ? random : null)).not.toBeNull();
     expect(el.querySelector('[data-action="generate"]')).toBeNull();
-    TestBed.inject(TranslocoService).setActiveLang('fr');
+    TestBed.inject(TranslateService).use('fr');
     await settle();
     fixture.detectChanges();
     expect(random.textContent).toContain('Aléatoire');

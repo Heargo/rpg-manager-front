@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { SiteFooterComponent } from '../components/site-footer/site-footer.component';
 
 const SECTIONS = [
@@ -14,20 +14,20 @@ const SECTIONS = [
 @Component({
   selector: 'app-privacy-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, SiteFooterComponent],
+  imports: [TranslatePipe, SiteFooterComponent],
   template: `
     <main class="page">
       <header class="page-header">
-        <h1>{{ 'privacy.title' | transloco }}</h1>
-        <p class="lead">{{ 'privacy.intro' | transloco }}</p>
+        <h1>{{ 'privacy.title' | translate }}</h1>
+        <p class="lead">{{ 'privacy.intro' | translate }}</p>
       </header>
       @for (s of sections; track s.key) {
         <section class="card" [class.highlight]="$first">
           <h2>
             <i class="pi {{ s.icon }}" aria-hidden="true"></i>
-            {{ 'privacy.' + s.key + '.title' | transloco }}
+            {{ 'privacy.' + s.key + '.title' | translate }}
           </h2>
-          <p>{{ 'privacy.' + s.key + '.text' | transloco }}</p>
+          <p>{{ 'privacy.' + s.key + '.text' | translate }}</p>
         </section>
       }
     </main>
