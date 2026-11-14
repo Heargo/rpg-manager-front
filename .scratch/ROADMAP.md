@@ -263,3 +263,12 @@ Tickets in `archived/item-coherence/` (IC). Decisions from the user on 2026-11-1
 | 116 | **IC07** Random image by kind and tint (done) | IC05, IC06 |
 | 117 | **IC08** Pack creator: structured kinds, tints and params (done) | IC01, IC03 |
 | 118 | **IC09** User docs: kinds, tints, phrases, naming conventions (done) | IC01, IC03, IC06, IC07, IC08 |
+
+## Phase 17: adjectives that fit the item (2026-11-14)
+
+Tickets in `item-adjectives/` (IA), follow-up of IC06's review. Decisions in the spec.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 119 | **IA01** Kind adjectives, tint fits and tint descriptions first | none |
+| 120 | **IA02** Pack creator: kind adjectives, tint fits, common words | IA01 |
