@@ -32,6 +32,11 @@
             [attr.aria-label]="'combat.drag' | transloco"
           ></i>
           <strong class="name">{{ combatant.name }}</strong>
+          @if (combatant.level !== undefined) {
+            <small class="level" data-field="level">{{
+              "combat.levelShort" | transloco: { level: combatant.level }
+            }}</small>
+          }
           @if (combat.$initiativeMode() !== "free") {
             <span class="initiative" data-field="initiative">
               <i class="pi pi-bolt"></i>{{ combatant.initiative ?? "—" }}

@@ -109,23 +109,6 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
                 [attr.title]="'npc.catalogue.view' | transloco"
                 (click)="view.emit(npc)"
               ></button>
-              @if (showControls()) {
-                <button
-                  pButton
-                  type="button"
-                  data-action="show"
-                  icon="pi pi-megaphone"
-                  severity="secondary"
-                  [text]="true"
-                  [disabled]="showDisabled()"
-                  [attr.aria-label]="'npc.catalogue.show' | transloco"
-                  [attr.title]="
-                    (showDisabled() ? 'npc.catalogue.showDuringCombat' : 'npc.catalogue.show')
-                      | transloco
-                  "
-                  (click)="show.emit(npc)"
-                ></button>
-              }
               <button
                 pButton
                 type="button"
@@ -197,16 +180,11 @@ export class NpcCatalogueComponent {
   private readonly language = inject(LanguageBusiness);
 
   readonly world = input.required<World>();
-  /** "Show on the table" can't start an encounter (a combat is running). */
-  readonly showDisabled = input(false);
-  /** Whether there is a table to show NPCs on (not in the sandbox tool). */
-  readonly showControls = input(true);
 
   readonly create = output<void>();
   readonly edit = output<Npc>();
   readonly duplicate = output<Npc>();
   readonly remove = output<Npc>();
-  readonly show = output<Npc>();
   /** Open the NPC's sheet. */
   readonly view = output<Npc>();
 

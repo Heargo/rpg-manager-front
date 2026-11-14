@@ -971,8 +971,6 @@
       "edit": "Modifier",
       "create": "Ajouter un PNJ",
       "copySuffix": "(copie)",
-      "show": "Montrer sur la table",
-      "showDuringCombat": "Impossible pendant un combat",
       "view": "Voir la fiche"
     },
     "role": {
@@ -1037,6 +1035,12 @@
     },
     "sheet": {
       "title": "Fiche du PNJ"
+    },
+    "card": {
+      "life": "Vie",
+      "attributes": "Attributs",
+      "equipment": "Équipement",
+      "noEquipment": "Rien d'équipé."
     }
   },
   "skill": {
@@ -1570,7 +1574,8 @@
     "grid": {
       "label": "Grille de combat",
       "reachLegend": "Déplacement possible"
-    }
+    },
+    "levelShort": "Niv. {{ level }}"
   },
   "packs": {
     "choiceLabel": "Pack",

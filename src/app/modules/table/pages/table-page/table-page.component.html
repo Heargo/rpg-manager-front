@@ -142,6 +142,7 @@
       [shopOpen]="
         !table.$isGameMaster() && table.$shopsOpen().includes(encounter.npc.id)
       "
+      [maxLevel]="characters.$world()?.maxLevel"
       [canView]="table.$isGameMaster()"
       (visitShop)="visitShop($event)"
       (view)="viewedNpcId.set($event)"

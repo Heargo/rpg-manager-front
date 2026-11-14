@@ -15,6 +15,7 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CombatBusiness } from '../../business/combat.business';
+import { TableNpcCardComponent } from '../../../table/components/table-npc-card/table-npc-card.component';
 import { CombatActionsComponent } from '../combat-actions/combat-actions.component';
 
 /** A player's side of an encounter: the turn order, their turn, their own skills, items and counters, and the last roll. */
@@ -28,6 +29,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
     ButtonModule,
     InputNumberModule,
     CombatActionsComponent,
+    TableNpcCardComponent,
   ],
   template: `
     @if (state(); as encounter) {
@@ -43,10 +45,30 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
             [class.down]="combatant.down"
             [class.enemy]="combatant.side === 'enemy'"
           >
-            {{ combatant.name }}
+            @if (combatant.characterId) {
+              {{ combatant.name }}
+            } @else {
+              <button
+                type="button"
+                class="npc"
+                data-action="open-npc"
+                [attr.aria-expanded]="openNpcId() === combatant.id"
+                (click)="toggleNpc(combatant.id)"
+              >
+                {{ combatant.name }}
+                @if (combatant.level !== undefined) {
+                  <small data-field="level">{{
+                    'combat.levelShort' | transloco: { level: combatant.level }
+                  }}</small>
+                }
+              </button>
+            }
           </li>
         }
       </ol>
+      @if (openNpc(); as npc) {
+        <app-table-npc-card data-testid="npc-card" [npc]="npc" />
+      }
 
       @if (myTurn()) {
         <div class="banner" data-testid="your-turn">
@@ -146,6 +168,14 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
       border-radius: 999px;
       white-space: nowrap;
     }
+    .order .npc {
+      all: unset;
+      cursor: pointer;
+    }
+    .order .npc small {
+      margin-left: 0.35rem;
+      opacity: 0.75;
+    }
     .order li.enemy {
       border-color: var(--p-red-400);
     }
@@ -210,6 +240,13 @@ export class CombatPlayerViewComponent {
 
   protected readonly initiative = signal<number | null>(null);
   protected readonly state = this.combat.$state;
+  /** The NPC combatant whose card is open: only what the world's rules let the players see. */
+  protected readonly openNpcId = signal<string | null>(null);
+  protected readonly openNpc = computed(() =>
+    this.state()?.combatants.find(
+      (c) => c.id === this.openNpcId() && !c.characterId,
+    ),
+  );
 
   protected readonly me = computed(() =>
     this.state()?.combatants.find((c) => c.id === this.combatantId()),
@@ -252,6 +289,10 @@ export class CombatPlayerViewComponent {
       this.character()?.skills.length;
       untracked(() => void this.combat.loadSkills().catch(() => undefined));
     });
+  }
+
+  protected toggleNpc(id: string): void {
+    this.openNpcId.update((open) => (open === id ? null : id));
   }
 
   protected endTurn(): void {

@@ -9,7 +9,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { ProgressBarModule } from '@openng/optimus-ui/progressbar';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
-import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
+import { CardBarComponent } from '../../../../core/components/card-bar/card-bar.component';
+import { PortraitCardComponent } from '../../../../core/components/portrait-card/portrait-card.component';
 import { RARITY_SEVERITY } from '../../../item/helpers/item-display';
 import { levelRarity } from '../../helpers/level.rules';
 import { Character } from '../../../world/models/world';
@@ -27,7 +28,8 @@ import {
     ProgressBarModule,
     TagModule,
     CoinDisplayComponent,
-    StoredImageComponent,
+    PortraitCardComponent,
+    CardBarComponent,
   ],
   templateUrl: './character-card.component.html',
   styleUrl: './character-card.component.scss',
@@ -53,8 +55,8 @@ export class CharacterCardComponent {
       this.world(),
     );
     return [
-      ...(life ? [{ kind: 'life', stat: life }] : []),
-      ...(mana ? [{ kind: 'mana', stat: mana }] : []),
+      ...(life ? [{ kind: 'life' as const, stat: life }] : []),
+      ...(mana ? [{ kind: 'mana' as const, stat: mana }] : []),
     ];
   });
 }

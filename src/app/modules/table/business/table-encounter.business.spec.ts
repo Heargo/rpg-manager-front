@@ -13,7 +13,6 @@ import { TableBusiness } from './table.business';
  * - `$encounter()`: `{ kind: 'story' | 'merchant'; npc: PublicNpc } | null` (null: no story/merchant encounter), same on every device.
  * - `startEncounter(kind, npcId)` and `endEncounter()` (GM only, a player is `forbidden`). A running story/merchant encounter is replaced.
  *   Rejections: `invalid` for an unknown NPC or a merchant encounter with an NPC without the merchant role, `rejected` during a combat.
- * - `showOnTable(npcId)`: the NPC catalogue's "Show on the table": a merchant encounter if the NPC has the merchant role, else a story one.
  * - A merchant encounter opens the shop for every player (`$shops()`, `buyFrom`, `sellTo`); ending it, replacing it or deleting the NPC closes it.
  */
 const herb: InventoryItem = {
@@ -151,7 +150,6 @@ describe('story and merchant encounters (GM + players)', () => {
 
     await expect(table(t.gm).startEncounter('story', sage.id)).rejects.toMatchObject({ code: 'rejected' });
     await expect(table(t.gm).startEncounter('merchant', mira.id)).rejects.toMatchObject({ code: 'rejected' });
-    await expect(table(t.gm).showOnTable(sage.id)).rejects.toMatchObject({ code: 'rejected' });
     await settle();
 
     expect(table(t.ada).$encounter()).toBeNull();
@@ -191,18 +189,6 @@ describe('story and merchant encounters (GM + players)', () => {
     await settle();
     await expect(table(t.ada).endEncounter()).rejects.toMatchObject({ code: 'forbidden' });
     expect(table(t.ada).$encounter()).not.toBeNull();
-  });
-
-  it('"Show on the table" starts a story encounter for a story NPC and a merchant one for a merchant NPC', async () => {
-    await table(t.gm).showOnTable(sage.id);
-    await settle();
-    expect(table(t.ada).$encounter()).toMatchObject({ kind: 'story', npc: { id: sage.id } });
-    expect(table(t.ada).$shops()).toEqual([]);
-
-    await table(t.gm).showOnTable(mira.id);
-    await settle();
-    expect(table(t.ada).$encounter()).toMatchObject({ kind: 'merchant', npc: { id: mira.id } });
-    expect(shopNames(t.ada)).toEqual(['Mira']);
   });
 
   it('republishes the card when the GM edits the NPC', async () => {

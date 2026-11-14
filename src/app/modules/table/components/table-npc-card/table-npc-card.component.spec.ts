@@ -6,7 +6,7 @@ import { TableNpcCardComponent } from './table-npc-card.component';
 /**
  * Contract: `app-table-npc-card` (replaces `app-table-npcs`) takes `npc` (PublicNpc, required) and `shopOpen` (boolean, default false) and renders
  * one `[data-testid="table-npc"]` with the name and, only when the projection carries it: `[data-field="description"]`, `[data-field="level"]`,
- * `[data-field="life-bar"]` (`data-percent`), `[data-field="life-numbers"]` ("current / max"), `[data-field="attribute"]` (one per attribute,
+ * `[data-field="life-bar"]` (`data-percent`, with "current / max" when the numbers are shown), `[data-field="attribute"]` (one per attribute,
  * "Name current / max"), `[data-field="equipment"]` (one per item). `[data-action="visit-shop"]` (label "Shop" / "Boutique") exists only
  * when the NPC is a merchant and `shopOpen` is true; its click emits `visitShop` with the npc id. No toggle-shop control any more.
  */
@@ -26,7 +26,7 @@ describe('TableNpcCardComponent', () => {
   it('shows the name only when the projection has nothing else', async () => {
     const { card } = await render({ id: 'n1', name: 'Grok' });
     expect(card!.textContent).toContain('Grok');
-    for (const field of ['description', 'level', 'life-bar', 'life-numbers', 'attribute', 'equipment']) {
+    for (const field of ['description', 'level', 'life-bar', 'attribute', 'equipment']) {
       expect(card!.querySelector(`[data-field="${field}"]`)).toBeNull();
     }
   });
@@ -41,9 +41,13 @@ describe('TableNpcCardComponent', () => {
     expect(card!.querySelector('[data-field="description"]')!.textContent).toContain('A grumpy ogre.');
     expect(card!.querySelector('[data-field="level"]')!.textContent).toContain('3');
     expect(card!.querySelector('[data-field="life-bar"]')!.getAttribute('data-percent')).toBe('40');
-    expect(card!.querySelector('[data-field="life-numbers"]')!.textContent!.replace(/\s+/g, ' ')).toContain('4 / 10');
-    const attributes = Array.from(card!.querySelectorAll('[data-field="attribute"]')).map((a) => a.textContent!.replace(/\s+/g, ' ').trim());
+    expect(card!.querySelector('[data-field="life-bar"]')!.textContent!.replace(/\s+/g, ' ')).toContain('4 / 10');
+    const attributes = Array.from(card!.querySelectorAll('[data-field="attribute"]')).map((a) =>
+      Array.from(a.children).map((part) => part.textContent!.trim()).join(' '),
+    );
     expect(attributes).toEqual(['Life 4 / 10', 'Strength 5 / 5']);
+    // The description sits under the card, in its own box.
+    expect(card!.querySelector('app-portrait-card [data-field="description"]')).toBeNull();
     expect(card!.querySelector('[data-field="equipment"]')!.textContent).toContain('Iron Helm');
   });
 
@@ -84,5 +88,23 @@ describe('TableNpcCardComponent', () => {
     await fixture.whenStable();
     (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('[data-action="view-sheet"]')!.click();
     expect(viewed).toEqual(['n1']);
+  });
+
+  it('shows the life bar without numbers when only the bar is allowed', async () => {
+    const { card } = await render({ id: 'n1', name: 'Grok', lifeBar: { percent: 40 } });
+    const bar = card!.querySelector('[data-field="life-bar"]')!;
+    expect(bar.getAttribute('data-percent')).toBe('40');
+    expect(bar.textContent).not.toContain('/');
+  });
+
+  it('colours the level badge by rarity when the world\'s max level is known', async () => {
+    TestBed.configureTestingModule({ imports: [TableNpcCardComponent], providers: TEST_PROVIDERS });
+    const fixture = TestBed.createComponent(TableNpcCardComponent);
+    fixture.componentRef.setInput('npc', { id: 'n1', name: 'Grok', level: 20 });
+    fixture.componentRef.setInput('maxLevel', 20);
+    await fixture.whenStable();
+    const level = (fixture.nativeElement as HTMLElement).querySelector('[data-field="level"]')!;
+    expect(level.getAttribute('data-rarity')).toBe('legendary');
+    expect(level.textContent).toContain('Level 20');
   });
 });

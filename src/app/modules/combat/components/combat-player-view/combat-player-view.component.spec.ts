@@ -63,6 +63,26 @@ describe('CombatPlayerViewComponent', () => {
       ).toBe('Ada');
     });
 
+    it("shows an NPC's level and opens its card with what the world lets players see", async () => {
+      await open(table.ada, 'Ada', 'ada');
+      const goblin = el.querySelector<HTMLElement>(
+        '[data-testid="order-item"][data-name="Goblin"]',
+      )!;
+      expect(clean(goblin.querySelector('[data-field="level"]'))).toBe('Lv 5');
+      expect(
+        el.querySelector(
+          '[data-testid="order-item"][data-name="Ada"] [data-action="open-npc"]',
+        ),
+      ).toBeNull();
+
+      await click(goblin.querySelector('[data-action="open-npc"]'));
+      const card = el.querySelector('[data-testid="npc-card"]')!;
+      expect(card.querySelector('[data-field="level"]')).not.toBeNull();
+      expect(card.querySelector('[data-field="life-bar"]')).not.toBeNull();
+      expect(card.querySelector('[data-field="equipment"]')).toBeNull();
+      expect(card.querySelector('[data-field="life-numbers"]')).toBeNull();
+    });
+
     it('shows "Your turn" only while it is the player\'s own turn', async () => {
       await open(table.ada, 'Ada', 'ada');
       expect(el.querySelector('[data-testid="your-turn"]')).not.toBeNull();

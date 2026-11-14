@@ -73,15 +73,6 @@ export class TableBusiness {
     return this.service.endEncounter();
   }
 
-  /** Game master: shows an NPC to everyone, as a merchant encounter if it is a merchant, else a story one. */
-  showOnTable(npcId: string): Promise<void> {
-    const npc = this.session.$world()?.npcs.find((n) => n.id === npcId);
-    return this.startEncounter(
-      npc?.roles.includes('merchant') ? 'merchant' : 'story',
-      npcId,
-    );
-  }
-
   buyFrom(npcId: string, inventoryId: string): Promise<unknown> {
     return this.merchants.buy(npcId, inventoryId);
   }

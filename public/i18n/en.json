@@ -971,8 +971,6 @@
       "edit": "Edit",
       "create": "Add NPC",
       "copySuffix": "(copy)",
-      "show": "Show on the table",
-      "showDuringCombat": "Not during a combat",
       "view": "View the sheet"
     },
     "role": {
@@ -1037,6 +1035,12 @@
     },
     "sheet": {
       "title": "NPC sheet"
+    },
+    "card": {
+      "life": "Life",
+      "attributes": "Attributes",
+      "equipment": "Equipment",
+      "noEquipment": "Nothing equipped."
     }
   },
   "skill": {
@@ -1570,7 +1574,8 @@
     "grid": {
       "label": "Combat grid",
       "reachLegend": "Can move here"
-    }
+    },
+    "levelShort": "Lv {{ level }}"
   },
   "packs": {
     "choiceLabel": "Pack",

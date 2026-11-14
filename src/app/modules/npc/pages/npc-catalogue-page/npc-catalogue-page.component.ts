@@ -48,9 +48,6 @@ import { Npc } from '../../models/npc';
       @if (catalogue.$world(); as world) {
         <app-npc-catalogue
           [world]="world"
-          [showDisabled]="table.$combatRunning()"
-          [showControls]="!tool"
-          (show)="run(table.showOnTable($event.id))"
           (view)="viewedNpcId.set($event.id)"
           (create)="openEditor()"
           (edit)="openEditor($event.id)"
@@ -89,7 +86,7 @@ import { Npc } from '../../models/npc';
 export class NpcCataloguePageComponent {
   protected readonly catalogue = inject(NpcCatalogueBusiness);
   protected readonly tool = !!inject(ActivatedRoute).snapshot.data['tool'];
-  protected readonly table = inject(TableBusiness);
+  private readonly table = inject(TableBusiness);
   /** The NPC whose sheet is open. */
   protected readonly viewedNpcId = signal<string | null>(null);
   private readonly router = inject(Router);
