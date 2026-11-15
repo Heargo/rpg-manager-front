@@ -631,6 +631,80 @@
    "texts": "generators/items.json"
   },
   "npcs": {
+   "kinds": {
+    "townsfolk": {
+     "roles": [
+      "story"
+     ]
+    },
+    "peasant": {
+     "parent": "townsfolk"
+    },
+    "noble": {
+     "parent": "townsfolk"
+    },
+    "scholar": {
+     "parent": "townsfolk"
+    },
+    "priest": {
+     "parent": "townsfolk"
+    },
+    "trader": {
+     "roles": [
+      "merchant"
+     ]
+    },
+    "merchant": {
+     "parent": "trader"
+    },
+    "innkeeper": {
+     "parent": "trader"
+    },
+    "blacksmith": {
+     "parent": "trader"
+    },
+    "peddler": {
+     "parent": "trader"
+    },
+    "guard": {
+     "roles": [
+      "story",
+      "enemy"
+     ]
+    },
+    "outlaw": {
+     "roles": [
+      "enemy"
+     ]
+    },
+    "bandit": {
+     "parent": "outlaw"
+    },
+    "cultist": {
+     "parent": "outlaw"
+    },
+    "mercenary": {
+     "parent": "outlaw"
+    },
+    "beast": {
+     "roles": [
+      "enemy"
+     ],
+     "person": false
+    },
+    "wolf": {
+     "parent": "beast"
+    },
+    "bear": {
+     "parent": "beast"
+    },
+    "giant-spider": {
+     "parent": "beast"
+    },
+    "boar": {
+     "parent": "beast"
+    }
+   },
    "texts": "generators/npcs.json"
   },
   "skills": {

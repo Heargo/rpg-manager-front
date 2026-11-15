@@ -1,4 +1,4 @@
-import { NpcNameList } from '../../../core/generators/npc-name-list';
+import { buildNpcVocabulary } from '../../../core/generators/npc-vocabulary';
 import { seededRandomSource } from '../../../core/generators/random-source';
 import { createSandboxWorld } from '../../world/helpers/default-world';
 import { CharacterClass } from '../../class/models/class';
@@ -13,12 +13,20 @@ import {
   setNpcSkill,
 } from './npc-editor.rules';
 
-const names: NpcNameList = {
-  version: 1,
-  given: [{ text: 'Aro', gender: 'm' }],
-  epithets: ['Grim'],
-  templates: ['{given} {epithet}'],
-};
+const names = buildNpcVocabulary([
+  {
+    packId: 'base-en',
+    isBase: true,
+    language: 'en',
+    kinds: { townsfolk: { roles: ['story'] } },
+    texts: {
+      version: 2,
+      given: [{ text: 'Aro', gender: 'm' }],
+      epithets: ['Grim'],
+      templates: ['{given} {epithet}'],
+    },
+  },
+]);
 
 const skill = (id: string, maxLevel: number, pointCost: number): Skill => ({
   id,

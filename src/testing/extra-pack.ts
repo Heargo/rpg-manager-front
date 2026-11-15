@@ -115,7 +115,7 @@ export const EXTRA_ITEMS = {
 
 /** A valid French NPC name list whose every NPC is named "Zorg". */
 export const EXTRA_NPCS = {
-  version: 1,
+  version: 2,
   given: [{ text: 'Zorg', gender: 'm' }],
   epithets: ['le Fou'],
   templates: ['{given}'],

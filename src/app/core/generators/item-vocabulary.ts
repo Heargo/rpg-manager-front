@@ -16,6 +16,7 @@ import {
   Noun,
   TintTexts,
 } from './word-list';
+import { kindLookups } from './kind-lookups';
 
 export interface ItemKindInfo {
   id: string;
@@ -76,16 +77,11 @@ export function buildItemVocabulary(sources: PooledSource[]): ItemVocabulary {
     pooled.sections[name] as T | undefined;
   const tintTexts = section<Record<string, TintTexts>>('tints') ?? {};
 
+  const lookups = kindLookups(pooled);
   const nearest = <T>(
     id: string,
     pick: (texts: KindTexts) => T[] | undefined,
-  ): T[] => {
-    for (const level of pooled.kinds[id]?.chain ?? []) {
-      const found = pick(texts(level) ?? {});
-      if (found && found.length > 0) return found;
-    }
-    return [];
-  };
+  ): T[] => lookups.nearest(id, pick);
   const nouns = (id: string): Noun[] => nearest(id, (t) => t.nouns);
 
   const info = (id: string): ItemKindInfo | undefined => {
@@ -122,8 +118,8 @@ export function buildItemVocabulary(sources: PooledSource[]): ItemVocabulary {
     kind: string | undefined,
   ): Tinted<T>[] => [
     ...(top?.[rarity] ?? []).map((value) => ({ value })),
-    ...(pooled.kinds[kind ?? '']?.chain ?? [])
-      .flatMap((level) => own(texts(level) ?? {})?.[rarity] ?? [])
+    ...lookups
+      .alongChain(kind ?? '', (t: KindTexts) => own(t)?.[rarity])
       .map((word) => entry<T>(word))
       .filter((word) => !word.tint || tintFits(word.tint, kind)),
     ...Object.entries(tintTexts)
@@ -143,7 +139,7 @@ export function buildItemVocabulary(sources: PooledSource[]): ItemVocabulary {
     descriptions: (id) => nearest(id, (t) => t.descriptions),
     names: (id, rarity) => nearest(id, (t) => t.names?.[rarity]),
     drawable(filter = {}) {
-      return Object.keys(pooled.kinds).filter((id) => {
+      return lookups.kindIds((id) => {
         const kind = info(id)!;
         return (
           nouns(id).length > 0 &&

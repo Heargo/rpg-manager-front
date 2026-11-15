@@ -4,6 +4,7 @@ import {
   ItemSlot,
   ItemType,
 } from '../models/item';
+import { NPC_ROLES } from '../../modules/npc/models/npc';
 
 export const KIND_ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -45,6 +46,31 @@ export const ITEM_KIND_SCHEMA: KindSchema = {
           : kind['type'] !== 'equipment'
       )
         errors.push('slot is only allowed on an equipment chain');
+    }
+    return errors;
+  },
+};
+
+/** NPCs: `roles` required on a root (a child may override), `person` on a root only. */
+export const NPC_KIND_SCHEMA: KindSchema = {
+  fields: ['roles', 'person'],
+  check(kind, { hasParent }) {
+    const errors: string[] = [];
+    const roles = kind['roles'];
+    if (roles !== undefined) {
+      if (
+        !Array.isArray(roles) ||
+        roles.length === 0 ||
+        !roles.every((role) => (NPC_ROLES as readonly unknown[]).includes(role))
+      )
+        errors.push(
+          `roles must be a non-empty list of ${NPC_ROLES.join(', ')}`,
+        );
+    } else if (!hasParent) errors.push('a root kind needs roles');
+    if (kind['person'] !== undefined) {
+      if (hasParent) errors.push('person is only allowed on a root kind');
+      else if (typeof kind['person'] !== 'boolean')
+        errors.push('person must be true or false');
     }
     return errors;
   },

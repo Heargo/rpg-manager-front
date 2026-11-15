@@ -1,6 +1,6 @@
 import { ITEM_RARITIES } from '../../../core/models/item';
 import { seededRandomSource } from '../../../core/generators/random-source';
-import { NpcNameList } from '../../../core/generators/npc-name-list';
+import { buildNpcVocabulary } from '../../../core/generators/npc-vocabulary';
 import { levelRarity } from '../../character/helpers/level.rules';
 import { createSandboxWorld } from '../../world/helpers/default-world';
 import { Item, World } from '../../world/models/world';
@@ -8,15 +8,23 @@ import { Npc } from '../models/npc';
 import { validateNpc } from './npc.rules';
 import { generateNpc, npcToJson, parseNpcJson, setNpcLevel } from './npc-editor.rules';
 
-const names: NpcNameList = {
-  version: 1,
-  given: [
-    { text: 'Aro', gender: 'm' },
-    { text: 'Mila', gender: 'f' },
-  ],
-  epithets: ['Grim'],
-  templates: ['{given} {epithet}'],
-};
+const names = buildNpcVocabulary([
+  {
+    packId: 'base-en',
+    isBase: true,
+    language: 'en',
+    kinds: { townsfolk: { roles: ['story'] } },
+    texts: {
+      version: 2,
+      given: [
+        { text: 'Aro', gender: 'm' },
+        { text: 'Mila', gender: 'f' },
+      ],
+      epithets: ['Grim'],
+      templates: ['{given} {epithet}'],
+    },
+  },
+]);
 const items: Item[] = ITEM_RARITIES.flatMap((rarity) =>
   (['weapon1', 'head', 'chest'] as const).map((slot) => ({
     id: `${rarity}-${slot}`,
@@ -192,7 +200,7 @@ describe('generateNpc', () => {
     }
   });
 
-  it('takes its name from the NPC name list, not the item words', () => {
+  it('takes its name from the NPC vocabulary, not the item words', () => {
     for (let i = 0; i < 20; i++) {
       expect(['Aro Grim', 'Mila Grim']).toContain(draw(`name-${i}`).name);
     }

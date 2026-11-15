@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import npcNames from '../../../../../../public/packs/base-en/generators/npcs.json';
+import { baseNpcVocabulary } from '../../../../../testing/base-vocabulary';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
-import { PackBusiness } from '../../../../core/business/pack.business';
+import { NpcVocabularyBusiness } from '../../../../core/business/npc-vocabulary.business';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
 import { Item, World } from '../../../world/models/world';
 import { CharacterClass } from '../../../class/models/class';
@@ -68,7 +68,7 @@ describe('NpcEditorComponent', () => {
   async function setup(npc?: Npc) {
     TestBed.configureTestingModule({
       imports: [NpcEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => npcNames, packsFor: async () => ['base-en'], $installed: () => [] } }],
+      providers: [...TEST_PROVIDERS, { provide: NpcVocabularyBusiness, useValue: { vocabulary: async () => baseNpcVocabulary('en') } }],
     });
     const fixture = TestBed.createComponent(NpcEditorComponent);
     fixture.componentRef.setInput('world', world);

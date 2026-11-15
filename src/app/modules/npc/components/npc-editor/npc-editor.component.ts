@@ -399,20 +399,6 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 />
               </div>
               <div class="field">
-                <label for="npc-pack">{{
-                  'packs.choiceLabel' | translate
-                }}</label>
-                <p-select
-                  inputId="npc-pack"
-                  data-field="pack"
-                  [options]="packOptions()"
-                  optionLabel="label"
-                  optionValue="value"
-                  [ngModel]="pack()"
-                  (ngModelChange)="pack.set($event ?? 'random')"
-                />
-              </div>
-              <div class="field">
                 <label for="npc-generate-class">{{
                   'npc.editor.fields.class' | translate
                 }}</label>
@@ -560,8 +546,6 @@ export class NpcEditorComponent {
     return [];
   });
   protected readonly seed = signal(this.editor.newSeed());
-  protected readonly pack = signal('random');
-  protected readonly packOptions = this.editor.packOptions;
   protected readonly generateClassId = signal<string | null>(null);
 
   private readonly attributeNames = computed(() =>
@@ -702,7 +686,6 @@ export class NpcEditorComponent {
       this.seed(),
       this.world(),
       this.generateClassId() ?? undefined,
-      this.pack(),
     );
     this.setDraft({ ...generated, id: this.draft().id });
   }

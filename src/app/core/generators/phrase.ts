@@ -3,7 +3,14 @@ import { RandomSource } from './random-source';
 import { Gender } from './word-list';
 
 const MAX_DEPTH = 5;
-const VALUE_NAMES = ['base', 'adjective', 'suffix'] as const;
+const VALUE_NAMES = [
+  'base',
+  'adjective',
+  'suffix',
+  'given',
+  'epithet',
+  'noun',
+] as const;
 type ValueName = (typeof VALUE_NAMES)[number];
 const PARAM_NAME = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
@@ -14,7 +21,7 @@ export interface PhraseContext {
   gender?: Gender;
   /** Picks the plural option of `{g:…}`. */
   plural?: boolean;
-  /** Replacements for `{base}`, `{adjective}` and `{suffix}`. */
+  /** Replacements for `{base}`, `{adjective}`, `{suffix}` and, for NPCs, `{given}`, `{epithet}` and `{noun}`. */
   values?: Partial<Record<ValueName, string>>;
 }
 
@@ -211,7 +218,10 @@ export function pluralForm(text: string): string {
   return /[sx]$/.test(text) ? text : `${text}s`;
 }
 
-function genderOption(options: readonly string[], context: PhraseContext): string {
+function genderOption(
+  options: readonly string[],
+  context: PhraseContext,
+): string {
   const feminine = (context.gender ?? 'm') === 'f';
   if (options.length === 4)
     return options[(context.plural ? 2 : 0) + (feminine ? 1 : 0)];

@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "given": [
     {
       "text": "Brannoc",
@@ -244,5 +244,374 @@
       "f": "la Pâle"
     }
   ],
-  "templates": ["{given}", "{given} {epithet}", "{given} {epithet}"]
+  "templates": ["{given}", "{given} {epithet}", "{given} {epithet}"],
+  "kinds": {
+    "townsfolk": {
+      "descriptions": [
+        "{g:Il|Elle} vit de peu, à l'écart des grandes routes de {place}.",
+        "{g:Il|Elle} connaît tout le monde au village et ne garde rien pour {g:lui|elle}.",
+        "{g:Il|Elle} aurait croisé {creature} un soir de brume."
+      ]
+    },
+    "peasant": {
+      "nouns": [
+        {
+          "text": "paysan",
+          "gender": "m"
+        },
+        {
+          "text": "paysanne",
+          "gender": "f"
+        }
+      ],
+      "descriptions": [
+        "{g:Il|Elle} cultive un lopin de terre près de {place}, les mains calleuses et le dos voûté.",
+        "{g:Il|Elle} parle encore de {event} avec des trémolos dans la voix.",
+        "{g:Il|Elle} garde une fourche à portée de main depuis qu'on a vu {creature} rôder."
+      ]
+    },
+    "noble": {
+      "nouns": [
+        {
+          "text": "seigneur",
+          "gender": "m"
+        },
+        {
+          "text": "dame",
+          "gender": "f"
+        }
+      ],
+      "names": ["{noun} {given}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:Il|Elle} porte de beaux habits, mais ses terres de {place} périclitent.",
+        "{g:Il|Elle} doit une fière chandelle à {owner} et n'aime pas qu'on le rappelle.",
+        "{g:Il|Elle} sourit poliment et n'oublie jamais un affront."
+      ]
+    },
+    "scholar": {
+      "nouns": [
+        {
+          "text": "érudit",
+          "gender": "m"
+        },
+        {
+          "text": "érudite",
+          "gender": "f"
+        }
+      ],
+      "names": ["{given}, {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:Il|Elle} passe ses nuits sur de vieux grimoires qui parlent de {event}.",
+        "{g:Il|Elle} cherche depuis des années ce qu'{g:il|elle} a perdu près de {place}.",
+        "{g:Il|Elle} a le nez dans ses notes et oublie de manger."
+      ]
+    },
+    "priest": {
+      "nouns": [
+        {
+          "text": "prêtre",
+          "gender": "m"
+        },
+        {
+          "text": "prêtresse",
+          "gender": "f"
+        }
+      ],
+      "names": ["{noun} {given}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:Il|Elle} veille sur un petit sanctuaire de {place} et écoute plus qu'{g:il|elle} ne parle.",
+        "{g:Il|Elle} a béni plus de morts que de naissances depuis {event}.",
+        "{g:Il|Elle} prie pour les gens laissés sans abri par {creature}."
+      ]
+    },
+    "trader": {
+      "descriptions": [
+        "{g:Il|Elle} compte ses pièces deux fois, par habitude.",
+        "{g:Il|Elle} a de bonnes affaires à proposer, et de meilleures à cacher.",
+        "Ses affaires {g:le|la} mènent jusqu'à {place} et au-delà."
+      ]
+    },
+    "merchant": {
+      "nouns": [
+        {
+          "text": "marchand",
+          "gender": "m"
+        },
+        {
+          "text": "marchande",
+          "gender": "f"
+        }
+      ],
+      "names": ["{given}, {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:Il|Elle} tient un étal bien rangé et connaît le prix de chaque chose.",
+        "{g:Il|Elle} ramène des marchandises rares de {place}, à des prix qui ne le sont pas moins.",
+        "{g:Il|Elle} a perdu une cargaison entière après avoir croisé {creature}."
+      ]
+    },
+    "innkeeper": {
+      "nouns": [
+        {
+          "text": "aubergiste",
+          "gender": "m"
+        },
+        {
+          "text": "aubergiste",
+          "gender": "f"
+        }
+      ],
+      "names": ["{given}, {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:Il|Elle} sert une soupe épaisse et des rumeurs encore plus épaisses.",
+        "{g:Il|Elle} garde un gourdin sous le comptoir, au cas où.",
+        "{g:Il|Elle} héberge des voyageurs venus de {place} et leur tire les vers du nez."
+      ]
+    },
+    "blacksmith": {
+      "nouns": [
+        {
+          "text": "forgeron",
+          "gender": "m"
+        },
+        {
+          "text": "forgeronne",
+          "gender": "f"
+        }
+      ],
+      "names": ["{given}, {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:Il|Elle} a les bras noircis par la forge et les mains sûres.",
+        "{g:Il|Elle} a appris le métier en observant {maker}.",
+        "{g:Il|Elle} forge à l'ancienne, ne jurant que par {material}."
+      ]
+    },
+    "peddler": {
+      "nouns": [
+        {
+          "text": "colporteur",
+          "gender": "m"
+        },
+        {
+          "text": "colporteuse",
+          "gender": "f"
+        }
+      ],
+      "names": ["{given}, {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:Il|Elle} traîne une hotte pleine de bric-à-brac et de promesses.",
+        "{g:Il|Elle} sillonne les routes de {place} et sait où l'on a besoin de quoi.",
+        "{g:Il|Elle} jure avoir vendu un talisman à {owner}."
+      ]
+    },
+    "guard": {
+      "nouns": [
+        {
+          "text": "garde",
+          "gender": "m"
+        },
+        {
+          "text": "garde",
+          "gender": "f"
+        }
+      ],
+      "names": ["{given}, {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:Il|Elle} monte la garde, la main sur le pommeau, et regarde les inconnus de travers.",
+        "{g:Il|Elle} a vu {event} de ses propres yeux et n'en parle jamais.",
+        "{g:Il|Elle} sert {owner} depuis des années, sans poser de questions."
+      ]
+    },
+    "outlaw": {
+      "descriptions": [
+        "{g:Il|Elle} vit en marge de la loi, du côté de {place}.",
+        "{g:Il|Elle} a un avis de recherche à son nom dans plus d'une ville.",
+        "{g:Il|Elle} évite les routes depuis qu'on a aperçu {creature} dans les environs."
+      ]
+    },
+    "bandit": {
+      "nouns": [
+        {
+          "text": "bandit",
+          "gender": "m"
+        },
+        {
+          "text": "bandite",
+          "gender": "f"
+        }
+      ],
+      "names": ["{given} {epithet}", "{given}, {noun}"],
+      "descriptions": [
+        "{g:Il|Elle} détrousse les voyageurs sur la route de {place}.",
+        "{g:Il|Elle} a volé de quoi vivre à {owner} et ne s'en est jamais vanté.",
+        "{g:Il|Elle} sourit largement, la lame déjà sortie."
+      ]
+    },
+    "cultist": {
+      "nouns": [
+        {
+          "text": "cultiste",
+          "gender": "m"
+        },
+        {
+          "text": "cultiste",
+          "gender": "f"
+        }
+      ],
+      "names": ["{given}, {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:Il|Elle} murmure des prières interdites en regardant les étoiles.",
+        "{g:Il|Elle} croit que {event} n'était qu'un début.",
+        "{g:Il|Elle} veille sur un autel caché, non loin de {place}."
+      ]
+    },
+    "mercenary": {
+      "nouns": [
+        {
+          "text": "mercenaire",
+          "gender": "m"
+        },
+        {
+          "text": "mercenaire",
+          "gender": "f"
+        }
+      ],
+      "names": ["{given}, {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:Il|Elle} loue son épée au plus offrant, sans états d'âme.",
+        "{g:Il|Elle} a combattu pendant {event} et en garde des cicatrices.",
+        "{g:Il|Elle} travaille pour {owner} sur une besogne peu avouable."
+      ]
+    },
+    "beast": {
+      "names": ["{noun} {adjective}", "{noun}"],
+      "adjectives": [
+        "sauvage",
+        "solitaire",
+        {
+          "m": "affamé",
+          "f": "affamée"
+        },
+        {
+          "m": "furieux",
+          "f": "furieuse"
+        }
+      ],
+      "descriptions": [
+        "{g:Il|Elle} rôde non loin de {place}, l'œil aux aguets.",
+        "{g:Il|Elle} a déjà causé bien des ennuis aux villageois.",
+        "{g:Il|Elle} se déplace sans bruit et ne recule devant rien."
+      ]
+    },
+    "wolf": {
+      "nouns": [
+        {
+          "text": "loup",
+          "gender": "m"
+        },
+        {
+          "text": "louve",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "gris",
+          "f": "grise"
+        },
+        {
+          "m": "noir",
+          "f": "noire"
+        },
+        "des neiges"
+      ],
+      "descriptions": [
+        "{g:Il|Elle} hurle à la lune au-dessus de {place}.",
+        "{g:Il|Elle} suit le troupeau à distance, patiemment.",
+        "{g:Il|Elle} guette les voyageurs attardés, les yeux luisants."
+      ]
+    },
+    "bear": {
+      "nouns": [
+        {
+          "text": "ours",
+          "gender": "m"
+        },
+        {
+          "text": "ourse",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "brun",
+          "f": "brune"
+        },
+        "immense",
+        {
+          "m": "grincheux",
+          "f": "grincheuse"
+        }
+      ],
+      "descriptions": [
+        "{g:Il|Elle} sort d'hibernation, affamé{g:|e} et de mauvaise humeur.",
+        "{g:Il|Elle} défend sa tanière près de {place} avec rage.",
+        "{g:Il|Elle} laisse derrière {g:lui|elle} des arbres griffés à hauteur d'homme."
+      ]
+    },
+    "giant-spider": {
+      "nouns": [
+        {
+          "text": "araignée géante",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "venimeux",
+          "f": "venimeuse"
+        },
+        {
+          "m": "silencieux",
+          "f": "silencieuse"
+        },
+        {
+          "m": "velu",
+          "f": "velue"
+        }
+      ],
+      "descriptions": [
+        "{g:Il|Elle} tisse sa toile entre les arbres de {place}.",
+        "{g:Il|Elle} attend, immobile, qu'une proie se prenne au piège.",
+        "Ses chélicères dégoulinent d'un venin verdâtre."
+      ]
+    },
+    "boar": {
+      "nouns": [
+        {
+          "text": "sanglier",
+          "gender": "m"
+        },
+        {
+          "text": "laie",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "hargneux",
+          "f": "hargneuse"
+        },
+        "borgne",
+        {
+          "m": "massif",
+          "f": "massive"
+        }
+      ],
+      "descriptions": [
+        "{g:Il|Elle} fouille le sol de {place} en grognant.",
+        "{g:Il|Elle} charge tête baissée dès qu'on s'approche.",
+        "{g:Il|Elle} a déjà blessé plus d'un chasseur."
+      ]
+    }
+  }
 }

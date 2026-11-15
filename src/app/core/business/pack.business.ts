@@ -3,6 +3,7 @@ import { ItemSlot, ItemType } from '../models/item';
 import { resolveItemKind } from '../packs/pack-kinds';
 import {
   ItemKindDef,
+  NpcKindDef,
   Pack,
   packFileUrl,
   PackGenerator,
@@ -117,6 +118,8 @@ export interface InstalledPack {
   common?: string;
   /** The pack's own items kinds and tints. */
   kinds: Record<string, ItemKindDef>;
+  /** The pack's own NPC kinds. */
+  npcKinds?: Record<string, NpcKindDef>;
   tints: Record<string, PackTint>;
 }
 
@@ -148,6 +151,7 @@ const installedOf = (
   generators: generatorsOf(pack),
   ...(pack.common ? { common: pack.common } : {}),
   kinds: pack.domains?.items?.kinds ?? {},
+  npcKinds: pack.domains?.npcs?.kinds ?? {},
   tints: pack.tints ?? {},
   ...(link ? { link } : {}),
   ...(local ? { local } : {}),
@@ -312,7 +316,8 @@ export class PackBusiness {
   async sprites(): Promise<BundledSprite[]> {
     await this.ensureLoaded();
     const result: BundledSprite[] = [];
-    for (const id of this.activeIds()) result.push(...(await this.spritesOfActive(id)));
+    for (const id of this.activeIds())
+      result.push(...(await this.spritesOfActive(id)));
     if (result.length) return result;
     const baseId = basePackId(this.languageBusiness.$language());
     return this.baseSprites(baseId);
@@ -330,7 +335,10 @@ export class PackBusiness {
     const ids = [...BASE_PACK_IDS].sort((a, b) => +(a === own) - +(b === own));
     const kinds: Record<string, ItemKindDef> = {};
     for (const id of ids)
-      Object.assign(kinds, (await this.manifest(id).catch(() => null))?.domains?.items?.kinds);
+      Object.assign(
+        kinds,
+        (await this.manifest(id).catch(() => null))?.domains?.items?.kinds,
+      );
     return kinds;
   }
 
@@ -568,16 +576,18 @@ export class PackBusiness {
           errors.push(`${path}: ${reason(error)}`);
         }
       }),
-      ...[...new Set([...lists.keys(), ...materials])].map((path) => async () => {
-        try {
-          const value = await this.service.loadJson(fileUrl(path));
-          size += JSON.stringify(value).length;
-          errors.push(...checkJsonFile(path, value, lists.get(path)));
-          files.set(path, { kind: 'json', value });
-        } catch (error) {
-          errors.push(`${path}: ${reason(error)}`);
-        }
-      }),
+      ...[...new Set([...lists.keys(), ...materials])].map(
+        (path) => async () => {
+          try {
+            const value = await this.service.loadJson(fileUrl(path));
+            size += JSON.stringify(value).length;
+            errors.push(...checkJsonFile(path, value, lists.get(path)));
+            files.set(path, { kind: 'json', value });
+          } catch (error) {
+            errors.push(`${path}: ${reason(error)}`);
+          }
+        },
+      ),
     ];
     await runLimited(tasks, MAX_FETCHES, (task) => task());
 
@@ -747,7 +757,10 @@ export class PackBusiness {
    */
   async itemKinds(
     packId: string,
-  ): Promise<{ own: Record<string, ItemKindDef>; fallback: Record<string, ItemKindDef> }> {
+  ): Promise<{
+    own: Record<string, ItemKindDef>;
+    fallback: Record<string, ItemKindDef>;
+  }> {
     await this.ensureLoaded();
     const manifest = isBasePack(packId)
       ? await this.manifest(packId).catch(() => null)

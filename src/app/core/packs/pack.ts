@@ -1,5 +1,11 @@
+import { NpcRole } from '../../modules/npc/models/npc';
 import { EquipmentSlot, ItemType } from '../models/item';
-import { ITEM_KIND_SCHEMA, KindSchema, validateKindTree } from './pack-kinds';
+import {
+  ITEM_KIND_SCHEMA,
+  KindSchema,
+  NPC_KIND_SCHEMA,
+  validateKindTree,
+} from './pack-kinds';
 
 export const PACK_FORMAT = 2;
 export const PACK_LANGUAGES = ['en', 'fr'] as const;
@@ -41,6 +47,13 @@ export interface ItemKindDef {
   slot?: EquipmentSlot;
 }
 
+/** A node of the NPC tree: a root has `roles` (and `person`), a child has a `parent` and may override `roles`. */
+export interface NpcKindDef {
+  parent?: string;
+  roles?: NpcRole[];
+  person?: boolean;
+}
+
 export interface PackDomainDef<K = never> {
   kinds?: Record<string, K>;
   texts?: string;
@@ -48,7 +61,7 @@ export interface PackDomainDef<K = never> {
 
 export interface PackDomains {
   items?: PackDomainDef<ItemKindDef>;
-  npcs?: PackDomainDef;
+  npcs?: PackDomainDef<NpcKindDef>;
   skills?: PackDomainDef;
   classes?: PackDomainDef;
 }
@@ -115,6 +128,7 @@ const DOMAIN_KEY_FIELDS = ['kinds', 'texts'] as const;
 /** The kind schema of the domains that have kinds; the others take `texts` only. */
 const KIND_SCHEMAS: Partial<Record<PackDomain, KindSchema>> = {
   items: ITEM_KIND_SCHEMA,
+  npcs: NPC_KIND_SCHEMA,
 };
 
 function validateTints(tints: unknown, errors: string[]): void {

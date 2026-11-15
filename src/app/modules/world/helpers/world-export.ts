@@ -118,7 +118,11 @@ function validateWorld(world: unknown, errors: string[]): void {
   }
   if (!Number.isInteger(world['startingMoney']))
     errors.push('world.startingMoney must be an integer');
-  if (!isRecord(world['offlineFeatures']) || typeof world['offlineFeatures']['learnSkills'] !== 'boolean') errors.push('world.offlineFeatures.learnSkills must be a boolean');
+  if (
+    !isRecord(world['offlineFeatures']) ||
+    typeof world['offlineFeatures']['learnSkills'] !== 'boolean'
+  )
+    errors.push('world.offlineFeatures.learnSkills must be a boolean');
   for (const key of ['offlineFeatures', 'barAttributes'] as const) {
     if (!isRecord(world[key])) errors.push(`world.${key} must be an object`);
   }
@@ -226,6 +230,8 @@ function validateWorld(world: unknown, errors: string[]): void {
     ) {
       errors.push(`${path}.roles must be a non-empty list of known roles`);
     }
+    if (npc['kind'] !== undefined && typeof npc['kind'] !== 'string')
+      errors.push(`${path}.kind must be a string`);
     if (!Number.isInteger(npc['xpReward']) || (npc['xpReward'] as number) < 0)
       errors.push(`${path}.xpReward must be an integer of 0 or more`);
     if (

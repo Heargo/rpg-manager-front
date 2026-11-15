@@ -1,5 +1,5 @@
 import { importConfig } from '../../modules/sprite/helpers/config-export';
-import { validateNpcNameList } from '../generators/npc-name-list';
+import { validateNpcWordList } from '../generators/npc-word-list';
 import {
   isClassWordList,
   isSkillWordList,
@@ -32,7 +32,7 @@ export function listChecker(
       };
     case 'npcs':
       return (json) => {
-        const r = validateNpcNameList(json);
+        const r = validateNpcWordList(json);
         return r.ok ? [] : r.errors;
       };
     case 'skills':
