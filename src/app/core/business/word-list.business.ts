@@ -1,37 +1,17 @@
 import { inject, Injectable } from '@angular/core';
 import { ClassWordList } from '../generators/class-generator';
-import { SkillWordList } from '../generators/skill-generator';
-import {
-  isClassWordList,
-  isSkillWordList,
-} from '../generators/pack-word-lists';
+import { isClassWordList } from '../generators/pack-word-lists';
 import { basePackId, PackBusiness } from './pack.business';
 import { LanguageBusiness } from './language.business';
 
 const FALLBACK_BASE = 'base-en';
 
-/** Skill and class word lists for the generators, per pack, cached; falls back to the Base of the language, then to base-en when a list is missing or invalid. */
+/** Class word lists for the generators, per pack, cached; falls back to the Base of the language, then to base-en when a list is missing or invalid. */
 @Injectable({ providedIn: 'root' })
 export class WordListBusiness {
   private readonly service = inject(PackBusiness);
   private readonly languageBusiness = inject(LanguageBusiness);
-  private readonly skillCache = new Map<string, Promise<SkillWordList>>();
   private readonly classCache = new Map<string, Promise<ClassWordList>>();
-
-  /** Skill word list for the given language (the active one by default). */
-  skillWords(
-    lang: string = this.languageBusiness.$language(),
-    packId: string = basePackId(lang),
-  ): Promise<SkillWordList> {
-    return this.cached(
-      this.skillCache,
-      lang,
-      packId,
-      (p) => this.service.wordList('skills', p),
-      isSkillWordList,
-      (l, p) => this.skillWords(l, p),
-    );
-  }
 
   /** Class word list for the given language (the active one by default). */
   classWords(

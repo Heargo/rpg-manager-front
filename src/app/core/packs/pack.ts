@@ -1,9 +1,11 @@
 import { NpcRole } from '../../modules/npc/models/npc';
+import { SkillType } from '../../modules/skill/models/skill';
 import { EquipmentSlot, ItemType } from '../models/item';
 import {
   ITEM_KIND_SCHEMA,
   KindSchema,
   NPC_KIND_SCHEMA,
+  SKILL_KIND_SCHEMA,
   validateKindTree,
 } from './pack-kinds';
 
@@ -54,6 +56,13 @@ export interface NpcKindDef {
   person?: boolean;
 }
 
+/** A node of the skill tree: a root has a `type` (and maybe an `effect`), a child has a `parent` and may override `effect`. */
+export interface SkillKindDef {
+  parent?: string;
+  type?: SkillType;
+  effect?: 'damage' | 'heal' | 'modify';
+}
+
 export interface PackDomainDef<K = never> {
   kinds?: Record<string, K>;
   texts?: string;
@@ -62,7 +71,7 @@ export interface PackDomainDef<K = never> {
 export interface PackDomains {
   items?: PackDomainDef<ItemKindDef>;
   npcs?: PackDomainDef<NpcKindDef>;
-  skills?: PackDomainDef;
+  skills?: PackDomainDef<SkillKindDef>;
   classes?: PackDomainDef;
 }
 
@@ -129,6 +138,7 @@ const DOMAIN_KEY_FIELDS = ['kinds', 'texts'] as const;
 const KIND_SCHEMAS: Partial<Record<PackDomain, KindSchema>> = {
   items: ITEM_KIND_SCHEMA,
   npcs: NPC_KIND_SCHEMA,
+  skills: SKILL_KIND_SCHEMA,
 };
 
 function validateTints(tints: unknown, errors: string[]): void {

@@ -163,8 +163,8 @@ describe('validatePack domains', () => {
 
   it('rejects kinds on a domain that has none yet', () => {
     const json = valid();
-    json['domains'].skills = { kinds: { strike: {} } };
-    expect(mentions(errorsOf(json), 'skills', 'kinds')).toBe(true);
+    json['domains'].classes = { kinds: { warrior: {} } };
+    expect(mentions(errorsOf(json), 'classes', 'kinds')).toBe(true);
   });
 
   it('rejects an unknown field inside a kind', () => {
@@ -356,7 +356,7 @@ describe.each(['base-fr', 'base-en'] as const)('the real %s pack in format 2', (
     const domains = validated().value.domains ?? {};
     expect(domains.items?.texts).toBe('generators/items.json');
     expect(domains.npcs?.texts).toBe('generators/npcs.json');
-    expect(domains.skills).toEqual({ texts: 'generators/skills.json' });
+    expect(domains.skills?.texts).toBe('generators/skills.json');
     expect(domains.classes).toEqual({ texts: 'generators/classes.json' });
   });
 

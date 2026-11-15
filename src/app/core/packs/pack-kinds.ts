@@ -5,6 +5,9 @@ import {
   ItemType,
 } from '../models/item';
 import { NPC_ROLES } from '../../modules/npc/models/npc';
+import { SKILL_TYPES } from '../../modules/skill/models/skill';
+
+export const SKILL_EFFECT_KINDS = ['damage', 'heal', 'modify'] as const;
 
 export const KIND_ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -71,6 +74,30 @@ export const NPC_KIND_SCHEMA: KindSchema = {
       if (hasParent) errors.push('person is only allowed on a root kind');
       else if (typeof kind['person'] !== 'boolean')
         errors.push('person must be true or false');
+    }
+    return errors;
+  },
+};
+
+/** Skills: `type` required on a root and only there, `effect` only on an active chain. */
+export const SKILL_KIND_SCHEMA: KindSchema = {
+  fields: ['type', 'effect'],
+  check(kind, { hasParent, root }) {
+    const errors: string[] = [];
+    if (kind['type'] !== undefined) {
+      if (hasParent) errors.push('type is only allowed on a root kind');
+      else if (!(SKILL_TYPES as readonly unknown[]).includes(kind['type']))
+        errors.push(`type must be one of ${SKILL_TYPES.join(', ')}`);
+    } else if (!hasParent) errors.push('a root kind needs a type');
+    if (kind['effect'] !== undefined) {
+      if (!(SKILL_EFFECT_KINDS as readonly unknown[]).includes(kind['effect']))
+        errors.push(`effect must be one of ${SKILL_EFFECT_KINDS.join(', ')}`);
+      else if (
+        hasParent
+          ? root && root['type'] !== 'active'
+          : kind['type'] !== 'active'
+      )
+        errors.push('effect is only allowed on an active chain');
     }
     return errors;
   },

@@ -1,25 +1,46 @@
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../../public/packs/base-en/generators/skills.json';
+import { baseSkillVocabulary } from '../../../../../testing/base-skill-vocabulary';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { PackBusiness } from '../../../../core/business/pack.business';
+import { SkillVocabularyBusiness } from '../../../../core/business/skill-vocabulary.business';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
 import { World } from '../../../world/models/world';
 import { SkillEditorComponent } from './skill-editor.component';
 
-/** `PackBusiness.wordList` is mocked. `[data-action="random"]` fills the form and the JSON. */
+/** `SkillVocabularyBusiness` is mocked with the real Base. `[data-action="random"]` fills the form and the JSON. */
 describe('SkillEditorComponent Random', () => {
   const world: World = {
     ...createSandboxWorld((key) => key),
     attributes: [
-      { id: 'wit', name: 'Wit', baseValue: 5, formula: { preset: 'linear', step: 1 } },
-      { id: 'grit', name: 'Grit', baseValue: 5, formula: { preset: 'linear', step: 1 } },
+      {
+        id: 'wit',
+        name: 'Wit',
+        baseValue: 5,
+        formula: { preset: 'linear', step: 1 },
+      },
+      {
+        id: 'grit',
+        name: 'Grit',
+        baseValue: 5,
+        formula: { preset: 'linear', step: 1 },
+      },
     ],
   };
 
   async function setup() {
     TestBed.configureTestingModule({
       imports: [SkillEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } }],
+      providers: [
+        ...TEST_PROVIDERS,
+        {
+          provide: PackBusiness,
+          useValue: { packsFor: async () => ['base-en'], $installed: () => [] },
+        },
+        {
+          provide: SkillVocabularyBusiness,
+          useValue: { vocabulary: async () => baseSkillVocabulary('en') },
+        },
+      ],
     });
     const fixture = TestBed.createComponent(SkillEditorComponent);
     fixture.componentRef.setInput('world', world);
@@ -40,21 +61,28 @@ describe('SkillEditorComponent Random', () => {
     const save = el.querySelector<HTMLElement>('[data-action="save"]')!;
     expect(random.parentElement).toBe(save.parentElement);
     expect(random.textContent).toContain('Random');
-    expect(random.querySelector('.pi-sparkles') ?? (random.className.includes('pi-sparkles') ? random : null)).not.toBeNull();
+    expect(
+      random.querySelector('.pi-sparkles') ??
+        (random.className.includes('pi-sparkles') ? random : null),
+    ).not.toBeNull();
   });
 
   it('fills the form with a generated skill on the world attributes, and a new one per click', async () => {
     const { el, settle } = await setup();
     const random = el.querySelector<HTMLElement>('[data-action="random"]')!;
-    const json = () => el.querySelector<HTMLTextAreaElement>('[data-field="json"]')!.value;
+    const json = () =>
+      el.querySelector<HTMLTextAreaElement>('[data-field="json"]')!.value;
 
     random.click();
     await settle();
     const first = JSON.parse(json());
     expect(first.name).not.toBe('');
-    expect(el.querySelector<HTMLInputElement>('[data-field="name"]')!.value).toBe(first.name);
+    expect(
+      el.querySelector<HTMLInputElement>('[data-field="name"]')!.value,
+    ).toBe(first.name);
     expect(first.effects.length).toBeGreaterThan(0);
-    for (const effect of first.effects) expect(['Wit', 'Grit']).toContain(effect.attribute);
+    for (const effect of first.effects)
+      expect(['Wit', 'Grit']).toContain(effect.attribute);
 
     random.click();
     await settle();

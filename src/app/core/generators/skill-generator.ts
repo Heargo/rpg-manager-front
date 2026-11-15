@@ -3,28 +3,16 @@ import {
   SkillDraft,
   SkillEffect,
   SkillTarget,
-  SkillType,
 } from '../../modules/skill/models/skill';
 import { adjectiveForm, capitalize } from './name-generator';
-import { pick, randomInt, shuffle, Weighted, weightedPick } from './random';
+import { expandPhrase } from './phrase';
+import { pick, randomInt, shuffle, weightedPick } from './random';
 import { RandomSource } from './random-source';
 import { RARITY_WEIGHTS } from './item-generator';
-import { Adjective, Gender, Noun } from './word-list';
+import { SkillVocabulary } from './skill-vocabulary';
+import { Gender } from './word-list';
 
-/** Skill name patterns use `{noun}`, `{adjective}` and `{suffix}`; word order is the language's. */
-export interface SkillWordList {
-  version: number;
-  templates: string[];
-  nouns: Record<SkillType, Noun[]>;
-  adjectives: Adjective[];
-  suffixes: string[];
-  descriptions: Record<SkillType, string[]>;
-}
-
-const TYPE_WEIGHTS: Weighted<SkillType>[] = [
-  { value: 'active', weight: 60 },
-  { value: 'passive', weight: 40 },
-];
+const EFFECT_KINDS = ['damage', 'heal', 'modify'] as const;
 
 const DAMAGE_TARGETS: SkillTarget[] = ['one-enemy', 'all-enemies', 'area'];
 const HEAL_TARGETS: SkillTarget[] = ['self', 'one-ally', 'all-allies'];
@@ -41,18 +29,23 @@ const MODIFY_TARGETS: SkillTarget[] = [
 export function generateSkill(
   source: RandomSource,
   attributes: readonly string[],
-  words: SkillWordList,
+  vocabulary: SkillVocabulary,
 ): SkillDraft {
   const unique = [...new Set(attributes)];
   const rarity = weightedPick(source, RARITY_WEIGHTS);
   const tier = ITEM_RARITIES.indexOf(rarity);
-  const type = weightedPick(source, TYPE_WEIGHTS);
+  const drawable = vocabulary.drawable();
+  if (drawable.length === 0)
+    throw new RangeError('generateSkill: the vocabulary has no drawable kind');
+  const kindId = pick(source, drawable);
+  const info = vocabulary.kind(kindId)!;
+  const type = info.type;
   const maxLevel = randomInt(source, 1, 3 + tier);
-  const name = skillName(source, words, type);
-  const description = pick(source, words.descriptions[type]);
+  const { name, description } = skillTexts(source, vocabulary, kindId);
   const base = {
     name,
     description,
+    kind: kindId,
     rarity,
     type,
     maxLevel,
@@ -75,7 +68,7 @@ export function generateSkill(
     return { ...base, effects };
   }
 
-  const kind = pick(source, ['damage', 'heal', 'modify'] as const);
+  const kind = info.effect ?? pick(source, EFFECT_KINDS);
   const targets =
     kind === 'damage'
       ? DAMAGE_TARGETS
@@ -106,19 +99,38 @@ export function generateSkill(
   };
 }
 
-function skillName(
+/** A name and a description for a skill of this kind, agreeing with the gender of its noun. */
+function skillTexts(
   source: RandomSource,
-  words: SkillWordList,
-  type: SkillType,
-): string {
-  const template = pick(source, words.templates);
-  const noun = pick(source, words.nouns[type]);
+  vocabulary: SkillVocabulary,
+  kindId: string,
+): { name: string; description: string } {
+  const noun = pick(source, vocabulary.nouns(kindId));
   const gender: Gender = noun.gender ?? 'm';
-  const name = template
-    .replace('{noun}', noun.text)
-    .replace('{adjective}', () =>
-      adjectiveForm(pick(source, words.adjectives), gender),
-    )
-    .replace('{suffix}', () => pick(source, words.suffixes));
-  return capitalize(name.replace(/\s+/g, ' ').trim());
+  const adjectives = vocabulary.adjectives(kindId);
+  const suffixes = vocabulary.suffixes(kindId);
+  const usable = (template: string): boolean =>
+    (adjectives.length > 0 || !template.includes('{adjective}')) &&
+    (suffixes.length > 0 || !template.includes('{suffix}'));
+
+  const fromKind = vocabulary.names(kindId).filter(usable);
+  const templates =
+    fromKind.length > 0 ? fromKind : vocabulary.templates().filter(usable);
+  const template = templates.length > 0 ? pick(source, templates) : '{noun}';
+
+  const values: Partial<Record<'noun' | 'adjective' | 'suffix', string>> = {
+    noun: noun.text,
+  };
+  if (template.includes('{adjective}'))
+    values.adjective = adjectiveForm(pick(source, adjectives), gender);
+  if (template.includes('{suffix}')) values.suffix = pick(source, suffixes);
+
+  const context = { params: vocabulary.params, gender, values };
+  const name = capitalize(expandPhrase(source, template, context) ?? noun.text);
+  const descriptions = vocabulary.descriptions(kindId);
+  const description =
+    descriptions.length > 0
+      ? (expandPhrase(source, pick(source, descriptions), context) ?? '')
+      : '';
+  return { name, description };
 }

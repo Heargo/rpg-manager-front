@@ -46,6 +46,8 @@ export interface Skill {
   /** Display only. */
   rarity: ItemRarity;
   type: SkillType;
+  /** The skill kind it was generated from (a kind id of the skill vocabulary). */
+  kind?: string;
   maxLevel: number;
   /** Skill points per level. */
   pointCost: number;

@@ -4,6 +4,7 @@ import { resolveItemKind } from '../packs/pack-kinds';
 import {
   ItemKindDef,
   NpcKindDef,
+  SkillKindDef,
   Pack,
   packFileUrl,
   PackGenerator,
@@ -120,6 +121,8 @@ export interface InstalledPack {
   kinds: Record<string, ItemKindDef>;
   /** The pack's own NPC kinds. */
   npcKinds?: Record<string, NpcKindDef>;
+  /** The pack's own skill kinds. */
+  skillKinds?: Record<string, SkillKindDef>;
   tints: Record<string, PackTint>;
 }
 
@@ -152,6 +155,7 @@ const installedOf = (
   ...(pack.common ? { common: pack.common } : {}),
   kinds: pack.domains?.items?.kinds ?? {},
   npcKinds: pack.domains?.npcs?.kinds ?? {},
+  skillKinds: pack.domains?.skills?.kinds ?? {},
   tints: pack.tints ?? {},
   ...(link ? { link } : {}),
   ...(local ? { local } : {}),

@@ -1,9 +1,10 @@
-import { inject, Injectable, Injector } from '@angular/core';
-import { PackChoiceBusiness } from '../../../core/business/pack-choice.business';
-import { RANDOM_PACK } from '../../../core/packs/pack-choice';
-import { WordListBusiness } from '../../../core/business/word-list.business';
+import { inject, Injectable } from '@angular/core';
+import { SkillVocabularyBusiness } from '../../../core/business/skill-vocabulary.business';
 import { generateSkill } from '../../../core/generators/skill-generator';
-import { createSeed, seededRandomSource } from '../../../core/generators/random-source';
+import {
+  createSeed,
+  seededRandomSource,
+} from '../../../core/generators/random-source';
 import { World } from '../../world/models/world';
 import {
   emptySkill,
@@ -22,13 +23,16 @@ import { buildSkillPrompt } from '../helpers/skill-ai-prompt';
 /** What the skill editor needs: checks, JSON and the live preview of an amount formula. */
 @Injectable({ providedIn: 'root' })
 export class SkillEditorBusiness {
-  private readonly injector = inject(Injector);
+  private readonly vocabulary = inject(SkillVocabularyBusiness);
 
   /** A new random skill on the world's attributes, in the active language. */
   async random(world: World): Promise<SkillDraft> {
     const seed = createSeed();
-    const pack = await this.injector.get(PackChoiceBusiness).resolve('skills', RANDOM_PACK, seed);
-    return generateSkill(seededRandomSource(seed), this.names(world), await this.injector.get(WordListBusiness).skillWords(undefined, pack));
+    return generateSkill(
+      seededRandomSource(seed),
+      this.names(world),
+      await this.vocabulary.vocabulary(),
+    );
   }
 
   empty(): SkillDraft {

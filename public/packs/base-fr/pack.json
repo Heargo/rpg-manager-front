@@ -708,6 +708,71 @@
    "texts": "generators/npcs.json"
   },
   "skills": {
+   "kinds": {
+    "attack": {
+     "type": "active",
+     "effect": "damage"
+    },
+    "strike": {
+     "parent": "attack"
+    },
+    "shot": {
+     "parent": "attack"
+    },
+    "fire-spell": {
+     "parent": "attack"
+    },
+    "frost-spell": {
+     "parent": "attack"
+    },
+    "lightning-spell": {
+     "parent": "attack"
+    },
+    "shadow-spell": {
+     "parent": "attack"
+    },
+    "healing": {
+     "type": "active",
+     "effect": "heal"
+    },
+    "prayer": {
+     "parent": "healing"
+    },
+    "remedy": {
+     "parent": "healing"
+    },
+    "support": {
+     "type": "active",
+     "effect": "modify"
+    },
+    "blessing": {
+     "parent": "support"
+    },
+    "curse": {
+     "parent": "support"
+    },
+    "war-cry": {
+     "parent": "support"
+    },
+    "song": {
+     "parent": "support"
+    },
+    "trait": {
+     "type": "passive"
+    },
+    "toughness": {
+     "parent": "trait"
+    },
+    "focus": {
+     "parent": "trait"
+    },
+    "agility": {
+     "parent": "trait"
+    },
+    "presence": {
+     "parent": "trait"
+    }
+   },
    "texts": "generators/skills.json"
   },
   "classes": {
