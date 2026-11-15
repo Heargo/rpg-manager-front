@@ -272,3 +272,16 @@ Tickets in `archived/item-adjectives/` (IA), follow-up of IC06's review. Decisio
 | - | --- | --- |
 | 119 | **IA01** Kind adjectives, tint fits and tint descriptions first (done) | none |
 | 120 | **IA02** Pack creator: kind adjectives, tint fits, common words (done) | IA01 |
+
+## Phase 18: NPC, skill and class generators on kinds (2026-11-15)
+
+Tickets in `generator-kinds/` (GK). User request; shapes assumed from the item system, marked in the spec. NPCs first (it also moves the generic code), skills before classes (classes pick skills by kind), the creator and docs last. GK05 is only recorded for later.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 121 | **GK01** NPC generator on kinds | none |
+| 122 | **GK02** Skill generator on kinds | GK01 |
+| 123 | **GK03** Class generator on kinds | GK02 |
+| 124 | **GK04** Pack creator: NPC, skill and class kinds | GK01–GK03 |
+| 125 | **GK06** User docs: NPC, skill and class kinds | GK01–GK04 |
+| — | **GK05** Packs ship fixed items, skills and classes (needs triage, later) | GK04 |
