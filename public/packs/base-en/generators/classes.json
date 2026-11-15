@@ -1,157 +1,392 @@
 {
-  "version": 1,
+  "version": 2,
   "templates": [
     "{adjective} {noun}",
     "{noun} of {suffix}",
     "{noun}",
     "{adjective} {noun} of {suffix}"
   ],
-  "nouns": [
-    {
-      "text": "Warrior"
-    },
-    {
-      "text": "Mage"
-    },
-    {
-      "text": "Ranger"
-    },
-    {
-      "text": "Rogue"
-    },
-    {
-      "text": "Cleric"
-    },
-    {
-      "text": "Paladin"
-    },
-    {
-      "text": "Druid"
-    },
-    {
-      "text": "Bard"
-    },
-    {
-      "text": "Monk"
-    },
-    {
-      "text": "Warlock"
-    },
-    {
-      "text": "Sentinel"
-    },
-    {
-      "text": "Duelist"
-    },
-    {
-      "text": "Alchemist"
-    },
-    {
-      "text": "Hunter"
-    },
-    {
-      "text": "Templar"
-    },
-    {
-      "text": "Shaman"
-    },
-    {
-      "text": "Berserker"
-    },
-    {
-      "text": "Scout"
-    },
-    {
-      "text": "Sage"
-    },
-    {
-      "text": "Guardian"
-    },
-    {
-      "text": "Assassin"
-    },
-    {
-      "text": "Spellblade"
-    },
-    {
-      "text": "Warden"
-    },
-    {
-      "text": "Mercenary"
-    }
-  ],
   "adjectives": [
     "Wandering",
     "Fearless",
-    "Arcane",
-    "Shadow",
-    "Holy",
-    "Wild",
-    "Iron",
+    "Unyielding",
     "Silent",
-    "Veteran",
-    "Sworn",
-    "Cursed",
-    "Stormborn",
+    "Seasoned",
     "Exiled",
-    "Cunning",
-    "Ancient",
-    "Relentless",
-    "Radiant",
-    "Grim",
-    "Nimble",
-    "Elder",
     "Fallen",
     "Devoted",
-    "Masked",
-    "Frontier"
+    "Ancient",
+    "Relentless",
+    "Legendary",
+    "Forgotten",
+    "Lone",
+    "Renowned"
   ],
   "suffixes": [
-    "the Wastes",
-    "the Crown",
-    "the Old Ways",
-    "the Hollow",
-    "the Dawn",
-    "the Deep Woods",
-    "the Flame",
-    "the Last Watch",
-    "the Moon",
-    "the Iron Pact",
-    "the Thorn",
-    "the Tide",
-    "the Ashen Road",
-    "the Veil",
-    "the Pale Court",
-    "the Mountain",
-    "the Hunt",
-    "the Silent Order",
-    "the Rift",
-    "the Wild",
-    "the Seven Seas",
+    "the Ancients",
     "the Oath",
-    "the Citadel",
-    "the Frozen North"
+    "the Moon",
+    "Silence",
+    "the Wanderer",
+    "Dawn",
+    "the Crown",
+    "the Last Watch",
+    "the Tide",
+    "the Veil",
+    "the Mountain",
+    "the Seven Seas",
+    "the Frozen North",
+    "the Ash Road"
   ],
-  "descriptions": [
-    "Learned the craft the hard way and never looked back.",
-    "Walks the line between discipline and instinct.",
-    "Trained for years, then went out to find a real test.",
-    "Fights for coin, for honor or for both.",
-    "Relies on a lifetime of habit to survive.",
-    "Knows the dangers of the road better than any map.",
-    "Calm in a crisis and dangerous in a corner.",
-    "Follows an old tradition few still remember.",
-    "Always prepared, rarely surprised.",
-    "A specialist others are glad to have on their side.",
-    "Mixes patience and sudden violence.",
-    "Carries the lessons of a mentor long gone.",
-    "Rarely seen, often felt.",
-    "Believes the right tool is skill, not luck.",
-    "Chose this path, and the path chose back.",
-    "Heir to a craft passed from hand to hand.",
-    "Never the loudest in the room, always the last standing.",
-    "Lives by a code that few understand.",
-    "Cuts through chaos with practiced calm.",
-    "A reliable pillar of any party."
-  ]
+  "kinds": {
+    "martial": {
+      "adjectives": [
+        "Ironclad",
+        "Battle-Hardened",
+        "Scarred"
+      ],
+      "suffixes": [
+        "the Front Line",
+        "Steel",
+        "the Shield Wall"
+      ]
+    },
+    "arcane": {
+      "adjectives": [
+        "Arcane",
+        "Learned",
+        "Enigmatic"
+      ],
+      "suffixes": [
+        "the Hidden Page",
+        "the Stars",
+        "the Sealed Tome"
+      ]
+    },
+    "divine": {
+      "adjectives": [
+        "Holy",
+        "Radiant",
+        "Faithful"
+      ],
+      "suffixes": [
+        "the Light",
+        "the Sacred Flame",
+        "the Vigil"
+      ]
+    },
+    "nature": {
+      "adjectives": [
+        "Wild",
+        "Verdant",
+        "Untamed"
+      ],
+      "suffixes": [
+        "the Deep Woods",
+        "the Seasons",
+        "the Wild Places"
+      ]
+    },
+    "cunning": {
+      "adjectives": [
+        "Cunning",
+        "Sly",
+        "Masked"
+      ],
+      "suffixes": [
+        "the Shadows",
+        "the Back Alley",
+        "the Silent Step"
+      ]
+    },
+    "warrior": {
+      "nouns": [
+        {
+          "text": "Warrior"
+        },
+        {
+          "text": "Soldier"
+        },
+        {
+          "text": "Fighter"
+        }
+      ],
+      "descriptions": [
+        "Learned the trade the hard way and never looked back.",
+        "Stands in the front rank and trusts steel before words.",
+        "Trained for years, then went looking for a real test.",
+        "Marked by {event}, and never quite the same since."
+      ]
+    },
+    "berserker": {
+      "nouns": [
+        {
+          "text": "Berserker"
+        },
+        {
+          "text": "Marauder"
+        },
+        {
+          "text": "Raider"
+        }
+      ],
+      "adjectives": [
+        "Raging",
+        "Bloodied"
+      ],
+      "descriptions": [
+        "Fights in a fury that friends fear almost as much as foes.",
+        "Lets the rage take the lead and pays for it afterwards.",
+        "A storm in the shape of a person, welcome only on the right side of the line."
+      ]
+    },
+    "knight": {
+      "nouns": [
+        {
+          "text": "Knight"
+        },
+        {
+          "text": "Squire"
+        },
+        {
+          "text": "Cavalier"
+        }
+      ],
+      "adjectives": [
+        "Chivalrous",
+        "Gallant"
+      ],
+      "descriptions": [
+        "Bound by a code and a sworn lord, in good times and in bad.",
+        "Rides to the aid of anyone who asks, and sometimes of those who do not.",
+        "Carries the banner of an order older than the roads."
+      ]
+    },
+    "mage": {
+      "nouns": [
+        {
+          "text": "Mage"
+        },
+        {
+          "text": "Wizard"
+        },
+        {
+          "text": "Magician"
+        }
+      ],
+      "descriptions": [
+        "Reads the world like a book and rewrites it page by page.",
+        "Calm in a crisis, dangerous in a corner.",
+        "Spent years among dusty tomes before daring to cast a single word of them."
+      ]
+    },
+    "warlock": {
+      "nouns": [
+        {
+          "text": "Warlock"
+        },
+        {
+          "text": "Occultist"
+        },
+        {
+          "text": "Hexer"
+        }
+      ],
+      "adjectives": [
+        "Accursed",
+        "Pact-Bound"
+      ],
+      "descriptions": [
+        "Bargained for power and is still paying the price.",
+        "Speaks to things that should have been left unanswered.",
+        "Draws strength from a pact that no one else has dared to read."
+      ]
+    },
+    "sorcerer": {
+      "nouns": [
+        {
+          "text": "Sorcerer"
+        },
+        {
+          "text": "Spellcaster"
+        },
+        {
+          "text": "Channeler"
+        }
+      ],
+      "adjectives": [
+        "Gifted",
+        "Storm-Touched"
+      ],
+      "descriptions": [
+        "Born with the gift, and still learning what it asks in return.",
+        "Magic flows unbidden and the world bends around it.",
+        "Never studied a day, yet casts as though the spells had always been theirs."
+      ]
+    },
+    "cleric": {
+      "nouns": [
+        {
+          "text": "Cleric"
+        },
+        {
+          "text": "Priest"
+        },
+        {
+          "text": "Acolyte"
+        }
+      ],
+      "descriptions": [
+        "Tends the wounded and the faithful with the same patience.",
+        "Carries a prayer for every road and a remedy for most wounds.",
+        "Keeps the vigil so the others can rest."
+      ]
+    },
+    "paladin": {
+      "nouns": [
+        {
+          "text": "Paladin"
+        },
+        {
+          "text": "Crusader"
+        },
+        {
+          "text": "Templar"
+        }
+      ],
+      "adjectives": [
+        "Righteous",
+        "Oath-Sworn"
+      ],
+      "descriptions": [
+        "Swore an oath in the dark and has kept it in the light.",
+        "Shield for the weak, scourge of the wicked.",
+        "Holy conviction made flesh, steel and armour."
+      ]
+    },
+    "druid": {
+      "nouns": [
+        {
+          "text": "Druid"
+        },
+        {
+          "text": "Warden"
+        },
+        {
+          "text": "Grove-Keeper"
+        }
+      ],
+      "descriptions": [
+        "Speaks for the forest where no one else will.",
+        "Follows the turning of the seasons and bends to none but them.",
+        "Keeps an old balance that few remember."
+      ]
+    },
+    "ranger": {
+      "nouns": [
+        {
+          "text": "Ranger"
+        },
+        {
+          "text": "Scout"
+        },
+        {
+          "text": "Hunter"
+        }
+      ],
+      "adjectives": [
+        "Keen-Eyed",
+        "Trailworn"
+      ],
+      "descriptions": [
+        "Knows the dangers of the road better than any map.",
+        "Reads tracks the way others read letters.",
+        "Walks the border where the roads end and the wild begins."
+      ]
+    },
+    "shaman": {
+      "nouns": [
+        {
+          "text": "Shaman"
+        },
+        {
+          "text": "Spirit-Caller"
+        },
+        {
+          "text": "Totemist"
+        }
+      ],
+      "adjectives": [
+        "Spirit-Led",
+        "Ancestral"
+      ],
+      "descriptions": [
+        "Listens to the spirits of the land and answers on their behalf.",
+        "Dances with storms and bargains with the dead.",
+        "Carries the memory of a whole people in a handful of bones."
+      ]
+    },
+    "rogue": {
+      "nouns": [
+        {
+          "text": "Rogue"
+        },
+        {
+          "text": "Thief"
+        },
+        {
+          "text": "Cutpurse"
+        }
+      ],
+      "descriptions": [
+        "Fights for coin, for pride, or for both.",
+        "Rarely seen, often felt.",
+        "Believes the best lock is the one that opens without a sound."
+      ]
+    },
+    "assassin": {
+      "nouns": [
+        {
+          "text": "Assassin"
+        },
+        {
+          "text": "Cutthroat"
+        },
+        {
+          "text": "Shadowblade"
+        }
+      ],
+      "adjectives": [
+        "Deadly",
+        "Unseen"
+      ],
+      "descriptions": [
+        "Patient for weeks, sudden for a heartbeat.",
+        "Leaves nothing behind but a rumour.",
+        "Every contract is a quiet promise kept."
+      ]
+    },
+    "bard": {
+      "nouns": [
+        {
+          "text": "Bard"
+        },
+        {
+          "text": "Minstrel"
+        },
+        {
+          "text": "Troubadour"
+        }
+      ],
+      "adjectives": [
+        "Silver-Tongued",
+        "Merry"
+      ],
+      "descriptions": [
+        "Turns a rough night into a legend and a legend into a weapon.",
+        "Carries the news, the songs and the secrets of a hundred taverns.",
+        "A smile, a lute and an exit plan."
+      ]
+    }
+  }
 }

@@ -5,6 +5,7 @@ import {
   ItemKindDef,
   NpcKindDef,
   SkillKindDef,
+  ClassKindDef,
   Pack,
   packFileUrl,
   PackGenerator,
@@ -123,6 +124,8 @@ export interface InstalledPack {
   npcKinds?: Record<string, NpcKindDef>;
   /** The pack's own skill kinds. */
   skillKinds?: Record<string, SkillKindDef>;
+  /** The pack's own class kinds. */
+  classKinds?: Record<string, ClassKindDef>;
   tints: Record<string, PackTint>;
 }
 
@@ -156,6 +159,7 @@ const installedOf = (
   kinds: pack.domains?.items?.kinds ?? {},
   npcKinds: pack.domains?.npcs?.kinds ?? {},
   skillKinds: pack.domains?.skills?.kinds ?? {},
+  classKinds: pack.domains?.classes?.kinds ?? {},
   tints: pack.tints ?? {},
   ...(link ? { link } : {}),
   ...(local ? { local } : {}),

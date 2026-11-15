@@ -1584,8 +1584,6 @@
     "levelShort": "Niv. {{ level }}"
   },
   "packs": {
-    "choiceLabel": "Pack",
-    "choiceRandom": "Aléatoire",
     "title": "Packs de contenu",
     "intro": "Sprites et listes de mots à ajouter à l'application. Téléchargez un pack pour l'utiliser dans un monde, puis il fonctionne hors ligne.",
     "alwaysOn": "Toujours disponible",

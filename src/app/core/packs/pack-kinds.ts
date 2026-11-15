@@ -103,6 +103,21 @@ export const SKILL_KIND_SCHEMA: KindSchema = {
   },
 };
 
+/** Classes: `skills`, the skill kinds the class favours, allowed on any level; the nearest level that has some wins. */
+export const CLASS_KIND_SCHEMA: KindSchema = {
+  fields: ['skills'],
+  check(kind) {
+    const skills = kind['skills'];
+    if (skills === undefined) return [];
+    if (
+      !Array.isArray(skills) ||
+      !skills.every((id) => typeof id === 'string' && KIND_ID.test(id))
+    )
+      return ['skills must be a list of kebab-case skill kind ids'];
+    return [];
+  },
+};
+
 /**
  * Checks a domain's kind tree: kebab-case ids, the fields the schema allows, no cycle inside the pack, then the
  * schema's own rules. A `parent` that the pack does not declare is allowed (it lives in another pack).

@@ -1,108 +1,10 @@
 {
-  "version": 1,
+  "version": 2,
   "templates": [
     "{noun} {adjective}",
     "{noun} {suffix}",
     "{noun}",
     "{noun} {adjective} {suffix}"
-  ],
-  "nouns": [
-    {
-      "text": "Guerrier",
-      "gender": "m"
-    },
-    {
-      "text": "Mage",
-      "gender": "m"
-    },
-    {
-      "text": "Rôdeuse",
-      "gender": "f"
-    },
-    {
-      "text": "Voleur",
-      "gender": "m"
-    },
-    {
-      "text": "Clerc",
-      "gender": "m"
-    },
-    {
-      "text": "Paladin",
-      "gender": "m"
-    },
-    {
-      "text": "Druide",
-      "gender": "m"
-    },
-    {
-      "text": "Barde",
-      "gender": "m"
-    },
-    {
-      "text": "Moine",
-      "gender": "m"
-    },
-    {
-      "text": "Occultiste",
-      "gender": "m"
-    },
-    {
-      "text": "Sentinelle",
-      "gender": "f"
-    },
-    {
-      "text": "Duelliste",
-      "gender": "m"
-    },
-    {
-      "text": "Alchimiste",
-      "gender": "m"
-    },
-    {
-      "text": "Chasseuse",
-      "gender": "f"
-    },
-    {
-      "text": "Templier",
-      "gender": "m"
-    },
-    {
-      "text": "Chamane",
-      "gender": "m"
-    },
-    {
-      "text": "Berserker",
-      "gender": "m"
-    },
-    {
-      "text": "Éclaireuse",
-      "gender": "f"
-    },
-    {
-      "text": "Sage",
-      "gender": "m"
-    },
-    {
-      "text": "Gardienne",
-      "gender": "f"
-    },
-    {
-      "text": "Assassin",
-      "gender": "m"
-    },
-    {
-      "text": "Lame-sorcière",
-      "gender": "f"
-    },
-    {
-      "text": "Garde-forestière",
-      "gender": "f"
-    },
-    {
-      "text": "Mercenaire",
-      "gender": "m"
-    }
   ],
   "adjectives": [
     {
@@ -110,16 +12,6 @@
       "f": "errante"
     },
     "intrépide",
-    "arcanique",
-    {
-      "m": "obscur",
-      "f": "obscure"
-    },
-    {
-      "m": "saint",
-      "f": "sainte"
-    },
-    "sauvage",
     "inflexible",
     {
       "m": "silencieux",
@@ -130,36 +22,8 @@
       "f": "chevronnée"
     },
     {
-      "m": "assermenté",
-      "f": "assermentée"
-    },
-    {
-      "m": "maudit",
-      "f": "maudite"
-    },
-    {
-      "m": "tempétueux",
-      "f": "tempétueuse"
-    },
-    {
       "m": "exilé",
       "f": "exilée"
-    },
-    {
-      "m": "rusé",
-      "f": "rusée"
-    },
-    "antique",
-    "implacable",
-    {
-      "m": "radieux",
-      "f": "radieuse"
-    },
-    "sinistre",
-    "agile",
-    {
-      "m": "ancien",
-      "f": "ancienne"
     },
     {
       "m": "déchu",
@@ -170,12 +34,19 @@
       "f": "dévouée"
     },
     {
-      "m": "masqué",
-      "f": "masquée"
+      "m": "ancien",
+      "f": "ancienne"
     },
+    "implacable",
+    "légendaire",
     {
-      "m": "frontalier",
-      "f": "frontalière"
+      "m": "oublié",
+      "f": "oubliée"
+    },
+    "solitaire",
+    {
+      "m": "renommé",
+      "f": "renommée"
     }
   ],
   "suffixes": [
@@ -184,46 +55,601 @@
     "des anciennes voies",
     "du vide",
     "de l'aube",
-    "des bois profonds",
-    "de la flamme",
-    "du dernier guet",
     "de la lune",
-    "du pacte de fer",
-    "de l'épine",
+    "du dernier guet",
     "de la marée",
     "de la route de cendres",
     "du voile",
-    "de la cour pâle",
     "de la montagne",
-    "de la traque",
-    "de l'ordre silencieux",
-    "de la faille",
-    "des terres sauvages",
     "des sept mers",
     "du serment",
-    "de la citadelle",
     "du nord gelé"
   ],
-  "descriptions": [
-    "A appris le métier à la dure et n'a jamais regardé en arrière.",
-    "Marche sur la ligne entre discipline et instinct.",
-    "S'est entraîné des années, puis est parti chercher une vraie épreuve.",
-    "Se bat pour l'argent, pour l'honneur, ou pour les deux.",
-    "S'appuie sur une vie d'habitudes pour survivre.",
-    "Connaît les dangers de la route mieux que n'importe quelle carte.",
-    "Calme dans la crise, dangereux dans un coin.",
-    "Suit une vieille tradition que peu de gens se rappellent.",
-    "Toujours préparé, rarement surpris.",
-    "Un spécialiste que chacun est content d'avoir de son côté.",
-    "Mêle patience et violence soudaine.",
-    "Porte les leçons d'un maître disparu depuis longtemps.",
-    "Rarement vu, souvent ressenti.",
-    "Croit que le bon outil, c'est le talent et non la chance.",
-    "A choisi cette voie, et la voie l'a choisi en retour.",
-    "Héritier d'un savoir-faire transmis de main en main.",
-    "Jamais le plus bruyant de la salle, toujours le dernier debout.",
-    "Vit selon un code que peu comprennent.",
-    "Traverse le chaos avec un calme rodé.",
-    "Un pilier fiable pour n'importe quelle équipe."
-  ]
+  "kinds": {
+    "martial": {
+      "adjectives": [
+        {
+          "m": "aguerri",
+          "f": "aguerrie"
+        },
+        {
+          "m": "cuirassé",
+          "f": "cuirassée"
+        },
+        {
+          "m": "balafré",
+          "f": "balafrée"
+        }
+      ],
+      "suffixes": [
+        "de la première ligne",
+        "d'acier",
+        "du mur de boucliers"
+      ]
+    },
+    "arcane": {
+      "adjectives": [
+        "arcanique",
+        {
+          "m": "érudit",
+          "f": "érudite"
+        },
+        {
+          "m": "énigmatique",
+          "f": "énigmatique"
+        }
+      ],
+      "suffixes": [
+        "de la page cachée",
+        "des étoiles",
+        "du grimoire scellé"
+      ]
+    },
+    "divine": {
+      "adjectives": [
+        {
+          "m": "saint",
+          "f": "sainte"
+        },
+        {
+          "m": "radieux",
+          "f": "radieuse"
+        },
+        {
+          "m": "fidèle",
+          "f": "fidèle"
+        }
+      ],
+      "suffixes": [
+        "de la lumière",
+        "de la flamme sacrée",
+        "de la veillée"
+      ]
+    },
+    "nature": {
+      "adjectives": [
+        "sauvage",
+        {
+          "m": "verdoyant",
+          "f": "verdoyante"
+        },
+        {
+          "m": "indompté",
+          "f": "indomptée"
+        }
+      ],
+      "suffixes": [
+        "des bois profonds",
+        "des saisons",
+        "des lieux sauvages"
+      ]
+    },
+    "cunning": {
+      "adjectives": [
+        {
+          "m": "rusé",
+          "f": "rusée"
+        },
+        {
+          "m": "sournois",
+          "f": "sournoise"
+        },
+        {
+          "m": "masqué",
+          "f": "masquée"
+        }
+      ],
+      "suffixes": [
+        "des ombres",
+        "de la ruelle",
+        "du pas silencieux"
+      ]
+    },
+    "warrior": {
+      "nouns": [
+        {
+          "text": "Guerrier",
+          "gender": "m"
+        },
+        {
+          "text": "Guerrière",
+          "gender": "f"
+        },
+        {
+          "text": "Soldat",
+          "gender": "m"
+        },
+        {
+          "text": "Soldate",
+          "gender": "f"
+        }
+      ],
+      "descriptions": [
+        "A appris le métier à la dure et n'a jamais regardé en arrière.",
+        "Tient la première ligne et se fie à l'acier avant les mots.",
+        "S'est {g:entraîné|entraînée} des années, puis est {g:parti|partie} chercher une vraie épreuve.",
+        "Rien ne {g:le|la} fait reculer, et {g:il|elle} le sait.",
+        "{g:Marqué|Marquée} par {event}, et plus jamais tout à fait {g:le même|la même}."
+      ]
+    },
+    "berserker": {
+      "nouns": [
+        {
+          "text": "Berserker",
+          "gender": "m"
+        },
+        {
+          "text": "Forcené",
+          "gender": "m"
+        },
+        {
+          "text": "Forcenée",
+          "gender": "f"
+        },
+        {
+          "text": "Maraudeur",
+          "gender": "m"
+        },
+        {
+          "text": "Maraudeuse",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "enragé",
+          "f": "enragée"
+        },
+        {
+          "m": "ensanglanté",
+          "f": "ensanglantée"
+        }
+      ],
+      "descriptions": [
+        "Se bat dans une fureur que les amis craignent presque autant que les ennemis.",
+        "Laisse la rage prendre les commandes et en paie le prix ensuite.",
+        "Une tempête à forme humaine, bienvenue seulement du bon côté de la ligne."
+      ]
+    },
+    "knight": {
+      "nouns": [
+        {
+          "text": "Chevalier",
+          "gender": "m"
+        },
+        {
+          "text": "Chevalière",
+          "gender": "f"
+        },
+        {
+          "text": "Écuyer",
+          "gender": "m"
+        },
+        {
+          "text": "Écuyère",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "galant",
+          "f": "galante"
+        },
+        {
+          "m": "courtois",
+          "f": "courtoise"
+        }
+      ],
+      "descriptions": [
+        "{g:Lié|Liée} par un code et un seigneur juré, dans les bons jours comme dans les mauvais.",
+        "Vole au secours de quiconque le demande, et parfois de ceux qui ne le demandent pas.",
+        "Porte la bannière d'un ordre plus vieux que les routes."
+      ]
+    },
+    "mage": {
+      "nouns": [
+        {
+          "text": "Mage",
+          "gender": "m"
+        },
+        {
+          "text": "Mage",
+          "gender": "f"
+        },
+        {
+          "text": "Magicien",
+          "gender": "m"
+        },
+        {
+          "text": "Magicienne",
+          "gender": "f"
+        }
+      ],
+      "descriptions": [
+        "Lit le monde comme un livre et le réécrit page après page.",
+        "Calme dans la crise, {g:dangereux|dangereuse} dans un coin.",
+        "A passé des années parmi les grimoires poussiéreux avant d'oser en prononcer un seul mot."
+      ]
+    },
+    "warlock": {
+      "nouns": [
+        {
+          "text": "Occultiste",
+          "gender": "m"
+        },
+        {
+          "text": "Occultiste",
+          "gender": "f"
+        },
+        {
+          "text": "Envoûteur",
+          "gender": "m"
+        },
+        {
+          "text": "Envoûteuse",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "maudit",
+          "f": "maudite"
+        },
+        {
+          "m": "lié",
+          "f": "liée"
+        }
+      ],
+      "descriptions": [
+        "A marchandé son pouvoir et en paie encore le prix.",
+        "Parle à des choses qu'il aurait mieux valu laisser sans réponse.",
+        "Puise sa force dans un pacte que nul autre n'a osé lire."
+      ]
+    },
+    "sorcerer": {
+      "nouns": [
+        {
+          "text": "Sorcier",
+          "gender": "m"
+        },
+        {
+          "text": "Sorcière",
+          "gender": "f"
+        },
+        {
+          "text": "Ensorceleur",
+          "gender": "m"
+        },
+        {
+          "text": "Ensorceleuse",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "doué",
+          "f": "douée"
+        },
+        {
+          "m": "tempétueux",
+          "f": "tempétueuse"
+        }
+      ],
+      "descriptions": [
+        "{g:Né|Née} avec le don, et {g:il|elle} apprend encore ce qu'il exige en retour.",
+        "La magie coule sans qu'on l'appelle et le monde plie autour d'elle.",
+        "N'a jamais rien étudié, et pourtant lance les sorts comme s'ils avaient toujours été les siens."
+      ]
+    },
+    "cleric": {
+      "nouns": [
+        {
+          "text": "Clerc",
+          "gender": "m"
+        },
+        {
+          "text": "Prêtre",
+          "gender": "m"
+        },
+        {
+          "text": "Prêtresse",
+          "gender": "f"
+        },
+        {
+          "text": "Acolyte",
+          "gender": "m"
+        },
+        {
+          "text": "Acolyte",
+          "gender": "f"
+        }
+      ],
+      "descriptions": [
+        "Soigne les blessés et les fidèles avec la même patience.",
+        "Porte une prière pour chaque route et un remède pour presque toutes les plaies.",
+        "Veille pour que les autres puissent dormir."
+      ]
+    },
+    "paladin": {
+      "nouns": [
+        {
+          "text": "Paladin",
+          "gender": "m"
+        },
+        {
+          "text": "Paladin",
+          "gender": "f"
+        },
+        {
+          "text": "Croisé",
+          "gender": "m"
+        },
+        {
+          "text": "Croisée",
+          "gender": "f"
+        },
+        {
+          "text": "Templier",
+          "gender": "m"
+        },
+        {
+          "text": "Templière",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "juste",
+          "f": "juste"
+        },
+        {
+          "m": "assermenté",
+          "f": "assermentée"
+        }
+      ],
+      "descriptions": [
+        "A juré dans l'obscurité et tient parole en pleine lumière.",
+        "Bouclier des faibles, fléau des méchants.",
+        "Une conviction sacrée faite chair, acier et armure."
+      ]
+    },
+    "druid": {
+      "nouns": [
+        {
+          "text": "Druide",
+          "gender": "m"
+        },
+        {
+          "text": "Druidesse",
+          "gender": "f"
+        },
+        {
+          "text": "Gardien des bois",
+          "gender": "m"
+        },
+        {
+          "text": "Gardienne des bois",
+          "gender": "f"
+        }
+      ],
+      "descriptions": [
+        "Parle pour la forêt là où personne d'autre ne le fera.",
+        "Suit le tour des saisons et ne se plie qu'à elles.",
+        "Garde un vieil équilibre dont peu se souviennent."
+      ]
+    },
+    "ranger": {
+      "nouns": [
+        {
+          "text": "Rôdeur",
+          "gender": "m"
+        },
+        {
+          "text": "Rôdeuse",
+          "gender": "f"
+        },
+        {
+          "text": "Éclaireur",
+          "gender": "m"
+        },
+        {
+          "text": "Éclaireuse",
+          "gender": "f"
+        },
+        {
+          "text": "Chasseur",
+          "gender": "m"
+        },
+        {
+          "text": "Chasseuse",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "perçant",
+          "f": "perçante"
+        },
+        {
+          "m": "usé",
+          "f": "usée"
+        }
+      ],
+      "descriptions": [
+        "Connaît les dangers de la route mieux que n'importe quelle carte.",
+        "Lit les traces comme d'autres lisent des lettres.",
+        "Arpente la frontière où les routes s'arrêtent et où le sauvage commence."
+      ]
+    },
+    "shaman": {
+      "nouns": [
+        {
+          "text": "Chaman",
+          "gender": "m"
+        },
+        {
+          "text": "Chamane",
+          "gender": "f"
+        },
+        {
+          "text": "Totémiste",
+          "gender": "m"
+        },
+        {
+          "text": "Totémiste",
+          "gender": "f"
+        },
+        {
+          "text": "Passeur d'âmes",
+          "gender": "m"
+        },
+        {
+          "text": "Passeuse d'âmes",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "inspiré",
+          "f": "inspirée"
+        },
+        {
+          "m": "ancestral",
+          "f": "ancestrale"
+        }
+      ],
+      "descriptions": [
+        "Écoute les esprits de la terre et leur répond.",
+        "Danse avec les orages et marchande avec les morts.",
+        "Porte la mémoire de tout un peuple dans une poignée d'os."
+      ]
+    },
+    "rogue": {
+      "nouns": [
+        {
+          "text": "Voleur",
+          "gender": "m"
+        },
+        {
+          "text": "Voleuse",
+          "gender": "f"
+        },
+        {
+          "text": "Détrousseur",
+          "gender": "m"
+        },
+        {
+          "text": "Détrousseuse",
+          "gender": "f"
+        },
+        {
+          "text": "Coupe-jarret",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Se bat pour l'argent, pour l'honneur, ou pour les deux.",
+        "Rarement {g:vu|vue}, souvent {g:ressenti|ressentie}.",
+        "Pense que la meilleure serrure est celle qui s'ouvre sans bruit."
+      ]
+    },
+    "assassin": {
+      "nouns": [
+        {
+          "text": "Assassin",
+          "gender": "m"
+        },
+        {
+          "text": "Assassine",
+          "gender": "f"
+        },
+        {
+          "text": "Égorgeur",
+          "gender": "m"
+        },
+        {
+          "text": "Égorgeuse",
+          "gender": "f"
+        },
+        {
+          "text": "Lame de l'ombre",
+          "gender": "f"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "mortel",
+          "f": "mortelle"
+        },
+        {
+          "m": "invisible",
+          "f": "invisible"
+        }
+      ],
+      "descriptions": [
+        "{g:Patient|Patiente} des semaines, {g:soudain|soudaine} le temps d'un battement de cœur.",
+        "Ne laisse derrière {g:lui|elle} qu'une rumeur.",
+        "Chaque contrat est une promesse silencieuse tenue."
+      ]
+    },
+    "bard": {
+      "nouns": [
+        {
+          "text": "Barde",
+          "gender": "m"
+        },
+        {
+          "text": "Barde",
+          "gender": "f"
+        },
+        {
+          "text": "Ménestrel",
+          "gender": "m"
+        },
+        {
+          "text": "Ménestrelle",
+          "gender": "f"
+        },
+        {
+          "text": "Troubadour",
+          "gender": "m"
+        }
+      ],
+      "adjectives": [
+        {
+          "m": "beau-parleur",
+          "f": "belle-parleuse"
+        },
+        {
+          "m": "jovial",
+          "f": "joviale"
+        }
+      ],
+      "descriptions": [
+        "Transforme une nuit difficile en légende, et la légende en arme.",
+        "Porte les nouvelles, les chansons et les secrets de cent tavernes.",
+        "Un sourire, un luth et un plan de fuite."
+      ]
+    }
+  }
 }

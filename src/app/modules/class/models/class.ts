@@ -25,6 +25,8 @@ export interface CharacterClass {
   bonuses?: ItemModifier[];
   /** Catalogue item ids given at creation. */
   startingItems?: string[];
+  /** The class kind it was generated from (a kind id of the class vocabulary). */
+  kind?: string;
   tree: TreeNode[];
 }
 

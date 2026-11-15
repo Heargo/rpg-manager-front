@@ -1584,8 +1584,6 @@
     "levelShort": "Lv {{ level }}"
   },
   "packs": {
-    "choiceLabel": "Pack",
-    "choiceRandom": "Random",
     "title": "Content packs",
     "intro": "Sprites and word lists you can add to the app. Download a pack to use it in a world, then it works offline.",
     "alwaysOn": "Always available",

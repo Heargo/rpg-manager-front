@@ -1,7 +1,7 @@
 import { importConfig } from '../../modules/sprite/helpers/config-export';
 import { validateNpcWordList } from '../generators/npc-word-list';
 import { validateSkillWordList } from '../generators/skill-word-list';
-import { isClassWordList } from '../generators/pack-word-lists';
+import { validateClassWordList } from '../generators/class-word-list';
 import { validateCommonTexts } from '../generators/common-texts';
 import { validateItemWordList } from '../generators/word-list';
 import { PackGenerator } from './pack';
@@ -39,7 +39,10 @@ export function listChecker(
         return r.ok ? [] : r.errors;
       };
     case 'classes':
-      return (json) => (isClassWordList(json) ? [] : ['not a class word list']);
+      return (json) => {
+        const r = validateClassWordList(json);
+        return r.ok ? [] : r.errors;
+      };
   }
 }
 

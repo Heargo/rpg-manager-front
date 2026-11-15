@@ -22,6 +22,8 @@ interface Context {
 
 interface SkillSpec {
   key: string;
+  /** The Base skill kind it stands for; none when no Base kind fits. */
+  kind?: string;
   name: Text;
   description: Text;
   rarity: ItemRarity;
@@ -53,6 +55,8 @@ interface NodeSpec {
 
 interface ClassSpec {
   name: Text;
+  /** The Base class kind it stands for. */
+  kind: string;
   description: Text;
   /** Which of the world's main attributes (by order) the class is built on. */
   mainIndex: number;
@@ -66,6 +70,7 @@ const ref = (name: string) => `[${name}]`;
 const CLASSES: ClassSpec[] = [
   {
     name: ['Warrior', 'Guerrier'],
+    kind: 'warrior',
     description: [
       'A front-line fighter: sturdy, strong and hard to put down.',
       'Un combattant de première ligne : robuste, puissant et difficile à abattre.',
@@ -74,6 +79,7 @@ const CLASSES: ClassSpec[] = [
     skills: [
       {
         key: 'power-strike',
+        kind: 'strike',
         name: ['Power Strike', 'Frappe puissante'],
         description: [
           'A heavy blow on one enemy. Grows with strength.',
@@ -92,6 +98,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'iron-skin',
+        kind: 'toughness',
         name: ['Iron Skin', 'Peau de fer'],
         description: [
           'Toughened by countless fights: permanently raises maximum life.',
@@ -110,6 +117,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'cleave',
+        kind: 'strike',
         name: ['Cleave', 'Enchaînement'],
         description: [
           'A sweeping swing that hits every enemy.',
@@ -128,6 +136,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'battle-cry',
+        kind: 'war-cry',
         name: ['Battle Cry', 'Cri de guerre'],
         description: [
           'Rallies the allies: their main attribute rises for three turns.',
@@ -147,6 +156,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'second-wind',
+        kind: 'remedy',
         name: ['Second Wind', 'Second souffle'],
         description: [
           'Catches your breath and recovers life.',
@@ -161,6 +171,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'mighty-blow',
+        kind: 'strike',
         name: ['Mighty Blow', 'Coup dévastateur'],
         description: [
           "All the warrior's strength in a single, crushing strike.",
@@ -213,6 +224,7 @@ const CLASSES: ClassSpec[] = [
   },
   {
     name: ['Mage', 'Mage'],
+    kind: 'mage',
     description: [
       'A scholar of the arcane: spells that burn, heal and protect.',
       'Un érudit des arcanes : des sorts qui brûlent, soignent et protègent.',
@@ -221,6 +233,7 @@ const CLASSES: ClassSpec[] = [
     skills: [
       {
         key: 'arcane-bolt',
+        kind: 'lightning-spell',
         name: ['Arcane Bolt', 'Trait arcanique'],
         description: [
           'A bolt of raw magic on one enemy.',
@@ -239,6 +252,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'healing-light',
+        kind: 'healing',
         name: ['Healing Light', 'Lumière guérisseuse'],
         description: [
           'A soft light that closes the wounds of one ally.',
@@ -257,6 +271,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'arcane-focus',
+        kind: 'focus',
         needsMana: true,
         name: ['Arcane Focus', 'Concentration arcanique'],
         description: [
@@ -276,6 +291,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'fireball',
+        kind: 'fire-spell',
         name: ['Fireball', 'Boule de feu'],
         description: [
           'An explosion of flames that burns an area.',
@@ -294,6 +310,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'mana-shield',
+        kind: 'blessing',
         name: ['Arcane Ward', 'Protection arcanique'],
         description: [
           'A shimmering barrier: your maximum life rises for three turns, more with intelligence.',
@@ -313,6 +330,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'meteor-storm',
+        kind: 'fire-spell',
         name: ['Meteor Storm', 'Pluie de météores'],
         description: [
           'Calls down a rain of burning rock on every enemy.',
@@ -359,6 +377,7 @@ const CLASSES: ClassSpec[] = [
   },
   {
     name: ['Rogue', 'Voleur'],
+    kind: 'rogue',
     description: [
       'Quick and cunning: strikes first, from the shadows.',
       "Vif et rusé : frappe en premier, depuis l'ombre.",
@@ -367,6 +386,7 @@ const CLASSES: ClassSpec[] = [
     skills: [
       {
         key: 'quick-stab',
+        kind: 'strike',
         name: ['Quick Stab', 'Coup rapide'],
         description: [
           'A fast, precise stab on one enemy.',
@@ -385,6 +405,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'nimble',
+        kind: 'agility',
         name: ['Nimble', 'Agilité accrue'],
         description: [
           'Light on your feet: permanently raises your main attribute.',
@@ -398,6 +419,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'poisoned-blade',
+        kind: 'strike',
         name: ['Poisoned Blade', 'Lame empoisonnée'],
         description: [
           'A coated blade that bites deeper than steel alone.',
@@ -435,6 +457,7 @@ const CLASSES: ClassSpec[] = [
       },
       {
         key: 'assassinate',
+        kind: 'strike',
         name: ['Assassinate', 'Assassinat'],
         description: [
           'A lethal strike on an enemy that never saw you coming.',
@@ -528,6 +551,7 @@ export function buildStarterClasses(
         id,
         name: entry.name[at],
         description: entry.description[at],
+        ...(entry.kind ? { kind: entry.kind } : {}),
         rarity: entry.rarity,
         type: entry.active ? 'active' : 'passive',
         maxLevel: entry.maxLevel,
@@ -565,6 +589,7 @@ export function buildStarterClasses(
       id: newId(),
       name: spec.name[at],
       description: spec.description[at],
+      kind: spec.kind,
       tree,
     };
   });

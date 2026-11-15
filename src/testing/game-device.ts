@@ -2,7 +2,6 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ImageBusiness } from '../app/core/business/image.business';
 import { ProfileBusiness } from '../app/core/business/profile.business';
-import { WordListBusiness } from '../app/core/business/word-list.business';
 import { ImageProcessingService } from '../app/core/services/image-processing.service';
 import { ImageStorageService } from '../app/core/services/image-storage.service';
 import { ImageTransferService } from '../app/core/services/image-transfer.service';
@@ -88,7 +87,6 @@ const GAME_DEVICE = [
     provide: ImageProcessingService,
     useValue: { resize: async (file: Blob) => file },
   },
-  { provide: WordListBusiness, useValue: {} },
 ];
 
 /** One app instance on the fake network, with its own profile and in-memory image store. */

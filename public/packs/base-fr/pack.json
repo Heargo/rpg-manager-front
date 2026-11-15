@@ -776,6 +776,89 @@
    "texts": "generators/skills.json"
   },
   "classes": {
+   "kinds": {
+    "martial": {
+     "skills": [
+      "strike",
+      "shot",
+      "war-cry",
+      "toughness"
+     ]
+    },
+    "warrior": {
+     "parent": "martial"
+    },
+    "berserker": {
+     "parent": "martial"
+    },
+    "knight": {
+     "parent": "martial"
+    },
+    "arcane": {
+     "skills": [
+      "fire-spell",
+      "frost-spell",
+      "lightning-spell",
+      "shadow-spell",
+      "focus"
+     ]
+    },
+    "mage": {
+     "parent": "arcane"
+    },
+    "warlock": {
+     "parent": "arcane"
+    },
+    "sorcerer": {
+     "parent": "arcane"
+    },
+    "divine": {
+     "skills": [
+      "healing",
+      "blessing",
+      "prayer"
+     ]
+    },
+    "cleric": {
+     "parent": "divine"
+    },
+    "paladin": {
+     "parent": "divine"
+    },
+    "nature": {
+     "skills": [
+      "remedy",
+      "frost-spell",
+      "agility"
+     ]
+    },
+    "druid": {
+     "parent": "nature"
+    },
+    "ranger": {
+     "parent": "nature"
+    },
+    "shaman": {
+     "parent": "nature"
+    },
+    "cunning": {
+     "skills": [
+      "shot",
+      "curse",
+      "agility",
+      "presence"
+     ]
+    },
+    "rogue": {
+     "parent": "cunning"
+    },
+    "assassin": {
+     "parent": "cunning"
+    },
+    "bard": {
+     "parent": "cunning"
+    }
+   },
    "texts": "generators/classes.json"
   }
  },

@@ -1,8 +1,5 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
-import { DebugElement } from '@angular/core';
-import { ComponentFixture } from '@angular/core/testing';
-import { NgModel } from '@angular/forms';
 import enItems from '../../public/packs/base-en/generators/items.json';
 import frItems from '../../public/packs/base-fr/generators/items.json';
 import enNpcs from '../../public/packs/base-en/generators/npcs.json';
@@ -14,7 +11,7 @@ import { EXTRA_ITEMS, EXTRA_MANIFEST, EXTRA_NPCS, extraPackService, provideExtra
  * `PackService` fake for the generator components: real Base word lists (items and NPC names, `base-en` and `base-fr`) and
  * the French `extra` pack, whose items are all "Zircon" and NPCs all "Zorg".
  */
-export function packChoiceProviders() {
+export function baseAndExtraPackProviders() {
   globalThis.indexedDB = new IDBFactory();
   URL.createObjectURL = vi.fn(() => 'blob:fake');
   URL.revokeObjectURL = vi.fn();
@@ -37,23 +34,4 @@ export function packChoiceProviders() {
       : baseManifest(id),
   );
   return provideExtraPack(fake);
-}
-
-/** The values of the options of the `p-select[data-field="pack"]` of a fixture, in order. */
-export function packOptionValues(fixture: ComponentFixture<unknown>): string[] {
-  const select = packSelect(fixture);
-  const options = select.componentInstance.options;
-  const list = (typeof options === 'function' ? options() : options) as Array<string | { value: string }>;
-  return list.map((o) => (typeof o === 'string' ? o : o.value));
-}
-
-/** The value currently bound to the pack select. */
-export function packSelected(fixture: ComponentFixture<unknown>): unknown {
-  return packSelect(fixture).injector.get(NgModel).model;
-}
-
-export function packSelect(fixture: ComponentFixture<unknown>): DebugElement {
-  const target = fixture.nativeElement.querySelector('p-select[data-field="pack"]');
-  expect(target).not.toBeNull();
-  return fixture.debugElement.query((d) => d.nativeElement === target);
 }

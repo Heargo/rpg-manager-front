@@ -9,14 +9,12 @@ import {
 import { provideTestTranslations } from '../../../../testing/test-providers';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { PackBusiness } from '../../../core/business/pack.business';
-import { PackChoiceBusiness } from '../../../core/business/pack-choice.business';
 import { WorldRules } from '../models/world';
 import { WorldSessionBusiness } from './world-session.business';
 import { SandboxWorldBusiness } from './sandbox-world.business';
 
 describe('the sandbox world gives its packs to the generators', () => {
   let sandbox: SandboxWorldBusiness;
-  let choice: PackChoiceBusiness;
 
   beforeEach(() => {
     globalThis.indexedDB = new IDBFactory();
@@ -30,16 +28,13 @@ describe('the sandbox world gives its packs to the generators', () => {
     });
     TestBed.inject(LanguageBusiness).setLanguage('fr');
     sandbox = TestBed.inject(SandboxWorldBusiness);
-    choice = TestBed.inject(PackChoiceBusiness);
   });
 
   const values = async (expected: string[]) => {
-    const options = TestBed.runInInjectionContext(() =>
-      choice.options('items'),
-    );
-    await vi.waitFor(() => {
-      TestBed.tick();
-      expect(options().map((o) => o.value)).toEqual(expected);
+    await vi.waitFor(async () => {
+      expect(await TestBed.inject(PackBusiness).packsFor('items')).toEqual(
+        expected,
+      );
     });
   };
   const rules = (packs: string[]): WorldRules => {
@@ -65,11 +60,11 @@ describe('the sandbox world gives its packs to the generators', () => {
   };
 
   it('offers the packs chosen in the sandbox rules', async () => {
-    await values(['random', 'base-fr']);
+    await values(['base-fr']);
 
     sandbox.applyRules(rules(['base-fr', 'base-en']));
 
-    await values(['random', 'base-fr', 'base-en']);
+    await values(['base-fr', 'base-en']);
     expect(
       (await TestBed.inject(PackBusiness).sprites()).some(
         (s) => s.packId === 'base-en',
@@ -83,8 +78,8 @@ describe('the sandbox world gives its packs to the generators', () => {
 
     sandbox.applyRules(rules(['base-fr']));
 
-    await values(['random', 'base-en']);
+    await values(['base-en']);
     TestBed.inject(WorldSessionBusiness).close();
-    await values(['random', 'base-fr']);
+    await values(['base-fr']);
   });
 });

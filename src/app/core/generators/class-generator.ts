@@ -1,50 +1,87 @@
 import { ClassDraft, TreeNode } from '../../modules/class/models/class';
 import { Skill } from '../../modules/skill/models/skill';
+import { ClassVocabulary } from './class-vocabulary';
 import { adjectiveForm, capitalize } from './name-generator';
+import { expandPhrase } from './phrase';
 import { pick, randomInt, shuffle } from './random';
 import { RandomSource } from './random-source';
-import { Adjective, Gender, Noun } from './word-list';
+import { SkillVocabulary } from './skill-vocabulary';
+import { Gender } from './word-list';
 
-/** Class name patterns use `{noun}`, `{adjective}` and `{suffix}`; word order is the language's. */
-export interface ClassWordList {
-  version: number;
-  templates: string[];
-  nouns: Noun[];
-  adjectives: Adjective[];
-  suffixes: string[];
-  descriptions: string[];
-}
-
+const MIN_TREE_SIZE = 3;
 const MAX_TREE_SIZE = 5;
 
-/** Draws a whole class: bonuses on the given attributes and a small tree from the given skills. Pure. */
+/**
+ * Draws a whole class: a kind, bonuses on the given attributes and a small tree from the given skills, preferring
+ * those whose kind the class kind favours. Pure: same source state and inputs give the same class.
+ */
 export function generateClass(
   source: RandomSource,
   attributes: readonly string[],
   skills: readonly Skill[],
-  words: ClassWordList,
+  vocabulary: ClassVocabulary,
+  skillVocabulary: SkillVocabulary,
 ): ClassDraft {
   const unique = [...new Set(attributes)];
+  const drawable = vocabulary.drawable();
+  if (drawable.length === 0)
+    throw new RangeError('generateClass: the vocabulary has no drawable kind');
+  const kindId = pick(source, drawable);
   const bonuses = shuffle(source, unique)
     .slice(0, randomInt(source, 1, 2))
     .map((attribute) => ({ attribute, value: randomInt(source, 1, 3) }));
+  const { name, description } = classTexts(source, vocabulary, kindId);
+  const favoured = vocabulary.kind(kindId)?.skills ?? [];
   return {
-    name: className(source, words),
-    description: pick(source, words.descriptions),
+    name,
+    description,
+    kind: kindId,
     bonuses,
-    tree: generateTree(source, skills),
+    tree: generateTree(source, skills, favoured, skillVocabulary),
   };
+}
+
+/** The skills whose kind chain holds a favoured skill kind: a parent kind counts for its children. */
+function preferredSkills(
+  skills: readonly Skill[],
+  favoured: readonly string[],
+  skillVocabulary: SkillVocabulary,
+): { preferred: Skill[]; others: Skill[] } {
+  const preferred: Skill[] = [];
+  const others: Skill[] = [];
+  for (const skill of skills) {
+    const chain = skill.kind
+      ? skillVocabulary.kind(skill.kind)?.chain
+      : undefined;
+    if (chain?.some((id) => favoured.includes(id))) preferred.push(skill);
+    else others.push(skill);
+  }
+  return { preferred, others };
 }
 
 /** A root, then each skill requires one earlier skill, so the tree is acyclic and reachable. */
 function generateTree(
   source: RandomSource,
   skills: readonly Skill[],
+  favoured: readonly string[],
+  skillVocabulary: SkillVocabulary,
 ): TreeNode[] {
-  const chosen = shuffle(source, skills).slice(
-    0,
-    Math.min(skills.length, randomInt(source, 3, MAX_TREE_SIZE)),
+  const { preferred, others } = preferredSkills(
+    skills,
+    favoured,
+    skillVocabulary,
   );
+  const size = Math.min(
+    skills.length,
+    randomInt(source, MIN_TREE_SIZE, MAX_TREE_SIZE),
+  );
+  const chosen =
+    preferred.length >= MIN_TREE_SIZE
+      ? shuffle(source, preferred).slice(0, size)
+      : shuffle(source, [
+          ...preferred,
+          ...shuffle(source, others).slice(0, size - preferred.length),
+        ]);
   const rows: number[] = [];
   const perRow = new Map<number, number>();
   const tree: TreeNode[] = [];
@@ -77,15 +114,38 @@ function generateTree(
   return tree;
 }
 
-function className(source: RandomSource, words: ClassWordList): string {
-  const template = pick(source, words.templates);
-  const noun = pick(source, words.nouns);
+/** A name and a description for a class of this kind, agreeing with the gender of its noun. */
+function classTexts(
+  source: RandomSource,
+  vocabulary: ClassVocabulary,
+  kindId: string,
+): { name: string; description: string } {
+  const noun = pick(source, vocabulary.nouns(kindId));
   const gender: Gender = noun.gender ?? 'm';
-  const name = template
-    .replace('{noun}', noun.text)
-    .replace('{adjective}', () =>
-      adjectiveForm(pick(source, words.adjectives), gender),
-    )
-    .replace('{suffix}', () => pick(source, words.suffixes));
-  return capitalize(name.replace(/\s+/g, ' ').trim());
+  const adjectives = vocabulary.adjectives(kindId);
+  const suffixes = vocabulary.suffixes(kindId);
+  const usable = (template: string): boolean =>
+    (adjectives.length > 0 || !template.includes('{adjective}')) &&
+    (suffixes.length > 0 || !template.includes('{suffix}'));
+
+  const fromKind = vocabulary.names(kindId).filter(usable);
+  const templates =
+    fromKind.length > 0 ? fromKind : vocabulary.templates().filter(usable);
+  const template = templates.length > 0 ? pick(source, templates) : '{noun}';
+
+  const values: Partial<Record<'noun' | 'adjective' | 'suffix', string>> = {
+    noun: noun.text,
+  };
+  if (template.includes('{adjective}'))
+    values.adjective = adjectiveForm(pick(source, adjectives), gender);
+  if (template.includes('{suffix}')) values.suffix = pick(source, suffixes);
+
+  const context = { params: vocabulary.params, gender, values };
+  const name = capitalize(expandPhrase(source, template, context) ?? noun.text);
+  const descriptions = vocabulary.descriptions(kindId);
+  const description =
+    descriptions.length > 0
+      ? (expandPhrase(source, pick(source, descriptions), context) ?? '')
+      : '';
+  return { name, description };
 }

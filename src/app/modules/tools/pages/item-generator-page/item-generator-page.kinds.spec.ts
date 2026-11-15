@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { baseItemVocabulary } from '../../../../../testing/base-vocabulary';
-import { packChoiceProviders } from '../../../../../testing/pack-choice-fixtures';
+import { baseAndExtraPackProviders } from '../../../../../testing/base-pack-fixtures';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { ItemVocabularyBusiness } from '../../../../core/business/item-vocabulary.business';
 import { ItemGeneratorPageComponent } from './item-generator-page.component';
@@ -11,7 +11,7 @@ describe('ItemGeneratorPageComponent without a pack choice', () => {
       imports: [ItemGeneratorPageComponent],
       providers: [
         ...TEST_PROVIDERS,
-        packChoiceProviders(),
+        baseAndExtraPackProviders(),
         { provide: ItemVocabularyBusiness, useValue: { vocabulary: async () => baseItemVocabulary('fr') } },
       ],
     });

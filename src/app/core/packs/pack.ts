@@ -2,6 +2,7 @@ import { NpcRole } from '../../modules/npc/models/npc';
 import { SkillType } from '../../modules/skill/models/skill';
 import { EquipmentSlot, ItemType } from '../models/item';
 import {
+  CLASS_KIND_SCHEMA,
   ITEM_KIND_SCHEMA,
   KindSchema,
   NPC_KIND_SCHEMA,
@@ -63,6 +64,12 @@ export interface SkillKindDef {
   effect?: 'damage' | 'heal' | 'modify';
 }
 
+/** A node of the class tree: `skills` are the skill kinds it favours (the nearest level that has some wins). */
+export interface ClassKindDef {
+  parent?: string;
+  skills?: string[];
+}
+
 export interface PackDomainDef<K = never> {
   kinds?: Record<string, K>;
   texts?: string;
@@ -72,7 +79,7 @@ export interface PackDomains {
   items?: PackDomainDef<ItemKindDef>;
   npcs?: PackDomainDef<NpcKindDef>;
   skills?: PackDomainDef<SkillKindDef>;
-  classes?: PackDomainDef;
+  classes?: PackDomainDef<ClassKindDef>;
 }
 
 export interface Pack {
@@ -134,11 +141,12 @@ function isRelativePath(path: unknown): path is string {
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 const DOMAIN_KEY_FIELDS = ['kinds', 'texts'] as const;
-/** The kind schema of the domains that have kinds; the others take `texts` only. */
-const KIND_SCHEMAS: Partial<Record<PackDomain, KindSchema>> = {
+/** The kind schema of each domain. */
+const KIND_SCHEMAS: Record<PackDomain, KindSchema> = {
   items: ITEM_KIND_SCHEMA,
   npcs: NPC_KIND_SCHEMA,
   skills: SKILL_KIND_SCHEMA,
+  classes: CLASS_KIND_SCHEMA,
 };
 
 function validateTints(tints: unknown, errors: string[]): void {
@@ -198,12 +206,9 @@ function validateDomains(
       continue;
     }
     const schema = KIND_SCHEMAS[domain as PackDomain];
-    for (const field of Object.keys(def)) {
+    for (const field of Object.keys(def))
       if (!(DOMAIN_KEY_FIELDS as readonly string[]).includes(field))
         errors.push(`domains.${domain}: unknown field "${field}"`);
-      else if (field === 'kinds' && !schema)
-        errors.push(`domains.${domain}: unknown field "kinds" (no kinds yet)`);
-    }
     if (def['kinds'] !== undefined && schema)
       errors.push(...validateKindTree(domain, def['kinds'], schema));
     if (def['texts'] !== undefined) {
