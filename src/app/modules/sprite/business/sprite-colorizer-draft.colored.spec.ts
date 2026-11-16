@@ -36,8 +36,7 @@ describe('SpriteColorizerBusiness: colored draft sprite', () => {
     await creator.addPng(draft.id, new Blob(['x'], { type: 'image/png' }), {
       id: 'tint',
       label: 'Teinte',
-      type: 'item',
-      slot: 'none',
+      kinds: ['item'],
       kind: 'colored',
     });
 

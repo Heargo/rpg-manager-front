@@ -1,33 +1,92 @@
+import { NpcRole } from '../../modules/npc/models/npc';
+import { SkillType } from '../../modules/skill/models/skill';
+import { EquipmentSlot, ItemType } from '../models/item';
 import {
-  EQUIPMENT_SLOTS,
-  ITEM_TYPES,
-  ItemSlot,
-  ItemType,
-} from '../models/item';
+  CLASS_KIND_SCHEMA,
+  ITEM_KIND_SCHEMA,
+  KindSchema,
+  NPC_KIND_SCHEMA,
+  SKILL_KIND_SCHEMA,
+  validateKindTree,
+} from './pack-kinds';
 
-export const PACK_FORMAT = 1;
+export const PACK_FORMAT = 2;
 export const PACK_LANGUAGES = ['en', 'fr'] as const;
 export const PACK_GENERATORS = ['items', 'npcs', 'skills', 'classes'] as const;
 export const SPRITE_KINDS = ['grayscale', 'masked', 'colored'] as const;
 
 export type PackLanguage = (typeof PACK_LANGUAGES)[number];
 export type PackGenerator = (typeof PACK_GENERATORS)[number];
+/** The domains a pack can hold content for. */
+export type PackDomain = PackGenerator;
 export type SpriteKind = (typeof SPRITE_KINDS)[number];
 
 export interface PackSprite {
   id: string;
   label: string;
-  type: ItemType;
-  slot: ItemSlot;
+  domain: PackDomain;
+  /** Kind ids in the domain's tree; the first one decides. */
+  kinds: string[];
   kind: SpriteKind;
   image: string;
   materials?: string;
 }
 
+export interface GradientStop {
+  position: number;
+  color: string;
+}
+
+export interface PackTint {
+  gradient: GradientStop[];
+  /** Kind ids the tint fits; its words and descriptions are only drawn for an item whose chain has one. No list: any item. */
+  fits?: string[];
+}
+
+/** A node of the items tree: a root has a `type`, a child has a `parent`; `slot` only on an equipment chain. */
+export interface ItemKindDef {
+  parent?: string;
+  type?: ItemType;
+  slot?: EquipmentSlot;
+}
+
+/** A node of the NPC tree: a root has `roles` (and `person`), a child has a `parent` and may override `roles`. */
+export interface NpcKindDef {
+  parent?: string;
+  roles?: NpcRole[];
+  person?: boolean;
+}
+
+/** A node of the skill tree: a root has a `type` (and maybe an `effect`), a child has a `parent` and may override `effect`. */
+export interface SkillKindDef {
+  parent?: string;
+  type?: SkillType;
+  effect?: 'damage' | 'heal' | 'modify';
+}
+
+/** A node of the class tree: `skills` are the skill kinds it favours (the nearest level that has some wins). */
+export interface ClassKindDef {
+  parent?: string;
+  skills?: string[];
+}
+
+export interface PackDomainDef<K = never> {
+  kinds?: Record<string, K>;
+  texts?: string;
+}
+
+export interface PackDomains {
+  items?: PackDomainDef<ItemKindDef>;
+  npcs?: PackDomainDef<NpcKindDef>;
+  skills?: PackDomainDef<SkillKindDef>;
+  classes?: PackDomainDef<ClassKindDef>;
+}
+
 export interface Pack {
   format: number;
   id: string;
-  language: PackLanguage;
+  /** A pack without language is neutral: no `common`, no `texts`. */
+  language?: PackLanguage;
   name: string;
   description: string;
   version: string;
@@ -35,12 +94,22 @@ export interface Pack {
   license: string;
   licenseUrl: string;
   homepage?: string;
-  generators: Partial<Record<PackGenerator, string>>;
+  tints?: Record<string, PackTint>;
+  domains?: PackDomains;
+  /** The shared language file (params). */
+  common?: string;
   sprites: PackSprite[];
 }
 
 export type PackValidation =
-  { ok: true; value: Pack } | { ok: false; errors: string[] };
+  | { ok: true; value: Pack; warnings: string[] }
+  | { ok: false; errors: string[] };
+
+/** The path of the word list of a generator in a pack, if it has one. */
+export const textsPath = (
+  pack: Pack,
+  generator: PackGenerator,
+): string | undefined => pack.domains?.[generator]?.texts;
 
 const ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -70,18 +139,107 @@ function isRelativePath(path: unknown): path is string {
   return !path.split('/').some((part) => part === '..' || part === '');
 }
 
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+const DOMAIN_KEY_FIELDS = ['kinds', 'texts'] as const;
+/** The kind schema of each domain. */
+const KIND_SCHEMAS: Record<PackDomain, KindSchema> = {
+  items: ITEM_KIND_SCHEMA,
+  npcs: NPC_KIND_SCHEMA,
+  skills: SKILL_KIND_SCHEMA,
+  classes: CLASS_KIND_SCHEMA,
+};
+
+function validateTints(tints: unknown, errors: string[]): void {
+  if (!isObject(tints)) {
+    errors.push('tints must be an object');
+    return;
+  }
+  for (const [id, tint] of Object.entries(tints)) {
+    const name = `tint "${id}"`;
+    if (!ID.test(id)) errors.push(`${name}: id must be kebab-case`);
+    const fits = isObject(tint) ? tint['fits'] : undefined;
+    if (fits !== undefined) {
+      if (!Array.isArray(fits))
+        errors.push(`${name}: fits must be a list of kind ids`);
+      else
+        for (const kind of fits)
+          if (typeof kind !== 'string' || !ID.test(kind))
+            errors.push(
+              `${name}: fits "${String(kind)}" must be a kebab-case kind id`,
+            );
+    }
+    const stops = isObject(tint) ? tint['gradient'] : undefined;
+    if (!Array.isArray(stops) || stops.length < 2) {
+      errors.push(`${name}: gradient needs at least 2 stops`);
+      continue;
+    }
+    stops.forEach((stop, i) => {
+      const position = isObject(stop) ? stop['position'] : undefined;
+      const color = isObject(stop) ? stop['color'] : undefined;
+      if (typeof position !== 'number' || !(position >= 0 && position <= 1))
+        errors.push(`${name}: stop ${i} position must be between 0 and 1`);
+      if (typeof color !== 'string' || !HEX_COLOR.test(color))
+        errors.push(`${name}: stop ${i} color must be #rrggbb`);
+    });
+  }
+}
+
+function validateDomains(
+  domains: unknown,
+  neutral: boolean,
+  errors: string[],
+  warnings: string[],
+): PackDomains | undefined {
+  if (!isObject(domains)) {
+    errors.push('domains must be an object');
+    return undefined;
+  }
+  const known: Record<string, unknown> = {};
+  for (const [domain, def] of Object.entries(domains)) {
+    if (!(PACK_GENERATORS as readonly string[]).includes(domain)) {
+      warnings.push(`domains.${domain}: unknown domain, ignored`);
+      continue;
+    }
+    known[domain] = def;
+    if (!isObject(def)) {
+      errors.push(`domains.${domain} must be an object`);
+      continue;
+    }
+    const schema = KIND_SCHEMAS[domain as PackDomain];
+    for (const field of Object.keys(def))
+      if (!(DOMAIN_KEY_FIELDS as readonly string[]).includes(field))
+        errors.push(`domains.${domain}: unknown field "${field}"`);
+    if (def['kinds'] !== undefined && schema)
+      errors.push(...validateKindTree(domain, def['kinds'], schema));
+    if (def['texts'] !== undefined) {
+      if (neutral)
+        errors.push(`domains.${domain}.texts needs a pack with a language`);
+      else if (!isRelativePath(def['texts']))
+        errors.push(
+          `domains.${domain}.texts must be a relative path inside the pack`,
+        );
+    }
+  }
+  return known as PackDomains;
+}
+
 /** Checks a pack manifest read from JSON, listing every problem with the field it concerns. */
 export function validatePack(json: unknown): PackValidation {
   if (!isObject(json))
     return { ok: false, errors: ['the manifest is not a JSON object'] };
   const errors: string[] = [];
+  const warnings: string[] = [];
 
   if (json['format'] !== PACK_FORMAT)
     errors.push(`format must be ${PACK_FORMAT}`);
   if (typeof json['id'] !== 'string' || !ID.test(json['id']))
     errors.push('id must be kebab-case (lowercase letters, digits and dashes)');
-  if (!(PACK_LANGUAGES as readonly unknown[]).includes(json['language']))
+  if (
+    json['language'] !== undefined &&
+    !(PACK_LANGUAGES as readonly unknown[]).includes(json['language'])
+  )
     errors.push(`language must be one of ${PACK_LANGUAGES.join(', ')}`);
+  const neutral = json['language'] === undefined;
   for (const field of ['name', 'description'])
     if (!text(json[field])) errors.push(`${field} is required (a text)`);
   for (const field of ['version', 'author', 'license', 'licenseUrl']) {
@@ -97,19 +255,16 @@ export function validatePack(json: unknown): PackValidation {
   if (json['homepage'] !== undefined && !text(json['homepage']))
     errors.push('homepage must be a text');
 
-  const generators = json['generators'];
-  if (generators !== undefined) {
-    if (!isObject(generators)) errors.push('generators must be an object');
-    else
-      for (const [generator, path] of Object.entries(generators)) {
-        if (!(PACK_GENERATORS as readonly string[]).includes(generator))
-          errors.push(`generators.${generator}: unknown generator`);
-        else if (!isRelativePath(path))
-          errors.push(
-            `generators.${generator} must be a relative path inside the pack`,
-          );
-      }
+  if (json['common'] !== undefined) {
+    if (neutral) errors.push('common needs a pack with a language');
+    else if (!isRelativePath(json['common']))
+      errors.push('common must be a relative path inside the pack');
   }
+  if (json['tints'] !== undefined) validateTints(json['tints'], errors);
+  const domains =
+    json['domains'] !== undefined
+      ? validateDomains(json['domains'], neutral, errors, warnings)
+      : undefined;
 
   const sprites = json['sprites'] ?? [];
   if (!Array.isArray(sprites)) errors.push('sprites must be a list');
@@ -128,16 +283,18 @@ export function validatePack(json: unknown): PackValidation {
       else if (seen.has(id)) errors.push(`${name}: id is used twice`);
       else seen.add(id);
       if (!text(sprite['label'])) errors.push(`${name}: label is required`);
-      if (!(ITEM_TYPES as readonly string[]).includes(sprite['type'] as string))
-        errors.push(`${name}: type must be one of ${ITEM_TYPES.join(', ')}`);
+      if (!(PACK_GENERATORS as readonly unknown[]).includes(sprite['domain']))
+        errors.push(
+          `${name}: domain must be one of ${PACK_GENERATORS.join(', ')}`,
+        );
+      const kinds = sprite['kinds'];
       if (
-        sprite['slot'] !== 'none' &&
-        !(EQUIPMENT_SLOTS as readonly string[]).includes(
-          sprite['slot'] as string,
-        )
+        !Array.isArray(kinds) ||
+        kinds.length === 0 ||
+        !kinds.every((k) => typeof k === 'string' && ID.test(k))
       )
         errors.push(
-          `${name}: slot must be none or one of ${EQUIPMENT_SLOTS.join(', ')}`,
+          `${name}: kinds must be a non-empty list of kebab-case ids`,
         );
       const kind = sprite['kind'];
       if (!(SPRITE_KINDS as readonly string[]).includes(kind as string))
@@ -157,10 +314,9 @@ export function validatePack(json: unknown): PackValidation {
   }
 
   if (errors.length) return { ok: false, errors };
-  return {
-    ok: true,
-    value: { sprites: [], generators: {}, ...json } as unknown as Pack,
-  };
+  const value = { sprites: [], ...json } as unknown as Pack;
+  if (domains) value.domains = domains;
+  return { ok: true, value, warnings };
 }
 
 /** The URL of a file listed in a manifest: the path resolved next to the manifest. */

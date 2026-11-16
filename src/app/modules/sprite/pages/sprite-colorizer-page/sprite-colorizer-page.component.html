@@ -1,8 +1,8 @@
 <div class="main-container sprite">
   <header class="head">
     <div>
-      <h1>{{ "sprite.title" | transloco }}</h1>
-      <p class="hint">{{ "sprite.intro" | transloco }}</p>
+      <h1>{{ "sprite.title" | translate }}</h1>
+      <p class="hint">{{ "sprite.intro" | translate }}</p>
     </div>
     <div class="row">
       <input
@@ -21,67 +21,67 @@
       />
       <p-button
         icon="pi pi-image"
-        [label]="'sprite.openImage' | transloco"
+        [label]="'sprite.openImage' | translate"
         severity="secondary"
         (onClick)="imageInput.click()"
       />
       <p-button
         icon="pi pi-th-large"
-        [label]="'sprite.library.open' | transloco"
-        [ariaLabel]="'sprite.library.open' | transloco"
+        [label]="'sprite.library.open' | translate"
+        [ariaLabel]="'sprite.library.open' | translate"
         severity="secondary"
         (onClick)="openLibrary()"
       />
       <p-button
         icon="pi pi-sparkles"
-        [label]="'sprite.demo' | transloco"
+        [label]="'sprite.demo' | translate"
         severity="secondary"
         (onClick)="loadDemo()"
       />
       <p-button
         icon="pi pi-undo"
-        [ariaLabel]="'sprite.undo' | transloco"
-        [pTooltip]="'sprite.undo' | transloco"
+        [ariaLabel]="'sprite.undo' | translate"
+        [pTooltip]="'sprite.undo' | translate"
         severity="secondary"
         [disabled]="!business.$canUndo()"
         (onClick)="business.undo()"
       />
       <p-button
         icon="pi pi-refresh"
-        [ariaLabel]="'sprite.redo' | transloco"
-        [pTooltip]="'sprite.redo' | transloco"
+        [ariaLabel]="'sprite.redo' | translate"
+        [pTooltip]="'sprite.redo' | translate"
         severity="secondary"
         [disabled]="!business.$canRedo()"
         (onClick)="business.redo()"
       />
       <p-button
         icon="pi pi-download"
-        [ariaLabel]="'sprite.exportPng' | transloco"
-        [pTooltip]="'sprite.exportPng' | transloco"
+        [ariaLabel]="'sprite.exportPng' | translate"
+        [pTooltip]="'sprite.exportPng' | translate"
         [label]="'PNG'"
         [disabled]="!business.$document()"
         (onClick)="business.downloadPng()"
       />
       <p-button
         icon="pi pi-save"
-        [ariaLabel]="'sprite.sets.save' | transloco"
-        [pTooltip]="'sprite.sets.saveHint' | transloco"
-        [label]="'sprite.sets.save' | transloco"
+        [ariaLabel]="'sprite.sets.save' | translate"
+        [pTooltip]="'sprite.sets.saveHint' | translate"
+        [label]="'sprite.sets.save' | translate"
         severity="secondary"
         [disabled]="!business.$document()"
         (onClick)="saveSet()"
       />
       <p-button
         icon="pi pi-plus"
-        [label]="'sprite.draft.add' | transloco"
+        [label]="'sprite.draft.add' | translate"
         severity="secondary"
         [disabled]="!business.$document()"
         (onClick)="openAdd()"
       />
       <p-button
         icon="pi pi-file-export"
-        [ariaLabel]="'sprite.exportJson' | transloco"
-        [pTooltip]="'sprite.exportJson' | transloco"
+        [ariaLabel]="'sprite.exportJson' | translate"
+        [pTooltip]="'sprite.exportJson' | translate"
         [label]="'JSON'"
         severity="secondary"
         [disabled]="!business.$document()"
@@ -89,8 +89,8 @@
       />
       <p-button
         icon="pi pi-file-import"
-        [ariaLabel]="'sprite.importJson' | transloco"
-        [pTooltip]="'sprite.importJson' | transloco"
+        [ariaLabel]="'sprite.importJson' | translate"
+        [pTooltip]="'sprite.importJson' | translate"
         severity="secondary"
         [disabled]="!business.$document()"
         (onClick)="jsonInput.click()"
@@ -104,13 +104,13 @@
         <span>{{ draftBanner() }}</span>
         <p-button
           icon="pi pi-save"
-          [label]="'sprite.draft.save' | transloco"
+          [label]="'sprite.draft.save' | translate"
           (onClick)="saveToDraft()"
         />
         <p-button
           icon="pi pi-arrow-left"
           severity="secondary"
-          [label]="'sprite.draft.back' | transloco"
+          [label]="'sprite.draft.back' | translate"
           (onClick)="backToDraft()"
         />
       </div>
@@ -123,29 +123,29 @@
         <p-button
           icon="pi pi-search-minus"
           severity="secondary"
-          [ariaLabel]="'sprite.view.zoomOut' | transloco"
-          [pTooltip]="'sprite.view.zoomOut' | transloco"
+          [ariaLabel]="'sprite.view.zoomOut' | translate"
+          [pTooltip]="'sprite.view.zoomOut' | translate"
           (onClick)="zoomBy(1 / 1.25)"
         />
         <span class="zoom">{{ zoom() * 100 | number: "1.0-0" }}%</span>
         <p-button
           icon="pi pi-search-plus"
           severity="secondary"
-          [ariaLabel]="'sprite.view.zoomIn' | transloco"
-          [pTooltip]="'sprite.view.zoomIn' | transloco"
+          [ariaLabel]="'sprite.view.zoomIn' | translate"
+          [pTooltip]="'sprite.view.zoomIn' | translate"
           (onClick)="zoomBy(1.25)"
         />
         <p-button
           icon="pi pi-expand"
           severity="secondary"
-          [ariaLabel]="'sprite.view.fit' | transloco"
-          [pTooltip]="'sprite.view.fit' | transloco"
+          [ariaLabel]="'sprite.view.fit' | translate"
+          [pTooltip]="'sprite.view.fit' | translate"
           (onClick)="fit()"
         />
         <p-button
           icon="pi pi-arrows-alt"
-          [ariaLabel]="'sprite.tools.pan' | transloco"
-          [pTooltip]="'sprite.tools.pan' | transloco"
+          [ariaLabel]="'sprite.tools.pan' | translate"
+          [pTooltip]="'sprite.tools.pan' | translate"
           [severity]="panMode() ? 'primary' : 'secondary'"
           [outlined]="!panMode()"
           (onClick)="panMode.set(!panMode())"
@@ -163,7 +163,7 @@
             [ngModel]="showMask()"
             (ngModelChange)="showMask.set($event)"
           />
-          {{ "sprite.view.overlay" | transloco }}
+          {{ "sprite.view.overlay" | translate }}
         </label>
       </div>
       <div
@@ -215,20 +215,20 @@
             </svg>
           </div>
         } @else {
-          <p class="empty">{{ "sprite.empty" | transloco }}</p>
+          <p class="empty">{{ "sprite.empty" | translate }}</p>
         }
       </div>
     </main>
 
     <aside class="panel">
       <section>
-        <h2>{{ "sprite.tools.title" | transloco }}</h2>
+        <h2>{{ "sprite.tools.title" | translate }}</h2>
         <div class="row">
           @for (tool of tools; track tool.id) {
             <p-button
               [icon]="tool.icon"
-              [ariaLabel]="tool.label | transloco"
-              [pTooltip]="tool.label | transloco"
+              [ariaLabel]="tool.label | translate"
+              [pTooltip]="tool.label | translate"
               [severity]="
                 business.$tool() === tool.id ? 'primary' : 'secondary'
               "
@@ -241,7 +241,7 @@
         @if (business.$tool() === "brush" || business.$tool() === "eraser") {
           <div class="field">
             <label
-              >{{ "sprite.tools.size" | transloco }}:
+              >{{ "sprite.tools.size" | translate }}:
               {{ business.$brush().size }}</label
             >
             <p-slider
@@ -253,7 +253,7 @@
           </div>
           <div class="field">
             <label
-              >{{ "sprite.tools.hardness" | transloco }}:
+              >{{ "sprite.tools.hardness" | translate }}:
               {{ business.$brush().hardness * 100 | number: "1.0-0" }}%</label
             >
             <p-slider
@@ -270,12 +270,12 @@
               [ngModel]="business.$snap().enabled"
               (ngModelChange)="setSnap({ enabled: $event })"
             />
-            {{ "sprite.tools.snap" | transloco }}
+            {{ "sprite.tools.snap" | translate }}
           </label>
           @if (business.$snap().enabled) {
             <div class="field">
               <label
-                >{{ "sprite.tools.snapRadius" | transloco }}:
+                >{{ "sprite.tools.snapRadius" | translate }}:
                 {{ business.$snap().radius }}</label
               >
               <p-slider
@@ -286,12 +286,12 @@
               />
             </div>
           }
-          <p class="hint">{{ "sprite.tools.polygonHint" | transloco }}</p>
+          <p class="hint">{{ "sprite.tools.polygonHint" | translate }}</p>
         }
         @if (business.$tool() === "bucket" || business.$tool() === "wand") {
           <div class="field">
             <label
-              >{{ "sprite.tools.tolerance" | transloco }}:
+              >{{ "sprite.tools.tolerance" | translate }}:
               {{ business.$tolerance() }}</label
             >
             <p-slider
@@ -311,27 +311,27 @@
             [ngModel]="business.$wandMode()"
             (ngModelChange)="business.setWandMode($event)"
           />
-          <p class="hint">{{ "sprite.tools.wandHint" | transloco }}</p>
+          <p class="hint">{{ "sprite.tools.wandHint" | translate }}</p>
         }
         @if (business.$tool() === "wand" || business.$tool() === "polygon") {
           <div class="row">
             <p-button
               icon="pi pi-check"
-              [ariaLabel]="'sprite.tools.applySelection' | transloco"
-              [pTooltip]="'sprite.tools.applySelection' | transloco"
+              [ariaLabel]="'sprite.tools.applySelection' | translate"
+              [pTooltip]="'sprite.tools.applySelection' | translate"
               (onClick)="business.applySelection()"
             />
             <p-button
               icon="pi pi-sync"
-              [ariaLabel]="'sprite.tools.invertSelection' | transloco"
-              [pTooltip]="'sprite.tools.invertSelection' | transloco"
+              [ariaLabel]="'sprite.tools.invertSelection' | translate"
+              [pTooltip]="'sprite.tools.invertSelection' | translate"
               severity="secondary"
               (onClick)="business.invertSelection()"
             />
             <p-button
               icon="pi pi-times"
-              [ariaLabel]="'sprite.tools.clearSelection' | transloco"
-              [pTooltip]="'sprite.tools.clearSelection' | transloco"
+              [ariaLabel]="'sprite.tools.clearSelection' | translate"
+              [pTooltip]="'sprite.tools.clearSelection' | translate"
               severity="secondary"
               (onClick)="business.clearSelection()"
             />
@@ -340,10 +340,10 @@
       </section>
 
       <section>
-        <h2>{{ "sprite.shapes.title" | transloco }}</h2>
+        <h2>{{ "sprite.shapes.title" | translate }}</h2>
         <div class="field">
           <label
-            >{{ "sprite.tools.tolerance" | transloco }}:
+            >{{ "sprite.tools.tolerance" | translate }}:
             {{ business.$tolerance() }}</label
           >
           <p-slider
@@ -356,15 +356,15 @@
         <div class="row">
           <p-button
             icon="pi pi-search"
-            [label]="'sprite.shapes.detect' | transloco"
-            [ariaLabel]="'sprite.shapes.detect' | transloco"
+            [label]="'sprite.shapes.detect' | translate"
+            [ariaLabel]="'sprite.shapes.detect' | translate"
             [loading]="business.$detecting()"
             [disabled]="!business.$image()"
             (onClick)="business.detectShapesAsync()"
           />
         </div>
         @if (business.$candidates().length) {
-          <p class="hint">{{ "sprite.shapes.hint" | transloco }}</p>
+          <p class="hint">{{ "sprite.shapes.hint" | translate }}</p>
           <ul class="candidates">
             @for (c of business.$candidates(); track c.id) {
               <li
@@ -376,37 +376,37 @@
                 (keydown.enter)="business.toggleCandidate(c.id)"
               >
                 <span class="chip" [style.background]="shapeCss(c.id)"></span>
-                {{ "sprite.shapes.pixels" | transloco: { n: c.size } }}
+                {{ "sprite.shapes.pixels" | translate: { n: c.size } }}
               </li>
             }
           </ul>
           <div class="row">
             <p-button
-              [label]="'sprite.shapes.apply' | transloco"
-              [ariaLabel]="'sprite.shapes.apply' | transloco"
+              [label]="'sprite.shapes.apply' | translate"
+              [ariaLabel]="'sprite.shapes.apply' | translate"
               [disabled]="!business.$selectedCandidates().length"
               (onClick)="applyShapes('active')"
             />
             <p-button
               severity="secondary"
-              [label]="'sprite.shapes.applyNew' | transloco"
-              [ariaLabel]="'sprite.shapes.applyNew' | transloco"
+              [label]="'sprite.shapes.applyNew' | translate"
+              [ariaLabel]="'sprite.shapes.applyNew' | translate"
               [disabled]="!business.$selectedCandidates().length"
               (onClick)="applyShapes('new')"
             />
           </div>
         } @else if (business.$detected()) {
-          <p class="hint">{{ "sprite.shapes.none" | transloco }}</p>
+          <p class="hint">{{ "sprite.shapes.none" | translate }}</p>
         }
       </section>
 
       <section>
         <div class="row between">
-          <h2>{{ "sprite.materials.title" | transloco }}</h2>
+          <h2>{{ "sprite.materials.title" | translate }}</h2>
           <p-button
             icon="pi pi-plus"
-            [ariaLabel]="'sprite.materials.add' | transloco"
-            [pTooltip]="'sprite.materials.add' | transloco"
+            [ariaLabel]="'sprite.materials.add' | translate"
+            [pTooltip]="'sprite.materials.add' | translate"
             [disabled]="!business.$document()"
             (onClick)="addMaterial()"
           />
@@ -426,7 +426,7 @@
                 type="button"
                 class="chip"
                 [style.background]="swatch(layer.gradient.stops)"
-                [attr.aria-label]="'sprite.materials.select' | transloco"
+                [attr.aria-label]="'sprite.materials.select' | translate"
                 (click)="business.selectMaterial(layer.id)"
               ></button>
               @if (editingId() === layer.id) {
@@ -452,8 +452,8 @@
                   size="small"
                   [text]="true"
                   severity="secondary"
-                  [ariaLabel]="'sprite.materials.rename' | transloco"
-                  [pTooltip]="'sprite.materials.rename' | transloco"
+                  [ariaLabel]="'sprite.materials.rename' | translate"
+                  [pTooltip]="'sprite.materials.rename' | translate"
                   (onClick)="editingId.set(layer.id)"
                 />
                 <p-button
@@ -465,13 +465,13 @@
                     (layer.visible
                       ? 'sprite.materials.hide'
                       : 'sprite.materials.show'
-                    ) | transloco
+                    ) | translate
                   "
                   [pTooltip]="
                     (layer.visible
                       ? 'sprite.materials.hide'
                       : 'sprite.materials.show'
-                    ) | transloco
+                    ) | translate
                   "
                   (onClick)="
                     business.setMaterialVisible(layer.id, !layer.visible)
@@ -486,13 +486,13 @@
                     (layer.locked
                       ? 'sprite.materials.unlock'
                       : 'sprite.materials.lock'
-                    ) | transloco
+                    ) | translate
                   "
                   [pTooltip]="
                     (layer.locked
                       ? 'sprite.materials.unlock'
                       : 'sprite.materials.lock'
-                    ) | transloco
+                    ) | translate
                   "
                   (onClick)="
                     business.setMaterialLocked(layer.id, !layer.locked)
@@ -504,7 +504,7 @@
                   [text]="true"
                   severity="secondary"
                   [disabled]="i === 0"
-                  [ariaLabel]="'sprite.materials.up' | transloco"
+                  [ariaLabel]="'sprite.materials.up' | translate"
                   (onClick)="business.moveMaterial(layer.id, i - 1)"
                 />
                 <p-button
@@ -513,7 +513,7 @@
                   [text]="true"
                   severity="secondary"
                   [disabled]="last"
-                  [ariaLabel]="'sprite.materials.down' | transloco"
+                  [ariaLabel]="'sprite.materials.down' | translate"
                   (onClick)="business.moveMaterial(layer.id, i + 1)"
                 />
                 @if (layer.id !== business.$document()?.baseId) {
@@ -522,8 +522,8 @@
                     size="small"
                     [text]="true"
                     severity="danger"
-                    [ariaLabel]="'sprite.materials.delete' | transloco"
-                    [pTooltip]="'sprite.materials.delete' | transloco"
+                    [ariaLabel]="'sprite.materials.delete' | translate"
+                    [pTooltip]="'sprite.materials.delete' | translate"
                     (onClick)="business.deleteMaterial(layer.id)"
                   />
                 }
@@ -535,7 +535,7 @@
       @if (business.$activeLayer(); as layer) {
         <section>
           <h2>
-            {{ "sprite.gradient.title" | transloco }} ·
+            {{ "sprite.gradient.title" | translate }} ·
             {{ materialName(layer) }}
           </h2>
           <div
@@ -548,7 +548,7 @@
                 format="hex"
                 [ngModel]="stop.color"
                 (ngModelChange)="setStopColor(i, $event)"
-                [attr.aria-label]="'sprite.gradient.stopColor' | transloco"
+                [attr.aria-label]="'sprite.gradient.stopColor' | translate"
               />
               <p-inputnumber
                 [ngModel]="stop.position * 100"
@@ -560,7 +560,7 @@
                 [showButtons]="true"
                 buttonLayout="horizontal"
                 inputStyleClass="stop-number"
-                [ariaLabel]="'sprite.gradient.stopPosition' | transloco"
+                [ariaLabel]="'sprite.gradient.stopPosition' | translate"
               />
               <p-button
                 icon="pi pi-minus"
@@ -568,8 +568,8 @@
                 [text]="true"
                 severity="secondary"
                 [disabled]="layer.gradient.stops.length <= 2"
-                [ariaLabel]="'sprite.gradient.removeStop' | transloco"
-                [pTooltip]="'sprite.gradient.removeStop' | transloco"
+                [ariaLabel]="'sprite.gradient.removeStop' | translate"
+                [pTooltip]="'sprite.gradient.removeStop' | translate"
                 (onClick)="removeStop(i)"
               />
             </div>
@@ -578,14 +578,14 @@
             icon="pi pi-plus"
             size="small"
             severity="secondary"
-            [label]="'sprite.gradient.addStop' | transloco"
+            [label]="'sprite.gradient.addStop' | translate"
             (onClick)="addStop()"
           />
         </section>
       }
 
       <section>
-        <h2>{{ "sprite.presets.title" | transloco }}</h2>
+        <h2>{{ "sprite.presets.title" | translate }}</h2>
         <ul class="presets">
           @for (preset of business.$presets(); track preset.id) {
             <li>
@@ -606,7 +606,7 @@
                   size="small"
                   [text]="true"
                   severity="danger"
-                  [ariaLabel]="'sprite.presets.delete' | transloco"
+                  [ariaLabel]="'sprite.presets.delete' | translate"
                   (onClick)="business.deleteCustomPreset(preset.id)"
                 />
               }
@@ -617,15 +617,15 @@
           <input
             pInputText
             class="grow"
-            [placeholder]="'sprite.presets.name' | transloco"
+            [placeholder]="'sprite.presets.name' | translate"
             [ngModel]="presetName()"
             (ngModelChange)="presetName.set($event)"
             (keydown.enter)="savePreset()"
           />
           <p-button
             icon="pi pi-save"
-            [ariaLabel]="'sprite.presets.save' | transloco"
-            [pTooltip]="'sprite.presets.save' | transloco"
+            [ariaLabel]="'sprite.presets.save' | translate"
+            [pTooltip]="'sprite.presets.save' | translate"
             [disabled]="!presetName().trim() || !business.$activeLayer()"
             (onClick)="savePreset()"
           />
@@ -635,7 +635,7 @@
   </div>
 </div>
 <p-dialog
-  [header]="'sprite.library.title' | transloco"
+  [header]="'sprite.library.title' | translate"
   [visible]="libraryOpen()"
   (visibleChange)="libraryOpen.set($event)"
   [modal]="true"
@@ -662,7 +662,7 @@
                   pInputText
                   class="saved-name-input"
                   [value]="set.name"
-                  [attr.aria-label]="'sprite.sets.rename' | transloco"
+                  [attr.aria-label]="'sprite.sets.rename' | translate"
                   (keydown.enter)="renameSet(set.id, $any($event.target).value)"
                   (keydown.escape)="renamingSetId.set(null)"
                   (blur)="renameSet(set.id, $any($event.target).value)"
@@ -671,25 +671,28 @@
                 <span class="saved-name">{{ set.name }}</span>
               }
               <span class="saved-date">{{ set.date }}</span>
-              <p-select
+              <p-multiselect
                 class="saved-kind"
                 data-test="set-kind"
-                [options]="setKinds()"
+                [options]="itemKindOptions()"
                 optionLabel="label"
                 optionValue="value"
                 appendTo="body"
-                [ariaLabel]="'sprite.sets.kind' | transloco"
-                [pTooltip]="'sprite.sets.kindHint' | transloco"
-                [ngModel]="set.kind"
-                (ngModelChange)="setKind(set.id, $event)"
+                [showToggleAll]="false"
+                [filter]="true"
+                [placeholder]="'sprite.sets.kindNone' | translate"
+                [ariaLabel]="'sprite.sets.kind' | translate"
+                [pTooltip]="'sprite.sets.kindHint' | translate"
+                [ngModel]="set.tags?.kinds ?? []"
+                (ngModelChange)="setKinds(set.id, $event)"
               />
               <span class="row tight">
                 <p-button
                   icon="pi pi-folder-open"
                   size="small"
                   [text]="true"
-                  [ariaLabel]="'sprite.sets.open' | transloco"
-                  [pTooltip]="'sprite.sets.open' | transloco"
+                  [ariaLabel]="'sprite.sets.open' | translate"
+                  [pTooltip]="'sprite.sets.open' | translate"
                   (onClick)="openSet(set.id)"
                 />
                 <p-button
@@ -697,8 +700,8 @@
                   size="small"
                   [text]="true"
                   severity="secondary"
-                  [ariaLabel]="'sprite.sets.rename' | transloco"
-                  [pTooltip]="'sprite.sets.rename' | transloco"
+                  [ariaLabel]="'sprite.sets.rename' | translate"
+                  [pTooltip]="'sprite.sets.rename' | translate"
                   (onClick)="startRenameSet(set.id)"
                 />
                 <p-button
@@ -706,14 +709,14 @@
                   size="small"
                   [text]="true"
                   severity="danger"
-                  [ariaLabel]="'sprite.sets.delete' | transloco"
-                  [pTooltip]="'sprite.sets.delete' | transloco"
+                  [ariaLabel]="'sprite.sets.delete' | translate"
+                  [pTooltip]="'sprite.sets.delete' | translate"
                   (onClick)="deleteSet(set)"
                 />
               </span>
             </li>
           } @empty {
-            <li class="library-empty">{{ "sprite.sets.empty" | transloco }}</li>
+            <li class="library-empty">{{ "sprite.sets.empty" | translate }}</li>
           }
         </ul>
       } @else {
@@ -722,8 +725,8 @@
           type="search"
           data-test="library-search"
           class="library-search"
-          [placeholder]="'sprite.library.search' | transloco"
-          [attr.aria-label]="'sprite.library.search' | transloco"
+          [placeholder]="'sprite.library.search' | translate"
+          [attr.aria-label]="'sprite.library.search' | translate"
           [value]="libraryQuery()"
           (input)="libraryQuery.set($any($event.target).value)"
         />
@@ -734,7 +737,7 @@
           optionLabel="label"
           optionValue="value"
           appendTo="body"
-          [ariaLabel]="'sprite.library.kindFilter' | transloco"
+          [ariaLabel]="'sprite.library.kindFilter' | translate"
           [ngModel]="libraryKind()"
           (ngModelChange)="libraryKind.set($event)"
         />
@@ -763,15 +766,15 @@
                 <p-tag
                   data-test="library-kind-badge"
                   severity="secondary"
-                  [value]="'sprite.kind.' + sprite.kind | transloco"
+                  [value]="'sprite.kind.' + sprite.kind | translate"
                 />
               </li>
             }
           </ul>
         } @empty {
-          <p class="library-empty">{{ "sprite.library.empty" | transloco }}</p>
+          <p class="library-empty">{{ "sprite.library.empty" | translate }}</p>
         }
-        <p class="library-credit">{{ "sprite.library.credit" | transloco }}</p>
+        <p class="library-credit">{{ "sprite.library.credit" | translate }}</p>
       }
     </div>
   }
@@ -783,7 +786,7 @@
       <span>{{ message.detail }}</span>
       <p-button
         size="small"
-        [label]="'sprite.draft.open' | transloco"
+        [label]="'sprite.draft.open' | translate"
         (onClick)="openDraft(message.data.draftId)"
       />
     </div>
@@ -791,7 +794,7 @@
 </p-toast>
 
 <p-dialog
-  [header]="'sprite.draft.addTitle' | transloco"
+  [header]="'sprite.draft.addTitle' | translate"
   [visible]="addOpen()"
   (visibleChange)="addOpen.set($event)"
   [modal]="true"
@@ -801,7 +804,7 @@
   @if (addOpen()) {
     <div class="add-form">
       <label>
-        {{ "sprite.draft.chooseDraft" | transloco }}
+        {{ "sprite.draft.chooseDraft" | translate }}
         <p-select
           data-test="add-draft-select"
           [options]="draftOptions()"
@@ -819,11 +822,11 @@
         icon="pi pi-plus"
         severity="secondary"
         size="small"
-        [label]="'sprite.draft.newDraft' | transloco"
+        [label]="'sprite.draft.newDraft' | translate"
         (click)="newDraft()"
       ></button>
       <label>
-        {{ "sprite.draft.spriteId" | transloco }}
+        {{ "sprite.draft.spriteId" | translate }}
         <input
           pInputText
           type="text"
@@ -833,7 +836,7 @@
         />
       </label>
       <label>
-        {{ "sprite.draft.label" | transloco }}
+        {{ "sprite.draft.label" | translate }}
         <input
           pInputText
           type="text"
@@ -842,24 +845,16 @@
         />
       </label>
       <label>
-        {{ "sprite.draft.type" | transloco }}
-        <p-select
-          [options]="typeOptions()"
+        {{ "packs.creator.spriteKinds" | translate }}
+        <p-multiselect
+          data-test="add-sprite-kinds"
+          [options]="itemKindOptions()"
           optionLabel="label"
           optionValue="value"
-          [ngModel]="addDetails().type"
-          (ngModelChange)="setAddType($event)"
-          appendTo="body"
-        />
-      </label>
-      <label>
-        {{ "sprite.draft.slot" | transloco }}
-        <p-select
-          [options]="slotOptions()"
-          optionLabel="label"
-          optionValue="value"
-          [ngModel]="addDetails().slot"
-          (ngModelChange)="patchAdd({ slot: $event })"
+          [ngModel]="addDetails().kinds"
+          (ngModelChange)="patchAdd({ kinds: $event ?? [] })"
+          [showToggleAll]="false"
+          [filter]="true"
           appendTo="body"
         />
       </label>
@@ -867,7 +862,7 @@
         pButton
         type="button"
         data-test="add-confirm"
-        [label]="'sprite.draft.confirm' | transloco"
+        [label]="'sprite.draft.confirm' | translate"
         [disabled]="!addDraftId() || !addDetails().id || adding()"
         (click)="confirmAdd()"
       ></button>

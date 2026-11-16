@@ -9,12 +9,13 @@ import {
   untracked,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CombatBusiness } from '../../business/combat.business';
+import { TableNpcCardComponent } from '../../../table/components/table-npc-card/table-npc-card.component';
 import { CombatActionsComponent } from '../combat-actions/combat-actions.component';
 
 /** A player's side of an encounter: the turn order, their turn, their own skills, items and counters, and the last roll. */
@@ -24,14 +25,15 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
   host: { '[class.docked]': 'docked()' },
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputNumberModule,
     CombatActionsComponent,
+    TableNpcCardComponent,
   ],
   template: `
     @if (state(); as encounter) {
-      <ol class="order" [attr.aria-label]="'combat.order' | transloco">
+      <ol class="order" [attr.aria-label]="'combat.order' | translate">
         @for (combatant of encounter.combatants; track combatant.id) {
           <li
             data-testid="order-item"
@@ -43,21 +45,41 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
             [class.down]="combatant.down"
             [class.enemy]="combatant.side === 'enemy'"
           >
-            {{ combatant.name }}
+            @if (combatant.characterId) {
+              {{ combatant.name }}
+            } @else {
+              <button
+                type="button"
+                class="npc"
+                data-action="open-npc"
+                [attr.aria-expanded]="openNpcId() === combatant.id"
+                (click)="toggleNpc(combatant.id)"
+              >
+                {{ combatant.name }}
+                @if (combatant.level !== undefined) {
+                  <small data-field="level">{{
+                    'combat.levelShort' | translate: { level: combatant.level }
+                  }}</small>
+                }
+              </button>
+            }
           </li>
         }
       </ol>
+      @if (openNpc(); as npc) {
+        <app-table-npc-card data-testid="npc-card" [npc]="npc" />
+      }
 
       @if (myTurn()) {
         <div class="banner" data-testid="your-turn">
           <i class="pi pi-flag"></i>
-          <strong>{{ 'combat.yourTurn' | transloco }}</strong>
+          <strong>{{ 'combat.yourTurn' | translate }}</strong>
           <button
             pButton
             type="button"
             data-action="end-turn"
             icon="pi pi-step-forward"
-            [label]="'combat.endTurn' | transloco"
+            [label]="'combat.endTurn' | translate"
             (click)="endTurn()"
           ></button>
         </div>
@@ -66,7 +88,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
       @if (encounter.initiativeMode === 'typed') {
         <div class="initiative">
           <label for="player-initiative">{{
-            'combat.initiative.yours' | transloco
+            'combat.initiative.yours' | translate
           }}</label>
           <p-inputnumber
             inputId="player-initiative"
@@ -80,7 +102,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
             type="button"
             data-action="initiative-set"
             icon="pi pi-check"
-            [label]="'combat.initiative.set' | transloco"
+            [label]="'combat.initiative.set' | translate"
             [disabled]="initiative() === null"
             (click)="setInitiative()"
           ></button>
@@ -92,7 +114,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
           <i class="pi pi-sparkles"></i>
           {{
             'combat.roll'
-              | transloco
+              | translate
                 : {
                     caster: last.caster,
                     skill: last.skill,
@@ -104,7 +126,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
       }
       @if (waiting()) {
         <p class="waiting" data-testid="waiting-gm">
-          <i class="pi pi-hourglass"></i> {{ 'combat.waitingGm' | transloco }}
+          <i class="pi pi-hourglass"></i> {{ 'combat.waitingGm' | translate }}
         </p>
       }
 
@@ -121,7 +143,7 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
       } @else {
         <p class="waiting" data-testid="waiting-turn">
           <i class="pi pi-hourglass"></i>
-          {{ 'combat.waitingTurn' | transloco: { name: activeName() } }}
+          {{ 'combat.waitingTurn' | translate: { name: activeName() } }}
         </p>
       }
     }
@@ -145,6 +167,14 @@ import { CombatActionsComponent } from '../combat-actions/combat-actions.compone
       border: 1px solid var(--p-content-border-color);
       border-radius: 999px;
       white-space: nowrap;
+    }
+    .order .npc {
+      all: unset;
+      cursor: pointer;
+    }
+    .order .npc small {
+      margin-left: 0.35rem;
+      opacity: 0.75;
     }
     .order li.enemy {
       border-color: var(--p-red-400);
@@ -210,6 +240,13 @@ export class CombatPlayerViewComponent {
 
   protected readonly initiative = signal<number | null>(null);
   protected readonly state = this.combat.$state;
+  /** The NPC combatant whose card is open: only what the world's rules let the players see. */
+  protected readonly openNpcId = signal<string | null>(null);
+  protected readonly openNpc = computed(() =>
+    this.state()?.combatants.find(
+      (c) => c.id === this.openNpcId() && !c.characterId,
+    ),
+  );
 
   protected readonly me = computed(() =>
     this.state()?.combatants.find((c) => c.id === this.combatantId()),
@@ -252,6 +289,10 @@ export class CombatPlayerViewComponent {
       this.character()?.skills.length;
       untracked(() => void this.combat.loadSkills().catch(() => undefined));
     });
+  }
+
+  protected toggleNpc(id: string): void {
+    this.openNpcId.update((open) => (open === id ? null : id));
   }
 
   protected endTurn(): void {

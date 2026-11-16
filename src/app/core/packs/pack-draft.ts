@@ -1,11 +1,16 @@
-import { ItemSlot, ItemType } from '../models/item';
 import {
+  ClassKindDef,
+  ItemKindDef,
+  NpcKindDef,
   Pack,
+  PackDomains,
+  PackTint,
   PACK_FORMAT,
   PACK_GENERATORS,
   PackGenerator,
   PackLanguage,
   PackSprite,
+  SkillKindDef,
   SpriteKind,
 } from './pack';
 
@@ -13,8 +18,8 @@ import {
 export interface DraftSprite {
   id: string;
   label: string;
-  type: ItemType;
-  slot: ItemSlot;
+  /** Kinds of the items tree (domain `items`); the first one decides. */
+  kinds: readonly string[];
   kind: SpriteKind;
   image: Blob;
   materials?: string;
@@ -38,6 +43,15 @@ export interface PackDraft {
   updatedAt: number;
   details: DraftDetails;
   generators: Partial<Record<PackGenerator, unknown>>;
+  /** The shared `generators/common.json` (params), raw like the word lists. */
+  common?: unknown;
+  /** The pack's own items kinds. */
+  kinds: Record<string, ItemKindDef>;
+  /** The pack's own NPC, skill and class kinds. */
+  npcKinds?: Record<string, NpcKindDef>;
+  skillKinds?: Record<string, SkillKindDef>;
+  classKinds?: Record<string, ClassKindDef>;
+  tints: Record<string, PackTint>;
   sprites: DraftSprite[];
 }
 
@@ -50,6 +64,8 @@ export function slugifyPackId(name: string): string {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
+
+export const COMMON_PATH = 'generators/common.json';
 
 export const wordListPath = (generator: PackGenerator) =>
   `generators/${generator}.json`;
@@ -73,23 +89,34 @@ export function buildPack(draft: PackDraft): {
   const { details } = draft;
   const files = new Map<string, Blob | unknown>();
 
-  const generators: Pack['generators'] = {};
+  const domains: PackDomains = {};
   for (const generator of PACK_GENERATORS) {
     const value = draft.generators[generator];
     if (value === undefined) continue;
     const path = wordListPath(generator);
-    generators[generator] = path;
+    domains[generator] = { texts: path };
     files.set(path, value);
   }
-
+  if (draft.common !== undefined) files.set(COMMON_PATH, draft.common);
+  if (Object.keys(draft.kinds).length)
+    domains.items = { ...domains.items, kinds: draft.kinds };
+  for (const [domain, field] of [
+    ['npcs', 'npcKinds'],
+    ['skills', 'skillKinds'],
+    ['classes', 'classKinds'],
+  ] as const) {
+    const kinds = draft[field];
+    if (kinds && Object.keys(kinds).length)
+      domains[domain] = { ...domains[domain], kinds } as never;
+  }
   const sprites: PackSprite[] = draft.sprites.map((sprite) => {
     const image = `sprites/${sprite.id}.png`;
     files.set(image, sprite.image);
     const entry: PackSprite = {
       id: sprite.id,
       label: sprite.label,
-      type: sprite.type,
-      slot: sprite.slot,
+      domain: 'items',
+      kinds: [...sprite.kinds],
       kind: sprite.kind,
       image,
     };
@@ -111,7 +138,9 @@ export function buildPack(draft: PackDraft): {
     license: details.license,
     licenseUrl: details.licenseUrl,
     ...(details.homepage ? { homepage: details.homepage } : {}),
-    generators,
+    tints: draft.tints,
+    domains,
+    ...(draft.common !== undefined ? { common: COMMON_PATH } : {}),
     sprites,
   };
   return { manifest, files };

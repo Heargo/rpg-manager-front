@@ -75,7 +75,7 @@ describe('ProfileBusiness', () => {
   it('never uses an untranslated key as the default name', () => {
     TestBed.configureTestingModule({
       providers: [
-        provideTestTranslations({ preloadLangs: false, langs: {} }),
+        provideTestTranslations({ langs: {} }),
         { provide: ProfileStorageService, useValue: storage },
       ],
     });

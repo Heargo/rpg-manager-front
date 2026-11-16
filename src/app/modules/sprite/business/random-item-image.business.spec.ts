@@ -42,17 +42,17 @@ function setup(saved: SpriteSet[] = []) {
 describe('RandomItemImageBusiness', () => {
   it('recolours a bundled sprite matching the item and stores it as an image', async () => {
     const { business, files, images } = setup();
-    const id = await business.create({ name: 'Hache du nord', type: 'equipment', slot: 'weapon1' }, 'seed');
+    const id = await business.create({ name: 'Hache du nord', type: 'equipment', slot: 'weapon1', kind: 'axe' }, 'seed');
     expect(id).toBe('stored-1');
     const url = (files.fetchImage.mock.calls[0] as unknown[])[0];
-    expect(['packs/base-fr/sprites/axe.png', 'packs/base-fr/sprites/waraxe.png']).toContain(url);
+    expect(url).toBe('packs/base-fr/sprites/axe.png');
     expect(files.fetchText).toHaveBeenCalledWith(String(url).replace('.png', '.json'));
     expect(files.encodePng).toHaveBeenCalled();
     expect(images.storeUpload).toHaveBeenCalled();
   });
 
   it('picks the same sprite for the same seed', async () => {
-    const item = { name: 'Lame', type: 'equipment' as const, slot: 'weapon1' as const };
+    const item = { name: 'Lame', type: 'equipment' as const, slot: 'weapon1' as const, kind: 'weapon' };
     const a = setup();
     await a.business.create(item, 'same');
     TestBed.resetTestingModule();
@@ -69,11 +69,11 @@ describe('RandomItemImageBusiness', () => {
       source: { kind: 'image', imageId: 'img-9' },
       config,
       updatedAt: 1,
-      tags: { type: 'item', slot: 'none' },
+      tags: { kinds: ['key'] },
     };
     const untagged: SpriteSet = { ...mine, id: 'other', name: 'Zorglub' , tags: undefined };
     const { business, storage, files } = setup([mine, untagged]);
-    await business.create({ name: 'Zorglub ancien', type: 'item', slot: 'none' }, 'k');
+    await business.create({ name: 'Zorglub ancien', type: 'item', slot: 'none', kind: 'key' }, 'k');
     expect(storage.get).toHaveBeenCalledWith('img-9');
     expect(files.fetchImage).not.toHaveBeenCalled();
   });
@@ -103,11 +103,11 @@ describe('RandomItemImageBusiness', () => {
       TestBed.inject(LanguageBusiness).setLanguage('fr');
       return { business: TestBed.inject(RandomItemImageBusiness), files, images };
     }
-    const look = (name: string) => ({ name, type: 'item' as const, slot: 'none' as const });
+    const look = (name: string, kind: string) => ({ name, kind, type: 'item' as const, slot: 'none' as const });
 
     it('recolours a masked sprite from its bundled materials', async () => {
       const { business, files, images } = setupKinds();
-      await business.create(look('Bravo'), 's');
+      await business.create(look('Bravo', 'potion'), 's');
       expect(files.fetchText).toHaveBeenCalledWith('packs/base-fr/sprites/bravo.json');
       expect(files.encodePng).toHaveBeenCalled();
       expect(images.storeUpload).toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('RandomItemImageBusiness', () => {
 
     it('recolours a grayscale sprite through the automatic guess, ignoring any materials file', async () => {
       const { business, files, images } = setupKinds();
-      await business.create(look('Alpha'), 's');
+      await business.create(look('Alpha', 'key'), 's');
       expect(files.fetchImage).toHaveBeenCalledWith('packs/base-fr/sprites/alpha.png');
       expect(files.fetchText).not.toHaveBeenCalled();
       expect(files.encodePng).toHaveBeenCalled();
@@ -124,7 +124,7 @@ describe('RandomItemImageBusiness', () => {
 
     it('stores a colored sprite as is, without decoding or recolouring', async () => {
       const { business, files, images } = setupKinds();
-      const id = await business.create(look('Charlie'), 's');
+      const id = await business.create(look('Charlie', 'apple'), 's');
       expect(id).toBe('stored-1');
       expect(files.fetchBlob).toHaveBeenCalledWith('packs/base-fr/sprites/charlie.png');
       expect(files.encodePng).not.toHaveBeenCalled();

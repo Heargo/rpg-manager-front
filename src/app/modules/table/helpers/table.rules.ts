@@ -2,6 +2,7 @@ import { World } from '../../world/models/world';
 import {
   NOTES_MAX_LENGTH,
   QUICK_IMAGES_MAX,
+  StartEncounterRequest,
   TableScene,
 } from '../models/table';
 
@@ -52,12 +53,14 @@ export function saveNotes(world: World, notes: string): World {
   return { ...world, notes };
 }
 
-/** The NPC request (`{ npcId, shown }`), or null when it isn't one. */
-export function parseNpcRequest(
+/** The encounter request (`{ kind, npcId }`), or null when it isn't one. */
+export function parseEncounterRequest(
   payload: unknown,
-): { npcId: string; shown: boolean } | null {
-  const { npcId, shown } = (payload ?? {}) as Record<string, unknown>;
-  return typeof npcId === 'string' && npcId && typeof shown === 'boolean'
-    ? { npcId, shown }
+): StartEncounterRequest | null {
+  const { kind, npcId } = (payload ?? {}) as Record<string, unknown>;
+  return (kind === 'story' || kind === 'merchant') &&
+    typeof npcId === 'string' &&
+    npcId
+    ? { kind, npcId }
     : null;
 }

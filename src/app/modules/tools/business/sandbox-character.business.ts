@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, resource, signal } from '@angular/core';
 import { LanguageBusiness } from '../../../core/business/language.business';
-import { WordListBusiness } from '../../../core/business/word-list.business';
+import { ItemVocabularyBusiness } from '../../../core/business/item-vocabulary.business';
 import { seededRandomSource } from '../../../core/generators/random-source';
 import {
   applyCharacterAction,
@@ -25,7 +25,7 @@ export const SANDBOX_HERO_PORTRAIT = 'images/sample-hero.webp';
 @Injectable({ providedIn: 'root' })
 export class SandboxCharacterBusiness {
   private readonly sandbox = inject(SandboxWorldBusiness);
-  private readonly words = inject(WordListBusiness);
+  private readonly words = inject(ItemVocabularyBusiness);
   private readonly language = inject(LanguageBusiness);
 
   readonly $world = this.sandbox.$world;
@@ -36,7 +36,7 @@ export class SandboxCharacterBusiness {
       world: this.sandbox.$world(),
     }),
     loader: async ({ params: { lang, world } }) => {
-      const words = await this.words.itemWords(lang);
+      const words = await this.words.vocabulary();
       const barIds = [world.barAttributes.life, world.barAttributes.mana];
       const items = generateStarterItems(seededRandomSource(world.id), words, {
         attributes: world.attributes.map((attribute) => attribute.name),

@@ -8,7 +8,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
@@ -23,7 +23,7 @@ import { SandboxCatalogueBusiness } from '../../business/sandbox-catalogue.busin
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     MessageModule,
     SkeletonModule,
@@ -33,19 +33,19 @@ import { SandboxCatalogueBusiness } from '../../business/sandbox-catalogue.busin
   template: `
     <div class="main-container tool">
       <header>
-        <h1>{{ 'item.editor.title' | transloco }}</h1>
-        <p class="hint">{{ 'item.editor.toolIntro' | transloco }}</p>
+        <h1>{{ 'item.editor.title' | translate }}</h1>
+        <p class="hint">{{ 'item.editor.toolIntro' | translate }}</p>
         <p-button
           icon="pi pi-arrow-left"
           severity="secondary"
           [text]="true"
-          [label]="'item.editor.back' | transloco"
+          [label]="'item.editor.back' | translate"
           routerLink="/tools/item-catalogue"
         />
       </header>
       @if (sandbox.$failed()) {
         <p-message severity="error">{{
-          'tools.itemGenerator.failed' | transloco
+          'tools.itemGenerator.failed' | translate
         }}</p-message>
       } @else if (sandbox.$loading()) {
         <p-skeleton height="12rem" />
@@ -56,7 +56,7 @@ import { SandboxCatalogueBusiness } from '../../business/sandbox-catalogue.busin
           (save)="save($event)"
         />
         @if (result(); as item) {
-          <h2>{{ 'item.editor.result' | transloco }}</h2>
+          <h2>{{ 'item.editor.result' | translate }}</h2>
           <app-item-card [item]="item" />
         }
       }

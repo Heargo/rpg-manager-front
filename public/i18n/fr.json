@@ -83,13 +83,17 @@
       "title": "Mondes rejoints",
       "hostedBy": "Hôte : {{ name }}",
       "lastSeen": "vu pour la dernière fois {{ date }}",
-      "rejoin": "Rejoindre",
+      "rejoinHint": "Une invitation ne sert qu'une fois : pour revenir dans un monde, demandez-en une nouvelle au MJ.",
       "openSheet": "Ouvrir le personnage",
       "remove": "Retirer de la liste",
       "readOnly": "Ceci est votre copie enregistrée du personnage dans « {{ name }} ». Elle est en lecture seule jusqu'à ce que vous rejoigniez."
     }
   },
   "world": {
+    "packs": {
+      "otherLanguage": "images, catégories et teintes uniquement",
+      "neutral": "images"
+    },
     "created": "« {{ name }} » est prêt",
     "new": {
       "title": "Nouveau monde",
@@ -137,6 +141,7 @@
       "starterClassesHint": "Guerrier, Mage et Voleur, chacun avec un arbre de compétences construit sur vos attributs, sont ajoutés au monde. Vous pourrez les modifier ou les supprimer ensuite.",
       "offlineTitle": "Quand l'hôte est hors ligne",
       "offlineHint": "Les joueurs peuvent toujours lire leur fiche. Choisissez ce qu'ils peuvent encore faire ; les changements sont vérifiés au retour de l'hôte.",
+      "language": "Langue du monde",
       "packsTitle": "Packs",
       "packsHint": "Les packs de contenu utilisés par ce monde. Un pack est dans une seule langue.",
       "packMissing": "Manquant",
@@ -390,17 +395,18 @@
       "noClass": "Pas encore de classe.",
       "taughtSkills": "Autres compétences",
       "refundFrom": "Reprendre un point à {{ name }}",
+      "statDetails": "Détails de {{ name }}",
       "tip": {
-        "base": "Base : {{ value }}",
-        "level": "Niveau : {{ value }}",
-        "formula": "Formule : {{ value }}",
-        "result": "Résultat de la formule : {{ value }}",
-        "cap": "Plafond : {{ value }}",
-        "bonus": "Bonus : {{ value }}",
-        "max": "Maximum : {{ value }}",
-        "current": "Actuel : {{ value }}",
-        "class": "Classe : {{ value }}",
-        "skills": "Compétences : {{ value }}"
+        "base": "Base",
+        "level": "Niveau",
+        "formula": "Formule",
+        "result": "Résultat de la formule",
+        "cap": "Plafond",
+        "bonus": "Bonus d'équipement",
+        "max": "Maximum",
+        "current": "Actuel",
+        "class": "Classe",
+        "skills": "Compétences"
       }
     },
     "items": {
@@ -534,6 +540,8 @@
         "slot": "Un emplacement est requis pour l'équipement, et seulement pour lui.",
         "price": "Le prix doit être de 0 ou plus.",
         "modifiers": "Les modificateurs sont des entiers sur les attributs de ce monde.",
+        "kind": "Le type précis doit être du texte.",
+        "tints": "Les teintes doivent être une liste de textes.",
         "json": "Ce JSON n'est pas un objet valide."
       },
       "randomImage": "Image aléatoire"
@@ -722,9 +730,21 @@
       "tooManyImages": "Trop d'images rapides : retirez-en d'abord.",
       "imageMissing": "Cette image n'est pas sur l'appareil de l'hôte.",
       "gameMasterOnly": "Seul le maître du jeu peut faire ça.",
-      "tooManyNpcs": "Quatre PNJ sont déjà sur la table : masquez-en un d'abord."
+      "combatRunning": "Un combat est en cours : terminez-le d'abord.",
+      "notMerchant": "Ce PNJ n'est pas un marchand."
     },
-    "npcs": "PNJ"
+    "encounter": {
+      "title": "Rencontre",
+      "kind": "Type de rencontre",
+      "combat": "Combat",
+      "story": "Histoire",
+      "merchant": "Marchand",
+      "npc": "PNJ",
+      "npcPlaceholder": "Choisir un PNJ",
+      "start": "Lancer",
+      "end": "Terminer",
+      "running": "{{name}} ({{kind}})"
+    }
   },
   "tools": {
     "sandbox": {
@@ -934,14 +954,11 @@
       "sell": "Vendre au marchand",
       "sellAction": "Vendre",
       "noStock": "Rien à vendre.",
-      "nothingToSell": "Rien à vendre."
+      "nothingToSell": "Rien à vendre.",
+      "details": "Détails"
     },
     "table": {
-      "open": "Ouvrir la boutique",
-      "close": "Fermer la boutique",
-      "visit": "Visiter la boutique",
-      "target": "Ouvrir ou fermer la boutique pour",
-      "everyone": "Tous les joueurs"
+      "visit": "Boutique"
     }
   },
   "npc": {
@@ -962,8 +979,7 @@
       "edit": "Modifier",
       "create": "Ajouter un PNJ",
       "copySuffix": "(copie)",
-      "show": "Montrer sur la table",
-      "hide": "Retirer de la table"
+      "view": "Voir la fiche"
     },
     "role": {
       "story": "Histoire",
@@ -1024,6 +1040,15 @@
       "learnFromClass": "Apprendre selon la classe",
       "removeSkill": "Retirer la compétence",
       "randomClass": "Classe au hasard"
+    },
+    "sheet": {
+      "title": "Fiche du PNJ"
+    },
+    "card": {
+      "life": "Vie",
+      "attributes": "Attributs",
+      "equipment": "Équipement",
+      "noEquipment": "Rien d'équipé."
     }
   },
   "skill": {
@@ -1435,8 +1460,6 @@
       "newDraft": "Nouveau brouillon",
       "spriteId": "Id",
       "label": "Libellé",
-      "type": "Type",
-      "slot": "Emplacement",
       "confirm": "Ajouter",
       "added": "Sprite ajouté au brouillon.",
       "addFailed": "Le sprite n'a pas pu être ajouté : {{ reason }}",
@@ -1557,11 +1580,10 @@
     "grid": {
       "label": "Grille de combat",
       "reachLegend": "Déplacement possible"
-    }
+    },
+    "levelShort": "Niv. {{ level }}"
   },
   "packs": {
-    "choiceLabel": "Pack",
-    "choiceRandom": "Aléatoire",
     "title": "Packs de contenu",
     "intro": "Sprites et listes de mots à ajouter à l'application. Téléchargez un pack pour l'utiliser dans un monde, puis il fonctionne hors ligne.",
     "alwaysOn": "Toujours disponible",
@@ -1651,7 +1673,7 @@
       "license": "Licence",
       "licenseUrl": "Lien de la licence",
       "homepage": "Page d'accueil (facultatif)",
-      "listsIntro": "Pour chaque générateur, collez ou importez une liste de mots en JSON, ou partez de celle de la Base de la langue du pack. Une liste vide n'est pas incluse dans le pack.",
+      "listsIntro": "Construisez les objets, PNJ, compétences et classes du pack avec les formulaires : catégories, listes de la langue, teintes et paramètres partagés. Le JSON brut de chaque fichier est dans Avancé : importez, exportez ou partez de celui de la Base de la langue du pack. Une liste vide n'est pas incluse dans le pack.",
       "importFile": "Importer un fichier",
       "copyBase": "Copier la liste de Base",
       "clear": "Vider",
@@ -1664,17 +1686,106 @@
       "noSprites": "Aucun sprite pour l'instant.",
       "spriteId": "Identifiant",
       "label": "Libellé",
-      "spriteType": "Type",
-      "spriteSlot": "Emplacement",
-      "spriteKind": "Genre",
-      "slotNone": "Aucun",
+      "spriteKinds": "Catégories",
+      "spriteKind": "Coloration",
       "removeSprite": "Retirer",
       "duplicateId": "Un autre sprite a cet identifiant.",
       "publishIntro": "Installez le pack sur cet appareil pour l'utiliser tout de suite, ou exportez-le en .zip pour le partager.",
       "installDevice": "Installer sur cet appareil",
       "export": "Exporter",
       "installed": "Pack installé sur cet appareil",
-      "editInColorizer": "Modifier dans le coloriseur"
+      "editInColorizer": "Modifier dans le coloriseur",
+      "lists": {
+        "items": "Objets",
+        "shared": "Partagé",
+        "advanced": "Avancé (JSON)",
+        "advancedHint": "Les fichiers bruts du pack : importer, exporter ou copier ceux de Base. Les changements apparaissent dans les formulaires ci-dessus."
+      },
+      "kinds": {
+        "title": "Catégories",
+        "add": "Ajouter une catégorie",
+        "id": "Id de la catégorie",
+        "parent": "Parent",
+        "type": "Type",
+        "slot": "Emplacement",
+        "remove": "Retirer",
+        "kebab": "Lettres minuscules, chiffres et tirets.",
+        "nouns": "Noms",
+        "newNoun": "Nouveau nom",
+        "gender": "Genre",
+        "masculine": "Masculin",
+        "feminine": "Féminin",
+        "plural": "Pluriel",
+        "addNoun": "Ajouter",
+        "descriptions": "Descriptions (une par ligne)",
+        "names": "Modèles de noms",
+        "namesHint": "Un par ligne, chacun avec {base}.",
+        "preview": "Aperçu",
+        "previewEmpty": "Rien à tirer : cette catégorie a besoin d'un nom.",
+        "uncovered": "Pas encore de sprite pour : {{ kinds }}",
+        "words": "Adjectifs et suffixes",
+        "wordsHint": "Adjectifs (masculin / féminin / pluriels, teinte facultative) et suffixes de ce type, par rareté."
+      },
+      "tints": {
+        "title": "Teintes",
+        "add": "Ajouter une teinte",
+        "id": "Id de la teinte",
+        "remove": "Retirer",
+        "shadow": "Ombre",
+        "mid": "Milieu",
+        "light": "Lumière",
+        "adjectives": "Adjectifs",
+        "adjectivesHint": "Un par ligne. Un adjectif accordé s'écrit masculin|féminin, suivi des pluriels s'ils sont irréguliers.",
+        "suffixes": "Suffixes",
+        "descriptions": "Descriptions (une par ligne)",
+        "fits": "Convient à",
+        "fitsAny": "Tout objet"
+      },
+      "params": {
+        "title": "Paramètres",
+        "add": "Ajouter un paramètre",
+        "name": "Nom du paramètre",
+        "newEntry": "Nouvelle expression",
+        "addEntry": "Ajouter",
+        "remove": "Retirer",
+        "removeEntry": "Retirer",
+        "neutral": "Les textes demandent un pack avec une langue : choisissez-en une dans Détails."
+      },
+      "templates": {
+        "title": "Modèles de noms (utiles seulement pour une Base)",
+        "hint": "Un par ligne, chacun avec {base}. Une catégorie peut avoir les siens."
+      },
+      "words": {
+        "common": "Adjectifs et suffixes communs",
+        "commonHint": "Adjectifs et suffixes que tout objet de la langue peut prendre, par rareté.",
+        "m": "Masculin",
+        "f": "Féminin",
+        "mp": "Masculin pluriel",
+        "fp": "Féminin pluriel",
+        "tint": "Teinte (facultatif)",
+        "suffix": "Nouveau suffixe",
+        "addAdjective": "Ajouter l’adjectif",
+        "addSuffix": "Ajouter le suffixe",
+        "remove": "Retirer"
+      },
+      "domain": {
+        "roles": "Rôles",
+        "person": "Personne ou créature",
+        "personYes": "Une personne (prénom)",
+        "personNo": "Une créature (nommée d'après ses noms)",
+        "effect": "Effet",
+        "skills": "Genres de compétences favorisés",
+        "adjectives": "Adjectifs",
+        "namesHint": "Un par ligne, avec {noun}, {adjective}, {given}, {epithet} ou {suffix} selon le domaine.",
+        "textsTitle": "Listes de la langue",
+        "top": {
+          "given": "Prénoms",
+          "epithets": "Épithètes",
+          "templates": "Modèles de noms",
+          "adjectives": "Adjectifs",
+          "suffixes": "Suffixes"
+        }
+      }
     },
     "createdHere": "Créé sur cet appareil",
     "editAsDraft": "Modifier comme brouillon"

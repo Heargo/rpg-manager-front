@@ -56,11 +56,9 @@ export class GameSessionBusiness {
     () => {
       const info = this.info();
       const room = this.room.$room();
-      const invite = this.room.$joinedInvite();
       if (
         !info ||
         !room ||
-        !invite ||
         !this.hasSheet() ||
         this.room.$isHost() ||
         this.room.$status() !== 'connected'
@@ -68,7 +66,6 @@ export class GameSessionBusiness {
         return null;
       return {
         info,
-        invite,
         roomId: room.id,
         hostName: room.members.find((member) => member.isHost)?.name ?? '',
       };
@@ -79,13 +76,12 @@ export class GameSessionBusiness {
         (!!a &&
           !!b &&
           a.info === b.info &&
-          a.invite === b.invite &&
           a.roomId === b.roomId &&
           a.hostName === b.hostName),
     },
   );
 
-  /** Player: keeps the world, host name, invite and sheet rules each time the host publishes the world. */
+  /** Player: keeps the world, host name and sheet rules each time the host publishes the world. */
   private recordJoined(): void {
     const key = this.joinedKey();
     if (!key) return;
@@ -104,7 +100,6 @@ export class GameSessionBusiness {
         roomId: key.roomId,
         name: info.name,
         hostName: key.hostName,
-        invite: key.invite,
         sheetWorld: {
           attributes,
           barAttributes,

@@ -1,12 +1,12 @@
 <div class="main-container table-page">
   <header class="table-header">
     <div>
-      <h1>{{ room.$room()?.name ?? ("table.title" | transloco) }}</h1>
+      <h1>{{ room.$room()?.name ?? ("table.title" | translate) }}</h1>
       <p class="hint">
         @if (table.$isGameMaster()) {
-          <i class="pi pi-crown"></i> {{ "table.gameMaster" | transloco }}
+          <i class="pi pi-crown"></i> {{ "table.gameMaster" | translate }}
         } @else if (room.$status() === "connected") {
-          <i class="pi pi-wifi"></i> {{ "room.lobby.connected" | transloco }}
+          <i class="pi pi-wifi"></i> {{ "room.lobby.connected" | translate }}
         }
       </p>
     </div>
@@ -15,14 +15,14 @@
       @if (table.$isGameMaster() && narrow()) {
         <p-button
           icon="pi pi-users"
-          [label]="'table.players' | transloco"
+          [label]="'table.players' | translate"
           severity="secondary"
           (onClick)="playersOpen.set(true)"
         />
       }
       <p-button
         icon="pi pi-sitemap"
-        [label]="'table.lobby' | transloco"
+        [label]="'table.lobby' | translate"
         severity="secondary"
         [text]="true"
         routerLink="/room"
@@ -32,12 +32,12 @@
 
   @if (room.$status() === "host-offline") {
     <p-message severity="warn" icon="pi pi-exclamation-triangle">{{
-      "room.lobby.hostOffline" | transloco
+      "room.lobby.hostOffline" | translate
     }}</p-message>
   }
   @if (room.$status() === "removed") {
     <p-message severity="error" icon="pi pi-user-minus">{{
-      "room.lobby.removed" | transloco
+      "room.lobby.removed" | translate
     }}</p-message>
   }
 
@@ -50,7 +50,7 @@
       <p-drawer
         [visible]="playersOpen()"
         (visibleChange)="playersOpen.set($event)"
-        [header]="'table.players' | transloco"
+        [header]="'table.players' | translate"
         position="left"
       >
         <ng-container [ngTemplateOutlet]="playersPanel" />
@@ -81,11 +81,6 @@
     <div class="player-layout">
       <section class="illustration-area">
         <ng-container [ngTemplateOutlet]="illustration" />
-        <app-table-npcs
-          [npcs]="table.$npcs()"
-          [shopsOpen]="table.$shopsOpen()"
-          (visitShop)="visitShop($event)"
-        />
       </section>
       <aside class="player-side">
         <p-card>
@@ -94,32 +89,32 @@
             <p-button
               class="open-sheet"
               icon="pi pi-id-card"
-              [label]="'character.sheet.open' | transloco"
+              [label]="'character.sheet.open' | translate"
               severity="secondary"
               [routerLink]="['/room/sheet', mine.id]"
             />
           } @else if (characters.$needsCharacter()) {
             <div class="cta">
-              <p>{{ "character.list.needOne" | transloco }}</p>
+              <p>{{ "character.list.needOne" | translate }}</p>
               <p-button
                 icon="pi pi-user-plus"
-                [label]="'character.create.title' | transloco"
+                [label]="'character.create.title' | translate"
                 routerLink="/room/character"
               />
             </div>
           } @else {
-            <p class="hint">{{ "table.waiting" | transloco }}</p>
+            <p class="hint">{{ "table.waiting" | translate }}</p>
           }
         </p-card>
         @if (myCombatant(); as own) {
-          <p-card [header]="'combat.title' | transloco">
+          <p-card [header]="'combat.title' | translate">
             <app-combat-player-view
               [combatantId]="own.combatantId"
               [characterId]="own.characterId"
             />
           </p-card>
         }
-        <p-card [header]="'dice.title' | transloco">
+        <p-card [header]="'dice.title' | translate">
           <app-dice-roller />
         </p-card>
       </aside>
@@ -127,6 +122,9 @@
   }
 </div>
 <app-combat-roll-banner />
+@if (table.$isGameMaster()) {
+  <app-npc-sheet-dialog [(npcId)]="viewedNpcId" />
+}
 <app-dice-overlay><app-combat-roll-decision diceActions /></app-dice-overlay>
 
 <!-- What everyone sees in the middle of the table. -->
@@ -137,11 +135,23 @@
       [skillId]="targeting.$skillId()"
       (targetPicked)="targeting.toggle($event)"
     />
+  } @else if (table.$encounter(); as encounter) {
+    <app-table-npc-card
+      data-testid="encounter-card"
+      [npc]="encounter.npc"
+      [shopOpen]="
+        !table.$isGameMaster() && table.$shopsOpen().includes(encounter.npc.id)
+      "
+      [maxLevel]="characters.$world()?.maxLevel"
+      [canView]="table.$isGameMaster()"
+      (visitShop)="visitShop($event)"
+      (view)="viewedNpcId.set($event)"
+    />
   } @else if (table.$scene()?.illustrationId; as imageId) {
     <app-stored-image
       class="illustration"
       [imageId]="imageId"
-      [alt]="'table.illustration' | transloco"
+      [alt]="'table.illustration' | translate"
     >
       <div class="empty"><i class="pi pi-spin pi-spinner"></i></div>
     </app-stored-image>
@@ -152,7 +162,7 @@
         (table.$isGameMaster()
           ? "table.noIllustrationGm"
           : "table.noIllustration"
-        ) | transloco
+        ) | translate
       }}</span>
     </div>
   }
@@ -161,14 +171,14 @@
 <!-- Game master: the characters, and the picked one's details. -->
 <ng-template #playersPanel>
   @if (!narrow()) {
-    <h2>{{ "table.players" | transloco }}</h2>
+    <h2>{{ "table.players" | translate }}</h2>
   }
   @if (characters.$characters(); as list) {
     @if (list.length) {
       <ul
         class="players"
         role="listbox"
-        [attr.aria-label]="'table.players' | transloco"
+        [attr.aria-label]="'table.players' | translate"
       >
         @for (character of list; track character.id) {
           <li
@@ -206,17 +216,17 @@
           <p-button
             class="open-sheet"
             icon="pi pi-id-card"
-            [label]="'character.sheet.open' | transloco"
+            [label]="'character.sheet.open' | translate"
             severity="secondary"
             [routerLink]="['/room/sheet', character.id]"
           />
         </div>
       }
     } @else {
-      <p class="hint">{{ "table.noPlayers" | transloco }}</p>
+      <p class="hint">{{ "table.noPlayers" | translate }}</p>
       <p-button
         icon="pi pi-user-plus"
-        [label]="'room.invite.add' | transloco"
+        [label]="'room.invite.add' | translate"
         [text]="true"
         routerLink="/room"
       />
@@ -232,29 +242,6 @@
     } @else {
       <ng-container [ngTemplateOutlet]="illustration" />
     }
-    <p-select
-      class="shop-target"
-      data-testid="shop-target"
-      [options]="shopTargets()"
-      optionValue="playerId"
-      [ngModel]="shopTarget()"
-      (ngModelChange)="shopTarget.set($event)"
-      appendTo="body"
-      [ariaLabel]="'merchant.table.target' | transloco"
-    >
-      <ng-template #selectedItem let-target>
-        {{ target.name ?? ("merchant.table.everyone" | transloco) }}
-      </ng-template>
-      <ng-template #item let-target>
-        {{ target.name ?? ("merchant.table.everyone" | transloco) }}
-      </ng-template>
-    </p-select>
-    <app-table-npcs
-      [npcs]="table.$npcs()"
-      [shopsOpen]="table.$shopsOpen()"
-      [gameMaster]="true"
-      (setShop)="setShop($event)"
-    />
     <div class="scene-actions">
       <p-fileupload
         #uploader
@@ -263,14 +250,14 @@
         [auto]="true"
         [customUpload]="true"
         chooseIcon="pi pi-upload"
-        [chooseLabel]="'table.addImage' | transloco"
+        [chooseLabel]="'table.addImage' | translate"
         [disabled]="uploading()"
         (uploadHandler)="upload($event, uploader)"
       />
       @if (table.$scene()?.illustrationId) {
         <p-button
           icon="pi pi-eye-slash"
-          [label]="'table.hideIllustration' | transloco"
+          [label]="'table.hideIllustration' | translate"
           severity="secondary"
           [text]="true"
           (onClick)="show(null)"
@@ -280,7 +267,7 @@
     @if (table.$quickImageIds().length) {
       <ul
         class="quick-images"
-        [attr.aria-label]="'table.quickImages' | transloco"
+        [attr.aria-label]="'table.quickImages' | translate"
       >
         @for (imageId of table.$quickImageIds(); track imageId) {
           <li [class.active]="table.$scene()?.illustrationId === imageId">
@@ -288,12 +275,12 @@
               type="button"
               class="thumb"
               (click)="show(imageId)"
-              [pTooltip]="'table.showToAll' | transloco"
+              [pTooltip]="'table.showToAll' | translate"
               tooltipPosition="top"
             >
               <app-stored-image
                 [imageId]="imageId"
-                [alt]="'table.quickImage' | transloco"
+                [alt]="'table.quickImage' | translate"
               />
             </button>
             <p-button
@@ -302,14 +289,14 @@
               [rounded]="true"
               size="small"
               styleClass="remove"
-              [ariaLabel]="'table.removeImage' | transloco"
+              [ariaLabel]="'table.removeImage' | translate"
               (onClick)="remove(imageId)"
             />
           </li>
         }
       </ul>
     } @else {
-      <p class="hint">{{ "table.quickImagesHint" | transloco }}</p>
+      <p class="hint">{{ "table.quickImagesHint" | translate }}</p>
     }
   </div>
 </ng-template>
@@ -323,30 +310,99 @@
     (valueChange)="setToolsOpen($event)"
   >
     <p-accordion-panel value="dice" data-testid="gm-tool" data-panel="dice">
-      <p-accordion-header>{{ "dice.title" | transloco }}</p-accordion-header>
+      <p-accordion-header>{{ "dice.title" | translate }}</p-accordion-header>
       <p-accordion-content>
         <app-dice-roller />
       </p-accordion-content>
     </p-accordion-panel>
     <p-accordion-panel value="combat" data-testid="gm-tool" data-panel="combat">
-      <p-accordion-header>{{ "combat.title" | transloco }}</p-accordion-header>
+      <p-accordion-header>{{
+        "table.encounter.title" | translate
+      }}</p-accordion-header>
       <p-accordion-content>
-        @if (combat.$state()?.grid) {
-          <app-combat-order [showRound]="false" />
+        @if (table.$encounter(); as running) {
+          <div class="encounter-running" data-testid="encounter-running">
+            <span>{{
+              "table.encounter.running"
+                | translate
+                  : {
+                      name: running.npc.name,
+                      kind: ("table.encounter." + running.kind | translate),
+                    }
+            }}</span>
+            <button
+              pButton
+              type="button"
+              data-action="end-encounter"
+              icon="pi pi-stop"
+              severity="secondary"
+              [label]="'table.encounter.end' | translate"
+              (click)="endEncounter()"
+            ></button>
+          </div>
+        } @else {
+          @if (!combat.$state()) {
+            <p-selectbutton
+              class="encounter-kind"
+              data-testid="encounter-kind"
+              [options]="encounterKinds()"
+              optionLabel="label"
+              optionValue="value"
+              [allowEmpty]="false"
+              [ngModel]="encounterKind()"
+              (ngModelChange)="pickKind($event)"
+            />
+          }
+          @if (encounterKind() !== "combat" && !combat.$state()) {
+            <div class="encounter-start">
+              <p-select
+                data-testid="encounter-npc"
+                [options]="encounterNpcs()"
+                optionLabel="name"
+                optionValue="id"
+                appendTo="body"
+                [placeholder]="'table.encounter.npcPlaceholder' | translate"
+                [ariaLabel]="'table.encounter.npc' | translate"
+                [ngModel]="encounterNpcId()"
+                (ngModelChange)="encounterNpcId.set($event)"
+              >
+                <ng-template #item let-npc>
+                  <span
+                    data-testid="encounter-npc-option"
+                    [attr.data-name]="npc.name"
+                    >{{ npc.name }}</span
+                  >
+                </ng-template>
+              </p-select>
+              <button
+                pButton
+                type="button"
+                data-action="start-encounter"
+                icon="pi pi-play"
+                [label]="'table.encounter.start' | translate"
+                [disabled]="!encounterNpcId()"
+                (click)="startEncounter()"
+              ></button>
+            </div>
+          } @else {
+            @if (combat.$state()?.grid) {
+              <app-combat-order [showRound]="false" />
+            }
+            <app-combat-gm-panel />
+          }
         }
-        <app-combat-gm-panel />
       </p-accordion-content>
     </p-accordion-panel>
     <p-accordion-panel value="notes" data-testid="gm-tool" data-panel="notes">
       <p-accordion-header>
         <span class="notes-header">
-          <span>{{ "table.notes.title" | transloco }}</span>
+          <span>{{ "table.notes.title" | translate }}</span>
           <small
             class="hint"
             [class.error]="table.$notesState() === 'error'"
             aria-live="polite"
           >
-            {{ "table.notes." + table.$notesState() | transloco }}
+            {{ "table.notes." + table.$notesState() | translate }}
           </small>
         </span>
       </p-accordion-header>
@@ -354,11 +410,11 @@
         <textarea
           pTextarea
           id="gm-notes"
-          [attr.aria-label]="'table.notes.title' | transloco"
+          [attr.aria-label]="'table.notes.title' | translate"
           [maxlength]="notesMaxLength"
           [ngModel]="notes()"
           (ngModelChange)="editNotes($event)"
-          [placeholder]="'table.notes.placeholder' | transloco"
+          [placeholder]="'table.notes.placeholder' | translate"
         ></textarea>
       </p-accordion-content>
     </p-accordion-panel>
@@ -370,7 +426,7 @@
   (visibleChange)="!$event && leaveShop()"
   [modal]="true"
   [dismissableMask]="true"
-  [header]="'merchant.shop.title' | transloco"
+  [header]="'merchant.shop.title' | translate"
   [style]="{ width: 'min(36rem, calc(100vw - 2rem))' }"
 >
   @if (visitedShop(); as shop) {

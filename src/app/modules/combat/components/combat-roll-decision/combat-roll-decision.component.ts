@@ -6,7 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -20,7 +20,7 @@ import { PendingResultView } from '../../models/combat';
 @Component({
   selector: 'app-combat-roll-decision',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslocoPipe, ButtonModule, InputNumberModule],
+  imports: [FormsModule, TranslatePipe, ButtonModule, InputNumberModule],
   template: `
     @if (landed()) {
       @if (combat.$isGameMaster()) {
@@ -30,7 +30,7 @@ import { PendingResultView } from '../../models/combat';
               <strong>
                 {{
                   'combat.pending.line'
-                    | transloco
+                    | translate
                       : {
                           caster: nameOf(pending.casterId),
                           skill: skillNameOf(pending),
@@ -42,7 +42,7 @@ import { PendingResultView } from '../../models/combat';
                 @for (effect of pending.effects; track $index) {
                   {{
                     'combat.skill.' + effect.kind
-                      | transloco
+                      | translate
                         : {
                             amount: effect.amount,
                             attribute: effect.attribute,
@@ -51,7 +51,7 @@ import { PendingResultView } from '../../models/combat';
                   }}{{ $last ? '' : ', ' }}
                 }
                 @if (!pending.success) {
-                  · {{ 'combat.pending.failed' | transloco }}
+                  · {{ 'combat.pending.failed' | translate }}
                 }
               </small>
             </div>
@@ -71,7 +71,7 @@ import { PendingResultView } from '../../models/combat';
                   data-action="apply-edited"
                   size="small"
                   icon="pi pi-check"
-                  [label]="'combat.pending.apply' | transloco"
+                  [label]="'combat.pending.apply' | translate"
                   (click)="applyEdited()"
                 ></button>
                 <button
@@ -80,7 +80,7 @@ import { PendingResultView } from '../../models/combat';
                   size="small"
                   severity="secondary"
                   [text]="true"
-                  [label]="'combat.actions.cancel' | transloco"
+                  [label]="'combat.actions.cancel' | translate"
                   (click)="editing.set(null)"
                 ></button>
               </div>
@@ -92,7 +92,7 @@ import { PendingResultView } from '../../models/combat';
                   data-action="apply"
                   size="small"
                   icon="pi pi-check"
-                  [label]="'combat.pending.apply' | transloco"
+                  [label]="'combat.pending.apply' | translate"
                   (click)="run(combat.apply(pending.id))"
                 ></button>
                 <button
@@ -102,7 +102,7 @@ import { PendingResultView } from '../../models/combat';
                   size="small"
                   severity="secondary"
                   icon="pi pi-pencil"
-                  [label]="'combat.pending.edit' | transloco"
+                  [label]="'combat.pending.edit' | translate"
                   (click)="edit(pending)"
                 ></button>
                 <button
@@ -113,7 +113,7 @@ import { PendingResultView } from '../../models/combat';
                   severity="secondary"
                   [text]="true"
                   icon="pi pi-times"
-                  [label]="'combat.pending.dismiss' | transloco"
+                  [label]="'combat.pending.dismiss' | translate"
                   (click)="run(combat.dismiss(pending.id))"
                 ></button>
               </div>
@@ -126,13 +126,13 @@ import { PendingResultView } from '../../models/combat';
             data-action="close-roll"
             severity="secondary"
             icon="pi pi-times"
-            [label]="'dice.close' | transloco"
+            [label]="'dice.close' | translate"
             (click)="closeRoll()"
           ></button>
         }
       } @else if (rows().length) {
         <span class="deciding" data-testid="deciding">{{
-          'combat.decision.deciding' | transloco
+          'combat.decision.deciding' | translate
         }}</span>
       }
     }

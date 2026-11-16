@@ -1,350 +1,861 @@
 {
-  "version": 1,
+  "version": 2,
   "templates": [
     "{noun} {adjective}",
     "{noun} {suffix}",
     "{noun}",
     "{noun} {adjective} {suffix}"
   ],
-  "nouns": {
-    "active": [
-      {
-        "text": "Frappe",
-        "gender": "f"
-      },
-      {
-        "text": "Boule de feu",
-        "gender": "f"
-      },
-      {
-        "text": "Éclair",
-        "gender": "m"
-      },
-      {
-        "text": "Entaille",
-        "gender": "f"
-      },
-      {
-        "text": "Volée",
-        "gender": "f"
-      },
-      {
-        "text": "Châtiment",
-        "gender": "m"
-      },
-      {
-        "text": "Charge",
-        "gender": "f"
-      },
-      {
-        "text": "Maléfice",
-        "gender": "m"
-      },
-      {
-        "text": "Déflagration",
-        "gender": "f"
-      },
-      {
-        "text": "Fouet",
-        "gender": "m"
-      },
-      {
-        "text": "Barrage",
-        "gender": "m"
-      },
-      {
-        "text": "Fendoir",
-        "gender": "m"
-      },
-      {
-        "text": "Tourbillon",
-        "gender": "m"
-      },
-      {
-        "text": "Estocade",
-        "gender": "f"
-      },
-      {
-        "text": "Tir",
-        "gender": "m"
-      },
-      {
-        "text": "Déferlante",
-        "gender": "f"
-      },
-      {
-        "text": "Pulsation",
-        "gender": "f"
-      },
-      {
-        "text": "Éclat",
-        "gender": "m"
-      },
-      {
-        "text": "Rempart",
-        "gender": "m"
-      },
-      {
-        "text": "Prière",
-        "gender": "f"
-      },
-      {
-        "text": "Ralliement",
-        "gender": "m"
-      },
-      {
-        "text": "Rugissement",
-        "gender": "m"
-      },
-      {
-        "text": "Chant",
-        "gender": "m"
-      },
-      {
-        "text": "Guérison",
-        "gender": "f"
-      },
-      {
-        "text": "Bénédiction",
-        "gender": "f"
-      },
-      {
-        "text": "Stratagème",
-        "gender": "m"
-      }
-    ],
-    "passive": [
-      {
-        "text": "Résilience",
-        "gender": "f"
-      },
-      {
-        "text": "Concentration",
-        "gender": "f"
-      },
-      {
-        "text": "Instinct",
-        "gender": "m"
-      },
-      {
-        "text": "Maîtrise",
-        "gender": "f"
-      },
-      {
-        "text": "Discipline",
-        "gender": "f"
-      },
-      {
-        "text": "Vigueur",
-        "gender": "f"
-      },
-      {
-        "text": "Vigilance",
-        "gender": "f"
-      },
-      {
-        "text": "Entraînement",
-        "gender": "m"
-      },
-      {
-        "text": "Robustesse",
-        "gender": "f"
-      },
-      {
-        "text": "Aplomb",
-        "gender": "m"
-      },
-      {
-        "text": "Intuition",
-        "gender": "f"
-      },
-      {
-        "text": "Endurance",
-        "gender": "f"
-      },
-      {
-        "text": "Prestance",
-        "gender": "f"
-      },
-      {
-        "text": "Réflexe",
-        "gender": "m"
-      },
-      {
-        "text": "Volonté",
-        "gender": "f"
-      },
-      {
-        "text": "Ténacité",
-        "gender": "f"
-      },
-      {
-        "text": "Grâce",
-        "gender": "f"
-      },
-      {
-        "text": "Ruse",
-        "gender": "f"
-      },
-      {
-        "text": "Détermination",
-        "gender": "f"
-      },
-      {
-        "text": "Stoïcisme",
-        "gender": "m"
-      },
-      {
-        "text": "Prudence",
-        "gender": "f"
-      },
-      {
-        "text": "Héritage",
-        "gender": "m"
-      },
-      {
-        "text": "Don",
-        "gender": "m"
-      },
-      {
-        "text": "Sang-froid",
-        "gender": "m"
-      }
-    ]
-  },
   "adjectives": [
-    "rapide",
     {
-      "m": "écrasant",
-      "f": "écrasante"
+      "m": "ancien",
+      "f": "ancienne"
     },
     {
-      "m": "brûlant",
-      "f": "brûlante"
+      "m": "mystérieux",
+      "f": "mystérieuse"
     },
     {
-      "m": "ténébreux",
-      "f": "ténébreuse"
+      "m": "légendaire",
+      "f": "légendaire"
     },
     {
-      "m": "radieux",
-      "f": "radieuse"
+      "m": "oublié",
+      "f": "oubliée"
     },
-    "sauvage",
-    {
-      "m": "silencieux",
-      "f": "silencieuse"
-    },
-    {
-      "m": "tonitruant",
-      "f": "tonitruante"
-    },
-    {
-      "m": "glacé",
-      "f": "glacée"
-    },
-    {
-      "m": "vertueux",
-      "f": "vertueuse"
-    },
-    {
-      "m": "rusé",
-      "f": "rusée"
-    },
-    {
-      "m": "fougueux",
-      "f": "fougueuse"
-    },
-    {
-      "m": "sacré",
-      "f": "sacrée"
-    },
-    "impitoyable",
-    {
-      "m": "évanescent",
-      "f": "évanescente"
-    },
-    {
-      "m": "flamboyant",
-      "f": "flamboyante"
-    },
-    {
-      "m": "perçant",
-      "f": "perçante"
-    },
-    {
-      "m": "spectral",
-      "f": "spectrale"
-    },
-    "inflexible",
     {
       "m": "éternel",
       "f": "éternelle"
     },
-    "implacable",
     {
-      "m": "doux",
-      "f": "douce"
+      "m": "secret",
+      "f": "secrète"
     },
     {
-      "m": "furieux",
-      "f": "furieuse"
+      "m": "rare",
+      "f": "rare"
     },
     {
-      "m": "caché",
-      "f": "cachée"
+      "m": "singulier",
+      "f": "singulière"
     }
   ],
   "suffixes": [
-    "de la tempête",
-    "des déchus",
-    "de cendres",
-    "de la traque",
-    "de l'aube",
-    "des profondeurs",
-    "d'épines",
-    "du néant",
-    "de fer",
-    "du dernier rempart",
-    "de braises",
-    "de la lune",
-    "du dépit",
     "des anciens",
-    "de givre",
-    "des terres sauvages",
-    "de sang",
-    "de la clémence",
-    "du crépuscule",
-    "du serpent",
     "du serment",
+    "de la lune",
     "du silence",
-    "du phénix",
-    "de la fureur"
+    "des terres sauvages",
+    "du voyageur",
+    "de l'aube"
   ],
-  "descriptions": {
-    "active": [
-      "Un geste éprouvé qui récompense la main sûre.",
-      "Née de cent escarmouches, elle met fin aux combats en un clin d'œil.",
-      "Elle coûte cher, mais personne ne l'oublie.",
-      "Enseignée seulement à ceux qui ont gagné la confiance des anciens.",
-      "Une technique spectaculaire au but très pratique.",
-      "Puise dans les réserves de son auteur pour renverser la situation.",
-      "Facile à apprendre, infinie à perfectionner.",
-      "Souvent la dernière chose que l'ennemi voit venir.",
-      "Appréciée des vétérans qui aiment finir ce qu'ils commencent.",
-      "Elle demande l'esprit clair et un réflexe vif."
-    ],
-    "passive": [
-      "Façonne discrètement tout ce que fait son possesseur.",
-      "Des années de pratique en ont fait une seconde nature.",
-      "Personne ne la remarque avant qu'elle ne sauve la mise.",
-      "Un don durable laissé par un long entraînement.",
-      "Inutile de l'invoquer : elle est simplement là.",
-      "Un trait qui se renforce à chaque épreuve.",
-      "Influence la manière dont son possesseur affronte le danger.",
-      "Une vieille habitude devenue talent.",
-      "Ceux qui la possèdent en parlent rarement.",
-      "Acquise à la dure et jamais oubliée."
-    ]
+  "kinds": {
+    "attack": {
+      "adjectives": [
+        {
+          "m": "écrasant",
+          "f": "écrasante"
+        },
+        "impitoyable",
+        {
+          "m": "furieux",
+          "f": "furieuse"
+        },
+        {
+          "m": "fougueux",
+          "f": "fougueuse"
+        },
+        "implacable",
+        {
+          "m": "perçant",
+          "f": "perçante"
+        },
+        "rapide",
+        "sauvage"
+      ],
+      "suffixes": [
+        "de la tempête",
+        "des déchus",
+        "de la traque",
+        "d'épines",
+        "de la fureur",
+        "du dépit",
+        "du dernier rempart"
+      ],
+      "descriptions": [
+        "Un geste éprouvé qui récompense la main sûre.",
+        "{g:Né|Née} de cent escarmouches, {g:il|elle} met fin aux combats en un clin d'œil.",
+        "{g:Coûteux|Coûteuse}, mais personne ne l'oublie.",
+        "Une technique spectaculaire au but très pratique.",
+        "Puise dans les réserves de son auteur pour renverser la situation.",
+        "Facile à apprendre, {g:infini|infinie} à perfectionner.",
+        "Souvent la dernière chose que l'ennemi voit venir.",
+        "{g:Apprécié|Appréciée} des vétérans qui aiment finir ce qu'ils commencent.",
+        "Un geste appris pendant {event}."
+      ]
+    },
+    "strike": {
+      "nouns": [
+        {
+          "text": "Frappe",
+          "gender": "f"
+        },
+        {
+          "text": "Entaille",
+          "gender": "f"
+        },
+        {
+          "text": "Estocade",
+          "gender": "f"
+        },
+        {
+          "text": "Fendoir",
+          "gender": "m"
+        },
+        {
+          "text": "Charge",
+          "gender": "f"
+        },
+        {
+          "text": "Tourbillon",
+          "gender": "m"
+        },
+        {
+          "text": "Fouet",
+          "gender": "m"
+        },
+        {
+          "text": "Châtiment",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Un coup net, porté au corps à corps sans une hésitation.",
+        "Il faut un bras solide et le sang-froid d'attendre l'ouverture.",
+        "Un geste de mêlée que les vétérans enseignent aux plus jeunes."
+      ],
+      "adjectives": [
+        {
+          "m": "tranchant",
+          "f": "tranchante"
+        },
+        "brutal"
+      ],
+      "suffixes": [
+        "de fer",
+        "de sang"
+      ]
+    },
+    "shot": {
+      "nouns": [
+        {
+          "text": "Tir",
+          "gender": "m"
+        },
+        {
+          "text": "Volée",
+          "gender": "f"
+        },
+        {
+          "text": "Barrage",
+          "gender": "m"
+        },
+        {
+          "text": "Flèche",
+          "gender": "f"
+        },
+        {
+          "text": "Carreau",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Un tir lointain, ajusté avant que la cible ne bouge.",
+        "L'œil sûr et la main qui ne tremble pas font le reste.",
+        "{g:Il|Elle} claque, et l'ennemi n'a pas le temps de comprendre."
+      ],
+      "adjectives": [
+        {
+          "m": "précis",
+          "f": "précise"
+        },
+        "mortel"
+      ],
+      "suffixes": [
+        "du chasseur"
+      ]
+    },
+    "fire-spell": {
+      "nouns": [
+        {
+          "text": "Boule de feu",
+          "gender": "f"
+        },
+        {
+          "text": "Déflagration",
+          "gender": "f"
+        },
+        {
+          "text": "Brasier",
+          "gender": "m"
+        },
+        {
+          "text": "Embrasement",
+          "gender": "m"
+        },
+        {
+          "text": "Explosion",
+          "gender": "f"
+        }
+      ],
+      "descriptions": [
+        "Un souffle de flammes que l'on sent avant de {g:le|la} voir.",
+        "La chaleur est telle que l'air tremble autour de {g:lui|elle}.",
+        "Le feu ne pardonne rien, pas même au lanceur distrait."
+      ],
+      "adjectives": [
+        {
+          "m": "brûlant",
+          "f": "brûlante"
+        },
+        {
+          "m": "flamboyant",
+          "f": "flamboyante"
+        },
+        {
+          "m": "ardent",
+          "f": "ardente"
+        }
+      ],
+      "suffixes": [
+        "de cendres",
+        "du phénix",
+        "de braises"
+      ]
+    },
+    "frost-spell": {
+      "nouns": [
+        {
+          "text": "Lance",
+          "gender": "f"
+        },
+        {
+          "text": "Javelot",
+          "gender": "m"
+        },
+        {
+          "text": "Éclat",
+          "gender": "m"
+        },
+        {
+          "text": "Rafale",
+          "gender": "f"
+        },
+        {
+          "text": "Souffle",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Un froid mordant qui fige l'ennemi sur place.",
+        "Le givre court sur le sol avant de happer sa victime.",
+        "Un sort d'hiver, lent à lancer et plus lent encore à fondre."
+      ],
+      "adjectives": [
+        {
+          "m": "glacé",
+          "f": "glacée"
+        },
+        {
+          "m": "gelé",
+          "f": "gelée"
+        },
+        {
+          "m": "polaire",
+          "f": "polaire"
+        }
+      ],
+      "suffixes": [
+        "de givre",
+        "de l'hiver"
+      ]
+    },
+    "lightning-spell": {
+      "nouns": [
+        {
+          "text": "Éclair",
+          "gender": "m"
+        },
+        {
+          "text": "Foudre",
+          "gender": "f"
+        },
+        {
+          "text": "Décharge",
+          "gender": "f"
+        },
+        {
+          "text": "Pulsation",
+          "gender": "f"
+        },
+        {
+          "text": "Orage",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Un éclat de lumière, puis le fracas du tonnerre.",
+        "La foudre frappe où elle veut, mais jamais par hasard.",
+        "Il faut un sang-froid d'acier pour {g:le|la} retenir jusqu'au bon moment."
+      ],
+      "adjectives": [
+        {
+          "m": "tonitruant",
+          "f": "tonitruante"
+        },
+        {
+          "m": "fulgurant",
+          "f": "fulgurante"
+        }
+      ],
+      "suffixes": [
+        "de la tempête",
+        "du tonnerre"
+      ]
+    },
+    "shadow-spell": {
+      "nouns": [
+        {
+          "text": "Étreinte",
+          "gender": "f"
+        },
+        {
+          "text": "Siphon",
+          "gender": "m"
+        },
+        {
+          "text": "Vortex",
+          "gender": "m"
+        },
+        {
+          "text": "Tentacule",
+          "gender": "f"
+        },
+        {
+          "text": "Voile",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Les ombres s'allongent et se referment sur la cible.",
+        "Une magie interdite qui se nourrit de la peur.",
+        "Personne n'en parle, tout le monde {g:le|la} redoute."
+      ],
+      "adjectives": [
+        {
+          "m": "ténébreux",
+          "f": "ténébreuse"
+        },
+        {
+          "m": "spectral",
+          "f": "spectrale"
+        },
+        {
+          "m": "évanescent",
+          "f": "évanescente"
+        }
+      ],
+      "suffixes": [
+        "du néant",
+        "du crépuscule",
+        "du silence"
+      ]
+    },
+    "healing": {
+      "descriptions": [
+        "Referme les plaies avant qu'elles ne deviennent graves.",
+        "Un geste doux qui remet sur pied les plus fatigués.",
+        "{g:Apprécié|Appréciée} de tous, y compris de ceux qui n'en parlent pas.",
+        "{g:Appris|Apprise} pendant {event}, quand il a fallu soigner à la hâte."
+      ],
+      "adjectives": [
+        {
+          "m": "doux",
+          "f": "douce"
+        },
+        {
+          "m": "radieux",
+          "f": "radieuse"
+        },
+        {
+          "m": "sacré",
+          "f": "sacrée"
+        },
+        {
+          "m": "bienfaisant",
+          "f": "bienfaisante"
+        }
+      ],
+      "suffixes": [
+        "de la clémence",
+        "de l'aube",
+        "de la lune"
+      ]
+    },
+    "prayer": {
+      "nouns": [
+        {
+          "text": "Prière",
+          "gender": "f"
+        },
+        {
+          "text": "Litanie",
+          "gender": "f"
+        },
+        {
+          "text": "Psaume",
+          "gender": "m"
+        },
+        {
+          "text": "Oraison",
+          "gender": "f"
+        },
+        {
+          "text": "Châtiment divin",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "{g:Murmuré|Murmurée} à genoux, {g:il|elle} apaise les corps comme les esprits.",
+        "Une ferveur ancienne guide chaque mot.",
+        "Seuls les croyants sincères en tirent un vrai secours."
+      ]
+    },
+    "remedy": {
+      "nouns": [
+        {
+          "text": "Guérison",
+          "gender": "f"
+        },
+        {
+          "text": "Baume",
+          "gender": "m"
+        },
+        {
+          "text": "Onguent",
+          "gender": "m"
+        },
+        {
+          "text": "Cataplasme",
+          "gender": "m"
+        },
+        {
+          "text": "Élixir",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Un remède de bonne femme, éprouvé depuis des générations.",
+        "{g:Il|Elle} sent fort, mais {g:il|elle} fait son effet.",
+        "Quelques herbes, un peu de patience, et la douleur s'efface."
+      ]
+    },
+    "support": {
+      "descriptions": [
+        "Change le cours d'une bataille sans qu'on voie un seul coup.",
+        "{g:Il|Elle} n'inflige rien, mais {g:il|elle} pèse sur l'issue du combat.",
+        "Un art subtil dont les effets durent bien après le geste.",
+        "{g:Enseigné|Enseignée} seulement à ceux qui ont gagné la confiance des anciens."
+      ],
+      "adjectives": [
+        {
+          "m": "subtil",
+          "f": "subtile"
+        },
+        {
+          "m": "puissant",
+          "f": "puissante"
+        },
+        {
+          "m": "précieux",
+          "f": "précieuse"
+        }
+      ],
+      "suffixes": [
+        "du serment",
+        "des anciens"
+      ]
+    },
+    "blessing": {
+      "nouns": [
+        {
+          "text": "Bénédiction",
+          "gender": "f"
+        },
+        {
+          "text": "Rempart",
+          "gender": "m"
+        },
+        {
+          "text": "Égide",
+          "gender": "f"
+        },
+        {
+          "text": "Grâce divine",
+          "gender": "f"
+        },
+        {
+          "text": "Sérénité",
+          "gender": "f"
+        }
+      ],
+      "descriptions": [
+        "Une lumière tiède entoure celui qui {g:le|la} reçoit.",
+        "Un vœu murmuré pour ceux qui marchent au front.",
+        "Le danger ne passe plus tout à fait de la même façon."
+      ],
+      "suffixes": [
+        "de l'aube",
+        "de la clémence"
+      ]
+    },
+    "curse": {
+      "nouns": [
+        {
+          "text": "Maléfice",
+          "gender": "m"
+        },
+        {
+          "text": "Malédiction",
+          "gender": "f"
+        },
+        {
+          "text": "Fléau",
+          "gender": "m"
+        },
+        {
+          "text": "Sortilège",
+          "gender": "m"
+        },
+        {
+          "text": "Mauvais œil",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Un mot soufflé, et la chance tourne chez l'adversaire.",
+        "Les victimes n'oublient jamais d'où vient leur malheur.",
+        "{g:Il|Elle} ronge la volonté de l'ennemi pendant des heures."
+      ],
+      "adjectives": [
+        {
+          "m": "maudit",
+          "f": "maudite"
+        },
+        {
+          "m": "pernicieux",
+          "f": "pernicieuse"
+        }
+      ],
+      "suffixes": [
+        "du dépit",
+        "du néant",
+        "des déchus"
+      ]
+    },
+    "war-cry": {
+      "nouns": [
+        {
+          "text": "Rugissement",
+          "gender": "m"
+        },
+        {
+          "text": "Ralliement",
+          "gender": "m"
+        },
+        {
+          "text": "Cri de guerre",
+          "gender": "m"
+        },
+        {
+          "text": "Stratagème",
+          "gender": "m"
+        },
+        {
+          "text": "Hurlement",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Un cri qui galvanise les alliés et fait hésiter l'ennemi.",
+        "{g:Il|Elle} porte loin, au-dessus du fracas des armes.",
+        "Quand tout vacille, {g:il|elle} rappelle pourquoi l'on se bat."
+      ],
+      "adjectives": [
+        {
+          "m": "tonitruant",
+          "f": "tonitruante"
+        },
+        "farouche"
+      ],
+      "suffixes": [
+        "de la fureur",
+        "du dernier rempart"
+      ]
+    },
+    "song": {
+      "nouns": [
+        {
+          "text": "Chant",
+          "gender": "m"
+        },
+        {
+          "text": "Ballade",
+          "gender": "f"
+        },
+        {
+          "text": "Mélodie",
+          "gender": "f"
+        },
+        {
+          "text": "Complainte",
+          "gender": "f"
+        },
+        {
+          "text": "Refrain",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Une mélodie qui trouve le chemin des cœurs.",
+        "Chaque note porte un peu de courage.",
+        "Un air ancien dont tout le monde connaît les paroles."
+      ],
+      "adjectives": [
+        {
+          "m": "mélodieux",
+          "f": "mélodieuse"
+        },
+        {
+          "m": "envoûtant",
+          "f": "envoûtante"
+        }
+      ],
+      "suffixes": [
+        "des anciens",
+        "de la lune"
+      ]
+    },
+    "trait": {
+      "adjectives": [
+        {
+          "m": "discret",
+          "f": "discrète"
+        },
+        {
+          "m": "patient",
+          "f": "patiente"
+        },
+        {
+          "m": "rusé",
+          "f": "rusée"
+        },
+        {
+          "m": "acquis",
+          "f": "acquise"
+        }
+      ],
+      "suffixes": [
+        "des années",
+        "de l'expérience"
+      ],
+      "descriptions": [
+        "Façonne discrètement tout ce que fait son possesseur.",
+        "Des années de pratique en ont fait une seconde nature.",
+        "Personne ne {g:le|la} remarque avant qu'{g:il|elle} ne sauve la mise.",
+        "Un don durable laissé par un long entraînement.",
+        "Inutile de l'invoquer : {g:il|elle} est simplement là.",
+        "Un trait qui se renforce à chaque épreuve.",
+        "Influence la manière dont son possesseur affronte le danger.",
+        "Ceux qui {g:le|la} possèdent en parlent rarement.",
+        "{g:Acquis|Acquise} à la dure et jamais oubliée."
+      ]
+    },
+    "toughness": {
+      "nouns": [
+        {
+          "text": "Résilience",
+          "gender": "f"
+        },
+        {
+          "text": "Vigueur",
+          "gender": "f"
+        },
+        {
+          "text": "Robustesse",
+          "gender": "f"
+        },
+        {
+          "text": "Endurance",
+          "gender": "f"
+        },
+        {
+          "text": "Ténacité",
+          "gender": "f"
+        },
+        {
+          "text": "Stoïcisme",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Le corps encaisse ce que l'esprit refuse de céder.",
+        "Les coups pleuvent, et {g:il|elle} reste debout.",
+        "Une constitution forgée par les épreuves."
+      ],
+      "adjectives": [
+        {
+          "m": "inébranlable",
+          "f": "inébranlable"
+        },
+        {
+          "m": "endurci",
+          "f": "endurcie"
+        }
+      ]
+    },
+    "focus": {
+      "nouns": [
+        {
+          "text": "Concentration",
+          "gender": "f"
+        },
+        {
+          "text": "Maîtrise",
+          "gender": "f"
+        },
+        {
+          "text": "Discipline",
+          "gender": "f"
+        },
+        {
+          "text": "Volonté",
+          "gender": "f"
+        },
+        {
+          "text": "Détermination",
+          "gender": "f"
+        },
+        {
+          "text": "Entraînement",
+          "gender": "m"
+        },
+        {
+          "text": "Sang-froid",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "L'esprit clair, la main sûre, rien ne vient troubler le geste.",
+        "Des heures d'exercice ont affûté chaque pensée.",
+        "Le monde se tait quand il faut viser juste."
+      ],
+      "adjectives": [
+        {
+          "m": "serein",
+          "f": "sereine"
+        },
+        {
+          "m": "studieux",
+          "f": "studieuse"
+        }
+      ]
+    },
+    "agility": {
+      "nouns": [
+        {
+          "text": "Instinct",
+          "gender": "m"
+        },
+        {
+          "text": "Réflexe",
+          "gender": "m"
+        },
+        {
+          "text": "Vigilance",
+          "gender": "f"
+        },
+        {
+          "text": "Intuition",
+          "gender": "f"
+        },
+        {
+          "text": "Ruse",
+          "gender": "f"
+        },
+        {
+          "text": "Prudence",
+          "gender": "f"
+        },
+        {
+          "text": "Don",
+          "gender": "m"
+        }
+      ],
+      "descriptions": [
+        "Le corps a réagi avant que l'esprit ne comprenne.",
+        "Un pas de côté, et le danger passe.",
+        "Rien ne surprend celui qui {g:le|la} possède."
+      ],
+      "adjectives": [
+        {
+          "m": "vif",
+          "f": "vive"
+        },
+        {
+          "m": "agile",
+          "f": "agile"
+        }
+      ]
+    },
+    "presence": {
+      "nouns": [
+        {
+          "text": "Prestance",
+          "gender": "f"
+        },
+        {
+          "text": "Aplomb",
+          "gender": "m"
+        },
+        {
+          "text": "Grâce",
+          "gender": "f"
+        },
+        {
+          "text": "Héritage",
+          "gender": "m"
+        },
+        {
+          "text": "Autorité",
+          "gender": "f"
+        }
+      ],
+      "descriptions": [
+        "Il suffit d'entrer dans la pièce pour qu'on se taise.",
+        "Une allure qui impose le respect avant même la première parole.",
+        "Les alliés se redressent, les rivaux hésitent."
+      ],
+      "adjectives": [
+        {
+          "m": "majestueux",
+          "f": "majestueuse"
+        },
+        {
+          "m": "noble",
+          "f": "noble"
+        }
+      ]
+    }
   }
 }

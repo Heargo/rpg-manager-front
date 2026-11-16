@@ -34,7 +34,7 @@ export class WorldSessionBusiness {
     // Closed (or another world opened) while loading: this open is out of date.
     if (attempt !== this.opening) return world;
     this.world.set(world);
-    this.activePacks.set(world.packs ?? []);
+    this.activePacks.set(world.packs ?? [], world.language);
     this.service.publishInfo(toWorldInfo(world));
     return world;
   }
@@ -42,7 +42,7 @@ export class WorldSessionBusiness {
   close(): void {
     this.opening++;
     this.world.set(null);
-    this.activePacks.set(null);
+    this.activePacks.set(null, null);
   }
 
   /** Applies a change to the open world and saves it. Runs after any change already in progress. */
@@ -54,7 +54,7 @@ export class WorldSessionBusiness {
       // The world may have been closed while saving.
       if (this.world()?.id === saved.id) {
         this.world.set(saved);
-        this.activePacks.set(saved.packs ?? []);
+        this.activePacks.set(saved.packs ?? [], saved.language);
         this.service.publishInfo(toWorldInfo(saved));
       }
       return saved;

@@ -1,10 +1,10 @@
 @if (sections() !== "offline") {
   <section class="section" data-testid="rules-section-progression">
     <fieldset class="level-curve">
-      <legend>{{ "world.rules.progression" | transloco }}</legend>
+      <legend>{{ "world.rules.progression" | translate }}</legend>
       <div class="field">
         <label for="stat-points">{{
-          "world.fields.startingStatPoints" | transloco
+          "world.fields.startingStatPoints" | translate
         }}</label>
         <p-inputnumber
           inputId="stat-points"
@@ -14,12 +14,12 @@
           (ngModelChange)="patch({ startingStatPoints: $event ?? 0 })"
         />
         @if (errors().startingStatPoints; as key) {
-          <small class="error">{{ key | transloco }}</small>
+          <small class="error">{{ key | translate }}</small>
         }
       </div>
       <div class="formula">
         <div class="formula-field">
-          <label for="level-curve">{{ "world.level.curve" | transloco }}</label>
+          <label for="level-curve">{{ "world.level.curve" | translate }}</label>
           <p-select
             inputId="level-curve"
             name="level-curve"
@@ -30,16 +30,16 @@
             appendTo="body"
           >
             <ng-template #selectedItem let-preset>{{
-              "world.level.presets." + preset | transloco
+              "world.level.presets." + preset | translate
             }}</ng-template>
             <ng-template #item let-preset>{{
-              "world.level.presets." + preset | transloco
+              "world.level.presets." + preset | translate
             }}</ng-template>
           </p-select>
         </div>
         @if (levelCurve().preset === "custom") {
           <label class="formula-field wide">
-            <span>{{ "world.fields.expression" | transloco }}</span>
+            <span>{{ "world.fields.expression" | translate }}</span>
             <input
               pInputText
               type="text"
@@ -51,7 +51,7 @@
             />
           </label>
           <small class="hint wide">{{
-            "world.level.customHelp" | transloco
+            "world.level.customHelp" | translate
           }}</small>
         }
         @if (curveError(); as error) {
@@ -61,13 +61,13 @@
             data-testid="level-curve-error"
             >{{
               error.key
-                | transloco
+                | translate
                   : { position: (error.position ?? 0) + 1, level: error.level }
             }}</small
           >
         }
         <small class="hint wide">
-          {{ "world.level.preview" | transloco }}:
+          {{ "world.level.preview" | translate }}:
           <span
             class="curve-preview"
             data-testid="level-curve-preview"
@@ -87,7 +87,7 @@
                 <app-formula-chart
                   [values]="curveChart()"
                   [startLevel]="2"
-                  [label]="'formula.chart.xpLabel' | transloco"
+                  [label]="'formula.chart.xpLabel' | translate"
                 />
               </span>
             }
@@ -97,7 +97,7 @@
       <div class="field-pair">
         <div class="field">
           <label for="max-level">{{
-            "world.level.maxLevel" | transloco
+            "world.level.maxLevel" | translate
           }}</label>
           <p-inputnumber
             inputId="max-level"
@@ -108,12 +108,12 @@
             (ngModelChange)="patch({ maxLevel: $event ?? 0 })"
           />
           @if (errors().maxLevel; as key) {
-            <small class="error">{{ key | transloco }}</small>
+            <small class="error">{{ key | translate }}</small>
           }
         </div>
         <div class="field">
           <label for="stat-points-per-level">{{
-            "world.level.statPointsPerLevel" | transloco
+            "world.level.statPointsPerLevel" | translate
           }}</label>
           <p-inputnumber
             inputId="stat-points-per-level"
@@ -123,14 +123,14 @@
             (ngModelChange)="patch({ statPointsPerLevel: $event ?? 0 })"
           />
           @if (errors().statPointsPerLevel; as key) {
-            <small class="error">{{ key | transloco }}</small>
+            <small class="error">{{ key | translate }}</small>
           }
         </div>
       </div>
       <div class="field-pair">
         <div class="field">
           <label for="starting-skill-points">{{
-            "world.fields.startingSkillPoints" | transloco
+            "world.fields.startingSkillPoints" | translate
           }}</label>
           <p-inputnumber
             inputId="starting-skill-points"
@@ -140,12 +140,12 @@
             (ngModelChange)="patch({ startingSkillPoints: $event ?? 0 })"
           />
           @if (errors().startingSkillPoints; as key) {
-            <small class="error">{{ key | transloco }}</small>
+            <small class="error">{{ key | translate }}</small>
           }
         </div>
         <div class="field">
           <label for="skill-points-per-level">{{
-            "world.level.skillPointsPerLevel" | transloco
+            "world.level.skillPointsPerLevel" | translate
           }}</label>
           <p-inputnumber
             inputId="skill-points-per-level"
@@ -155,7 +155,7 @@
             (ngModelChange)="patch({ skillPointsPerLevel: $event ?? 0 })"
           />
           @if (errors().skillPointsPerLevel; as key) {
-            <small class="error">{{ key | transloco }}</small>
+            <small class="error">{{ key | translate }}</small>
           }
         </div>
       </div>
@@ -164,10 +164,10 @@
 
   <section class="section" data-testid="rules-section-economy">
     <fieldset class="level-curve">
-      <legend>{{ "world.rules.economy" | transloco }}</legend>
+      <legend>{{ "world.rules.economy" | translate }}</legend>
       <div class="field">
         <label for="money">{{
-          "world.fields.startingMoney" | transloco
+          "world.fields.startingMoney" | translate
         }}</label>
         <app-coin-input
           id="money"
@@ -175,7 +175,7 @@
           (valueChange)="patch({ startingMoney: $event })"
         />
         @if (errors().startingMoney; as key) {
-          <small class="error">{{ key | transloco }}</small>
+          <small class="error">{{ key | translate }}</small>
         }
       </div>
       <div class="toggle">
@@ -185,13 +185,13 @@
           (ngModelChange)="patch({ sellAnywhere: $event })"
         />
         <label for="sell-anywhere">{{
-          "world.rules.selling.sellAnywhere" | transloco
+          "world.rules.selling.sellAnywhere" | translate
         }}</label>
       </div>
-      <p class="hint">{{ "world.rules.selling.hint" | transloco }}</p>
+      <p class="hint">{{ "world.rules.selling.hint" | translate }}</p>
       <div class="field">
         <label for="sell-anywhere-ratio">{{
-          "world.rules.selling.sellAnywhereRatio" | transloco
+          "world.rules.selling.sellAnywhereRatio" | translate
         }}</label>
         <p-inputnumber
           inputId="sell-anywhere-ratio"
@@ -206,12 +206,12 @@
           (ngModelChange)="patch({ sellAnywhereRatio: $event ?? 0 })"
         />
         @if (errors().sellAnywhereRatio; as key) {
-          <small class="error">{{ key | transloco }}</small>
+          <small class="error">{{ key | translate }}</small>
         }
       </div>
       <div class="field">
         <label for="merchant-buy-ratio">{{
-          "world.rules.selling.merchantBuyRatio" | transloco
+          "world.rules.selling.merchantBuyRatio" | translate
         }}</label>
         <p-inputnumber
           inputId="merchant-buy-ratio"
@@ -226,12 +226,12 @@
           (ngModelChange)="patch({ merchantBuyRatio: $event ?? 0 })"
         />
         @if (errors().merchantBuyRatio; as key) {
-          <small class="error">{{ key | transloco }}</small>
+          <small class="error">{{ key | translate }}</small>
         }
       </div>
       <div class="field">
         <label for="merchant-sell-ratio">{{
-          "world.rules.selling.merchantSellRatio" | transloco
+          "world.rules.selling.merchantSellRatio" | translate
         }}</label>
         <p-inputnumber
           inputId="merchant-sell-ratio"
@@ -246,7 +246,7 @@
           (ngModelChange)="patch({ merchantSellRatio: $event ?? 0 })"
         />
         @if (errors().merchantSellRatio; as key) {
-          <small class="error">{{ key | transloco }}</small>
+          <small class="error">{{ key | translate }}</small>
         }
       </div>
     </fieldset>
@@ -256,8 +256,8 @@
 @if (sections() !== "rules") {
   <section class="section" data-testid="rules-section-offline">
     <fieldset class="offline">
-      <legend>{{ "world.fields.offlineTitle" | transloco }}</legend>
-      <p class="hint">{{ "world.fields.offlineHint" | transloco }}</p>
+      <legend>{{ "world.fields.offlineTitle" | translate }}</legend>
+      <p class="hint">{{ "world.fields.offlineHint" | translate }}</p>
       @for (feature of offlineFeatures; track feature) {
         <div class="toggle">
           <p-toggleswitch
@@ -266,7 +266,7 @@
             (ngModelChange)="setOffline(feature, $event)"
           />
           <label [for]="'offline-' + feature">{{
-            "world.offline." + feature | transloco
+            "world.offline." + feature | translate
           }}</label>
         </div>
       }
@@ -277,8 +277,24 @@
 @if (sections() !== "offline") {
   <section class="section" data-testid="rules-section-packs">
     <fieldset class="offline">
-      <legend>{{ "world.fields.packsTitle" | transloco }}</legend>
-      <p class="hint">{{ "world.fields.packsHint" | transloco }}</p>
+      <legend>{{ "world.fields.packsTitle" | translate }}</legend>
+      <p class="hint">{{ "world.fields.packsHint" | translate }}</p>
+      <div class="field">
+        <label for="world-language">{{
+          "world.fields.language" | translate
+        }}</label>
+        <p-select
+          inputId="world-language"
+          name="world-language"
+          data-testid="world-language-select"
+          [options]="languageOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="worldLanguage()"
+          (ngModelChange)="patch({ language: $event })"
+          appendTo="body"
+        />
+      </div>
       @for (pack of installedPacks(); track pack.id) {
         <div class="toggle" data-testid="pack-row" [attr.data-pack]="pack.id">
           <p-checkbox
@@ -288,11 +304,18 @@
             (ngModelChange)="setPack(pack.id, $event)"
           />
           <label [for]="'pack-' + pack.id">{{ pack.name }}</label>
-          <p-tag
-            data-testid="pack-language"
-            [value]="pack.language.toUpperCase()"
-            severity="secondary"
-          />
+          @if (pack.language) {
+            <p-tag
+              data-testid="pack-language"
+              [value]="pack.language.toUpperCase()"
+              severity="secondary"
+            />
+          }
+          @if (packNote(pack); as note) {
+            <small class="hint" data-testid="pack-note">{{
+              note | translate
+            }}</small>
+          }
         </div>
       }
       @for (pack of missingPacks(); track pack.id) {
@@ -300,14 +323,14 @@
           <span>{{ pack.id }}</span>
           <p-tag
             data-testid="pack-missing"
-            [value]="'world.fields.packMissing' | transloco"
+            [value]="'world.fields.packMissing' | translate"
             severity="warn"
           />
           @if (pack.official) {
             <p-button
               data-testid="pack-install"
               size="small"
-              [label]="'world.fields.packInstall' | transloco"
+              [label]="'world.fields.packInstall' | translate"
               [loading]="installing() === pack.id"
               (click)="installPack(pack.id)"
             />
@@ -316,7 +339,7 @@
               data-testid="pack-remove"
               size="small"
               severity="secondary"
-              [label]="'world.fields.packRemove' | transloco"
+              [label]="'world.fields.packRemove' | translate"
               (click)="removePack(pack.id)"
             />
           }
@@ -327,8 +350,8 @@
 
   <section class="section" data-testid="rules-section-skills">
     <fieldset class="offline">
-      <legend>{{ "world.rules.skillRolls.title" | transloco }}</legend>
-      <p class="hint">{{ "world.rules.skillRolls.hint" | transloco }}</p>
+      <legend>{{ "world.rules.skillRolls.title" | translate }}</legend>
+      <p class="hint">{{ "world.rules.skillRolls.hint" | translate }}</p>
       <div class="toggle">
         <p-toggleswitch
           inputId="skill-rolls"
@@ -336,7 +359,7 @@
           (ngModelChange)="patch({ skillRollsEnabled: $event })"
         />
         <label for="skill-rolls">{{
-          "world.rules.skillRolls.label" | transloco
+          "world.rules.skillRolls.label" | translate
         }}</label>
       </div>
     </fieldset>
@@ -347,12 +370,12 @@
     data-testid="rules-section-combat"
     [attr.open]="collapsed() ? null : ''"
   >
-    <summary>{{ "world.rules.combat.title" | transloco }}</summary>
+    <summary>{{ "world.rules.combat.title" | translate }}</summary>
     <fieldset class="level-curve">
-      <p class="hint">{{ "world.rules.combat.hint" | transloco }}</p>
+      <p class="hint">{{ "world.rules.combat.hint" | translate }}</p>
       <div class="field">
         <label for="combat-life-attribute">{{
-          "world.rules.combat.lifeAttribute" | transloco
+          "world.rules.combat.lifeAttribute" | translate
         }}</label>
         <p-select
           inputId="combat-life-attribute"
@@ -363,7 +386,7 @@
           (ngModelChange)="patchCombat({ lifeAttribute: $event ?? undefined })"
         />
         @if (errors()["combatLifeAttribute"]; as key) {
-          <small class="error">{{ key | transloco }}</small>
+          <small class="error">{{ key | translate }}</small>
         }
       </div>
       <div class="toggle">
@@ -373,7 +396,7 @@
           (ngModelChange)="setStep('initiative', $event)"
         />
         <label for="combat-step-initiative">{{
-          "world.rules.combat.steps.initiative" | transloco
+          "world.rules.combat.steps.initiative" | translate
         }}</label>
       </div>
       <div class="toggle">
@@ -383,7 +406,7 @@
           (ngModelChange)="setStep('actionCounters', $event)"
         />
         <label for="combat-step-action-counters">{{
-          "world.rules.combat.steps.actionCounters" | transloco
+          "world.rules.combat.steps.actionCounters" | translate
         }}</label>
       </div>
       <div class="toggle">
@@ -393,7 +416,7 @@
           (ngModelChange)="setStep('gmValidation', $event)"
         />
         <label for="combat-step-gm-validation">{{
-          "world.rules.combat.steps.gmValidation" | transloco
+          "world.rules.combat.steps.gmValidation" | translate
         }}</label>
       </div>
       <div class="toggle">
@@ -403,7 +426,7 @@
           (ngModelChange)="setStep('defence', $event)"
         />
         <label for="combat-step-defence">{{
-          "world.rules.combat.steps.defence" | transloco
+          "world.rules.combat.steps.defence" | translate
         }}</label>
       </div>
       <div class="toggle">
@@ -413,13 +436,13 @@
           (ngModelChange)="setStep('rewards', $event)"
         />
         <label for="combat-step-rewards">{{
-          "world.rules.combat.steps.rewards" | transloco
+          "world.rules.combat.steps.rewards" | translate
         }}</label>
       </div>
       @if (combat().steps.initiative) {
         <div class="field">
           <label for="combat-initiative-mode">{{
-            "world.rules.combat.initiativeMode" | transloco
+            "world.rules.combat.initiativeMode" | translate
           }}</label>
           <p-select
             inputId="combat-initiative-mode"
@@ -433,16 +456,16 @@
             "
           >
             <ng-template #selectedItem let-mode>{{
-              "world.rules.combat.modes." + mode | transloco
+              "world.rules.combat.modes." + mode | translate
             }}</ng-template>
             <ng-template #item let-mode>{{
-              "world.rules.combat.modes." + mode | transloco
+              "world.rules.combat.modes." + mode | translate
             }}</ng-template>
           </p-select>
         </div>
         <div class="field">
           <label for="combat-initiative-count">{{
-            "world.rules.combat.initiativeDice" | transloco
+            "world.rules.combat.initiativeDice" | translate
           }}</label>
           <div class="row">
             <p-inputnumber
@@ -467,12 +490,12 @@
             !combatErrors().initiative && errors()["combatInitiative"];
             as key
           ) {
-            <small class="error">{{ key | transloco }}</small>
+            <small class="error">{{ key | translate }}</small>
           }
         </div>
         <div class="field">
           <label for="combat-initiative-formula">{{
-            "world.rules.combat.initiativeFormula" | transloco
+            "world.rules.combat.initiativeFormula" | translate
           }}</label>
           <input
             pInputText
@@ -492,7 +515,7 @@
           />
           @if (combatErrors().initiative) {
             <small class="error" data-testid="combat-error-initiative">{{
-              "world.errors.combatFormula" | transloco
+              "world.errors.combatFormula" | translate
             }}</small>
           }
         </div>
@@ -500,7 +523,7 @@
       @if (combat().steps.actionCounters) {
         <div class="field">
           <span class="label">{{
-            "world.rules.combat.actionTypes" | transloco
+            "world.rules.combat.actionTypes" | translate
           }}</span>
           @for (action of combat().actionTypes; track $index) {
             <div class="row" data-testid="combat-action">
@@ -509,7 +532,7 @@
                 type="text"
                 name="combat-action-name"
                 autocomplete="off"
-                [attr.aria-label]="'world.rules.combat.actionName' | transloco"
+                [attr.aria-label]="'world.rules.combat.actionName' | translate"
                 [value]="action.name"
                 (input)="setAction($index, { name: $any($event.target).value })"
               />
@@ -527,14 +550,14 @@
                   (ngModelChange)="setAction($index, { movement: $event })"
                 />
                 <label [for]="'action-type-movement-' + $index">{{
-                  "world.rules.combat.actionMovement" | transloco
+                  "world.rules.combat.actionMovement" | translate
                 }}</label>
               </div>
               <p-button
                 icon="pi pi-trash"
                 severity="secondary"
                 [text]="true"
-                [ariaLabel]="'world.rules.combat.removeAction' | transloco"
+                [ariaLabel]="'world.rules.combat.removeAction' | translate"
                 (onClick)="removeAction($index)"
               />
             </div>
@@ -547,10 +570,10 @@
             (click)="addAction()"
           >
             <span class="pi pi-plus"></span>
-            {{ "world.rules.combat.addAction" | transloco }}
+            {{ "world.rules.combat.addAction" | translate }}
           </button>
           @if (errors()["combatActionTypes"]; as key) {
-            <small class="error">{{ key | transloco }}</small>
+            <small class="error">{{ key | translate }}</small>
           }
         </div>
       }
@@ -561,13 +584,13 @@
           (ngModelChange)="setGrid({ enabled: $event })"
         />
         <label for="combat-grid">{{
-          "world.rules.combat.grid" | transloco
+          "world.rules.combat.grid" | translate
         }}</label>
       </div>
       @if (combat().grid.enabled) {
         <div class="field">
           <label for="combat-grid-columns">{{
-            "world.rules.combat.gridSize" | transloco
+            "world.rules.combat.gridSize" | translate
           }}</label>
           <div class="row">
             <p-inputnumber
@@ -587,12 +610,12 @@
             />
           </div>
           @if (errors()["combatGrid"]; as key) {
-            <small class="error">{{ key | transloco }}</small>
+            <small class="error">{{ key | translate }}</small>
           }
         </div>
         <div class="field">
           <label for="combat-grid-map">{{
-            "world.rules.combat.gridMap" | transloco
+            "world.rules.combat.gridMap" | translate
           }}</label>
           <app-image-picker
             inputId="combat-grid-map"
@@ -606,7 +629,7 @@
       }
       <div class="field">
         <label for="combat-movement">{{
-          "world.rules.combat.movement" | transloco
+          "world.rules.combat.movement" | translate
         }}</label>
         <input
           pInputText
@@ -619,13 +642,13 @@
         />
         @if (combatErrors().movement) {
           <small class="error" data-testid="combat-error-movement">{{
-            "world.errors.combatFormula" | transloco
+            "world.errors.combatFormula" | translate
           }}</small>
         }
       </div>
       <div class="field">
         <label for="combat-basic-attack">{{
-          "world.rules.combat.basicAttack" | transloco
+          "world.rules.combat.basicAttack" | translate
         }}</label>
         <input
           pInputText
@@ -638,14 +661,14 @@
         />
         @if (combatErrors()["basic-attack"]) {
           <small class="error" data-testid="combat-error-basic-attack">{{
-            "world.errors.combatFormula" | transloco
+            "world.errors.combatFormula" | translate
           }}</small>
         }
       </div>
       @if (combat().steps.defence) {
         <div class="field">
           <label for="combat-defence">{{
-            "world.rules.combat.defence" | transloco
+            "world.rules.combat.defence" | translate
           }}</label>
           <input
             pInputText
@@ -658,7 +681,7 @@
           />
           @if (combatErrors().defence) {
             <small class="error" data-testid="combat-error-defence">{{
-              "world.errors.combatFormula" | transloco
+              "world.errors.combatFormula" | translate
             }}</small>
           }
         </div>
@@ -668,16 +691,16 @@
 
   <section class="section" data-testid="rules-section-npcs">
     <fieldset class="level-curve">
-      <legend>{{ "world.rules.npcs.title" | transloco }}</legend>
-      <p class="hint">{{ "world.rules.npcs.hint" | transloco }}</p>
+      <legend>{{ "world.rules.npcs.title" | translate }}</legend>
+      <p class="hint">{{ "world.rules.npcs.hint" | translate }}</p>
       <div class="npc-grid" role="group">
         <span></span>
         @for (role of npcRoles; track role) {
-          <strong class="role">{{ "npc.role." + role | transloco }}</strong>
+          <strong class="role">{{ "npc.role." + role | translate }}</strong>
         }
         @for (field of npcFields; track field) {
           <span class="field-name">{{
-            "world.rules.npcs.fields." + field | transloco
+            "world.rules.npcs.fields." + field | translate
           }}</span>
           @for (role of npcRoles; track role) {
             <p-checkbox
@@ -685,9 +708,9 @@
               [binary]="true"
               [inputId]="'npc-' + role + '-' + field"
               [ariaLabel]="
-                ('npc.role.' + role | transloco) +
+                ('npc.role.' + role | translate) +
                 ': ' +
-                ('world.rules.npcs.fields.' + field | transloco)
+                ('world.rules.npcs.fields.' + field | translate)
               "
               [ngModel]="npcVisibility()[role][field]"
               (ngModelChange)="setNpcField(role, field, $event)"

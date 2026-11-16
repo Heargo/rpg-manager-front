@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -32,7 +32,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     MessageModule,
     SkeletonModule,
@@ -43,7 +43,7 @@ import {
     <div class="main-container sheet-page">
       <p-button
         icon="pi pi-arrow-left"
-        [label]="'table.title' | transloco"
+        [label]="'table.title' | translate"
         [text]="true"
         routerLink="/room/table"
       />
@@ -54,7 +54,7 @@ import {
               severity="warn"
               icon="pi pi-lock"
               styleClass="read-only"
-              >{{ 'character.readOnly' | transloco }}</p-message
+              >{{ 'character.readOnly' | translate }}</p-message
             >
           }
           @if (characters.$world(); as world) {
@@ -80,7 +80,7 @@ import {
         } @else if (characters.$characters() === null) {
           <p-skeleton height="20rem" />
         } @else {
-          <p class="hint">{{ 'character.sheet.notFound' | transloco }}</p>
+          <p class="hint">{{ 'character.sheet.notFound' | translate }}</p>
         }
       </div>
     </div>

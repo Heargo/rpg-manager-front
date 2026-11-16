@@ -1,243 +1,626 @@
 {
-  "version": 1,
+  "version": 2,
   "templates": [
     "{adjective} {noun}",
     "{noun} of {suffix}",
     "{noun}",
     "{adjective} {noun} of {suffix}"
   ],
-  "nouns": {
-    "active": [
-      {
-        "text": "Strike"
-      },
-      {
-        "text": "Fireball"
-      },
-      {
-        "text": "Bolt"
-      },
-      {
-        "text": "Slash"
-      },
-      {
-        "text": "Volley"
-      },
-      {
-        "text": "Smite"
-      },
-      {
-        "text": "Charge"
-      },
-      {
-        "text": "Hex"
-      },
-      {
-        "text": "Blast"
-      },
-      {
-        "text": "Lash"
-      },
-      {
-        "text": "Barrage"
-      },
-      {
-        "text": "Cleave"
-      },
-      {
-        "text": "Whirlwind"
-      },
-      {
-        "text": "Stab"
-      },
-      {
-        "text": "Shot"
-      },
-      {
-        "text": "Surge"
-      },
-      {
-        "text": "Pulse"
-      },
-      {
-        "text": "Burst"
-      },
-      {
-        "text": "Ward"
-      },
-      {
-        "text": "Prayer"
-      },
-      {
-        "text": "Rally"
-      },
-      {
-        "text": "Roar"
-      },
-      {
-        "text": "Chant"
-      },
-      {
-        "text": "Mending"
-      },
-      {
-        "text": "Blessing"
-      },
-      {
-        "text": "Gambit"
-      }
-    ],
-    "passive": [
-      {
-        "text": "Resilience"
-      },
-      {
-        "text": "Focus"
-      },
-      {
-        "text": "Instinct"
-      },
-      {
-        "text": "Mastery"
-      },
-      {
-        "text": "Discipline"
-      },
-      {
-        "text": "Vigor"
-      },
-      {
-        "text": "Awareness"
-      },
-      {
-        "text": "Training"
-      },
-      {
-        "text": "Fortitude"
-      },
-      {
-        "text": "Poise"
-      },
-      {
-        "text": "Insight"
-      },
-      {
-        "text": "Endurance"
-      },
-      {
-        "text": "Presence"
-      },
-      {
-        "text": "Reflexes"
-      },
-      {
-        "text": "Willpower"
-      },
-      {
-        "text": "Tenacity"
-      },
-      {
-        "text": "Grace"
-      },
-      {
-        "text": "Cunning"
-      },
-      {
-        "text": "Resolve"
-      },
-      {
-        "text": "Stoicism"
-      },
-      {
-        "text": "Alertness"
-      },
-      {
-        "text": "Heritage"
-      },
-      {
-        "text": "Knack"
-      },
-      {
-        "text": "Composure"
-      }
-    ]
-  },
   "adjectives": [
-    "Swift",
-    "Crushing",
-    "Burning",
-    "Shadowy",
-    "Radiant",
-    "Savage",
-    "Silent",
-    "Thunderous",
-    "Frozen",
-    "Righteous",
-    "Cunning",
-    "Wild",
-    "Hallowed",
-    "Ruthless",
-    "Fading",
-    "Blazing",
-    "Piercing",
-    "Spectral",
-    "Iron",
+    "Ancient",
+    "Mysterious",
+    "Legendary",
+    "Forgotten",
     "Eternal",
-    "Merciless",
-    "Gentle",
-    "Furious",
-    "Hidden"
+    "Secret",
+    "Rare",
+    "Singular"
   ],
   "suffixes": [
-    "the Storm",
-    "the Fallen",
-    "Ash",
-    "the Hunt",
-    "Dawn",
-    "the Deep",
-    "Thorns",
-    "the Void",
-    "Iron",
-    "the Last Stand",
-    "Embers",
-    "the Moon",
-    "Spite",
     "the Ancients",
-    "Frost",
-    "the Wild",
-    "Blood",
-    "Mercy",
-    "Twilight",
-    "the Serpent",
     "the Oath",
+    "the Moon",
     "Silence",
-    "the Phoenix",
-    "Fury"
+    "the Wild",
+    "the Wanderer",
+    "Dawn"
   ],
-  "descriptions": {
-    "active": [
-      "A practiced move that rewards a steady hand.",
-      "Born in a hundred skirmishes, it ends fights quickly.",
-      "It costs dearly, but nobody forgets it.",
-      "Taught only to those who earned the trust of their elders.",
-      "A showy technique that hides a very practical purpose.",
-      "Draws on the user's reserves to turn the moment around.",
-      "Simple to learn, endless to refine.",
-      "Often the last thing an enemy sees coming.",
-      "A favorite of veterans who prefer to finish what they start.",
-      "It takes a clear head and a quick reaction."
-    ],
-    "passive": [
-      "Quietly shapes everything its owner does.",
-      "Years of practice have made it second nature.",
-      "Nobody notices it until it saves the day.",
-      "A lasting gift of long training.",
-      "It never needs to be called upon: it is simply there.",
-      "A trait that grows stronger with every hardship.",
-      "Shapes the way its owner faces danger.",
-      "An old habit that became a talent.",
-      "Those who have it rarely speak of it.",
-      "Earned the hard way and never forgotten."
-    ]
+  "kinds": {
+    "attack": {
+      "adjectives": [
+        "Crushing",
+        "Ruthless",
+        "Furious",
+        "Savage",
+        "Merciless",
+        "Piercing",
+        "Swift",
+        "Iron"
+      ],
+      "suffixes": [
+        "the Storm",
+        "the Fallen",
+        "the Hunt",
+        "Thorns",
+        "Fury",
+        "Spite",
+        "the Last Stand"
+      ],
+      "descriptions": [
+        "A practiced move that rewards a steady hand.",
+        "Born in a hundred skirmishes, it ends fights quickly.",
+        "It costs dearly, but nobody forgets it.",
+        "A showy technique that hides a very practical purpose.",
+        "Draws on the user's reserves to turn the moment around.",
+        "Simple to learn, endless to refine.",
+        "Often the last thing an enemy sees coming.",
+        "A favorite of veterans who prefer to finish what they start.",
+        "A move learned during {event}."
+      ]
+    },
+    "strike": {
+      "nouns": [
+        {
+          "text": "Strike"
+        },
+        {
+          "text": "Slash"
+        },
+        {
+          "text": "Stab"
+        },
+        {
+          "text": "Cleave"
+        },
+        {
+          "text": "Charge"
+        },
+        {
+          "text": "Whirlwind"
+        },
+        {
+          "text": "Lash"
+        },
+        {
+          "text": "Smite"
+        }
+      ],
+      "descriptions": [
+        "A clean blow, delivered in close quarters without a flicker of doubt.",
+        "It takes a strong arm and the nerve to wait for an opening.",
+        "A melee move that veterans teach the young."
+      ],
+      "adjectives": [
+        "Sharp",
+        "Brutal"
+      ],
+      "suffixes": [
+        "Iron",
+        "Blood"
+      ]
+    },
+    "shot": {
+      "nouns": [
+        {
+          "text": "Shot"
+        },
+        {
+          "text": "Volley"
+        },
+        {
+          "text": "Barrage"
+        },
+        {
+          "text": "Arrow"
+        },
+        {
+          "text": "Bolt"
+        }
+      ],
+      "descriptions": [
+        "A long shot, aimed before the target ever moves.",
+        "A sure eye and a steady hand do the rest.",
+        "It snaps, and the enemy has no time to understand."
+      ],
+      "adjectives": [
+        "Precise",
+        "Deadly"
+      ],
+      "suffixes": [
+        "the Hunter"
+      ]
+    },
+    "fire-spell": {
+      "nouns": [
+        {
+          "text": "Fireball"
+        },
+        {
+          "text": "Blast"
+        },
+        {
+          "text": "Inferno"
+        },
+        {
+          "text": "Conflagration"
+        },
+        {
+          "text": "Burst"
+        }
+      ],
+      "descriptions": [
+        "A breath of flame you feel before you see it.",
+        "The heat is such that the air shivers around it.",
+        "Fire forgives nothing, not even a careless caster."
+      ],
+      "adjectives": [
+        "Burning",
+        "Blazing",
+        "Fiery"
+      ],
+      "suffixes": [
+        "Ash",
+        "the Phoenix",
+        "Embers"
+      ]
+    },
+    "frost-spell": {
+      "nouns": [
+        {
+          "text": "Lance"
+        },
+        {
+          "text": "Spike"
+        },
+        {
+          "text": "Shard"
+        },
+        {
+          "text": "Gust"
+        },
+        {
+          "text": "Breath"
+        }
+      ],
+      "descriptions": [
+        "A biting cold that freezes the enemy where it stands.",
+        "Frost creeps across the ground before it seizes its victim.",
+        "A winter spell, slow to cast and slower to thaw."
+      ],
+      "adjectives": [
+        "Frozen",
+        "Icy",
+        "Polar"
+      ],
+      "suffixes": [
+        "Frost",
+        "Winter"
+      ]
+    },
+    "lightning-spell": {
+      "nouns": [
+        {
+          "text": "Bolt"
+        },
+        {
+          "text": "Lightning"
+        },
+        {
+          "text": "Discharge"
+        },
+        {
+          "text": "Pulse"
+        },
+        {
+          "text": "Tempest"
+        }
+      ],
+      "descriptions": [
+        "A flash of light, then the crash of thunder.",
+        "Lightning strikes where it will, but never by chance.",
+        "It takes nerves of steel to hold it back until the right moment."
+      ],
+      "adjectives": [
+        "Thunderous",
+        "Blinding"
+      ],
+      "suffixes": [
+        "the Storm",
+        "Thunder"
+      ]
+    },
+    "shadow-spell": {
+      "nouns": [
+        {
+          "text": "Embrace"
+        },
+        {
+          "text": "Siphon"
+        },
+        {
+          "text": "Vortex"
+        },
+        {
+          "text": "Tendril"
+        },
+        {
+          "text": "Veil"
+        }
+      ],
+      "descriptions": [
+        "Shadows lengthen and close around the target.",
+        "A forbidden magic that feeds on fear.",
+        "Nobody speaks of it, and everyone dreads it."
+      ],
+      "adjectives": [
+        "Shadowy",
+        "Spectral",
+        "Fading"
+      ],
+      "suffixes": [
+        "the Void",
+        "Twilight",
+        "Silence"
+      ]
+    },
+    "healing": {
+      "descriptions": [
+        "Closes wounds before they turn grave.",
+        "A gentle gesture that puts the weariest back on their feet.",
+        "Loved by all, even those who never mention it.",
+        "Learned during {event}, when wounds had to be tended in haste."
+      ],
+      "adjectives": [
+        "Gentle",
+        "Radiant",
+        "Hallowed",
+        "Soothing"
+      ],
+      "suffixes": [
+        "Mercy",
+        "Dawn",
+        "the Moon"
+      ]
+    },
+    "prayer": {
+      "nouns": [
+        {
+          "text": "Prayer"
+        },
+        {
+          "text": "Litany"
+        },
+        {
+          "text": "Psalm"
+        },
+        {
+          "text": "Orison"
+        },
+        {
+          "text": "Divine Smite"
+        }
+      ],
+      "descriptions": [
+        "Murmured on bended knee, it soothes bodies and minds alike.",
+        "An ancient fervor guides every word.",
+        "Only the sincere draw real succor from it."
+      ]
+    },
+    "remedy": {
+      "nouns": [
+        {
+          "text": "Mending"
+        },
+        {
+          "text": "Salve"
+        },
+        {
+          "text": "Ointment"
+        },
+        {
+          "text": "Poultice"
+        },
+        {
+          "text": "Elixir"
+        }
+      ],
+      "descriptions": [
+        "A folk remedy, proven over generations.",
+        "It smells strong, but it works.",
+        "A few herbs, a little patience, and the pain fades."
+      ]
+    },
+    "support": {
+      "descriptions": [
+        "Turns the tide of a battle without a single blow in sight.",
+        "It deals nothing, yet it weighs on the outcome of the fight.",
+        "A subtle art whose effects outlast the gesture.",
+        "Taught only to those who earned the trust of their elders."
+      ],
+      "adjectives": [
+        "Subtle",
+        "Mighty",
+        "Precious"
+      ],
+      "suffixes": [
+        "the Oath",
+        "the Ancients"
+      ]
+    },
+    "blessing": {
+      "nouns": [
+        {
+          "text": "Blessing"
+        },
+        {
+          "text": "Ward"
+        },
+        {
+          "text": "Aegis"
+        },
+        {
+          "text": "Divine Grace"
+        },
+        {
+          "text": "Serenity"
+        }
+      ],
+      "descriptions": [
+        "A warm light surrounds whoever receives it.",
+        "A wish whispered for those who walk at the front.",
+        "Danger no longer passes quite the same way."
+      ],
+      "suffixes": [
+        "Dawn",
+        "Mercy"
+      ]
+    },
+    "curse": {
+      "nouns": [
+        {
+          "text": "Hex"
+        },
+        {
+          "text": "Curse"
+        },
+        {
+          "text": "Bane"
+        },
+        {
+          "text": "Jinx"
+        },
+        {
+          "text": "Evil Eye"
+        }
+      ],
+      "descriptions": [
+        "One whispered word, and the enemy's luck turns.",
+        "Victims never forget where their misfortune came from.",
+        "It gnaws at the enemy's will for hours."
+      ],
+      "adjectives": [
+        "Accursed",
+        "Pernicious"
+      ],
+      "suffixes": [
+        "Spite",
+        "the Void",
+        "the Fallen"
+      ]
+    },
+    "war-cry": {
+      "nouns": [
+        {
+          "text": "Roar"
+        },
+        {
+          "text": "Rally"
+        },
+        {
+          "text": "War Cry"
+        },
+        {
+          "text": "Gambit"
+        },
+        {
+          "text": "Howl"
+        }
+      ],
+      "descriptions": [
+        "A cry that rouses allies and gives the enemy pause.",
+        "It carries far above the clamor of arms.",
+        "When all wavers, it reminds everyone why they fight."
+      ],
+      "adjectives": [
+        "Thunderous",
+        "Fierce"
+      ],
+      "suffixes": [
+        "Fury",
+        "the Last Stand"
+      ]
+    },
+    "song": {
+      "nouns": [
+        {
+          "text": "Chant"
+        },
+        {
+          "text": "Ballad"
+        },
+        {
+          "text": "Melody"
+        },
+        {
+          "text": "Lament"
+        },
+        {
+          "text": "Refrain"
+        }
+      ],
+      "descriptions": [
+        "A tune that finds its way to the heart.",
+        "Every note carries a little courage.",
+        "An old air whose words everyone knows."
+      ],
+      "adjectives": [
+        "Melodious",
+        "Haunting"
+      ],
+      "suffixes": [
+        "the Ancients",
+        "the Moon"
+      ]
+    },
+    "trait": {
+      "adjectives": [
+        "Quiet",
+        "Patient",
+        "Cunning",
+        "Earned"
+      ],
+      "suffixes": [
+        "Years",
+        "Experience"
+      ],
+      "descriptions": [
+        "Quietly shapes everything its owner does.",
+        "Years of practice have made it second nature.",
+        "Nobody notices it until it saves the day.",
+        "A lasting gift of long training.",
+        "It never needs to be called upon: it is simply there.",
+        "A trait that grows stronger with every hardship.",
+        "Shapes the way its owner faces danger.",
+        "Those who have it rarely speak of it.",
+        "Earned the hard way and never forgotten."
+      ]
+    },
+    "toughness": {
+      "nouns": [
+        {
+          "text": "Resilience"
+        },
+        {
+          "text": "Vigor"
+        },
+        {
+          "text": "Fortitude"
+        },
+        {
+          "text": "Endurance"
+        },
+        {
+          "text": "Tenacity"
+        },
+        {
+          "text": "Stoicism"
+        }
+      ],
+      "descriptions": [
+        "The body takes what the mind refuses to yield.",
+        "Blows rain down, and it stays standing.",
+        "A constitution forged by hardship."
+      ],
+      "adjectives": [
+        "Unyielding",
+        "Hardened"
+      ]
+    },
+    "focus": {
+      "nouns": [
+        {
+          "text": "Focus"
+        },
+        {
+          "text": "Mastery"
+        },
+        {
+          "text": "Discipline"
+        },
+        {
+          "text": "Willpower"
+        },
+        {
+          "text": "Resolve"
+        },
+        {
+          "text": "Training"
+        },
+        {
+          "text": "Composure"
+        }
+      ],
+      "descriptions": [
+        "A clear mind, a steady hand, nothing disturbs the gesture.",
+        "Hours of practice have sharpened every thought.",
+        "The world goes quiet when the shot must land."
+      ],
+      "adjectives": [
+        "Serene",
+        "Studious"
+      ]
+    },
+    "agility": {
+      "nouns": [
+        {
+          "text": "Instinct"
+        },
+        {
+          "text": "Reflexes"
+        },
+        {
+          "text": "Awareness"
+        },
+        {
+          "text": "Insight"
+        },
+        {
+          "text": "Cunning"
+        },
+        {
+          "text": "Alertness"
+        },
+        {
+          "text": "Knack"
+        }
+      ],
+      "descriptions": [
+        "The body reacted before the mind understood.",
+        "One step aside, and the danger passes.",
+        "Nothing surprises the one who has it."
+      ],
+      "adjectives": [
+        "Nimble",
+        "Quick"
+      ]
+    },
+    "presence": {
+      "nouns": [
+        {
+          "text": "Presence"
+        },
+        {
+          "text": "Poise"
+        },
+        {
+          "text": "Grace"
+        },
+        {
+          "text": "Heritage"
+        },
+        {
+          "text": "Authority"
+        }
+      ],
+      "descriptions": [
+        "Walking into a room is enough to silence it.",
+        "A bearing that commands respect before a word is spoken.",
+        "Allies stand taller, rivals hesitate."
+      ],
+      "adjectives": [
+        "Majestic",
+        "Noble"
+      ]
+    }
   }
 }

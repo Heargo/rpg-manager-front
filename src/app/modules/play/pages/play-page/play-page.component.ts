@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
@@ -33,7 +33,7 @@ import { PlayBusiness } from '../../business/play.business';
     LocalDatePipe,
     FormsModule,
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     CardModule,
     DataViewModule,
@@ -116,13 +116,6 @@ export class PlayPageComponent implements OnInit {
       },
       accept: () => void this.play.deleteWorld(worldId),
     });
-  }
-
-  /** Rejoins with the invite saved when the world was joined. */
-  protected async rejoin(invite: string): Promise<void> {
-    const hash = invite.indexOf('#');
-    const fragment = (hash >= 0 ? invite.slice(hash + 1) : invite).replace(/\s+/g, '');
-    if (fragment) await this.router.navigate(['/join'], { fragment });
   }
 
   protected async openSheet(worldId: string): Promise<void> {

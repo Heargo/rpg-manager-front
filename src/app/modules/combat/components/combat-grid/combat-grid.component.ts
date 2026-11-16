@@ -7,7 +7,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
 import { CombatBusiness } from '../../business/combat.business';
 import {
@@ -22,7 +22,7 @@ import {
 @Component({
   selector: 'app-combat-grid',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, StoredImageComponent],
+  imports: [TranslatePipe, StoredImageComponent],
   template: `
     @if (grid(); as g) {
       <div
@@ -30,7 +30,7 @@ import {
         class="board"
         data-testid="grid"
         role="group"
-        [attr.aria-label]="'combat.grid.label' | transloco"
+        [attr.aria-label]="'combat.grid.label' | translate"
         [attr.data-columns]="g.columns"
         [attr.data-rows]="g.rows"
         [style.aspect-ratio]="g.columns + ' / ' + g.rows"
@@ -57,7 +57,7 @@ import {
               [class.reachable]="reachable().has(cell.key)"
               [title]="
                 reachable().has(cell.key)
-                  ? ('combat.grid.reachLegend' | transloco)
+                  ? ('combat.grid.reachLegend' | translate)
                   : ''
               "
               [class.in-range]="inRange().has(cell.key)"
@@ -108,7 +108,7 @@ import {
       @if (reachable().size) {
         <p class="legend" data-testid="reach-legend">
           <span class="swatch"></span>
-          {{ 'combat.grid.reachLegend' | transloco }}
+          {{ 'combat.grid.reachLegend' | translate }}
         </p>
       }
     }

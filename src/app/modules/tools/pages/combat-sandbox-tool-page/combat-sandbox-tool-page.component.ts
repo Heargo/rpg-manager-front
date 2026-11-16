@@ -6,7 +6,7 @@ import {
   effect,
   inject,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
@@ -29,7 +29,7 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
   selector: 'app-combat-sandbox-tool-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     CardModule,
     CombatGmPanelComponent,
@@ -49,15 +49,15 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
   template: `
     <div class="main-container combat-tool">
       <header>
-        <h1>{{ 'tools.combat.title' | transloco }}</h1>
-        <p class="hint">{{ 'tools.combat.intro' | transloco }}</p>
+        <h1>{{ 'tools.combat.title' | translate }}</h1>
+        <p class="hint">{{ 'tools.combat.intro' | translate }}</p>
         @if (!combat.$state()) {
           <button
             pButton
             type="button"
             data-action="sandbox-start"
             icon="pi pi-play"
-            [label]="'tools.combat.start' | transloco"
+            [label]="'tools.combat.start' | translate"
             [disabled]="!pair()"
             (click)="start()"
           ></button>
@@ -70,13 +70,13 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
         (targetPicked)="targeting.toggle($event)"
       />
       <div class="views">
-        <p-card [header]="'tools.combat.gm' | transloco">
+        <p-card [header]="'tools.combat.gm' | translate">
           <div data-testid="sandbox-gm">
             <app-combat-order [showRound]="false" />
             <app-combat-gm-panel />
           </div>
         </p-card>
-        <p-card [header]="'tools.combat.player' | transloco">
+        <p-card [header]="'tools.combat.player' | translate">
           <div data-testid="sandbox-player">
             @if (mine(); as own) {
               <app-combat-player-view
@@ -85,7 +85,7 @@ import { SandboxCombatBusiness } from '../../business/sandbox-combat.business';
                 [docked]="false"
               />
             } @else {
-              <p class="hint">{{ 'tools.combat.noEncounter' | transloco }}</p>
+              <p class="hint">{{ 'tools.combat.noEncounter' | translate }}</p>
             }
           </div>
         </p-card>

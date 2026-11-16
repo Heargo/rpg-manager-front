@@ -563,10 +563,10 @@ describe('SpriteColorizerBusiness', () => {
       const business = TestBed.inject(SpriteColorizerBusiness);
       await business.loadLibrary('helm');
       await business.saveSet('My helm');
-      expect(sets[0].tags).toEqual({ type: 'equipment', slot: 'head' });
+      expect(sets[0].tags).toEqual({ kinds: ['helm'] });
 
-      await business.setSetTags(sets[0].id, { type: 'equipment', slot: 'chest' });
-      expect(business.$savedSets()[0].tags).toEqual({ type: 'equipment', slot: 'chest' });
+      await business.setSetTags(sets[0].id, { kinds: ['armor', 'helm'] });
+      expect(business.$savedSets()[0].tags).toEqual({ kinds: ['armor', 'helm'] });
       await business.setSetTags(sets[0].id, undefined);
       expect(business.$savedSets()[0].tags).toBeUndefined();
     });

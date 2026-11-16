@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -17,7 +17,7 @@ import { ItemEditorComponent } from '../../components/item-editor/item-editor.co
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     MessageModule,
     ItemEditorComponent,
@@ -25,19 +25,19 @@ import { ItemEditorComponent } from '../../components/item-editor/item-editor.co
   template: `
     <div class="main-container editor">
       <header>
-        <h1>{{ 'item.editor.title' | transloco }}</h1>
+        <h1>{{ 'item.editor.title' | translate }}</h1>
         <p-button
           icon="pi pi-arrow-left"
           severity="secondary"
           [text]="true"
-          [label]="'item.editor.back' | transloco"
+          [label]="'item.editor.back' | translate"
           routerLink="/room/items"
         />
       </header>
       @if (catalogue.$world(); as world) {
         @if (itemId && !item()) {
           <p-message severity="warn">{{
-            'item.editor.notFound' | transloco
+            'item.editor.notFound' | translate
           }}</p-message>
         } @else {
           <app-item-editor
@@ -48,7 +48,7 @@ import { ItemEditorComponent } from '../../components/item-editor/item-editor.co
         }
       } @else {
         <p-message severity="info">{{
-          'item.editor.notHosting' | transloco
+          'item.editor.notHosting' | translate
         }}</p-message>
       }
     </div>

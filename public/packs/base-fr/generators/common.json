@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "params": {
+    "maker": [
+      "un forgeron nain",
+      "les moines de {place}",
+      "un apprenti [maladroit|pressé]",
+      "une artisane anonyme",
+      "un vieil armurier"
+    ],
+    "owner": [
+      "un capitaine déchu",
+      "une voleuse célèbre",
+      "un vieux mage",
+      "une reine oubliée",
+      "un chasseur de primes"
+    ],
+    "place": [
+      "Valombre",
+      "la côte gelée",
+      "Pierrefeu",
+      "la vallée des cendres",
+      "la forêt d'Orm"
+    ],
+    "event": [
+      "la bataille des Trois Ponts",
+      "la chute de la tour",
+      "la grande famine",
+      "l'hiver sans fin",
+      "la guerre des clans"
+    ],
+    "material": [
+      "l'acier noir",
+      "le cuir bouilli",
+      "la corne polie",
+      "l'os sculpté",
+      "le bois de saule"
+    ],
+    "creature": [
+      "un loup géant",
+      "une vouivre",
+      "un ours des cavernes",
+      "un troll des marais",
+      "un griffon"
+    ],
+    "effect": ["soin", "vigueur", "force", "célérité", "vision nocturne"]
+  }
+}

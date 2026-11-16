@@ -16,7 +16,6 @@ const harbour: JoinedWorld = {
   roomId: 'r1',
   name: 'Harbour',
   hostName: 'Gm',
-  invite: 'https://app.example/join#abc',
   lastSeenAt: 1000,
   sheetWorld,
 };
@@ -36,8 +35,8 @@ describe('JoinedWorldsStorageService', () => {
 
   it('replaces the record of the same world id', async () => {
     await storage.save(harbour);
-    await storage.save({ ...harbour, lastSeenAt: 2000, invite: 'https://app.example/join#new' });
-    expect(await storage.list()).toEqual([{ ...harbour, lastSeenAt: 2000, invite: 'https://app.example/join#new' }]);
+    await storage.save({ ...harbour, lastSeenAt: 2000 });
+    expect(await storage.list()).toEqual([{ ...harbour, lastSeenAt: 2000 }]);
   });
 
   it('deletes one record and keeps the others', async () => {

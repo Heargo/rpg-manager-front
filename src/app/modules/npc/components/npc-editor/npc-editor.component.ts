@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -35,7 +35,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputTextModule,
     InputNumberModule,
@@ -50,10 +50,10 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
   template: `
     <p-tabs value="form">
       <p-tablist>
-        <p-tab value="form">{{ 'npc.editor.tabForm' | transloco }}</p-tab>
-        <p-tab value="json">{{ 'npc.editor.tabJson' | transloco }}</p-tab>
+        <p-tab value="form">{{ 'npc.editor.tabForm' | translate }}</p-tab>
+        <p-tab value="json">{{ 'npc.editor.tabJson' | translate }}</p-tab>
         <p-tab value="generate">{{
-          'npc.editor.tabGenerate' | transloco
+          'npc.editor.tabGenerate' | translate
         }}</p-tab>
       </p-tablist>
       <p-tabpanels>
@@ -61,7 +61,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
           <div class="form">
             <div class="field image">
               <label for="npc-portrait">{{
-                'npc.editor.fields.portrait' | transloco
+                'npc.editor.fields.portrait' | translate
               }}</label>
               <span data-testid="portrait-preview" class="preview">
                 <app-image-picker
@@ -77,7 +77,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
             </div>
             <div class="field">
               <label for="npc-name">{{
-                'npc.editor.fields.name' | transloco
+                'npc.editor.fields.name' | translate
               }}</label>
               <input
                 pInputText
@@ -90,7 +90,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
             </div>
             <div class="field">
               <label for="npc-description">{{
-                'npc.editor.fields.description' | transloco
+                'npc.editor.fields.description' | translate
               }}</label>
               <textarea
                 pTextarea
@@ -104,7 +104,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
             <div class="row">
               <div class="field">
                 <label for="npc-roles">{{
-                  'npc.editor.fields.roles' | transloco
+                  'npc.editor.fields.roles' | translate
                 }}</label>
                 <p-multiselect
                   inputId="npc-roles"
@@ -120,7 +120,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
               </div>
               <div class="field">
                 <label for="npc-level">{{
-                  'npc.editor.fields.level' | transloco
+                  'npc.editor.fields.level' | translate
                 }}</label>
                 <p-inputnumber
                   inputId="npc-level"
@@ -134,7 +134,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
               </div>
               <div class="field">
                 <label for="npc-money">{{
-                  'npc.editor.fields.money' | transloco
+                  'npc.editor.fields.money' | translate
                 }}</label>
                 <app-coin-input
                   id="npc-money"
@@ -146,7 +146,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
             </div>
 
             <fieldset class="row">
-              <legend>{{ 'npc.editor.fields.attributes' | transloco }}</legend>
+              <legend>{{ 'npc.editor.fields.attributes' | translate }}</legend>
               @for (attribute of world().attributes; track attribute.id) {
                 <div class="field">
                   <label [for]="'npc-attr-' + attribute.id">{{
@@ -167,7 +167,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
             @if (isEnemy()) {
               <div class="field">
                 <label for="npc-xp-reward">{{
-                  'npc.editor.fields.xpReward' | transloco
+                  'npc.editor.fields.xpReward' | translate
                 }}</label>
                 <p-inputnumber
                   inputId="npc-xp-reward"
@@ -183,7 +183,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
               <div class="row">
                 <div class="field">
                   <label for="npc-buy-ratio">{{
-                    'npc.editor.fields.buyRatio' | transloco
+                    'npc.editor.fields.buyRatio' | translate
                   }}</label>
                   <p-inputnumber
                     inputId="npc-buy-ratio"
@@ -199,7 +199,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 </div>
                 <div class="field">
                   <label for="npc-sell-ratio">{{
-                    'npc.editor.fields.sellRatio' | transloco
+                    'npc.editor.fields.sellRatio' | translate
                   }}</label>
                   <p-inputnumber
                     inputId="npc-sell-ratio"
@@ -218,7 +218,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
 
             <div class="field">
               <label for="npc-class">{{
-                'npc.editor.fields.class' | transloco
+                'npc.editor.fields.class' | translate
               }}</label>
               <p-select
                 inputId="npc-class"
@@ -229,16 +229,16 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 [showClear]="true"
                 [ngModel]="draft().classId ?? null"
                 (ngModelChange)="setClass($event)"
-                [placeholder]="'npc.editor.fields.noClass' | transloco"
+                [placeholder]="'npc.editor.fields.noClass' | translate"
               />
             </div>
 
             <fieldset class="inventory" data-field="skills">
-              <legend>{{ 'npc.editor.fields.skills' | transloco }}</legend>
+              <legend>{{ 'npc.editor.fields.skills' | translate }}</legend>
               <p class="hint">
                 {{
                   'npc.editor.skillPoints'
-                    | transloco: { count: draft().skillPoints }
+                    | translate: { count: draft().skillPoints }
                 }}
               </p>
               <div class="entry">
@@ -249,7 +249,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                   icon="pi pi-sitemap"
                   size="small"
                   [disabled]="!draft().classId"
-                  [label]="'npc.editor.learnFromClass' | transloco"
+                  [label]="'npc.editor.learnFromClass' | translate"
                   (click)="learnFromClass()"
                 ></button>
                 <p-select
@@ -259,7 +259,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                   optionValue="id"
                   [ngModel]="null"
                   (ngModelChange)="addSkill($event)"
-                  [placeholder]="'npc.editor.fields.addSkill' | transloco"
+                  [placeholder]="'npc.editor.fields.addSkill' | translate"
                   [filter]="true"
                 />
               </div>
@@ -282,7 +282,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                     size="small"
                     severity="danger"
                     [text]="true"
-                    [attr.aria-label]="'npc.editor.removeSkill' | transloco"
+                    [attr.aria-label]="'npc.editor.removeSkill' | translate"
                     (click)="setSkillLevel(entry.skillId, 0)"
                   ></button>
                 </div>
@@ -290,7 +290,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
             </fieldset>
 
             <fieldset class="inventory">
-              <legend>{{ 'npc.editor.fields.inventory' | transloco }}</legend>
+              <legend>{{ 'npc.editor.fields.inventory' | translate }}</legend>
               <p-select
                 data-field="add-item"
                 [options]="world().items"
@@ -298,7 +298,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 optionValue="id"
                 [ngModel]="null"
                 (ngModelChange)="addItem($event)"
-                [placeholder]="'npc.editor.fields.addItem' | transloco"
+                [placeholder]="'npc.editor.fields.addItem' | translate"
                 [filter]="true"
               />
               @for (entry of draft().inventory; track entry.id) {
@@ -312,7 +312,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                     size="small"
                     [severity]="entry.equipped ? 'primary' : 'secondary'"
                     [outlined]="!entry.equipped"
-                    [label]="'npc.editor.equipped' | transloco"
+                    [label]="'npc.editor.equipped' | translate"
                     [attr.aria-pressed]="entry.equipped"
                     (click)="toggleEquipped(entry.id)"
                   ></button>
@@ -325,7 +325,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                       size="small"
                       [severity]="isLoot(entry.id) ? 'primary' : 'secondary'"
                       [outlined]="!isLoot(entry.id)"
-                      [label]="'npc.editor.loot' | transloco"
+                      [label]="'npc.editor.loot' | translate"
                       [attr.aria-pressed]="isLoot(entry.id)"
                       (click)="toggleLoot(entry.id)"
                     ></button>
@@ -338,7 +338,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                     size="small"
                     severity="danger"
                     [text]="true"
-                    [attr.aria-label]="'npc.editor.removeItem' | transloco"
+                    [attr.aria-label]="'npc.editor.removeItem' | translate"
                     (click)="removeEntry(entry.id)"
                   ></button>
                 </div>
@@ -349,7 +349,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
 
         <p-tabpanel value="json">
           <div class="form">
-            <p class="hint">{{ 'npc.editor.jsonHint' | transloco }}</p>
+            <p class="hint">{{ 'npc.editor.jsonHint' | translate }}</p>
             <textarea
               pTextarea
               data-field="json"
@@ -372,21 +372,21 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 icon="pi pi-copy"
                 severity="secondary"
                 [text]="true"
-                [label]="'ai.copyPrompt' | transloco"
+                [label]="'ai.copyPrompt' | translate"
                 (click)="copyAiPrompt()"
               ></button>
-              <small class="hint">{{ 'ai.copyPromptHint' | transloco }}</small>
+              <small class="hint">{{ 'ai.copyPromptHint' | translate }}</small>
             </div>
           </div>
         </p-tabpanel>
 
         <p-tabpanel value="generate">
           <div class="form">
-            <p class="hint">{{ 'npc.editor.generateHint' | transloco }}</p>
+            <p class="hint">{{ 'npc.editor.generateHint' | translate }}</p>
             <div class="seed">
               <div class="field">
                 <label for="npc-seed">{{
-                  'tools.itemGenerator.seed' | transloco
+                  'tools.itemGenerator.seed' | translate
                 }}</label>
                 <input
                   pInputText
@@ -399,22 +399,8 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 />
               </div>
               <div class="field">
-                <label for="npc-pack">{{
-                  'packs.choiceLabel' | transloco
-                }}</label>
-                <p-select
-                  inputId="npc-pack"
-                  data-field="pack"
-                  [options]="packOptions()"
-                  optionLabel="label"
-                  optionValue="value"
-                  [ngModel]="pack()"
-                  (ngModelChange)="pack.set($event ?? 'random')"
-                />
-              </div>
-              <div class="field">
                 <label for="npc-generate-class">{{
-                  'npc.editor.fields.class' | transloco
+                  'npc.editor.fields.class' | translate
                 }}</label>
                 <p-select
                   inputId="npc-generate-class"
@@ -425,7 +411,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                   [showClear]="true"
                   [ngModel]="generateClassId()"
                   (ngModelChange)="generateClassId.set($event)"
-                  [placeholder]="'npc.editor.randomClass' | transloco"
+                  [placeholder]="'npc.editor.randomClass' | translate"
                 />
               </div>
               <button
@@ -433,7 +419,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 type="button"
                 data-action="generate-seed"
                 icon="pi pi-sparkles"
-                [label]="'common.generateFromSeed' | transloco"
+                [label]="'common.generateFromSeed' | translate"
                 (click)="generate()"
               ></button>
               <button
@@ -442,7 +428,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                 data-action="reroll"
                 icon="pi pi-refresh"
                 severity="secondary"
-                [label]="'tools.itemGenerator.reroll' | transloco"
+                [label]="'tools.itemGenerator.reroll' | translate"
                 (click)="reroll()"
               ></button>
             </div>
@@ -461,7 +447,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
         data-action="random"
         icon="pi pi-sparkles"
         severity="secondary"
-        [label]="'common.random' | transloco"
+        [label]="'common.random' | translate"
         (click)="reroll()"
       ></button>
       <button
@@ -469,7 +455,7 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
         type="button"
         data-action="save"
         icon="pi pi-save"
-        [label]="'npc.editor.save' | transloco"
+        [label]="'npc.editor.save' | translate"
         (click)="submit()"
       ></button>
     </div>
@@ -560,8 +546,6 @@ export class NpcEditorComponent {
     return [];
   });
   protected readonly seed = signal(this.editor.newSeed());
-  protected readonly pack = signal('random');
-  protected readonly packOptions = this.editor.packOptions;
   protected readonly generateClassId = signal<string | null>(null);
 
   private readonly attributeNames = computed(() =>
@@ -702,7 +686,6 @@ export class NpcEditorComponent {
       this.seed(),
       this.world(),
       this.generateClassId() ?? undefined,
-      this.pack(),
     );
     this.setDraft({ ...generated, id: this.draft().id });
   }

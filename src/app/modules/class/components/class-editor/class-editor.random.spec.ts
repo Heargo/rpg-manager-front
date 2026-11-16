@@ -1,13 +1,15 @@
 import { TestBed } from '@angular/core/testing';
-import en from '../../../../../../public/packs/base-en/generators/classes.json';
+import { baseClassVocabulary } from '../../../../../testing/base-class-vocabulary';
+import { baseSkillVocabulary } from '../../../../../testing/base-skill-vocabulary';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
-import { PackBusiness } from '../../../../core/business/pack.business';
+import { ClassVocabularyBusiness } from '../../../../core/business/class-vocabulary.business';
+import { SkillVocabularyBusiness } from '../../../../core/business/skill-vocabulary.business';
 import { Skill } from '../../../skill/models/skill';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
 import { World } from '../../../world/models/world';
 import { ClassEditorComponent } from './class-editor.component';
 
-/** `PackBusiness.wordList` is mocked. `[data-action="random"]` fills the form, the JSON and the tree. */
+/** The two vocabulary businesses are mocked with the real Base. `[data-action="random"]` fills the form, the JSON and the tree. */
 describe('ClassEditorComponent Random', () => {
   const skill = (id: string): Skill => ({
     id, name: id, description: '', rarity: 'common', type: 'passive', maxLevel: 3, pointCost: 1,
@@ -25,7 +27,11 @@ describe('ClassEditorComponent Random', () => {
   async function setup() {
     TestBed.configureTestingModule({
       imports: [ClassEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } }],
+      providers: [
+        ...TEST_PROVIDERS,
+        { provide: ClassVocabularyBusiness, useValue: { vocabulary: async () => baseClassVocabulary('en') } },
+        { provide: SkillVocabularyBusiness, useValue: { vocabulary: async () => baseSkillVocabulary('en') } },
+      ],
     });
     const fixture = TestBed.createComponent(ClassEditorComponent);
     fixture.componentRef.setInput('world', world);

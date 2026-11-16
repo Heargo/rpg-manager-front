@@ -83,13 +83,17 @@
       "title": "Joined worlds",
       "hostedBy": "Host: {{ name }}",
       "lastSeen": "last seen {{ date }}",
-      "rejoin": "Rejoin",
+      "rejoinHint": "An invite works only once: to come back to a world, ask the GM for a new one.",
       "openSheet": "Open character",
       "remove": "Remove from the list",
       "readOnly": "This is your saved copy of the character in \"{{ name }}\". It is read-only until you rejoin."
     }
   },
   "world": {
+    "packs": {
+      "otherLanguage": "images, kinds and tints only",
+      "neutral": "images"
+    },
     "created": "\"{{ name }}\" is ready",
     "new": {
       "title": "New world",
@@ -137,6 +141,7 @@
       "starterClassesHint": "Warrior, Mage and Rogue, each with a skill tree built on your attributes, are added to the world. You can edit or delete them afterwards.",
       "offlineTitle": "When the host is offline",
       "offlineHint": "Players can always read their sheet. Choose what else they can still do; changes are checked when the host is back.",
+      "language": "World language",
       "packsTitle": "Packs",
       "packsHint": "The content packs this world uses. A pack is in a single language.",
       "packMissing": "Missing",
@@ -390,17 +395,18 @@
       "noClass": "No class yet.",
       "taughtSkills": "Other skills",
       "refundFrom": "Take back a point from {{ name }}",
+      "statDetails": "{{ name }} details",
       "tip": {
-        "base": "Base: {{ value }}",
-        "level": "Level: {{ value }}",
-        "formula": "Formula: {{ value }}",
-        "result": "Formula result: {{ value }}",
-        "cap": "Cap: {{ value }}",
-        "bonus": "Bonus: {{ value }}",
-        "max": "Max: {{ value }}",
-        "current": "Current: {{ value }}",
-        "class": "Class: {{ value }}",
-        "skills": "Skills: {{ value }}"
+        "base": "Base",
+        "level": "Level",
+        "formula": "Formula",
+        "result": "Formula result",
+        "cap": "Cap",
+        "bonus": "Equipment bonus",
+        "max": "Max",
+        "current": "Current",
+        "class": "Class",
+        "skills": "Skills"
       }
     },
     "items": {
@@ -534,6 +540,8 @@
         "slot": "A slot is needed for equipment and only for equipment.",
         "price": "The price must be 0 or more.",
         "modifiers": "Modifiers must be whole numbers on the attributes of this world.",
+        "kind": "The kind must be text.",
+        "tints": "The tints must be a list of text.",
         "json": "This is not valid JSON for an item."
       },
       "randomImage": "Random image"
@@ -722,9 +730,21 @@
       "tooManyImages": "Too many quick images: remove some first.",
       "imageMissing": "This picture isn't on the host's device.",
       "gameMasterOnly": "Only the game master can do that.",
-      "tooManyNpcs": "Four NPCs are already on the table: hide one first."
+      "combatRunning": "A combat is running: end it first.",
+      "notMerchant": "This NPC isn't a merchant."
     },
-    "npcs": "NPCs"
+    "encounter": {
+      "title": "Encounter",
+      "kind": "Kind of encounter",
+      "combat": "Combat",
+      "story": "Story",
+      "merchant": "Merchant",
+      "npc": "NPC",
+      "npcPlaceholder": "Pick an NPC",
+      "start": "Start",
+      "end": "End",
+      "running": "{{name}} ({{kind}})"
+    }
   },
   "tools": {
     "sandbox": {
@@ -934,14 +954,11 @@
       "sell": "Sell to the merchant",
       "sellAction": "Sell",
       "noStock": "Nothing for sale.",
-      "nothingToSell": "Nothing to sell."
+      "nothingToSell": "Nothing to sell.",
+      "details": "Details"
     },
     "table": {
-      "open": "Open shop",
-      "close": "Close shop",
-      "visit": "Visit shop",
-      "target": "Open or close the shop for",
-      "everyone": "All players"
+      "visit": "Shop"
     }
   },
   "npc": {
@@ -962,8 +979,7 @@
       "edit": "Edit",
       "create": "Add NPC",
       "copySuffix": "(copy)",
-      "show": "Show on the table",
-      "hide": "Hide from the table"
+      "view": "View the sheet"
     },
     "role": {
       "story": "Story",
@@ -1024,6 +1040,15 @@
       "learnFromClass": "Learn from the class",
       "removeSkill": "Remove the skill",
       "randomClass": "Random class"
+    },
+    "sheet": {
+      "title": "NPC sheet"
+    },
+    "card": {
+      "life": "Life",
+      "attributes": "Attributes",
+      "equipment": "Equipment",
+      "noEquipment": "Nothing equipped."
     }
   },
   "skill": {
@@ -1435,8 +1460,6 @@
       "newDraft": "New draft",
       "spriteId": "Id",
       "label": "Label",
-      "type": "Type",
-      "slot": "Slot",
       "confirm": "Add",
       "added": "Sprite added to the draft.",
       "addFailed": "The sprite could not be added: {{ reason }}",
@@ -1557,11 +1580,10 @@
     "grid": {
       "label": "Combat grid",
       "reachLegend": "Can move here"
-    }
+    },
+    "levelShort": "Lv {{ level }}"
   },
   "packs": {
-    "choiceLabel": "Pack",
-    "choiceRandom": "Random",
     "title": "Content packs",
     "intro": "Sprites and word lists you can add to the app. Download a pack to use it in a world, then it works offline.",
     "alwaysOn": "Always available",
@@ -1651,7 +1673,7 @@
       "license": "License",
       "licenseUrl": "License link",
       "homepage": "Home page (optional)",
-      "listsIntro": "For each generator, paste or import a JSON word list, or start from the Base of the pack's language. An empty list is left out of the pack.",
+      "listsIntro": "Build the pack's items, NPCs, skills and classes with the forms: kinds, language lists, tints and shared params. The raw JSON of each file is under Advanced: import, export or start from the Base of the pack's language. An empty list is left out of the pack.",
       "importFile": "Import a file",
       "copyBase": "Copy Base's list",
       "clear": "Clear",
@@ -1664,17 +1686,106 @@
       "noSprites": "No sprite yet.",
       "spriteId": "Id",
       "label": "Label",
-      "spriteType": "Type",
-      "spriteSlot": "Slot",
-      "spriteKind": "Kind",
-      "slotNone": "None",
+      "spriteKinds": "Item kinds",
+      "spriteKind": "Colouring",
       "removeSprite": "Remove",
       "duplicateId": "Another sprite has this id.",
       "publishIntro": "Install the pack on this device to use it now, or export it as a .zip to share.",
       "installDevice": "Install on this device",
       "export": "Export",
       "installed": "Pack installed on this device",
-      "editInColorizer": "Edit in the colorizer"
+      "editInColorizer": "Edit in the colorizer",
+      "lists": {
+        "items": "Items",
+        "shared": "Shared",
+        "advanced": "Advanced (JSON)",
+        "advancedHint": "The raw files of the pack: import, export or copy Base's. Changes here show up in the forms above."
+      },
+      "kinds": {
+        "title": "Kinds",
+        "add": "Add a kind",
+        "id": "Kind id",
+        "parent": "Parent",
+        "type": "Type",
+        "slot": "Slot",
+        "remove": "Remove",
+        "kebab": "Lowercase letters, digits and dashes.",
+        "nouns": "Nouns",
+        "newNoun": "New noun",
+        "gender": "Gender",
+        "masculine": "Masculine",
+        "feminine": "Feminine",
+        "plural": "Plural",
+        "addNoun": "Add",
+        "descriptions": "Descriptions (one per line)",
+        "names": "Name templates",
+        "namesHint": "One per line, each with {base}.",
+        "preview": "Preview",
+        "previewEmpty": "Nothing to draw: this kind needs a noun.",
+        "uncovered": "No sprite yet for: {{ kinds }}",
+        "words": "Adjectives and suffixes",
+        "wordsHint": "Adjectives (m / f / plural forms, optional tint) and suffixes of this kind, per rarity."
+      },
+      "tints": {
+        "title": "Tints",
+        "add": "Add a tint",
+        "id": "Tint id",
+        "remove": "Remove",
+        "shadow": "Shadow",
+        "mid": "Middle",
+        "light": "Light",
+        "adjectives": "Adjectives",
+        "adjectivesHint": "One per line. A gendered adjective is written masculine|feminine, with the plurals after if they are irregular.",
+        "suffixes": "Suffixes",
+        "descriptions": "Descriptions (one per line)",
+        "fits": "Fits kinds",
+        "fitsAny": "Any item"
+      },
+      "params": {
+        "title": "Params",
+        "add": "Add a param",
+        "name": "Param name",
+        "newEntry": "New phrase",
+        "addEntry": "Add",
+        "remove": "Remove",
+        "removeEntry": "Remove",
+        "neutral": "Texts need a pack with a language: choose one in Details."
+      },
+      "templates": {
+        "title": "Name templates (only needed for a Base)",
+        "hint": "One per line, each with {base}. A kind can bring its own."
+      },
+      "words": {
+        "common": "Common adjectives and suffixes",
+        "commonHint": "Adjectives and suffixes any item of the language can take, per rarity.",
+        "m": "Masculine",
+        "f": "Feminine",
+        "mp": "Masculine plural",
+        "fp": "Feminine plural",
+        "tint": "Tint (optional)",
+        "suffix": "New suffix",
+        "addAdjective": "Add adjective",
+        "addSuffix": "Add suffix",
+        "remove": "Remove"
+      },
+      "domain": {
+        "roles": "Roles",
+        "person": "Person or creature",
+        "personYes": "A person (given name)",
+        "personNo": "A creature (named from its nouns)",
+        "effect": "Effect",
+        "skills": "Favoured skill kinds",
+        "adjectives": "Adjectives",
+        "namesHint": "One per line, with {noun}, {adjective}, {given}, {epithet} or {suffix} as the domain allows.",
+        "textsTitle": "Language lists",
+        "top": {
+          "given": "Given names",
+          "epithets": "Epithets",
+          "templates": "Name templates",
+          "adjectives": "Adjectives",
+          "suffixes": "Suffixes"
+        }
+      }
     },
     "createdHere": "Created on this device",
     "editAsDraft": "Edit as a draft"

@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -18,7 +18,6 @@ import { LanguageBusiness } from '../../../../core/business/language.business';
 import { World } from '../../../world/models/world';
 import { filterNpcs } from '../../helpers/npc.rules';
 import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
-import { TABLE_NPCS_MAX } from '../../../table/models/table';
 import { NpcCardComponent } from '../npc-card/npc-card.component';
 
 /** A world's NPC catalogue: search and filters, a card per NPC, with duplicate and delete. */
@@ -27,7 +26,7 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputTextModule,
     InputNumberModule,
@@ -40,8 +39,8 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
         pInputText
         data-field="search"
         type="search"
-        [attr.aria-label]="'npc.catalogue.search' | transloco"
-        [placeholder]="'npc.catalogue.search' | transloco"
+        [attr.aria-label]="'npc.catalogue.search' | translate"
+        [placeholder]="'npc.catalogue.search' | translate"
         [value]="search()"
         (input)="search.set($any($event.target).value)"
         autocomplete="off"
@@ -53,23 +52,23 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
         optionValue="value"
         [ngModel]="roles()"
         (ngModelChange)="roles.set($event ?? [])"
-        [placeholder]="'npc.catalogue.roles' | transloco"
+        [placeholder]="'npc.catalogue.roles' | translate"
         [showToggleAll]="false"
         display="chip"
       />
       <p-inputnumber
         data-field="level-min"
         [min]="1"
-        [ariaLabel]="'npc.catalogue.levelMin' | transloco"
-        [placeholder]="'npc.catalogue.levelMin' | transloco"
+        [ariaLabel]="'npc.catalogue.levelMin' | translate"
+        [placeholder]="'npc.catalogue.levelMin' | translate"
         [ngModel]="levelMin()"
         (ngModelChange)="levelMin.set($event)"
       />
       <p-inputnumber
         data-field="level-max"
         [min]="1"
-        [ariaLabel]="'npc.catalogue.levelMax' | transloco"
-        [placeholder]="'npc.catalogue.levelMax' | transloco"
+        [ariaLabel]="'npc.catalogue.levelMax' | translate"
+        [placeholder]="'npc.catalogue.levelMax' | translate"
         [ngModel]="levelMax()"
         (ngModelChange)="levelMax.set($event)"
       />
@@ -78,7 +77,7 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
         type="button"
         data-action="create"
         icon="pi pi-plus"
-        [label]="'npc.catalogue.create' | transloco"
+        [label]="'npc.catalogue.create' | translate"
         (click)="create.emit()"
       ></button>
     </div>
@@ -96,35 +95,20 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
                 icon="pi pi-pencil"
                 severity="secondary"
                 [text]="true"
-                [attr.aria-label]="'npc.catalogue.edit' | transloco"
+                [attr.aria-label]="'npc.catalogue.edit' | translate"
                 (click)="edit.emit(npc)"
               ></button>
-              @if (showControls()) {
-                @if (shownIds().includes(npc.id)) {
-                  <button
-                    pButton
-                    type="button"
-                    data-action="hide"
-                    icon="pi pi-eye-slash"
-                    severity="secondary"
-                    [text]="true"
-                    [attr.aria-label]="'npc.catalogue.hide' | transloco"
-                    (click)="hide.emit(npc)"
-                  ></button>
-                } @else {
-                  <button
-                    pButton
-                    type="button"
-                    data-action="show"
-                    icon="pi pi-eye"
-                    severity="secondary"
-                    [text]="true"
-                    [disabled]="shownIds().length >= maxShown"
-                    [attr.aria-label]="'npc.catalogue.show' | transloco"
-                    (click)="show.emit(npc)"
-                  ></button>
-                }
-              }
+              <button
+                pButton
+                type="button"
+                data-action="view"
+                icon="pi pi-eye"
+                severity="secondary"
+                [text]="true"
+                [attr.aria-label]="'npc.catalogue.view' | translate"
+                [attr.title]="'npc.catalogue.view' | translate"
+                (click)="view.emit(npc)"
+              ></button>
               <button
                 pButton
                 type="button"
@@ -132,7 +116,7 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
                 icon="pi pi-copy"
                 severity="secondary"
                 [text]="true"
-                [label]="'npc.catalogue.duplicate' | transloco"
+                [label]="'npc.catalogue.duplicate' | translate"
                 (click)="duplicate.emit(npc)"
               ></button>
               <button
@@ -142,7 +126,7 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
                 icon="pi pi-trash"
                 severity="danger"
                 [text]="true"
-                [attr.aria-label]="'npc.catalogue.delete' | transloco"
+                [attr.aria-label]="'npc.catalogue.delete' | translate"
                 (click)="askDelete(npc)"
               ></button>
             </div>
@@ -150,7 +134,7 @@ import { NpcCardComponent } from '../npc-card/npc-card.component';
         }
       </div>
     } @else {
-      <p class="empty">{{ 'npc.catalogue.empty' | transloco }}</p>
+      <p class="empty">{{ 'npc.catalogue.empty' | translate }}</p>
     }
   `,
   styles: `
@@ -196,18 +180,13 @@ export class NpcCatalogueComponent {
   private readonly language = inject(LanguageBusiness);
 
   readonly world = input.required<World>();
-  /** Ids of the NPCs on the table. */
-  readonly shownIds = input<string[]>([]);
-  /** Whether there is a table to show NPCs on (not in the sandbox tool). */
-  readonly showControls = input(true);
-  protected readonly maxShown = TABLE_NPCS_MAX;
 
   readonly create = output<void>();
   readonly edit = output<Npc>();
   readonly duplicate = output<Npc>();
   readonly remove = output<Npc>();
-  readonly show = output<Npc>();
-  readonly hide = output<Npc>();
+  /** Open the NPC's sheet. */
+  readonly view = output<Npc>();
 
   protected readonly search = signal('');
   protected readonly roles = signal<NpcRole[]>([]);

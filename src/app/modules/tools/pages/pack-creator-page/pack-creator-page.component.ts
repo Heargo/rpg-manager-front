@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
@@ -23,7 +23,7 @@ import { LocalDatePipe } from '../../../../core/pipes/local-date.pipe';
   selector: 'app-pack-creator-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     LocalDatePipe,
     ButtonModule,
     CardModule,
@@ -32,11 +32,11 @@ import { LocalDatePipe } from '../../../../core/pipes/local-date.pipe';
   template: `
     <div class="main-container creator">
       <header>
-        <h1>{{ 'packs.creator.title' | transloco }}</h1>
-        <p class="hint">{{ 'packs.creator.intro' | transloco }}</p>
+        <h1>{{ 'packs.creator.title' | translate }}</h1>
+        <p class="hint">{{ 'packs.creator.intro' | translate }}</p>
         <p-button
           icon="pi pi-plus"
-          [label]="'packs.creator.newDraft' | transloco"
+          [label]="'packs.creator.newDraft' | translate"
           [loading]="creating()"
           (onClick)="create()"
         />
@@ -49,20 +49,20 @@ import { LocalDatePipe } from '../../../../core/pipes/local-date.pipe';
                 <div class="info">
                   <h2>{{ name(draft) }}</h2>
                   <span class="hint">
-                    {{ 'packs.creator.updated' | transloco }}
+                    {{ 'packs.creator.updated' | translate }}
                     {{ draft.updatedAt | localDate: 'dateTime' }}
                   </span>
                 </div>
                 <p-button
                   severity="secondary"
                   icon="pi pi-pencil"
-                  [label]="'packs.creator.open' | transloco"
+                  [label]="'packs.creator.open' | translate"
                   (onClick)="open(draft.id)"
                 />
                 <p-button
                   severity="danger"
                   icon="pi pi-trash"
-                  [label]="'packs.creator.delete' | transloco"
+                  [label]="'packs.creator.delete' | translate"
                   (onClick)="confirmDelete(draft)"
                 />
               </div>
@@ -70,7 +70,7 @@ import { LocalDatePipe } from '../../../../core/pipes/local-date.pipe';
           </li>
         } @empty {
           @if (loaded()) {
-            <li class="hint">{{ 'packs.creator.empty' | transloco }}</li>
+            <li class="hint">{{ 'packs.creator.empty' | translate }}</li>
           }
         }
       </ul>

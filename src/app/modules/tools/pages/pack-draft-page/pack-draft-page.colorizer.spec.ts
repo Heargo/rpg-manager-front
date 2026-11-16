@@ -11,8 +11,7 @@ import { PackDraftPageComponent } from './pack-draft-page.component';
 const sprite = (id: string, kind: DraftSprite['kind']): DraftSprite => ({
   id,
   label: id,
-  type: 'item',
-  slot: 'none',
+  kinds: ['item'],
   kind,
   image: new Blob(['png'], { type: 'image/png' }),
   ...(kind === 'masked' ? { materials: '{}' } : {}),

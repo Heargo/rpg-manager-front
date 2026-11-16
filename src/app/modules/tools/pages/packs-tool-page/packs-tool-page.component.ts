@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -47,7 +47,7 @@ export function formatSize(bytes: number): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     CardModule,
     DialogModule,
@@ -59,25 +59,25 @@ export function formatSize(bytes: number): string {
   template: `
     <div class="main-container packs">
       <header>
-        <h1>{{ 'packs.title' | transloco }}</h1>
-        <p class="hint">{{ 'packs.intro' | transloco }}</p>
+        <h1>{{ 'packs.title' | translate }}</h1>
+        <p class="hint">{{ 'packs.intro' | translate }}</p>
         <div class="header-actions">
           <p-button
             icon="pi pi-plus"
-            [label]="'packs.add' | transloco"
+            [label]="'packs.add' | translate"
             (onClick)="openAdd()"
           />
           <p-button
             severity="secondary"
             icon="pi pi-pencil"
-            [label]="'packs.creator.create' | transloco"
+            [label]="'packs.creator.create' | translate"
             (onClick)="openCreator()"
           />
         </div>
       </header>
       @if (registry().length) {
         <section>
-          <h2 class="section-title">{{ 'packs.officialTitle' | transloco }}</h2>
+          <h2 class="section-title">{{ 'packs.officialTitle' | translate }}</h2>
           <ul class="grid">
             @for (entry of registry(); track entry.id) {
               <li data-test="pack-card" [attr.data-pack]="entry.id">
@@ -92,29 +92,29 @@ export function formatSize(bytes: number): string {
                     @if (entry.builtIn) {
                       <p-tag
                         severity="info"
-                        [value]="'packs.alwaysOn' | transloco"
+                        [value]="'packs.alwaysOn' | translate"
                       />
                     } @else {
                       @if (isDownloaded(entry.id)) {
                         <p-tag
                           severity="success"
-                          [value]="'packs.downloaded' | transloco"
+                          [value]="'packs.downloaded' | translate"
                         />
                       }
                       @if (busy().has(entry.id)) {
                         <p-progressspinner
                           strokeWidth="6"
                           [style]="{ width: '1.5rem', height: '1.5rem' }"
-                          [ariaLabel]="'packs.downloading' | transloco"
+                          [ariaLabel]="'packs.downloading' | translate"
                         />
                       }
                     }
                   </div>
                   <p class="desc">{{ entry.description }}</p>
                   <dl>
-                    <dt>{{ 'packs.author' | transloco }}</dt>
+                    <dt>{{ 'packs.author' | translate }}</dt>
                     <dd>{{ entry.author }}</dd>
-                    <dt>{{ 'packs.license' | transloco }}</dt>
+                    <dt>{{ 'packs.license' | translate }}</dt>
                     <dd>
                       <a
                         [href]="entry.licenseUrl"
@@ -124,12 +124,12 @@ export function formatSize(bytes: number): string {
                       >
                     </dd>
                     @if (!entry.builtIn) {
-                      <dt>{{ 'packs.size' | transloco }}</dt>
+                      <dt>{{ 'packs.size' | translate }}</dt>
                       <dd>{{ size(entry.size) }}</dd>
                     }
-                    <dt>{{ 'packs.detailsSprites' | transloco }}</dt>
+                    <dt>{{ 'packs.detailsSprites' | translate }}</dt>
                     <dd>{{ entry.sprites }}</dd>
-                    <dt>{{ 'packs.language' | transloco }}</dt>
+                    <dt>{{ 'packs.language' | translate }}</dt>
                     <dd>{{ languageName(entry.language) }}</dd>
                   </dl>
                   <ng-template #footer>
@@ -138,13 +138,13 @@ export function formatSize(bytes: number): string {
                         <p-button
                           severity="secondary"
                           icon="pi pi-info-circle"
-                          [label]="'packs.details' | transloco"
+                          [label]="'packs.details' | translate"
                           (onClick)="openDetails(entry)"
                         />
                         <p-button
                           severity="secondary"
                           icon="pi pi-copy"
-                          [label]="'packs.duplicate' | transloco"
+                          [label]="'packs.duplicate' | translate"
                           [loading]="busy().has(entry.id)"
                           [disabled]="busy().has(entry.id)"
                           (onClick)="duplicate(entry.id)"
@@ -153,7 +153,7 @@ export function formatSize(bytes: number): string {
                       @if (!entry.builtIn && !isDownloaded(entry.id)) {
                         <p-button
                           icon="pi pi-download"
-                          [label]="'packs.download' | transloco"
+                          [label]="'packs.download' | translate"
                           [disabled]="busy().has(entry.id)"
                           (onClick)="download(entry)"
                         />
@@ -163,7 +163,7 @@ export function formatSize(bytes: number): string {
                           severity="danger"
                           variant="text"
                           icon="pi pi-trash"
-                          [label]="'packs.remove' | transloco"
+                          [label]="'packs.remove' | translate"
                           [disabled]="busy().has(entry.id)"
                           (onClick)="confirmRemove(entry.id, entry.name)"
                         />
@@ -179,7 +179,7 @@ export function formatSize(bytes: number): string {
       @if (unofficial().length) {
         <section>
           <h2 class="section-title">
-            {{ 'packs.unofficialTitle' | transloco }}
+            {{ 'packs.unofficialTitle' | translate }}
           </h2>
           <ul class="grid">
             @for (pack of unofficial(); track pack.id) {
@@ -195,22 +195,22 @@ export function formatSize(bytes: number): string {
                     @if (!pack.link) {
                       <p-tag
                         severity="secondary"
-                        [value]="'packs.createdHere' | transloco"
+                        [value]="'packs.createdHere' | translate"
                       />
                     }
                     @if (busy().has(pack.id)) {
                       <p-progressspinner
                         strokeWidth="6"
                         [style]="{ width: '1.5rem', height: '1.5rem' }"
-                        [ariaLabel]="'packs.downloading' | transloco"
+                        [ariaLabel]="'packs.downloading' | translate"
                       />
                     }
                   </div>
                   <p class="desc">{{ pack.description }}</p>
                   <dl>
-                    <dt>{{ 'packs.author' | transloco }}</dt>
+                    <dt>{{ 'packs.author' | translate }}</dt>
                     <dd>{{ pack.author }}</dd>
-                    <dt>{{ 'packs.license' | transloco }}</dt>
+                    <dt>{{ 'packs.license' | translate }}</dt>
                     <dd>
                       <a
                         [href]="pack.licenseUrl"
@@ -219,9 +219,9 @@ export function formatSize(bytes: number): string {
                         >{{ pack.license }}</a
                       >
                     </dd>
-                    <dt>{{ 'packs.version' | transloco }}</dt>
+                    <dt>{{ 'packs.version' | translate }}</dt>
                     <dd>{{ pack.version }}</dd>
-                    <dt>{{ 'packs.source' | transloco }}</dt>
+                    <dt>{{ 'packs.source' | translate }}</dt>
                     <dd>
                       @if (pack.link) {
                         <a
@@ -231,7 +231,7 @@ export function formatSize(bytes: number): string {
                           >{{ pack.link }}</a
                         >
                       } @else {
-                        {{ 'packs.createdHere' | transloco }}
+                        {{ 'packs.createdHere' | translate }}
                       }
                     </dd>
                   </dl>
@@ -241,7 +241,7 @@ export function formatSize(bytes: number): string {
                         <p-button
                           severity="secondary"
                           icon="pi pi-refresh"
-                          [label]="'packs.update' | transloco"
+                          [label]="'packs.update' | translate"
                           [disabled]="busy().has(pack.id)"
                           (onClick)="checkUpdate(pack)"
                         />
@@ -249,7 +249,7 @@ export function formatSize(bytes: number): string {
                       <p-button
                         severity="secondary"
                         icon="pi pi-copy"
-                        [label]="'packs.duplicate' | transloco"
+                        [label]="'packs.duplicate' | translate"
                         [loading]="busy().has(pack.id)"
                         [disabled]="busy().has(pack.id)"
                         (onClick)="duplicate(pack.id)"
@@ -258,7 +258,7 @@ export function formatSize(bytes: number): string {
                         <p-button
                           severity="secondary"
                           icon="pi pi-pencil"
-                          [label]="'packs.editAsDraft' | transloco"
+                          [label]="'packs.editAsDraft' | translate"
                           [disabled]="busy().has(pack.id)"
                           (onClick)="editAsDraft(pack)"
                         />
@@ -267,7 +267,7 @@ export function formatSize(bytes: number): string {
                         severity="danger"
                         variant="text"
                         icon="pi pi-trash"
-                        [label]="'packs.remove' | transloco"
+                        [label]="'packs.remove' | translate"
                         [disabled]="busy().has(pack.id)"
                         (onClick)="confirmRemove(pack.id, pack.name)"
                       />
@@ -281,7 +281,7 @@ export function formatSize(bytes: number): string {
       }
     </div>
     <p-dialog
-      [header]="'packs.add' | transloco"
+      [header]="'packs.add' | translate"
       [visible]="addOpen()"
       (visibleChange)="!$event && closeAdd()"
       [modal]="true"
@@ -294,11 +294,11 @@ export function formatSize(bytes: number): string {
           type="text"
           [ngModel]="link()"
           (ngModelChange)="link.set($event)"
-          [placeholder]="'packs.linkPlaceholder' | transloco"
-          [attr.aria-label]="'packs.linkLabel' | transloco"
+          [placeholder]="'packs.linkPlaceholder' | translate"
+          [attr.aria-label]="'packs.linkLabel' | translate"
         />
         <p-button
-          [label]="'packs.check' | transloco"
+          [label]="'packs.check' | translate"
           [loading]="checking()"
           (onClick)="check()"
         />
@@ -315,9 +315,9 @@ export function formatSize(bytes: number): string {
           <h3>{{ pack.manifest.name }}</h3>
           <p>{{ pack.manifest.description }}</p>
           <dl>
-            <dt>{{ 'packs.author' | transloco }}</dt>
+            <dt>{{ 'packs.author' | translate }}</dt>
             <dd>{{ pack.manifest.author }}</dd>
-            <dt>{{ 'packs.license' | transloco }}</dt>
+            <dt>{{ 'packs.license' | translate }}</dt>
             <dd>
               <a
                 [href]="pack.manifest.licenseUrl"
@@ -326,7 +326,7 @@ export function formatSize(bytes: number): string {
                 >{{ pack.manifest.license }}</a
               >
             </dd>
-            <dt>{{ 'packs.source' | transloco }}</dt>
+            <dt>{{ 'packs.source' | translate }}</dt>
             <dd>
               <a
                 [href]="pack.source"
@@ -335,28 +335,28 @@ export function formatSize(bytes: number): string {
                 >{{ pack.source }}</a
               >
             </dd>
-            <dt>{{ 'packs.version' | transloco }}</dt>
+            <dt>{{ 'packs.version' | translate }}</dt>
             <dd>{{ pack.manifest.version }}</dd>
-            <dt>{{ 'packs.size' | transloco }}</dt>
+            <dt>{{ 'packs.size' | translate }}</dt>
             <dd>{{ size(pack.size) }}</dd>
-            <dt>{{ 'packs.language' | transloco }}</dt>
+            <dt>{{ 'packs.language' | translate }}</dt>
             <dd>{{ languageName(pack.manifest.language) }}</dd>
             @if (pack.counts.generators) {
-              <dt>{{ 'packs.detailsGenerators' | transloco }}</dt>
+              <dt>{{ 'packs.detailsGenerators' | translate }}</dt>
               <dd>
                 {{
                   'packs.wordLists'
-                    | transloco: { count: pack.counts.generators }
+                    | translate: { count: pack.counts.generators }
                 }}
               </dd>
             }
             @for (kind of countsSprites(pack); track kind.kind) {
-              <dt>{{ 'sprite.kind.' + kind.kind | transloco }}</dt>
+              <dt>{{ 'sprite.kind.' + kind.kind | translate }}</dt>
               <dd>{{ kind.count }}</dd>
             }
           </dl>
           <p-message severity="warn">{{
-            'packs.warning' | transloco
+            'packs.warning' | translate
           }}</p-message>
         </div>
       }
@@ -364,7 +364,7 @@ export function formatSize(bytes: number): string {
         @if (prepared()) {
           <p-button
             icon="pi pi-download"
-            [label]="'packs.install' | transloco"
+            [label]="'packs.install' | translate"
             [loading]="installing()"
             (onClick)="install()"
           />
@@ -372,7 +372,7 @@ export function formatSize(bytes: number): string {
       </ng-template>
     </p-dialog>
     <p-dialog
-      [header]="'packs.update' | transloco"
+      [header]="'packs.update' | translate"
       [visible]="update() !== null"
       (visibleChange)="!$event && update.set(null)"
       [modal]="true"
@@ -383,7 +383,7 @@ export function formatSize(bytes: number): string {
           <p>
             {{
               'packs.updateVersions'
-                | transloco
+                | translate
                   : {
                       name: pending.update.prepared.manifest.name,
                       from: pending.update.oldVersion,
@@ -392,7 +392,7 @@ export function formatSize(bytes: number): string {
             }}
           </p>
           <p-message severity="warn">{{
-            'packs.warning' | transloco
+            'packs.warning' | translate
           }}</p-message>
         </div>
       }
@@ -400,11 +400,11 @@ export function formatSize(bytes: number): string {
         <p-button
           severity="secondary"
           outlined
-          [label]="'packs.cancel' | transloco"
+          [label]="'packs.cancel' | translate"
           (onClick)="update.set(null)"
         />
         <p-button
-          [label]="'packs.confirm' | transloco"
+          [label]="'packs.confirm' | translate"
           [loading]="installing()"
           (onClick)="confirmUpdate()"
         />
@@ -425,13 +425,13 @@ export function formatSize(bytes: number): string {
             [href]="pack.licenseUrl"
             target="_blank"
             rel="noopener noreferrer"
-            >{{ 'packs.licenseLink' | transloco }}</a
+            >{{ 'packs.licenseLink' | translate }}</a
           >
           ({{ pack.license }})
         </p>
-        <h3>{{ 'packs.detailsGenerators' | transloco }}</h3>
+        <h3>{{ 'packs.detailsGenerators' | translate }}</h3>
         <p>
-          <strong>{{ 'packs.language' | transloco }}</strong>:
+          <strong>{{ 'packs.language' | translate }}</strong>:
           <span data-test="pack-details-language">{{
             languageName(pack.language)
           }}</span>
@@ -439,14 +439,14 @@ export function formatSize(bytes: number): string {
         @for (g of generatorNames(); track g) {
           <p-tag
             severity="secondary"
-            [value]="'packs.generator.' + g | transloco"
+            [value]="'packs.generator.' + g | translate"
           />
         } @empty {
-          <p class="hint">{{ 'packs.detailsNoGenerators' | transloco }}</p>
+          <p class="hint">{{ 'packs.detailsNoGenerators' | translate }}</p>
         }
-        <h3>{{ 'packs.detailsSprites' | transloco }}</h3>
+        <h3>{{ 'packs.detailsSprites' | translate }}</h3>
         @for (group of spriteGroups(); track group.kind) {
-          <h4>{{ 'sprite.kind.' + group.kind | transloco }}</h4>
+          <h4>{{ 'sprite.kind.' + group.kind | translate }}</h4>
           <ul class="thumbs">
             @for (sprite of group.sprites; track sprite.id) {
               <li>
@@ -462,7 +462,7 @@ export function formatSize(bytes: number): string {
             }
           </ul>
         } @empty {
-          <p class="hint">{{ 'packs.detailsNoSprites' | transloco }}</p>
+          <p class="hint">{{ 'packs.detailsNoSprites' | translate }}</p>
         }
       }
     </p-dialog>
@@ -630,7 +630,9 @@ export class PacksToolPageComponent {
   }
 
   /** A pack language in its own language, whatever the app language. */
-  protected languageName(code: string): string {
+  /** The name of a pack language; empty for a neutral pack. */
+  protected languageName(code: string | undefined): string {
+    if (!code) return '';
     return SUPPORTED_LANGUAGES.find((l) => l.code === code)?.label ?? code;
   }
 

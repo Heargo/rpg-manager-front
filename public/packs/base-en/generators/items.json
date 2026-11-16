@@ -1,5 +1,755 @@
 {
-  "version": 1,
+  "version": 2,
+  "kinds": {
+    "equipment": {
+      "descriptions": [
+        "Light enough to forget you're wearing it.",
+        "Built for a long road and a hard fight.",
+        "Scratches on it tell a story of its own.",
+        "It fits as if it was made for you."
+      ],
+      "adjectives": {
+        "common": [
+          "Worn",
+          "Sturdy"
+        ],
+        "mythic": [
+          "Starforged",
+          "Wyrmscale"
+        ],
+        "legendary": [
+          "Godforged"
+        ]
+      }
+    },
+    "consumable": {
+      "descriptions": [
+        "Smells worse than it tastes. Mostly.",
+        "Best used before the fight, not after.",
+        "A traveller's favourite, sold in every tavern."
+      ]
+    },
+    "item": {
+      "descriptions": [
+        "An odd find that someone, somewhere, must be looking for.",
+        "It hums faintly when nobody is watching.",
+        "Worth more to the right buyer.",
+        "Its maker left a mark you don't recognise."
+      ],
+      "adjectives": {
+        "common": [
+          "Worn"
+        ]
+      }
+    },
+    "helm": {
+      "nouns": [
+        {
+          "text": "Helm"
+        }
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Reinforced",
+          "Polished"
+        ]
+      }
+    },
+    "hood": {
+      "nouns": [
+        {
+          "text": "Hood"
+        }
+      ]
+    },
+    "crown": {
+      "nouns": [
+        {
+          "text": "Crown"
+        }
+      ]
+    },
+    "diadem": {
+      "nouns": [
+        {
+          "text": "Circlet"
+        }
+      ]
+    },
+    "cap": {
+      "nouns": [
+        {
+          "text": "Cap"
+        }
+      ]
+    },
+    "earring": {
+      "nouns": [
+        {
+          "text": "Earring"
+        }
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Polished"
+        ]
+      }
+    },
+    "ear-hoop": {
+      "nouns": [
+        {
+          "text": "Ear Cuff"
+        }
+      ]
+    },
+    "ear-pendant": {
+      "nouns": [
+        {
+          "text": "Stud"
+        }
+      ]
+    },
+    "amulet": {
+      "nouns": [
+        {
+          "text": "Amulet"
+        }
+      ]
+    },
+    "pendant": {
+      "nouns": [
+        {
+          "text": "Pendant"
+        }
+      ]
+    },
+    "necklace-chain": {
+      "nouns": [
+        {
+          "text": "Necklace"
+        }
+      ]
+    },
+    "torc": {
+      "nouns": [
+        {
+          "text": "Torc"
+        }
+      ]
+    },
+    "ring": {
+      "nouns": [
+        {
+          "text": "Ring"
+        },
+        {
+          "text": "Band"
+        }
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Polished"
+        ]
+      }
+    },
+    "signet-ring": {
+      "nouns": [
+        {
+          "text": "Signet"
+        }
+      ]
+    },
+    "armor": {
+      "nouns": [
+        {
+          "text": "Breastplate"
+        }
+      ]
+    },
+    "tunic": {
+      "nouns": [
+        {
+          "text": "Tunic"
+        }
+      ]
+    },
+    "robe": {
+      "nouns": [
+        {
+          "text": "Robe"
+        }
+      ]
+    },
+    "chainmail": {
+      "nouns": [
+        {
+          "text": "Hauberk"
+        }
+      ]
+    },
+    "doublet": {
+      "nouns": [
+        {
+          "text": "Jerkin"
+        }
+      ]
+    },
+    "glove": {
+      "nouns": [
+        {
+          "text": "Gloves",
+          "plural": true
+        }
+      ]
+    },
+    "gauntlets": {
+      "nouns": [
+        {
+          "text": "Gauntlets",
+          "plural": true
+        }
+      ]
+    },
+    "bracers": {
+      "nouns": [
+        {
+          "text": "Bracers",
+          "plural": true
+        }
+      ]
+    },
+    "mittens": {
+      "nouns": [
+        {
+          "text": "Wraps",
+          "plural": true
+        }
+      ]
+    },
+    "greaves": {
+      "nouns": [
+        {
+          "text": "Greaves",
+          "plural": true
+        }
+      ]
+    },
+    "hose": {
+      "nouns": [
+        {
+          "text": "Leggings",
+          "plural": true
+        }
+      ]
+    },
+    "breeches": {
+      "nouns": [
+        {
+          "text": "Trousers",
+          "plural": true
+        }
+      ]
+    },
+    "cuisses": {
+      "nouns": [
+        {
+          "text": "Tassets",
+          "plural": true
+        }
+      ]
+    },
+    "boots": {
+      "nouns": [
+        {
+          "text": "Boots",
+          "plural": true
+        }
+      ]
+    },
+    "sandals": {
+      "nouns": [
+        {
+          "text": "Sandals",
+          "plural": true
+        }
+      ]
+    },
+    "sabatons": {
+      "nouns": [
+        {
+          "text": "Sabatons",
+          "plural": true
+        }
+      ]
+    },
+    "shoes": {
+      "nouns": [
+        {
+          "text": "Shoes",
+          "plural": true
+        }
+      ]
+    },
+    "sword": {
+      "nouns": [
+        {
+          "text": "Sword"
+        }
+      ]
+    },
+    "axe": {
+      "nouns": [
+        {
+          "text": "Axe"
+        }
+      ]
+    },
+    "mace": {
+      "nouns": [
+        {
+          "text": "Mace"
+        }
+      ]
+    },
+    "spear": {
+      "nouns": [
+        {
+          "text": "Spear"
+        }
+      ]
+    },
+    "staff": {
+      "nouns": [
+        {
+          "text": "Staff"
+        }
+      ]
+    },
+    "dagger": {
+      "nouns": [
+        {
+          "text": "Dagger"
+        }
+      ]
+    },
+    "bow-long": {
+      "nouns": [
+        {
+          "text": "Bow"
+        }
+      ]
+    },
+    "bow-short": {
+      "nouns": [
+        {
+          "text": "Bow"
+        }
+      ]
+    },
+    "shield": {
+      "nouns": [
+        {
+          "text": "Shield"
+        }
+      ],
+      "descriptions": [
+        "It still bears the marks of {event}."
+      ]
+    },
+    "buckler": {
+      "nouns": [
+        {
+          "text": "Buckler"
+        }
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Reinforced"
+        ]
+      }
+    },
+    "grimoire": {
+      "nouns": [
+        {
+          "text": "Tome"
+        }
+      ]
+    },
+    "orb": {
+      "nouns": [
+        {
+          "text": "Orb"
+        }
+      ]
+    },
+    "parrying-dagger": {
+      "nouns": [
+        {
+          "text": "Parrying Dagger"
+        }
+      ]
+    },
+    "map": {
+      "nouns": [
+        {
+          "text": "Map"
+        }
+      ]
+    },
+    "key": {
+      "nouns": [
+        {
+          "text": "Key"
+        }
+      ],
+      "descriptions": [
+        "It opens a forgotten door in {place}.",
+        "It belonged to {owner}, who never let it out of sight."
+      ]
+    },
+    "gem": {
+      "nouns": [
+        {
+          "text": "Gem"
+        }
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Polished"
+        ]
+      }
+    },
+    "idol": {
+      "nouns": [
+        {
+          "text": "Idol"
+        }
+      ]
+    },
+    "lantern": {
+      "nouns": [
+        {
+          "text": "Lantern"
+        }
+      ]
+    },
+    "compass": {
+      "nouns": [
+        {
+          "text": "Compass"
+        }
+      ]
+    },
+    "scroll-case": {
+      "nouns": [
+        {
+          "text": "Scroll Case"
+        }
+      ]
+    },
+    "potion": {
+      "nouns": [
+        {
+          "text": "Potion"
+        }
+      ],
+      "descriptions": [
+        "Brewed by {maker}, from a recipe nobody will confirm.",
+        "A seller from {place} swears it saved {owner}.",
+        "The label is half torn, but the colour looks right."
+      ],
+      "names": {
+        "common": [
+          "{base} of {effect}"
+        ],
+        "uncommon": [
+          "{base} of {effect}"
+        ],
+        "rare": [
+          "{base} of {effect}"
+        ]
+      }
+    },
+    "elixir": {
+      "nouns": [
+        {
+          "text": "Elixir"
+        }
+      ],
+      "names": {
+        "common": [
+          "{base} of {effect}"
+        ],
+        "uncommon": [
+          "{base} of {effect}"
+        ],
+        "rare": [
+          "{base} of {effect}"
+        ]
+      }
+    },
+    "brew": {
+      "nouns": [
+        {
+          "text": "Draught"
+        }
+      ]
+    },
+    "tonic": {
+      "nouns": [
+        {
+          "text": "Tonic"
+        }
+      ],
+      "names": {
+        "common": [
+          "{base} of {effect}"
+        ],
+        "uncommon": [
+          "{base} of {effect}"
+        ],
+        "rare": [
+          "{base} of {effect}"
+        ]
+      }
+    },
+    "ration": {
+      "nouns": [
+        {
+          "text": "Ration"
+        }
+      ]
+    },
+    "ointment": {
+      "nouns": [
+        {
+          "text": "Salve"
+        }
+      ]
+    },
+    "scroll": {
+      "nouns": [
+        {
+          "text": "Scroll"
+        }
+      ]
+    },
+    "weapon": {
+      "descriptions": [
+        "A [reliable|fearsome] weapon, forged by {maker}.",
+        "They say it once belonged to {owner}.",
+        "It survived {event}, and it shows.",
+        "It is shaped from {material}."
+      ],
+      "adjectives": {
+        "uncommon": [
+          "Keen",
+          "Balanced",
+          "Polished"
+        ]
+      }
+    },
+    "chest": {
+      "adjectives": {
+        "common": [
+          "Patched"
+        ],
+        "uncommon": [
+          "Reinforced"
+        ]
+      }
+    },
+    "hand": {
+      "adjectives": {
+        "common": [
+          "Patched"
+        ],
+        "uncommon": [
+          "Reinforced"
+        ]
+      }
+    },
+    "legs": {
+      "adjectives": {
+        "common": [
+          "Patched"
+        ],
+        "uncommon": [
+          "Reinforced"
+        ]
+      }
+    },
+    "foot": {
+      "adjectives": {
+        "common": [
+          "Patched"
+        ],
+        "uncommon": [
+          "Reinforced"
+        ]
+      }
+    },
+    "head": {
+      "adjectives": {
+        "common": [
+          "Patched"
+        ]
+      }
+    },
+    "necklace": {
+      "adjectives": {
+        "uncommon": [
+          "Polished"
+        ]
+      }
+    }
+  },
+  "tints": {
+    "rust": {
+      "adjectives": {
+        "common": [
+          "Rusty"
+        ]
+      },
+      "descriptions": [
+        "Rust has eaten the edges, but the core holds."
+      ]
+    },
+    "steel": {
+      "adjectives": {
+        "uncommon": [
+          "Tempered"
+        ]
+      }
+    },
+    "silver": {
+      "adjectives": {
+        "rare": [
+          "Silvered"
+        ]
+      },
+      "descriptions": [
+        "A pale, almost lunar sheen runs over the whole surface."
+      ]
+    },
+    "gold": {
+      "adjectives": {
+        "legendary": [
+          "Sovereign"
+        ]
+      }
+    },
+    "fire": {
+      "adjectives": {
+        "rare": [
+          "Blazing"
+        ]
+      },
+      "suffixes": {
+        "rare": [
+          "of Embers"
+        ]
+      },
+      "descriptions": [
+        "Still warm to the touch, even after a night outside."
+      ]
+    },
+    "ice": {
+      "adjectives": {
+        "rare": [
+          "Frosted"
+        ]
+      },
+      "suffixes": {
+        "rare": [
+          "of the Tides"
+        ]
+      },
+      "descriptions": [
+        "A thin frost never quite melts away."
+      ]
+    },
+    "arcane": {
+      "adjectives": {
+        "rare": [
+          "Arcane"
+        ],
+        "mythic": [
+          "Celestial"
+        ]
+      },
+      "descriptions": [
+        "Pale patterns shift when you aren't looking."
+      ]
+    },
+    "shadow": {
+      "adjectives": {
+        "mythic": [
+          "Phantom"
+        ]
+      },
+      "suffixes": {
+        "mythic": [
+          "of the Silent Moon"
+        ],
+        "legendary": [
+          "of the Endless Night"
+        ]
+      },
+      "descriptions": [
+        "Light seems to get lost in it."
+      ]
+    }
+  },
+  "adjectives": {
+    "common": [
+      "Plain",
+      "Simple"
+    ],
+    "uncommon": [
+      "Fine",
+      "Careful"
+    ],
+    "rare": [
+      "Enchanted",
+      "Runed",
+      "Gleaming",
+      "Masterwork"
+    ],
+    "mythic": [
+      "Dread",
+      "Ancient",
+      "Forgotten"
+    ],
+    "legendary": [
+      "Eternal",
+      "Fabled",
+      "Worldbreaker",
+      "Undying"
+    ]
+  },
+  "suffixes": {
+    "uncommon": [
+      "of Vigor",
+      "of the Fox"
+    ],
+    "rare": [
+      "of Vigor",
+      "of the Fox",
+      "of the Bear",
+      "of Swiftness"
+    ],
+    "mythic": [
+      "of the Fallen Star",
+      "of the Wyrm",
+      "of Ten Storms"
+    ],
+    "legendary": [
+      "of the Ancient Kings",
+      "of the First Dawn",
+      "of the Last Hero"
+    ]
+  },
   "templates": {
     "common": [
       "{adjective} {base}",
@@ -18,295 +768,6 @@
     ],
     "legendary": [
       "{adjective} {base} {suffix}"
-    ]
-  },
-  "bases": {
-    "head": [
-      {
-        "text": "Helm"
-      },
-      {
-        "text": "Hood"
-      },
-      {
-        "text": "Circlet"
-      },
-      {
-        "text": "Cap"
-      },
-      {
-        "text": "Crown"
-      }
-    ],
-    "earring": [
-      {
-        "text": "Earring"
-      },
-      {
-        "text": "Ear Cuff"
-      },
-      {
-        "text": "Stud"
-      }
-    ],
-    "necklace": [
-      {
-        "text": "Amulet"
-      },
-      {
-        "text": "Pendant"
-      },
-      {
-        "text": "Necklace"
-      },
-      {
-        "text": "Torc"
-      }
-    ],
-    "ring": [
-      {
-        "text": "Ring"
-      },
-      {
-        "text": "Band"
-      },
-      {
-        "text": "Signet"
-      }
-    ],
-    "chest": [
-      {
-        "text": "Breastplate"
-      },
-      {
-        "text": "Tunic"
-      },
-      {
-        "text": "Robe"
-      },
-      {
-        "text": "Hauberk"
-      },
-      {
-        "text": "Jerkin"
-      }
-    ],
-    "hand": [
-      {
-        "text": "Gloves"
-      },
-      {
-        "text": "Gauntlets"
-      },
-      {
-        "text": "Bracers"
-      },
-      {
-        "text": "Wraps"
-      }
-    ],
-    "legs": [
-      {
-        "text": "Greaves"
-      },
-      {
-        "text": "Leggings"
-      },
-      {
-        "text": "Trousers"
-      },
-      {
-        "text": "Tassets"
-      }
-    ],
-    "foot": [
-      {
-        "text": "Boots"
-      },
-      {
-        "text": "Sandals"
-      },
-      {
-        "text": "Sabatons"
-      },
-      {
-        "text": "Shoes"
-      }
-    ],
-    "weapon1": [
-      {
-        "text": "Sword"
-      },
-      {
-        "text": "Axe"
-      },
-      {
-        "text": "Mace"
-      },
-      {
-        "text": "Spear"
-      },
-      {
-        "text": "Staff"
-      },
-      {
-        "text": "Dagger"
-      },
-      {
-        "text": "Bow"
-      }
-    ],
-    "weapon2": [
-      {
-        "text": "Shield"
-      },
-      {
-        "text": "Buckler"
-      },
-      {
-        "text": "Tome"
-      },
-      {
-        "text": "Orb"
-      },
-      {
-        "text": "Parrying Dagger"
-      }
-    ],
-    "item": [
-      {
-        "text": "Map"
-      },
-      {
-        "text": "Key"
-      },
-      {
-        "text": "Gem"
-      },
-      {
-        "text": "Idol"
-      },
-      {
-        "text": "Lantern"
-      },
-      {
-        "text": "Compass"
-      },
-      {
-        "text": "Scroll Case"
-      }
-    ],
-    "consumable": [
-      {
-        "text": "Potion"
-      },
-      {
-        "text": "Elixir"
-      },
-      {
-        "text": "Draught"
-      },
-      {
-        "text": "Tonic"
-      },
-      {
-        "text": "Ration"
-      },
-      {
-        "text": "Salve"
-      },
-      {
-        "text": "Scroll"
-      }
-    ]
-  },
-  "adjectives": {
-    "common": [
-      "Worn",
-      "Plain",
-      "Rusty",
-      "Simple",
-      "Patched",
-      "Sturdy"
-    ],
-    "uncommon": [
-      "Fine",
-      "Polished",
-      "Reinforced",
-      "Keen",
-      "Tempered",
-      "Balanced"
-    ],
-    "rare": [
-      "Enchanted",
-      "Runed",
-      "Gleaming",
-      "Masterwork",
-      "Arcane",
-      "Silvered"
-    ],
-    "mythic": [
-      "Celestial",
-      "Dread",
-      "Starforged",
-      "Ancient",
-      "Wyrmscale",
-      "Phantom"
-    ],
-    "legendary": [
-      "Eternal",
-      "Godforged",
-      "Sovereign",
-      "Fabled",
-      "Worldbreaker",
-      "Undying"
-    ]
-  },
-  "suffixes": {
-    "common": [],
-    "uncommon": [
-      "of Vigor",
-      "of the Fox"
-    ],
-    "rare": [
-      "of Vigor",
-      "of the Fox",
-      "of the Bear",
-      "of Embers",
-      "of the Tides",
-      "of Swiftness"
-    ],
-    "mythic": [
-      "of the Fallen Star",
-      "of the Wyrm",
-      "of the Silent Moon",
-      "of Ten Storms"
-    ],
-    "legendary": [
-      "of the Ancient Kings",
-      "of the First Dawn",
-      "of the Endless Night",
-      "of the Last Hero"
-    ]
-  },
-  "descriptions": {
-    "item": [
-      "An odd find that someone, somewhere, must be looking for.",
-      "It hums faintly when nobody is watching.",
-      "Worth more to the right buyer.",
-      "Its maker left a mark you don't recognise."
-    ],
-    "consumable": [
-      "Smells worse than it tastes. Mostly.",
-      "Best used before the fight, not after.",
-      "A traveller's favourite, sold in every tavern.",
-      "The label is half torn, but the colour looks right."
-    ],
-    "equipment": [
-      "Light enough to forget you're wearing it.",
-      "Built for a long road and a hard fight.",
-      "Scratches on it tell a story of its own.",
-      "It fits as if it was made for you."
     ]
   }
 }

@@ -80,16 +80,16 @@ The app is zoneless, so signals are the default for state.
 
 ## i18n
 
-The app is in English and French, switchable at runtime (no reload, so live peer connections survive) with Transloco (`@jsverse/transloco`). Don't use `@angular/localize` / `i18n` attributes.
+The app is in English and French, switchable at runtime (no reload, so live peer connections survive) with ngx-translate (`@ngx-translate/core`, files loaded by `@ngx-translate/http-loader`). Don't use `@angular/localize` / `i18n` attributes.
 
 - UI strings live in `public/i18n/en.json` and `public/i18n/fr.json`, nested keys by feature (`nav.*`, `auth.*`, `room.*`). Add every new key to both files in the same change.
-- Templates: `{{ 'feature.key' | transloco }}` (import `TranslocoPipe`), params as `{{ 'profile.welcome' | transloco: { name } }}`.
+- Templates: `{{ 'feature.key' | translate }}` (import `TranslatePipe` from `@ngx-translate/core`), params as `{{ 'profile.welcome' | translate: { name } }}`.
 - TypeScript (menu labels, toasts, error messages): `LanguageBusiness.t('key', params)`; it is reactive inside `computed()`. Never hard-code a user-facing string.
 - The active language: `LanguageBusiness.$language`; change it with `setLanguage()`. Starting language: saved choice, then the browser language, then `en` (`core/i18n/initial-language.ts`).
 - Optimus UI's built-in texts come from the `optimus` block of each language file.
 - Dates: the `localDate` pipe (`core/pipes/local-date.pipe.ts`, `Intl` in the active language), not Angular's `DatePipe` (fixed locale).
 - Confirmations: `ConfirmationService.confirm()` with translated header, message and button labels; the dialog lives in `app.html`.
-- Data that depends on the language (generator word lists) lives in the Base pack of the language (`public/packs/base-<lang>/generators/<generator>.json`, listed by `public/packs/base-<lang>/pack.json`; a pack has one language), loaded by `PackService` through `PackBusiness`, not through Transloco.
+- Data that depends on the language (generator word lists) lives in the Base pack of the language (`public/packs/base-<lang>/generators/<generator>.json`, listed by `public/packs/base-<lang>/pack.json`; a pack has one language), loaded by `PackService` through `PackBusiness`, not through ngx-translate.
 - Supported languages are listed in `core/constants/languages.ts`; adding one means a new JSON file per folder and an entry there.
 
 ## Local storage
@@ -131,5 +131,5 @@ Vitest through Angular's `@angular/build:unit-test` builder (jsdom), globals (`d
 - Pure helpers (generators, codecs, reducers) are tested directly, without TestBed.
 - Business classes: `TestBed.configureTestingModule({ providers: [...] })` then `TestBed.inject`.
 - Components are standalone, so specs use `imports: [Component]` and `providers: TEST_PROVIDERS` from `src/testing/test-providers.ts` (router, mocked `HttpClient`, real EN/FR translations, Optimus UI `MessageService`/`DialogService`). Await `fixture.whenStable()` instead of calling `detectChanges()` (zoneless).
-- Translations in specs come from the real `public/i18n/*.json` files with the app's own Transloco settings (`core/i18n/transloco-config.ts`), so a missing key or a broken language switch fails a test.
+- Translations in specs come from the real `public/i18n/*.json` files with the app's own ngx-translate settings (`core/i18n/translate-config.ts`), so a missing key or a broken language switch fails a test.
 - Randomness: inject a `RandomSource`; use a seeded one in tests, never `Math.random()` in code under test.

@@ -37,6 +37,12 @@ Once the game is running, **World rules** lets you adjust everything. Changes re
 
 ![The World rules page](../../../assets/screens/en/worlds-rules.png)
 
+### The world language
+
+The **World language** setting (English or French) is in the rules section, in the wizard (**Rules** step) as in **World rules**. A new world takes the app's language; an older world that has none is read with the app's language. It is exported with the world. In the **Tools**, with no world, it is the app's language (or the one set in **Tools › World rules**).
+
+This language decides the **texts** of the item generators: nouns, adjectives, descriptions and params only come from [packs](/docs/en/packs/#the-world-language) written in that language. An active pack in another language is still allowed, marked "images, kinds and tints only": only its sprites, kinds and tints are used. A neutral pack is marked "images".
+
 ### Combat
 
 The **Combat** section sets the life attribute (0 means down), initiative, actions per turn, the grid, movement, and the basic attack and defence formulas. **Every combat step is optional**: initiative, action counters, GM validation of results, defence and end-of-combat rewards. A step that is off hides its settings and leaves the combats (see [Combat](/docs/en/combat/)).

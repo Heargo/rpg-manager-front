@@ -16,7 +16,9 @@ import { SpriteColorizerBusiness } from './sprite-colorizer.business';
 const sprite = () => gray(4, 1, [10, 10, 220, 220]);
 const text = async (blob: Blob) => new TextDecoder().decode(await blob.arrayBuffer());
 const png = (content: string) => new Blob([content], { type: 'image/png' });
-const details = { id: 'blue-axe', label: 'Hache bleue', type: 'equipment', slot: 'weapon1' } as const;
+const details = { id: 'blue-axe', label: 'Hache bleue', kinds: ['weapon'] };
+/** The draft sprite that `details` gives: its kinds go straight through. */
+const meta = { id: 'blue-axe', label: 'Hache bleue', kinds: ['weapon'] } as const;
 
 function setup() {
   globalThis.indexedDB = new IDBFactory();
@@ -52,7 +54,7 @@ describe('SpriteColorizerBusiness: pack drafts', () => {
       const s = setup();
       const draft = await s.creator.createDraft();
       const materials = exportConfig(autoMaterials(sprite()));
-      await s.creator.addFromColorizer(draft.id, { ...details, image: png('axe'), materials });
+      await s.creator.addFromColorizer(draft.id, { ...meta, kinds: ['weapon'], image: png('axe'), materials });
 
       await s.business.loadDraftSprite(draft.id, 'blue-axe');
 
@@ -64,7 +66,7 @@ describe('SpriteColorizerBusiness: pack drafts', () => {
     it('opens a grayscale draft sprite as a loaded image, without materials', async () => {
       const s = setup();
       const draft = await s.creator.createDraft();
-      await s.creator.addPng(draft.id, png('spark'), { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' });
+      await s.creator.addPng(draft.id, png('spark'), { id: 'spark', label: 'Etincelle', kinds: ['item'], kind: 'grayscale' });
 
       await s.business.loadDraftSprite(draft.id, 'spark');
 
@@ -85,7 +87,7 @@ describe('SpriteColorizerBusiness: pack drafts', () => {
     it('writes the current materials back to the draft sprite, which becomes masked', async () => {
       const s = setup();
       const draft = await s.creator.createDraft();
-      await s.creator.addPng(draft.id, png('spark'), { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' });
+      await s.creator.addPng(draft.id, png('spark'), { id: 'spark', label: 'Etincelle', kinds: ['item'], kind: 'grayscale' });
       await s.business.loadDraftSprite(draft.id, 'spark');
       s.business.addMaterial('Blade');
 
@@ -109,7 +111,7 @@ describe('SpriteColorizerBusiness: pack drafts', () => {
       await s.business.addCurrentToDraft(draft.id, details);
 
       const [saved] = (await s.creator.getDraft(draft.id))!.sprites;
-      expect(saved).toMatchObject({ ...details, kind: 'masked', materials: s.business.exportJson() });
+      expect(saved).toMatchObject({ ...meta, kind: 'masked', materials: s.business.exportJson() });
       expect(s.files.encodePng).toHaveBeenCalledWith(sprite());
       expect(await text(saved.image)).toBe('encoded-png');
     });

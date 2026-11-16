@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { DOCUMENT } from '@angular/core';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslateService } from '@ngx-translate/core';
 import { LANGUAGE_STORAGE_KEY } from '../constants/languages';
 import { provideTestTranslations } from '../../../testing/test-providers';
 import { LanguageBusiness } from './language.business';
@@ -34,7 +34,7 @@ describe('LanguageBusiness', () => {
   it('ignores unsupported languages', () => {
     business.setLanguage('de');
 
-    expect(TestBed.inject(TranslocoService).getActiveLang()).toBe('en');
+    expect(TestBed.inject(TranslateService).getCurrentLang()).toBe('en');
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBeNull();
   });
 });

@@ -20,7 +20,7 @@ import {
 import { DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { ColorPickerModule } from '@openng/optimus-ui/colorpicker';
@@ -29,9 +29,10 @@ import { SelectModule } from '@openng/optimus-ui/select';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { ToastModule } from '@openng/optimus-ui/toast';
 import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
+import { PackDraftFormBusiness } from '../../../../core/business/pack-draft-form.business';
+import { KindKey, kindOptions } from '../../../../core/packs/kind-label';
 import { slugifyPackId } from '../../../../core/packs/pack-draft';
-import { EQUIPMENT_SLOTS, ITEM_TYPES, ItemSlot, ItemType } from '../../../../core/models/item';
-import { SpriteSetTags } from '../../models/sprite-set';
+import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { SelectButtonModule } from '@openng/optimus-ui/selectbutton';
@@ -79,11 +80,12 @@ const toHex = (rgb: number[]) =>
   imports: [
     DecimalPipe,
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     ColorPickerModule,
     DialogModule,
     SelectModule,
+    MultiSelectModule,
     InputNumberModule,
     InputTextModule,
     SelectButtonModule,
@@ -108,14 +110,14 @@ export class SpriteColorizerPageComponent {
   readonly sprite = input<string>();
 
   private readonly creator = inject(PackCreatorBusiness);
+  private readonly form = inject(PackDraftFormBusiness);
   private readonly router = inject(Router);
   protected readonly addOpen = signal(false);
   protected readonly addDraftId = signal<string | null>(null);
   protected readonly addDetails = signal({
     id: '',
     label: '',
-    type: 'item' as ItemType,
-    slot: 'none' as ItemSlot,
+    kinds: [] as string[],
   });
   protected readonly adding = signal(false);
   protected readonly draftOptions = computed(() =>
@@ -124,19 +126,14 @@ export class SpriteColorizerPageComponent {
       value: d.id,
     })),
   );
-  protected readonly typeOptions = computed(() =>
-    ITEM_TYPES.map((value) => ({
-      value,
-      label: this.language.t(`item.type.${value}`),
-    })),
+  /** The kinds of the installed packs, then those of the saved sets, to tag sprites with (`id — first noun`). */
+  private readonly knownKinds = signal<KindKey[]>([]);
+  protected readonly itemKindOptions = computed(() =>
+    kindOptions(
+      this.knownKinds(),
+      this.business.$savedSets().flatMap((s) => s.tags?.kinds ?? []),
+    ),
   );
-  protected readonly slotOptions = computed(() => [
-    { value: 'none', label: this.language.t('packs.creator.slotNone') },
-    ...EQUIPMENT_SLOTS.map((value) => ({
-      value,
-      label: this.language.t(`item.slot.${value}`),
-    })),
-  ]);
   protected readonly draftBanner = computed(() => {
     const target = this.business.$draftTarget();
     return target
@@ -185,16 +182,6 @@ export class SpriteColorizerPageComponent {
     { value: 'mine', label: this.language.t('sprite.library.mine') },
   ]);
   protected readonly renamingSetId = signal<string | null>(null);
-  /** What a saved set can illustrate, for the random item images; '' = nothing. */
-  protected readonly setKinds = computed(() => [
-    { value: '', label: this.language.t('sprite.sets.kindNone') },
-    { value: 'item', label: this.language.t('item.type.item') },
-    { value: 'consumable', label: this.language.t('item.type.consumable') },
-    ...EQUIPMENT_SLOTS.map((slot) => ({
-      value: `equipment:${slot}`,
-      label: `${this.language.t('item.type.equipment')} · ${this.language.t('item.slot.' + slot)}`,
-    })),
-  ]);
   /** The saved sets, with their date in the page's language. */
   protected readonly savedSets = computed(() => {
     const format = new Intl.DateTimeFormat(this.language.$language() ?? 'fr', {
@@ -204,11 +191,6 @@ export class SpriteColorizerPageComponent {
     return this.business.$savedSets().map((set) => ({
       ...set,
       date: format.format(set.updatedAt),
-      kind: !set.tags
-        ? ''
-        : set.tags.type === 'equipment'
-          ? `equipment:${set.tags.slot}`
-          : set.tags.type,
     }));
   });
   protected readonly libraryGroups = computed(() => {
@@ -300,6 +282,10 @@ export class SpriteColorizerPageComponent {
   private shownImage: unknown = null;
 
   constructor() {
+    void this.form.knownKeys().then(
+      (known) => this.knownKinds.set(known.kinds),
+      () => undefined,
+    );
     this.packs
       .sprites()
       .then((sprites) => this.bundled.set(sprites))
@@ -676,14 +662,8 @@ export class SpriteColorizerPageComponent {
     await this.business.renameSet(id, name);
   }
 
-  protected setKind(id: string, kind: string): void {
-    const [type, slot] = kind.split(':');
-    const tags: SpriteSetTags | undefined = !kind
-      ? undefined
-      : type === 'equipment'
-        ? { type: 'equipment', slot: slot as SpriteSetTags['slot'] }
-        : { type: type as SpriteSetTags['type'], slot: 'none' };
-    void this.business.setSetTags(id, tags);
+  protected setKinds(id: string, kinds: string[] | null): void {
+    void this.business.setSetTags(id, kinds?.length ? { kinds } : undefined);
   }
 
   protected deleteSet(set: { id: string; name: string }): void {
@@ -747,8 +727,7 @@ export class SpriteColorizerPageComponent {
     this.addDetails.set({
       id: slugifyPackId(name),
       label: name,
-      type: 'item',
-      slot: 'none',
+      kinds: [],
     });
     this.addOpen.set(true);
     void this.creator.loadDrafts().then(() => {
@@ -756,16 +735,12 @@ export class SpriteColorizerPageComponent {
         this.addDraftId.set(this.creator.$drafts()[0]?.id ?? null);
     });
     void this.business.openTags().then((tags) => {
-      if (tags) this.patchAdd(tags);
+      if (tags) this.patchAdd({ kinds: tags.kinds });
     });
   }
 
   protected patchAdd(patch: Partial<ReturnType<typeof this.addDetails>>): void {
     this.addDetails.update((d) => ({ ...d, ...patch }));
-  }
-
-  protected setAddType(type: ItemType): void {
-    this.patchAdd({ type, ...(type === 'equipment' ? {} : { slot: 'none' }) });
   }
 
   protected async newDraft(): Promise<void> {

@@ -18,7 +18,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -57,7 +57,7 @@ const never = (): boolean => false;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     CdkDrag,
     CdkDragHandle,
     CdkDropList,
@@ -76,15 +76,15 @@ const never = (): boolean => false;
   template: `
     <p-tabs value="form">
       <p-tablist>
-        <p-tab value="form">{{ 'class.editor.tabForm' | transloco }}</p-tab>
-        <p-tab value="json">{{ 'class.editor.tabJson' | transloco }}</p-tab>
+        <p-tab value="form">{{ 'class.editor.tabForm' | translate }}</p-tab>
+        <p-tab value="json">{{ 'class.editor.tabJson' | translate }}</p-tab>
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="form">
           <div class="form">
             <div class="field">
               <label for="class-name">{{
-                'class.editor.fields.name' | transloco
+                'class.editor.fields.name' | translate
               }}</label>
               <input
                 pInputText
@@ -97,7 +97,7 @@ const never = (): boolean => false;
             </div>
             <div class="field">
               <label for="class-description">{{
-                'class.editor.fields.description' | transloco
+                'class.editor.fields.description' | translate
               }}</label>
               <textarea
                 pTextarea
@@ -110,21 +110,21 @@ const never = (): boolean => false;
             </div>
 
             <section class="tree">
-              <h3>{{ 'class.editor.fields.tree' | transloco }}</h3>
-              <p class="hint">{{ 'class.editor.treeHint' | transloco }}</p>
+              <h3>{{ 'class.editor.fields.tree' | translate }}</h3>
+              <p class="hint">{{ 'class.editor.treeHint' | translate }}</p>
 
               <div class="workbench">
                 <aside class="panel palette">
-                  <h4>{{ 'class.editor.palette.title' | transloco }}</h4>
+                  <h4>{{ 'class.editor.palette.title' | translate }}</h4>
                   <input
                     pInputText
                     data-field="palette-search"
                     type="search"
                     autocomplete="off"
                     [attr.aria-label]="
-                      'class.editor.palette.search' | transloco
+                      'class.editor.palette.search' | translate
                     "
-                    [placeholder]="'class.editor.palette.search' | transloco"
+                    [placeholder]="'class.editor.palette.search' | translate"
                     [value]="paletteSearch()"
                     (input)="paletteSearch.set($any($event.target).value)"
                   />
@@ -161,7 +161,7 @@ const never = (): boolean => false;
                           [text]="true"
                           [rounded]="true"
                           [attr.aria-label]="
-                            'class.editor.palette.add' | transloco
+                            'class.editor.palette.add' | translate
                           "
                           (click)="addFirstFree(skill.id)"
                         ></button>
@@ -180,7 +180,7 @@ const never = (): boolean => false;
                           (paletteSearch()
                             ? 'class.editor.palette.noMatch'
                             : 'class.editor.noMoreSkills'
-                          ) | transloco
+                          ) | translate
                         }}
                       </p>
                     }
@@ -207,7 +207,7 @@ const never = (): boolean => false;
                         </h4>
                         <div class="field">
                           <label>{{
-                            'class.editor.fields.minLevel' | transloco
+                            'class.editor.fields.minLevel' | translate
                           }}</label>
                           <p-inputnumber
                             data-field="node-min-level"
@@ -222,7 +222,7 @@ const never = (): boolean => false;
                           />
                         </div>
                         <h5>
-                          {{ 'class.editor.fields.requires' | transloco }}
+                          {{ 'class.editor.fields.requires' | translate }}
                         </h5>
                         @for (
                           requirement of target.requirements;
@@ -253,7 +253,7 @@ const never = (): boolean => false;
                               [text]="true"
                               [rounded]="true"
                               [attr.aria-label]="
-                                'class.editor.removeRequirement' | transloco
+                                'class.editor.removeRequirement' | translate
                               "
                               (click)="
                                 unlink(requirement.skillId, target.node.skillId)
@@ -264,7 +264,7 @@ const never = (): boolean => false;
                           <p class="hint">
                             {{
                               'class.editor.inspector.noPrerequisites'
-                                | transloco
+                                | translate
                             }}
                           </p>
                         }
@@ -277,7 +277,7 @@ const never = (): boolean => false;
                               optionValue="value"
                               [ngModel]="null"
                               [placeholder]="
-                                'class.editor.addRequirement' | transloco
+                                'class.editor.addRequirement' | translate
                               "
                               (ngModelChange)="
                                 $event &&
@@ -301,13 +301,13 @@ const never = (): boolean => false;
                           severity="danger"
                           size="small"
                           [outlined]="true"
-                          [label]="'class.editor.removeNode' | transloco"
+                          [label]="'class.editor.removeNode' | translate"
                           (click)="remove(target.node.skillId)"
                         ></button>
                       } @else {
                         <h4>
                           <i class="pi pi-link"></i>
-                          {{ 'class.editor.inspector.link' | transloco }}
+                          {{ 'class.editor.inspector.link' | translate }}
                         </h4>
                         <p class="hint">
                           {{ target.fromName }}
@@ -316,7 +316,7 @@ const never = (): boolean => false;
                         </p>
                         <div class="field">
                           <label>{{
-                            'class.editor.fields.level' | transloco
+                            'class.editor.fields.level' | translate
                           }}</label>
                           <p-inputnumber
                             data-field="requirement-level"
@@ -337,7 +337,7 @@ const never = (): boolean => false;
                           severity="danger"
                           size="small"
                           [outlined]="true"
-                          [label]="'class.editor.deleteLink' | transloco"
+                          [label]="'class.editor.deleteLink' | translate"
                           (click)="unlink(target.from, target.to)"
                         ></button>
                       }
@@ -346,7 +346,7 @@ const never = (): boolean => false;
                     <div class="inspector-empty">
                       <i class="pi pi-info-circle"></i>
                       <p class="hint">
-                        {{ 'class.editor.inspector.empty' | transloco }}
+                        {{ 'class.editor.inspector.empty' | translate }}
                       </p>
                     </div>
                   }
@@ -358,7 +358,7 @@ const never = (): boolean => false;
 
         <p-tabpanel value="json">
           <div class="form">
-            <p class="hint">{{ 'class.editor.jsonHint' | transloco }}</p>
+            <p class="hint">{{ 'class.editor.jsonHint' | translate }}</p>
             <textarea
               pTextarea
               data-field="json"
@@ -376,10 +376,10 @@ const never = (): boolean => false;
                 icon="pi pi-copy"
                 severity="secondary"
                 [text]="true"
-                [label]="'ai.copyPrompt' | transloco"
+                [label]="'ai.copyPrompt' | translate"
                 (click)="copyAiPrompt()"
               ></button>
-              <small class="hint">{{ 'ai.copyPromptHint' | transloco }}</small>
+              <small class="hint">{{ 'ai.copyPromptHint' | translate }}</small>
             </div>
           </div>
         </p-tabpanel>
@@ -388,7 +388,7 @@ const never = (): boolean => false;
 
     @for (issue of allIssues(); track $index) {
       <p-message severity="warn" data-field="error">{{
-        'class.editor.issue.' + issue.code | transloco
+        'class.editor.issue.' + issue.code | translate
       }}</p-message>
     }
     <div class="actions">
@@ -398,7 +398,7 @@ const never = (): boolean => false;
         data-action="random"
         icon="pi pi-sparkles"
         severity="secondary"
-        [label]="'common.random' | transloco"
+        [label]="'common.random' | translate"
         (click)="random()"
       ></button>
       <button
@@ -406,7 +406,7 @@ const never = (): boolean => false;
         type="button"
         data-action="save"
         icon="pi pi-save"
-        [label]="'class.editor.save' | transloco"
+        [label]="'class.editor.save' | translate"
         (click)="submit()"
       ></button>
     </div>

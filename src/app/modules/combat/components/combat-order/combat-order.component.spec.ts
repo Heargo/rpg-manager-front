@@ -78,6 +78,16 @@ describe('CombatOrderComponent', () => {
     expect(clean(el.querySelector('[data-field="round"]'))).toContain('1');
   });
 
+  it("shows each combatant's level", async () => {
+    await table.start();
+    await settle();
+    await open();
+
+    expect(clean(row(el, 'Goblin').querySelector('[data-field="level"]'))).toBe(
+      'Lv 5',
+    );
+  });
+
   it('removes a status from its chip', async () => {
     await table.start();
     await table.combat(table.gm).edit(table.named(table.gm, 'Goblin').id, {

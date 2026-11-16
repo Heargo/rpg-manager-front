@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "given": [
     {
       "text": "Brannoc",
@@ -184,5 +184,254 @@
     "the Swift",
     "Cinderwell"
   ],
-  "templates": ["{given}", "{given} {epithet}", "{given} {epithet}"]
+  "templates": ["{given}", "{given} {epithet}", "{given} {epithet}"],
+  "kinds": {
+    "townsfolk": {
+      "descriptions": [
+        "{g:He|She} lives simply, off the beaten tracks of {place}.",
+        "{g:He|She} knows everyone in the village and keeps nothing to {g:himself|herself}.",
+        "Word is {g:he|she} crossed paths with {creature} one foggy night."
+      ]
+    },
+    "peasant": {
+      "nouns": [
+        {
+          "text": "Farmer"
+        }
+      ],
+      "descriptions": [
+        "{g:He|She} tills a small plot near {place}, with calloused hands and a bent back.",
+        "{g:He|She} still talks about {event} with a tremble in {g:his|her} voice.",
+        "{g:He|She} keeps a pitchfork within reach ever since {creature} was seen prowling."
+      ]
+    },
+    "noble": {
+      "nouns": [
+        {
+          "text": "Lord",
+          "gender": "m"
+        },
+        {
+          "text": "Lady",
+          "gender": "f"
+        }
+      ],
+      "names": ["{noun} {given}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:He|She} wears fine clothes, but the lands around {place} are failing.",
+        "{g:He|She} owes a great debt to {owner} and dislikes being reminded.",
+        "{g:He|She} smiles politely and never forgets an insult."
+      ]
+    },
+    "scholar": {
+      "nouns": [
+        {
+          "text": "Scholar"
+        }
+      ],
+      "names": ["{given} the {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:He|She} spends nights over old tomes that speak of {event}.",
+        "{g:He|She} has spent years looking for what {g:he|she} lost near {place}.",
+        "{g:He|She} has {g:his|her} nose in {g:his|her} notes and forgets to eat."
+      ]
+    },
+    "priest": {
+      "nouns": [
+        {
+          "text": "Priest",
+          "gender": "m"
+        },
+        {
+          "text": "Priestess",
+          "gender": "f"
+        }
+      ],
+      "names": ["{noun} {given}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:He|She} tends a small shrine in {place} and listens more than {g:he|she} speaks.",
+        "{g:He|She} has blessed more dead than newborn since {event}.",
+        "{g:He|She} prays for those {creature} left homeless."
+      ]
+    },
+    "trader": {
+      "descriptions": [
+        "{g:He|She} counts coins twice, out of habit.",
+        "{g:He|She} has good deals to offer, and better ones to hide.",
+        "Business has taken {g:him|her} to {place} and beyond."
+      ]
+    },
+    "merchant": {
+      "nouns": [
+        {
+          "text": "Merchant"
+        }
+      ],
+      "names": ["{given} the {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:He|She} keeps a tidy stall and knows the price of everything.",
+        "{g:He|She} brings rare goods from {place}, at prices just as rare.",
+        "{g:He|She} lost a whole cargo to {creature}."
+      ]
+    },
+    "innkeeper": {
+      "nouns": [
+        {
+          "text": "Innkeeper"
+        }
+      ],
+      "names": ["{given} the {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:He|She} serves a thick stew and even thicker rumours.",
+        "{g:He|She} keeps a cudgel under the counter, just in case.",
+        "{g:He|She} houses travellers from {place} and pries their stories out of them."
+      ]
+    },
+    "blacksmith": {
+      "nouns": [
+        {
+          "text": "Blacksmith"
+        }
+      ],
+      "names": ["{given} the {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:He|She} has forge-blackened arms and steady hands.",
+        "{g:He|She} learned the trade from {maker}.",
+        "{g:He|She} forges the old way, with {material}."
+      ]
+    },
+    "peddler": {
+      "nouns": [
+        {
+          "text": "Peddler"
+        }
+      ],
+      "names": ["{given} the {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:He|She} drags a basket full of knick-knacks and promises.",
+        "{g:He|She} walks the roads of {place} and knows who needs what.",
+        "{g:He|She} swears {g:he|she} once sold a charm to {owner}."
+      ]
+    },
+    "guard": {
+      "nouns": [
+        {
+          "text": "Guard"
+        }
+      ],
+      "names": ["{given} the {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:He|She} keeps watch, hand on the pommel, eyeing strangers sideways.",
+        "{g:He|She} saw {event} with {g:his|her} own eyes and never speaks of it.",
+        "{g:He|She} has served {owner} for years without asking questions."
+      ]
+    },
+    "outlaw": {
+      "descriptions": [
+        "{g:He|She} lives outside the law, somewhere near {place}.",
+        "{g:He|She} has a wanted poster in more than one town.",
+        "{g:He|She} avoids the roads since {creature} was spotted nearby."
+      ]
+    },
+    "bandit": {
+      "nouns": [
+        {
+          "text": "Bandit"
+        }
+      ],
+      "names": ["{given} {epithet}", "{given} the {noun}"],
+      "descriptions": [
+        "{g:He|She} robs travellers on the road to {place}.",
+        "{g:He|She} made a living robbing {owner} and never boasted about it.",
+        "{g:He|She} grins broadly, blade already drawn."
+      ]
+    },
+    "cultist": {
+      "nouns": [
+        {
+          "text": "Cultist"
+        }
+      ],
+      "names": ["{given} the {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:He|She} whispers forbidden prayers while staring at the stars.",
+        "{g:He|She} believes {event} was only the beginning.",
+        "{g:He|She} watches over a hidden altar, not far from {place}."
+      ]
+    },
+    "mercenary": {
+      "nouns": [
+        {
+          "text": "Mercenary"
+        }
+      ],
+      "names": ["{given} the {noun}", "{given} {epithet}"],
+      "descriptions": [
+        "{g:He|She} hires out {g:his|her} sword to the highest bidder, no regrets.",
+        "{g:He|She} fought through {event} and bears the scars.",
+        "{g:He|She} was hired by {owner} for a job best left unspoken."
+      ]
+    },
+    "beast": {
+      "names": ["{adjective} {noun}", "{noun}"],
+      "adjectives": ["Wild", "Lone", "Starving", "Furious"],
+      "descriptions": [
+        "It prowls near {place}, always watchful.",
+        "It has already caused the villagers plenty of trouble.",
+        "It moves without a sound and stops at nothing."
+      ]
+    },
+    "wolf": {
+      "nouns": [
+        {
+          "text": "Wolf"
+        }
+      ],
+      "adjectives": ["Grey", "Black", "Snow"],
+      "descriptions": [
+        "It howls at the moon above {place}.",
+        "It trails the herd at a distance, patiently.",
+        "It stalks belated travellers, eyes gleaming."
+      ]
+    },
+    "bear": {
+      "nouns": [
+        {
+          "text": "Bear"
+        }
+      ],
+      "adjectives": ["Brown", "Huge", "Grumpy"],
+      "descriptions": [
+        "It has just left hibernation, hungry and ill-tempered.",
+        "It defends its den near {place} with fury.",
+        "It leaves clawed trees at man height behind it."
+      ]
+    },
+    "giant-spider": {
+      "nouns": [
+        {
+          "text": "Giant Spider"
+        }
+      ],
+      "adjectives": ["Venomous", "Silent", "Hairy"],
+      "descriptions": [
+        "It weaves its web between the trees of {place}.",
+        "It waits motionless for prey to stumble into the trap.",
+        "Its fangs drip with a greenish venom."
+      ]
+    },
+    "boar": {
+      "nouns": [
+        {
+          "text": "Boar"
+        }
+      ],
+      "adjectives": ["Savage", "One-Eyed", "Massive"],
+      "descriptions": [
+        "It roots up the ground of {place}, grunting.",
+        "It charges headlong whenever someone gets close.",
+        "It has already wounded more than one hunter."
+      ]
+    }
+  }
 }

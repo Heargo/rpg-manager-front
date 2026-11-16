@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { WorldSessionBusiness } from '../../world/business/world-session.business';
 import { LanguageBusiness } from '../../../core/business/language.business';
-import { addNpcCopy } from '../helpers/npc.rules';
+import { addNpcCopy, npcSheetView, NpcSheetView } from '../helpers/npc.rules';
 import { upsertNpc } from '../helpers/npc-editor.rules';
 import { Npc } from '../models/npc';
 
@@ -13,6 +13,12 @@ export class NpcCatalogueBusiness {
   private readonly language = inject(LanguageBusiness);
 
   readonly $world = this.session.$world;
+
+  /** Game master: a catalogue NPC as a read-only character sheet (bars full), with its class and skills; null when it is gone. */
+  sheetOf(npcId: string): NpcSheetView | null {
+    const world = this.$world();
+    return world ? npcSheetView(world, npcId) : null;
+  }
 
   async duplicate(npcId: string): Promise<void> {
     await this.session.update((world) => ({

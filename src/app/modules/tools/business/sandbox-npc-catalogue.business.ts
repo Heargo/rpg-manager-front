@@ -1,7 +1,12 @@
 import { computed, effect, inject, Injectable, untracked } from '@angular/core';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { SandboxWorldBusiness } from '../../world/business/sandbox-world.business';
-import { addNpcCopy, sampleNpcs } from '../../npc/helpers/npc.rules';
+import {
+  addNpcCopy,
+  npcSheetView,
+  NpcSheetView,
+  sampleNpcs,
+} from '../../npc/helpers/npc.rules';
 import { upsertNpc } from '../../npc/helpers/npc-editor.rules';
 import { Npc } from '../../npc/models/npc';
 import { SandboxCatalogueBusiness } from './sandbox-catalogue.business';
@@ -34,6 +39,11 @@ export class SandboxNpcCatalogueBusiness {
         this.sandbox.updateNpcs(() => sampleNpcs((key) => this.language.t(key)));
       });
     });
+  }
+
+  /** A sandbox NPC as a read-only character sheet (bars full); null when it is gone. */
+  sheetOf(npcId: string): NpcSheetView | null {
+    return npcSheetView(this.$world(), npcId);
   }
 
   async duplicate(npcId: string): Promise<void> {

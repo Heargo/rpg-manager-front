@@ -5,25 +5,25 @@
         <div>
           <h1>{{ room.$room()?.name }}</h1>
           <p class="hint">
-            <i class="pi pi-crown"></i> {{ "room.lobby.hosting" | transloco }}
+            <i class="pi pi-crown"></i> {{ "room.lobby.hosting" | translate }}
           </p>
         </div>
         <div class="header-actions">
           <p-button
             icon="pi pi-th-large"
-            [label]="'table.open' | transloco"
+            [label]="'table.open' | translate"
             routerLink="/room/table"
           />
         </div>
       </header>
       @if (room.$restored()) {
         <p-message severity="info" icon="pi pi-replay">{{
-          "room.lobby.restored" | transloco
+          "room.lobby.restored" | translate
         }}</p-message>
       }
       <p class="hint room-size-max">
         <i class="pi pi-users"></i>
-        {{ "room.size.max" | transloco: { max: size.$recommendedMax() } }}
+        {{ "room.size.max" | translate: { max: size.$recommendedMax() } }}
       </p>
       @if (size.$overMax()) {
         <p-message
@@ -31,7 +31,7 @@
           severity="warn"
           icon="pi pi-exclamation-triangle"
           >{{
-            "room.size.over" | transloco: { max: size.$recommendedMax() }
+            "room.size.over" | translate: { max: size.$recommendedMax() }
           }}</p-message
         >
       }
@@ -40,12 +40,12 @@
           class="room-size-struggling"
           severity="warn"
           icon="pi pi-wifi"
-          >{{ "room.size.struggling" | transloco }}</p-message
+          >{{ "room.size.struggling" | translate }}</p-message
         >
       }
       <div class="lobby">
         <app-character-list />
-        <p-card [header]="'room.members.title' | transloco">
+        <p-card [header]="'room.members.title' | translate">
           @if (room.$room(); as state) {
             <app-member-list
               [members]="state.members"
@@ -57,13 +57,13 @@
           }
         </p-card>
         <p-card
-          [header]="'room.invite.add' | transloco"
+          [header]="'room.invite.add' | translate"
           styleClass="invite-section"
         >
           <section class="stack">
             <p-button
               icon="pi pi-user-plus"
-              [label]="'room.invite.add' | transloco"
+              [label]="'room.invite.add' | translate"
               [loading]="inviting()"
               (onClick)="invite()"
             />
@@ -73,7 +73,7 @@
             @if (room.$pendingInvites().length) {
               <p class="hint pending-invites-note">
                 <i class="pi pi-info-circle"></i>
-                {{ "room.lobby.pendingInvitesNote" | transloco }}
+                {{ "room.lobby.pendingInvitesNote" | translate }}
               </p>
             }
             @for (invite of room.$pendingInvites(); track invite.id) {
@@ -87,15 +87,15 @@
     @default {
       <header class="lobby-header">
         <div>
-          <h1>{{ room.$room()?.name ?? ("room.title" | transloco) }}</h1>
+          <h1>{{ room.$room()?.name ?? ("room.title" | translate) }}</h1>
           <p class="hint">
             @switch (room.$status()) {
               @case ("joining") {
-                {{ "room.lobby.joining" | transloco }}
+                {{ "room.lobby.joining" | translate }}
               }
               @case ("connected") {
                 <i class="pi pi-wifi"></i>
-                {{ "room.lobby.connected" | transloco }}
+                {{ "room.lobby.connected" | translate }}
               }
             }
           </p>
@@ -104,13 +104,13 @@
           @if (room.$room()) {
             <p-button
               icon="pi pi-th-large"
-              [label]="'table.open' | transloco"
+              [label]="'table.open' | translate"
               routerLink="/room/table"
             />
           }
           <p-button
             icon="pi pi-sign-out"
-            [label]="'room.lobby.leave' | transloco"
+            [label]="'room.lobby.leave' | translate"
             severity="secondary"
             [text]="true"
             (onClick)="leave()"
@@ -119,19 +119,19 @@
       </header>
       @if (room.$status() === "host-offline") {
         <p-message severity="warn" icon="pi pi-exclamation-triangle">{{
-          "room.lobby.hostOffline" | transloco
+          "room.lobby.hostOffline" | translate
         }}</p-message>
       }
       @if (room.$status() === "removed") {
         <p-message severity="error" icon="pi pi-user-minus">{{
-          "room.lobby.removed" | transloco
+          "room.lobby.removed" | translate
         }}</p-message>
       }
       @if (room.$room(); as state) {
         <div class="lobby">
           <app-character-list />
           <p-card
-            [header]="'room.members.title' | transloco"
+            [header]="'room.members.title' | translate"
             styleClass="players"
           >
             <app-member-list

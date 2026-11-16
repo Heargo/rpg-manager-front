@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, DOCUMENT, inject, signal } from '@a
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, fromEvent } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
@@ -22,41 +22,41 @@ import { RoomBusiness } from '../../business/room.business';
 @Component({
   selector: 'app-join-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, ButtonModule, CardModule, MessageModule, ProgressSpinnerModule, TextareaModule],
+  imports: [RouterLink, TranslatePipe, ButtonModule, CardModule, MessageModule, ProgressSpinnerModule, TextareaModule],
   template: `
     <div class="main-container flex-col center middle">
       <p-card styleClass="join">
         <div class="stack">
-          <h1>{{ 'room.join.title' | transloco }}</h1>
+          <h1>{{ 'room.join.title' | translate }}</h1>
           @if (room.$joinState() === 'failed' && room.$failedWhileAway()) {
-            <p-message severity="error">{{ 'room.join.failedAway' | transloco }}</p-message>
-            <a routerLink="/play">{{ 'play.title' | transloco }}</a>
+            <p-message severity="error">{{ 'room.join.failedAway' | translate }}</p-message>
+            <a routerLink="/play">{{ 'play.title' | translate }}</a>
           } @else if (error()) {
             <p-message severity="error">{{ error() }}</p-message>
-            <a routerLink="/play">{{ 'play.title' | transloco }}</a>
+            <a routerLink="/play">{{ 'play.title' | translate }}</a>
           } @else if (!answerCode()) {
-            <div class="row"><p-progress-spinner styleClass="spinner" strokeWidth="6" /> {{ 'room.join.preparing' | transloco }}</div>
+            <div class="row"><p-progress-spinner styleClass="spinner" strokeWidth="6" /> {{ 'room.join.preparing' | translate }}</div>
           } @else if (mailbox()) {
-            <div class="row"><p-progress-spinner styleClass="spinner" strokeWidth="6" /> {{ 'room.join.connectingAuto' | transloco }}</div>
-            <p class="hint">{{ 'room.join.autoHint' | transloco }}</p>
+            <div class="row"><p-progress-spinner styleClass="spinner" strokeWidth="6" /> {{ 'room.join.connectingAuto' | translate }}</div>
+            <p class="hint">{{ 'room.join.autoHint' | translate }}</p>
           } @else {
-            <label for="answer-code">{{ 'room.join.step' | transloco }}</label>
+            <label for="answer-code">{{ 'room.join.step' | translate }}</label>
             <textarea pTextarea id="answer-code" readonly rows="4" [value]="answerCode()" (focus)="select($event)"></textarea>
             <div class="actions">
-              <p-button icon="pi pi-send" [label]="'room.join.send' | transloco" size="large" (onClick)="send()" />
-              <p-button icon="pi pi-copy" [label]="'room.invite.copy' | transloco" severity="secondary" (onClick)="copy()" />
+              <p-button icon="pi pi-send" [label]="'room.join.send' | translate" size="large" (onClick)="send()" />
+              <p-button icon="pi pi-copy" [label]="'room.invite.copy' | translate" severity="secondary" (onClick)="copy()" />
             </div>
             @if (qr(); as qrUrl) {
-              <img class="qr" [src]="qrUrl" [alt]="'room.join.qrAlt' | transloco" />
+              <img class="qr" [src]="qrUrl" [alt]="'room.join.qrAlt' | translate" />
             }
             @if (sent()) {
-              <p-message severity="info">{{ 'room.join.comeBack' | transloco }}</p-message>
+              <p-message severity="info">{{ 'room.join.comeBack' | translate }}</p-message>
             } @else {
-              <p class="hint">{{ 'room.join.hint' | transloco }}</p>
+              <p class="hint">{{ 'room.join.hint' | translate }}</p>
             }
             <div class="row">
               <p-progress-spinner styleClass="spinner" strokeWidth="6" />
-              {{ (returned() ? 'room.join.stillWaiting' : 'room.join.waiting') | transloco }}
+              {{ (returned() ? 'room.join.stillWaiting' : 'room.join.waiting') | translate }}
             </div>
           }
         </div>

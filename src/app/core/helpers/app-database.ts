@@ -1,8 +1,8 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
 
 export const APP_DATABASE_NAME = 'rpg-manager';
-/** v1: worlds, images. v2: hostedRoom, joinedRooms. v3: playerCopies. v4: joinedWorlds (replaces joinedRooms). v5: spriteSets. v6: packs, packFiles. v7: packDrafts. v8: packs, packFiles and packDrafts emptied (packs are one language now). */
-const APP_DATABASE_VERSION = 8;
+/** v1: worlds, images. v2: hostedRoom, joinedRooms. v3: playerCopies. v4: joinedWorlds (replaces joinedRooms). v5: spriteSets. v6: packs, packFiles. v7: packDrafts. v8: packs, packFiles and packDrafts emptied (packs are one language now). v9: packs, packFiles and packDrafts emptied again (pack format 2: kinds and tints). */
+const APP_DATABASE_VERSION = 9;
 
 export interface StoredImage {
   /** SHA-256 of the bytes, hex. */
@@ -53,8 +53,8 @@ export function openAppDatabase(name = APP_DATABASE_NAME): Promise<AppDatabase> 
       if (!db.objectStoreNames.contains('packs')) db.createObjectStore('packs', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('packFiles')) db.createObjectStore('packFiles');
       if (!db.objectStoreNames.contains('packDrafts')) db.createObjectStore('packDrafts', { keyPath: 'id' });
-      // v8: the two-language pack format is gone; stored packs and drafts in it are dropped.
-      if (oldVersion > 0 && oldVersion < 8)
+      // v8, v9: the earlier pack formats are gone; stored packs and drafts in them are dropped.
+      if (oldVersion > 0 && oldVersion < 9)
         for (const store of ['packs', 'packFiles', 'packDrafts'] as const) void tx.objectStore(store).clear();
     },
   });

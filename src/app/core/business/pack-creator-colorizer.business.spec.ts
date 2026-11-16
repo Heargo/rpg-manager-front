@@ -27,7 +27,7 @@ function setup() {
   return { dims, creator: TestBed.inject(PackCreatorBusiness) };
 }
 
-const axe = { id: 'axe', label: 'Hache', type: 'equipment', slot: 'weapon1' } as const;
+const axe = { id: 'axe', label: 'Hache', kinds: ['weapon'] } as const;
 
 describe('PackCreatorBusiness: colorizer link', () => {
   describe('addFromColorizer', () => {
@@ -77,7 +77,7 @@ describe('PackCreatorBusiness: colorizer link', () => {
   });
 
   describe('updateSpriteMaterials', () => {
-    const grayscale = { id: 'spark', label: 'Etincelle', type: 'item', slot: 'none', kind: 'grayscale' } as const;
+    const grayscale = { id: 'spark', label: 'Etincelle', kinds: ['item'], kind: 'grayscale' } as const;
 
     it('replaces the materials of a masked sprite and keeps its image', async () => {
       const s = setup();

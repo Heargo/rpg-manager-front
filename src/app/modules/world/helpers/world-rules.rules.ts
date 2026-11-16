@@ -112,6 +112,7 @@ export function applyWorldRules<T extends World>(
     skillPointsPerLevel: rules.skillPointsPerLevel,
     offlineFeatures: rules.offlineFeatures,
     packs: [...(rules.packs ?? world.packs)],
+    language: rules.language ?? world.language,
     skillRollsEnabled: rules.skillRollsEnabled ?? world.skillRollsEnabled,
     sellAnywhere: rules.sellAnywhere ?? world.sellAnywhere,
     sellAnywhereRatio: rules.sellAnywhereRatio ?? world.sellAnywhereRatio,

@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -56,7 +56,7 @@ const PRESETS: readonly (FormulaPreset | 'custom')[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputNumberModule,
     InputTextModule,
@@ -95,6 +95,7 @@ export class WorldRulesPageComponent {
       skillPointsPerLevel: world?.skillPointsPerLevel,
       offlineFeatures: world?.offlineFeatures,
       packs: world?.packs,
+      language: world?.language,
       skillRollsEnabled: world?.skillRollsEnabled,
       sellAnywhere: world?.sellAnywhere,
       sellAnywhereRatio: world?.sellAnywhereRatio,
@@ -158,6 +159,7 @@ export class WorldRulesPageComponent {
       skillPointsPerLevel: fields.skillPointsPerLevel ?? 0,
       offlineFeatures: { ...world!.offlineFeatures, ...fields.offlineFeatures },
       packs: fields.packs ?? world!.packs,
+      language: fields.language ?? world!.language,
       skillRollsEnabled:
         fields.skillRollsEnabled ?? world!.skillRollsEnabled ?? true,
       sellAnywhere: fields.sellAnywhere ?? world!.sellAnywhere ?? true,

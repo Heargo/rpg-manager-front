@@ -1,11 +1,20 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { ItemSlot, ItemType } from '../models/item';
+import { resolveItemKind } from '../packs/pack-kinds';
 import {
+  ItemKindDef,
+  NpcKindDef,
+  SkillKindDef,
+  ClassKindDef,
   Pack,
   packFileUrl,
   PackGenerator,
   PackLanguage,
   PackSprite,
+  PackTint,
   SPRITE_KINDS,
+  textsPath,
+  PACK_GENERATORS,
   SpriteKind,
   validatePack,
 } from '../packs/pack';
@@ -19,6 +28,7 @@ import {
   failureReason as reason,
   ImageSize,
   listChecker,
+  commonChecker,
   MAX_PACK_BYTES,
 } from '../packs/pack-files';
 import { resolvePackLink } from '../packs/pack-link';
@@ -36,6 +46,10 @@ export const BASE_PACK_IDS = ['base-fr', 'base-en'] as const;
 /** The Base pack of a language (English for a language without a Base). */
 export const basePackId = (lang: string): string =>
   lang === 'fr' ? 'base-fr' : 'base-en';
+
+/** The pack language matching an app language code. */
+export const packLanguageOf = (lang: string): PackLanguage =>
+  lang === 'fr' ? 'fr' : 'en';
 
 export const isBasePack = (id: string): boolean =>
   (BASE_PACK_IDS as readonly string[]).includes(id);
@@ -73,6 +87,9 @@ export interface PackUpdate {
 
 /** A pack sprite with the pack it comes from and the URLs of its files. */
 export interface BundledSprite extends PackSprite {
+  /** Resolved from the first kind up the items tree. */
+  type: ItemType;
+  slot: ItemSlot;
   packId: string;
   imageUrl: string;
   materialsUrl?: string;
@@ -81,7 +98,8 @@ export interface BundledSprite extends PackSprite {
 /** A pack available on this device: Base, or an official pack that was downloaded. */
 export interface InstalledPack {
   id: string;
-  language: PackLanguage;
+  /** Missing for a neutral pack. */
+  language?: PackLanguage;
   name: string;
   description: string;
   author: string;
@@ -96,8 +114,29 @@ export interface InstalledPack {
   homepage?: string;
   /** The pack's sprites, for the details view. */
   sprites: PackSprite[];
-  generators: Pack['generators'];
+  /** The word list paths by generator, from `domains.<generator>.texts`. */
+  generators: Partial<Record<PackGenerator, string>>;
+  /** The shared language file (params), when the pack has one. */
+  common?: string;
+  /** The pack's own items kinds and tints. */
+  kinds: Record<string, ItemKindDef>;
+  /** The pack's own NPC kinds. */
+  npcKinds?: Record<string, NpcKindDef>;
+  /** The pack's own skill kinds. */
+  skillKinds?: Record<string, SkillKindDef>;
+  /** The pack's own class kinds. */
+  classKinds?: Record<string, ClassKindDef>;
+  tints: Record<string, PackTint>;
 }
+
+const generatorsOf = (pack: Pack): InstalledPack['generators'] => {
+  const result: InstalledPack['generators'] = {};
+  for (const generator of PACK_GENERATORS) {
+    const path = textsPath(pack, generator);
+    if (path) result[generator] = path;
+  }
+  return result;
+};
 
 const installedOf = (
   pack: Pack,
@@ -115,7 +154,13 @@ const installedOf = (
   version: pack.version,
   builtIn,
   sprites: pack.sprites,
-  generators: pack.generators,
+  generators: generatorsOf(pack),
+  ...(pack.common ? { common: pack.common } : {}),
+  kinds: pack.domains?.items?.kinds ?? {},
+  npcKinds: pack.domains?.npcs?.kinds ?? {},
+  skillKinds: pack.domains?.skills?.kinds ?? {},
+  classKinds: pack.domains?.classes?.kinds ?? {},
+  tints: pack.tints ?? {},
   ...(link ? { link } : {}),
   ...(local ? { local } : {}),
   ...(pack.homepage ? { homepage: pack.homepage } : {}),
@@ -179,6 +224,8 @@ export class PackBusiness {
       builtIn: true,
       sprites: [],
       generators: {},
+      kinds: {},
+      tints: {},
     };
   }
 
@@ -277,7 +324,8 @@ export class PackBusiness {
   async sprites(): Promise<BundledSprite[]> {
     await this.ensureLoaded();
     const result: BundledSprite[] = [];
-    for (const id of this.activeIds()) result.push(...(await this.spritesOfActive(id)));
+    for (const id of this.activeIds())
+      result.push(...(await this.spritesOfActive(id)));
     if (result.length) return result;
     const baseId = basePackId(this.languageBusiness.$language());
     return this.baseSprites(baseId);
@@ -289,12 +337,41 @@ export class PackBusiness {
     return record ? this.storedSprites(record) : [];
   }
 
+  /** The items kinds of the Bases, for a kind whose parent lives in another pack. */
+  private async baseKinds(): Promise<Record<string, ItemKindDef>> {
+    const own = basePackId(this.languageBusiness.$language());
+    const ids = [...BASE_PACK_IDS].sort((a, b) => +(a === own) - +(b === own));
+    const kinds: Record<string, ItemKindDef> = {};
+    for (const id of ids)
+      Object.assign(
+        kinds,
+        (await this.manifest(id).catch(() => null))?.domains?.items?.kinds,
+      );
+    return kinds;
+  }
+
+  /** The items sprites of a manifest, each with the type and slot of its first kind; unresolvable ones are left out. */
+  private async bundle(
+    manifest: Pack,
+    packId: string,
+    files: (sprite: PackSprite) => { imageUrl: string; materialsUrl?: string },
+  ): Promise<BundledSprite[]> {
+    const own = manifest.domains?.items?.kinds ?? {};
+    const fallback = await this.baseKinds();
+    const result: BundledSprite[] = [];
+    for (const sprite of manifest.sprites) {
+      if (sprite.domain !== 'items') continue;
+      const resolved = resolveItemKind(sprite.kinds[0], own, fallback);
+      if (!resolved) continue;
+      result.push({ ...sprite, ...resolved, packId, ...files(sprite) });
+    }
+    return result;
+  }
+
   private async baseSprites(baseId: string): Promise<BundledSprite[]> {
     const base = await this.manifest(baseId);
     const manifestUrl = `packs/${baseId}/pack.json`;
-    return base.sprites.map((sprite) => ({
-      ...sprite,
-      packId: baseId,
+    return this.bundle(base, baseId, (sprite) => ({
       imageUrl: packFileUrl(manifestUrl, sprite.image),
       ...(sprite.materials
         ? { materialsUrl: packFileUrl(manifestUrl, sprite.materials) }
@@ -304,13 +381,11 @@ export class PackBusiness {
 
   private async storedSprites(record: StoredPack): Promise<BundledSprite[]> {
     const urls = await this.objectUrls(record);
-    return record.manifest.sprites.map((sprite) => {
+    return this.bundle(record.manifest, record.id, (sprite) => {
       const materialsUrl = sprite.materials
         ? urls.get(sprite.materials)
         : undefined;
       return {
-        ...sprite,
-        packId: record.id,
         imageUrl: urls.get(sprite.image) ?? '',
         ...(materialsUrl ? { materialsUrl } : {}),
       };
@@ -320,18 +395,7 @@ export class PackBusiness {
   /** The sprites of one installed pack, whatever its language, for its details. */
   async spritesOf(packId: string): Promise<BundledSprite[]> {
     await this.ensureLoaded();
-    if (isBasePack(packId)) {
-      const base = await this.manifest(packId);
-      const manifestUrl = `packs/${packId}/pack.json`;
-      return base.sprites.map((sprite) => ({
-        ...sprite,
-        packId,
-        imageUrl: packFileUrl(manifestUrl, sprite.image),
-        ...(sprite.materials
-          ? { materialsUrl: packFileUrl(manifestUrl, sprite.materials) }
-          : {}),
-      }));
-    }
+    if (isBasePack(packId)) return this.baseSprites(packId);
     const record = this.stored().find((p) => p.id === packId);
     return record ? this.storedSprites(record) : [];
   }
@@ -411,8 +475,11 @@ export class PackBusiness {
       images.add(sprite.image);
       if (sprite.materials) jsons.add(sprite.materials);
     }
-    for (const path of Object.values(manifest.generators))
+    for (const generator of PACK_GENERATORS) {
+      const path = textsPath(manifest, generator);
       if (path) jsons.add(path);
+    }
+    if (manifest.common) jsons.add(manifest.common);
 
     const url = (path: string) => `packs/${id}/${path}`;
     const files = new Map<string, StoredPackFile>();
@@ -491,8 +558,11 @@ export class PackBusiness {
       images.add(sprite.image);
       if (sprite.materials) materials.add(sprite.materials);
     }
-    for (const [generator, path] of Object.entries(manifest.generators))
-      if (path) lists.set(path, listChecker(generator as PackGenerator));
+    for (const generator of PACK_GENERATORS) {
+      const path = textsPath(manifest, generator);
+      if (path) lists.set(path, listChecker(generator));
+    }
+    if (manifest.common) lists.set(manifest.common, commonChecker);
 
     const tasks: (() => Promise<void>)[] = [
       ...[...images].map((path) => async () => {
@@ -514,16 +584,18 @@ export class PackBusiness {
           errors.push(`${path}: ${reason(error)}`);
         }
       }),
-      ...[...new Set([...lists.keys(), ...materials])].map((path) => async () => {
-        try {
-          const value = await this.service.loadJson(fileUrl(path));
-          size += JSON.stringify(value).length;
-          errors.push(...checkJsonFile(path, value, lists.get(path)));
-          files.set(path, { kind: 'json', value });
-        } catch (error) {
-          errors.push(`${path}: ${reason(error)}`);
-        }
-      }),
+      ...[...new Set([...lists.keys(), ...materials])].map(
+        (path) => async () => {
+          try {
+            const value = await this.service.loadJson(fileUrl(path));
+            size += JSON.stringify(value).length;
+            errors.push(...checkJsonFile(path, value, lists.get(path)));
+            files.set(path, { kind: 'json', value });
+          } catch (error) {
+            errors.push(`${path}: ${reason(error)}`);
+          }
+        },
+      ),
     ];
     await runLimited(tasks, MAX_FETCHES, (task) => task());
 
@@ -538,7 +610,7 @@ export class PackBusiness {
     if (errors.length) throw new PackError([...new Set(errors)].sort());
 
     const counts: PreparedPack['counts'] = {
-      generators: Object.values(manifest.generators).filter(Boolean).length,
+      generators: Object.keys(generatorsOf(manifest)).length,
       sprites: {},
     };
     for (const kind of SPRITE_KINDS) {
@@ -661,12 +733,50 @@ export class PackBusiness {
       const has =
         content === 'sprites'
           ? manifest.sprites.length > 0
-          : !!manifest.generators[content];
+          : !!textsPath(manifest, content);
       if (has) result.push(id);
     }
     return result.length
       ? result
       : [basePackId(this.languageBusiness.$language())];
+  }
+
+  /** The raw `common.json` (shared params) of a pack; rejects when the pack has none. */
+  async commonTexts(packId: string): Promise<unknown> {
+    const missing = () => new Error(`Pack "${packId}" has no common texts`);
+    if (!isBasePack(packId)) {
+      await this.ensureLoaded();
+      const record = this.stored().find((p) => p.id === packId);
+      const path = record?.manifest.common;
+      const file = path ? await this.storage.getFile(packId, path) : undefined;
+      if (file?.kind !== 'json') throw missing();
+      return file.value;
+    }
+    const pack = await this.manifest(packId);
+    if (!pack.common) throw missing();
+    return this.service.loadJson(
+      packFileUrl(`packs/${packId}/pack.json`, pack.common),
+    );
+  }
+
+  /**
+   * The items kinds of a pack and of the Bases (for a kind whose parent lives in another pack), to resolve the
+   * type and slot of a kind.
+   */
+  async itemKinds(
+    packId: string,
+  ): Promise<{
+    own: Record<string, ItemKindDef>;
+    fallback: Record<string, ItemKindDef>;
+  }> {
+    await this.ensureLoaded();
+    const manifest = isBasePack(packId)
+      ? await this.manifest(packId).catch(() => null)
+      : this.stored().find((p) => p.id === packId)?.manifest;
+    return {
+      own: manifest?.domains?.items?.kinds ?? {},
+      fallback: await this.baseKinds(),
+    };
   }
 
   /** The raw word list of a generator in a pack; rejects when the pack has none. */
@@ -676,13 +786,13 @@ export class PackBusiness {
     if (!isBasePack(packId)) {
       await this.ensureLoaded();
       const record = this.stored().find((p) => p.id === packId);
-      const path = record?.manifest.generators[generator];
+      const path = record && textsPath(record.manifest, generator);
       const file = path ? await this.storage.getFile(packId, path) : undefined;
       if (file?.kind !== 'json') throw missing();
       return file.value;
     }
     const pack = await this.manifest(packId);
-    const path = pack.generators[generator];
+    const path = textsPath(pack, generator);
     if (!path) throw missing();
     return this.service.loadJson(
       packFileUrl(`packs/${packId}/pack.json`, path),

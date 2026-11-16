@@ -8,7 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { DialogModule } from '@openng/optimus-ui/dialog';
@@ -26,7 +26,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
   selector: 'app-class-catalogue',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     DialogModule,
     InputTextModule,
@@ -39,8 +39,8 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
         pInputText
         data-field="search"
         type="search"
-        [attr.aria-label]="'class.catalogue.search' | transloco"
-        [placeholder]="'class.catalogue.search' | transloco"
+        [attr.aria-label]="'class.catalogue.search' | translate"
+        [placeholder]="'class.catalogue.search' | translate"
         [value]="search()"
         (input)="search.set($any($event.target).value)"
         autocomplete="off"
@@ -50,7 +50,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
         type="button"
         data-action="create"
         icon="pi pi-plus"
-        [label]="'class.catalogue.create' | transloco"
+        [label]="'class.catalogue.create' | translate"
         (click)="create.emit()"
       ></button>
       <button
@@ -59,7 +59,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
         data-action="add-defaults"
         icon="pi pi-plus"
         severity="secondary"
-        [label]="'class.catalogue.addDefaults' | transloco"
+        [label]="'class.catalogue.addDefaults' | translate"
         (click)="addDefaults.emit()"
       ></button>
     </div>
@@ -83,7 +83,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
                 }}</span>
                 <span class="meta" data-field="class-skill-count">{{
                   'class.catalogue.skills'
-                    | transloco: { count: entry.tree.length }
+                    | translate: { count: entry.tree.length }
                 }}</span>
               </div>
               <p class="hint">{{ entry.description }}</p>
@@ -96,7 +96,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
                 icon="pi pi-eye"
                 severity="secondary"
                 size="small"
-                [label]="'class.catalogue.view' | transloco"
+                [label]="'class.catalogue.view' | translate"
                 (click)="viewing.set(entry)"
               ></button>
               <button
@@ -106,7 +106,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
                 icon="pi pi-pencil"
                 severity="secondary"
                 [text]="true"
-                [attr.aria-label]="'class.catalogue.edit' | transloco"
+                [attr.aria-label]="'class.catalogue.edit' | translate"
                 (click)="edit.emit(entry)"
               ></button>
               <button
@@ -116,7 +116,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
                 icon="pi pi-copy"
                 severity="secondary"
                 [text]="true"
-                [attr.aria-label]="'class.catalogue.duplicate' | transloco"
+                [attr.aria-label]="'class.catalogue.duplicate' | translate"
                 (click)="duplicate.emit(entry)"
               ></button>
               <button
@@ -126,7 +126,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
                 icon="pi pi-trash"
                 severity="danger"
                 [text]="true"
-                [attr.aria-label]="'class.catalogue.delete' | transloco"
+                [attr.aria-label]="'class.catalogue.delete' | translate"
                 (click)="askDelete(entry)"
               ></button>
             </div>
@@ -134,7 +134,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
         }
       </ul>
     } @else {
-      <p class="hint">{{ 'class.catalogue.empty' | transloco }}</p>
+      <p class="hint">{{ 'class.catalogue.empty' | translate }}</p>
     }
 
     <p-dialog
@@ -143,7 +143,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
       [modal]="true"
       [dismissableMask]="true"
       [draggable]="false"
-      [header]="'class.catalogue.detailsTitle' | transloco"
+      [header]="'class.catalogue.detailsTitle' | translate"
       [style]="{ width: '48rem', maxWidth: '96vw' }"
     >
       @if (viewing(); as details) {
@@ -166,7 +166,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
 
           @if (details.bonuses?.length) {
             <section>
-              <h3>{{ 'class.catalogue.bonuses' | transloco }}</h3>
+              <h3>{{ 'class.catalogue.bonuses' | translate }}</h3>
               <ul class="chips">
                 @for (bonus of details.bonuses; track bonus.attribute) {
                   <li class="chip" data-field="details-bonus">
@@ -182,7 +182,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
 
           @if (startingItems().length) {
             <section>
-              <h3>{{ 'class.catalogue.startingItems' | transloco }}</h3>
+              <h3>{{ 'class.catalogue.startingItems' | translate }}</h3>
               <ul class="chips">
                 @for (item of startingItems(); track item) {
                   <li class="chip" data-field="details-item">{{ item }}</li>
@@ -192,7 +192,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
           }
 
           <section>
-            <h3>{{ 'class.catalogue.tree' | transloco }}</h3>
+            <h3>{{ 'class.catalogue.tree' | translate }}</h3>
             <app-skill-tree
               class="tree"
               [tree]="details.tree"
@@ -202,7 +202,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
           </section>
 
           <section>
-            <h3>{{ 'class.catalogue.skillList' | transloco }}</h3>
+            <h3>{{ 'class.catalogue.skillList' | translate }}</h3>
             <div class="skill-list">
               @for (skill of viewedSkills(); track skill.id) {
                 <article class="skill" [attr.data-skill]="skill.id">
@@ -210,7 +210,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
                     <strong>{{ skill.name }}</strong>
                     <span class="hint">{{
                       'class.catalogue.maxLevel'
-                        | transloco: { count: skill.maxLevel }
+                        | translate: { count: skill.maxLevel }
                     }}</span>
                   </header>
                   <p class="hint">{{ skill.description }}</p>

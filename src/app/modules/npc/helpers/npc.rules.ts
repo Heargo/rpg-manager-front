@@ -1,4 +1,48 @@
+import {
+  AttributeStat,
+  attributeStats,
+} from '../../character/helpers/character-stats';
+import {
+  classBonusesOf,
+  classViewOf,
+} from '../../character/helpers/class-view.rules';
+import { ClassView } from '../../character/models/character-api';
+import { Character, World } from '../../world/models/world';
 import { Npc, NPC_ROLES, NpcFilter, NpcRole } from '../models/npc';
+
+/** What the stats of an NPC read from its world. */
+export type NpcStatsWorld = Pick<World, 'attributes' | 'barAttributes'> &
+  Partial<Pick<World, 'skills' | 'classes'>>;
+
+/**
+ * Every attribute of a catalogue NPC: maxima with its equipment, class and passive skills, and its bars full. A catalogue
+ * NPC is a template, so each copy (on the table, in a combat) starts at full life and mana.
+ */
+export function npcStats(npc: Npc, world: NpcStatsWorld): AttributeStat[] {
+  return attributeStats(
+    world.attributes,
+    npc,
+    world.barAttributes,
+    world.skills ?? [],
+    classBonusesOf(npc, world.classes ?? []),
+  ).map((stat) => ({ ...stat, current: stat.max }));
+}
+
+/** The NPC as a read-only character sheet: its bars full, no player behind it. */
+export function npcSheet(npc: Npc, world: NpcStatsWorld): Character {
+  const stats = npcStats(npc, world);
+  return {
+    ...structuredClone(npc),
+    playerId: '',
+    rev: 0,
+    attributes: npc.attributes.map((entry) => ({
+      ...entry,
+      current:
+        stats.find((stat) => stat.attributeId === entry.attributeId)?.max ??
+        entry.current,
+    })),
+  };
+}
 
 export interface NpcIssue {
   field: 'name' | 'roles' | 'xpReward' | 'loot' | 'merchant';
@@ -40,6 +84,24 @@ export function duplicateNpc(
   suffix = ' (copy)',
 ): Npc {
   return { ...structuredClone(npc), id: newId(), name: `${npc.name}${suffix}` };
+}
+
+/** What the NPC sheet view shows: the NPC as a sheet, its world and its class view. */
+export interface NpcSheetView {
+  character: Character;
+  world: World;
+  classView: ClassView;
+}
+
+/** The sheet view of the world's NPC with this id; null when it is gone. */
+export function npcSheetView(world: World, npcId: string): NpcSheetView | null {
+  const npc = world.npcs.find((entry) => entry.id === npcId);
+  if (!npc) return null;
+  return {
+    character: npcSheet(npc, world),
+    world,
+    classView: classViewOf(npc, world),
+  };
 }
 
 export function filterNpcs(npcs: Npc[], filter: NpcFilter): Npc[] {

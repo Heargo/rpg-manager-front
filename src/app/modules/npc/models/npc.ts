@@ -6,6 +6,8 @@ export type NpcRole = (typeof NPC_ROLES)[number];
 export type Npc = Sheet & {
   roles: NpcRole[];
   description: string;
+  /** The NPC kind it was generated from (a kind id of the NPC vocabulary). */
+  kind?: string;
   /** XP given to the players on defeat (integer, 0 or more). */
   xpReward: number;
   /** Ids of the NPC's inventory entries dropped on defeat. */

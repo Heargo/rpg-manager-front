@@ -76,8 +76,8 @@ describe('PackBusiness concurrency (K03 review fixes)', () => {
       sprites: Array.from({ length: 12 }, (_, i) => ({
         id: `g${i}`,
         label: 'G',
-        type: 'item',
-        slot: 'none',
+        domain: 'items',
+        kinds: ['item'],
         kind: 'grayscale',
         image: `sprites/g${i}.png`,
       })),

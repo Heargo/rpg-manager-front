@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -13,10 +13,10 @@ import { DiceOverlayComponent } from '../../components/dice-overlay/dice-overlay
 @Component({
   selector: 'app-dice-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, TranslocoPipe, ButtonModule, CardModule, InputNumberModule, SelectButtonModule, LocalDatePipe, DiceOverlayComponent],
+  imports: [FormsModule, TranslatePipe, ButtonModule, CardModule, InputNumberModule, SelectButtonModule, LocalDatePipe, DiceOverlayComponent],
   template: `
     <div class="main-container dice">
-      <h1>{{ 'dice.title' | transloco }}</h1>
+      <h1>{{ 'dice.title' | translate }}</h1>
       <p-card>
         <form class="roller" (ngSubmit)="dice.roll()">
           <div class="notation">
@@ -28,7 +28,7 @@ import { DiceOverlayComponent } from '../../components/dice-overlay/dice-overlay
               [ngModel]="dice.$count()"
               (ngModelChange)="dice.$count.set($event ?? 1)"
               name="count"
-              [ariaLabel]="'dice.count' | transloco"
+              [ariaLabel]="'dice.count' | translate"
               inputStyleClass="count"
             />
             <span class="d">d</span>
@@ -39,7 +39,7 @@ import { DiceOverlayComponent } from '../../components/dice-overlay/dice-overlay
               [ngModel]="dice.$sides()"
               (ngModelChange)="dice.$sides.set($event ?? 6)"
               name="sides"
-              [ariaLabel]="'dice.sides' | transloco"
+              [ariaLabel]="'dice.sides' | translate"
               inputStyleClass="sides"
             />
           </div>
@@ -51,14 +51,14 @@ import { DiceOverlayComponent } from '../../components/dice-overlay/dice-overlay
             optionLabel="label"
             optionValue="value"
             [allowEmpty]="false"
-            [ariaLabel]="'dice.sides' | transloco"
+            [ariaLabel]="'dice.sides' | translate"
           />
-          <p-button type="submit" icon="pi pi-box" [label]="('dice.roll' | transloco) + ' ' + dice.$notation()" size="large" />
+          <p-button type="submit" icon="pi pi-box" [label]="('dice.roll' | translate) + ' ' + dice.$notation()" size="large" />
         </form>
       </p-card>
 
       @if (dice.$history().length) {
-        <p-card [header]="'dice.history' | transloco">
+        <p-card [header]="'dice.history' | translate">
           <ul class="history">
             @for (roll of dice.$history(); track roll.id) {
               <li>

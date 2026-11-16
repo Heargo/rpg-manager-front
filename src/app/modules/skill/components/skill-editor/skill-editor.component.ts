@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
@@ -55,7 +55,7 @@ type PresetTarget = 'success' | number;
     NgTemplateOutlet,
     FormsModule,
     FormulaPresetsDialogComponent,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputNumberModule,
     InputTextModule,
@@ -67,8 +67,8 @@ type PresetTarget = 'success' | number;
   template: `
     <p-tabs value="form">
       <p-tablist>
-        <p-tab value="form">{{ 'skill.editor.tabForm' | transloco }}</p-tab>
-        <p-tab value="json">{{ 'skill.editor.tabJson' | transloco }}</p-tab>
+        <p-tab value="form">{{ 'skill.editor.tabForm' | translate }}</p-tab>
+        <p-tab value="json">{{ 'skill.editor.tabJson' | translate }}</p-tab>
       </p-tablist>
       <p-tabpanels>
         <p-tabpanel value="form">
@@ -83,7 +83,7 @@ type PresetTarget = 'success' | number;
                 size="small"
                 [text]="true"
                 [attr.aria-expanded]="helpOpen()"
-                [label]="'skill.variables.toggle' | transloco"
+                [label]="'skill.variables.toggle' | translate"
                 (click)="helpOpen.set(!helpOpen())"
               ></button>
               <button
@@ -94,31 +94,31 @@ type PresetTarget = 'success' | number;
                 severity="secondary"
                 size="small"
                 [text]="true"
-                [label]="'skill.presets.manage' | transloco"
+                [label]="'skill.presets.manage' | translate"
                 (click)="managing.set(true)"
               ></button>
             </div>
             @if (helpOpen()) {
               <div class="help" data-field="variables-help">
-                <h4>{{ 'skill.variables.title' | transloco }}</h4>
+                <h4>{{ 'skill.variables.title' | translate }}</h4>
                 <p>
                   <strong>{{
-                    'skill.variables.successTitle' | transloco
+                    'skill.variables.successTitle' | translate
                   }}</strong>
-                  {{ 'skill.variables.successBody' | transloco }}
-                  {{ 'skill.variables.exampleLabel' | transloco }}
+                  {{ 'skill.variables.successBody' | translate }}
+                  {{ 'skill.variables.exampleLabel' | translate }}
                   <code data-example="success">{{ successExample() }}</code>
                 </p>
                 <p>
                   <strong>{{
-                    'skill.variables.amountTitle' | transloco
+                    'skill.variables.amountTitle' | translate
                   }}</strong>
-                  {{ 'skill.variables.amountBody' | transloco }}
-                  {{ 'skill.variables.exampleLabel' | transloco }}
+                  {{ 'skill.variables.amountBody' | translate }}
+                  {{ 'skill.variables.exampleLabel' | translate }}
                   <code data-example="amount">{{ amountExample() }}</code>
                 </p>
                 <p class="hint" data-field="variables-spaces">
-                  {{ 'skill.variables.spaces' | transloco }}
+                  {{ 'skill.variables.spaces' | translate }}
                   <code>[Points de vie]</code>
                   <code>[target_Points de vie]</code>
                 </p>
@@ -126,7 +126,7 @@ type PresetTarget = 'success' | number;
                   @for (variable of variables(); track variable.name) {
                     <li [attr.data-variable]="variable.name">
                       <code>{{ asVariable(variable.name) }}</code>
-                      {{ variable.descriptionKey | transloco }}
+                      {{ variable.descriptionKey | translate }}
                     </li>
                   }
                 </ul>
@@ -139,16 +139,16 @@ type PresetTarget = 'success' | number;
                   ><i class="pi pi-id-card" aria-hidden="true"></i
                 ></span>
                 <div>
-                  <h3>{{ 'skill.editor.sections.identity' | transloco }}</h3>
+                  <h3>{{ 'skill.editor.sections.identity' | translate }}</h3>
                   <p class="hint">
-                    {{ 'skill.editor.sections.identityHint' | transloco }}
+                    {{ 'skill.editor.sections.identityHint' | translate }}
                   </p>
                 </div>
               </header>
               <div class="card-body">
                 <div class="field">
                   <label for="skill-name">{{
-                    'skill.editor.fields.name' | transloco
+                    'skill.editor.fields.name' | translate
                   }}</label>
                   <input
                     pInputText
@@ -161,7 +161,7 @@ type PresetTarget = 'success' | number;
                 </div>
                 <div class="field">
                   <label for="skill-description">{{
-                    'skill.editor.fields.description' | transloco
+                    'skill.editor.fields.description' | translate
                   }}</label>
                   <textarea
                     pTextarea
@@ -172,13 +172,13 @@ type PresetTarget = 'success' | number;
                     (input)="patch({ description: $any($event.target).value })"
                   ></textarea>
                   <small class="hint">{{
-                    'skill.editor.help.description' | transloco
+                    'skill.editor.help.description' | translate
                   }}</small>
                 </div>
                 <div class="row">
                   <div class="field">
                     <label for="skill-type">{{
-                      'skill.editor.fields.type' | transloco
+                      'skill.editor.fields.type' | translate
                     }}</label>
                     <p-select
                       inputId="skill-type"
@@ -190,12 +190,12 @@ type PresetTarget = 'success' | number;
                       (ngModelChange)="setType($event)"
                     />
                     <small class="hint">{{
-                      'skill.editor.help.type' | transloco
+                      'skill.editor.help.type' | translate
                     }}</small>
                   </div>
                   <div class="field">
                     <label for="skill-rarity">{{
-                      'skill.editor.fields.rarity' | transloco
+                      'skill.editor.fields.rarity' | translate
                     }}</label>
                     <p-select
                       inputId="skill-rarity"
@@ -207,7 +207,7 @@ type PresetTarget = 'success' | number;
                       (ngModelChange)="patch({ rarity: $event })"
                     />
                     <small class="hint">{{
-                      'skill.editor.help.rarity' | transloco
+                      'skill.editor.help.rarity' | translate
                     }}</small>
                   </div>
                 </div>
@@ -220,9 +220,9 @@ type PresetTarget = 'success' | number;
                   ><i class="pi pi-sliders-h" aria-hidden="true"></i
                 ></span>
                 <div>
-                  <h3>{{ 'skill.editor.sections.cost' | transloco }}</h3>
+                  <h3>{{ 'skill.editor.sections.cost' | translate }}</h3>
                   <p class="hint">
-                    {{ 'skill.editor.sections.costHint' | transloco }}
+                    {{ 'skill.editor.sections.costHint' | translate }}
                   </p>
                 </div>
               </header>
@@ -230,7 +230,7 @@ type PresetTarget = 'success' | number;
                 <div class="row">
                   <div class="field">
                     <label for="skill-max-level">{{
-                      'skill.editor.fields.maxLevel' | transloco
+                      'skill.editor.fields.maxLevel' | translate
                     }}</label>
                     <p-inputnumber
                       inputId="skill-max-level"
@@ -242,12 +242,12 @@ type PresetTarget = 'success' | number;
                       (ngModelChange)="patch({ maxLevel: $event ?? 0 })"
                     />
                     <small class="hint">{{
-                      'skill.editor.help.maxLevel' | transloco
+                      'skill.editor.help.maxLevel' | translate
                     }}</small>
                   </div>
                   <div class="field">
                     <label for="skill-point-cost">{{
-                      'skill.editor.fields.pointCost' | transloco
+                      'skill.editor.fields.pointCost' | translate
                     }}</label>
                     <p-inputnumber
                       inputId="skill-point-cost"
@@ -258,7 +258,7 @@ type PresetTarget = 'success' | number;
                       (ngModelChange)="patch({ pointCost: $event ?? 0 })"
                     />
                     <small class="hint">{{
-                      'skill.editor.help.pointCost' | transloco
+                      'skill.editor.help.pointCost' | translate
                     }}</small>
                   </div>
                 </div>
@@ -266,7 +266,7 @@ type PresetTarget = 'success' | number;
                   <div class="row">
                     <div class="field">
                       <label for="skill-target">{{
-                        'skill.editor.fields.target' | transloco
+                        'skill.editor.fields.target' | translate
                       }}</label>
                       <p-select
                         inputId="skill-target"
@@ -278,12 +278,12 @@ type PresetTarget = 'success' | number;
                         (ngModelChange)="patch({ target: $event })"
                       />
                       <small class="hint">{{
-                        'skill.editor.help.target' | transloco
+                        'skill.editor.help.target' | translate
                       }}</small>
                     </div>
                     <div class="field">
                       <label for="skill-cooldown">{{
-                        'skill.editor.fields.cooldown' | transloco
+                        'skill.editor.fields.cooldown' | translate
                       }}</label>
                       <p-inputnumber
                         inputId="skill-cooldown"
@@ -294,14 +294,14 @@ type PresetTarget = 'success' | number;
                         (ngModelChange)="patch({ cooldown: $event ?? 0 })"
                       />
                       <small class="hint">{{
-                        'skill.editor.help.cooldown' | transloco
+                        'skill.editor.help.cooldown' | translate
                       }}</small>
                     </div>
                   </div>
                   <div class="row">
                     <div class="field">
                       <label for="skill-action-type">{{
-                        'skill.editor.fields.actionType' | transloco
+                        'skill.editor.fields.actionType' | translate
                       }}</label>
                       <p-select
                         inputId="skill-action-type"
@@ -314,12 +314,12 @@ type PresetTarget = 'success' | number;
                         (ngModelChange)="setActionType($event)"
                       />
                       <small class="hint">{{
-                        'skill.editor.help.actionType' | transloco
+                        'skill.editor.help.actionType' | translate
                       }}</small>
                     </div>
                     <div class="field">
                       <label for="skill-range">{{
-                        'skill.editor.fields.range' | transloco
+                        'skill.editor.fields.range' | translate
                       }}</label>
                       <p-inputnumber
                         inputId="skill-range"
@@ -330,14 +330,14 @@ type PresetTarget = 'success' | number;
                         (ngModelChange)="setRange($event)"
                       />
                       <small class="hint">{{
-                        'skill.editor.help.range' | transloco
+                        'skill.editor.help.range' | translate
                       }}</small>
                     </div>
                   </div>
                   <div class="row">
                     <div class="field">
                       <label for="skill-cost-attribute">{{
-                        'skill.editor.fields.costAttribute' | transloco
+                        'skill.editor.fields.costAttribute' | translate
                       }}</label>
                       <p-select
                         inputId="skill-cost-attribute"
@@ -350,13 +350,13 @@ type PresetTarget = 'success' | number;
                         (ngModelChange)="setCostAttribute($event)"
                       />
                       <small class="hint">{{
-                        'skill.editor.help.costAttribute' | transloco
+                        'skill.editor.help.costAttribute' | translate
                       }}</small>
                     </div>
                     @if (draft().cost; as cost) {
                       <div class="field">
                         <label for="skill-cost-amount">{{
-                          'skill.editor.fields.costAmount' | transloco
+                          'skill.editor.fields.costAmount' | translate
                         }}</label>
                         <p-inputnumber
                           inputId="skill-cost-amount"
@@ -374,7 +374,7 @@ type PresetTarget = 'success' | number;
                           "
                         />
                         <small class="hint">{{
-                          'skill.editor.help.costAmount' | transloco
+                          'skill.editor.help.costAmount' | translate
                         }}</small>
                       </div>
                     }
@@ -390,9 +390,9 @@ type PresetTarget = 'success' | number;
                     ><i class="pi pi-box" aria-hidden="true"></i
                   ></span>
                   <div>
-                    <h3>{{ 'skill.editor.sections.roll' | transloco }}</h3>
+                    <h3>{{ 'skill.editor.sections.roll' | translate }}</h3>
                     <p class="hint">
-                      {{ 'skill.editor.help.roll' | transloco }}
+                      {{ 'skill.editor.help.roll' | translate }}
                     </p>
                   </div>
                 </header>
@@ -400,7 +400,7 @@ type PresetTarget = 'success' | number;
                   <div class="row">
                     <div class="field">
                       <label for="skill-roll-count">{{
-                        'skill.editor.fields.rollCount' | transloco
+                        'skill.editor.fields.rollCount' | translate
                       }}</label>
                       <p-inputnumber
                         inputId="skill-roll-count"
@@ -418,7 +418,7 @@ type PresetTarget = 'success' | number;
                     </div>
                     <div class="field">
                       <label for="skill-roll-faces">{{
-                        'skill.editor.fields.rollFaces' | transloco
+                        'skill.editor.fields.rollFaces' | translate
                       }}</label>
                       <p-inputnumber
                         inputId="skill-roll-faces"
@@ -438,7 +438,7 @@ type PresetTarget = 'success' | number;
                   <div class="row">
                     <div class="field">
                       <label for="skill-success-mode">{{
-                        'skill.editor.fields.successMode' | transloco
+                        'skill.editor.fields.successMode' | translate
                       }}</label>
                       <p-select
                         inputId="skill-success-mode"
@@ -450,13 +450,13 @@ type PresetTarget = 'success' | number;
                         (ngModelChange)="setSuccessMode($event)"
                       />
                       <small class="hint">{{
-                        'skill.editor.help.successMode' | transloco
+                        'skill.editor.help.successMode' | translate
                       }}</small>
                     </div>
                     @if (thresholdSuccess(); as threshold) {
                       <div class="field">
                         <label for="skill-success-value">{{
-                          'skill.editor.fields.successValue' | transloco
+                          'skill.editor.fields.successValue' | translate
                         }}</label>
                         <p-inputnumber
                           inputId="skill-success-value"
@@ -473,14 +473,14 @@ type PresetTarget = 'success' | number;
                           "
                         />
                         <small class="hint">{{
-                          'skill.editor.help.successValue' | transloco
+                          'skill.editor.help.successValue' | translate
                         }}</small>
                       </div>
                     }
                     @if (formulaSuccess(); as formula) {
                       <div class="field grow">
                         <label for="skill-success-formula">{{
-                          'skill.editor.fields.successFormula' | transloco
+                          'skill.editor.fields.successFormula' | translate
                         }}</label>
                         <div class="control">
                           <input
@@ -509,7 +509,7 @@ type PresetTarget = 'success' | number;
                           [ngTemplateOutletContext]="{ target: 'success' }"
                         />
                         <small class="hint">{{
-                          'skill.editor.help.successFormula' | transloco
+                          'skill.editor.help.successFormula' | translate
                         }}</small>
                       </div>
                     }
@@ -529,9 +529,9 @@ type PresetTarget = 'success' | number;
                   ><i class="pi pi-bolt" aria-hidden="true"></i
                 ></span>
                 <div>
-                  <h3>{{ 'skill.editor.sections.effects' | transloco }}</h3>
+                  <h3>{{ 'skill.editor.sections.effects' | translate }}</h3>
                   <p class="hint">
-                    {{ 'skill.editor.help.effects' | transloco }}
+                    {{ 'skill.editor.help.effects' | translate }}
                   </p>
                 </div>
               </header>
@@ -541,7 +541,7 @@ type PresetTarget = 'success' | number;
                     <div class="effect-head">
                       <span class="effect-title">{{
                         'skill.editor.effectTitle'
-                          | transloco: { n: $index + 1 }
+                          | translate: { n: $index + 1 }
                       }}</span>
                       <button
                         pButton
@@ -552,7 +552,7 @@ type PresetTarget = 'success' | number;
                         size="small"
                         [text]="true"
                         [attr.aria-label]="
-                          'skill.editor.removeEffect' | transloco
+                          'skill.editor.removeEffect' | translate
                         "
                         (click)="removeEffect($index)"
                       ></button>
@@ -560,7 +560,7 @@ type PresetTarget = 'success' | number;
                     <div class="effect-grid">
                       <div class="field">
                         <label>{{
-                          'skill.editor.fields.kind' | transloco
+                          'skill.editor.fields.kind' | translate
                         }}</label>
                         <p-select
                           data-field="effect-kind"
@@ -573,7 +573,7 @@ type PresetTarget = 'success' | number;
                       </div>
                       <div class="field">
                         <label>{{
-                          'skill.editor.fields.attribute' | transloco
+                          'skill.editor.fields.attribute' | translate
                         }}</label>
                         <p-select
                           data-field="effect-attribute"
@@ -589,14 +589,14 @@ type PresetTarget = 'success' | number;
                       @if (effect.kind === 'modify') {
                         <div class="field">
                           <label>{{
-                            'skill.editor.fields.duration' | transloco
+                            'skill.editor.fields.duration' | translate
                           }}</label>
                           <p-inputnumber
                             data-field="effect-duration"
                             [min]="0"
                             [showButtons]="true"
                             [ariaLabel]="
-                              'skill.editor.fields.duration' | transloco
+                              'skill.editor.fields.duration' | translate
                             "
                             [ngModel]="effect.duration"
                             (ngModelChange)="
@@ -607,7 +607,7 @@ type PresetTarget = 'success' | number;
                       }
                       <div class="field wide">
                         <label>{{
-                          'skill.editor.fields.amount' | transloco
+                          'skill.editor.fields.amount' | translate
                         }}</label>
                         <div class="control">
                           <input
@@ -616,7 +616,7 @@ type PresetTarget = 'success' | number;
                             autocomplete="off"
                             spellcheck="false"
                             [attr.aria-label]="
-                              'skill.editor.fields.amount' | transloco
+                              'skill.editor.fields.amount' | translate
                             "
                             [value]="effect.amount"
                             (input)="
@@ -646,7 +646,7 @@ type PresetTarget = 'success' | number;
                           ><i class="pi pi-chart-line" aria-hidden="true"></i>
                           {{
                             'skill.editor.preview'
-                              | transloco
+                              | translate
                                 : {
                                     max: draft().maxLevel,
                                     level1: preview.level1,
@@ -665,7 +665,7 @@ type PresetTarget = 'success' | number;
                     data-action="add-effect"
                     icon="pi pi-plus"
                     severity="secondary"
-                    [label]="'skill.editor.addEffect' | transloco"
+                    [label]="'skill.editor.addEffect' | translate"
                     (click)="addEffect()"
                   ></button>
                 </div>
@@ -676,7 +676,7 @@ type PresetTarget = 'success' | number;
 
         <p-tabpanel value="json">
           <div class="form">
-            <p class="hint">{{ 'skill.editor.jsonHint' | transloco }}</p>
+            <p class="hint">{{ 'skill.editor.jsonHint' | translate }}</p>
             <textarea
               pTextarea
               data-field="json"
@@ -699,10 +699,10 @@ type PresetTarget = 'success' | number;
                 icon="pi pi-copy"
                 severity="secondary"
                 [text]="true"
-                [label]="'ai.copyPrompt' | transloco"
+                [label]="'ai.copyPrompt' | translate"
                 (click)="copyAiPrompt()"
               ></button>
-              <small class="hint">{{ 'ai.copyPromptHint' | transloco }}</small>
+              <small class="hint">{{ 'ai.copyPromptHint' | translate }}</small>
             </div>
           </div>
         </p-tabpanel>
@@ -719,8 +719,8 @@ type PresetTarget = 'success' | number;
         optionLabel="name"
         optionValue="id"
         [filter]="false"
-        [ariaLabel]="'skill.presets.choose' | transloco"
-        [placeholder]="'skill.presets.choose' | transloco"
+        [ariaLabel]="'skill.presets.choose' | translate"
+        [placeholder]="'skill.presets.choose' | translate"
         [ngModel]="null"
         (ngModelChange)="pickPreset(target, $event); resetPicker(picker)"
         #picker
@@ -733,7 +733,7 @@ type PresetTarget = 'success' | number;
         icon="pi pi-bookmark"
         severity="secondary"
         [text]="true"
-        [attr.aria-label]="'skill.presets.saveAs' | transloco"
+        [attr.aria-label]="'skill.presets.saveAs' | translate"
         (click)="startSave(target)"
       ></button>
     </ng-template>
@@ -744,7 +744,7 @@ type PresetTarget = 'success' | number;
           <div class="block panel" data-field="preset-mapping">
             <strong class="panel-title">{{
               'skill.presets.mappingTitle'
-                | transloco: { name: presets.label(current.preset) }
+                | translate: { name: presets.label(current.preset) }
             }}</strong>
             @for (token of tokens(); track token) {
               <div class="map">
@@ -767,7 +767,7 @@ type PresetTarget = 'success' | number;
                 data-action="apply-preset"
                 icon="pi pi-check"
                 [disabled]="!mappingComplete()"
-                [label]="'skill.presets.apply' | transloco"
+                [label]="'skill.presets.apply' | translate"
                 (click)="applyPending()"
               ></button>
               <button
@@ -776,7 +776,7 @@ type PresetTarget = 'success' | number;
                 data-action="cancel-preset"
                 severity="secondary"
                 [text]="true"
-                [label]="'common.cancel' | transloco"
+                [label]="'common.cancel' | translate"
                 (click)="pending.set(null)"
               ></button>
             </div>
@@ -790,8 +790,8 @@ type PresetTarget = 'success' | number;
               pInputText
               data-field="preset-name"
               autocomplete="off"
-              [attr.aria-label]="'skill.presets.name' | transloco"
-              [placeholder]="'skill.presets.name' | transloco"
+              [attr.aria-label]="'skill.presets.name' | translate"
+              [placeholder]="'skill.presets.name' | translate"
               [value]="current.name"
               (input)="
                 saving.set({ ...current, name: $any($event.target).value })
@@ -803,7 +803,7 @@ type PresetTarget = 'success' | number;
                 type="button"
                 data-action="confirm-save-preset"
                 icon="pi pi-check"
-                [label]="'skill.presets.save' | transloco"
+                [label]="'skill.presets.save' | translate"
                 (click)="confirmSave()"
               ></button>
               <button
@@ -812,7 +812,7 @@ type PresetTarget = 'success' | number;
                 data-action="cancel-save-preset"
                 severity="secondary"
                 [text]="true"
-                [label]="'common.cancel' | transloco"
+                [label]="'common.cancel' | translate"
                 (click)="saving.set(null)"
               ></button>
             </div>
@@ -833,7 +833,7 @@ type PresetTarget = 'success' | number;
         data-action="random"
         icon="pi pi-sparkles"
         severity="secondary"
-        [label]="'common.random' | transloco"
+        [label]="'common.random' | translate"
         (click)="random()"
       ></button>
       <button
@@ -841,7 +841,7 @@ type PresetTarget = 'success' | number;
         type="button"
         data-action="save"
         icon="pi pi-save"
-        [label]="'skill.editor.save' | transloco"
+        [label]="'skill.editor.save' | translate"
         (click)="submit()"
       ></button>
     </div>

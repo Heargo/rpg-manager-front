@@ -6,7 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { MessageModule } from '@openng/optimus-ui/message';
@@ -28,7 +28,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     InputNumberModule,
     MessageModule,
@@ -47,7 +47,7 @@ import {
           [ngModel]="dice.$count()"
           (ngModelChange)="dice.$count.set($event ?? 1)"
           name="count"
-          [ariaLabel]="'dice.count' | transloco"
+          [ariaLabel]="'dice.count' | translate"
           inputStyleClass="count"
         />
         <p-select
@@ -57,12 +57,12 @@ import {
           [ngModel]="dice.$sides()"
           (ngModelChange)="dice.$sides.set($event)"
           name="sides"
-          [ariaLabel]="'dice.sides' | transloco"
+          [ariaLabel]="'dice.sides' | translate"
         />
         <p-button
           type="submit"
           icon="pi pi-box"
-          [label]="'dice.roll' | transloco"
+          [label]="'dice.roll' | translate"
           [loading]="rolling()"
         />
       </div>
@@ -74,7 +74,7 @@ import {
             (ngModelChange)="dice.$shareWithTable.set($event)"
             name="share"
           />
-          <label for="share-roll">{{ 'dice.share' | transloco }}</label>
+          <label for="share-roll">{{ 'dice.share' | translate }}</label>
         </div>
       }
       @if (error()) {
@@ -84,7 +84,7 @@ import {
 
     @if (dice.$tableRolls(); as rolls) {
       @if (rolls.length) {
-        <h3>{{ 'dice.tableRolls' | transloco }}</h3>
+        <h3>{{ 'dice.tableRolls' | translate }}</h3>
         <ul class="rolls">
           @for (roll of rolls; track roll.id) {
             <li>

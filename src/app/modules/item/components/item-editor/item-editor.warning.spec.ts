@@ -1,7 +1,8 @@
 import 'fake-indexeddb/auto';
 import { TestBed } from '@angular/core/testing';
-import { TranslocoService } from '@jsverse/transloco';
-import en from '../../../../../../public/packs/base-en/generators/items.json';
+import { TranslateService } from '@ngx-translate/core';
+import { baseItemVocabulary } from '../../../../../testing/base-vocabulary';
+import { ItemVocabularyBusiness } from '../../../../core/business/item-vocabulary.business';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { PackBusiness } from '../../../../core/business/pack.business';
 import { createSandboxWorld } from '../../../world/helpers/default-world';
@@ -12,14 +13,14 @@ describe('ItemEditorComponent image warning', () => {
   it('shows the human-artists warning in English and French', async () => {
     TestBed.configureTestingModule({
       imports: [ItemEditorComponent],
-      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } }],
+      providers: [...TEST_PROVIDERS, { provide: PackBusiness, useValue: { packsFor: async () => ['base-en'], $installed: () => [] } }, { provide: ItemVocabularyBusiness, useValue: { vocabulary: async () => baseItemVocabulary('en') } }],
     });
     const fixture = TestBed.createComponent(ItemEditorComponent);
     fixture.componentRef.setInput('world', createSandboxWorld((key) => key));
     await fixture.whenStable();
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('[data-testid="image-warning"]')!.textContent).toContain('human artists');
-    TestBed.inject(TranslocoService).setActiveLang('fr');
+    TestBed.inject(TranslateService).use('fr');
     await fixture.whenStable();
     fixture.detectChanges();
     expect(el.querySelector('[data-testid="image-warning"]')!.textContent).toContain('artistes humains');

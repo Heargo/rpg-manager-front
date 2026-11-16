@@ -93,8 +93,7 @@ describe('SpriteColorizerPageComponent: pack drafts', () => {
     const maskedSprite = () => ({
       id: 'axe',
       label: 'Hache',
-      type: 'equipment' as const,
-      slot: 'weapon1' as const,
+      kinds: ['weapon'],
       kind: 'masked' as const,
       image: png('axe-image'),
       materials: exportConfig(autoMaterials(sprite())),

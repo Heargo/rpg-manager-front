@@ -1,21 +1,21 @@
 <div class="main-container flex-col center middle">
   <p-card styleClass="create">
     <form class="stack" (ngSubmit)="create()">
-      <h1>{{ 'character.create.title' | transloco }}</h1>
+      <h1>{{ 'character.create.title' | translate }}</h1>
       @if (characters.$world(); as world) {
-        <p class="hint">{{ 'character.create.intro' | transloco: { world: world.name } }}</p>
+        <p class="hint">{{ 'character.create.intro' | translate: { world: world.name } }}</p>
       }
 
       <div class="identity">
         <div class="portrait">
           @if (portraitUrl(); as url) {
-            <img [src]="url" [alt]="'character.create.portrait' | transloco" />
+            <img [src]="url" [alt]="'character.create.portrait' | translate" />
           } @else {
             <i class="pi pi-user"></i>
           }
         </div>
         <div class="fields">
-          <label for="character-name">{{ 'character.create.name' | transloco }}</label>
+          <label for="character-name">{{ 'character.create.name' | translate }}</label>
           <input pInputText id="character-name" name="name" [maxlength]="maxLength" [ngModel]="name()" (ngModelChange)="name.set($event)" />
           <p-fileupload
             mode="basic"
@@ -23,7 +23,7 @@
             [auto]="true"
             [customUpload]="true"
             chooseIcon="pi pi-image"
-            [chooseLabel]="'character.create.choosePortrait' | transloco"
+            [chooseLabel]="'character.create.choosePortrait' | translate"
             (uploadHandler)="choosePortrait($event)"
           />
         </div>
@@ -31,8 +31,8 @@
 
       @if (classChoices().length) {
         <section class="classes">
-          <h2>{{ 'character.create.class' | transloco }}</h2>
-          <div class="class-list" role="radiogroup" [attr.aria-label]="'character.create.class' | transloco">
+          <h2>{{ 'character.create.class' | translate }}</h2>
+          <div class="class-list" role="radiogroup" [attr.aria-label]="'character.create.class' | translate">
             @for (choice of classChoices(); track choice.id) {
               <button
                 type="button"
@@ -65,15 +65,15 @@
 
       @if (characters.$world(); as world) {
         <section class="start">
-          <h2>{{ 'character.create.startsWith' | transloco }}</h2>
+          <h2>{{ 'character.create.startsWith' | translate }}</h2>
           <ul class="stats">
             @for (attribute of world.attributes; track attribute.id) {
               <li><span>{{ attribute.name }}</span><strong>{{ attribute.baseValue }}</strong></li>
             }
           </ul>
           <p class="hint">
-            {{ 'character.create.statPoints' | transloco: { count: world.startingStatPoints } }} ·
-            {{ 'character.create.money' | transloco }} <app-coin-display [copper]="world.startingMoney" />
+            {{ 'character.create.statPoints' | translate: { count: world.startingStatPoints } }} ·
+            {{ 'character.create.money' | translate }} <app-coin-display [copper]="world.startingMoney" />
           </p>
         </section>
       }
@@ -82,8 +82,8 @@
         <p-message severity="error" size="small">{{ error() }}</p-message>
       }
       <div class="actions">
-        <a routerLink="/room" class="later">{{ 'character.create.later' | transloco }}</a>
-        <p-button type="submit" icon="pi pi-check" [label]="'character.create.submit' | transloco" [loading]="creating()" [disabled]="!canCreate()" />
+        <a routerLink="/room" class="later">{{ 'character.create.later' | translate }}</a>
+        <p-button type="submit" icon="pi pi-check" [label]="'character.create.submit' | translate" [loading]="creating()" [disabled]="!canCreate()" />
       </div>
     </form>
   </p-card>

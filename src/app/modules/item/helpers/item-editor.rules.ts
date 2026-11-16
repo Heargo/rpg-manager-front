@@ -49,9 +49,9 @@ export function validateItemDraft(
 
 /** The item as editable JSON: no id, no image. */
 export function itemToJson(draft: ItemDraft): string {
-  const { name, description, rarity, type, slot, price, modifiers } = draft;
+  const { name, description, rarity, type, slot, price, modifiers, kind, tints } = draft;
   return JSON.stringify(
-    { name, description, rarity, type, slot, price, modifiers },
+    { name, description, rarity, type, slot, price, modifiers, kind, tints },
     null,
     2,
   );
@@ -92,6 +92,14 @@ export function parseItemJson(
   const modifiers = raw['modifiers'] ?? [];
   if (!Array.isArray(modifiers) || !modifiers.every(isModifier))
     bad('modifiers');
+  const kind = raw['kind'];
+  if (kind !== undefined && typeof kind !== 'string') bad('kind');
+  const tints = raw['tints'];
+  if (
+    tints !== undefined &&
+    (!Array.isArray(tints) || !tints.every((tint) => typeof tint === 'string'))
+  )
+    bad('tints');
   if (issues.length) return { issues };
 
   const draft = {
@@ -102,6 +110,8 @@ export function parseItemJson(
     slot: raw['slot'] ?? 'none',
     price: raw['price'],
     modifiers,
+    ...(kind !== undefined ? { kind } : {}),
+    ...(tints !== undefined ? { tints } : {}),
   } as ItemDraft;
   const problems = validateItemDraft(draft, attributeNames);
   return problems.length ? { issues: problems } : { draft, issues: [] };

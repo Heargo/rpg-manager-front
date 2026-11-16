@@ -45,13 +45,15 @@ describe('validateRegistry', () => {
     }
   });
 
-  it('requires a language that is en or fr, and rejects the old languages list', () => {
+  it('requires a language that is en or fr when there is one', () => {
+    const result = validateRegistry({ format: 1, packs: [{ ...entry(), language: 'de' }] });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.errors.join('\n')).toContain('language');
+  });
+
+  it('allows a pack without language (a neutral pack)', () => {
     const { language: _language, ...without } = entry();
-    for (const bad of [without, { ...entry(), language: 'de' }, { ...without, languages: ['en', 'fr'] }]) {
-      const result = validateRegistry({ format: 1, packs: [bad] });
-      expect(result.ok).toBe(false);
-      if (!result.ok) expect(result.errors.join('\n')).toContain('language');
-    }
+    expect(validateRegistry({ format: 1, packs: [without] }).ok).toBe(true);
   });
 
   it('rejects a name and a description given per language', () => {

@@ -6,8 +6,6 @@ export interface JoinedWorld {
   roomId: string;
   name: string;
   hostName: string;
-  /** The invite link fragment (what follows `#`), to rejoin. */
-  invite: string;
   lastSeenAt: number;
   /** The world rules the sheet needs, as the host last published them. */
   sheetWorld: SheetWorld;

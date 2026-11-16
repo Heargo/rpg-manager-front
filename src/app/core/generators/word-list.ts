@@ -1,6 +1,21 @@
-import { EQUIPMENT_SLOTS, ITEM_RARITIES, ITEM_TYPES, ItemRarity, ItemType } from '../models/item';
+import { KIND_ID } from '../packs/pack-kinds';
+import { ITEM_RARITIES, ItemRarity } from '../models/item';
+import {
+  checkLanguageFile,
+  isRecord,
+  keyedBy,
+  keyedByOneOf,
+  listOf,
+  nonEmptyString,
+  objectOf,
+  phrase,
+  phraseWithBase,
+  Section,
+} from './language-file';
 
-export const WORD_LIST_VERSION = 1;
+export { isRecord, nonEmptyString };
+
+export const WORD_LIST_VERSION = 2;
 
 export type Gender = 'm' | 'f';
 
@@ -8,114 +23,199 @@ export interface Noun {
   text: string;
   /** Grammatical gender, for languages where adjectives agree. Defaults to `m`. */
   gender?: Gender;
+  /** A plural noun ("Gants"): its adjectives take the plural form. */
+  plural?: boolean;
 }
 
-/** One form for every gender (English), or one per gender (French). */
-export type Adjective = string | Record<Gender, string>;
+/**
+ * One form for every gender (English), or one per gender (French); `mp` / `fp` are the plural forms when
+ * they are not the singular plus `s`.
+ */
+export type Adjective =
+  string | ({ m: string; f: string } & { mp?: string; fp?: string });
 
-/** What an item's name is built around: its equipment slot, or its type when it isn't equipment. */
-export const BASE_KEYS = [...EQUIPMENT_SLOTS, 'item', 'consumable'] as const;
-export type BaseKey = (typeof BASE_KEYS)[number];
+type PerRarity<T> = Partial<Record<ItemRarity, T[]>>;
 
-export const TEMPLATE_PLACEHOLDERS = ['base', 'adjective', 'suffix'] as const;
+/** An adjective of a kind: a plain one, or one tied to a tint (`{ text, tint }` for a single form, or gendered forms plus `tint`). */
+export type KindAdjective =
+  | Adjective
+  | { text: string; tint: string }
+  | ({ m: string; f: string; mp?: string; fp?: string } & { tint: string });
 
-export interface WordList {
+/** A suffix of a kind: a phrase, or a phrase tied to a tint. */
+export type KindSuffix = string | { text: string; tint: string };
+
+export interface KindTexts {
+  nouns?: Noun[];
+  descriptions?: string[];
+  /** Name templates of this kind per rarity, before the language's; each has `{base}`. */
+  names?: PerRarity<string>;
+  /** Adjectives and suffixes of this kind; they add up along the chain, with the top-level ones. */
+  adjectives?: PerRarity<KindAdjective>;
+  suffixes?: PerRarity<KindSuffix>;
+}
+
+export interface TintTexts {
+  adjectives?: PerRarity<Adjective>;
+  suffixes?: PerRarity<string>;
+  descriptions?: string[];
+}
+
+/** `generators/items.json`: the texts of the items domain, per kind, per tint, and the language's templates. */
+export interface ItemWordList {
   version: typeof WORD_LIST_VERSION;
-  /** Name patterns per rarity, using `{base}`, `{adjective}` and `{suffix}`; word order is the language's. */
-  templates: Record<ItemRarity, string[]>;
-  bases: Record<BaseKey, Noun[]>;
-  adjectives: Record<ItemRarity, Adjective[]>;
-  /** Phrases after the noun ("of Vigor", "des anciens rois"); may be empty for low rarities. */
-  suffixes: Record<ItemRarity, string[]>;
-  descriptions: Record<ItemType, string[]>;
+  kinds?: Record<string, KindTexts>;
+  tints?: Record<string, TintTexts>;
+  adjectives?: PerRarity<Adjective>;
+  suffixes?: PerRarity<string>;
+  templates?: PerRarity<string>;
 }
 
-export type WordListValidation = { ok: true; value: WordList } | { ok: false; errors: string[] };
+export type ItemWordListValidation =
+  | { ok: true; value: ItemWordList; warnings: string[] }
+  | { ok: false; errors: string[] };
 
-/** Checks a loaded JSON file against the format, with readable errors. */
-export function validateWordList(json: unknown): WordListValidation {
-  const errors: string[] = [];
-  if (!isRecord(json)) return { ok: false, errors: ['the file is not a JSON object'] };
-  if (json['version'] !== WORD_LIST_VERSION) errors.push(`version must be ${WORD_LIST_VERSION}`);
-
-  const templates = section(json, 'templates', errors);
-  const bases = section(json, 'bases', errors);
-  const adjectives = section(json, 'adjectives', errors);
-  const suffixes = section(json, 'suffixes', errors);
-  const descriptions = section(json, 'descriptions', errors);
-
-  for (const rarity of ITEM_RARITIES) {
-    const rarityTemplates = stringList(templates?.[rarity], `templates.${rarity}`, errors, true);
-    const raritySuffixes = stringList(suffixes?.[rarity], `suffixes.${rarity}`, errors, false);
-    for (const template of rarityTemplates) {
-      for (const placeholder of template.match(/\{[^}]*\}/g) ?? []) {
-        const name = placeholder.slice(1, -1);
-        if (!(TEMPLATE_PLACEHOLDERS as readonly string[]).includes(name)) {
-          errors.push(`templates.${rarity}: unknown placeholder ${placeholder} in "${template}"`);
-        }
-      }
-      if (!template.includes('{base}')) errors.push(`templates.${rarity}: "${template}" has no {base}`);
-      if (template.includes('{suffix}') && raritySuffixes.length === 0) {
-        errors.push(`templates.${rarity}: "${template}" uses {suffix} but suffixes.${rarity} is empty`);
-      }
-    }
-    const rarityAdjectives = adjectives?.[rarity];
-    if (!Array.isArray(rarityAdjectives) || rarityAdjectives.length === 0) {
-      errors.push(`adjectives.${rarity} must be a non-empty list`);
-    } else {
-      rarityAdjectives.forEach((adjective, i) => {
-        if (!isAdjective(adjective)) errors.push(`adjectives.${rarity}[${i}] must be a string or { "m": …, "f": … }`);
-      });
-    }
-  }
-
-  for (const key of BASE_KEYS) {
-    const nouns = bases?.[key];
-    if (!Array.isArray(nouns) || nouns.length === 0) {
-      errors.push(`bases.${key} must be a non-empty list`);
-      continue;
-    }
-    nouns.forEach((noun, i) => {
-      if (!isRecord(noun) || !nonEmptyString(noun['text'])) errors.push(`bases.${key}[${i}] needs a "text"`);
-      else if (noun['gender'] !== undefined && noun['gender'] !== 'm' && noun['gender'] !== 'f') {
-        errors.push(`bases.${key}[${i}].gender must be "m" or "f"`);
-      }
-    });
-  }
-
-  for (const type of ITEM_TYPES) stringList(descriptions?.[type], `descriptions.${type}`, errors, true);
-
-  return errors.length === 0 ? { ok: true, value: json as unknown as WordList } : { ok: false, errors };
-}
-
-export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-export function nonEmptyString(value: unknown): value is string {
-  return typeof value === 'string' && value.trim().length > 0;
-}
+const noun: Section = (value, path, context) => {
+  if (!isRecord(value) || !nonEmptyString(value['text']))
+    context.error(`${path} needs a "text"`);
+  else if (
+    value['gender'] !== undefined &&
+    value['gender'] !== 'm' &&
+    value['gender'] !== 'f'
+  )
+    context.error(`${path}.gender must be "m" or "f"`);
+  else if (
+    value['plural'] !== undefined &&
+    typeof value['plural'] !== 'boolean'
+  )
+    context.error(`${path}.plural must be true or false`);
+};
 
 export function isAdjective(value: unknown): value is Adjective {
-  return nonEmptyString(value) || (isRecord(value) && nonEmptyString(value['m']) && nonEmptyString(value['f']));
+  return (
+    nonEmptyString(value) ||
+    (isRecord(value) &&
+      nonEmptyString(value['m']) &&
+      nonEmptyString(value['f']) &&
+      (value['mp'] === undefined || nonEmptyString(value['mp'])) &&
+      (value['fp'] === undefined || nonEmptyString(value['fp'])))
+  );
 }
 
-function section(json: Record<string, unknown>, key: string, errors: string[]): Record<string, unknown> | undefined {
-  const value = json[key];
-  if (!isRecord(value)) {
-    errors.push(`${key} must be an object`);
-    return undefined;
-  }
-  return value;
-}
+const adjective: Section = (value, path, context) => {
+  if (!isAdjective(value))
+    context.error(
+      `${path} must be a string or { "m": …, "f": …, "mp"?: …, "fp"?: … }`,
+    );
+};
 
-function stringList(value: unknown, path: string, errors: string[], required: boolean): string[] {
-  if (!Array.isArray(value)) {
-    errors.push(`${path} must be a list`);
-    return [];
+const tintId: Section = (value, path, context) => {
+  if (!nonEmptyString(value))
+    context.error(`${path} must be a non-empty string`);
+};
+
+const kindAdjective: Section = (value, path, context) => {
+  if (isRecord(value) && value['text'] !== undefined) {
+    for (const key of Object.keys(value))
+      if (key !== 'text' && key !== 'tint')
+        context.error(`${path}: unknown field "${key}"`);
+    phrase(value['text'], `${path}.text`, context);
+    if (value['tint'] !== undefined)
+      tintId(value['tint'], `${path}.tint`, context);
+    return;
   }
-  if (required && value.length === 0) errors.push(`${path} must not be empty`);
-  const strings = value.filter(nonEmptyString);
-  if (strings.length !== value.length) errors.push(`${path} must only contain non-empty strings`);
-  return strings;
+  if (isRecord(value) && value['tint'] !== undefined) {
+    const { tint, ...rest } = value;
+    tintId(tint, `${path}.tint`, context);
+    adjective(rest, path, context);
+    return;
+  }
+  adjective(value, path, context);
+};
+
+const kindSuffix: Section = (value, path, context) => {
+  if (!isRecord(value)) return phrase(value, path, context);
+  for (const key of Object.keys(value))
+    if (key !== 'text' && key !== 'tint')
+      context.error(`${path}: unknown field "${key}"`);
+  phrase(value['text'], `${path}.text`, context);
+  tintId(value['tint'], `${path}.tint`, context);
+};
+
+const perRarity = (entry: Section): Section =>
+  keyedByOneOf(ITEM_RARITIES, listOf(entry));
+
+const SECTIONS: Record<string, Section> = {
+  kinds: keyedBy(
+    KIND_ID,
+    'kind id',
+    objectOf({
+      nouns: listOf(noun),
+      descriptions: listOf(phrase),
+      names: perRarity(phraseWithBase),
+      adjectives: perRarity(kindAdjective),
+      suffixes: perRarity(kindSuffix),
+    }),
+  ),
+  tints: keyedBy(
+    KIND_ID,
+    'tint id',
+    objectOf({
+      adjectives: perRarity(adjective),
+      suffixes: perRarity(phrase),
+      descriptions: listOf(phrase),
+    }),
+  ),
+  adjectives: perRarity(adjective),
+  suffixes: perRarity(phrase),
+  templates: perRarity(phraseWithBase),
+};
+
+const has = (list: unknown): boolean => Array.isArray(list) && list.length > 0;
+
+/**
+ * Checks a loaded `generators/items.json` against the format, with readable errors. `params` lists the params
+ * defined elsewhere (the language's `common.json`); a param used and defined nowhere is a warning, and so is a
+ * `{suffix}` template for a rarity that has no suffix in the file (another pack may give some).
+ */
+export function validateItemWordList(
+  json: unknown,
+  params: readonly string[] = [],
+): ItemWordListValidation {
+  const checked = checkLanguageFile(json, {
+    version: WORD_LIST_VERSION,
+    sections: SECTIONS,
+  });
+  if (checked.errors.length > 0) return { ok: false, errors: checked.errors };
+  const value = json as ItemWordList;
+  const warnings: string[] = [];
+
+  const suffixed = (rarity: ItemRarity): boolean =>
+    has(value.suffixes?.[rarity]) ||
+    Object.values(value.tints ?? {}).some((tint) =>
+      has(tint.suffixes?.[rarity]),
+    ) ||
+    Object.values(value.kinds ?? {}).some((kind) =>
+      has(kind.suffixes?.[rarity]),
+    );
+  const noSuffix = (
+    path: string,
+    list: string[] | undefined,
+    rarity: ItemRarity,
+  ) => {
+    for (const template of list ?? [])
+      if (template.includes('{suffix}') && !suffixed(rarity))
+        warnings.push(
+          `${path}: "${template}" uses {suffix} but no suffix is given for ${rarity} in this file`,
+        );
+  };
+  for (const rarity of ITEM_RARITIES) {
+    noSuffix(`templates.${rarity}`, value.templates?.[rarity], rarity);
+    for (const [kind, texts] of Object.entries(value.kinds ?? {}))
+      noSuffix(`kinds.${kind}.names.${rarity}`, texts.names?.[rarity], rarity);
+  }
+  for (const name of checked.params)
+    if (!params.includes(name))
+      warnings.push(`param {${name}} is used but not defined in this file`);
+  return { ok: true, value, warnings };
 }

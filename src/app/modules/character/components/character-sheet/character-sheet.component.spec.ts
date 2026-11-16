@@ -106,12 +106,22 @@ describe('CharacterSheetComponent', () => {
     expect(text('Life')).toContain('6 / 12');
   });
 
-  it('leaves the current line out of the tooltip of a non-bar attribute', async () => {
+  it('opens the details of an attribute from the "?" next to its name, with no current line for a non-bar attribute', async () => {
     const { fixture } = await render({ canPlay: false, gameMaster: false });
-    const tooltip = (id: string) => (fixture.componentInstance as unknown as { tooltip(id: string): string }).tooltip(id);
-    expect(tooltip('str')).toContain('Max: 2');
-    expect(tooltip('str')).not.toContain('Current');
-    expect(tooltip('life')).toContain('Current: 6');
+    const details = async (id: string) => {
+      const button = document.querySelector<HTMLElement>(`[data-stat-details="${id}"] button`)!;
+      expect(button.getAttribute('aria-label')).toContain('details');
+      button.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      return document.querySelector('[data-testid="stat-details"]')!.textContent!;
+    };
+    const strength = await details('str');
+    expect(strength).toContain('Strength');
+    expect(strength).toMatch(/Max\s*2/);
+    expect(strength).not.toContain('Current');
+    const life = await details('life');
+    expect(life).toMatch(/Current\s*6/);
   });
 
   it('shows an equipment bonus next to the attribute name, with no bonus column', async () => {
@@ -157,13 +167,18 @@ describe('CharacterSheetComponent', () => {
     expect(broke.el.querySelector('[aria-label="Spend a point on Strength"]')).toBeNull();
   });
 
-  it('gives the value a tooltip with the base, level, formula, result, cap, bonus, max and current', async () => {
+  it('lists the base, level, formula, result, bonus, max and current in the details popover, one row each', async () => {
     const { fixture } = await render({ canPlay: false, gameMaster: false });
-    const text = (fixture.componentInstance as unknown as { tooltip(id: string): string }).tooltip('life');
-    for (const part of ['Base: 10', 'Level: 0', 'Linear', 'Formula result: 10', 'Bonus: +2', 'Max: 12', 'Current: 6'])
-      expect(text).toContain(part);
-    expect(text).not.toContain('Cap');
-    expect(text.split('\n').length).toBeGreaterThan(5);
+    document.querySelector<HTMLElement>('[data-stat-details="life"] button')!.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const rows = [...document.querySelectorAll('[data-testid="stat-details"] dl > div')].map((row) =>
+      [row.querySelector('dt')!.textContent!.trim(), row.querySelector('dd')!.textContent!.trim()].join(': '),
+    );
+    for (const part of ['Base: 10', 'Level: 0', 'Formula result: 10', 'Equipment bonus: +2', 'Max: 12', 'Current: 6'])
+      expect(rows).toContain(part);
+    expect(rows.find((row) => row.startsWith('Formula:'))).toContain('Linear');
+    expect(rows.some((row) => row.startsWith('Cap'))).toBe(false);
   });
 
   it('shows the level and an XP progress bar', async () => {

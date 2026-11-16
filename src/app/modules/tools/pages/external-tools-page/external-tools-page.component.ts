@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { CardModule } from '@openng/optimus-ui/card';
 
 /** Free tools by other people that help prepare a game (from the legacy tools page). */
@@ -20,12 +20,12 @@ export const EXTERNAL_TOOLS = [
 @Component({
   selector: 'app-external-tools-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, CardModule],
+  imports: [TranslatePipe, CardModule],
   template: `
     <div class="main-container external">
       <header>
-        <h1>{{ 'tools.external.title' | transloco }}</h1>
-        <p class="hint">{{ 'tools.external.intro' | transloco }}</p>
+        <h1>{{ 'tools.external.title' | translate }}</h1>
+        <p class="hint">{{ 'tools.external.intro' | translate }}</p>
       </header>
       <ul class="grid">
         @for (tool of tools; track tool.key) {
@@ -36,13 +36,13 @@ export const EXTERNAL_TOOLS = [
                   <i [class]="tool.icon"></i>
                   <div>
                     <h2>
-                      {{ 'tools.external.' + tool.key + '.name' | transloco }}
+                      {{ 'tools.external.' + tool.key + '.name' | translate }}
                       <i class="pi pi-external-link"></i>
                     </h2>
                     <p>
                       {{
                         'tools.external.' + tool.key + '.description'
-                          | transloco
+                          | translate
                       }}
                     </p>
                   </div>
@@ -52,7 +52,7 @@ export const EXTERNAL_TOOLS = [
           </li>
         }
       </ul>
-      <small class="hint">{{ 'tools.external.notOurs' | transloco }}</small>
+      <small class="hint">{{ 'tools.external.notOurs' | translate }}</small>
     </div>
   `,
   styles: `

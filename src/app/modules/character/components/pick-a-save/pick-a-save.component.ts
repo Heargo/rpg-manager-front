@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { LanguageBusiness } from '../../../../core/business/language.business';
@@ -11,7 +11,7 @@ import { PickASaveDialogComponent } from '../pick-a-save-dialog/pick-a-save-dial
 @Component({
   selector: 'app-pick-a-save',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe, DialogModule, PickASaveDialogComponent],
+  imports: [TranslatePipe, DialogModule, PickASaveDialogComponent],
   template: `
     @if (copies.$conflicts()[0]; as conflict) {
       <p-dialog
@@ -20,7 +20,7 @@ import { PickASaveDialogComponent } from '../pick-a-save-dialog/pick-a-save-dial
         [closable]="false"
         [draggable]="false"
         [header]="
-          'character.pickASave.title' | transloco: { name: conflict.playerName }
+          'character.pickASave.title' | translate: { name: conflict.playerName }
         "
         [style]="{ width: 'min(40rem, calc(100vw - 2rem))' }"
       >

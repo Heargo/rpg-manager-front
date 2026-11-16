@@ -4,7 +4,8 @@ import { TestBed } from '@angular/core/testing';
 import { ImageBusiness } from '../../../core/business/image.business';
 import { ImageStorageService } from '../../../core/services/image-storage.service';
 import { WorldImportError, WorldLibraryBusiness } from './world-library.business';
-import en from '../../../../../public/packs/base-en/generators/items.json';
+import { baseItemVocabulary } from '../../../../testing/base-vocabulary';
+import { ItemVocabularyBusiness } from '../../../core/business/item-vocabulary.business';
 import { PackBusiness } from '../../../core/business/pack.business';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { WorldStorageService } from '../services/world-storage.service';
@@ -12,7 +13,7 @@ import { provideTestTranslations } from '../../../../testing/test-providers';
 
 const TEST_WORLD_PROVIDERS = [
   provideTestTranslations(),
-  { provide: PackBusiness, useValue: { wordList: async () => en, packsFor: async () => ['base-en'], $installed: () => [] } },
+  { provide: PackBusiness, useValue: { packsFor: async () => ['base-en'], $installed: () => [] } }, { provide: ItemVocabularyBusiness, useValue: { vocabulary: async () => baseItemVocabulary('en') } },
 ];
 
 describe('WorldLibraryBusiness (IndexedDB)', () => {
@@ -170,6 +171,40 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
       await TestBed.inject(WorldStorageService).put(legacy as typeof stored);
 
       expect((await library.get(stored.id))?.packs).toEqual([]);
+    });
+  });
+
+  describe('language', () => {
+    it.each(['fr', 'en'] as const)('a new world in the %s app has that language', async (lang) => {
+      TestBed.inject(LanguageBusiness).setLanguage(lang);
+
+      expect((await library.create({ name: 'Eldoria', attributes: [] })).language).toBe(lang);
+    });
+
+    it('keeps the language the draft names', async () => {
+      TestBed.inject(LanguageBusiness).setLanguage('fr');
+
+      const world = await library.create({ name: 'Eldoria', attributes: [], language: 'en' });
+
+      expect(world.language).toBe('en');
+      expect((await library.get(world.id))?.language).toBe('en');
+    });
+
+    it('reads a stored world without a language as the app language', async () => {
+      TestBed.inject(LanguageBusiness).setLanguage('en');
+      const stored = await library.create({ name: 'Old', attributes: [], language: 'fr' });
+      const { language: _language, ...legacy } = stored;
+      await TestBed.inject(WorldStorageService).put(legacy as typeof stored);
+
+      expect((await library.get(stored.id))?.language).toBe('en');
+    });
+
+    it('keeps the language through export and import', async () => {
+      const world = await library.create({ name: 'Eldoria', attributes: [], language: 'en' });
+
+      const imported = await library.importWorld(await (await library.exportWorld(world.id)).text());
+
+      expect(imported.language).toBe('en');
     });
   });
 });

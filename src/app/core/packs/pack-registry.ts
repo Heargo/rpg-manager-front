@@ -14,7 +14,8 @@ export interface PackRegistryEntry {
   size: number;
   /** Number of sprites. */
   sprites: number;
-  language: PackLanguage;
+  /** Missing for a neutral pack (sprites, kinds and tints only). */
+  language?: PackLanguage;
   /** Bundled with the app and always on (Base). */
   builtIn?: boolean;
 }
@@ -71,7 +72,10 @@ export function validateRegistry(json: unknown): RegistryValidation {
       errors.push(`${where}: size must be a count of bytes`);
     if (!count(entry['sprites']))
       errors.push(`${where}: sprites must be a count`);
-    if (!(PACK_LANGUAGES as readonly unknown[]).includes(entry['language']))
+    if (
+      entry['language'] !== undefined &&
+      !(PACK_LANGUAGES as readonly unknown[]).includes(entry['language'])
+    )
       errors.push(`${where}: language must be one of ${PACK_LANGUAGES.join(', ')}`);
     if (entry['builtIn'] !== undefined && typeof entry['builtIn'] !== 'boolean')
       errors.push(`${where}: builtIn must be true or false`);

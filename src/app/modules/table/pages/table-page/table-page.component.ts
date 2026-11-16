@@ -10,7 +10,7 @@ import {
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { AccordionModule } from '@openng/optimus-ui/accordion';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -24,11 +24,13 @@ import {
 } from '@openng/optimus-ui/fileupload';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
+import { SelectButtonModule } from '@openng/optimus-ui/selectbutton';
 import { SplitterModule } from '@openng/optimus-ui/splitter';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { HostOfflineIconComponent } from '../../../../core/components/host-offline-icon/host-offline-icon.component';
 import { StoredImageComponent } from '../../../../core/components/stored-image/stored-image.component';
+import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { CharacterBusiness } from '../../../character/business/character.business';
 import { CombatBusiness } from '../../../combat/business/combat.business';
@@ -40,13 +42,14 @@ import { CombatGmPanelComponent } from '../../../combat/components/combat-gm-pan
 import { CombatPlayerViewComponent } from '../../../combat/components/combat-player-view/combat-player-view.component';
 import { CharacterSummaryComponent } from '../../../character/components/character-summary/character-summary.component';
 import { MerchantShopComponent } from '../../../npc/components/merchant-shop/merchant-shop.component';
+import { NpcSheetDialogComponent } from '../../../npc/components/npc-sheet-dialog/npc-sheet-dialog.component';
 import { CombatRollDecisionComponent } from '../../../combat/components/combat-roll-decision/combat-roll-decision.component';
 import { DiceOverlayComponent } from '../../../dice/components/dice-overlay/dice-overlay.component';
 import { DiceRollerComponent } from '../../../dice/components/dice-roller/dice-roller.component';
 import { RoomBusiness } from '../../../room/business/room.business';
 import { TableBusiness } from '../../business/table.business';
-import { TableNpcsComponent } from '../../components/table-npcs/table-npcs.component';
-import { NOTES_MAX_LENGTH } from '../../models/table';
+import { TableNpcCardComponent } from '../../components/table-npc-card/table-npc-card.component';
+import { EncounterKind, NOTES_MAX_LENGTH } from '../../models/table';
 
 /** Below this width the game master's splitter becomes one column, with the players in a drawer. */
 const NARROW_QUERY = '(max-width: 960px)';
@@ -70,16 +73,18 @@ function readToolsOpen(): string[] {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CombatRollBannerComponent,
-    TableNpcsComponent,
+    TableNpcCardComponent,
+    NpcSheetDialogComponent,
     NgTemplateOutlet,
     FormsModule,
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     CardModule,
     DrawerModule,
     DialogModule,
     SelectModule,
+    SelectButtonModule,
     MerchantShopComponent,
     FileUploadModule,
     MessageModule,
@@ -132,6 +137,8 @@ export class TablePageComponent {
 
   protected readonly notesMaxLength = NOTES_MAX_LENGTH;
   protected readonly narrow = signal(false);
+  /** Game master: the encounter NPC whose sheet is open. */
+  protected readonly viewedNpcId = signal<string | null>(null);
   protected readonly playersOpen = signal(false);
   /** The game master's tool panels left open, remembered on this device (all open by default). */
   protected readonly toolsOpen = signal<string[]>(readToolsOpen());
@@ -161,15 +168,24 @@ export class TablePageComponent {
     }
   }
 
-  /** Game master: who opening or closing a shop is for (null: every player). */
-  protected readonly shopTarget = signal<string | null>(null);
-  protected readonly shopTargets = computed(() => [
-    { name: null as string | null, playerId: null as string | null },
-    ...(this.characters.$characters() ?? []).map(({ name, playerId }) => ({
-      name,
-      playerId,
+  private readonly language = inject(LanguageBusiness);
+  protected readonly encounterKind = signal<'combat' | EncounterKind>('combat');
+  protected readonly encounterNpcId = signal<string | null>(null);
+  protected readonly encounterKinds = computed(() =>
+    (['combat', 'story', 'merchant'] as const).map((value) => ({
+      value,
+      label: this.language.t(`table.encounter.${value}`),
     })),
-  ]);
+  );
+  /** The NPCs a story encounter can use, or the merchants only for a merchant encounter. */
+  protected readonly encounterNpcs = computed(() =>
+    this.combat
+      .$npcs()
+      .filter(
+        (npc) =>
+          this.encounterKind() !== 'merchant' || npc.roles.includes('merchant'),
+      ),
+  );
   private readonly visitedNpcId = signal<string | null>(null);
   /** The shop the player is in; closes itself when the game master closes the shop. */
   protected readonly visitedShop = computed(() =>
@@ -202,11 +218,22 @@ export class TablePageComponent {
     this.visitedNpcId.set(null);
   }
 
-  protected setShop(change: { npcId: string; open: boolean }): void {
-    const target = this.shopTarget();
+  protected pickKind(kind: 'combat' | EncounterKind): void {
+    this.encounterKind.set(kind);
+    this.encounterNpcId.set(null);
+  }
+
+  protected startEncounter(): void {
+    const kind = this.encounterKind();
+    const npcId = this.encounterNpcId();
+    if (kind === 'combat' || !npcId) return;
     this.table
-      .setShop(change.npcId, change.open, target ? [target] : undefined)
+      .startEncounter(kind, npcId)
       .catch((error) => this.toastError(error));
+  }
+
+  protected endEncounter(): void {
+    this.table.endEncounter().catch((error) => this.toastError(error));
   }
 
   protected buy(inventoryId: string): void {

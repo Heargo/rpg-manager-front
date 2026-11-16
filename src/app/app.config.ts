@@ -7,11 +7,12 @@ import {
   provideAppInitializer,
   Injector,
 } from '@angular/core';
-import { provideTransloco, TranslocoService } from '@jsverse/transloco';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { firstValueFrom } from 'rxjs';
 import { detectInitialLanguage } from './core/i18n/initial-language';
-import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
-import { translocoSettings } from './core/i18n/transloco-config';
+import { DEFAULT_LANGUAGE } from './core/constants/languages';
+import { translateSettings } from './core/i18n/translate-config';
 import { LanguageBusiness } from './core/business/language.business';
 import { DebugLogBusiness } from './core/business/debug-log.business';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
@@ -31,18 +32,23 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     // HttpClient only loads the app's own static files (translations, word lists): there is no backend.
     provideHttpClient(withFetch()),
-    provideTransloco({
-      config: translocoSettings(detectInitialLanguage()),
-      loader: TranslocoHttpLoader,
+    provideTranslateService({
+      ...translateSettings(detectInitialLanguage()),
+      // Loads `public/i18n/<lang>.json`. A failed download throws and is retried, instead of leaving keys on screen.
+      loader: provideTranslateHttpLoader({ prefix: 'i18n/', suffix: '.json', failOnError: true }),
+      retry: { count: 3, delay: (_error, attempt) => 300 * attempt },
     }),
     // Load the starting language before the first render (no flash of keys), and start LanguageBusiness.
     provideAppInitializer(() => {
       // First, so the debug log sees everything that follows.
       inject(DebugLogBusiness).start();
-      const transloco = inject(TranslocoService);
+      const translate = inject(TranslateService);
       const injector = inject(Injector);
       inject(LanguageBusiness);
-      return firstValueFrom(transloco.load(transloco.getActiveLang())).then(() => {
+      return Promise.all([
+        firstValueFrom(translate.use(detectInitialLanguage())),
+        firstValueFrom(translate.setFallbackLang(DEFAULT_LANGUAGE)),
+      ]).then(() => {
         // Only once translations are in: starting the room creates the profile, whose default name is translated.
         // Reopens the room this device was hosting before a reload, and its world's game handlers.
         // A lazy chunk too: it pulls in the whole room and game host side, which the initial bundle can't afford.

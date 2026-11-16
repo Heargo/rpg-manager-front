@@ -4,7 +4,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 
 /** A link of the board, as drawn: its curve, the level chip position and its state. */
 export interface BoardLink {
@@ -23,7 +23,7 @@ export interface BoardLink {
 @Component({
   selector: 'app-tree-links',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoPipe],
+  imports: [TranslatePipe],
   styleUrl: './tree-links.component.scss',
   template: `
     <svg class="links" [attr.width]="width()" [attr.height]="height()">
@@ -72,7 +72,7 @@ export interface BoardLink {
         [class.selected]="link.selected"
         [class.invalid]="link.invalid"
         [attr.data-link]="link.key"
-        [attr.aria-label]="'class.editor.selectLink' | transloco"
+        [attr.aria-label]="'class.editor.selectLink' | translate"
         [style.left.px]="link.midX"
         [style.top.px]="link.midY"
         (click)="$event.stopPropagation(); select(link.from, link.to)"

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
@@ -16,7 +16,7 @@ import { SandboxCharacterBusiness } from '../../business/sandbox-character.busin
   selector: 'app-sheet-tool-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     SkeletonModule,
     CharacterSheetComponent,
@@ -25,12 +25,12 @@ import { SandboxCharacterBusiness } from '../../business/sandbox-character.busin
     <div class="main-container sheet-tool">
       <header>
         <div>
-          <h1>{{ 'tools.sheet.title' | transloco }}</h1>
-          <p class="hint">{{ 'tools.sheet.intro' | transloco }}</p>
+          <h1>{{ 'tools.sheet.title' | translate }}</h1>
+          <p class="hint">{{ 'tools.sheet.intro' | translate }}</p>
         </div>
         <p-button
           icon="pi pi-refresh"
-          [label]="'tools.sheet.reset' | transloco"
+          [label]="'tools.sheet.reset' | translate"
           severity="secondary"
           [text]="true"
           (onClick)="sandbox.reset()"

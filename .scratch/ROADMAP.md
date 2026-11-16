@@ -239,3 +239,49 @@ Tickets in `combat-ux-2/` (D), from trying C01–C09. Bugs first, the dice-scree
 | 105 | **D02** Recap banner above the dice screen, with bubbles (D03 merged in) (done) | none |
 | 106 | **D04** GM decides on the dice screen; it closes for everyone (done) | D02 |
 | 108 | **D05** Combat panel spacing, subtler reach area (done) | none |
+
+## Phase 15: encounters that are not a combat (2026-11-14)
+
+Tickets in `archived/encounters/` (E). Decisions from the user on 2026-11-14 are in the spec.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 109 | **E01** Story and merchant encounters (done) | none |
+
+## Phase 16: coherent generated items (2026-11-14)
+
+Tickets in `archived/item-coherence/` (IC). Decisions from the user on 2026-11-14 are in the spec. Pure formats and the phrase engine first, then the pooled vocabulary the generator and the image build on, the creator form, the docs last.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 110 | **IC01** Manifest v2: kinds, tints, sprite kinds, neutral packs (done) | none |
+| 111 | **IC02** Phrase engine: variants, params, agreement (done) | none |
+| 112 | **IC03** Item word list v2 and the Base FR/EN lists (done) | IC01, IC02 |
+| 113 | **IC04** The world has a language (done) | none |
+| 114 | **IC05** Item vocabulary pooled from the active packs (done) | IC01, IC03, IC04 |
+| 115 | **IC06** Item generator draws a kind; the item keeps its kind and tints (done) | IC05 |
+| 116 | **IC07** Random image by kind and tint (done) | IC05, IC06 |
+| 117 | **IC08** Pack creator: structured kinds, tints and params (done) | IC01, IC03 |
+| 118 | **IC09** User docs: kinds, tints, phrases, naming conventions (done) | IC01, IC03, IC06, IC07, IC08 |
+
+## Phase 17: adjectives that fit the item (2026-11-14)
+
+Tickets in `archived/item-adjectives/` (IA), follow-up of IC06's review. Decisions in the spec.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 119 | **IA01** Kind adjectives, tint fits and tint descriptions first (done) | none |
+| 120 | **IA02** Pack creator: kind adjectives, tint fits, common words (done) | IA01 |
+
+## Phase 18: NPC, skill and class generators on kinds (2026-11-15)
+
+Tickets in `generator-kinds/` (GK). User request; shapes assumed from the item system, marked in the spec. NPCs first (it also moves the generic code), skills before classes (classes pick skills by kind), the creator and docs last. GK05 is only recorded for later.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 121 | **GK01** NPC generator on kinds | none |
+| 122 | **GK02** Skill generator on kinds | GK01 |
+| 123 | **GK03** Class generator on kinds | GK02 |
+| 124 | **GK04** Pack creator: NPC, skill and class kinds | GK01–GK03 |
+| 125 | **GK06** User docs: NPC, skill and class kinds | GK01–GK04 |
+| — | **GK05** Packs ship fixed items, skills and classes (needs triage, later) | GK04 |

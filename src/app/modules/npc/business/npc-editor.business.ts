@@ -3,9 +3,7 @@ import {
   createSeed,
   seededRandomSource,
 } from '../../../core/generators/random-source';
-import { PackChoiceBusiness } from '../../../core/business/pack-choice.business';
-import { RANDOM_PACK } from '../../../core/packs/pack-choice';
-import { NpcNamesBusiness } from './npc-names.business';
+import { NpcVocabularyBusiness } from '../../../core/business/npc-vocabulary.business';
 import { Item, World } from '../../world/models/world';
 import {
   addNpcItem,
@@ -33,9 +31,7 @@ import { buildNpcPrompt } from '../helpers/npc-ai-prompt';
 /** What the NPC editor needs: checks, JSON, form edits and the random Generate. */
 @Injectable({ providedIn: 'root' })
 export class NpcEditorBusiness {
-  private readonly names = inject(NpcNamesBusiness);
-  private readonly packChoice = inject(PackChoiceBusiness);
-  readonly packOptions = this.packChoice.options('npcs');
+  private readonly vocabulary = inject(NpcVocabularyBusiness);
 
   empty(world: World): Npc {
     return emptyNpc(world);
@@ -106,15 +102,11 @@ export class NpcEditorBusiness {
     seed: string,
     world: World,
     classId?: string,
-    pack: string = RANDOM_PACK,
   ): Promise<Omit<Npc, 'id'>> {
     return generateNpc(
       world,
       seededRandomSource(seed),
-      await this.names.names(
-        undefined,
-        await this.packChoice.resolve('npcs', pack, seed),
-      ),
+      await this.vocabulary.vocabulary(),
       classId,
     );
   }

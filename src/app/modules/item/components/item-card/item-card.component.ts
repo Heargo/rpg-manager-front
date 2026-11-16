@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { CardModule } from '@openng/optimus-ui/card';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { CoinDisplayComponent } from '../../../../core/components/coin-display/coin-display.component';
@@ -12,7 +12,7 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
   selector: 'app-item-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    TranslocoPipe,
+    TranslatePipe,
     CardModule,
     TagModule,
     CoinDisplayComponent,
@@ -24,18 +24,18 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
       <div class="head">
         <h2>{{ item.name }}</h2>
         <p-tag
-          [value]="'item.rarity.' + item.rarity | transloco"
+          [value]="'item.rarity.' + item.rarity | translate"
           [severity]="severity[item.rarity]"
         />
       </div>
       <p class="kind">
-        {{ 'item.type.' + item.type | transloco }}
+        {{ 'item.type.' + item.type | translate }}
         @if (item.slot !== 'none') {
-          · {{ 'item.slot.' + item.slot | transloco }}
+          · {{ 'item.slot.' + item.slot | translate }}
         }
       </p>
       @if (item.modifiers.length) {
-        <ul class="modifiers" [attr.aria-label]="'item.modifiers' | transloco">
+        <ul class="modifiers" [attr.aria-label]="'item.modifiers' | translate">
           @for (modifier of item.modifiers; track modifier.attribute) {
             <li [class.malus]="modifier.value < 0">
               <span>{{ modifier.attribute }}</span>
@@ -54,7 +54,7 @@ import { RARITY_SEVERITY } from '../../helpers/item-display';
         <app-slot-silhouette
           class="slot-icon"
           [slot]="item.slot"
-          [label]="'item.slot.' + item.slot | transloco"
+          [label]="'item.slot.' + item.slot | translate"
         />
       }
     </p-card>

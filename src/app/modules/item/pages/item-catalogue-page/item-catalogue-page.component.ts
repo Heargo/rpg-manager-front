@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { DialogModule } from '@openng/optimus-ui/dialog';
@@ -26,7 +26,7 @@ import { ItemCatalogueComponent } from '../../components/item-catalogue/item-cat
   imports: [
     FormsModule,
     RouterLink,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     DialogModule,
     MessageModule,
@@ -36,12 +36,12 @@ import { ItemCatalogueComponent } from '../../components/item-catalogue/item-cat
   template: `
     <div class="main-container catalogue">
       <header>
-        <h1>{{ 'item.catalogue.title' | transloco }}</h1>
+        <h1>{{ 'item.catalogue.title' | translate }}</h1>
         <p-button
           icon="pi pi-arrow-left"
           severity="secondary"
           [text]="true"
-          [label]="'item.catalogue.back' | transloco"
+          [label]="'item.catalogue.back' | translate"
           routerLink="/room"
         />
       </header>
@@ -60,13 +60,13 @@ import { ItemCatalogueComponent } from '../../components/item-catalogue/item-cat
           [modal]="true"
           [header]="
             'item.catalogue.giveTitle'
-              | transloco: { name: itemToGive()?.name ?? '' }
+              | translate: { name: itemToGive()?.name ?? '' }
           "
         >
           @if (world.characters.length) {
             <div class="picker">
               <label for="give-to">{{
-                'item.catalogue.giveTo' | transloco
+                'item.catalogue.giveTo' | translate
               }}</label>
               <p-select
                 inputId="give-to"
@@ -78,18 +78,18 @@ import { ItemCatalogueComponent } from '../../components/item-catalogue/item-cat
               />
               <p-button
                 icon="pi pi-gift"
-                [label]="'item.catalogue.give' | transloco"
+                [label]="'item.catalogue.give' | translate"
                 [disabled]="!characterId()"
                 (onClick)="give()"
               />
             </div>
           } @else {
-            <p>{{ 'item.catalogue.noPlayers' | transloco }}</p>
+            <p>{{ 'item.catalogue.noPlayers' | translate }}</p>
           }
         </p-dialog>
       } @else {
         <p-message severity="info">{{
-          'item.catalogue.notHosting' | transloco
+          'item.catalogue.notHosting' | translate
         }}</p-message>
       }
     </div>

@@ -4,15 +4,15 @@
   <div class="details" data-testid="character-details">
     @if (characters.playerName(c.playerId); as player) {
       <small class="played-by">{{
-        "character.sheet.playedBy" | transloco: { name: player }
+        "character.sheet.playedBy" | translate: { name: player }
       }}</small>
     }
     <p-tabs value="stats">
       <p-tablist>
         <p-tab
           value="stats"
-          [attr.aria-label]="'character.sheet.tabs.stats' | transloco"
-          [pTooltip]="'character.sheet.tabs.stats' | transloco"
+          [attr.aria-label]="'character.sheet.tabs.stats' | translate"
+          [pTooltip]="'character.sheet.tabs.stats' | translate"
           tooltipPosition="top"
         >
           <i class="pi pi-chart-bar" aria-hidden="true"></i>
@@ -22,16 +22,16 @@
         </p-tab>
         <p-tab
           value="equipment"
-          [attr.aria-label]="'character.sheet.tabs.equipment' | transloco"
-          [pTooltip]="'character.sheet.tabs.equipment' | transloco"
+          [attr.aria-label]="'character.sheet.tabs.equipment' | translate"
+          [pTooltip]="'character.sheet.tabs.equipment' | translate"
           tooltipPosition="top"
         >
           <i class="pi pi-shield" aria-hidden="true"></i>
         </p-tab>
         <p-tab
           value="inventory"
-          [attr.aria-label]="'character.sheet.tabs.inventory' | transloco"
-          [pTooltip]="'character.sheet.tabs.inventory' | transloco"
+          [attr.aria-label]="'character.sheet.tabs.inventory' | translate"
+          [pTooltip]="'character.sheet.tabs.inventory' | translate"
           tooltipPosition="top"
         >
           <i class="pi pi-briefcase" aria-hidden="true"></i>
@@ -39,8 +39,8 @@
         </p-tab>
         <p-tab
           value="skills"
-          [attr.aria-label]="'character.sheet.tabs.skills' | transloco"
-          [pTooltip]="'character.sheet.tabs.skills' | transloco"
+          [attr.aria-label]="'character.sheet.tabs.skills' | translate"
+          [pTooltip]="'character.sheet.tabs.skills' | translate"
           tooltipPosition="top"
         >
           <i class="pi pi-bolt" aria-hidden="true"></i>
@@ -56,11 +56,11 @@
             <section class="grant-panel" aria-labelledby="grant-title">
               <h3 id="grant-title" class="grant-title">
                 <i class="pi pi-gift" aria-hidden="true"></i>
-                {{ "character.sheet.grantTitle" | transloco }}
+                {{ "character.sheet.grantTitle" | translate }}
               </h3>
               <form class="grant" (ngSubmit)="grantXp()">
                 <label for="grant-xp">{{
-                  "character.sheet.grantXpLabel" | transloco
+                  "character.sheet.grantXpLabel" | translate
                 }}</label>
                 <p-inputnumber
                   inputId="grant-xp"
@@ -77,13 +77,13 @@
                   type="submit"
                   data-testid="grant-xp-button"
                   icon="pi pi-plus"
-                  [label]="'character.sheet.grantXp' | transloco"
+                  [label]="'character.sheet.grantXp' | translate"
                   [disabled]="busy()"
                 />
               </form>
               <form class="grant" (ngSubmit)="grant()">
                 <label for="grant-points">{{
-                  "character.sheet.grantLabel" | transloco
+                  "character.sheet.grantLabel" | translate
                 }}</label>
                 <p-inputnumber
                   inputId="grant-points"
@@ -99,7 +99,7 @@
                 <p-button
                   type="submit"
                   icon="pi pi-plus"
-                  [label]="'character.sheet.grant' | transloco"
+                  [label]="'character.sheet.grant' | translate"
                   [disabled]="busy()"
                 />
               </form>
@@ -109,18 +109,18 @@
             <thead>
               <tr>
                 <th scope="col">
-                  {{ "character.sheet.attribute" | transloco }}
+                  {{ "character.sheet.attribute" | translate }}
                 </th>
                 <th scope="col" class="num optional">
-                  {{ "character.sheet.level" | transloco }}
+                  {{ "character.sheet.level" | translate }}
                 </th>
                 <th scope="col" class="num">
-                  {{ "character.sheet.value" | transloco }}
+                  {{ "character.sheet.value" | translate }}
                 </th>
                 @if ((canPlay() && c.statPoints > 0) || gameMaster()) {
                   <th scope="col">
                     <span class="sr-only">{{
-                      "character.sheet.spend" | transloco
+                      "character.sheet.spend" | translate
                     }}</span>
                   </th>
                 }
@@ -130,29 +130,38 @@
               @for (stat of stats(); track stat.attributeId) {
                 <tr>
                   <th scope="row">
-                    {{ stat.name }}
-                    @if (stat.bonus !== 0) {
-                      <span
-                        class="bonus"
-                        [class.plus]="stat.bonus > 0"
-                        [class.minus]="stat.bonus < 0"
-                        [attr.aria-label]="'character.sheet.bonus' | transloco"
-                        >{{ stat.bonus > 0 ? "+" : "" }}{{ stat.bonus }}</span
-                      >
-                    }
+                    <span class="stat-name">
+                      {{ stat.name }}
+                      @if (stat.bonus !== 0) {
+                        <span
+                          class="bonus"
+                          [class.plus]="stat.bonus > 0"
+                          [class.minus]="stat.bonus < 0"
+                          [attr.aria-label]="'character.sheet.bonus' | translate"
+                          >{{ stat.bonus > 0 ? "+" : "" }}{{ stat.bonus }}</span
+                        >
+                      }
+                      <p-button
+                        icon="pi pi-question-circle"
+                        [rounded]="true"
+                        [text]="true"
+                        severity="secondary"
+                        size="small"
+                        styleClass="stat-help"
+                        [attr.data-stat-details]="stat.attributeId"
+                        [ariaLabel]="
+                          'character.sheet.statDetails'
+                            | translate: { name: stat.name }
+                        "
+                        (onClick)="
+                          openStatDetails($event, stat.attributeId, statPopover)
+                        "
+                      />
+                    </span>
                   </th>
                   <td class="num optional">{{ stat.level }}</td>
                   <td class="num value">
-                    <span
-                      class="value-text"
-                      [pTooltip]="tooltip(stat.attributeId)"
-                      tooltipPosition="left"
-                      tooltipStyleClass="stat-tip"
-                      tabindex="0"
-                      >{{
-                        stat.isBar ? stat.current + " / " + stat.max : stat.max
-                      }}</span
-                    >
+                    {{ stat.isBar ? stat.current + " / " + stat.max : stat.max }}
                   </td>
                   @if ((canPlay() && c.statPoints > 0) || gameMaster()) {
                     <td class="actions">
@@ -166,11 +175,11 @@
                           "
                           [attr.aria-label]="
                             isLocked('spend-stat-point')
-                              ? ('character.sheet.lockedOffline' | transloco)
+                              ? ('character.sheet.lockedOffline' | translate)
                               : null
                           "
                           [pTooltip]="
-                            'character.sheet.lockedOffline' | transloco
+                            'character.sheet.lockedOffline' | translate
                           "
                           [tooltipDisabled]="!isLocked('spend-stat-point')"
                         >
@@ -181,7 +190,7 @@
                             [disabled]="busy() || isLocked('spend-stat-point')"
                             [ariaLabel]="
                               'character.sheet.spendOn'
-                                | transloco: { name: stat.name }
+                                | translate: { name: stat.name }
                             "
                             (onClick)="spend(stat.attributeId)"
                           />
@@ -196,7 +205,7 @@
                           [disabled]="busy()"
                           [ariaLabel]="
                             'character.sheet.refundFrom'
-                              | transloco: { name: stat.name }
+                              | translate: { name: stat.name }
                           "
                           (onClick)="refund(stat.attributeId)"
                         />
@@ -215,7 +224,7 @@
             @for (slot of slots(); track slot.slot) {
               <li>
                 <span class="slot-name">{{
-                  slotLabel(slot.slot) | transloco
+                  slotLabel(slot.slot) | translate
                 }}</span>
                 @if (slot.entry; as entry) {
                   <ng-container
@@ -225,7 +234,7 @@
                   <div class="tile empty">
                     <app-slot-silhouette
                       [slot]="slot.slot"
-                      [label]="slotLabel(slot.slot) | transloco"
+                      [label]="slotLabel(slot.slot) | translate"
                     />
                   </div>
                 }
@@ -250,7 +259,7 @@
               }
             </ul>
           } @else {
-            <p class="hint">{{ "character.items.empty" | transloco }}</p>
+            <p class="hint">{{ "character.items.empty" | translate }}</p>
           }
         </p-tabpanel>
 
@@ -260,11 +269,11 @@
             <section class="grant-panel" aria-labelledby="grant-skill-title">
               <h3 id="grant-skill-title" class="grant-title">
                 <i class="pi pi-gift" aria-hidden="true"></i>
-                {{ "character.sheet.grantTitle" | transloco }}
+                {{ "character.sheet.grantTitle" | translate }}
               </h3>
               <form class="grant" (ngSubmit)="grantSkillPoints()">
                 <label for="grant-skill-points">{{
-                  "character.sheet.grantSkillPointsLabel" | transloco
+                  "character.sheet.grantSkillPointsLabel" | translate
                 }}</label>
                 <p-inputnumber
                   inputId="grant-skill-points"
@@ -282,7 +291,7 @@
                   type="submit"
                   data-testid="grant-skill-points-button"
                   icon="pi pi-plus"
-                  [label]="'character.sheet.grantSkillPoints' | transloco"
+                  [label]="'character.sheet.grantSkillPoints' | translate"
                   [disabled]="busy()"
                 />
               </form>
@@ -290,7 +299,7 @@
           }
           <p class="skill-points" data-skill-points>
             <i class="pi pi-star" aria-hidden="true"></i>
-            {{ "character.sheet.skillPoints" | transloco }}:
+            {{ "character.sheet.skillPoints" | translate }}:
             <strong>{{ c.skillPoints }}</strong>
           </p>
           @if (classView()?.characterClass; as characterClass) {
@@ -307,10 +316,10 @@
                   <span class="skill-name">{{ row.name }}</span>
                   <span class="skill-level">{{
                     "class.tree.level"
-                      | transloco: { level: row.level, max: row.maxLevel }
+                      | translate: { level: row.level, max: row.maxLevel }
                   }}</span>
                   <small>{{
-                    "character.sheet.skillCost" | transloco: { cost: row.cost }
+                    "character.sheet.skillCost" | translate: { cost: row.cost }
                   }}</small>
                   @if (canPlay() && !gameMaster() && row.learnable) {
                     <p-button
@@ -321,7 +330,7 @@
                       [disabled]="busy() || isLocked('learn-skill')"
                       [ariaLabel]="
                         'character.sheet.learnSkill'
-                          | transloco: { name: row.name }
+                          | translate: { name: row.name }
                       "
                       (onClick)="learn(row.skillId)"
                     />
@@ -332,7 +341,7 @@
                       size="small"
                       [attr.data-use]="row.skillId"
                       [disabled]="busy() || pendingUses().includes(row.skillId)"
-                      [label]="'character.sheet.useSkill' | transloco: { name: row.name }"
+                      [label]="'character.sheet.useSkill' | translate: { name: row.name }"
                       (onClick)="useSkill(row.skillId)"
                     />
                   }
@@ -350,7 +359,7 @@
                       [disabled]="busy()"
                       [ariaLabel]="
                         'character.sheet.refundSkill'
-                          | transloco: { name: row.name }
+                          | translate: { name: row.name }
                       "
                       (onClick)="refundSkill(row.skillId)"
                     />
@@ -359,11 +368,11 @@
               }
             </ul>
           } @else {
-            <p class="hint">{{ "character.sheet.noClass" | transloco }}</p>
+            <p class="hint">{{ "character.sheet.noClass" | translate }}</p>
           }
           @if (taughtRows().length) {
             <h3 class="skills-title">
-              {{ "character.sheet.taughtSkills" | transloco }}
+              {{ "character.sheet.taughtSkills" | translate }}
             </h3>
             <ul class="skill-rows">
               @for (row of taughtRows(); track row.skillId) {
@@ -371,7 +380,7 @@
                   <span class="skill-name">{{ row.name }}</span>
                   <span class="skill-level">{{
                     "class.tree.level"
-                      | transloco: { level: row.level, max: row.maxLevel }
+                      | translate: { level: row.level, max: row.maxLevel }
                   }}</span>
                   @if (canPlay() && row.usable) {
                     <p-button
@@ -379,7 +388,7 @@
                       size="small"
                       [attr.data-use]="row.skillId"
                       [disabled]="busy() || pendingUses().includes(row.skillId)"
-                      [label]="'character.sheet.useSkill' | transloco: { name: row.name }"
+                      [label]="'character.sheet.useSkill' | translate: { name: row.name }"
                       (onClick)="useSkill(row.skillId)"
                     />
                   }
@@ -397,7 +406,7 @@
                       [disabled]="busy()"
                       [ariaLabel]="
                         'character.sheet.removeSkill'
-                          | transloco: { name: row.name }
+                          | translate: { name: row.name }
                       "
                       (onClick)="removeTaught(row.skillId)"
                     />
@@ -421,22 +430,22 @@
     >
       <strong>{{
         (use.success ? "character.sheet.useSuccess" : "character.sheet.useFailure")
-          | transloco
+          | translate
       }}</strong>
       @if (use.rolls.length) {
         <small>{{
-          "character.sheet.useRolled" | transloco: { total: use.total }
+          "character.sheet.useRolled" | translate: { total: use.total }
         }}</small>
       }
       @if (use.error) {
-        <small>{{ "character.sheet.useError" | transloco }}</small>
+        <small>{{ "character.sheet.useError" | translate }}</small>
       }
       @for (effect of use.effects; track $index) {
         <small>{{
           "character.sheet.useAmount"
-            | transloco
+            | translate
               : {
-                  kind: ("skill.effectKind." + effect.kind | transloco),
+                  kind: ("skill.effectKind." + effect.kind | translate),
                   attribute: effect.attribute,
                   amount: effect.amount,
                 }
@@ -468,7 +477,7 @@
       <span class="tile-name">{{ entry.item.name }}</span>
       @if (entry.equipped) {
         <span class="tile-equipped">{{
-          "character.items.equipped" | transloco
+          "character.items.equipped" | translate
         }}</span>
       }
       @if (
@@ -479,7 +488,7 @@
         <app-slot-silhouette
           class="tile-slot"
           [slot]="entry.item.slot"
-          [label]="'item.slot.' + entry.item.slot | transloco"
+          [label]="'item.slot.' + entry.item.slot | translate"
         />
       }
     </button>
@@ -490,12 +499,28 @@
       severity="secondary"
       styleClass="tile-menu"
       [ariaLabel]="
-        'character.items.actions' | transloco: { name: entry.item.name }
+        'character.items.actions' | translate: { name: entry.item.name }
       "
       (onClick)="openActionMenu($event, entry, actionMenu)"
     />
   </div>
 </ng-template>
+
+<p-popover #statPopover (onHide)="detailsAttributeId.set(null)">
+  @if (detailsStat(); as stat) {
+    <div class="stat-details" data-testid="stat-details">
+      <strong class="stat-details-title">{{ stat.name }}</strong>
+      <dl>
+        @for (row of statDetails(stat.attributeId); track row.key) {
+          <div [class.total]="row.total">
+            <dt>{{ "character.sheet.tip." + row.key | translate }}</dt>
+            <dd>{{ row.value }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+  }
+</p-popover>
 
 <p-contextmenu #contextMenu [model]="menuModel()" appendTo="body" />
 <p-menu #actionMenu [model]="menuModel()" [popup]="true" appendTo="body" />
@@ -505,7 +530,7 @@
   (visibleChange)="!$event && closeDetails()"
   [modal]="true"
   [dismissableMask]="true"
-  [header]="'character.items.details' | transloco"
+  [header]="'character.items.details' | translate"
   [style]="{ width: 'min(28rem, calc(100vw - 2rem))' }"
 >
   @if (openItem(); as entry) {
@@ -519,12 +544,12 @@
               (entry.equipped
                 ? 'character.items.unequip'
                 : 'character.items.equip'
-              ) | transloco
+              ) | translate
             "
             [disabled]="
               busy() || isLocked(entry.equipped ? 'unequip' : 'equip')
             "
-            [pTooltip]="'character.sheet.lockedOffline' | transloco"
+            [pTooltip]="'character.sheet.lockedOffline' | translate"
             [tooltipDisabled]="!isLocked(entry.equipped ? 'unequip' : 'equip')"
             (onClick)="equip(entry)"
           />
@@ -532,9 +557,9 @@
         @if (entry.item.type === "consumable") {
           <p-button
             icon="pi pi-heart"
-            [label]="'character.items.use' | transloco"
+            [label]="'character.items.use' | translate"
             [disabled]="busy() || isLocked('use')"
-            [pTooltip]="'character.sheet.lockedOffline' | transloco"
+            [pTooltip]="'character.sheet.lockedOffline' | translate"
             [tooltipDisabled]="!isLocked('use')"
             (onClick)="use(entry)"
           />
@@ -544,11 +569,11 @@
             icon="pi pi-wallet"
             [label]="
               'character.items.sellFor'
-                | transloco: { price: money(sellPriceOf(entry)) }
+                | translate: { price: money(sellPriceOf(entry)) }
             "
             severity="secondary"
             [disabled]="busy() || isLocked('sell')"
-            [pTooltip]="'character.sheet.lockedOffline' | transloco"
+            [pTooltip]="'character.sheet.lockedOffline' | translate"
             [tooltipDisabled]="!isLocked('sell')"
             (onClick)="sell(entry)"
           />

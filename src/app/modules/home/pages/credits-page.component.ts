@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { TagModule } from '@openng/optimus-ui/tag';
 import { PackBusiness } from '../../../core/business/pack.business';
 import { SiteFooterComponent } from '../components/site-footer/site-footer.component';
@@ -9,9 +9,9 @@ import { SiteFooterComponent } from '../components/site-footer/site-footer.compo
 export const CREDIT_LIBRARIES = [
   { name: 'Angular', licence: 'MIT', url: 'https://angular.dev/' },
   {
-    name: 'Transloco',
+    name: 'ngx-translate',
     licence: 'MIT',
-    url: 'https://jsverse.gitbook.io/transloco',
+    url: 'https://ngx-translate.org/',
   },
   {
     name: 'Optimus UI (OpenNG)',
@@ -45,14 +45,14 @@ export const CREDIT_LIBRARIES = [
 @Component({
   selector: 'app-credits-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, TranslocoPipe, TagModule, SiteFooterComponent],
+  imports: [RouterLink, TranslatePipe, TagModule, SiteFooterComponent],
   template: `
     <main class="page">
       <header class="page-header">
-        <h1>{{ 'credits.title' | transloco }}</h1>
-        <p class="lead">{{ 'credits.intro' | transloco }}</p>
+        <h1>{{ 'credits.title' | translate }}</h1>
+        <p class="lead">{{ 'credits.intro' | translate }}</p>
       </header>
-      <h2>{{ 'credits.librariesTitle' | transloco }}</h2>
+      <h2>{{ 'credits.librariesTitle' | translate }}</h2>
       <ul class="libs">
         @for (lib of libraries; track lib.name) {
           <li class="card lib">
@@ -63,35 +63,35 @@ export const CREDIT_LIBRARIES = [
           </li>
         }
       </ul>
-      <h2>{{ 'credits.illustrationsTitle' | transloco }}</h2>
+      <h2>{{ 'credits.illustrationsTitle' | translate }}</h2>
       <div class="card">
         <p>
-          {{ 'credits.sampleHeroPrefix' | transloco }}
+          {{ 'credits.sampleHeroPrefix' | translate }}
           <a [href]="yuumeiUrl" target="_blank" rel="noopener noreferrer"
             >Yuumei</a
-          >{{ 'credits.sampleHeroSuffix' | transloco }}
+          >{{ 'credits.sampleHeroSuffix' | translate }}
         </p>
       </div>
       <div class="card illustration" data-test="sprites">
         <p>
-          {{ 'credits.spritesPrefix' | transloco }}
+          {{ 'credits.spritesPrefix' | translate }}
           <a [href]="spritesPackUrl" target="_blank" rel="noopener noreferrer"
             >Fantasy items pack</a
           >
-          {{ 'credits.spritesBy' | transloco }}
+          {{ 'credits.spritesBy' | translate }}
           <a [href]="ccByUrl" target="_blank" rel="noopener noreferrer"
             >CC BY 4.0</a
-          >{{ 'credits.spritesSuffix' | transloco }}
+          >{{ 'credits.spritesSuffix' | translate }}
         </p>
       </div>
       @if (packs().length) {
-        <h2>{{ 'credits.packsTitle' | transloco }}</h2>
+        <h2>{{ 'credits.packsTitle' | translate }}</h2>
         <div class="card" data-test="packs">
-          <p>{{ 'credits.packsIntro' | transloco }}</p>
+          <p>{{ 'credits.packsIntro' | translate }}</p>
           <ul>
             @for (pack of packs(); track pack.id) {
               <li>
-                {{ pack.name }} {{ 'credits.packBy' | transloco }}
+                {{ pack.name }} {{ 'credits.packBy' | translate }}
                 {{ pack.author }},
                 <a
                   [href]="pack.licenseUrl"
@@ -104,16 +104,16 @@ export const CREDIT_LIBRARIES = [
           </ul>
         </div>
       }
-      <h2>{{ 'credits.aiTitle' | transloco }}</h2>
+      <h2>{{ 'credits.aiTitle' | translate }}</h2>
       <div class="card" data-test="ai">
-        <p>{{ 'credits.ai' | transloco }}</p>
+        <p>{{ 'credits.ai' | translate }}</p>
         <p>
-          <a routerLink="/contact">{{ 'credits.aiContact' | transloco }}</a>
+          <a routerLink="/contact">{{ 'credits.aiContact' | translate }}</a>
         </p>
       </div>
-      <h2>{{ 'credits.toolsTitle' | transloco }}</h2>
+      <h2>{{ 'credits.toolsTitle' | translate }}</h2>
       <div class="card">
-        <p>{{ 'credits.tools' | transloco }}</p>
+        <p>{{ 'credits.tools' | translate }}</p>
       </div>
     </main>
     <app-site-footer />

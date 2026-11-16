@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { SkillVocabularyBusiness } from '../../../core/business/skill-vocabulary.business';
 import { World } from '../../world/models/world';
 import { Skill } from '../models/skill';
 import { SkillEditorBusiness } from './skill-editor.business';
@@ -32,11 +33,23 @@ describe('SkillEditorBusiness action types', () => {
   let editor: SkillEditorBusiness;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: SkillVocabularyBusiness,
+          useValue: { vocabulary: async () => undefined },
+        },
+      ],
+    });
     editor = TestBed.inject(SkillEditorBusiness);
   });
 
   it('offers the names of the world combat action types, in order', () => {
-    expect(editor.actionTypeOptions(world)).toEqual(['Action', 'Movement', 'Reaction']);
+    expect(editor.actionTypeOptions(world)).toEqual([
+      'Action',
+      'Movement',
+      'Reaction',
+    ]);
   });
 
   it('a new skill has no action type', () => {
@@ -51,7 +64,10 @@ describe('SkillEditorBusiness action types', () => {
   });
 
   it('refuses a passive skill that names an action type', () => {
-    const issues = editor.validate({ ...skill, type: 'passive', target: undefined }, world);
+    const issues = editor.validate(
+      { ...skill, type: 'passive', target: undefined },
+      world,
+    );
 
     expect(issues).toEqual([{ field: 'actionType', code: 'invalid' }]);
   });

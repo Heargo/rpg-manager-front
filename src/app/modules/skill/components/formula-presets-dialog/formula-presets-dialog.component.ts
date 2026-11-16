@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { DialogModule } from '@openng/optimus-ui/dialog';
@@ -36,7 +36,7 @@ interface PresetForm extends FormulaPresetDraft {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     DialogModule,
     InputTextModule,
@@ -50,19 +50,19 @@ interface PresetForm extends FormulaPresetDraft {
       (visibleChange)="visible.set($event); form.set(null)"
       [modal]="true"
       [draggable]="false"
-      [header]="'skill.presets.manageTitle' | transloco"
+      [header]="'skill.presets.manageTitle' | translate"
       [style]="{ width: 'min(40rem, calc(100vw - 2rem))' }"
     >
       <div class="body">
-        <p class="hint">{{ 'skill.presets.hint' | transloco }}</p>
+        <p class="hint">{{ 'skill.presets.hint' | translate }}</p>
         @if (form(); as current) {
           <div class="form" data-field="preset-edit">
             <input
               pInputText
               data-field="edit-name"
               autocomplete="off"
-              [attr.aria-label]="'skill.presets.name' | transloco"
-              [placeholder]="'skill.presets.name' | transloco"
+              [attr.aria-label]="'skill.presets.name' | translate"
+              [placeholder]="'skill.presets.name' | translate"
               [ngModel]="current.name"
               (ngModelChange)="patch({ name: $event })"
             />
@@ -80,8 +80,8 @@ interface PresetForm extends FormulaPresetDraft {
               data-field="edit-formula"
               autocomplete="off"
               spellcheck="false"
-              [attr.aria-label]="'skill.presets.formula' | transloco"
-              [placeholder]="'skill.presets.formula' | transloco"
+              [attr.aria-label]="'skill.presets.formula' | translate"
+              [placeholder]="'skill.presets.formula' | translate"
               [ngModel]="current.formula"
               (ngModelChange)="patch({ formula: $event })"
             />
@@ -90,8 +90,8 @@ interface PresetForm extends FormulaPresetDraft {
               class="wide"
               data-field="edit-description"
               autocomplete="off"
-              [attr.aria-label]="'skill.presets.description' | transloco"
-              [placeholder]="'skill.presets.description' | transloco"
+              [attr.aria-label]="'skill.presets.description' | translate"
+              [placeholder]="'skill.presets.description' | translate"
               [ngModel]="current.description"
               (ngModelChange)="patch({ description: $event })"
             />
@@ -101,7 +101,7 @@ interface PresetForm extends FormulaPresetDraft {
                 type="button"
                 data-action="save-edit"
                 icon="pi pi-check"
-                [label]="'skill.presets.save' | transloco"
+                [label]="'skill.presets.save' | translate"
                 (click)="saveForm()"
               ></button>
               <button
@@ -110,7 +110,7 @@ interface PresetForm extends FormulaPresetDraft {
                 data-action="cancel-edit"
                 severity="secondary"
                 [text]="true"
-                [label]="'common.cancel' | transloco"
+                [label]="'common.cancel' | translate"
                 (click)="form.set(null)"
               ></button>
             </div>
@@ -123,7 +123,7 @@ interface PresetForm extends FormulaPresetDraft {
               data-action="new-preset"
               icon="pi pi-plus"
               severity="secondary"
-              [label]="'skill.presets.new' | transloco"
+              [label]="'skill.presets.new' | translate"
               (click)="startNew()"
             ></button>
           </div>
@@ -139,7 +139,7 @@ interface PresetForm extends FormulaPresetDraft {
               <div class="info">
                 <strong>{{ presets.label(preset) }}</strong>
                 <span class="hint">{{
-                  'skill.presets.kind.' + preset.kind | transloco
+                  'skill.presets.kind.' + preset.kind | translate
                 }}</span>
                 <code>{{ preset.formula }}</code>
                 @if (presets.describe(preset); as description) {
@@ -154,7 +154,7 @@ interface PresetForm extends FormulaPresetDraft {
                   icon="pi pi-clone"
                   severity="secondary"
                   [text]="true"
-                  [attr.aria-label]="'skill.presets.duplicate' | transloco"
+                  [attr.aria-label]="'skill.presets.duplicate' | translate"
                   (click)="run(presets.duplicate(preset.id))"
                 ></button>
                 @if (!preset.builtIn) {
@@ -165,7 +165,7 @@ interface PresetForm extends FormulaPresetDraft {
                     icon="pi pi-pencil"
                     severity="secondary"
                     [text]="true"
-                    [attr.aria-label]="'skill.presets.edit' | transloco"
+                    [attr.aria-label]="'skill.presets.edit' | translate"
                     (click)="startEdit(preset)"
                   ></button>
                   <button
@@ -175,7 +175,7 @@ interface PresetForm extends FormulaPresetDraft {
                     icon="pi pi-trash"
                     severity="danger"
                     [text]="true"
-                    [attr.aria-label]="'skill.presets.delete' | transloco"
+                    [attr.aria-label]="'skill.presets.delete' | translate"
                     (click)="askDelete(preset)"
                   ></button>
                 }

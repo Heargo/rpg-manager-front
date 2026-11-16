@@ -2,13 +2,14 @@ import { inject, Injectable, signal } from '@angular/core';
 import { strToU8, zipSync } from 'fflate';
 import { SpriteSet } from '../../modules/sprite/models/sprite-set';
 import { SpriteSetBusiness } from '../../modules/sprite/business/sprite-set.business';
-import { ItemSlot, ItemType } from '../models/item';
 import {
   Pack,
   PACK_GENERATORS,
   PackGenerator,
+  PackLanguage,
   packFileUrl,
   SpriteKind,
+  textsPath,
   validatePack,
 } from '../packs/pack';
 import {
@@ -23,6 +24,7 @@ import {
   checkMaterialsFile,
   ImageSize,
   listChecker,
+  commonChecker,
   MAX_PACK_BYTES,
 } from '../packs/pack-files';
 import { ImageProcessingService } from '../services/image-processing.service';
@@ -32,7 +34,12 @@ import { StoredPackFile } from '../services/pack-storage.service';
 import { runLimited } from '../helpers/pool';
 import { ImageBusiness } from './image.business';
 import { LanguageBusiness } from './language.business';
-import { basePackId, isBasePack, PackBusiness, PackError } from './pack.business';
+import {
+  basePackId,
+  isBasePack,
+  PackBusiness,
+  PackError,
+} from './pack.business';
 
 /** What a sprite needs besides its image. */
 export type SpriteMeta = Omit<DraftSprite, 'image' | 'materials'>;
@@ -98,6 +105,11 @@ export class PackCreatorBusiness {
     );
   }
 
+  /** The app language as a pack language, for a draft that has none yet. */
+  private draftLanguage(): PackLanguage {
+    return this.language.$language() === 'fr' ? 'fr' : 'en';
+  }
+
   /** The saved drafts, the latest changed first. */
   async listDrafts(): Promise<PackDraft[]> {
     return (await this.storage.list()).sort(
@@ -116,7 +128,7 @@ export class PackCreatorBusiness {
       updatedAt: Date.now(),
       details: {
         id: '',
-        language: this.language.$language() === 'fr' ? 'fr' : 'en',
+        language: this.draftLanguage(),
         name: '',
         description: '',
         version: '1.0.0',
@@ -125,6 +137,8 @@ export class PackCreatorBusiness {
         licenseUrl: '',
       },
       generators: {},
+      kinds: {},
+      tints: {},
       sprites: [],
     };
     await this.storage.save(draft);
@@ -202,7 +216,9 @@ export class PackCreatorBusiness {
     const sprite = draft.sprites.find((s) => s.id === spriteId);
     if (!sprite) throw new PackError([`sprite "${spriteId}" does not exist`]);
     if (sprite.kind === 'colored')
-      throw new PackError([`sprite "${spriteId}": a colored sprite has no materials`]);
+      throw new PackError([
+        `sprite "${spriteId}": a colored sprite has no materials`,
+      ]);
     const updated: DraftSprite = { ...sprite, kind: 'masked', materials };
     await this.saveDraft({
       ...draft,
@@ -216,7 +232,7 @@ export class PackCreatorBusiness {
     return this.sets.list();
   }
 
-  /** Adds a saved sprite set as a masked sprite, with its materials; its tags prefill the type and slot. */
+  /** Adds a saved sprite set as a masked sprite, with its materials; its tags give the kinds. */
   async addFromSpriteSet(draftId: string, setId: string): Promise<DraftSprite> {
     const set = (await this.sets.list()).find((s) => s.id === setId);
     if (!set) throw new PackError([`sprite "${setId}" does not exist`]);
@@ -229,8 +245,7 @@ export class PackCreatorBusiness {
     return this.addSprite(draftId, {
       id,
       label: set.name,
-      type: set.tags?.type ?? 'item',
-      slot: set.tags?.slot ?? 'none',
+      kinds: set.tags?.kinds.length ? set.tags.kinds : ['item'],
       kind: 'masked',
       image,
       materials: set.config,
@@ -272,6 +287,22 @@ export class PackCreatorBusiness {
     return value;
   }
 
+  /** Copies the shared `common.json` of the Base of the draft's language into the draft. */
+  async copyBaseCommon(draftId: string): Promise<unknown> {
+    const draft = await this.draftOrThrow(draftId);
+    const value = await this.packs.commonTexts(
+      basePackId(draft.details.language),
+    );
+    const latest = await this.draftOrThrow(draftId);
+    await this.saveDraft({ ...latest, common: value });
+    return value;
+  }
+
+  /** The problems of a `common.json` value, as the validator words them. */
+  commonErrors(value: unknown): string[] {
+    return commonChecker(value);
+  }
+
   /** The problems of a word list value (an unparsed text is a string), as the validators word them. */
   wordListErrors(generator: PackGenerator, value: unknown): string[] {
     return listChecker(generator)(value);
@@ -281,8 +312,7 @@ export class PackCreatorBusiness {
   async idWarning(id: string): Promise<'official' | 'link' | null> {
     if (!id) return null;
     const entries = await this.packs.registry().catch(() => []);
-    if (isBasePack(id) || entries.some((p) => p.id === id))
-      return 'official';
+    if (isBasePack(id) || entries.some((p) => p.id === id)) return 'official';
     const installed = this.packs.$installed().find((p) => p.id === id);
     return installed?.link ? 'link' : null;
   }
@@ -297,9 +327,10 @@ export class PackCreatorBusiness {
 
     const lists = new Map<string, (json: unknown) => string[]>();
     for (const generator of PACK_GENERATORS) {
-      const path = manifest.generators[generator];
+      const path = textsPath(manifest, generator);
       if (path) lists.set(path, listChecker(generator));
     }
+    if (manifest.common) lists.set(manifest.common, commonChecker);
     const dimensions = new Map<string, ImageSize>();
     const files = new Map<string, StoredPackFile>();
     let size = 0;
@@ -374,6 +405,9 @@ export class PackCreatorBusiness {
       if (!pack.generators[generator]) continue;
       generators[generator] = await this.packs.wordList(generator, packId);
     }
+    const common = pack.common
+      ? await this.packs.commonTexts(packId)
+      : undefined;
 
     const sprites = await this.copySprites(pack.id, pack.sprites);
 
@@ -382,7 +416,7 @@ export class PackCreatorBusiness {
       updatedAt: Date.now(),
       details: {
         id: pack.id,
-        language: pack.language,
+        language: pack.language ?? this.draftLanguage(),
         name: pack.name,
         description: pack.description,
         version: pack.version,
@@ -392,6 +426,12 @@ export class PackCreatorBusiness {
         ...(pack.homepage ? { homepage: pack.homepage } : {}),
       },
       generators,
+      ...(common !== undefined ? { common } : {}),
+      kinds: { ...pack.kinds },
+      ...(pack.npcKinds ? { npcKinds: { ...pack.npcKinds } } : {}),
+      ...(pack.skillKinds ? { skillKinds: { ...pack.skillKinds } } : {}),
+      ...(pack.classKinds ? { classKinds: { ...pack.classKinds } } : {}),
+      tints: { ...pack.tints },
       sprites,
     };
     await this.storage.save(draft);
@@ -434,8 +474,7 @@ export class PackCreatorBusiness {
       sprites[i] = {
         id: sprite.id,
         label: sprite.label,
-        type: sprite.type as ItemType,
-        slot: sprite.slot as ItemSlot,
+        kinds: sprite.kinds,
         kind: sprite.kind as SpriteKind,
         image,
         ...(materials ? { materials } : {}),
@@ -455,9 +494,12 @@ export class PackCreatorBusiness {
       if (!pack.generators[generator]) continue;
       generators[generator] = await this.packs.wordList(generator, packId);
     }
+    const common = pack.common
+      ? await this.packs.commonTexts(packId)
+      : undefined;
     const sprites = await this.copySprites(pack.id, pack.sprites);
 
-    const suffix = COPY_WORDS[pack.language];
+    const suffix = COPY_WORDS[pack.language ?? this.draftLanguage()];
     const taken = new Set<string>([
       ...(await this.packs.registry().catch(() => [])).map((p) => p.id),
       ...this.packs.$installed().map((p) => p.id),
@@ -470,7 +512,7 @@ export class PackCreatorBusiness {
       updatedAt: Date.now(),
       details: {
         id,
-        language: pack.language,
+        language: pack.language ?? this.draftLanguage(),
         name: `${pack.name} (${suffix})`,
         description: pack.description,
         version: pack.version,
@@ -480,6 +522,12 @@ export class PackCreatorBusiness {
         ...(pack.homepage ? { homepage: pack.homepage } : {}),
       },
       generators,
+      ...(common !== undefined ? { common } : {}),
+      kinds: { ...pack.kinds },
+      ...(pack.npcKinds ? { npcKinds: { ...pack.npcKinds } } : {}),
+      ...(pack.skillKinds ? { skillKinds: { ...pack.skillKinds } } : {}),
+      ...(pack.classKinds ? { classKinds: { ...pack.classKinds } } : {}),
+      tints: { ...pack.tints },
       sprites,
     };
     await this.storage.save(draft);

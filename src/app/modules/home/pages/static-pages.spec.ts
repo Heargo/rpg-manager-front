@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslateService } from '@ngx-translate/core';
 import { TEST_PROVIDERS } from '../../../../testing/test-providers';
 import { routes } from '../../../app.routes';
 import en from '../../../../../public/i18n/en.json';
@@ -17,7 +17,7 @@ function leafKeys(tree: Tree, prefix = ''): string[] {
 
 async function visit(url: string, lang = 'en') {
   TestBed.configureTestingModule({ providers: [...TEST_PROVIDERS, provideRouter(routes)] });
-  TestBed.inject(TranslocoService).setActiveLang(lang);
+  TestBed.inject(TranslateService).use(lang);
   const harness = await RouterTestingHarness.create();
   await harness.navigateByUrl(url);
   harness.detectChanges();

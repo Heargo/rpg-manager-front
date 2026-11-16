@@ -29,7 +29,6 @@ describe('GameSessionBusiness joined world recorder', () => {
             $room: room,
             $status: status,
             $isHost: isHost,
-            $joinedInvite: signal('frag'),
           },
         },
         { provide: WorldInfoBusiness, useValue: { $info: info } },
@@ -77,7 +76,6 @@ describe('GameSessionBusiness joined world recorder', () => {
         roomId: 'r1',
         name: 'Harbour',
         hostName: 'Gm',
-        invite: 'frag',
       }),
     );
     room.set({ id: 'r1', members: members(false) });

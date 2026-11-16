@@ -12,7 +12,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
@@ -31,7 +31,7 @@ import { QrScanComponent } from '../qr-scan/qr-scan.component';
   imports: [
     NgTemplateOutlet,
     FormsModule,
-    TranslocoPipe,
+    TranslatePipe,
     ButtonModule,
     CardModule,
     InputTextModule,
@@ -46,12 +46,12 @@ import { QrScanComponent } from '../qr-scan/qr-scan.component';
           <strong class="for"
             ><i class="pi pi-user"></i>
             {{
-              'room.invite.forPlayer' | transloco: { name: player.name }
+              'room.invite.forPlayer' | translate: { name: player.name }
             }}</strong
           >
         }
         <label [for]="'link-' + invite().id">{{
-          'room.invite.step1' | transloco
+          'room.invite.step1' | translate
         }}</label>
         <input
           pInputText
@@ -63,14 +63,14 @@ import { QrScanComponent } from '../qr-scan/qr-scan.component';
         <div class="actions">
           <p-button
             icon="pi pi-copy"
-            [label]="'room.invite.copy' | transloco"
+            [label]="'room.invite.copy' | translate"
             size="small"
             (onClick)="copy()"
           />
           @if (canShare) {
             <p-button
               icon="pi pi-share-alt"
-              [label]="'room.invite.share' | transloco"
+              [label]="'room.invite.share' | translate"
               size="small"
               severity="secondary"
               (onClick)="share()"
@@ -79,7 +79,7 @@ import { QrScanComponent } from '../qr-scan/qr-scan.component';
           <p-button
             icon="pi pi-qrcode"
             [label]="
-              (qr() ? 'room.invite.hideQr' : 'room.invite.showQr') | transloco
+              (qr() ? 'room.invite.hideQr' : 'room.invite.showQr') | translate
             "
             size="small"
             severity="secondary"
@@ -91,30 +91,30 @@ import { QrScanComponent } from '../qr-scan/qr-scan.component';
           <img
             class="qr"
             [src]="qrUrl"
-            [alt]="'room.invite.qrAlt' | transloco"
+            [alt]="'room.invite.qrAlt' | translate"
           />
         }
-        <small class="privacy">{{ 'room.invite.privacy' | transloco }}</small>
+        <small class="privacy">{{ 'room.invite.privacy' | translate }}</small>
 
         @if (invite().boxId) {
           @if (!invite().mailboxDown) {
-            <small class="privacy">{{ 'room.invite.auto' | transloco }}</small>
+            <small class="privacy">{{ 'room.invite.auto' | translate }}</small>
           }
           @if (invite().mailboxDown) {
             <p-message severity="warn" size="small" variant="simple">{{
-              'room.invite.mailboxDown' | transloco
+              'room.invite.mailboxDown' | translate
             }}</p-message>
           }
           <details
             class="manual"
             [open]="!!invite().mailboxDown || invite().state === 'failed'"
           >
-            <summary>{{ 'room.invite.paste' | transloco }}</summary>
+            <summary>{{ 'room.invite.paste' | translate }}</summary>
             <ng-container *ngTemplateOutlet="answerField" />
           </details>
         } @else {
           <label [for]="'answer-' + invite().id">{{
-            'room.invite.step2' | transloco
+            'room.invite.step2' | translate
           }}</label>
           <ng-container *ngTemplateOutlet="answerField" />
         }
@@ -125,7 +125,7 @@ import { QrScanComponent } from '../qr-scan/qr-scan.component';
               type="button"
               data-test="scan"
               icon="pi pi-camera"
-              [label]="'room.scan.button' | transloco"
+              [label]="'room.scan.button' | translate"
               size="small"
               severity="secondary"
               (click)="scanning.set(true)"
@@ -135,17 +135,17 @@ import { QrScanComponent } from '../qr-scan/qr-scan.component';
             pTextarea
             rows="3"
             [id]="'answer-' + invite().id"
-            [placeholder]="'room.invite.answerPlaceholder' | transloco"
+            [placeholder]="'room.invite.answerPlaceholder' | translate"
             [(ngModel)]="answer"
           ></textarea>
         </ng-template>
         @if (invite().state === 'connecting') {
           <p-message severity="info" size="small" variant="simple">{{
-            'room.invite.connecting' | transloco
+            'room.invite.connecting' | translate
           }}</p-message>
         } @else if (invite().state === 'failed') {
           <p-message severity="error" size="small" variant="simple">{{
-            'room.invite.failed' | transloco
+            'room.invite.failed' | translate
           }}</p-message>
           @if (error()) {
             <p-message severity="warn" size="small" variant="simple">{{
@@ -156,14 +156,14 @@ import { QrScanComponent } from '../qr-scan/qr-scan.component';
             @if (!invite().relay) {
               <p-button
                 icon="pi pi-sitemap"
-                [label]="'room.invite.relay' | transloco"
+                [label]="'room.invite.relay' | translate"
                 size="small"
                 (onClick)="retry(true)"
               />
             }
             <p-button
               icon="pi pi-refresh"
-              [label]="'room.invite.retry' | transloco"
+              [label]="'room.invite.retry' | translate"
               size="small"
               [severity]="invite().relay ? 'primary' : 'secondary'"
               (onClick)="retry()"
@@ -176,7 +176,7 @@ import { QrScanComponent } from '../qr-scan/qr-scan.component';
         }
         <div class="actions end">
           <p-button
-            [label]="'room.invite.cancel' | transloco"
+            [label]="'room.invite.cancel' | translate"
             severity="secondary"
             [text]="true"
             size="small"
@@ -184,7 +184,7 @@ import { QrScanComponent } from '../qr-scan/qr-scan.component';
           />
           <p-button
             icon="pi pi-link"
-            [label]="'room.invite.accept' | transloco"
+            [label]="'room.invite.accept' | translate"
             size="small"
             [loading]="connecting()"
             [disabled]="!answer().trim()"

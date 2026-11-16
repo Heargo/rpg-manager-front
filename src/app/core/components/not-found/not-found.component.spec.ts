@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslocoService } from '@jsverse/transloco';
+import { TranslateService } from '@ngx-translate/core';
 import { TEST_PROVIDERS } from '../../../../testing/test-providers';
 import { NotFoundComponent } from './not-found.component';
 
@@ -18,7 +18,7 @@ describe('NotFoundComponent', () => {
 
     expect(title()).toBe('Page not found');
 
-    TestBed.inject(TranslocoService).setActiveLang('fr');
+    TestBed.inject(TranslateService).use('fr');
     await fixture.whenStable();
 
     expect(title()).toBe('Page introuvable');

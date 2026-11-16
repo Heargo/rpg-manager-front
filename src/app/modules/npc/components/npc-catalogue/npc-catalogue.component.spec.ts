@@ -115,30 +115,21 @@ describe('NpcCatalogueComponent', () => {
     expect(edited).toEqual([goblin]);
   });
 
-  it('offers Show on a hidden NPC and Hide on a shown one, and emits the NPC', async () => {
-    const { fixture, q, component } = await setup();
-    fixture.componentRef.setInput('shownIds', ['n2']);
-    await fixture.whenStable();
-    expect(q('[data-action="show"]')).toHaveLength(2);
-    expect(q('[data-action="hide"]')).toHaveLength(1);
-
-    const shown: Npc[] = [];
-    const hidden: Npc[] = [];
-    component.show.subscribe((n: Npc) => shown.push(n));
-    component.hide.subscribe((n: Npc) => hidden.push(n));
-    q('[data-action="show"]')[0].click();
-    q('[data-action="hide"]')[0].click();
-    await fixture.whenStable();
-    expect(shown).toEqual([goblin]);
-    expect(hidden).toEqual([baker]);
+  it('offers edit, view, duplicate and delete on each NPC, in that order', async () => {
+    const { q } = await setup();
+    const first = q('.actions')[0];
+    const actions = Array.from(first.querySelectorAll('[data-action]')).map((b) => b.getAttribute('data-action'));
+    expect(actions).toEqual(['edit', 'view', 'duplicate', 'delete']);
   });
 
-  it('disables Show on the other NPCs once 4 are shown', async () => {
-    const { fixture, q } = await setup();
-    fixture.componentRef.setInput('shownIds', ['n2', 'a', 'b', 'c']);
+  it('opens the sheet of an NPC from the eye button', async () => {
+    const { fixture, q, component } = await setup();
+    expect(q('[data-action="view"]')).toHaveLength(3);
+
+    const viewed: Npc[] = [];
+    component.view.subscribe((n: Npc) => viewed.push(n));
+    q('[data-action="view"]')[0].click();
     await fixture.whenStable();
-    const buttons = q('[data-action="show"]');
-    expect(buttons).toHaveLength(2);
-    buttons.forEach((b) => expect((b.querySelector('button') ?? b).hasAttribute('disabled')).toBe(true));
+    expect(viewed).toEqual([goblin]);
   });
 });
