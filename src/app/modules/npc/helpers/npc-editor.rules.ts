@@ -250,7 +250,7 @@ type Values = Partial<
 >;
 
 /** A name and a description for an NPC of this kind: a person from a given name, a creature from its noun. */
-function drawNpcTexts(
+export function drawNpcTexts(
   random: RandomSource,
   vocabulary: NpcVocabulary,
   kindId: string,

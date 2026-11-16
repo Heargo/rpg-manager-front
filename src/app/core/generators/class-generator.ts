@@ -115,7 +115,7 @@ function generateTree(
 }
 
 /** A name and a description for a class of this kind, agreeing with the gender of its noun. */
-function classTexts(
+export function classTexts(
   source: RandomSource,
   vocabulary: ClassVocabulary,
   kindId: string,

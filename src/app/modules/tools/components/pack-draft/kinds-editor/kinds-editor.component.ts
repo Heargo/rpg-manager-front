@@ -524,6 +524,7 @@ export class KindsEditorComponent {
     kinds: [],
     tints: [],
     params: [],
+    domainKinds: { npcs: [], skills: [], classes: [] },
   });
   protected readonly suggestions = signal<string[]>([]);
   protected readonly uncovered = signal<string[]>([]);
@@ -575,7 +576,9 @@ export class KindsEditorComponent {
   }
 
   protected issuesOf(id: string): DraftIssue[] {
-    return id ? this.issues().filter((issue) => issue.kind === id) : [];
+    return id
+      ? this.issues().filter((issue) => issue.kind === id && !issue.domain)
+      : [];
   }
 
   protected invalidId(id: string): boolean {

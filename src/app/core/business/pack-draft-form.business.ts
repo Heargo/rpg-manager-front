@@ -1,5 +1,14 @@
 import { inject, Injectable } from '@angular/core';
+import { drawNpcTexts } from '../../modules/npc/helpers/npc-editor.rules';
+import { validateClassWordList } from '../generators/class-word-list';
+import { buildClassVocabulary } from '../generators/class-vocabulary';
+import { classTexts } from '../generators/class-generator';
 import { validateCommonTexts } from '../generators/common-texts';
+import { buildNpcVocabulary } from '../generators/npc-vocabulary';
+import { validateNpcWordList } from '../generators/npc-word-list';
+import { buildSkillVocabulary } from '../generators/skill-vocabulary';
+import { skillTexts } from '../generators/skill-generator';
+import { validateSkillWordList } from '../generators/skill-word-list';
 import { generateItem } from '../generators/item-generator';
 import {
   buildItemVocabulary,
@@ -11,6 +20,11 @@ import { ItemDraft, ITEM_RARITIES, ItemRarity } from '../models/item';
 import { KindKey } from '../packs/kind-label';
 import { validatePack } from '../packs/pack';
 import { buildPack, PackDraft } from '../packs/pack-draft';
+import {
+  domainKindsOf,
+  STRUCTURED_DOMAINS,
+  StructuredDomain,
+} from '../packs/pack-draft-edits';
 import { PooledSource } from '../packs/pooled-domain';
 import { LanguageBusiness } from './language.business';
 import {
@@ -25,6 +39,14 @@ export interface KnownKeys {
   kinds: KindKey[];
   tints: string[];
   params: string[];
+  /** The kinds of the NPC, skill and class trees, with their first noun. */
+  domainKinds: Record<StructuredDomain, KindKey[]>;
+}
+
+/** One draw of an NPC, skill or class kind in the preview. */
+export interface DomainPreview {
+  name: string;
+  description: string;
 }
 
 /** A validation message of the draft, with the field it concerns. */
@@ -35,7 +57,21 @@ export interface DraftIssue {
   tint?: string;
   param?: string;
   rarity?: ItemRarity;
+  /** Set on a message about the NPC, skill or class domain (its `kind` is a kind of that domain). */
+  domain?: StructuredDomain;
 }
+
+const FIELDS = {
+  npcs: 'npcKinds',
+  skills: 'skillKinds',
+  classes: 'classKinds',
+} as const;
+
+const WORD_LIST_VALIDATORS = {
+  npcs: validateNpcWordList,
+  skills: validateSkillWordList,
+  classes: validateClassWordList,
+} as const;
 
 type Json = Record<string, unknown>;
 
@@ -82,6 +118,12 @@ function fieldOf(
   return field;
 }
 
+/** The domain a manifest message is about (`domains.npcs.kinds.…`), when it is one of the structured ones. */
+function domainOf(message: string): Pick<DraftIssue, 'domain'> {
+  const domain = /^domains\.(npcs|skills|classes)\b/.exec(message);
+  return domain ? { domain: domain[1] as StructuredDomain } : {};
+}
+
 /** What the pack form needs beyond editing the draft: known keys, sprite coverage, previews and field-level issues. */
 @Injectable({ providedIn: 'root' })
 export class PackDraftFormBusiness {
@@ -103,7 +145,21 @@ export class PackDraftFormBusiness {
       ...installed.kinds,
       ...Object.keys(draft?.kinds ?? {}),
     ]);
+    const domainKinds = {} as Record<StructuredDomain, KindKey[]>;
+    for (const domain of STRUCTURED_DOMAINS) {
+      const domainNouns = new Map(installed.domainNouns[domain]);
+      for (const [id, noun] of firstNouns(draft?.generators[domain]))
+        domainNouns.set(id, noun);
+      const domainIds = new Set([
+        ...installed.domainKinds[domain],
+        ...(draft ? Object.keys(domainKindsOf(draft, domain)) : []),
+      ]);
+      domainKinds[domain] = [...domainIds].map((id) =>
+        domainNouns.has(id) ? { id, noun: domainNouns.get(id) } : { id },
+      );
+    }
     return {
+      domainKinds,
       kinds: [...ids].map((id) =>
         nouns.has(id) ? { id, noun: nouns.get(id) } : { id },
       ),
@@ -164,7 +220,20 @@ export class PackDraftFormBusiness {
     const issues: DraftIssue[] = [];
     const add = (level: DraftIssue['level'], messages: readonly string[]) => {
       for (const message of messages)
-        issues.push({ level, message, ...fieldOf(message) });
+        issues.push({
+          level,
+          message,
+          ...fieldOf(message),
+          ...domainOf(message),
+        });
+    };
+    const addFor = (
+      domain: StructuredDomain,
+      level: DraftIssue['level'],
+      messages: readonly string[],
+    ) => {
+      for (const message of messages)
+        issues.push({ level, message, ...fieldOf(message), domain });
     };
     const { manifest } = buildPack(draft);
     const pack = validatePack(manifest);
@@ -178,11 +247,54 @@ export class PackDraftFormBusiness {
       if (!list.ok) add('error', list.errors);
       else add('warning', list.warnings);
     }
+    for (const domain of STRUCTURED_DOMAINS) {
+      const file = draft.generators[domain];
+      if (!isRecord(file)) continue;
+      const known = await this.knownKeys(draft);
+      const list = WORD_LIST_VALIDATORS[domain](file, known.params);
+      if (!list.ok) addFor(domain, 'error', list.errors);
+      else addFor(domain, 'warning', list.warnings);
+    }
     if (draft.common !== undefined) {
       const common = validateCommonTexts(draft.common);
       if (!common.ok) add('error', common.errors);
     }
     return issues;
+  }
+
+  /** Draws `count` names and descriptions of a kind of the NPC, skill or class tree, with the draft plus the Base of its language. */
+  async previewDomain(
+    draft: PackDraft,
+    domain: StructuredDomain,
+    kind: string,
+    count = 3,
+  ): Promise<DomainPreview[]> {
+    const sources = await this.domainSources(draft, domain);
+    const random = seededRandomSource(`${draft.id}:${domain}:${kind}`);
+    const draw = (one: () => DomainPreview) =>
+      Array.from({ length: count }, one);
+    if (domain === 'npcs') {
+      const vocabulary = buildNpcVocabulary(sources);
+      const info = vocabulary.kind(kind);
+      if (
+        !info ||
+        (info.person
+          ? vocabulary.given().length === 0
+          : vocabulary.nouns(kind).length === 0)
+      )
+        return [];
+      return draw(() => drawNpcTexts(random, vocabulary, kind));
+    }
+    if (domain === 'skills') {
+      const vocabulary = buildSkillVocabulary(sources);
+      if (!vocabulary.kind(kind) || vocabulary.nouns(kind).length === 0)
+        return [];
+      return draw(() => skillTexts(random, vocabulary, kind));
+    }
+    const vocabulary = buildClassVocabulary(sources);
+    if (!vocabulary.kind(kind) || vocabulary.nouns(kind).length === 0)
+      return [];
+    return draw(() => classTexts(random, vocabulary, kind));
   }
 
   // --- the installed packs ----------------------------------------------------------------------------------
@@ -217,6 +329,8 @@ export class PackDraftFormBusiness {
       tints: [],
       nouns: new Map(),
       params: [],
+      domainKinds: { npcs: [], skills: [], classes: [] },
+      domainNouns: { npcs: new Map(), skills: new Map(), classes: new Map() },
     };
     for (const pack of installed) {
       for (const [id, kind] of Object.entries(pack.kinds)) {
@@ -224,6 +338,10 @@ export class PackDraftFormBusiness {
         if (kind.parent && !result.parents.has(id))
           result.parents.set(id, kind.parent);
       }
+      for (const domain of STRUCTURED_DOMAINS)
+        result.domainKinds[domain].push(
+          ...Object.keys(pack[FIELDS[domain]] ?? {}),
+        );
       result.tints.push(...Object.keys(pack.tints));
       for (const sprite of pack.sprites)
         if (sprite.domain === 'items') result.spriteKinds.push(...sprite.kinds);
@@ -246,8 +364,80 @@ export class PackDraftFormBusiness {
         for (const [id, noun] of firstNouns(list))
           if (!result.nouns.has(id)) result.nouns.set(id, noun);
       }
+      for (const domain of STRUCTURED_DOMAINS) {
+        if (!pack.generators[domain]) continue;
+        const list = await this.packs
+          .wordList(domain, pack.id)
+          .catch(() => undefined);
+        for (const [id, noun] of firstNouns(list))
+          if (!result.domainNouns[domain].has(id))
+            result.domainNouns[domain].set(id, noun);
+      }
     }
     return result;
+  }
+
+  /** The sources of a domain's vocabulary: the Base of the draft's language, then the draft. */
+  private async domainSources(
+    draft: PackDraft,
+    domain: StructuredDomain,
+  ): Promise<PooledSource[]> {
+    await this.packs.load();
+    const language =
+      draft.details.language ?? packLanguageOf(this.language.$language());
+    const baseId = basePackId(language);
+    const base = this.packs.$installed().find((pack) => pack.id === baseId);
+    const validate = WORD_LIST_VALIDATORS[domain] as (json: unknown) => {
+      ok: boolean;
+      value?: unknown;
+    };
+    const sources: PooledSource[] = [];
+    if (base) {
+      const source: PooledSource = {
+        packId: base.id,
+        isBase: true,
+        language,
+        kinds: base[FIELDS[domain]] as PooledSource['kinds'],
+      };
+      const list = base.generators[domain]
+        ? await this.packs.wordList(domain, base.id).catch(() => undefined)
+        : undefined;
+      const valid = list === undefined ? undefined : validate(list);
+      if (valid?.ok) {
+        // A kind the draft gives texts for is previewed with the draft's, not with the Base's on top of them.
+        const file = valid.value as Json;
+        const own = draft.generators[domain];
+        const ownKinds =
+          isRecord(own) && isRecord(own['kinds']) ? own['kinds'] : {};
+        const kinds = Object.fromEntries(
+          Object.entries(isRecord(file['kinds']) ? file['kinds'] : {}).filter(
+            ([id]) => !(id in ownKinds),
+          ),
+        );
+        source.texts = { ...file, kinds } as unknown as PooledSource['texts'];
+      }
+      if (base.common) {
+        const common = validateCommonTexts(
+          await this.packs.commonTexts(base.id).catch(() => undefined),
+        );
+        if (common.ok && common.value.params)
+          source.params = common.value.params;
+      }
+      sources.push(source);
+    }
+    const own: PooledSource = {
+      packId: draft.details.id || draft.id,
+      isBase: false,
+      language,
+      kinds: domainKindsOf(draft, domain) as PooledSource['kinds'],
+    };
+    const file = draft.generators[domain];
+    const checked = isRecord(file) ? validate(file) : undefined;
+    if (checked?.ok) own.texts = checked.value as PooledSource['texts'];
+    const params = paramsOf(draft.common);
+    if (Object.keys(params).length > 0) own.params = params;
+    sources.push(own);
+    return sources;
   }
 
   /** The pooled vocabulary of the draft and the Base of its language. */
@@ -321,4 +511,6 @@ interface Installed {
   tints: string[];
   nouns: Map<string, string>;
   params: string[];
+  domainKinds: Record<StructuredDomain, string[]>;
+  domainNouns: Record<StructuredDomain, Map<string, string>>;
 }

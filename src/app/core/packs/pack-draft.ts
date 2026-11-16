@@ -1,5 +1,7 @@
 import {
+  ClassKindDef,
   ItemKindDef,
+  NpcKindDef,
   Pack,
   PackDomains,
   PackTint,
@@ -8,6 +10,7 @@ import {
   PackGenerator,
   PackLanguage,
   PackSprite,
+  SkillKindDef,
   SpriteKind,
 } from './pack';
 
@@ -44,6 +47,10 @@ export interface PackDraft {
   common?: unknown;
   /** The pack's own items kinds. */
   kinds: Record<string, ItemKindDef>;
+  /** The pack's own NPC, skill and class kinds. */
+  npcKinds?: Record<string, NpcKindDef>;
+  skillKinds?: Record<string, SkillKindDef>;
+  classKinds?: Record<string, ClassKindDef>;
   tints: Record<string, PackTint>;
   sprites: DraftSprite[];
 }
@@ -93,6 +100,15 @@ export function buildPack(draft: PackDraft): {
   if (draft.common !== undefined) files.set(COMMON_PATH, draft.common);
   if (Object.keys(draft.kinds).length)
     domains.items = { ...domains.items, kinds: draft.kinds };
+  for (const [domain, field] of [
+    ['npcs', 'npcKinds'],
+    ['skills', 'skillKinds'],
+    ['classes', 'classKinds'],
+  ] as const) {
+    const kinds = draft[field];
+    if (kinds && Object.keys(kinds).length)
+      domains[domain] = { ...domains[domain], kinds } as never;
+  }
   const sprites: PackSprite[] = draft.sprites.map((sprite) => {
     const image = `sprites/${sprite.id}.png`;
     files.set(image, sprite.image);

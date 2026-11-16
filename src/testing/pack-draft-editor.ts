@@ -2,7 +2,10 @@ import { Type } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { IDBFactory } from 'fake-indexeddb';
 import baseEnCommon from '../../public/packs/base-en/generators/common.json';
+import baseEnClasses from '../../public/packs/base-en/generators/classes.json';
 import baseEnItems from '../../public/packs/base-en/generators/items.json';
+import baseEnNpcs from '../../public/packs/base-en/generators/npcs.json';
+import baseEnSkills from '../../public/packs/base-en/generators/skills.json';
 import { PackDraft } from '../app/core/packs/pack-draft';
 import { provideBasePack } from './base-pack';
 import { TEST_PROVIDERS } from './test-providers';
@@ -40,7 +43,13 @@ export function draftOf(over: Record<string, unknown> = {}, ...rest: [language?:
  * Renders a pack draft child editor (`draft` input, `changed` output, optional `issues` input). Every emitted draft is fed
  * back as the new `draft`, like the page container does; `last()` is the latest one emitted.
  */
-export async function renderEditor(component: Type<unknown>, draft: PackDraft, issues: unknown[] = []) {
+export async function renderEditor(
+  component: Type<unknown>,
+  draft: PackDraft,
+  issues: unknown[] = [],
+  /** Other inputs of the editor, such as the `domain` of a domain editor. */
+  inputs: Record<string, unknown> = {},
+) {
   globalThis.indexedDB = new IDBFactory();
   TestBed.configureTestingModule({
     imports: [component],
@@ -49,6 +58,9 @@ export async function renderEditor(component: Type<unknown>, draft: PackDraft, i
       provideBasePack({
         'packs/base-en/generators/items.json': baseEnItems,
         'packs/base-en/generators/common.json': baseEnCommon,
+        'packs/base-en/generators/npcs.json': baseEnNpcs,
+        'packs/base-en/generators/skills.json': baseEnSkills,
+        'packs/base-en/generators/classes.json': baseEnClasses,
       }),
     ],
   });
@@ -56,6 +68,7 @@ export async function renderEditor(component: Type<unknown>, draft: PackDraft, i
   const emitted: PackDraft[] = [];
   fixture.componentRef.setInput('draft', draft);
   fixture.componentRef.setInput('issues', issues);
+  for (const [name, value] of Object.entries(inputs)) fixture.componentRef.setInput(name, value);
   fixture.componentInstance.changed.subscribe((next: PackDraft) => {
     emitted.push(next);
     fixture.componentRef.setInput('draft', next);

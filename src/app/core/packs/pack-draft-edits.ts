@@ -7,7 +7,7 @@ import {
   Noun,
   WORD_LIST_VERSION,
 } from '../generators/word-list';
-import { GradientStop, ItemKindDef } from './pack';
+import { GradientStop, ItemKindDef, PackGenerator } from './pack';
 import { PackDraft } from './pack-draft';
 
 type Json = Record<string, unknown>;
@@ -65,9 +65,13 @@ function setIn(
  * Applies `edit` to a copy of the items word list (`{ version: 2, … }`). A draft with no language has no texts, so it
  * is returned as it is. A list that ends up empty is kept as `{ version }` if there was one, and not created otherwise.
  */
-function editItems(draft: PackDraft, edit: (list: Json) => void): PackDraft {
+function editList(
+  draft: PackDraft,
+  generator: PackGenerator,
+  edit: (list: Json) => void,
+): PackDraft {
   if (isNeutral(draft)) return draft;
-  const existing = draft.generators.items;
+  const existing = draft.generators[generator];
   const list: Json = isRecord(existing)
     ? { ...existing }
     : { version: WORD_LIST_VERSION };
@@ -77,8 +81,11 @@ function editItems(draft: PackDraft, edit: (list: Json) => void): PackDraft {
     Object.keys(list).every((key) => key === 'version')
   )
     return draft;
-  return { ...draft, generators: { ...draft.generators, items: list } };
+  return { ...draft, generators: { ...draft.generators, [generator]: list } };
 }
+
+const editItems = (draft: PackDraft, edit: (list: Json) => void): PackDraft =>
+  editList(draft, 'items', edit);
 
 // --- kinds -----------------------------------------------------------------------------------------------
 
@@ -428,4 +435,180 @@ export function commonWordsOf(draft: PackDraft): {
     adjectives: (items['adjectives'] as PerRarity<Adjective> | undefined) ?? {},
     suffixes: (items['suffixes'] as PerRarity<string> | undefined) ?? {},
   };
+}
+
+// --- the NPC, skill and class domains --------------------------------------------------------------------
+
+/** The domains with a structured section besides items. */
+export type StructuredDomain = 'npcs' | 'skills' | 'classes';
+
+export const STRUCTURED_DOMAINS: readonly StructuredDomain[] = [
+  'npcs',
+  'skills',
+  'classes',
+];
+
+const KIND_FIELD = {
+  npcs: 'npcKinds',
+  skills: 'skillKinds',
+  classes: 'classKinds',
+} as const;
+
+/** The fields of a domain's kind (parent included), as the draft stores them. */
+export type DomainKindFields = Record<string, unknown>;
+
+/** The kinds the draft declares for a domain. */
+export function domainKindsOf(
+  draft: PackDraft,
+  domain: StructuredDomain,
+): Record<string, DomainKindFields> {
+  return (draft[KIND_FIELD[domain]] ?? {}) as Record<string, DomainKindFields>;
+}
+
+function withDomainKinds(
+  draft: PackDraft,
+  domain: StructuredDomain,
+  kinds: Record<string, DomainKindFields>,
+): PackDraft {
+  return { ...draft, [KIND_FIELD[domain]]: kinds } as PackDraft;
+}
+
+/** Sets the given fields of a domain kind (creating it); a field given as `undefined` is cleared. */
+export function setDomainKind(
+  draft: PackDraft,
+  domain: StructuredDomain,
+  id: string,
+  patch: DomainKindFields,
+): PackDraft {
+  const kinds = domainKindsOf(draft, domain);
+  const kind = assign(kinds[id] ?? {}, patch) ?? {};
+  return withDomainKinds(draft, domain, { ...kinds, [id]: kind });
+}
+
+/** Renames a domain kind, and follows it in the parents, its texts and, for a skill kind, the kinds classes favour. */
+export function renameDomainKind(
+  draft: PackDraft,
+  domain: StructuredDomain,
+  from: string,
+  to: string,
+): PackDraft {
+  const own = domainKindsOf(draft, domain);
+  if (from === to || !(from in own) || to in own) return draft;
+  const kinds: Record<string, DomainKindFields> = {};
+  for (const [id, kind] of Object.entries(own)) {
+    const moved = kind['parent'] === from ? { ...kind, parent: to } : kind;
+    kinds[id === from ? to : id] = moved;
+  }
+  let renamed = withDomainKinds(draft, domain, kinds);
+  if (domain === 'skills' && renamed.classKinds) {
+    const classKinds = Object.fromEntries(
+      Object.entries(renamed.classKinds).map(([id, kind]) => [
+        id,
+        Array.isArray(kind.skills)
+          ? {
+              ...kind,
+              skills: kind.skills.map((skill) => (skill === from ? to : skill)),
+            }
+          : kind,
+      ]),
+    );
+    renamed = { ...renamed, classKinds };
+  }
+  const texts = draft.generators[domain];
+  const held = isRecord(texts) ? texts['kinds'] : undefined;
+  if (!isRecord(held) || !(from in held)) return renamed;
+  return editList(renamed, domain, (list) => {
+    const moved: Json = {};
+    for (const [id, value] of Object.entries(list['kinds'] as Json))
+      moved[id === from ? to : id] = value;
+    list['kinds'] = moved;
+  });
+}
+
+/** Removes a domain kind and its texts. */
+export function removeDomainKind(
+  draft: PackDraft,
+  domain: StructuredDomain,
+  id: string,
+): PackDraft {
+  const { [id]: _removed, ...kinds } = domainKindsOf(draft, domain);
+  return editList(withDomainKinds(draft, domain, kinds), domain, (list) =>
+    setIn(list, 'kinds', id, undefined),
+  );
+}
+
+/** The texts of a domain kind. */
+export interface DomainKindTexts {
+  nouns?: Noun[];
+  descriptions?: string[];
+  adjectives?: Adjective[];
+  names?: string[];
+}
+
+/** Sets the texts of a domain kind; each field given replaces the whole field, and an empty one is removed. */
+export function setDomainKindTexts(
+  draft: PackDraft,
+  domain: StructuredDomain,
+  id: string,
+  texts: DomainKindTexts,
+): PackDraft {
+  return editList(draft, domain, (list) => {
+    const current =
+      isRecord(list['kinds']) && isRecord(list['kinds'][id])
+        ? (list['kinds'][id] as Json)
+        : {};
+    const patch: Json = {};
+    for (const field of [
+      'nouns',
+      'descriptions',
+      'adjectives',
+      'names',
+    ] as const)
+      if (field in texts)
+        patch[field] = listOrNothing(texts[field] as unknown[] | undefined);
+    setIn(list, 'kinds', id, assign(current, patch));
+  });
+}
+
+/** Sets the top-level lists of a domain's language file; each list given replaces the whole list, and an empty one is removed. */
+export function setDomainTexts(
+  draft: PackDraft,
+  domain: StructuredDomain,
+  top: Record<string, unknown[] | undefined>,
+): PackDraft {
+  return editList(draft, domain, (list) => {
+    for (const [name, entries] of Object.entries(top)) {
+      const next = listOrNothing(entries);
+      if (next) list[name] = next;
+      else delete list[name];
+    }
+  });
+}
+
+/** The texts of a domain kind in the draft's language file (empty when there are none). */
+export function domainKindTextsOf(
+  draft: PackDraft,
+  domain: StructuredDomain,
+  id: string,
+): Required<DomainKindTexts> {
+  const file = draft.generators[domain];
+  const kinds = isRecord(file) && isRecord(file['kinds']) ? file['kinds'] : {};
+  const texts = isRecord(kinds[id]) ? (kinds[id] as Json) : {};
+  return {
+    nouns: (texts['nouns'] as Noun[] | undefined) ?? [],
+    descriptions: (texts['descriptions'] as string[] | undefined) ?? [],
+    adjectives: (texts['adjectives'] as Adjective[] | undefined) ?? [],
+    names: (texts['names'] as string[] | undefined) ?? [],
+  };
+}
+
+/** A top-level list of a domain's language file (empty when there is none). */
+export function domainTopOf<T = unknown>(
+  draft: PackDraft,
+  domain: StructuredDomain,
+  name: string,
+): T[] {
+  const file = draft.generators[domain];
+  const list = isRecord(file) ? file[name] : undefined;
+  return Array.isArray(list) ? (list as T[]) : [];
 }

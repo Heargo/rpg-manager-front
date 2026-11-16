@@ -1673,7 +1673,7 @@
       "license": "License",
       "licenseUrl": "License link",
       "homepage": "Home page (optional)",
-      "listsIntro": "Build the pack's items with the forms: kinds, tints and shared params. NPCs, skills and classes are still JSON word lists: paste or import one, or start from the Base of the pack's language. The raw JSON of the items and params is under Advanced. An empty list is left out of the pack.",
+      "listsIntro": "Build the pack's items, NPCs, skills and classes with the forms: kinds, language lists, tints and shared params. The raw JSON of each file is under Advanced: import, export or start from the Base of the pack's language. An empty list is left out of the pack.",
       "importFile": "Import a file",
       "copyBase": "Copy Base's list",
       "clear": "Clear",
@@ -1767,6 +1767,24 @@
         "addAdjective": "Add adjective",
         "addSuffix": "Add suffix",
         "remove": "Remove"
+      },
+      "domain": {
+        "roles": "Roles",
+        "person": "Person or creature",
+        "personYes": "A person (given name)",
+        "personNo": "A creature (named from its nouns)",
+        "effect": "Effect",
+        "skills": "Favoured skill kinds",
+        "adjectives": "Adjectives",
+        "namesHint": "One per line, with {noun}, {adjective}, {given}, {epithet} or {suffix} as the domain allows.",
+        "textsTitle": "Language lists",
+        "top": {
+          "given": "Given names",
+          "epithets": "Epithets",
+          "templates": "Name templates",
+          "adjectives": "Adjectives",
+          "suffixes": "Suffixes"
+        }
       }
     },
     "createdHere": "Created on this device",

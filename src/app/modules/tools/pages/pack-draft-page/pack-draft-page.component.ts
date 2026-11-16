@@ -36,6 +36,8 @@ import {
   PackDraftFormBusiness,
 } from '../../../../core/business/pack-draft-form.business';
 import { CommonWordsEditorComponent } from '../../components/pack-draft/common-words-editor/common-words-editor.component';
+import { DomainKindsEditorComponent } from '../../components/pack-draft/domain-kinds-editor/domain-kinds-editor.component';
+import { DomainTextsEditorComponent } from '../../components/pack-draft/domain-texts-editor/domain-texts-editor.component';
 import { KindsEditorComponent } from '../../components/pack-draft/kinds-editor/kinds-editor.component';
 import { ParamsEditorComponent } from '../../components/pack-draft/params-editor/params-editor.component';
 import { TemplatesEditorComponent } from '../../components/pack-draft/templates-editor/templates-editor.component';
@@ -55,6 +57,7 @@ import {
   PackDraft,
   slugifyPackId,
 } from '../../../../core/packs/pack-draft';
+import { STRUCTURED_DOMAINS } from '../../../../core/packs/pack-draft-edits';
 import { SpriteSet } from '../../../sprite/models/sprite-set';
 
 type Tab = 'details' | 'lists' | 'sprites' | 'publish';
@@ -78,6 +81,8 @@ const SPRITES_PER_PAGE = 12;
     MessageModule,
     MultiSelectModule,
     CommonWordsEditorComponent,
+    DomainKindsEditorComponent,
+    DomainTextsEditorComponent,
     KindsEditorComponent,
     PanelModule,
     PaginatorModule,
@@ -263,6 +268,29 @@ const SPRITES_PER_PAGE = 12;
                       />
                     </p-panel>
                   </section>
+                  @for (domain of structuredDomains; track domain) {
+                    <section class="list" [attr.data-test]="'domain-' + domain">
+                      <h3>{{ 'packs.generator.' + domain | translate }}</h3>
+                      <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
+                      <app-domain-kinds-editor
+                        [draft]="current"
+                        [issues]="issues()"
+                        [domain]="domain"
+                        (changed)="edited($event)"
+                      />
+                      @if (current.details.language !== undefined) {
+                        <h4>
+                          {{ 'packs.creator.domain.textsTitle' | translate }}
+                        </h4>
+                        <app-domain-texts-editor
+                          [draft]="current"
+                          [issues]="issues()"
+                          [domain]="domain"
+                          (changed)="edited($event)"
+                        />
+                      }
+                    </section>
+                  }
                   <section class="list">
                     <h3>{{ 'packs.creator.lists.shared' | translate }}</h3>
                     <h4>{{ 'packs.creator.params.title' | translate }}</h4>
@@ -684,6 +712,7 @@ export class PackDraftPageComponent {
   private readonly router = inject(Router);
 
   protected readonly languageOptions = [...SUPPORTED_LANGUAGES];
+  protected readonly structuredDomains = STRUCTURED_DOMAINS;
   protected readonly otherGenerators = PACK_GENERATORS.filter(
     (generator) => generator !== 'items',
   );
@@ -727,6 +756,7 @@ export class PackDraftPageComponent {
     kinds: [],
     tints: [],
     params: [],
+    domainKinds: { npcs: [], skills: [], classes: [] },
   });
   /** The validation messages of the draft, each with the field it is about. */
   protected readonly issues = signal<DraftIssue[]>([]);
@@ -892,9 +922,11 @@ export class PackDraftPageComponent {
     this.change(() => draft);
     this.texts.update((t) => {
       const next = { ...t };
-      const items = draft.generators.items;
-      if (items === undefined) delete next['items'];
-      else next['items'] = this.stringify(items);
+      for (const generator of PACK_GENERATORS) {
+        const value = draft.generators[generator];
+        if (value === undefined) delete next[generator];
+        else next[generator] = this.stringify(value);
+      }
       return next;
     });
     this.commonText.set(this.stringify(draft.common));

@@ -100,7 +100,7 @@ export function generateSkill(
 }
 
 /** A name and a description for a skill of this kind, agreeing with the gender of its noun. */
-function skillTexts(
+export function skillTexts(
   source: RandomSource,
   vocabulary: SkillVocabulary,
   kindId: string,

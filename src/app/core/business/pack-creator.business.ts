@@ -34,7 +34,12 @@ import { StoredPackFile } from '../services/pack-storage.service';
 import { runLimited } from '../helpers/pool';
 import { ImageBusiness } from './image.business';
 import { LanguageBusiness } from './language.business';
-import { basePackId, isBasePack, PackBusiness, PackError } from './pack.business';
+import {
+  basePackId,
+  isBasePack,
+  PackBusiness,
+  PackError,
+} from './pack.business';
 
 /** What a sprite needs besides its image. */
 export type SpriteMeta = Omit<DraftSprite, 'image' | 'materials'>;
@@ -211,7 +216,9 @@ export class PackCreatorBusiness {
     const sprite = draft.sprites.find((s) => s.id === spriteId);
     if (!sprite) throw new PackError([`sprite "${spriteId}" does not exist`]);
     if (sprite.kind === 'colored')
-      throw new PackError([`sprite "${spriteId}": a colored sprite has no materials`]);
+      throw new PackError([
+        `sprite "${spriteId}": a colored sprite has no materials`,
+      ]);
     const updated: DraftSprite = { ...sprite, kind: 'masked', materials };
     await this.saveDraft({
       ...draft,
@@ -305,8 +312,7 @@ export class PackCreatorBusiness {
   async idWarning(id: string): Promise<'official' | 'link' | null> {
     if (!id) return null;
     const entries = await this.packs.registry().catch(() => []);
-    if (isBasePack(id) || entries.some((p) => p.id === id))
-      return 'official';
+    if (isBasePack(id) || entries.some((p) => p.id === id)) return 'official';
     const installed = this.packs.$installed().find((p) => p.id === id);
     return installed?.link ? 'link' : null;
   }
@@ -422,6 +428,9 @@ export class PackCreatorBusiness {
       generators,
       ...(common !== undefined ? { common } : {}),
       kinds: { ...pack.kinds },
+      ...(pack.npcKinds ? { npcKinds: { ...pack.npcKinds } } : {}),
+      ...(pack.skillKinds ? { skillKinds: { ...pack.skillKinds } } : {}),
+      ...(pack.classKinds ? { classKinds: { ...pack.classKinds } } : {}),
       tints: { ...pack.tints },
       sprites,
     };
@@ -515,6 +524,9 @@ export class PackCreatorBusiness {
       generators,
       ...(common !== undefined ? { common } : {}),
       kinds: { ...pack.kinds },
+      ...(pack.npcKinds ? { npcKinds: { ...pack.npcKinds } } : {}),
+      ...(pack.skillKinds ? { skillKinds: { ...pack.skillKinds } } : {}),
+      ...(pack.classKinds ? { classKinds: { ...pack.classKinds } } : {}),
       tints: { ...pack.tints },
       sprites,
     };
