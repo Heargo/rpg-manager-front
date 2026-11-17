@@ -308,6 +308,7 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
     .tag-cell {
       text-align: right;
       white-space: nowrap;
+      padding-inline-end: 1rem;
     }
     .label-cell {
       display: flex;
@@ -322,7 +323,7 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
       width: 35%;
     }
     .tag-col {
-      width: 8rem;
+      width: 9.5rem;
     }
     .words-col {
       width: 6rem;
@@ -332,7 +333,7 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
         width: auto;
       }
       .tag-col {
-        width: 3rem;
+        width: 3.5rem;
       }
       .tag-cell ::ng-deep .p-tag-label {
         display: none;

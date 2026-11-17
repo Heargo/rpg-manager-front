@@ -407,13 +407,6 @@ const SPRITES_PER_PAGE = 12;
               @if (tab() === 'items') {
                 <p class="hint">{{ 'packs.creator.listsIntro' | translate }}</p>
                 <section class="list">
-                  <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
-                  <app-kinds-tree-table
-                    [draft]="current"
-                    [issues]="issues()"
-                    domain="items"
-                    (changed)="edited($event)"
-                  />
                   <h4>{{ 'packs.creator.tints.title' | translate }}</h4>
                   <app-tints-table
                     [draft]="current"
@@ -423,6 +416,13 @@ const SPRITES_PER_PAGE = 12;
                   <app-common-words-editor
                     [draft]="current"
                     [issues]="issues()"
+                    (changed)="edited($event)"
+                  />
+                  <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
+                  <app-kinds-tree-table
+                    [draft]="current"
+                    [issues]="issues()"
+                    domain="items"
                     (changed)="edited($event)"
                   />
                   <p-panel
