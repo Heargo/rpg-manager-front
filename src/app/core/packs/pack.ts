@@ -73,6 +73,16 @@ export interface ClassKindDef {
 export interface PackDomainDef<K = never> {
   kinds?: Record<string, K>;
   texts?: string;
+  /** A JSON list of fixed entries (items, skills, classes) in the pack's language. */
+  content?: string;
+}
+
+/** An attribute the pack's fixed content uses. */
+export interface PackAttribute {
+  id: string;
+  name: string;
+  max?: number;
+  formula?: string;
 }
 
 export interface PackDomains {
@@ -96,6 +106,8 @@ export interface Pack {
   homepage?: string;
   tints?: Record<string, PackTint>;
   domains?: PackDomains;
+  /** The attributes the pack's fixed content uses. */
+  attributes?: PackAttribute[];
   /** The shared language file (params). */
   common?: string;
   sprites: PackSprite[];
@@ -110,6 +122,12 @@ export const textsPath = (
   pack: Pack,
   generator: PackGenerator,
 ): string | undefined => pack.domains?.[generator]?.texts;
+
+/** The path of the fixed content file of a domain in a pack, if it has one. */
+export const contentPath = (
+  pack: Pack,
+  domain: PackDomain,
+): string | undefined => pack.domains?.[domain]?.content;
 
 const ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -140,7 +158,8 @@ function isRelativePath(path: unknown): path is string {
 }
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
-const DOMAIN_KEY_FIELDS = ['kinds', 'texts'] as const;
+const DOMAIN_KEY_FIELDS = ['kinds', 'texts', 'content'] as const;
+const CONTENT_DOMAIN_NAMES: readonly string[] = ['items', 'skills', 'classes'];
 /** The kind schema of each domain. */
 const KIND_SCHEMAS: Record<PackDomain, KindSchema> = {
   items: ITEM_KIND_SCHEMA,
@@ -209,6 +228,8 @@ function validateDomains(
     for (const field of Object.keys(def))
       if (!(DOMAIN_KEY_FIELDS as readonly string[]).includes(field))
         errors.push(`domains.${domain}: unknown field "${field}"`);
+    if (def['content'] !== undefined && !CONTENT_DOMAIN_NAMES.includes(domain))
+      errors.push(`domains.${domain}: unknown field "content"`);
     if (def['kinds'] !== undefined && schema)
       errors.push(...validateKindTree(domain, def['kinds'], schema));
     if (def['texts'] !== undefined) {
@@ -219,8 +240,43 @@ function validateDomains(
           `domains.${domain}.texts must be a relative path inside the pack`,
         );
     }
+    if (def['content'] !== undefined && CONTENT_DOMAIN_NAMES.includes(domain)) {
+      if (neutral)
+        errors.push(`domains.${domain}.content needs a pack with a language`);
+      else if (!isRelativePath(def['content']))
+        errors.push(
+          `domains.${domain}.content must be a relative path inside the pack`,
+        );
+    }
   }
   return known as PackDomains;
+}
+
+function validateAttributes(attributes: unknown, errors: string[]): void {
+  if (!Array.isArray(attributes)) {
+    errors.push('attributes must be a list');
+    return;
+  }
+  const seen = new Set<string>();
+  attributes.forEach((attribute, i) => {
+    const at = `attributes[${i}]`;
+    if (!isObject(attribute)) {
+      errors.push(`${at} must be an object`);
+      return;
+    }
+    const id = attribute['id'];
+    if (typeof id !== 'string' || !ID.test(id))
+      errors.push(`${at}: id must be kebab-case`);
+    else if (seen.has(id)) errors.push(`attributes "${id}": id is used twice`);
+    else seen.add(id);
+    if (!text(attribute['name']))
+      errors.push(`${at}: name is required (a text)`);
+    const max = attribute['max'];
+    if (max !== undefined && (typeof max !== 'number' || !(max >= 1)))
+      errors.push(`${at}: max must be a number, 1 or more`);
+    if (attribute['formula'] !== undefined && !text(attribute['formula']))
+      errors.push(`${at}: formula must be a text`);
+  });
 }
 
 /** Checks a pack manifest read from JSON, listing every problem with the field it concerns. */
@@ -260,6 +316,8 @@ export function validatePack(json: unknown): PackValidation {
     else if (!isRelativePath(json['common']))
       errors.push('common must be a relative path inside the pack');
   }
+  if (json['attributes'] !== undefined)
+    validateAttributes(json['attributes'], errors);
   if (json['tints'] !== undefined) validateTints(json['tints'], errors);
   const domains =
     json['domains'] !== undefined

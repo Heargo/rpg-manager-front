@@ -13,6 +13,11 @@ Dev project: no backward compatibility, the v1 lists `generators/npcs.json`, `sk
 5. **No tints** for these domains: they have no image. Tints stay items only. *(assumed)*
 6. **Pack creator**: structured Kinds sections for the three domains, like Items (IC08/IA02), raw JSON stays as advanced import/export.
 
+7. **Fixed content (user, 2026-11-17).** A pack with a language can ship fixed items, skills and classes: `domains.items|skills|classes.content` is a path to a JSON list, like `texts`. Neutral packs have none.
+8. **Imported copy.** Fixed content is copied into the world's catalogue (on pack activation, and through an "Import from the pack" action), where the GM edits it. Ids are `<packId>:<entryId>`; re-importing updates the untouched copies and leaves the GM's edited ones alone. A class brings the pack skills it references.
+9. **Attributes.** A pack declares the attributes its content uses (`attributes`: id, name, default max and formula). When the world lacks one, the GM chooses for each: map it to an existing attribute, add it to the world, or skip it (its modifiers are dropped).
+10. **Base ships the starter content.** Base FR/EN carry today's starter classes and skills as fixed content, and `starter-classes.ts` goes away.
+
 ## Per domain
 
 ### NPCs
@@ -45,4 +50,4 @@ Where the item vocabulary has domain-free logic (nearest-level lookup, words tha
 - NPC portraits from sprites (`domain: "npcs"`).
 - An NPC kind suggesting gear kinds or a class kind.
 - A kind select in the editors (the GM edits the result; items have none either).
-- Fixed content lists in packs: ticket `05-pack-fixed-content.md`, needs triage.
+- Fixed content lists in packs: tickets 05, 07, 08 (Decisions 7–10).

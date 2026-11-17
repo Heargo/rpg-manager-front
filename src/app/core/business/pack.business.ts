@@ -14,6 +14,7 @@ import {
   PackTint,
   SPRITE_KINDS,
   textsPath,
+  contentPath,
   PACK_GENERATORS,
   SpriteKind,
   validatePack,
@@ -32,6 +33,7 @@ import {
   MAX_PACK_BYTES,
 } from '../packs/pack-files';
 import { resolvePackLink } from '../packs/pack-link';
+import { validatePackContent, CONTENT_DOMAINS } from '../packs/pack-content';
 import { PackRegistryEntry, validateRegistry } from '../packs/pack-registry';
 import { ImageProcessingService } from '../services/image-processing.service';
 import { PackService } from '../services/pack.service';
@@ -479,6 +481,10 @@ export class PackBusiness {
       const path = textsPath(manifest, generator);
       if (path) jsons.add(path);
     }
+    for (const domain of CONTENT_DOMAINS) {
+      const path = contentPath(manifest, domain);
+      if (path) jsons.add(path);
+    }
     if (manifest.common) jsons.add(manifest.common);
 
     const url = (path: string) => `packs/${id}/${path}`;
@@ -563,6 +569,10 @@ export class PackBusiness {
       if (path) lists.set(path, listChecker(generator));
     }
     if (manifest.common) lists.set(manifest.common, commonChecker);
+    for (const domain of CONTENT_DOMAINS) {
+      const path = contentPath(manifest, domain);
+      if (path) lists.set(path, () => []);
+    }
 
     const tasks: (() => Promise<void>)[] = [
       ...[...images].map((path) => async () => {
@@ -606,6 +616,7 @@ export class PackBusiness {
       const problem = checkMaterialsFile(sprite.materials, file.value, dims);
       if (problem) errors.push(problem);
     }
+    errors.push(...this.contentErrors(manifest, files));
     if (size > MAX_PACK_BYTES) errors.push('pack: larger than 20 MB in total');
     if (errors.length) throw new PackError([...new Set(errors)].sort());
 
@@ -618,6 +629,34 @@ export class PackBusiness {
       if (n) counts.sprites[kind] = n;
     }
     return { manifest, source, manifestUrl, size, counts, files };
+  }
+
+  /** The problems of the content files of a pack, each prefixed by its path (cross-file: attributes, pack skills). */
+  private contentErrors(
+    manifest: Pack,
+    files: Map<string, StoredPackFile>,
+  ): string[] {
+    const listOf = (path: string | undefined): unknown => {
+      const file = path ? files.get(path) : undefined;
+      return file?.kind === 'json' ? file.value : undefined;
+    };
+    const skills = listOf(contentPath(manifest, 'skills'));
+    const context = {
+      attributeIds: (manifest.attributes ?? []).map((a) => a.id),
+      attributeNames: (manifest.attributes ?? []).map((a) => a.name),
+      skillIds: (Array.isArray(skills) ? skills : [])
+        .map((s) => (s as { id?: unknown })?.id)
+        .filter((id): id is string => typeof id === 'string'),
+    };
+    const errors: string[] = [];
+    for (const domain of CONTENT_DOMAINS) {
+      const path = contentPath(manifest, domain);
+      const value = listOf(path);
+      if (!path || value === undefined) continue;
+      const result = validatePackContent(domain, value, context);
+      if (!result.ok) errors.push(...result.errors.map((e) => `${path}: ${e}`));
+    }
+    return errors;
   }
 
   /** Refuses an id of an official pack, or already installed from another link (`source` null: created here). */
@@ -763,9 +802,7 @@ export class PackBusiness {
    * The items kinds of a pack and of the Bases (for a kind whose parent lives in another pack), to resolve the
    * type and slot of a kind.
    */
-  async itemKinds(
-    packId: string,
-  ): Promise<{
+  async itemKinds(packId: string): Promise<{
     own: Record<string, ItemKindDef>;
     fallback: Record<string, ItemKindDef>;
   }> {
@@ -797,5 +834,27 @@ export class PackBusiness {
     return this.service.loadJson(
       packFileUrl(`packs/${packId}/pack.json`, path),
     );
+  }
+
+  /** The raw fixed content (a list of entries) of a domain in a pack; rejects when the pack has none. */
+  async content(domain: PackGenerator, packId: string): Promise<unknown[]> {
+    const missing = () =>
+      new Error(`Pack "${packId}" has no ${domain} content`);
+    if (!isBasePack(packId)) {
+      await this.ensureLoaded();
+      const record = this.stored().find((p) => p.id === packId);
+      const path = record && contentPath(record.manifest, domain);
+      const file = path ? await this.storage.getFile(packId, path) : undefined;
+      if (file?.kind !== 'json' || !Array.isArray(file.value)) throw missing();
+      return file.value;
+    }
+    const pack = await this.manifest(packId);
+    const path = contentPath(pack, domain);
+    if (!path) throw missing();
+    const value = await this.service.loadJson(
+      packFileUrl(`packs/${packId}/pack.json`, path),
+    );
+    if (!Array.isArray(value)) throw missing();
+    return value;
   }
 }

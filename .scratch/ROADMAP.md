@@ -284,4 +284,6 @@ Tickets in `generator-kinds/` (GK). User request; shapes assumed from the item s
 | 123 | **GK03** Class generator on kinds (done) | GK02 |
 | 124 | **GK04** Pack creator: NPC, skill and class kinds (done) | GK01–GK03 |
 | 125 | **GK06** User docs: NPC, skill and class kinds (done) | GK01–GK04 |
-| — | **GK05** Packs ship fixed items, skills and classes (needs triage, later) | GK04 |
+| 126 | **GK05** Pack fixed content: format, validation, import rules (done) | GK04 |
+| 127 | **GK07** Pack fixed content reaches the catalogues (GM attribute dialog) | GK05 |
+| 128 | **GK08** Base ships the starter classes and skills | GK07 |
