@@ -136,3 +136,10 @@ Decisions taken for this round (orchestrator, from the feedback and the review):
 - Round 2 followed the user's feedback (readable panel, alignment, parent rows, no table actions, scroll lock) and the review's Must fix (texts tests). Specs edited outside the red step: `pack-draft-page.tabs.spec.ts` (selectors), `pack-draft-domains.spec.ts` (children removed with the parent); both reviewed.
 - Checked: suite 307 files / 3043 tests green (baseline 306 / 2962); build clean; review round 2 ship. Browser (a Base FR duplicate): table alignment and parent rows on desktop; detail and form in FR and EN; at 375 px the drawer is full width with no horizontal scroll and the table shows the Label column only. Three layout bugs found in the browser and fixed: controls 1024 px wide in the drawer (no `.w-full` utility; now `[fluid]`), selects broken by a `display: block` override, table columns overlapping on a phone. No console error.
 - Left (review Consider): no test switches the item rarity selector; the read-only detail reuses the form label "Descriptions (one per line)".
+
+## Follow-up: missing sprite tag (2026-11-17, user request)
+
+- Items rows whose kind is uncovered by the existing coverage rule (`PackDraftFormBusiness.coverage()`: no sprite on the kind or an ancestor, installed packs included; a sprite on a child doesn't cover its parent) show a warn `p-tag` "No sprite" / "Sans sprite" with an image icon and a tooltip, in a last right-aligned column. On a phone the tag shows its icon only. NPCs, skills and classes have no sprites, so no tag.
+- On a Base FR duplicate: 40 of 123 item kinds tagged, 10 of them parents (Equipment, Head, …), consistent with the coverage message.
+- Browser fixes along the way: label column 35% and tag column 8rem (fixed layout had made the label wrap under the toggler, then the tag column 8px); headers hyphenate instead of breaking mid-word; on a phone the label column takes the rest and words only break when they can't fit.
+- Checked: suite 307 files / 3050 tests green; build clean; FR desktop and 375 px, no overflow, no misaligned row.

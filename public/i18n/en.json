@@ -1730,7 +1730,9 @@
         "rarity": "Rarity",
         "rarityHint": "The name templates, adjectives and suffixes below are for this rarity.",
         "nounsAndDescriptions": "Nouns and descriptions",
-        "parentCycle": "A kind cannot be under itself or one of its children."
+        "parentCycle": "A kind cannot be under itself or one of its children.",
+        "noSprite": "No sprite",
+        "noSpriteHint": "No sprite illustrates this kind or any kind above it."
       },
       "tints": {
         "title": "Tints",

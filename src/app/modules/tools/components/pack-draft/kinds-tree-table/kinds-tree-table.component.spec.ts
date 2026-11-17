@@ -418,4 +418,68 @@ describe.each(CASES)('KindsTreeTableComponent on $domain', (c) => {
       expect(doc('kind-new-noun')).toBeNull();
     });
   });
+
+  describe('missing sprite tag', () => {
+    const sprite = (kinds: string[]) => ({
+      id: 's',
+      label: 'S',
+      kinds,
+      kind: 'grayscale',
+      image: new Blob(['x'], { type: 'image/png' }),
+    });
+    const tagged = async (sprites: unknown[], ...rest: [language?: string]) => {
+      const view = await renderEditor(KindsTreeTableComponent, draftOf({ ...c.seed, sprites }, ...rest), [], {
+        domain: c.domain,
+      });
+      const ids = ['folk', 'elder', 'sage', 'other'];
+      await vi.waitFor(() => {
+        view.fixture.detectChanges();
+        // The coverage line shows once the (async) coverage is known and something is uncovered.
+        if (c.domain === 'items' && !(sprites as any[]).some((x) => x.kinds.includes('folk')))
+          expect(view.el.querySelector('[data-test="coverage"]')).not.toBeNull();
+      });
+      await view.fixture.whenStable();
+      view.fixture.detectChanges();
+      return { view, ids, has: (id: string) => view.$(`missing-sprite-${id}`) !== null };
+    };
+
+    if (c.domain === 'items') {
+      it('tags every kind whose chain has no sprite (parents included) and not the covered ones', async () => {
+        const { has } = await tagged([sprite(['elder'])]);
+
+        // elder covers itself and its child sage; folk (its parent) and other have no sprite in their chain.
+        expect([has('folk'), has('elder'), has('sage'), has('other')]).toEqual([true, false, false, true]);
+      });
+
+      it('a sprite on a root covers its whole subtree', async () => {
+        const { has } = await tagged([sprite(['folk', 'other'])]);
+
+        expect([has('folk'), has('elder'), has('sage'), has('other')]).toEqual([false, false, false, false]);
+      });
+
+      it('is a warn p-tag in the last cell of the row', async () => {
+        const { view } = await tagged([]);
+
+        const tag = view.$('missing-sprite-sage')!;
+        expect(tag.tagName.toLowerCase()).toBe('p-tag');
+        const instance = view.fixture.debugElement.query(By.css('[data-test="missing-sprite-sage"]')).componentInstance;
+        const severity = typeof instance.severity === 'function' ? instance.severity() : instance.severity;
+        expect(severity).toBe('warn');
+        const cells = view.$('kind-row-sage')!.querySelectorAll(':scope > td');
+        expect(cells[cells.length - 1].contains(tag)).toBe(true);
+      });
+
+      it('follows the coverage rule for a neutral draft too', async () => {
+        const { has } = await tagged([sprite(['elder'])], undefined);
+
+        expect([has('folk'), has('elder'), has('sage'), has('other')]).toEqual([true, false, false, true]);
+      });
+    } else {
+      it('shows no missing sprite tag in a domain without sprites', async () => {
+        const { view } = await tagged([]);
+
+        expect(view.el.querySelector('[data-test^="missing-sprite-"]')).toBeNull();
+      });
+    }
+  });
 });

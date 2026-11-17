@@ -1730,7 +1730,9 @@
         "rarity": "Rareté",
         "rarityHint": "Les modèles de noms, adjectifs et suffixes ci-dessous valent pour cette rareté.",
         "nounsAndDescriptions": "Noms et descriptions",
-        "parentCycle": "Une catégorie ne peut pas être sous elle-même ni sous un de ses enfants."
+        "parentCycle": "Une catégorie ne peut pas être sous elle-même ni sous un de ses enfants.",
+        "noSprite": "Sans sprite",
+        "noSpriteHint": "Aucun sprite n’illustre cette catégorie ni une catégorie au-dessus."
       },
       "tints": {
         "title": "Teintes",

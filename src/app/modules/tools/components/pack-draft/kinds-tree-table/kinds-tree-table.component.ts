@@ -13,6 +13,8 @@ import { ConfirmationService, TreeNode } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { DrawerModule } from '@openng/optimus-ui/drawer';
 import { MessageModule } from '@openng/optimus-ui/message';
+import { TagModule } from '@openng/optimus-ui/tag';
+import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { TreeTableModule } from '@openng/optimus-ui/treetable';
 import { LanguageBusiness } from '../../../../../core/business/language.business';
 import {
@@ -60,6 +62,8 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
     ButtonModule,
     DrawerModule,
     MessageModule,
+    TagModule,
+    TooltipModule,
     TreeTableModule,
     KindDetailComponent,
     KindFormComponent,
@@ -82,10 +86,15 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
     >
       <ng-template #header>
         <tr>
-          <th>{{ 'packs.creator.kinds.label' | translate }}</th>
+          <th class="label-col">
+            {{ 'packs.creator.kinds.label' | translate }}
+          </th>
           <th class="extra">{{ 'packs.creator.kinds.id' | translate }}</th>
           @for (field of fields(); track field) {
             <th class="extra">{{ fieldLabel(field) | translate }}</th>
+          }
+          @if (domain() === 'items') {
+            <th class="tag-cell tag-col"></th>
           }
         </tr>
       </ng-template>
@@ -104,15 +113,15 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
                 <p-treeTableToggler [rowNode]="rowNode" />
               </span>
               <span data-test="cell-label">{{ row.label }}</span>
-              @for (issue of issuesOf(row.id); track $index) {
-                <p-message
-                  data-test="issue"
-                  size="small"
-                  [severity]="issue.level === 'error' ? 'error' : 'warn'"
-                  >{{ issue.message }}</p-message
-                >
-              }
             </div>
+            @for (issue of issuesOf(row.id); track $index) {
+              <p-message
+                data-test="issue"
+                size="small"
+                [severity]="issue.level === 'error' ? 'error' : 'warn'"
+                >{{ issue.message }}</p-message
+              >
+            }
           </td>
           <td class="extra" data-test="cell-id">{{ row.id }}</td>
           @for (field of fields(); track field) {
@@ -120,11 +129,27 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
               {{ display(field, row.fields[field]) }}
             </td>
           }
+          @if (domain() === 'items') {
+            <td class="tag-cell">
+              @if (uncovered().includes(row.id)) {
+                <p-tag
+                  [attr.data-test]="'missing-sprite-' + row.id"
+                  severity="warn"
+                  icon="pi pi-image"
+                  [value]="'packs.creator.kinds.noSprite' | translate"
+                  [pTooltip]="'packs.creator.kinds.noSpriteHint' | translate"
+                  [attr.aria-label]="
+                    'packs.creator.kinds.noSpriteHint' | translate
+                  "
+                />
+              }
+            </td>
+          }
         </tr>
       </ng-template>
       <ng-template #emptymessage>
         <tr>
-          <td [attr.colspan]="fields().length + 2">
+          <td [attr.colspan]="fields().length + 3">
             {{ 'packs.creator.kinds.empty' | translate }}
           </td>
         </tr>
@@ -239,22 +264,49 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
     .kind-parent > td {
       background: var(--p-content-hover-background);
     }
-    th,
     td {
-      overflow-wrap: anywhere;
+      overflow-wrap: break-word;
+    }
+    th {
+      hyphens: auto;
     }
     @media (max-width: 40rem) {
       .extra {
         display: none;
       }
     }
+    .tag-cell {
+      text-align: right;
+      white-space: nowrap;
+    }
     .label-cell {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: center;
       gap: 0.25rem;
     }
+    .label-cell [data-test='cell-label'] {
+      min-width: 0;
+    }
+    .label-col {
+      width: 35%;
+    }
+    .tag-col {
+      width: 8rem;
+    }
+    @media (max-width: 40rem) {
+      .label-col {
+        width: auto;
+      }
+      .tag-col {
+        width: 3rem;
+      }
+      .tag-cell ::ng-deep .p-tag-label {
+        display: none;
+      }
+    }
     .toggler {
+      flex: none;
       display: inline-flex;
       align-items: center;
     }
