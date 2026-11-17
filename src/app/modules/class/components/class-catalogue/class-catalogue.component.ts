@@ -62,6 +62,15 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
         [label]="'class.catalogue.addDefaults' | translate"
         (click)="addDefaults.emit()"
       ></button>
+      <button
+        pButton
+        type="button"
+        data-action="import-packs"
+        icon="pi pi-download"
+        severity="secondary"
+        [label]="'packImport.import' | translate"
+        (click)="importPacks.emit()"
+      ></button>
     </div>
 
     @if (shown().length) {
@@ -380,6 +389,7 @@ export class ClassCatalogueComponent {
 
   readonly create = output<void>();
   readonly addDefaults = output<void>();
+  readonly importPacks = output<void>();
   readonly edit = output<CharacterClass>();
   readonly duplicate = output<CharacterClass>();
   readonly remove = output<CharacterClass>();

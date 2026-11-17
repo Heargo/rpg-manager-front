@@ -8,7 +8,11 @@ import {
 import { toWorldInfo } from '../helpers/world.factory';
 import { World, WorldRules } from '../models/world';
 import { WorldService } from '../services/world.service';
+import { PackContentImportBusiness } from './pack-content-import.business';
 import { WorldLibraryBusiness } from './world-library.business';
+
+/** The rules were saved but importing the content of a newly activated pack failed. */
+export class PackImportError extends Error {}
 
 /**
  * Host: the world being played, in memory. Changes go through `update()`, one at a time (requests from several
@@ -67,6 +71,7 @@ export class WorldSessionBusiness {
   async saveRules(rules: WorldRules): Promise<World> {
     if (Object.keys(validateWorldRules(rules)).length)
       throw new Error('Invalid world rules');
+    const before = this.world()?.packs ?? [];
     const saved = await this.update((world) => {
       const next = applyWorldRules(world, rules, () => crypto.randomUUID());
       const now = Date.now();
@@ -81,6 +86,16 @@ export class WorldSessionBusiness {
     });
     // Looked up when needed: the character host itself depends on this session.
     this.injector.get(CharacterHostBusiness).publish();
+    const activated = (saved.packs ?? []).filter((id) => !before.includes(id));
+    if (activated.length)
+      // A pack that needs a choice of attributes is left pending: the rules page asks the GM.
+      try {
+        await this.injector
+          .get(PackContentImportBusiness)
+          .importActivated(activated);
+      } catch (error) {
+        throw new PackImportError('Pack import failed', { cause: error });
+      }
     return saved;
   }
 }

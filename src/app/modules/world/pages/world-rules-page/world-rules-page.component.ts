@@ -4,6 +4,7 @@ import {
   computed,
   inject,
   linkedSignal,
+  PendingTasks,
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -23,8 +24,13 @@ import {
   formulaExpression,
 } from '../../../../core/helpers/formula';
 import { MessageLevel } from '../../../../core/models/toast-level';
+import { PackImportFlowBusiness } from '../../business/pack-import-flow.business';
+import { PackAttributeMappingComponent } from '../../components/pack-attribute-mapping/pack-attribute-mapping.component';
 import { RuleFieldsComponent } from '../../components/rule-fields/rule-fields.component';
-import { WorldSessionBusiness } from '../../business/world-session.business';
+import {
+  PackImportError,
+  WorldSessionBusiness,
+} from '../../business/world-session.business';
 import {
   attributeCapError,
   attributeFormulaErrors,
@@ -64,6 +70,7 @@ const PRESETS: readonly (FormulaPreset | 'custom')[] = [
     SelectModule,
     TabsModule,
     RuleFieldsComponent,
+    PackAttributeMappingComponent,
   ],
   templateUrl: './world-rules-page.component.html',
   styleUrl: './world-rules-page.component.scss',
@@ -73,6 +80,8 @@ export class WorldRulesPageComponent {
   private readonly confirmation = inject(ConfirmationService);
   private readonly language = inject(LanguageBusiness);
   private readonly messages = inject(MessageService);
+  protected readonly flow = inject(PackImportFlowBusiness);
+  private readonly pendingTasks = inject(PendingTasks);
 
   protected readonly world = this.session.$world;
   protected readonly attributeMax = ATTRIBUTE_NAME_MAX_LENGTH;
@@ -312,6 +321,8 @@ export class WorldRulesPageComponent {
   protected async save(): Promise<void> {
     if (!this.world() || !this.canSave() || this.saving()) return;
     this.saving.set(true);
+    // Saving may import pack content: the app is busy until then.
+    const done = this.pendingTasks.add();
     try {
       await this.session.saveRules(this.rules());
       this.messages.add({
@@ -319,14 +330,25 @@ export class WorldRulesPageComponent {
         summary: this.language.t('world.rules.saved'),
         life: 2500,
       });
+      this.flow.notifyActivation();
     } catch (error) {
       console.error('Saving the world rules failed', error);
+      const imported = error instanceof PackImportError;
+      if (imported)
+        this.messages.add({
+          severity: MessageLevel.Success,
+          summary: this.language.t('world.rules.saved'),
+          life: 2500,
+        });
       this.messages.add({
         severity: MessageLevel.Error,
-        summary: this.language.t('room.errors.generic'),
+        summary: this.language.t(
+          imported ? 'packImport.failed' : 'room.errors.generic',
+        ),
         life: 4000,
       });
     } finally {
+      done();
       this.saving.set(false);
     }
   }

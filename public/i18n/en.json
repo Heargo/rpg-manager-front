@@ -1789,5 +1789,17 @@
     },
     "createdHere": "Created on this device",
     "editAsDraft": "Edit as a draft"
+  },
+  "packImport": {
+    "import": "Import from the packs",
+    "title": "Attributes the world does not have",
+    "hint": "The packs' content uses these attributes. For each one, map it to an attribute of the world, add it, or skip it.",
+    "attribute": "Pack attribute",
+    "add": "Add to the world",
+    "skip": "Skip",
+    "confirm": "Import",
+    "cancel": "Cancel",
+    "done": "Packs imported: {{added}} added, {{updated}} updated, {{kept}} kept.",
+    "failed": "The packs' content could not be imported."
   }
 }

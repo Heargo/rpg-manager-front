@@ -28,7 +28,9 @@ export interface PackContentContext {
 export type PackContentValidation =
   { ok: true; value: Record<string, any>[] } | { ok: false; errors: string[] };
 
-type Entry = Record<string, any>;
+/** A catalogue entry as the planner reads it. */
+export type PackEntry = Record<string, any>;
+type Entry = PackEntry;
 
 const isObject = (value: unknown): value is Entry =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -309,5 +311,23 @@ export function planPackImport(input: PackImportInput): PackImportPlan {
     kept,
     addAttributes,
     needsChoice,
+  };
+}
+
+/** Writes `written` into `current` by id: replaced where the id exists, appended otherwise; counts both. */
+export function mergeById<T extends { id: string }>(
+  current: readonly T[],
+  written: readonly T[],
+): { entries: T[]; added: number; updated: number } {
+  const byId = new Map(written.map((entry) => [entry.id, entry]));
+  const known = new Set(current.map((entry) => entry.id));
+  const updated = written.filter((entry) => known.has(entry.id)).length;
+  return {
+    entries: [
+      ...current.map((entry) => byId.get(entry.id) ?? entry),
+      ...written.filter((entry) => !known.has(entry.id)),
+    ],
+    added: written.length - updated,
+    updated,
   };
 }

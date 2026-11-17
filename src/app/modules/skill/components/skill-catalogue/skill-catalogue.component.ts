@@ -58,6 +58,15 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
         [label]="'skill.catalogue.create' | translate"
         (click)="create.emit()"
       ></button>
+      <button
+        pButton
+        type="button"
+        data-action="import-packs"
+        icon="pi pi-download"
+        severity="secondary"
+        [label]="'packImport.import' | translate"
+        (click)="importPacks.emit()"
+      ></button>
     </div>
 
     @if (shown().length) {
@@ -200,6 +209,7 @@ export class SkillCatalogueComponent {
   readonly skills = input.required<Skill[]>();
 
   readonly create = output<void>();
+  readonly importPacks = output<void>();
   readonly edit = output<Skill>();
   readonly duplicate = output<Skill>();
   readonly remove = output<Skill>();

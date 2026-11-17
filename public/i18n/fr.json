@@ -1789,5 +1789,17 @@
     },
     "createdHere": "Créé sur cet appareil",
     "editAsDraft": "Modifier comme brouillon"
+  },
+  "packImport": {
+    "import": "Importer depuis les packs",
+    "title": "Attributs absents du monde",
+    "hint": "Le contenu des packs utilise ces attributs. Pour chacun, associez-le à un attribut du monde, ajoutez-le ou ignorez-le.",
+    "attribute": "Attribut du pack",
+    "add": "Ajouter au monde",
+    "skip": "Ignorer",
+    "confirm": "Importer",
+    "cancel": "Annuler",
+    "done": "Packs importés : {{added}} ajouté(s), {{updated}} mis à jour, {{kept}} conservé(s).",
+    "failed": "Le contenu des packs n'a pas pu être importé."
   }
 }

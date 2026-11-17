@@ -9,6 +9,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageModule } from '@openng/optimus-ui/message';
+import { PackImportFlowBusiness } from '../../../world/business/pack-import-flow.business';
+import { PackAttributeMappingComponent } from '../../../world/components/pack-attribute-mapping/pack-attribute-mapping.component';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { ClassCatalogueBusiness } from '../../business/class-catalogue.business';
@@ -25,6 +27,7 @@ import { CharacterClass } from '../../models/class';
     TranslatePipe,
     ButtonModule,
     MessageModule,
+    PackAttributeMappingComponent,
     ClassCatalogueComponent,
     ClassEditorComponent,
   ],
@@ -59,16 +62,26 @@ import { CharacterClass } from '../../models/class';
             (save)="save($event)"
           />
         } @else {
-          <app-class-catalogue
-            [classes]="world.classes"
-            [skills]="world.skills"
-            [items]="world.items"
-            (create)="editing.set('new')"
-            (addDefaults)="run(catalogue.addDefaults())"
-            (edit)="editing.set($event)"
-            (duplicate)="run(catalogue.duplicate($event.id))"
-            (remove)="run(catalogue.remove($event.id))"
-          />
+          @if (flow.$pending(); as pending) {
+            <app-pack-attribute-mapping
+              [missing]="pending.missing"
+              [attributes]="world.attributes"
+              (confirmed)="flow.confirm($event)"
+              (cancelled)="flow.cancel()"
+            />
+          } @else {
+            <app-class-catalogue
+              (importPacks)="flow.run()"
+              [classes]="world.classes"
+              [skills]="world.skills"
+              [items]="world.items"
+              (create)="editing.set('new')"
+              (addDefaults)="run(catalogue.addDefaults())"
+              (edit)="editing.set($event)"
+              (duplicate)="run(catalogue.duplicate($event.id))"
+              (remove)="run(catalogue.remove($event.id))"
+            />
+          }
         }
       } @else {
         <p-message severity="info">{{
@@ -99,6 +112,7 @@ import { CharacterClass } from '../../models/class';
   `,
 })
 export class ClassCataloguePageComponent {
+  protected readonly flow = inject(PackImportFlowBusiness);
   protected readonly catalogue = inject(ClassCatalogueBusiness);
   protected readonly tool = !!inject(ActivatedRoute).snapshot.data['tool'];
   protected readonly editing = signal<CharacterClass | 'new' | null>(null);

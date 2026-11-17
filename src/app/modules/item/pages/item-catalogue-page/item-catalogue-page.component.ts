@@ -12,6 +12,8 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
+import { PackImportFlowBusiness } from '../../../world/business/pack-import-flow.business';
+import { PackAttributeMappingComponent } from '../../../world/components/pack-attribute-mapping/pack-attribute-mapping.component';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { RoomBusiness } from '../../../room/business/room.business';
@@ -30,6 +32,7 @@ import { ItemCatalogueComponent } from '../../components/item-catalogue/item-cat
     ButtonModule,
     DialogModule,
     MessageModule,
+    PackAttributeMappingComponent,
     SelectModule,
     ItemCatalogueComponent,
   ],
@@ -46,14 +49,24 @@ import { ItemCatalogueComponent } from '../../components/item-catalogue/item-cat
         />
       </header>
       @if (catalogue.$world(); as world) {
-        <app-item-catalogue
-          [world]="world"
-          (give)="itemToGive.set($event)"
-          (edit)="router.navigate(['/room/items/editor', $event.id])"
-          (create)="router.navigate(['/room/items/editor'])"
-          (remove)="remove($event)"
-          (addDefaults)="addDefaults()"
-        />
+        @if (flow.$pending(); as pending) {
+          <app-pack-attribute-mapping
+            [missing]="pending.missing"
+            [attributes]="world.attributes"
+            (confirmed)="flow.confirm($event)"
+            (cancelled)="flow.cancel()"
+          />
+        } @else {
+          <app-item-catalogue
+            (importPacks)="flow.run()"
+            [world]="world"
+            (give)="itemToGive.set($event)"
+            (edit)="router.navigate(['/room/items/editor', $event.id])"
+            (create)="router.navigate(['/room/items/editor'])"
+            (remove)="remove($event)"
+            (addDefaults)="addDefaults()"
+          />
+        }
         <p-dialog
           [visible]="!!itemToGive()"
           (visibleChange)="$event || itemToGive.set(null)"
@@ -118,6 +131,7 @@ import { ItemCatalogueComponent } from '../../components/item-catalogue/item-cat
   `,
 })
 export class ItemCataloguePageComponent {
+  protected readonly flow = inject(PackImportFlowBusiness);
   protected readonly catalogue = inject(ItemCatalogueBusiness);
   protected readonly router = inject(Router);
   private readonly room = inject(RoomBusiness);

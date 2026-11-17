@@ -82,7 +82,9 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         display="chip"
       />
       <div class="price-filter">
-        <span class="price-label">{{ 'item.catalogue.price' | translate }}</span>
+        <span class="price-label">{{
+          'item.catalogue.price' | translate
+        }}</span>
         <p-slider
           [range]="true"
           [min]="bounds().min"
@@ -94,7 +96,9 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         />
         <span class="price-ends">
           <app-coin-display [copper]="range()[0]" />
-          <span class="price-to">{{ 'item.catalogue.priceTo' | translate }}</span>
+          <span class="price-to">{{
+            'item.catalogue.priceTo' | translate
+          }}</span>
           <app-coin-display [copper]="range()[1]" />
         </span>
       </div>
@@ -114,6 +118,15 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         severity="secondary"
         [label]="'item.catalogue.addDefaults' | translate"
         (click)="addDefaults.emit()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        data-action="import-packs"
+        icon="pi pi-download"
+        severity="secondary"
+        [label]="'packImport.import' | translate"
+        (click)="importPacks.emit()"
       ></button>
     </div>
 
@@ -157,7 +170,6 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       } @else {
         <p class="empty">{{ 'item.catalogue.empty' | translate }}</p>
       }
-
     </div>
 
     <p-menu
@@ -324,6 +336,7 @@ export class ItemCatalogueComponent {
   readonly create = output<void>();
   readonly remove = output<Item>();
   readonly addDefaults = output<void>();
+  readonly importPacks = output<void>();
 
   protected readonly kindIcons: Record<ItemType, string> = {
     item: 'pi pi-box',
