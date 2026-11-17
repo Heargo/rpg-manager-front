@@ -39,7 +39,6 @@ import { SandboxCatalogueBusiness } from '../../business/sandbox-catalogue.busin
           "
           (create)="router.navigate(['/tools/item-editor'])"
           (remove)="sandbox.remove($event.id)"
-          (addDefaults)="sandbox.addDefaults()"
         />
       }
     </div>

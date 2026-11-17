@@ -64,7 +64,6 @@ import { ItemCatalogueComponent } from '../../components/item-catalogue/item-cat
             (edit)="router.navigate(['/room/items/editor', $event.id])"
             (create)="router.navigate(['/room/items/editor'])"
             (remove)="remove($event)"
-            (addDefaults)="addDefaults()"
           />
         }
         <p-dialog
@@ -161,10 +160,6 @@ export class ItemCataloguePageComponent {
 
   protected remove(item: Item): Promise<void> {
     return this.run(() => this.catalogue.remove(item.id));
-  }
-
-  protected addDefaults(): Promise<void> {
-    return this.run(() => this.catalogue.addDefaults());
   }
 
   private async run(action: () => Promise<unknown>): Promise<void> {

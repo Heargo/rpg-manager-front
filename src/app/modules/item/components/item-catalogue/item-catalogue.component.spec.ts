@@ -24,7 +24,7 @@ const potion = item('potion', 'Healing Potion', 'rare');
  * imageId) or a `[data-field="slot-kind-icon"]`. Clicking a slot (or the context-menu key / right click on it) opens a
  * popup menu anchored to the slot (appended to the body) with items `[data-automationid]` = `view` (a dialog with an
  * `app-item-card` of the item), `give` (only when `canGive`), `edit` and `delete`; none exist before. The toolbar
- * keeps `add-defaults` and `[data-field="search"]`.
+ * keeps `[data-field="search"]`.
  */
 describe('ItemCatalogueComponent', () => {
   const world: World = {
@@ -174,14 +174,5 @@ describe('ItemCatalogueComponent', () => {
 
     confirm.mock.calls[0][0].accept!();
     expect(removed).toEqual([potion]);
-  });
-
-  it('emits addDefaults from the toolbar', async () => {
-    const { fixture, q, component } = await setup(true);
-    let fired = 0;
-    component.addDefaults.subscribe(() => fired++);
-    q('[data-action="add-defaults"]')[0].click();
-    await fixture.whenStable();
-    expect(fired).toBe(1);
   });
 });

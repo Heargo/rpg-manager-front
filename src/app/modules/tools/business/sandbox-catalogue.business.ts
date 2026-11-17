@@ -76,12 +76,4 @@ export class SandboxCatalogueBusiness {
     this.items.set(result.items);
     return result.item;
   }
-
-  addDefaults(): void {
-    const drafts = this.defaults.hasValue() ? this.defaults.value() : undefined;
-    if (!drafts) return;
-    this.items.update((items) =>
-      mergeDefaultItems(items, drafts, () => crypto.randomUUID()),
-    );
-  }
 }
