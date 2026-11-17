@@ -1,0 +1,199 @@
+[
+ {
+  "id": "warrior",
+  "name": "Guerrier",
+  "description": "Un combattant de première ligne : robuste, puissant et difficile à abattre.",
+  "kind": "warrior",
+  "tree": [
+   {
+    "skillId": "power-strike",
+    "requires": [],
+    "minLevel": 1,
+    "column": 0,
+    "row": 0
+   },
+   {
+    "skillId": "iron-skin",
+    "requires": [],
+    "minLevel": 1,
+    "column": 2,
+    "row": 0
+   },
+   {
+    "skillId": "cleave",
+    "requires": [
+     {
+      "skillId": "power-strike",
+      "level": 2
+     }
+    ],
+    "minLevel": 3,
+    "column": 0,
+    "row": 1
+   },
+   {
+    "skillId": "battle-cry",
+    "requires": [
+     {
+      "skillId": "iron-skin",
+      "level": 1
+     }
+    ],
+    "minLevel": 3,
+    "column": 1,
+    "row": 1
+   },
+   {
+    "skillId": "second-wind",
+    "requires": [
+     {
+      "skillId": "iron-skin",
+      "level": 2
+     }
+    ],
+    "minLevel": 5,
+    "column": 2,
+    "row": 1
+   },
+   {
+    "skillId": "mighty-blow",
+    "requires": [
+     {
+      "skillId": "cleave",
+      "level": 2
+     }
+    ],
+    "minLevel": 7,
+    "column": 0,
+    "row": 2
+   }
+  ]
+ },
+ {
+  "id": "mage",
+  "name": "Mage",
+  "description": "Un érudit des arcanes : des sorts qui brûlent, soignent et protègent.",
+  "kind": "mage",
+  "tree": [
+   {
+    "skillId": "arcane-bolt",
+    "requires": [],
+    "minLevel": 1,
+    "column": 0,
+    "row": 0
+   },
+   {
+    "skillId": "healing-light",
+    "requires": [],
+    "minLevel": 1,
+    "column": 1,
+    "row": 0
+   },
+   {
+    "skillId": "arcane-focus",
+    "requires": [],
+    "minLevel": 1,
+    "column": 2,
+    "row": 0
+   },
+   {
+    "skillId": "fireball",
+    "requires": [
+     {
+      "skillId": "arcane-bolt",
+      "level": 2
+     }
+    ],
+    "minLevel": 3,
+    "column": 0,
+    "row": 1
+   },
+   {
+    "skillId": "mana-shield",
+    "requires": [
+     {
+      "skillId": "healing-light",
+      "level": 1
+     }
+    ],
+    "minLevel": 4,
+    "column": 2,
+    "row": 1
+   },
+   {
+    "skillId": "meteor-storm",
+    "requires": [
+     {
+      "skillId": "fireball",
+      "level": 3
+     }
+    ],
+    "minLevel": 8,
+    "column": 0,
+    "row": 2
+   }
+  ]
+ },
+ {
+  "id": "rogue",
+  "name": "Voleur",
+  "description": "Vif et rusé : frappe en premier, depuis l'ombre.",
+  "kind": "rogue",
+  "tree": [
+   {
+    "skillId": "quick-stab",
+    "requires": [],
+    "minLevel": 1,
+    "column": 0,
+    "row": 0
+   },
+   {
+    "skillId": "nimble",
+    "requires": [],
+    "minLevel": 1,
+    "column": 2,
+    "row": 0
+   },
+   {
+    "skillId": "poisoned-blade",
+    "requires": [
+     {
+      "skillId": "quick-stab",
+      "level": 2
+     }
+    ],
+    "minLevel": 3,
+    "column": 0,
+    "row": 1
+   },
+   {
+    "skillId": "shadow-step",
+    "requires": [
+     {
+      "skillId": "nimble",
+      "level": 1
+     }
+    ],
+    "minLevel": 3,
+    "column": 2,
+    "row": 1
+   },
+   {
+    "skillId": "assassinate",
+    "requires": [
+     {
+      "skillId": "poisoned-blade",
+      "level": 1
+     },
+     {
+      "skillId": "shadow-step",
+      "level": 1
+     }
+    ],
+    "minLevel": 6,
+    "column": 1,
+    "row": 2
+   }
+  ]
+ }
+]

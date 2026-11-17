@@ -76,7 +76,6 @@ import { CharacterClass } from '../../models/class';
               [skills]="world.skills"
               [items]="world.items"
               (create)="editing.set('new')"
-              (addDefaults)="run(catalogue.addDefaults())"
               (edit)="editing.set($event)"
               (duplicate)="run(catalogue.duplicate($event.id))"
               (remove)="run(catalogue.remove($event.id))"

@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { PackBusiness } from '../../../core/business/pack.business';
+import { provideBasePackOnDisk } from '../../../../testing/base-pack-on-disk';
 import { provideTestTranslations } from '../../../../testing/test-providers';
 import { baseItemVocabulary } from '../../../../testing/base-vocabulary';
 import { ItemVocabularyBusiness } from '../../../core/business/item-vocabulary.business';
@@ -19,10 +19,7 @@ describe('SandboxCharacterBusiness', () => {
     TestBed.configureTestingModule({
       providers: [
         provideTestTranslations(),
-        {
-          provide: PackBusiness,
-          useValue: { packsFor: async () => ['base-en'], $installed: () => [] },
-        },
+        provideBasePackOnDisk(),
         { provide: ItemVocabularyBusiness, useValue: { vocabulary: async () => baseItemVocabulary('en') } },
       ],
     });

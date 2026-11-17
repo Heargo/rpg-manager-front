@@ -1,15 +1,14 @@
-import { effect, inject, Injectable, linkedSignal } from '@angular/core';
+import { effect, inject, untracked, Injectable, linkedSignal } from '@angular/core';
 import { ActivePacksBusiness } from '../../../core/business/active-packs.business';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { basePackId, packLanguageOf } from '../../../core/business/pack.business';
-import { createSandboxWorld, SANDBOX_WORLD_ID } from '../helpers/default-world';
-// Static on purpose: the sandbox world only loads in the lazy Tools chunks, never in the initial bundle.
-import { buildStarterClasses } from '../helpers/starter-classes';
+import { createSandboxWorld } from '../helpers/default-world';
 import { applyWorldRules } from '../helpers/world-rules.rules';
 import { Npc } from '../../npc/models/npc';
 import { CharacterClass } from '../../class/models/class';
 import { Skill } from '../../skill/models/skill';
 import { World, WorldRules } from '../models/world';
+import { PackContentApplier } from './pack-content-applier.business';
 import { WorldSessionBusiness } from './world-session.business';
 
 /**
@@ -21,20 +20,16 @@ export class SandboxWorldBusiness {
   private readonly language = inject(LanguageBusiness);
   private readonly activePacks = inject(ActivePacksBusiness);
   private readonly session = inject(WorldSessionBusiness);
+  private readonly contentApplier = inject(PackContentApplier);
 
   private readonly world = linkedSignal<World>(() => {
-    const world = createSandboxWorld((key) => this.language.t(key));
-    let next = 0;
-    return {
-      ...world,
+    const world = {
+      ...createSandboxWorld((key) => this.language.t(key)),
       packs: [basePackId(this.language.$language())],
       language: packLanguageOf(this.language.$language()),
-      ...buildStarterClasses(
-        world,
-        this.language.$language(),
-        () => `${SANDBOX_WORLD_ID}-starter-${next++}`,
-      ),
     };
+    this.importBase(world).catch((error) => console.error('Sandbox: the Base import failed', error));
+    return world;
   });
 
   readonly $world = this.world.asReadonly();
@@ -43,6 +38,15 @@ export class SandboxWorldBusiness {
     // The tools' generators follow the sandbox packs, unless a game world is open (it has its own packs).
     this.publishPacks();
     effect(() => this.publishPacks());
+  }
+
+  /** Fills the sandbox with the classes and skills of its Base pack, unless the language changed or skills and classes were added meanwhile. */
+  private async importBase(base: World): Promise<void> {
+    const filled = await this.contentApplier.applyAndSkipMissing(base, { domains: ['skills', 'classes'] });
+    const current = untracked(() => this.world());
+    // Rules edited meanwhile: still filled in, unless the language changed or the GM already added some.
+    if (current.packs?.[0] !== base.packs?.[0] || current.skills.length || current.classes.length) return;
+    this.world.set({ ...current, skills: filled.skills, classes: filled.classes });
   }
 
   private publishPacks(): void {

@@ -110,34 +110,6 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
     expect((await library.get(world.id))?.items).toHaveLength(world.items.length);
   });
 
-  it('creates a world with the starter classes and skills', async () => {
-    const world = await library.create(
-      {
-        name: 'Eldoria',
-        attributes: [
-          { name: 'Life', baseValue: 10, formula: { preset: 'linear', step: 1 } },
-          { name: 'Mana', baseValue: 5, formula: { preset: 'linear', step: 1 } },
-          { name: 'Strength', baseValue: 2, formula: { preset: 'linear', step: 1 } },
-        ],
-        barAttributes: { life: 'Life', mana: 'Mana' },
-      },
-      { starterClasses: true } as unknown as { starterItems?: boolean },
-    );
-
-    expect(world.classes.map((c) => c.name)).toEqual(['Warrior', 'Mage', 'Rogue']);
-    expect(world.classes.every((c) => c.tree.length >= 4 && c.tree.length <= 6)).toBe(true);
-    expect(world.classes.every((c) => c.tree.every((n) => world.skills.some((s) => s.id === n.skillId)))).toBe(true);
-    expect(new Set(world.skills.map((s) => s.id)).size).toBe(world.skills.length);
-    expect(world.items).toEqual([]);
-    expect(world.skills.every((s) => typeof s.maxLevel === 'number' && !('maxRank' in s))).toBe(true);
-    expect(world.skills.every((s) => s.effects.every((e) => !/\brank\b/.test(e.amount)))).toBe(true);
-    expect(world.skills.some((s) => s.effects.some((e) => /\bskillLevel\b/.test(e.amount)))).toBe(true);
-    expect(world.classes.every((c) => c.tree.every((n) => n.requires.every((r) => typeof r.level === 'number' && !('rank' in r))))).toBe(true);
-    const stored = await library.get(world.id);
-    expect(stored?.classes).toHaveLength(3);
-    expect(stored?.skills).toHaveLength(world.skills.length);
-  });
-
   it('creates no classes or skills without the option', async () => {
     const world = await library.create({ name: 'Bare', attributes: [] });
     expect(world.classes).toEqual([]);

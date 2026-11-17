@@ -773,7 +773,8 @@
      "parent": "trait"
     }
    },
-   "texts": "generators/skills.json"
+   "texts": "generators/skills.json",
+   "content": "content/skills.json"
   },
   "classes": {
    "kinds": {
@@ -859,7 +860,8 @@
      "parent": "cunning"
     }
    },
-   "texts": "generators/classes.json"
+   "texts": "generators/classes.json",
+   "content": "content/classes.json"
   }
  },
  "common": "generators/common.json",
@@ -1974,6 +1976,28 @@
    "kind": "masked",
    "image": "sprites/warhammer.png",
    "materials": "sprites/warhammer.json"
+  }
+ ],
+ "attributes": [
+  {
+   "id": "life",
+   "name": "Vie"
+  },
+  {
+   "id": "mana",
+   "name": "Mana"
+  },
+  {
+   "id": "strength",
+   "name": "Force"
+  },
+  {
+   "id": "agility",
+   "name": "Agilité"
+  },
+  {
+   "id": "intelligence",
+   "name": "Intelligence"
   }
  ]
 }

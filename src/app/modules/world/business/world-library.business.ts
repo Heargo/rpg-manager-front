@@ -9,6 +9,7 @@ import { validateWorldDraft, WorldDraftErrors } from '../helpers/world-draft.rul
 import { buildWorldExport, ExportedImage, parseWorldExport, WorldExport } from '../helpers/world-export';
 import { createWorld, remapWorldImages, summarizeWorld, worldImageIds } from '../helpers/world.factory';
 import { World, WorldDraft, WorldSummary } from '../models/world';
+import { PackContentApplier } from './pack-content-applier.business';
 import { WorldStorageService } from '../services/world-storage.service';
 
 export class WorldImportError extends Error {
@@ -24,6 +25,7 @@ export class WorldLibraryBusiness {
   private readonly imageBusiness = inject(ImageBusiness);
   private readonly wordLists = inject(ItemVocabularyBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly contentApplier = inject(PackContentApplier);
 
   private readonly worlds = signal<WorldSummary[]>([]);
   /** Most recently changed first. */
@@ -40,7 +42,7 @@ export class WorldLibraryBusiness {
     return world && { ...world, packs: world.packs ?? [], language: world.language ?? appLanguage };
   }
 
-  /** Creates a world, optionally with the default items and the starter classes and skills built on its own attributes (in the active language). */
+  /** Creates a world, optionally with the default items and the classes and skills of its packs (imported on its own attributes). */
   async create(draft: WorldDraft, options: { starterItems?: boolean; starterClasses?: boolean } = {}): Promise<World> {
     const appLanguage = packLanguageOf(this.language.$language());
     let world = createWorld(
@@ -56,8 +58,7 @@ export class WorldLibraryBusiness {
       world = { ...world, items: items.map((item) => ({ ...item, id: crypto.randomUUID() })) };
     }
     if (options.starterClasses) {
-      const { buildStarterClasses } = await import('../helpers/starter-classes');
-      world = { ...world, ...buildStarterClasses(world, this.language.$language(), () => crypto.randomUUID()) };
+      world = await this.contentApplier.applyAndSkipMissing(world, { domains: ['skills', 'classes'] });
     }
     await this.persist(world);
     return world;

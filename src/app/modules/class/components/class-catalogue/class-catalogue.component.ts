@@ -56,15 +56,6 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
       <button
         pButton
         type="button"
-        data-action="add-defaults"
-        icon="pi pi-plus"
-        severity="secondary"
-        [label]="'class.catalogue.addDefaults' | translate"
-        (click)="addDefaults.emit()"
-      ></button>
-      <button
-        pButton
-        type="button"
         data-action="import-packs"
         icon="pi pi-download"
         severity="secondary"
@@ -388,7 +379,6 @@ export class ClassCatalogueComponent {
   readonly items = input<Item[]>([]);
 
   readonly create = output<void>();
-  readonly addDefaults = output<void>();
   readonly importPacks = output<void>();
   readonly edit = output<CharacterClass>();
   readonly duplicate = output<CharacterClass>();

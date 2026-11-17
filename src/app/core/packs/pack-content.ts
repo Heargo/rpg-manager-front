@@ -106,6 +106,18 @@ export function validatePackContent(
         return;
       }
       const effects = Array.isArray(entry['effects']) ? entry['effects'] : [];
+      const costAttribute = isObject(entry['cost'])
+        ? String(entry['cost']['attribute'])
+        : undefined;
+      const undeclaredUse = [
+        ...effects.map((e) => (isObject(e) ? String(e['attribute']) : '')),
+        ...(costAttribute === undefined ? [] : [costAttribute]),
+      ].filter((a) => a && !attributes.has(a));
+      problems(
+        [...new Set(undeclaredUse)].map(
+          (a) => `effect or cost on undeclared attribute "${a}"`,
+        ),
+      );
       const names = [
         ...attributes,
         ...(context.attributeNames ?? []),
@@ -168,6 +180,8 @@ export interface PackImportInput {
     skills: Entry[];
     classes: Entry[];
     attributes: WorldAttributeRef[];
+    /** The combat action types (`world.combat.actionTypes`): active skills tick the first, movement skills the movement counter. */
+    actionTypes?: { name: string; movement: boolean }[];
   };
   mapping: AttributeMapping;
   domains: ContentDomain[];
@@ -221,7 +235,9 @@ export function planPackImport(input: PackImportInput): PackImportPlan {
     skillIds.add(entry['id']);
   for (const klass of classes)
     for (const node of klass['tree'] ?? []) skillIds.add(node['skillId']);
-  const skills = (content.skills ?? []).filter((e) => skillIds.has(e['id']));
+  const skillSources = (content.skills ?? []).filter((e) =>
+    skillIds.has(e['id']),
+  );
   const items = wanted.has('items') ? (content.items ?? []) : [];
 
   const byId = new Map(input.attributes.map((a) => [a.id, a]));
@@ -230,6 +246,21 @@ export function planPackImport(input: PackImportInput): PackImportPlan {
     (modifiers ?? []).forEach((m) => used.add(m.attribute));
   items.forEach((e) => collect(e['modifiers']));
   classes.forEach((e) => collect(e['bonuses']));
+  /** The pack attributes a skill formula reads, written `[Name]`. */
+  const formulaAttributes = (skill: Entry): string[] => {
+    const formulas = [
+      ...(skill['effects'] ?? []).map((e: Entry) => String(e['amount'] ?? '')),
+      ...(skill['success']?.['formula'] ? [String(skill['success']['formula'])] : []),
+    ];
+    return input.attributes
+      .filter((a) => formulas.some((f) => f.includes(`[${a.name}]`)))
+      .map((a) => a.id);
+  };
+  for (const skill of skillSources) {
+    for (const effect of skill['effects'] ?? []) used.add(effect['attribute']);
+    if (skill['cost']) used.add(skill['cost']['attribute']);
+    formulaAttributes(skill).forEach((id) => used.add(id));
+  }
 
   const needsChoice: PackAttribute[] = [];
   const addAttributes: PackAttribute[] = [];
@@ -267,6 +298,55 @@ export function planPackImport(input: PackImportInput): PackImportPlan {
       return name === undefined ? [] : [{ ...m, attribute: name }];
     });
 
+  /** A formula with the pack attribute names it reads replaced by the world's. */
+  const remapFormula = (formula: string) =>
+    input.attributes.reduce((text, a) => {
+      const name = resolved.get(a.id);
+      return name === undefined || name === a.name
+        ? text
+        : text.split(`[${a.name}]`).join(`[${name}]`);
+    }, formula);
+  const actionTypes = world.actionTypes ?? [];
+  const firstAction = actionTypes[0]?.name;
+  const movementAction = actionTypes.find((a) => a.movement)?.name ?? firstAction;
+  /** A skill on the world's attributes; undefined when it needs one the world lacks. */
+  const adaptSkill = (source: Entry): Entry | undefined => {
+    const needed = [
+      ...(source['effects'] ?? []).map((e: Entry) => e['attribute']),
+      ...formulaAttributes(source),
+    ];
+    if (needed.some((id) => resolved.get(id) === undefined)) return undefined;
+    const { movement, cost, ...rest } = source;
+    const costName = cost ? resolved.get(cost['attribute']) : undefined;
+    const tick = movement ? movementAction : firstAction;
+    return {
+      ...rest,
+      effects: (source['effects'] ?? []).map((e: Entry) => ({
+        ...e,
+        attribute: resolved.get(e['attribute']),
+        amount: remapFormula(String(e['amount'])),
+      })),
+      ...(rest['success']?.['formula']
+        ? {
+            success: {
+              ...rest['success'],
+              formula: remapFormula(String(rest['success']['formula'])),
+            },
+          }
+        : {}),
+      ...(costName === undefined
+        ? {}
+        : { cost: { ...cost, attribute: costName } }),
+      ...(source['type'] === 'active' && tick ? { actionType: tick } : {}),
+    };
+  };
+  const adapted = new Map<string, Entry>();
+  for (const source of skillSources) {
+    const skill = adaptSkill(source);
+    if (skill) adapted.set(source['id'], skill);
+  }
+  const skills = [...adapted.values()];
+
   const kept: string[] = [];
   const write = (
     entries: Entry[],
@@ -299,14 +379,15 @@ export function planPackImport(input: PackImportInput): PackImportPlan {
       ...e,
       id: prefix(e['id']),
       ...(e['bonuses'] ? { bonuses: remap(e['bonuses']) } : {}),
-      tree: (e['tree'] ?? []).map((node: Entry) => ({
-        ...node,
-        skillId: prefix(node['skillId']),
-        requires: (node['requires'] ?? []).map((r: Entry) => ({
-          ...r,
-          skillId: prefix(r['skillId']),
+      tree: (e['tree'] ?? [])
+        .filter((node: Entry) => adapted.has(node['skillId']))
+        .map((node: Entry) => ({
+          ...node,
+          skillId: prefix(node['skillId']),
+          requires: (node['requires'] ?? [])
+            .filter((r: Entry) => adapted.has(r['skillId']))
+            .map((r: Entry) => ({ ...r, skillId: prefix(r['skillId']) })),
         })),
-      })),
     })),
     kept,
     addAttributes,

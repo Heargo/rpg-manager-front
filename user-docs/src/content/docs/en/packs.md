@@ -21,6 +21,14 @@ A sprite has one of three **colourings**:
 - **Masked**: a grayscale image shipped with its materials, ready to recolour.
 - **Colored**: an image already in colour, used as is. The colorizer refuses it.
 
+## Fixed content
+
+Besides word lists and sprites, a pack can ship **fixed content**: ready-made **items**, **skills** and **classes** that are copied as they are into a world's catalogues, instead of being drawn by a generator. The pack declares the **attributes** its content uses (Life, Strength…).
+
+- **Import from the packs** (in the item, skill and class catalogues) copies the fixed content of the world's active packs. Importing again updates the copies you did not edit and leaves your edited ones alone.
+- When the world lacks an attribute the pack uses, you choose for each one: use one of your attributes, add it to the world, or skip it. Skipping drops the modifiers on it, and a **skill that needs a skipped attribute** (in an effect or a formula) is left out, with its place in the class trees. A skill whose **cost** is on a skipped attribute is kept, and becomes free.
+- The Base packs ship the **starter classes and skills** (Warrior, Mage and Rogue with their skill trees) written on the default attributes (Life, Mana, Strength, Agility, Intelligence). A new world with **Add default classes and skills** ticked, and the tools' sandbox, get them from Base; a world that renamed or lacks one of these attributes simply gets the skills that do not need it. Active skills tick the first action type of the world (its movement counter for movement skills).
+
 ## Official packs
 
 Official packs are listed on the page, but **their files are only downloaded when you click Download** (or **Install** from the rules of a world that uses it). They then stay on the device and work **offline**. **Remove from device** deletes them (you can download it again); worlds that used it then show it as missing.

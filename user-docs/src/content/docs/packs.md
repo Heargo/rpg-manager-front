@@ -21,6 +21,14 @@ Un sprite peut être de trois **colorations** :
 - **Avec masques** : une image en niveaux de gris livrée avec ses matériaux, prête à recolorer.
 - **Coloré** : une image déjà en couleurs, utilisée telle quelle. Le coloriseur la refuse.
 
+## Contenu fixe
+
+En plus des listes de mots et des sprites, un pack peut fournir du **contenu fixe** : des **objets**, **compétences** et **classes** prêts à l'emploi, copiés tels quels dans les catalogues d'un monde au lieu d'être tirés par un générateur. Le pack déclare les **attributs** que son contenu utilise (Vie, Force…).
+
+- **Importer depuis les packs** (dans les catalogues d'objets, de compétences et de classes) copie le contenu fixe des packs actifs du monde. Importer de nouveau met à jour les copies que vous n'avez pas modifiées et laisse les vôtres tranquilles.
+- Quand le monde n'a pas un attribut utilisé par le pack, vous choisissez pour chacun : utiliser un de vos attributs, l'ajouter au monde, ou l'ignorer. Ignorer retire les modificateurs qui le visent, et une **compétence qui a besoin d'un attribut ignoré** (dans un effet ou une formule) est écartée, avec sa place dans les arbres de classe. Une compétence dont le **coût** porte sur un attribut ignoré est gardée, et devient gratuite.
+- Les packs Base fournissent les **classes et compétences de départ** (Guerrier, Mage et Voleur avec leurs arbres de compétences), écrites sur les attributs par défaut (Vie, Mana, Force, Agilité, Intelligence). Un nouveau monde où **Ajouter des classes et compétences par défaut** est coché, et le bac à sable des outils, les reçoivent de Base ; un monde qui a renommé ou n'a pas un de ces attributs reçoit simplement les compétences qui n'en ont pas besoin. Les compétences actives utilisent le premier type d'action du monde (son compteur de mouvement pour les compétences de déplacement).
+
 ## Packs officiels
 
 Les packs officiels sont listés sur la page, mais **leurs fichiers ne sont téléchargés que quand vous cliquez sur Télécharger** (ou **Installer** depuis les règles d'un monde qui l'utilise). Ils restent ensuite sur l'appareil et fonctionnent **hors ligne**. **Supprimer de l'appareil** les efface (vous pourrez le télécharger de nouveau) ; les mondes qui l'utilisaient le montrent alors comme manquant.
