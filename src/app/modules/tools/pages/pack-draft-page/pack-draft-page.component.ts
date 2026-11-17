@@ -60,7 +60,23 @@ import {
 import { STRUCTURED_DOMAINS } from '../../../../core/packs/pack-draft-edits';
 import { SpriteSet } from '../../../sprite/models/sprite-set';
 
-type Tab = 'details' | 'lists' | 'sprites' | 'publish';
+type Tab =
+  | 'details'
+  | 'common'
+  | 'items'
+  | 'npcs'
+  | 'skills'
+  | 'classes'
+  | 'sprites'
+  | 'publish';
+
+const LIST_TABS: readonly Tab[] = [
+  'common',
+  'items',
+  'npcs',
+  'skills',
+  'classes',
+];
 
 const SAVE_DELAY_MS = 500;
 /** Sprites shown per page: a row holds three selects, so all of them at once freezes the editor. */
@@ -102,14 +118,83 @@ const SPRITES_PER_PAGE = 12;
         }}</a>
       </header>
       @if (draft(); as current) {
+        <ng-template #advanced let-generator>
+          <section class="list">
+            <p-panel
+              [header]="'packs.creator.lists.advanced' | translate"
+              [toggleable]="true"
+              [collapsed]="true"
+            >
+              <p class="hint">
+                {{ 'packs.creator.lists.advancedHint' | translate }}
+              </p>
+              <section class="list">
+                <h3>{{ 'packs.generator.' + generator | translate }}</h3>
+                <textarea
+                  pTextarea
+                  class="json"
+                  rows="6"
+                  [attr.data-test]="'wordlist-' + generator"
+                  [attr.aria-label]="'packs.generator.' + generator | translate"
+                  [ngModel]="text(generator)"
+                  (ngModelChange)="setText(generator, $event)"
+                ></textarea>
+                @if (listErrors(generator); as errors) {
+                  <ul
+                    class="errors"
+                    [attr.data-test]="'wordlist-error-' + generator"
+                  >
+                    @for (error of errors; track error) {
+                      <li>{{ error }}</li>
+                    }
+                  </ul>
+                }
+                <div class="actions">
+                  <p-fileupload
+                    mode="basic"
+                    accept=".json,application/json"
+                    [auto]="true"
+                    [customUpload]="true"
+                    chooseIcon="pi pi-upload"
+                    [chooseLabel]="'packs.creator.importFile' | translate"
+                    (uploadHandler)="importFile(generator, $event)"
+                  />
+                  <p-button
+                    severity="secondary"
+                    icon="pi pi-copy"
+                    [label]="'packs.creator.copyBase' | translate"
+                    (onClick)="copyBase(generator)"
+                  />
+                  <p-button
+                    severity="secondary"
+                    outlined
+                    icon="pi pi-times"
+                    [label]="'packs.creator.clear' | translate"
+                    (onClick)="setText(generator, '')"
+                  />
+                </div>
+              </section>
+            </p-panel>
+          </section>
+        </ng-template>
         <p-tabs [value]="tab()" (valueChange)="tab.set($any($event))">
           <p-tablist>
             <p-tab value="details">{{
               'packs.creator.tabs.details' | translate
             }}</p-tab>
-            <p-tab value="lists">{{
-              'packs.creator.tabs.lists' | translate
+            @if (current.details.language !== undefined) {
+              <p-tab value="common">{{
+                'packs.creator.tabs.common' | translate
+              }}</p-tab>
+            }
+            <p-tab value="items">{{
+              'packs.generator.items' | translate
             }}</p-tab>
+            @for (domain of structuredDomains; track domain) {
+              <p-tab [value]="domain">{{
+                'packs.generator.' + domain | translate
+              }}</p-tab>
+            }
             <p-tab value="sprites">{{
               'packs.creator.tabs.sprites' | translate
             }}</p-tab>
@@ -232,75 +317,21 @@ const SPRITES_PER_PAGE = 12;
                 />
               </div>
             </p-tabpanel>
-            <p-tabpanel value="lists">
-              @if (tab() === 'lists') {
-                <p class="hint">{{ 'packs.creator.listsIntro' | translate }}</p>
-                <!-- Advanced comes before the other generators in the DOM and after them on screen (CSS order). -->
-                <div class="lists">
+            @if (current.details.language !== undefined) {
+              <p-tabpanel value="common">
+                @if (tab() === 'common') {
+                  <p class="hint">
+                    {{ 'packs.creator.listsIntro' | translate }}
+                  </p>
                   <section class="list">
-                    <h3>{{ 'packs.creator.lists.items' | translate }}</h3>
-                    <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
-                    <app-kinds-editor
-                      [draft]="current"
-                      [issues]="issues()"
-                      (changed)="edited($event)"
-                    />
-                    <h4>{{ 'packs.creator.tints.title' | translate }}</h4>
-                    <app-tints-editor
-                      [draft]="current"
-                      [issues]="issues()"
-                      (changed)="edited($event)"
-                    />
-                    <app-common-words-editor
-                      [draft]="current"
-                      [issues]="issues()"
-                      (changed)="edited($event)"
-                    />
-                    <p-panel
-                      [header]="'packs.creator.templates.title' | translate"
-                      [toggleable]="true"
-                      [collapsed]="true"
-                    >
-                      <app-templates-editor
-                        [draft]="current"
-                        [issues]="issues()"
-                        (changed)="edited($event)"
-                      />
-                    </p-panel>
-                  </section>
-                  @for (domain of structuredDomains; track domain) {
-                    <section class="list" [attr.data-test]="'domain-' + domain">
-                      <h3>{{ 'packs.generator.' + domain | translate }}</h3>
-                      <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
-                      <app-domain-kinds-editor
-                        [draft]="current"
-                        [issues]="issues()"
-                        [domain]="domain"
-                        (changed)="edited($event)"
-                      />
-                      @if (current.details.language !== undefined) {
-                        <h4>
-                          {{ 'packs.creator.domain.textsTitle' | translate }}
-                        </h4>
-                        <app-domain-texts-editor
-                          [draft]="current"
-                          [issues]="issues()"
-                          [domain]="domain"
-                          (changed)="edited($event)"
-                        />
-                      }
-                    </section>
-                  }
-                  <section class="list">
-                    <h3>{{ 'packs.creator.lists.shared' | translate }}</h3>
-                    <h4>{{ 'packs.creator.params.title' | translate }}</h4>
+                    <h3>{{ 'packs.creator.params.title' | translate }}</h3>
                     <app-params-editor
                       [draft]="current"
                       [issues]="issues()"
                       (changed)="edited($event)"
                     />
                   </section>
-                  <section class="list advanced">
+                  <section class="list">
                     <p-panel
                       [header]="'packs.creator.lists.advanced' | translate"
                       [toggleable]="true"
@@ -309,12 +340,6 @@ const SPRITES_PER_PAGE = 12;
                       <p class="hint">
                         {{ 'packs.creator.lists.advancedHint' | translate }}
                       </p>
-                      <ng-container
-                        *ngTemplateOutlet="
-                          json;
-                          context: { $implicit: 'items' }
-                        "
-                      />
                       <section class="list">
                         <h3>common.json</h3>
                         <textarea
@@ -362,71 +387,79 @@ const SPRITES_PER_PAGE = 12;
                       </section>
                     </p-panel>
                   </section>
-                  <div class="list others">
-                    @for (generator of otherGenerators; track generator) {
-                      <ng-container
-                        *ngTemplateOutlet="
-                          json;
-                          context: { $implicit: generator }
-                        "
-                      />
-                    }
-                  </div>
-                </div>
-                <ng-template #json let-generator>
-                  <section class="list">
-                    <h3>
-                      {{ 'packs.generator.' + generator | translate }}
-                    </h3>
-                    <textarea
-                      pTextarea
-                      class="json"
-                      rows="6"
-                      [attr.data-test]="'wordlist-' + generator"
-                      [attr.aria-label]="
-                        'packs.generator.' + generator | translate
-                      "
-                      [ngModel]="text(generator)"
-                      (ngModelChange)="setText(generator, $event)"
-                    ></textarea>
-                    @if (listErrors(generator); as errors) {
-                      <ul
-                        class="errors"
-                        [attr.data-test]="'wordlist-error-' + generator"
-                      >
-                        @for (error of errors; track error) {
-                          <li>{{ error }}</li>
-                        }
-                      </ul>
-                    }
-                    <div class="actions">
-                      <p-fileupload
-                        mode="basic"
-                        accept=".json,application/json"
-                        [auto]="true"
-                        [customUpload]="true"
-                        chooseIcon="pi pi-upload"
-                        [chooseLabel]="'packs.creator.importFile' | translate"
-                        (uploadHandler)="importFile(generator, $event)"
-                      />
-                      <p-button
-                        severity="secondary"
-                        icon="pi pi-copy"
-                        [label]="'packs.creator.copyBase' | translate"
-                        (onClick)="copyBase(generator)"
-                      />
-                      <p-button
-                        severity="secondary"
-                        outlined
-                        icon="pi pi-times"
-                        [label]="'packs.creator.clear' | translate"
-                        (onClick)="setText(generator, '')"
-                      />
-                    </div>
-                  </section>
-                </ng-template>
+                }
+              </p-tabpanel>
+            }
+            <p-tabpanel value="items">
+              @if (tab() === 'items') {
+                <p class="hint">{{ 'packs.creator.listsIntro' | translate }}</p>
+                <section class="list">
+                  <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
+                  <app-kinds-editor
+                    [draft]="current"
+                    [issues]="issues()"
+                    (changed)="edited($event)"
+                  />
+                  <h4>{{ 'packs.creator.tints.title' | translate }}</h4>
+                  <app-tints-editor
+                    [draft]="current"
+                    [issues]="issues()"
+                    (changed)="edited($event)"
+                  />
+                  <app-common-words-editor
+                    [draft]="current"
+                    [issues]="issues()"
+                    (changed)="edited($event)"
+                  />
+                  <p-panel
+                    [header]="'packs.creator.templates.title' | translate"
+                    [toggleable]="true"
+                    [collapsed]="true"
+                  >
+                    <app-templates-editor
+                      [draft]="current"
+                      [issues]="issues()"
+                      (changed)="edited($event)"
+                    />
+                  </p-panel>
+                </section>
+                <ng-container
+                  *ngTemplateOutlet="advanced; context: { $implicit: 'items' }"
+                />
               }
             </p-tabpanel>
+            @for (domain of structuredDomains; track domain) {
+              <p-tabpanel [value]="domain">
+                @if (tab() === domain) {
+                  <p class="hint">
+                    {{ 'packs.creator.listsIntro' | translate }}
+                  </p>
+                  <section class="list" [attr.data-test]="'domain-' + domain">
+                    <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
+                    <app-domain-kinds-editor
+                      [draft]="current"
+                      [issues]="issues()"
+                      [domain]="domain"
+                      (changed)="edited($event)"
+                    />
+                    @if (current.details.language !== undefined) {
+                      <h4>
+                        {{ 'packs.creator.domain.textsTitle' | translate }}
+                      </h4>
+                      <app-domain-texts-editor
+                        [draft]="current"
+                        [issues]="issues()"
+                        [domain]="domain"
+                        (changed)="edited($event)"
+                      />
+                    }
+                  </section>
+                  <ng-container
+                    *ngTemplateOutlet="advanced; context: { $implicit: domain }"
+                  />
+                }
+              </p-tabpanel>
+            }
             <p-tabpanel value="sprites">
               @if (tab() === 'sprites') {
                 <p class="hint">
@@ -642,16 +675,6 @@ const SPRITES_PER_PAGE = 12;
       flex-direction: column;
       gap: 0.25rem;
     }
-    .lists {
-      display: flex;
-      flex-direction: column;
-    }
-    .lists .others {
-      order: 1;
-    }
-    .lists .advanced {
-      order: 2;
-    }
     .list {
       margin-bottom: 1.5rem;
     }
@@ -713,9 +736,6 @@ export class PackDraftPageComponent {
 
   protected readonly languageOptions = [...SUPPORTED_LANGUAGES];
   protected readonly structuredDomains = STRUCTURED_DOMAINS;
-  protected readonly otherGenerators = PACK_GENERATORS.filter(
-    (generator) => generator !== 'items',
-  );
   protected readonly tab = signal<Tab>('details');
   protected readonly draft = signal<PackDraft | null>(null);
   protected readonly missing = signal(false);
@@ -790,7 +810,7 @@ export class PackDraftPageComponent {
         (known) => load === this.issueLoads && this.known.set(known),
         () => undefined,
       );
-      if (this.tab() === 'lists')
+      if (LIST_TABS.includes(this.tab()))
         void this.form.issues(draft).then(
           (issues) => load === this.issueLoads && this.issues.set(issues),
           () => undefined,

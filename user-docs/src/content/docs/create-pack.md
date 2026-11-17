@@ -7,7 +7,7 @@ Un pack, ce sont des **données** : un fichier `pack.json` qui décrit le pack (
 
 ## Le créateur de pack
 
-**Packs › Créer un pack** ouvre la liste de vos **brouillons**. Ils sont enregistrés sur cet appareil au fil de vos modifications : vous pouvez partir et revenir. **Nouveau brouillon** en ouvre un, avec quatre onglets.
+**Packs › Créer un pack** ouvre la liste de vos **brouillons**. Ils sont enregistrés sur cet appareil au fil de vos modifications : vous pouvez partir et revenir. **Nouveau brouillon** en ouvre un, avec huit onglets : **Détails**, **Commun**, **Objets**, **PNJ**, **Compétences**, **Classes**, **Sprites** et **Publier**.
 
 ### Détails
 
@@ -15,9 +15,9 @@ La **langue du pack** (français ou anglais, par défaut celle de l'application)
 
 ![Les détails d'un brouillon de pack](../../assets/screens/fr/packs-creator-details.png)
 
-### Listes de mots
+### Listes de mots (Commun, Objets, PNJ, Compétences, Classes)
 
-L'onglet a trois blocs, et le texte d'introduction rappelle que les listes vides ne sont pas incluses dans le pack.
+Les listes de mots sont réparties en cinq onglets ; chaque introduction rappelle que les listes vides ne sont pas incluses dans le pack. **Commun** (masqué pour un pack sans langue) contient les **paramètres partagés** et le fichier `common.json` ; **Objets**, **PNJ**, **Compétences** et **Classes** contiennent chacun leurs formulaires et leur fichier brut.
 
 **Objets** se remplit avec des formulaires :
 

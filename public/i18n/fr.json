@@ -1634,7 +1634,7 @@
       "notFound": "Ce brouillon n'existe pas.",
       "tabs": {
         "details": "Détails",
-        "lists": "Listes de mots",
+        "common": "Commun",
         "sprites": "Sprites",
         "publish": "Publier"
       },
@@ -1652,7 +1652,7 @@
       "license": "Licence",
       "licenseUrl": "Lien de la licence",
       "homepage": "Page d'accueil (facultatif)",
-      "listsIntro": "Construisez les objets, PNJ, compétences et classes du pack avec les formulaires : catégories, listes de la langue, teintes et paramètres partagés. Le JSON brut de chaque fichier est dans Avancé : importez, exportez ou partez de celui de la Base de la langue du pack. Une liste vide n'est pas incluse dans le pack.",
+      "listsIntro": "Remplissez les formulaires ; le JSON brut du fichier est dans Avancé : importez, exportez ou partez de celui de la Base de la langue du pack. Une liste vide n'est pas incluse dans le pack.",
       "importFile": "Importer un fichier",
       "copyBase": "Copier la liste de Base",
       "clear": "Vider",
@@ -1675,8 +1675,6 @@
       "installed": "Pack installé sur cet appareil",
       "editInColorizer": "Modifier dans le coloriseur",
       "lists": {
-        "items": "Objets",
-        "shared": "Partagé",
         "advanced": "Avancé (JSON)",
         "advancedHint": "Les fichiers bruts du pack : importer, exporter ou copier ceux de Base. Les changements apparaissent dans les formulaires ci-dessus."
       },

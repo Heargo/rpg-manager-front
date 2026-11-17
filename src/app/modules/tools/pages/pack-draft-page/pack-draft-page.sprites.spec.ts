@@ -85,7 +85,7 @@ describe('PackDraftPageComponent: sprites tab on a large draft', () => {
     const { el, rows, tab, settle } = await render(30);
 
     expect(rows()).toHaveLength(0);
-    await tab('Word lists');
+    await tab('Items');
     await tab('Publish');
     expect(rows()).toHaveLength(0);
     expect(el.querySelector('p-paginator')).toBeNull();

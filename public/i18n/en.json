@@ -1634,7 +1634,7 @@
       "notFound": "This draft does not exist.",
       "tabs": {
         "details": "Details",
-        "lists": "Word lists",
+        "common": "Common",
         "sprites": "Sprites",
         "publish": "Publish"
       },
@@ -1652,7 +1652,7 @@
       "license": "License",
       "licenseUrl": "License link",
       "homepage": "Home page (optional)",
-      "listsIntro": "Build the pack's items, NPCs, skills and classes with the forms: kinds, language lists, tints and shared params. The raw JSON of each file is under Advanced: import, export or start from the Base of the pack's language. An empty list is left out of the pack.",
+      "listsIntro": "Fill in the forms; the raw JSON of the file is under Advanced: import, export or start from the Base of the pack's language. An empty list is left out of the pack.",
       "importFile": "Import a file",
       "copyBase": "Copy Base's list",
       "clear": "Clear",
@@ -1675,8 +1675,6 @@
       "installed": "Pack installed on this device",
       "editInColorizer": "Edit in the colorizer",
       "lists": {
-        "items": "Items",
-        "shared": "Shared",
         "advanced": "Advanced (JSON)",
         "advancedHint": "The raw files of the pack: import, export or copy Base's. Changes here show up in the forms above."
       },

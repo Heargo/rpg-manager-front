@@ -7,7 +7,7 @@ A pack is **data**: a `pack.json` file that describes the pack (its kinds, tints
 
 ## The pack creator
 
-**Packs › Create a pack** opens the list of your **drafts**. They are saved on this device as you edit: you can leave and come back. **New draft** opens one, with four tabs.
+**Packs › Create a pack** opens the list of your **drafts**. They are saved on this device as you edit: you can leave and come back. **New draft** opens one, with eight tabs: **Details**, **Common**, **Items**, **NPCs**, **Skills**, **Classes**, **Sprites** and **Publish**.
 
 ### Details
 
@@ -15,9 +15,9 @@ The **pack language** (English or French, by default the app's), the name, the d
 
 ![A pack draft's details](../../../assets/screens/en/packs-creator-details.png)
 
-### Word lists
+### Word lists (Common, Items, NPCs, Skills, Classes)
 
-The tab has three blocks, and its intro reminds you that empty lists are left out of the pack.
+The word lists are split in five tabs; each intro reminds you that empty lists are left out of the pack. **Common** (hidden for a pack with no language) holds the **Shared** params and the `common.json` file; **Items**, **NPCs**, **Skills** and **Classes** each hold their forms and their raw file.
 
 **Items** is filled with forms:
 
