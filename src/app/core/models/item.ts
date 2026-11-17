@@ -39,6 +39,4 @@ export interface ItemDraft {
   kind?: string;
   /** The tints of the adjective, then of the suffix, that named the item. */
   tints?: string[];
-  /** The shared kinds (a leaf per root, e.g. `{ material: 'iron' }`) that named and described the item. */
-  shared?: Record<string, string>;
 }

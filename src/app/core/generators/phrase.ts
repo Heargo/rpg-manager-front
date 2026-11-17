@@ -23,8 +23,8 @@ export interface PhraseContext {
   plural?: boolean;
   /** Replacements for `{base}`, `{adjective}`, `{suffix}` and, for NPCs, `{given}`, `{epithet}` and `{noun}`. */
   values?: Partial<Record<ValueName, string>>;
-  /** The shared kinds drawn for the entry, per root id: `{root}` inserts the word, `{root:adjective}` the adjective. */
-  shared?: Record<string, { word?: string; adjective?: string }>;
+  /** What `{kind id}` and `{kind id:adjective}` insert when the id is not a param: a noun or an adjective of that kind. */
+  kindWord?: (id: string, form: 'word' | 'adjective') => string | undefined;
 }
 
 type Node =
@@ -161,13 +161,16 @@ export function checkPhrase(phrase: string): {
   return { errors, params };
 }
 
-/** The names a phrase uses, as `{name}` or `{name:adjective}`: what it needs from the params and the shared kinds. */
-export function usedNames(phrase: string): string[] {
+/** The names a phrase uses, as `{name}` (words) or `{name:adjective}` (adjectives): what it needs from the params and the kinds. */
+export function phraseRefs(phrase: string): {
+  words: string[];
+  adjectives: string[];
+} {
   const { nodes } = parse(phrase);
-  const params: string[] = [];
+  const words: string[] = [];
   const adjectives: string[] = [];
-  usedParams(nodes, params, adjectives);
-  return [...params, ...adjectives];
+  usedParams(nodes, words, adjectives);
+  return { words, adjectives };
 }
 
 /** Expands a phrase, or returns `undefined` when it fails (missing param or value, depth over 5, syntax error). */
@@ -219,19 +222,14 @@ function render(
         part = context.values?.[node.name];
         break;
       case 'adjective':
-        part = context.shared?.[node.name]?.adjective;
+        part = context.kindWord?.(node.name, 'adjective');
         break;
       case 'param': {
-        const drawn = context.shared?.[node.name];
-        if (drawn) {
-          part = drawn.word;
-          break;
-        }
         const entries = context.params?.[node.name];
         part =
           entries && entries.length > 0
             ? expand(source, pick(source, entries), context, depth + 1)
-            : undefined;
+            : context.kindWord?.(node.name, 'word');
         break;
       }
     }

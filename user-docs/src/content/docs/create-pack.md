@@ -17,12 +17,10 @@ La **langue du pack** (français ou anglais, par défaut celle de l'application)
 
 ### Listes de mots (Commun, Objets, PNJ, Compétences, Classes)
 
-Les listes de mots sont réparties en cinq onglets ; chaque introduction rappelle que les listes vides ne sont pas incluses dans le pack. **Commun** contient l'arbre des **types partagés** (ci-dessous) et, pour un pack avec une langue, les **paramètres partagés** et le fichier `common.json` ; **Objets**, **PNJ**, **Compétences** et **Classes** contiennent chacun leurs formulaires et leur fichier brut.
+Les listes de mots sont réparties en cinq onglets ; chaque introduction rappelle que les listes vides ne sont pas incluses dans le pack. **Commun** (pour un pack avec une langue) contient les **paramètres** et le fichier `common.json` ; **Objets**, **PNJ**, **Compétences** et **Classes** contiennent chacun leurs formulaires et leur fichier brut.
 
 **Objets** se remplit avec des formulaires :
 
-- **Types partagés** (onglet Commun) : l'arbre des types partagés (matière → métal → fer) dans un tableau en arbre avec le même panneau latéral que les catégories : libellé, identifiant et nombre de mots, **Ajouter un type partagé**, **Ajouter un enfant**, **Modifier** et **Supprimer** (qui retire les enfants, leurs mots et leur place dans les types acceptés des catégories). Le formulaire demande un identifiant et un **Parent** et, pour un pack avec une langue, les **Mots**, **Adjectifs** et **Descriptions** du type (stockés dans `common.json`). Un pack sans langue n'affiche que l'arbre. Des textes pour un type partagé qu'aucun pack actif ne déclare s'affichent en avertissement sous l'arbre. Renommer un type partagé suit ses enfants, ses textes et les catégories qui le prennent.
-- **Types partagés d'une catégorie** : le formulaire d'une catégorie d'objet, de PNJ, de compétence ou de classe a un champ **Types partagés** : les types partagés de ce brouillon et des packs Base actifs que la catégorie prend (les enfants les héritent).
 - **Catégories** : un tableau en arbre (parent, puis enfants) avec le libellé, l'identifiant, le **Type** et l'**Emplacement** de chaque catégorie. Cliquer une ligne montre son détail dans un panneau latéral ; **Modifier** ouvre le formulaire. **Ajouter une catégorie** (au-dessus du tableau) ajoute une racine, et **Ajouter un enfant** sur une ligne ajoute une catégorie dessous. **Supprimer** demande confirmation et retire la catégorie **avec ses enfants** et leurs textes. Fermer le panneau avec des modifications non enregistrées demande s'il faut les abandonner. Le formulaire demande un identifiant (en anglais, minuscules, chiffres et tirets, par exemple `sabre`), un **Parent** et, pour une racine, un **Type** ; l'**Emplacement** se choisit au niveau où il s'applique. Rien n'est appliqué avant **Enregistrer**. Chaque catégorie a ses **Noms** (avec le **Genre** masculin ou féminin, et **Pluriel** pour un nom comme « Gants »), ses **Descriptions** (une par ligne, avec la [syntaxe des phrases](/docs/packs/#la-syntaxe-des-phrases)) et, si besoin, ses **Modèles de noms** (un par ligne, chacun avec `{base}`) et ses **Adjectifs** et **Suffixes** par rareté (repliés). Ces mots s'additionnent le long de la chaîne : une épée reçoit ceux de `sword`, de `weapon` et d'`equipment`, plus les mots communs. Mettez « affûté » sur `weapon` plutôt qu'en commun, pour qu'aucune capuche ne soit « affûtée ». Les identifiants déjà connus des packs installés sont proposés par autocomplétion, pour réutiliser les catégories standard.
 - **Aperçu** : dans le panneau latéral d'une catégorie, tire quelques objets d'essai avec ses noms et descriptions. Une catégorie sans nom affiche « Rien à tirer : cette catégorie a besoin d'un nom ».
 - **Ligne de couverture** : « Pas encore de sprite pour : … » liste les catégories du pack qu'aucun sprite n'illustre encore. Elle n'empêche rien : un pack peut être sans sprites, et une catégorie sans sprite reçoit une image par type et emplacement.
@@ -30,7 +28,7 @@ Les listes de mots sont réparties en cinq onglets ; chaque introduction rappell
 - **Adjectifs et suffixes communs** (repliés) : les mots qui vont à n'importe quel objet (« ancien », « légendaire »…), par rareté.
 - **Modèles de noms** (repliés) : les modèles par rareté, utiles seulement pour la Base d'une langue.
 
-**Partagé** contient les **Paramètres** : **Ajouter un paramètre** demande son nom (son **rôle dans la phrase** : `maker`, `place`…), puis ses expressions, une à une (**Nouvelle expression**). Chaque expression est un groupe nominal complet avec son article. Un pack sans langue n'a pas de textes : le formulaire demande d'en choisir une dans **Détails**.
+**Commun** contient les **Paramètres** : **Ajouter un paramètre** demande son nom (son **rôle dans la phrase** : `maker`, `place`…), puis ses expressions, une à une (**Nouvelle expression**). Chaque expression est un groupe nominal complet avec son article. Un pack sans langue n'a pas de textes : le formulaire demande d'en choisir une dans **Détails**.
 
 Les **PNJ**, les **compétences** et les **classes** ont les mêmes deux sections que les objets, remplies avec des formulaires (les listes vides sont laissées de côté) :
 
@@ -117,16 +115,11 @@ Et son `pack.json` :
       ]
     }
   },
-  "sharedKinds": {
-    "material": {},
-    "metal": { "parent": "material" },
-    "iron": { "parent": "metal" }
-  },
   "domains": {
     "items": {
       "kinds": {
         "equipment": { "type": "equipment" },
-        "weapon": { "parent": "equipment", "slot": "weapon1", "shared": ["metal"] },
+        "weapon": { "parent": "equipment", "slot": "weapon1" },
         "sword": { "parent": "weapon" },
         "rapier": { "parent": "sword" }
       },
@@ -157,9 +150,8 @@ Et son `pack.json` :
 | `version`, `author`, `license` | Des textes. |
 | `licenseUrl`, `homepage` | Des liens **https** (`homepage` est facultatif). |
 | `tints` | Les teintes du pack : un identifiant et un `gradient` (liste de `position` de 0 à 1 et de `color`). |
-| `sharedKinds` | L'arbre des types partagés : un identifiant et un `parent` facultatif, comme un arbre de catégories (identifiants en kebab-case, sans cycle ; un `parent` déclaré dans un autre pack est permis, et un pack neutre peut le déclarer). Ses mots sont dans `common.json`. |
 | `domains` | Le contenu par domaine : `items`, et `npcs`, `skills`, `classes`. Chacun peut avoir `kinds` (l'arbre des catégories) et `texts` (le chemin de son fichier de langue). Un domaine inconnu de l'application est ignoré avec un avertissement, mais un champ inconnu dans un domaine connu est une erreur (pour repérer les fautes de frappe). |
-| `common` | Le chemin de `generators/common.json` (les paramètres et les mots des types partagés, partagés par tous les domaines). |
+| `common` | Le chemin de `generators/common.json` (les paramètres, partagés par tous les domaines). |
 | `sprites` | La liste des sprites (voir ci-dessous). |
 
 **Catégories** (`domains.items.kinds`) : chaque entrée a un `parent` facultatif. Seules les racines déclarent un `type` (`item`, `consumable` ou `equipment`) ; `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` ou `weapon2`) se déclare sur un niveau de la chaîne d'équipement. L'arbre n'a pas de cycle et sa racine déclare un `type` ; un `parent` déclaré dans un autre pack est permis. Les identifiants sont propres à chaque domaine (`items` `guard` et `npcs` `guard` sont différents).
@@ -200,9 +192,7 @@ Et son `pack.json` :
 - `adjectives`, `suffixes` : les mots communs, pour tout objet, par rareté (`common`, `uncommon`, `rare`, `mythic`, `legendary`). Une catégorie peut aussi avoir ses `adjectives` et `suffixes` (ils s'additionnent le long de la chaîne), et une entrée peut porter une `tint`. Dans le manifeste, une teinte peut avoir `fits` : la liste des catégories qu'elle colore.
 - `templates` : les modèles de noms par rareté, avec `{base}` obligatoire (`{adjective}` et `{suffix}` facultatifs). Facultatifs : le Base de chaque langue les fournit ; à défaut, le nom est `{base}`.
 
-**Types partagés acceptés** : toute catégorie d'un domaine (objets, PNJ, compétences, classes) peut avoir `shared`, une liste d'identifiants de types partagés qu'elle accepte (`"shared": ["metal"]`). La liste est héritée le long de la chaîne ; sans liste, la catégorie ne prend aucun type partagé.
-
-**`generators/common.json`** (paramètres et mots des types partagés, partagés par tous les domaines ; version 2, la version 1 n'est plus acceptée) :
+**`generators/common.json`** (les paramètres, partagés par tous les domaines ; version 2, la version 1 n'est plus acceptée) :
 
 ```json
 {
@@ -211,18 +201,11 @@ Et son `pack.json` :
     "maker": ["un forgeron nain", "les moines de {place}", "un apprenti [maladroit|pressé]"],
     "place": ["Valombre", "la côte gelée"],
     "effect": ["soin", "vigueur"]
-  },
-  "kinds": {
-    "iron": {
-      "words": [{ "text": "fer", "gender": "m" }],
-      "adjectives": [{ "m": "ferré", "f": "ferrée" }, "de fer"]
-    },
-    "metal": { "descriptions": ["Quelques éclats de {material} brillent sous la poussière."] }
   }
 }
 ```
 
-`kinds` contient, par identifiant de type partagé, ses `words` (des noms : `text`, `gender`, `plural`), ses `adjectives` (une chaîne, ou `{ "m": …, "f": … }`) et ses `descriptions` (des phrases). Ils s'additionnent le long de la chaîne, et seule une feuille de l'arbre est tirée. Dans un modèle de nom, une description ou un paramètre, `{material}` (l'identifiant de la racine de l'arbre) insère le mot tiré et `{material:adjective}` son adjectif. Les textes d'un type qu'aucun pack actif ne déclare dans `sharedKinds` sont un avertissement.
+Dans un modèle de nom, une description ou un paramètre, `{kind id}` insère un nom d'une catégorie de n'importe quel domaine (la catégorie ou l'un de ses descendants qui a des noms, parmi les packs actifs) et `{kind id:adjective}` l'un de ses adjectifs, accordé avec le nom de l'entrée. Le tirage a lieu une fois par identifiant et par entrée, si bien qu'un nom et une description s'accordent. Exemple : une description d'objet `"Forgée par {blacksmith}."` où `blacksmith` est une catégorie de PNJ. Un paramètre qui porte le nom d'une catégorie reste un paramètre ; un identifiant qui n'est ni un paramètre ni une catégorie d'un pack actif est un avertissement. Un `common.json` avec `kinds`, ou un manifeste avec un arbre de types partagés, est refusé comme champ inconnu.
 
 **Catégories de PNJ, de compétences et de classes** (`domains.npcs.kinds`, `domains.skills.kinds`, `domains.classes.kinds`) : même arbre, `parent` facultatif. PNJ : `roles` (liste de `story`, `merchant`, `enemy`) et `person` (booléen), hérités. Compétences : `type` (`active` ou `passive`, sur une racine) et `effect` (`damage`, `heal` ou `modify`). Classes : `skills`, une liste de catégories de compétences. Leurs fichiers `texts` sont en v2 (voir plus bas).
 

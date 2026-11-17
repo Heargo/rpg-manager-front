@@ -6,6 +6,7 @@ import {
 } from '../generators/skill-vocabulary';
 import { validateSkillWordList } from '../generators/skill-word-list';
 import { PooledSource } from '../packs/pooled-domain';
+import { PackKindSourcesBusiness } from './pack-kind-sources.business';
 import { ActivePacksBusiness } from './active-packs.business';
 import { LanguageBusiness } from './language.business';
 import {
@@ -19,6 +20,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class SkillVocabularyBusiness {
   private readonly packs = inject(PackBusiness);
+  private readonly kindSources = inject(PackKindSourcesBusiness);
   private readonly active = inject(ActivePacksBusiness);
   private readonly languageBusiness = inject(LanguageBusiness);
   private cached: { key: string; vocabulary: Promise<SkillVocabulary> } | null =
@@ -72,8 +74,12 @@ export class SkillVocabularyBusiness {
       isBase: isBasePack(id),
       ...(pack?.language ? { language: pack.language } : {}),
       kinds: pack?.skillKinds as PooledSource['kinds'],
-      ...(pack?.sharedKinds ? { sharedKinds: pack.sharedKinds } : {}),
     };
+    source.otherDomains = await this.kindSources.otherDomains(
+      id,
+      language,
+      'skills',
+    );
     if (!pack?.language || pack.language !== language) return source;
     if (pack.generators.skills) {
       try {
@@ -96,7 +102,6 @@ export class SkillVocabularyBusiness {
         const result = validateCommonTexts(await this.packs.commonTexts(id));
         if (result.ok) {
           if (result.value.params) source.params = result.value.params;
-          source.sharedTexts = result.value;
         }
       } catch (error) {
         console.warn(

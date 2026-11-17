@@ -27,8 +27,6 @@ export interface CharacterClass {
   startingItems?: string[];
   /** The class kind it was generated from (a kind id of the class vocabulary). */
   kind?: string;
-  /** The shared kinds drawn for it (a leaf per root, e.g. `{ material: 'iron' }`). */
-  shared?: Record<string, string>;
   tree: TreeNode[];
 }
 

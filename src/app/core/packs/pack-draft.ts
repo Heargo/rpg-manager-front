@@ -10,7 +10,6 @@ import {
   PackGenerator,
   PackLanguage,
   PackSprite,
-  SharedKindDef,
   SkillKindDef,
   SpriteKind,
 } from './pack';
@@ -46,8 +45,6 @@ export interface PackDraft {
   generators: Partial<Record<PackGenerator, unknown>>;
   /** The shared `generators/common.json` (params), raw like the word lists. */
   common?: unknown;
-  /** The pack's own shared kinds tree (ids and parents); the words are in `common`. */
-  sharedKinds?: Record<string, SharedKindDef>;
   /** The pack's own items kinds. */
   kinds: Record<string, ItemKindDef>;
   /** The pack's own NPC, skill and class kinds. */
@@ -142,9 +139,6 @@ export function buildPack(draft: PackDraft): {
     licenseUrl: details.licenseUrl,
     ...(details.homepage ? { homepage: details.homepage } : {}),
     tints: draft.tints,
-    ...(draft.sharedKinds && Object.keys(draft.sharedKinds).length
-      ? { sharedKinds: draft.sharedKinds }
-      : {}),
     domains,
     ...(draft.common !== undefined ? { common: COMMON_PATH } : {}),
     sprites,

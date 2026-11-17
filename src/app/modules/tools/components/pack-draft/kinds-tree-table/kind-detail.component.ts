@@ -45,25 +45,6 @@ import { readTexts, scopesOf } from './kind-texts';
             {{ shown(field) || ('packs.creator.kinds.none' | translate) }}
           </dd>
         }
-        @if (domain() !== 'shared') {
-          <dt>{{ 'packs.creator.kinds.shared' | translate }}</dt>
-          <dd data-test="detail-shared">
-            {{ sharedShown() }}
-            @if (sharedShown() && inherited().length) {
-              ,
-            }
-            @if (inherited().length) {
-              <span
-                data-test="detail-shared-inherited"
-                [title]="'packs.creator.kinds.sharedInherited' | translate"
-                >{{ inherited().join(', ') }}</span
-              >
-            }
-            @if (!sharedShown() && !inherited().length) {
-              {{ 'packs.creator.kinds.none' | translate }}
-            }
-          </dd>
-        }
       </dl>
       @if (texted()) {
         <h4>{{ 'packs.creator.kinds.texts' | translate }}</h4>
@@ -75,9 +56,7 @@ import { readTexts, scopesOf } from './kind-texts';
             }
           </dl>
         }
-        @if (domain() !== 'shared') {
-          <app-kind-preview [entries]="drawn()" (run)="preview.emit()" />
-        }
+        <app-kind-preview [entries]="drawn()" (run)="preview.emit()" />
       }
       @if (uncovered()) {
         <p-message data-test="kind-coverage" severity="info" size="small">{{
@@ -137,42 +116,6 @@ export class KindDetailComponent {
 
   protected fieldLabel(field: string): string {
     return FIELD_LABEL[field];
-  }
-
-  /** The shared kinds taken from the ancestors, each with the kind it comes from. */
-  protected readonly inherited = computed(() => {
-    const draft = this.draft();
-    const domain = this.domain();
-    const kinds = (
-      domain === 'items'
-        ? draft.kinds
-        : domain === 'shared'
-          ? {}
-          : domainKindsOf(draft, domain)
-    ) as Record<string, Record<string, unknown>>;
-    const own = new Set<string>(
-      (this.kind().fields['shared'] as string[] | undefined) ?? [],
-    );
-    const result: string[] = [];
-    const seen = new Set<string>();
-    let at = this.kind().fields['parent'] as string | undefined;
-    while (at && !seen.has(at) && kinds[at]) {
-      seen.add(at);
-      for (const id of (kinds[at]['shared'] as string[] | undefined) ?? [])
-        if (!own.has(id)) {
-          own.add(id);
-          result.push(
-            `${id} (${this.language.t('packs.creator.kinds.sharedFrom', { kind: at })})`,
-          );
-        }
-      at = kinds[at]['parent'] as string | undefined;
-    }
-    return result;
-  });
-
-  protected sharedShown(): string {
-    const shared = this.kind().fields['shared'];
-    return Array.isArray(shared) ? shared.join(', ') : '';
   }
 
   protected shown(field: string): string {

@@ -4,7 +4,6 @@ import { resolveItemKind } from '../packs/pack-kinds';
 import {
   ItemKindDef,
   NpcKindDef,
-  SharedKindDef,
   SkillKindDef,
   ClassKindDef,
   Pack,
@@ -130,8 +129,6 @@ export interface InstalledPack {
   /** The pack's own class kinds. */
   classKinds?: Record<string, ClassKindDef>;
   tints: Record<string, PackTint>;
-  /** The pack's own shared kinds tree. */
-  sharedKinds?: Record<string, SharedKindDef>;
 }
 
 const generatorsOf = (pack: Pack): InstalledPack['generators'] => {
@@ -166,7 +163,6 @@ const installedOf = (
   skillKinds: pack.domains?.skills?.kinds ?? {},
   classKinds: pack.domains?.classes?.kinds ?? {},
   tints: pack.tints ?? {},
-  ...(pack.sharedKinds ? { sharedKinds: pack.sharedKinds } : {}),
   ...(link ? { link } : {}),
   ...(local ? { local } : {}),
   ...(pack.homepage ? { homepage: pack.homepage } : {}),

@@ -142,28 +142,26 @@ import { ALL, KindTexts, TextsDomain } from './kind-texts';
             </div>
           </p-accordion-content>
         </p-accordion-panel>
-        @if (domain() !== 'shared') {
-          <p-accordion-panel value="names">
-            <p-accordion-header>{{
-              'packs.creator.kinds.names' | translate
-            }}</p-accordion-header>
-            <p-accordion-content>
-              <div class="section">
-                <small class="hint">{{ namesHint() | translate }}</small>
-                <label class="field">
-                  {{ 'packs.creator.kinds.names' | translate }}
-                  <textarea
-                    pTextarea
-                    rows="3"
-                    [attr.data-test]="'kind-names-' + scope()"
-                    [value]="value().names[scope()] ?? ''"
-                    (input)="setName($any($event.target).value)"
-                  ></textarea>
-                </label>
-              </div>
-            </p-accordion-content>
-          </p-accordion-panel>
-        }
+        <p-accordion-panel value="names">
+          <p-accordion-header>{{
+            'packs.creator.kinds.names' | translate
+          }}</p-accordion-header>
+          <p-accordion-content>
+            <div class="section">
+              <small class="hint">{{ namesHint() | translate }}</small>
+              <label class="field">
+                {{ 'packs.creator.kinds.names' | translate }}
+                <textarea
+                  pTextarea
+                  rows="3"
+                  [attr.data-test]="'kind-names-' + scope()"
+                  [value]="value().names[scope()] ?? ''"
+                  (input)="setName($any($event.target).value)"
+                ></textarea>
+              </label>
+            </div>
+          </p-accordion-content>
+        </p-accordion-panel>
         <p-accordion-panel value="adjectives">
           <p-accordion-header>{{
             'packs.creator.domain.adjectives' | translate
@@ -217,7 +215,7 @@ import { ALL, KindTexts, TextsDomain } from './kind-texts';
             </div>
           </p-accordion-content>
         </p-accordion-panel>
-        @if (domain() !== 'npcs' && domain() !== 'shared') {
+        @if (domain() !== 'npcs') {
           <p-accordion-panel value="suffixes">
             <p-accordion-header>{{
               'packs.creator.domain.top.suffixes' | translate

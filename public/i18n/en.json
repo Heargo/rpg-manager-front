@@ -1653,7 +1653,6 @@
       "licenseUrl": "License link",
       "homepage": "Home page (optional)",
       "listsIntro": "Fill in the forms; the raw JSON of the file is under Advanced: import, export or start from the Base of the pack's language. An empty list is left out of the pack.",
-      "sharedNeutralIntro": "This pack has no language: it declares the shared kinds tree only. The words come with a pack that has a language.",
       "importFile": "Import a file",
       "copyBase": "Copy Base's list",
       "clear": "Clear",
@@ -1733,15 +1732,7 @@
         "nounsAndDescriptions": "Nouns and descriptions",
         "parentCycle": "A kind cannot be under itself or one of its children.",
         "noSprite": "No sprite",
-        "noSpriteHint": "No sprite illustrates this kind or any kind above it.",
-        "sharedTitle": "Shared kinds",
-        "sharedIntro": "Kinds every generator can draw from (material → metal → iron). Domain kinds point at them with their \"Shared kinds\" field.",
-        "addShared": "Add shared kind",
-        "shared": "Shared kinds",
-        "sharedHint": "Shared kinds this kind takes, from this pack and the active packs. Children inherit them.",
-        "wordsCount": "Words",
-        "sharedInherited": "Inherited shared kinds",
-        "sharedFrom": "from {{ kind }}"
+        "noSpriteHint": "No sprite illustrates this kind or any kind above it."
       },
       "tints": {
         "title": "Tints",

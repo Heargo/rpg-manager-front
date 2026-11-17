@@ -89,160 +89,139 @@ import { KindTextsFormComponent } from './kind-texts-form.component';
           }
         </div>
       </section>
-      @if (domain() !== 'shared') {
-        <section>
-          <h4>{{ 'packs.creator.kinds.fieldsTitle' | translate }}</h4>
-          @switch (domain()) {
-            @case ('items') {
-              @if (!form().parent) {
-                <div class="field">
-                  <span class="label">{{
-                    'packs.creator.kinds.type' | translate
-                  }}</span>
-                  <p-select
-                    data-test="kind-type"
-                    [options]="typeOptions()"
-                    optionLabel="label"
-                    optionValue="value"
-                    [ngModel]="form().fields['type']"
-                    (onChange)="setField('type', $event.value ?? undefined)"
-                    [showClear]="true"
-                    [ariaLabel]="'packs.creator.kinds.type' | translate"
-                    [fluid]="true"
-                  />
-                </div>
-              }
+      <section>
+        <h4>{{ 'packs.creator.kinds.fieldsTitle' | translate }}</h4>
+        @switch (domain()) {
+          @case ('items') {
+            @if (!form().parent) {
               <div class="field">
                 <span class="label">{{
-                  'packs.creator.kinds.slot' | translate
+                  'packs.creator.kinds.type' | translate
                 }}</span>
                 <p-select
-                  data-test="kind-slot"
-                  [options]="slotOptions()"
+                  data-test="kind-type"
+                  [options]="typeOptions()"
                   optionLabel="label"
                   optionValue="value"
-                  [ngModel]="form().fields['slot']"
-                  (onChange)="setField('slot', $event.value ?? undefined)"
+                  [ngModel]="form().fields['type']"
+                  (onChange)="setField('type', $event.value ?? undefined)"
                   [showClear]="true"
-                  [ariaLabel]="'packs.creator.kinds.slot' | translate"
+                  [ariaLabel]="'packs.creator.kinds.type' | translate"
                   [fluid]="true"
                 />
               </div>
             }
-            @case ('npcs') {
+            <div class="field">
+              <span class="label">{{
+                'packs.creator.kinds.slot' | translate
+              }}</span>
+              <p-select
+                data-test="kind-slot"
+                [options]="slotOptions()"
+                optionLabel="label"
+                optionValue="value"
+                [ngModel]="form().fields['slot']"
+                (onChange)="setField('slot', $event.value ?? undefined)"
+                [showClear]="true"
+                [ariaLabel]="'packs.creator.kinds.slot' | translate"
+                [fluid]="true"
+              />
+            </div>
+          }
+          @case ('npcs') {
+            <div class="field">
+              <span class="label">{{
+                'packs.creator.domain.roles' | translate
+              }}</span>
+              <p-multiselect
+                data-test="kind-roles"
+                [options]="roleOptions()"
+                optionLabel="label"
+                optionValue="value"
+                display="chip"
+                [ngModel]="form().fields['roles'] ?? []"
+                (onChange)="setField('roles', listOrNothing($event.value))"
+                [ariaLabel]="'packs.creator.domain.roles' | translate"
+                [fluid]="true"
+              />
+            </div>
+            @if (!form().parent) {
               <div class="field">
                 <span class="label">{{
-                  'packs.creator.domain.roles' | translate
+                  'packs.creator.domain.person' | translate
                 }}</span>
-                <p-multiselect
-                  data-test="kind-roles"
-                  [options]="roleOptions()"
+                <p-select
+                  data-test="kind-person"
+                  [options]="personOptions()"
                   optionLabel="label"
                   optionValue="value"
-                  display="chip"
-                  [ngModel]="form().fields['roles'] ?? []"
-                  (onChange)="setField('roles', listOrNothing($event.value))"
-                  [ariaLabel]="'packs.creator.domain.roles' | translate"
-                  [fluid]="true"
-                />
-              </div>
-              @if (!form().parent) {
-                <div class="field">
-                  <span class="label">{{
-                    'packs.creator.domain.person' | translate
-                  }}</span>
-                  <p-select
-                    data-test="kind-person"
-                    [options]="personOptions()"
-                    optionLabel="label"
-                    optionValue="value"
-                    [ngModel]="form().fields['person']"
-                    (onChange)="setField('person', $event.value ?? undefined)"
-                    [showClear]="true"
-                    [ariaLabel]="'packs.creator.domain.person' | translate"
-                    [fluid]="true"
-                  />
-                </div>
-              }
-            }
-            @case ('skills') {
-              @if (!form().parent) {
-                <div class="field">
-                  <span class="label">{{
-                    'packs.creator.kinds.type' | translate
-                  }}</span>
-                  <p-select
-                    data-test="kind-type"
-                    [options]="skillTypeOptions()"
-                    optionLabel="label"
-                    optionValue="value"
-                    [ngModel]="form().fields['type']"
-                    (onChange)="setField('type', $event.value ?? undefined)"
-                    [showClear]="true"
-                    [ariaLabel]="'packs.creator.kinds.type' | translate"
-                    [fluid]="true"
-                  />
-                </div>
-              }
-              @if (form().fields['type'] !== 'passive') {
-                <div class="field">
-                  <span class="label">{{
-                    'packs.creator.domain.effect' | translate
-                  }}</span>
-                  <p-select
-                    data-test="kind-effect"
-                    [options]="effectOptions()"
-                    optionLabel="label"
-                    optionValue="value"
-                    [ngModel]="form().fields['effect']"
-                    (onChange)="setField('effect', $event.value ?? undefined)"
-                    [showClear]="true"
-                    [ariaLabel]="'packs.creator.domain.effect' | translate"
-                    [fluid]="true"
-                  />
-                </div>
-              }
-            }
-            @case ('classes') {
-              <div class="field">
-                <span class="label">{{
-                  'packs.creator.domain.skills' | translate
-                }}</span>
-                <p-multiselect
-                  data-test="kind-skills"
-                  [options]="skillOptions()"
-                  optionLabel="label"
-                  optionValue="value"
-                  display="chip"
-                  [ngModel]="form().fields['skills'] ?? []"
-                  (onChange)="setField('skills', listOrNothing($event.value))"
-                  [ariaLabel]="'packs.creator.domain.skills' | translate"
+                  [ngModel]="form().fields['person']"
+                  (onChange)="setField('person', $event.value ?? undefined)"
+                  [showClear]="true"
+                  [ariaLabel]="'packs.creator.domain.person' | translate"
                   [fluid]="true"
                 />
               </div>
             }
           }
-          <div class="field">
-            <span class="label">{{
-              'packs.creator.kinds.shared' | translate
-            }}</span>
-            <p-multiselect
-              data-test="kind-shared"
-              [options]="sharedOptions()"
-              optionLabel="label"
-              optionValue="value"
-              display="chip"
-              [ngModel]="form().fields['shared'] ?? []"
-              (onChange)="setField('shared', listOrNothing($event.value))"
-              [ariaLabel]="'packs.creator.kinds.shared' | translate"
-              [fluid]="true"
-            />
-            <small class="hint">{{
-              'packs.creator.kinds.sharedHint' | translate
-            }}</small>
-          </div>
-        </section>
-      }
+          @case ('skills') {
+            @if (!form().parent) {
+              <div class="field">
+                <span class="label">{{
+                  'packs.creator.kinds.type' | translate
+                }}</span>
+                <p-select
+                  data-test="kind-type"
+                  [options]="skillTypeOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  [ngModel]="form().fields['type']"
+                  (onChange)="setField('type', $event.value ?? undefined)"
+                  [showClear]="true"
+                  [ariaLabel]="'packs.creator.kinds.type' | translate"
+                  [fluid]="true"
+                />
+              </div>
+            }
+            @if (form().fields['type'] !== 'passive') {
+              <div class="field">
+                <span class="label">{{
+                  'packs.creator.domain.effect' | translate
+                }}</span>
+                <p-select
+                  data-test="kind-effect"
+                  [options]="effectOptions()"
+                  optionLabel="label"
+                  optionValue="value"
+                  [ngModel]="form().fields['effect']"
+                  (onChange)="setField('effect', $event.value ?? undefined)"
+                  [showClear]="true"
+                  [ariaLabel]="'packs.creator.domain.effect' | translate"
+                  [fluid]="true"
+                />
+              </div>
+            }
+          }
+          @case ('classes') {
+            <div class="field">
+              <span class="label">{{
+                'packs.creator.domain.skills' | translate
+              }}</span>
+              <p-multiselect
+                data-test="kind-skills"
+                [options]="skillOptions()"
+                optionLabel="label"
+                optionValue="value"
+                display="chip"
+                [ngModel]="form().fields['skills'] ?? []"
+                (onChange)="setField('skills', listOrNothing($event.value))"
+                [ariaLabel]="'packs.creator.domain.skills' | translate"
+                [fluid]="true"
+              />
+            </div>
+          }
+        }
+      </section>
       @if (form().texts; as texts) {
         <section>
           <h4>{{ 'packs.creator.kinds.texts' | translate }}</h4>
@@ -251,13 +230,11 @@ import { KindTextsFormComponent } from './kind-texts-form.component';
             [domain]="domain()"
             (valueChange)="patch({ texts: $event })"
           />
-          @if (domain() !== 'shared') {
-            <app-kind-preview
-              [entries]="drawn()"
-              [disabled]="error() !== null || !form().id.trim()"
-              (run)="preview.emit()"
-            />
-          }
+          <app-kind-preview
+            [entries]="drawn()"
+            [disabled]="error() !== null || !form().id.trim()"
+            (run)="preview.emit()"
+          />
         </section>
       }
     </div>
@@ -309,8 +286,6 @@ export class KindFormComponent {
   /** The kinds that may be picked as the parent. */
   readonly candidates = input<KindKey[]>([]);
   readonly skillOptions = input<{ value: string; label: string }[]>([]);
-  /** The shared kinds a kind may take (this draft's and the active packs'). */
-  readonly sharedOptions = input<{ value: string; label: string }[]>([]);
   readonly drawn = input<Drawn[] | null>(null);
   readonly formChange = output<KindForm>();
   readonly preview = output<void>();

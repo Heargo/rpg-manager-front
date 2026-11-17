@@ -234,11 +234,16 @@ describe('PackDraftFormBusiness.issues', () => {
     expect(issues).toEqual([]);
   });
 
-  describe('common.json warnings', () => {
+  describe('placeholders and common.json warnings', () => {
     const commonOf = (...descriptions: string[]) =>
+      draft({ common: { version: 2, params: { spell: descriptions } } });
+    const itemWith = (description: string, over: Record<string, unknown> = {}) =>
       draft({
-        sharedKinds: { gem: {}, ruby: { parent: 'gem' } },
-        common: { version: 2, kinds: { ruby: { words: [{ text: 'Ruby' }], descriptions } } },
+        kinds: { orb: { type: 'item' } },
+        generators: {
+          items: { version: 2, kinds: { orb: { nouns: [{ text: 'Orb' }], descriptions: [description] } } },
+        },
+        ...over,
       });
     const messages = async (d: PackDraft) => (await setup().issues(d)).map((i) => i.message);
 
@@ -254,15 +259,47 @@ describe('PackDraftFormBusiness.issues', () => {
       expect(found.some((m) => m.includes('param {nowhere} is used but not defined'))).toBe(true);
     });
 
-    it('still warns about texts for an undeclared shared kind', async () => {
+    it('does not warn about an id that is a kind of another domain in the draft', async () => {
+      const found = await messages(
+        itemWith('Made by {smith}.', { npcKinds: { smith: { roles: ['merchant'] } } }),
+      );
+
+      expect(found.filter((m) => m.includes('{smith}'))).toEqual([]);
+    });
+
+    it('does not warn about an id that is a kind of another domain in an installed pack', async () => {
+      const found = await messages(itemWith('Made by {blacksmith}, kept by {guard:adjective}.'));
+
+      expect(found.filter((m) => m.includes('{blacksmith}') || m.includes('{guard}'))).toEqual([]);
+    });
+
+    it('warns about an id that is neither a param nor a kind of any active pack', async () => {
+      const found = await messages(
+        itemWith('Made by {smith} and {ghost}.', { npcKinds: { smith: { roles: ['merchant'] } } }),
+      );
+
+      expect(found.some((m) => m.includes('{ghost}') && m.includes('not defined'))).toBe(true);
+      expect(found.filter((m) => m.includes('{smith}'))).toEqual([]);
+    });
+
+    it('warns about an unknown id used in a param of common.json, and not about a kind of the draft', async () => {
       const found = await messages(
         draft({
-          sharedKinds: { gem: {} },
-          common: { version: 2, kinds: { ghost: { words: [{ text: 'Boo' }] } } },
+          skillKinds: { smite: { type: 'active', effect: 'damage' } },
+          common: { version: 2, params: { spell: ['{smite} and {ghost}'] } },
         }),
       );
 
-      expect(found.some((m) => m.includes('shared kind "ghost" has texts but no active pack declares it'))).toBe(true);
+      expect(found.some((m) => m.includes('{ghost}'))).toBe(true);
+      expect(found.filter((m) => m.includes('{smite}'))).toEqual([]);
+    });
+
+    it('rejects a common.json that still has kinds, as an unknown field', async () => {
+      const issues = await setup().issues(
+        draft({ common: { version: 2, kinds: { ruby: { words: [{ text: 'Ruby' }] } } } }),
+      );
+
+      expect(issues.some((i) => i.level === 'error' && i.message.includes('kinds'))).toBe(true);
     });
   });
 });

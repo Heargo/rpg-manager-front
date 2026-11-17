@@ -6,7 +6,6 @@ import {
   ITEM_KIND_SCHEMA,
   KindSchema,
   NPC_KIND_SCHEMA,
-  SHARED_KIND_SCHEMA,
   SKILL_KIND_SCHEMA,
   validateKindTree,
 } from './pack-kinds';
@@ -49,8 +48,6 @@ export interface ItemKindDef {
   parent?: string;
   type?: ItemType;
   slot?: EquipmentSlot;
-  /** Shared kind ids the item may take (a kind of the `sharedKinds` trees), inherited down the chain. */
-  shared?: string[];
 }
 
 /** A node of the NPC tree: a root has `roles` (and `person`), a child has a `parent` and may override `roles`. */
@@ -58,7 +55,6 @@ export interface NpcKindDef {
   parent?: string;
   roles?: NpcRole[];
   person?: boolean;
-  shared?: string[];
 }
 
 /** A node of the skill tree: a root has a `type` (and maybe an `effect`), a child has a `parent` and may override `effect`. */
@@ -66,19 +62,12 @@ export interface SkillKindDef {
   parent?: string;
   type?: SkillType;
   effect?: 'damage' | 'heal' | 'modify';
-  shared?: string[];
 }
 
 /** A node of the class tree: `skills` are the skill kinds it favours (the nearest level that has some wins). */
 export interface ClassKindDef {
   parent?: string;
   skills?: string[];
-  shared?: string[];
-}
-
-/** A node of the shared kinds tree (`material` → `metal` → `iron`): a root has no `parent`. */
-export interface SharedKindDef {
-  parent?: string;
 }
 
 export interface PackDomainDef<K = never> {
@@ -116,8 +105,6 @@ export interface Pack {
   licenseUrl: string;
   homepage?: string;
   tints?: Record<string, PackTint>;
-  /** The shared kinds tree every generator's names and descriptions can draw from; the words are in `common`. */
-  sharedKinds?: Record<string, SharedKindDef>;
   domains?: PackDomains;
   /** The attributes the pack's fixed content uses. */
   attributes?: PackAttribute[];
@@ -143,6 +130,25 @@ export const contentPath = (
 ): string | undefined => pack.domains?.[domain]?.content;
 
 const ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/** The top-level fields of `pack.json`; any other is an error (a typo, or a field of an older format). */
+const MANIFEST_FIELDS: readonly string[] = [
+  'format',
+  'id',
+  'language',
+  'name',
+  'description',
+  'version',
+  'author',
+  'license',
+  'licenseUrl',
+  'homepage',
+  'tints',
+  'domains',
+  'attributes',
+  'common',
+  'sprites',
+];
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -332,15 +338,9 @@ export function validatePack(json: unknown): PackValidation {
   if (json['attributes'] !== undefined)
     validateAttributes(json['attributes'], errors);
   if (json['tints'] !== undefined) validateTints(json['tints'], errors);
-  if (json['sharedKinds'] !== undefined)
-    errors.push(
-      ...validateKindTree(
-        '',
-        json['sharedKinds'],
-        SHARED_KIND_SCHEMA,
-        'sharedKinds',
-      ),
-    );
+  for (const field of Object.keys(json))
+    if (!MANIFEST_FIELDS.includes(field))
+      errors.push(`unknown field "${field}"`);
   const domains =
     json['domains'] !== undefined
       ? validateDomains(json['domains'], neutral, errors, warnings)

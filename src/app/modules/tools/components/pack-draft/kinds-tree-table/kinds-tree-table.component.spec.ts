@@ -518,24 +518,37 @@ describe('KindsTreeTableComponent classes skills cell', () => {
   });
 });
 
-describe('KindsTreeTableComponent detail of inherited shared kinds (items)', () => {
-  it('shows the shared kinds a child inherits from its parent, marked as inherited, not "None"', async () => {
-    const view = await renderEditor(
-      KindsTreeTableComponent,
-      draftOf({ kinds: { gear: { type: 'equipment', shared: ['metal'] }, blade: { parent: 'gear' } } }),
-      [],
-      { domain: 'items' },
-    );
-
-    view.$('kind-row-blade')!.click();
+describe('KindsTreeTableComponent without shared kinds (items)', () => {
+  const open = () =>
+    renderEditor(KindsTreeTableComponent, draftOf({ kinds: { gear: { type: 'equipment' }, blade: { parent: 'gear' } } }), [], {
+      domain: 'items',
+    });
+  const settle = async (view: Awaited<ReturnType<typeof open>>) => {
     view.fixture.detectChanges();
     await view.fixture.whenStable();
     view.fixture.detectChanges();
+  };
+
+  it('shows no Shared kinds line in the detail of a kind', async () => {
+    const view = await open();
+    view.$('kind-row-blade')!.click();
+    await settle(view);
 
     const detail = document.querySelector<HTMLElement>('[data-test="kind-detail"]')!;
-    const inherited = detail.querySelector<HTMLElement>('[data-test="detail-shared-inherited"]');
-    expect(inherited).not.toBeNull();
-    expect(inherited!.textContent).toContain('metal');
-    expect(detail.querySelector('[data-test="detail-shared"]')!.textContent).not.toMatch(/none/i);
+    expect(detail).not.toBeNull();
+    expect(detail.querySelector('[data-test="detail-shared"]')).toBeNull();
+    expect(detail.querySelector('[data-test="detail-shared-inherited"]')).toBeNull();
+  });
+
+  it('has no Shared kinds multiselect in the form of a kind', async () => {
+    const view = await open();
+    view.$('kind-row-blade')!.click();
+    await settle(view);
+    const edit = document.querySelector<HTMLElement>('[data-test="detail-edit"]')!;
+    (edit instanceof HTMLButtonElement ? edit : (edit.querySelector('button') ?? edit)).click();
+    await settle(view);
+
+    expect(document.querySelector('[data-test="kind-form"]')).not.toBeNull();
+    expect(document.querySelector('[data-test="kind-shared"]')).toBeNull();
   });
 });

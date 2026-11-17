@@ -1,8 +1,15 @@
 import { GradientStop, PackTint } from './pack';
-import { SharedKindTexts } from '../generators/common-texts';
 import { KindSchema } from './pack-kinds';
 
 type Fields = Record<string, unknown>;
+
+export type KindDomain = 'items' | 'npcs' | 'skills' | 'classes';
+
+/** The kinds and the texts a pack gives one domain. */
+export interface DomainSource {
+  kinds?: Record<string, Fields>;
+  texts?: Fields;
+}
 
 /** What one active pack gives a domain, in the world's pack order. `texts` is already filtered to the world's language. */
 export interface PooledSource {
@@ -14,10 +21,8 @@ export interface PooledSource {
   texts?: Fields;
   tints?: Record<string, PackTint>;
   params?: Record<string, string[]>;
-  /** The shared kinds tree of the pack's manifest. */
-  sharedKinds?: Record<string, { parent?: string }>;
-  /** The parsed `common.json` (v2): the words, adjectives and descriptions of the shared kinds. */
-  sharedTexts?: { version?: number; kinds?: Record<string, SharedKindTexts> };
+  /** The other domains' kinds and texts, as the pack gives them: what `{kind id}` in a phrase can refer to. */
+  otherDomains?: Partial<Record<KindDomain, DomainSource>>;
 }
 
 /** A kind of the pooled tree: the schema's fields resolved up the chain, and the chain from the kind to its root. */

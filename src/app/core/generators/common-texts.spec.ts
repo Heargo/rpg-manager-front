@@ -44,6 +44,11 @@ describe('validateCommonTexts', () => {
     expect(errorsOf({ ...valid(), colour: {} }).some((e) => e.includes('colour'))).toBe(true);
   });
 
+  it('rejects the kinds of the former common.json as an unknown field', () => {
+    const errors = errorsOf({ ...valid(), kinds: { iron: { words: [{ text: 'fer' }] } } });
+    expect(errors.some((e) => e.includes('kinds'))).toBe(true);
+  });
+
   it('rejects a bad param name and bad entries, with their path', () => {
     const json = valid();
     json['params']['Bad Name'] = ['x'];
@@ -81,11 +86,11 @@ describe('the Base common texts', () => {
   it.each([
     ['en', enCommon, enPack],
     ['fr', frCommon, frPack],
-  ])('%s is valid, with the standard params of 5 entries or more', (_lang, json, pack) => {
-    const result = validateCommonTexts(json, Object.keys(pack.sharedKinds));
+  ])('%s is valid, with the standard params, material included, of 5 entries or more', (_lang, json, pack) => {
+    const result = validateCommonTexts(json);
     expect(result.ok ? [] : result.errors).toEqual([]);
     expect(result.ok ? result.warnings : []).toEqual([]);
-    for (const name of ['maker', 'owner', 'place', 'event', 'creature', 'effect']) {
+    for (const name of ['maker', 'owner', 'place', 'event', 'creature', 'effect', 'material']) {
       const entries: string[] = (json as Json)['params'][name] ?? [];
       expect(entries.length, name).toBeGreaterThanOrEqual(5);
       for (const entry of entries) expect(checkPhrase(entry).errors).toEqual([]);

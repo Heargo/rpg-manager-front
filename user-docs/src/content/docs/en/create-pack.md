@@ -17,12 +17,10 @@ The **pack language** (English or French, by default the app's), the name, the d
 
 ### Word lists (Common, Items, NPCs, Skills, Classes)
 
-The word lists are split in five tabs; each intro reminds you that empty lists are left out of the pack. **Common** holds the **Shared kinds** tree (below) and, for a pack with a language, the **Shared** params and the `common.json` file; **Items**, **NPCs**, **Skills** and **Classes** each hold their forms and their raw file.
+The word lists are split in five tabs; each intro reminds you that empty lists are left out of the pack. **Common** (for a pack with a language) holds the **Params** and the `common.json` file; **Items**, **NPCs**, **Skills** and **Classes** each hold their forms and their raw file.
 
 **Items** is filled with forms:
 
-- **Shared kinds** (Common tab): the tree of shared kinds (material → metal → iron) as a tree table with the same side panel as the kinds: label, id and the number of words, **Add shared kind**, **Add child**, **Edit** and **Delete** (which removes the children, their words and their place in the domain kinds' fits). The form asks for an id and a **Parent** and, for a pack with a language, the **Words**, **Adjectives** and **Descriptions** of the kind (stored in `common.json`). A pack with no language shows the tree only. Texts for a shared kind that no active pack declares show as a warning under the tree. Renaming a shared kind follows its children, its texts and the kinds that take it.
-- **Shared kinds on a domain kind**: the form of an item, NPC, skill or class kind has a **Shared kinds** field: the shared kinds of this draft and of the active Base packs that the kind takes (children inherit them).
 - **Kinds**: a tree table (parent, then children) with the label, id, **Type** and **Slot** of each kind. Click a row to see its detail in a side panel; **Edit** opens the form. **Add a kind** (above the table) adds a root, and **Add child** on a row adds a kind under it. **Delete** asks first and removes the kind **with its children** and their texts. Closing the panel with unsaved changes asks whether to discard them. The form asks for an id (English, lowercase letters, digits and dashes, for example `sabre`), a **Parent** and, for a root, a **Type**; the **Slot** is chosen on the level where it applies. Nothing is applied until **Save**. Each kind has its **Nouns** (with the **Gender** masculine or feminine, and **Plural** for a noun such as "Gloves"), its **Descriptions** (one per line, using the [phrase syntax](/docs/en/packs/#the-phrase-syntax)) and, if needed, its **Name templates** (one per line, each with `{base}`) and its **Adjectives** and **Suffixes** per rarity (collapsed). These words add up along the chain: a sword gets those of `sword`, `weapon` and `equipment`, plus the common words. Put "sharpened" on `weapon` rather than in the common words, so no hood is "sharpened". Ids already known from installed packs are offered by autocompletion, so you can reuse the standard kinds.
 - **Preview**: in the side panel of a kind, draws a few trial items with its nouns and descriptions. A kind with no noun says "Nothing to draw: this kind needs a noun".
 - **Coverage line**: "No sprite yet for: …" lists the pack's kinds that no sprite illustrates yet. It blocks nothing: a pack can have no sprites, and a kind with no sprite gets an image by type and slot.
@@ -30,7 +28,7 @@ The word lists are split in five tabs; each intro reminds you that empty lists a
 - **Common adjectives and suffixes** (collapsed): words that fit any item ("ancient", "legendary"…), per rarity.
 - **Name templates** (collapsed): the templates per rarity, only needed for a language Base. Untinted adjectives and suffixes stay in the raw file (see Advanced).
 
-**Shared** holds the **Params**: **Add a param** asks for its name (its **role in the sentence**: `maker`, `place`…), then its phrases one by one (**New phrase**). Each phrase is a complete noun phrase with its article. A pack with no language has no texts: the form asks you to choose one in **Details**.
+**Common** holds the **Params**: **Add a param** asks for its name (its **role in the sentence**: `maker`, `place`…), then its phrases one by one (**New phrase**). Each phrase is a complete noun phrase with its article. A pack with no language has no texts: the form asks you to choose one in **Details**.
 
 **NPCs**, **skills** and **classes** have the same two sections as items, filled with forms (empty lists are left out):
 
@@ -117,16 +115,11 @@ And its `pack.json`:
       ]
     }
   },
-  "sharedKinds": {
-    "material": {},
-    "metal": { "parent": "material" },
-    "iron": { "parent": "metal" }
-  },
   "domains": {
     "items": {
       "kinds": {
         "equipment": { "type": "equipment" },
-        "weapon": { "parent": "equipment", "slot": "weapon1", "shared": ["metal"] },
+        "weapon": { "parent": "equipment", "slot": "weapon1" },
         "sword": { "parent": "weapon" },
         "rapier": { "parent": "sword" }
       },
@@ -157,9 +150,8 @@ And its `pack.json`:
 | `version`, `author`, `license` | Texts. |
 | `licenseUrl`, `homepage` | **https** links (`homepage` is optional). |
 | `tints` | The pack's tints: an id and a `gradient` (a list of `position` from 0 to 1 and `color`). |
-| `sharedKinds` | The shared kinds tree: an id and an optional `parent`, like a kind tree (kebab-case ids, no cycle; a `parent` declared in another pack is allowed, and a neutral pack may declare it). Its words are in `common.json`. |
 | `domains` | The content per domain: `items`, and `npcs`, `skills`, `classes`. Each can have `kinds` (the kind tree) and `texts` (the path to its language file). A domain the app doesn't know is ignored with a warning, but an unknown field inside a known domain is an error (to catch typos). |
-| `common` | The path to `generators/common.json` (the params and the shared kinds' words, shared by every domain). |
+| `common` | The path to `generators/common.json` (the params, shared by every domain). |
 | `sprites` | The list of sprites (see below). |
 
 **Kinds** (`domains.items.kinds`): each entry has an optional `parent`. Only roots declare a `type` (`item`, `consumable` or `equipment`); `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` or `weapon2`) is declared on one level of the equipment chain. The tree has no cycle and its root declares a `type`; a `parent` declared in another pack is allowed. Ids are scoped by domain (`items` `guard` and `npcs` `guard` are different).
@@ -200,9 +192,7 @@ And its `pack.json`:
 - `adjectives`, `suffixes`: the common words, for any item, per rarity (`common`, `uncommon`, `rare`, `mythic`, `legendary`). A kind can also have its own `adjectives` and `suffixes` (they add up along the chain), and an entry may carry a `tint`. In the manifest, a tint may have `fits`: the kinds it colours.
 - `templates`: name templates per rarity, `{base}` required (`{adjective}` and `{suffix}` optional). Optional: each language's Base provides them; otherwise the name is `{base}`.
 
-**Shared fits**: any domain kind (items, NPCs, skills, classes) may have `shared`, a list of shared kind ids it takes (`"shared": ["metal"]`). The list is inherited down the chain; without one, the kind takes no shared kind.
-
-**`generators/common.json`** (params and shared kinds' words, shared by every domain; version 2, version 1 is no longer accepted):
+**`generators/common.json`** (the params, shared by every domain; version 2, version 1 is no longer accepted):
 
 ```json
 {
@@ -211,18 +201,11 @@ And its `pack.json`:
     "maker": ["a dwarf smith", "the monks of {place}", "a [clumsy|hasty] apprentice"],
     "place": ["Duskhollow", "the frozen coast"],
     "effect": ["healing", "vigor"]
-  },
-  "kinds": {
-    "iron": {
-      "words": [{ "text": "iron" }],
-      "adjectives": ["iron", "ferrous"]
-    },
-    "metal": { "descriptions": ["Flecks of {material} glint under the dust."] }
   }
 }
 ```
 
-`kinds` holds, per shared kind id, its `words` (nouns: `text`, `gender`, `plural`), its `adjectives` (a string, or `{ "m": …, "f": … }`) and its `descriptions` (phrases). They add up along the chain, and only a leaf of the tree is drawn. In a name template, a description or a param, `{material}` (the tree's root id) inserts the drawn word and `{material:adjective}` its adjective. Texts for a kind that no active pack declares in `sharedKinds` are a warning.
+In a name template, a description or a param, `{kind id}` inserts a noun of a kind of any domain (the kind or one of its descendants that has nouns, from the active packs) and `{kind id:adjective}` one of its adjectives, agreed with the noun of the entry. The draw happens once per id for each entry, so a name and a description agree. Example: an item description `"Forged by {blacksmith}."` where `blacksmith` is an NPC kind. A param named like a kind stays a param; an id that is neither a param nor a kind of an active pack is a warning. A `common.json` with `kinds`, or a manifest with a shared kinds tree, is rejected as an unknown field.
 
 **NPC, skill and class kinds** (`domains.npcs.kinds`, `domains.skills.kinds`, `domains.classes.kinds`): same tree, `parent` optional. NPCs: `roles` (list of `story`, `merchant`, `enemy`) and `person` (boolean), inherited. Skills: `type` (`active` or `passive`, on a root) and `effect` (`damage`, `heal` or `modify`). Classes: `skills`, a list of skill kinds. Their `texts` files are v2 (below).
 

@@ -180,9 +180,11 @@ const SPRITES_PER_PAGE = 12;
             <p-tab value="details">{{
               'packs.creator.tabs.details' | translate
             }}</p-tab>
-            <p-tab value="common">{{
-              'packs.creator.tabs.common' | translate
-            }}</p-tab>
+            @if (current.details.language !== undefined) {
+              <p-tab value="common">{{
+                'packs.creator.tabs.common' | translate
+              }}</p-tab>
+            }
             <p-tab value="items">{{
               'packs.generator.items' | translate
             }}</p-tab>
@@ -313,29 +315,12 @@ const SPRITES_PER_PAGE = 12;
                 />
               </div>
             </p-tabpanel>
-            <p-tabpanel value="common">
-              @if (tab() === 'common') {
-                <p class="hint">
-                  {{
-                    (current.details.language !== undefined
-                      ? 'packs.creator.listsIntro'
-                      : 'packs.creator.sharedNeutralIntro'
-                    ) | translate
-                  }}
-                </p>
-                <section class="list">
-                  <h3>{{ 'packs.creator.kinds.sharedTitle' | translate }}</h3>
+            @if (current.details.language !== undefined) {
+              <p-tabpanel value="common">
+                @if (tab() === 'common') {
                   <p class="hint">
-                    {{ 'packs.creator.kinds.sharedIntro' | translate }}
+                    {{ 'packs.creator.listsIntro' | translate }}
                   </p>
-                  <app-kinds-tree-table
-                    [draft]="current"
-                    [issues]="issues()"
-                    domain="shared"
-                    (changed)="edited($event)"
-                  />
-                </section>
-                @if (current.details.language !== undefined) {
                   <section class="list">
                     <h3>{{ 'packs.creator.params.title' | translate }}</h3>
                     <app-params-editor
@@ -401,8 +386,8 @@ const SPRITES_PER_PAGE = 12;
                     </p-panel>
                   </section>
                 }
-              }
-            </p-tabpanel>
+              </p-tabpanel>
+            }
             <p-tabpanel value="items">
               @if (tab() === 'items') {
                 <p class="hint">{{ 'packs.creator.listsIntro' | translate }}</p>
@@ -791,7 +776,6 @@ export class PackDraftPageComponent {
     tints: [],
     params: [],
     domainKinds: { npcs: [], skills: [], classes: [] },
-    sharedKinds: [],
   });
   /** The validation messages of the draft, each with the field it is about. */
   protected readonly issues = signal<DraftIssue[]>([]);

@@ -245,81 +245,6 @@
    ]
   }
  },
- "sharedKinds": {
-  "material": {},
-  "metal": {
-   "parent": "material"
-  },
-  "iron": {
-   "parent": "metal"
-  },
-  "steel": {
-   "parent": "metal"
-  },
-  "bronze": {
-   "parent": "metal"
-  },
-  "copper": {
-   "parent": "metal"
-  },
-  "wood": {
-   "parent": "material"
-  },
-  "oak": {
-   "parent": "wood"
-  },
-  "ash": {
-   "parent": "wood"
-  },
-  "yew": {
-   "parent": "wood"
-  },
-  "willow": {
-   "parent": "wood"
-  },
-  "leather": {
-   "parent": "material"
-  },
-  "tanned-leather": {
-   "parent": "leather"
-  },
-  "boiled-leather": {
-   "parent": "leather"
-  },
-  "cloth": {
-   "parent": "material"
-  },
-  "linen": {
-   "parent": "cloth"
-  },
-  "wool": {
-   "parent": "cloth"
-  },
-  "silk": {
-   "parent": "cloth"
-  },
-  "bone": {
-   "parent": "material"
-  },
-  "ivory": {
-   "parent": "bone"
-  },
-  "horn": {
-   "parent": "bone"
-  },
-  "stone": {
-   "parent": "material"
-  },
-  "granite": {
-   "parent": "stone"
-  },
-  "obsidian": {
-   "parent": "stone"
-  },
-  "marble": {
-   "parent": "stone"
-  }
- },
  "domains": {
   "items": {
    "kinds": {
@@ -334,76 +259,43 @@
     },
     "head": {
      "parent": "equipment",
-     "slot": "head",
-     "shared": [
-      "metal"
-     ]
+     "slot": "head"
     },
     "earring": {
      "parent": "equipment",
-     "slot": "earring",
-     "shared": [
-      "metal"
-     ]
+     "slot": "earring"
     },
     "necklace": {
      "parent": "equipment",
-     "slot": "necklace",
-     "shared": [
-      "metal"
-     ]
+     "slot": "necklace"
     },
     "ring": {
      "parent": "equipment",
-     "slot": "ring",
-     "shared": [
-      "metal"
-     ]
+     "slot": "ring"
     },
     "chest": {
      "parent": "equipment",
-     "slot": "chest",
-     "shared": [
-      "cloth",
-      "leather"
-     ]
+     "slot": "chest"
     },
     "hand": {
      "parent": "equipment",
-     "slot": "hand",
-     "shared": [
-      "leather"
-     ]
+     "slot": "hand"
     },
     "legs": {
      "parent": "equipment",
-     "slot": "legs",
-     "shared": [
-      "cloth",
-      "leather"
-     ]
+     "slot": "legs"
     },
     "foot": {
      "parent": "equipment",
-     "slot": "foot",
-     "shared": [
-      "leather"
-     ]
+     "slot": "foot"
     },
     "weapon": {
      "parent": "equipment",
-     "slot": "weapon1",
-     "shared": [
-      "metal"
-     ]
+     "slot": "weapon1"
     },
     "shield": {
      "parent": "equipment",
-     "slot": "weapon2",
-     "shared": [
-      "wood",
-      "metal"
-     ]
+     "slot": "weapon2"
     },
     "amulet": {
      "parent": "necklace"
@@ -412,11 +304,7 @@
      "parent": "consumable"
     },
     "armor": {
-     "parent": "chest",
-     "shared": [
-      "metal",
-      "leather"
-     ]
+     "parent": "chest"
     },
     "arrows": {
      "parent": "item"
@@ -449,16 +337,10 @@
      "parent": "foot"
     },
     "bow-long": {
-     "parent": "weapon",
-     "shared": [
-      "wood"
-     ]
+     "parent": "weapon"
     },
     "bow-short": {
-     "parent": "weapon",
-     "shared": [
-      "wood"
-     ]
+     "parent": "weapon"
     },
     "bread": {
      "parent": "consumable"
@@ -467,10 +349,7 @@
      "parent": "item"
     },
     "cape": {
-     "parent": "chest",
-     "shared": [
-      "cloth"
-     ]
+     "parent": "chest"
     },
     "carrot": {
      "parent": "consumable"
@@ -485,10 +364,7 @@
      "parent": "item"
     },
     "compass": {
-     "parent": "item",
-     "shared": [
-      "metal"
-     ]
+     "parent": "item"
     },
     "crown": {
      "parent": "head"
@@ -503,10 +379,7 @@
      "parent": "consumable"
     },
     "eyepatch": {
-     "parent": "head",
-     "shared": [
-      "leather"
-     ]
+     "parent": "head"
     },
     "falchion": {
      "parent": "weapon"
@@ -518,10 +391,7 @@
      "parent": "consumable"
     },
     "fishing-rod": {
-     "parent": "item",
-     "shared": [
-      "wood"
-     ]
+     "parent": "item"
     },
     "flail": {
      "parent": "weapon"
@@ -536,8 +406,7 @@
      "parent": "item"
     },
     "glasses": {
-     "parent": "head",
-     "shared": []
+     "parent": "head"
     },
     "glove": {
      "parent": "hand"
@@ -561,28 +430,19 @@
      "parent": "item"
     },
     "key": {
-     "parent": "item",
-     "shared": [
-      "metal"
-     ]
+     "parent": "item"
     },
     "letter": {
      "parent": "item"
     },
     "lockpick": {
-     "parent": "item",
-     "shared": [
-      "metal"
-     ]
+     "parent": "item"
     },
     "luth": {
      "parent": "item"
     },
     "magic-hat": {
-     "parent": "head",
-     "shared": [
-      "cloth"
-     ]
+     "parent": "head"
     },
     "map": {
      "parent": "item"
@@ -609,43 +469,28 @@
      "parent": "weapon"
     },
     "rock": {
-     "parent": "item",
-     "shared": [
-      "stone"
-     ]
+     "parent": "item"
     },
     "rope": {
-     "parent": "item",
-     "shared": [
-      "cloth"
-     ]
+     "parent": "item"
     },
     "rune": {
      "parent": "item"
     },
     "saw": {
-     "parent": "item",
-     "shared": [
-      "metal"
-     ]
+     "parent": "item"
     },
     "scroll": {
      "parent": "consumable"
     },
     "shovel": {
-     "parent": "item",
-     "shared": [
-      "metal"
-     ]
+     "parent": "item"
     },
     "skull": {
      "parent": "item"
     },
     "sleepingbag": {
-     "parent": "item",
-     "shared": [
-      "cloth"
-     ]
+     "parent": "item"
     },
     "spear": {
      "parent": "weapon"
@@ -654,10 +499,7 @@
      "parent": "weapon"
     },
     "torch": {
-     "parent": "item",
-     "shared": [
-      "wood"
-     ]
+     "parent": "item"
     },
     "trap": {
      "parent": "item"
@@ -666,10 +508,7 @@
      "parent": "consumable"
     },
     "wand": {
-     "parent": "weapon",
-     "shared": [
-      "wood"
-     ]
+     "parent": "weapon"
     },
     "waraxe": {
      "parent": "weapon"
@@ -678,10 +517,7 @@
      "parent": "weapon"
     },
     "staff": {
-     "parent": "weapon",
-     "shared": [
-      "wood"
-     ]
+     "parent": "weapon"
     },
     "mace": {
      "parent": "weapon"

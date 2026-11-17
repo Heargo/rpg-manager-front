@@ -30,28 +30,11 @@ export interface KindSchema {
 const isObject = (value: unknown): value is Fields =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-/** `shared`: the shared kinds a domain kind takes, a list of kebab-case ids (inherited down the chain). */
-function checkShared(kind: Fields): string[] {
-  const shared = kind['shared'];
-  if (shared === undefined) return [];
-  if (!Array.isArray(shared))
-    return ['shared must be a list of kebab-case shared kind ids'];
-  return shared
-    .filter((id) => typeof id !== 'string' || !KIND_ID.test(id))
-    .map((id) => `shared "${String(id)}" must be a kebab-case shared kind id`);
-}
-
-/** The shared kinds tree: ids and parents only, the words live in `common.json`. */
-export const SHARED_KIND_SCHEMA: KindSchema = {
-  fields: [],
-  check: () => [],
-};
-
 /** Items: `type` only on a root, `slot` only on an equipment chain. */
 export const ITEM_KIND_SCHEMA: KindSchema = {
-  fields: ['type', 'slot', 'shared'],
+  fields: ['type', 'slot'],
   check(kind, { hasParent, root }) {
-    const errors: string[] = checkShared(kind);
+    const errors: string[] = [];
     if (kind['type'] !== undefined) {
       if (hasParent) errors.push('type is only allowed on a root kind');
       else if (!(ITEM_TYPES as readonly unknown[]).includes(kind['type']))
@@ -73,9 +56,9 @@ export const ITEM_KIND_SCHEMA: KindSchema = {
 
 /** NPCs: `roles` required on a root (a child may override), `person` on a root only. */
 export const NPC_KIND_SCHEMA: KindSchema = {
-  fields: ['roles', 'person', 'shared'],
+  fields: ['roles', 'person'],
   check(kind, { hasParent }) {
-    const errors: string[] = checkShared(kind);
+    const errors: string[] = [];
     const roles = kind['roles'];
     if (roles !== undefined) {
       if (
@@ -98,9 +81,9 @@ export const NPC_KIND_SCHEMA: KindSchema = {
 
 /** Skills: `type` required on a root and only there, `effect` only on an active chain. */
 export const SKILL_KIND_SCHEMA: KindSchema = {
-  fields: ['type', 'effect', 'shared'],
+  fields: ['type', 'effect'],
   check(kind, { hasParent, root }) {
-    const errors: string[] = checkShared(kind);
+    const errors: string[] = [];
     if (kind['type'] !== undefined) {
       if (hasParent) errors.push('type is only allowed on a root kind');
       else if (!(SKILL_TYPES as readonly unknown[]).includes(kind['type']))
@@ -122,9 +105,9 @@ export const SKILL_KIND_SCHEMA: KindSchema = {
 
 /** Classes: `skills`, the skill kinds the class favours, allowed on any level; the nearest level that has some wins. */
 export const CLASS_KIND_SCHEMA: KindSchema = {
-  fields: ['skills', 'shared'],
+  fields: ['skills'],
   check(kind) {
-    const errors = checkShared(kind);
+    const errors: string[] = [];
     const skills = kind['skills'];
     if (
       skills !== undefined &&

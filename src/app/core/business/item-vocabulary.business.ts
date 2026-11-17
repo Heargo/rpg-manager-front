@@ -6,6 +6,7 @@ import {
 import { validateCommonTexts } from '../generators/common-texts';
 import { validateItemWordList } from '../generators/word-list';
 import { PooledSource } from '../packs/pooled-domain';
+import { PackKindSourcesBusiness } from './pack-kind-sources.business';
 import { ActivePacksBusiness } from './active-packs.business';
 import { LanguageBusiness } from './language.business';
 import {
@@ -19,6 +20,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class ItemVocabularyBusiness {
   private readonly packs = inject(PackBusiness);
+  private readonly kindSources = inject(PackKindSourcesBusiness);
   private readonly active = inject(ActivePacksBusiness);
   private readonly languageBusiness = inject(LanguageBusiness);
   private cached: { key: string; vocabulary: Promise<ItemVocabulary> } | null =
@@ -73,8 +75,12 @@ export class ItemVocabularyBusiness {
       ...(pack?.language ? { language: pack.language } : {}),
       kinds: pack?.kinds as PooledSource['kinds'],
       tints: pack?.tints,
-      ...(pack?.sharedKinds ? { sharedKinds: pack.sharedKinds } : {}),
     };
+    source.otherDomains = await this.kindSources.otherDomains(
+      id,
+      language,
+      'items',
+    );
     if (!pack?.language || pack.language !== language) return source;
     if (pack.generators.items) {
       try {
@@ -97,7 +103,6 @@ export class ItemVocabularyBusiness {
         const result = validateCommonTexts(await this.packs.commonTexts(id));
         if (result.ok) {
           if (result.value.params) source.params = result.value.params;
-          source.sharedTexts = result.value;
         }
       } catch (error) {
         console.warn(

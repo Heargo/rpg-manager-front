@@ -25,7 +25,8 @@ import {
   STRUCTURED_DOMAINS,
   StructuredDomain,
 } from '../packs/pack-draft-edits';
-import { PooledSource } from '../packs/pooled-domain';
+import { KindDomain, PooledSource } from '../packs/pooled-domain';
+import { PackKindSourcesBusiness } from './pack-kind-sources.business';
 import { LanguageBusiness } from './language.business';
 import {
   basePackId,
@@ -41,8 +42,6 @@ export interface KnownKeys {
   params: string[];
   /** The kinds of the NPC, skill and class trees, with their first noun. */
   domainKinds: Record<StructuredDomain, KindKey[]>;
-  /** The shared kinds of the installed packs and of the draft, with their first word. */
-  sharedKinds: KindKey[];
 }
 
 /** One draw of an NPC, skill or class kind in the preview. */
@@ -60,7 +59,7 @@ export interface DraftIssue {
   param?: string;
   rarity?: ItemRarity;
   /** Set on a message about the NPC, skill or class domain (its `kind` is a kind of that domain). */
-  domain?: StructuredDomain | 'shared';
+  domain?: StructuredDomain;
 }
 
 const FIELDS = {
@@ -87,20 +86,6 @@ function firstNouns(list: unknown): Map<string, string> {
   for (const [id, texts] of Object.entries(kinds)) {
     const nouns = isRecord(texts) ? texts['nouns'] : undefined;
     const first = Array.isArray(nouns) ? nouns[0] : undefined;
-    if (isRecord(first) && typeof first['text'] === 'string')
-      result.set(id, first['text']);
-  }
-  return result;
-}
-
-/** The first word of each shared kind of a (raw) `common.json`. */
-function firstWords(common: unknown): Map<string, string> {
-  const result = new Map<string, string>();
-  const kinds =
-    isRecord(common) && isRecord(common['kinds']) ? common['kinds'] : {};
-  for (const [id, texts] of Object.entries(kinds)) {
-    const words = isRecord(texts) ? texts['words'] : undefined;
-    const first = Array.isArray(words) ? words[0] : undefined;
     if (isRecord(first) && typeof first['text'] === 'string')
       result.set(id, first['text']);
   }
@@ -140,11 +125,36 @@ function domainOf(message: string): Pick<DraftIssue, 'domain'> {
   return domain ? { domain: domain[1] as StructuredDomain } : {};
 }
 
+const DRAFT_DOMAINS: Record<KindDomain, (draft: PackDraft) => unknown> = {
+  items: (draft) => draft.kinds,
+  npcs: (draft) => domainKindsOf(draft, 'npcs'),
+  skills: (draft) => domainKindsOf(draft, 'skills'),
+  classes: (draft) => domainKindsOf(draft, 'classes'),
+};
+
+/** The kinds and texts of the draft's domains other than `own`, for `{kind id}` in a phrase. */
+function draftOtherDomains(
+  draft: PackDraft,
+  own: KindDomain,
+): NonNullable<PooledSource['otherDomains']> {
+  const result: NonNullable<PooledSource['otherDomains']> = {};
+  for (const domain of Object.keys(DRAFT_DOMAINS) as KindDomain[]) {
+    if (domain === own) continue;
+    const texts = draft.generators[domain];
+    result[domain] = {
+      kinds: DRAFT_DOMAINS[domain](draft) as PooledSource['kinds'],
+      ...(isRecord(texts) ? { texts } : {}),
+    };
+  }
+  return result;
+}
+
 /** What the pack form needs beyond editing the draft: known keys, sprite coverage, previews and field-level issues. */
 @Injectable({ providedIn: 'root' })
 export class PackDraftFormBusiness {
   private readonly packs = inject(PackBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly kindSources = inject(PackKindSourcesBusiness);
   private cache: {
     installed: InstalledPack[];
     language: string;
@@ -174,18 +184,8 @@ export class PackDraftFormBusiness {
         domainNouns.has(id) ? { id, noun: domainNouns.get(id) } : { id },
       );
     }
-    const sharedNouns = new Map(installed.sharedNouns);
-    for (const [id, noun] of firstWords(draft?.common))
-      sharedNouns.set(id, noun);
-    const sharedIds = new Set([
-      ...installed.sharedKinds,
-      ...Object.keys(draft?.sharedKinds ?? {}),
-    ]);
     return {
       domainKinds,
-      sharedKinds: [...sharedIds].map((id) =>
-        sharedNouns.has(id) ? { id, noun: sharedNouns.get(id) } : { id },
-      ),
       kinds: [...ids].map((id) =>
         nouns.has(id) ? { id, noun: nouns.get(id) } : { id },
       ),
@@ -267,36 +267,31 @@ export class PackDraftFormBusiness {
     else add('warning', pack.warnings);
 
     const known = await this.knownKeys(draft);
+    // A placeholder names a param, or a kind of any domain of the active packs.
+    const names = [
+      ...known.params,
+      ...known.kinds.map((kind) => kind.id),
+      ...STRUCTURED_DOMAINS.flatMap((domain) =>
+        known.domainKinds[domain].map((kind) => kind.id),
+      ),
+    ];
     const items = draft.generators.items;
     if (isRecord(items)) {
-      const list = validateItemWordList(items, known.params);
+      const list = validateItemWordList(items, names);
       if (!list.ok) add('error', list.errors);
       else add('warning', list.warnings);
     }
     for (const domain of STRUCTURED_DOMAINS) {
       const file = draft.generators[domain];
       if (!isRecord(file)) continue;
-      const list = WORD_LIST_VALIDATORS[domain](file, known.params);
+      const list = WORD_LIST_VALIDATORS[domain](file, names);
       if (!list.ok) addFor(domain, 'error', list.errors);
       else addFor(domain, 'warning', list.warnings);
     }
     if (draft.common !== undefined) {
-      const common = validateCommonTexts(
-        draft.common,
-        known.sharedKinds.map((kind) => kind.id),
-        known.params,
-      );
+      const common = validateCommonTexts(draft.common, names);
       if (!common.ok) add('error', common.errors);
-      else
-        for (const message of common.warnings) {
-          const shared = /^shared kind "([^"]+)"/.exec(message);
-          issues.push({
-            level: 'warning',
-            message,
-            ...fieldOf(message),
-            ...(shared ? { kind: shared[1], domain: 'shared' as const } : {}),
-          });
-        }
+      else add('warning', common.warnings);
     }
     return issues;
   }
@@ -370,8 +365,6 @@ export class PackDraftFormBusiness {
       params: [],
       domainKinds: { npcs: [], skills: [], classes: [] },
       domainNouns: { npcs: new Map(), skills: new Map(), classes: new Map() },
-      sharedKinds: [],
-      sharedNouns: new Map(),
     };
     for (const pack of installed) {
       for (const [id, kind] of Object.entries(pack.kinds)) {
@@ -383,7 +376,6 @@ export class PackDraftFormBusiness {
         result.domainKinds[domain].push(
           ...Object.keys(pack[FIELDS[domain]] ?? {}),
         );
-      result.sharedKinds.push(...Object.keys(pack.sharedKinds ?? {}));
       result.tints.push(...Object.keys(pack.tints));
       for (const sprite of pack.sprites)
         if (sprite.domain === 'items') result.spriteKinds.push(...sprite.kinds);
@@ -394,8 +386,6 @@ export class PackDraftFormBusiness {
         .commonTexts(pack.id)
         .catch(() => undefined);
       result.params.push(...Object.keys(paramsOf(common)));
-      for (const [id, noun] of firstWords(common))
-        if (!result.sharedNouns.has(id)) result.sharedNouns.set(id, noun);
     }
     const speaking = installed.filter(
       (pack) => pack.language === packLanguageOf(language),
@@ -442,6 +432,11 @@ export class PackDraftFormBusiness {
         isBase: true,
         language,
         kinds: base[FIELDS[domain]] as PooledSource['kinds'],
+        otherDomains: await this.kindSources.otherDomains(
+          base.id,
+          language,
+          domain,
+        ),
       };
       const list = base.generators[domain]
         ? await this.packs.wordList(domain, base.id).catch(() => undefined)
@@ -474,6 +469,7 @@ export class PackDraftFormBusiness {
       isBase: false,
       language,
       kinds: domainKindsOf(draft, domain) as PooledSource['kinds'],
+      otherDomains: draftOtherDomains(draft, domain),
     };
     const file = draft.generators[domain];
     const checked = isRecord(file) ? validate(file) : undefined;
@@ -499,6 +495,11 @@ export class PackDraftFormBusiness {
         language,
         kinds: base.kinds as PooledSource['kinds'],
         tints: base.tints,
+        otherDomains: await this.kindSources.otherDomains(
+          base.id,
+          language,
+          'items',
+        ),
       };
       const list = base.generators.items
         ? await this.packs.wordList('items', base.id).catch(() => undefined)
@@ -536,6 +537,7 @@ export class PackDraftFormBusiness {
       language,
       kinds: draft.kinds as PooledSource['kinds'],
       tints: draft.tints,
+      otherDomains: draftOtherDomains(draft, 'items'),
     };
     const items = draft.generators.items;
     const checked = isRecord(items) ? validateItemWordList(items) : undefined;
@@ -557,6 +559,4 @@ interface Installed {
   params: string[];
   domainKinds: Record<StructuredDomain, string[]>;
   domainNouns: Record<StructuredDomain, Map<string, string>>;
-  sharedKinds: string[];
-  sharedNouns: Map<string, string>;
 }

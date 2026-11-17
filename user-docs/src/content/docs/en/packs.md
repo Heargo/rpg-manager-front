@@ -88,19 +88,17 @@ Descriptions, name templates and params are **phrases** that can vary:
 | `{g:he\|she}` | Agreement with the gender of the drawn noun (masculine\|feminine). |
 | `{g:m\|f\|mp\|fp}` | The same agreement with plurals (masculine\|feminine\|masculine plural\|feminine plural), for plural nouns such as "Gloves". |
 | `{base}`, `{adjective}`, `{suffix}` | In a name template: the drawn noun, adjective and suffix. |
-| `{material}` | The word of the **shared kind** drawn for this entry (see [Shared kinds](#shared-kinds)); `{material:adjective}` is its adjective, agreed with the noun. |
+| `{kind id}` | A noun of that kind, drawn from the kind or one of its descendants (see [Kind references](#kind-references)); `{kind id:adjective}` is one of its adjectives, agreed with the noun of the entry. A param with the same name wins. |
 
 Example: "A [reliable\|fearsome] weapon, made by {maker}." A phrase whose param no active pack of the language defines is skipped (another one is drawn); if none is left, the text is empty.
 
 **Plural nouns** (gloves, boots) are marked on the noun (the **Plural** box in the creator): the adjective then takes its plural form (by default the singular plus `s`, unless it ends in `s` or `x`).
 
-### Shared kinds
+### Kind references
 
-A pack can declare a **shared kinds tree** (`sharedKinds` in `pack.json`): a tree that every generator's names and descriptions draw from, for example `material` → `metal` → `iron`, `steel`; `wood` → `oak`. The tree itself has no words: the words, adjectives and descriptions of each kind are in the language's `generators/common.json` (version 2), and they add up along the chain.
+Any name template, description or param can use the id of a **kind of any domain** (items, NPCs, skills, classes) as a placeholder: an item description can say `Forged by {blacksmith}.` with `blacksmith` a kind of the NPCs domain. `{blacksmith}` inserts a noun of that kind, drawn from the kind or one of its descendants that has nouns, among all the active packs; `{blacksmith:adjective}` inserts one of the kind's adjectives, agreed with the noun of the entry.
 
-A kind of any domain (items, NPCs, skills, classes) says which shared kinds it takes with `shared`, a list of shared kind ids (a `weapon` takes `metal`, a `bow-long` takes `wood`). The list is inherited down the kind chain, and a child's list replaces its parent's; a kind with no list (and none above it) takes no shared kind.
-
-When the generator draws a kind that takes shared kinds, it draws **one shared kind per root** (a leaf under the listed ids, among all the active packs) and keeps it for the whole entry, so the name and the description agree: "Iron axe" and "forged in iron". The phrases then use the **root**: `{material}` inserts the drawn word, `{material:adjective}` its adjective. A phrase that uses a root the entry did not draw is skipped when another one is possible; otherwise the placeholder is dropped. The generated item, NPC, skill or class **keeps its shared kinds**, so drawing a new description stays consistent. Texts for a shared kind that no active pack declares are ignored with a warning.
+The draw happens once per placeholder id for each generated entry, so a name and a description that use the same id agree. When an id exists in several domains, the entry's own domain is searched first, then items, NPCs, skills and classes. A param named like a kind stays a param. An id that is neither a param nor a kind of an active pack is a warning in the pack creator.
 
 ### Naming conventions
 
@@ -119,7 +117,7 @@ Both Bases declare **the same kinds and the same tints** (they merge). If you na
 - **Kinds** below them: for example `sword`, `rapier`, `dagger`, `axe`, `bow-long`, `staff`, `mace` under `weapon`; `helm`, `crown`, `hood` under `head`; `armor`, `cape`, `robe`, `tunic` under `chest`; `potion`, `elixir`, `bread`, `scroll` under `consumable`; `key`, `book`, `torch`, `gem`, `lantern` under `item`. The full list is in Base's `pack.json`.
 - **Tints**: `steel`, `wood`, `gold`, `ice`, `fire`, `leaf`, `arcane`, `rust`, `silver`, `shadow`.
 - **Params** (`generators/common.json`): `maker`, `owner`, `place`, `event`, `creature`, `effect`.
-- **Shared kinds**: the `material` tree (`metal`, `wood`, `leather`, `cloth`, `bone`, `stone`, each with a few leaves such as `iron`, `oak`, `silk`, `marble`), with its words in `common.json`. Weapons take `metal`, bows and staves `wood`, armour `metal` or `leather`, and so on.
+- **Cross-domain reference**: a weapon description uses `{blacksmith}`, a kind of Base's NPCs; the `material` param holds the materials.
 
 Base also publishes the kinds of the three other domains.
 

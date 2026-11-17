@@ -5,7 +5,6 @@ import { adjectiveForm, capitalize } from './name-generator';
 import { expandPhrase } from './phrase';
 import { pick, randomInt, shuffle } from './random';
 import { RandomSource } from './random-source';
-import { descriptionPool, keptShared } from './shared-kinds';
 import { SkillVocabulary } from './skill-vocabulary';
 import { Gender } from './word-list';
 
@@ -31,13 +30,12 @@ export function generateClass(
   const bonuses = shuffle(source, unique)
     .slice(0, randomInt(source, 1, 2))
     .map((attribute) => ({ attribute, value: randomInt(source, 1, 3) }));
-  const { name, description, shared } = classTexts(source, vocabulary, kindId);
+  const { name, description } = classTexts(source, vocabulary, kindId);
   const favoured = vocabulary.kind(kindId)?.skills ?? [];
   return {
     name,
     description,
     kind: kindId,
-    ...keptShared(shared),
     bonuses,
     tree: generateTree(source, skills, favoured, skillVocabulary),
   };
@@ -121,17 +119,16 @@ export function classTexts(
   source: RandomSource,
   vocabulary: ClassVocabulary,
   kindId: string,
-): { name: string; description: string; shared: Record<string, string> } {
+): { name: string; description: string } {
   const noun = pick(source, vocabulary.nouns(kindId));
   const gender: Gender = noun.gender ?? 'm';
-  const shared = vocabulary.shared.draw(source, vocabulary.sharedFits(kindId));
-  const sharedWords = vocabulary.shared.words(source, shared, gender, false);
+  const kindWord = vocabulary.refs.resolver(source, gender, false);
   const adjectives = vocabulary.adjectives(kindId);
   const suffixes = vocabulary.suffixes(kindId);
   const usable = (template: string): boolean =>
     (adjectives.length > 0 || !template.includes('{adjective}')) &&
     (suffixes.length > 0 || !template.includes('{suffix}')) &&
-    !vocabulary.shared.undrawn(template, shared);
+    vocabulary.refs.usable(template, vocabulary.params);
 
   const fromKind = vocabulary.names(kindId).filter(usable);
   const templates =
@@ -149,17 +146,13 @@ export function classTexts(
     params: vocabulary.params,
     gender,
     values,
-    shared: sharedWords.values,
+    kindWord,
   };
   const name = capitalize(expandPhrase(source, template, context) ?? noun.text);
-  const descriptions = descriptionPool(
-    source,
-    vocabulary.descriptions(kindId),
-    sharedWords.descriptions,
-  );
+  const descriptions = vocabulary.descriptions(kindId);
   const description =
     descriptions.length > 0
       ? (expandPhrase(source, pick(source, descriptions), context) ?? '')
       : '';
-  return { name, description, shared };
+  return { name, description };
 }
