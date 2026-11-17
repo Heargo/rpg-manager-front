@@ -34,9 +34,10 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
     SkillTreeComponent,
   ],
   template: `
-    <div class="toolbar">
+    <div class="toolbar" data-field="toolbar">
       <input
         pInputText
+        class="search"
         data-field="search"
         type="search"
         [attr.aria-label]="'class.catalogue.search' | translate"
@@ -47,6 +48,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
       />
       <button
         pButton
+        class="create"
         type="button"
         data-action="create"
         icon="pi pi-plus"
@@ -233,6 +235,14 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
       flex-wrap: wrap;
       gap: 0.75rem;
       align-items: center;
+    }
+    /* phone: search and New class stacked at full width */
+    @media (max-width: 40rem) {
+      .toolbar .search,
+      .toolbar .create {
+        flex: 1 1 100%;
+        width: 100%;
+      }
     }
     /* one card per entry, so a long list keeps some relief */
     .list {
