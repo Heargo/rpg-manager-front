@@ -1060,6 +1060,7 @@
       "edit": "Modifier",
       "duplicate": "Dupliquer",
       "delete": "Supprimer",
+      "actions": "Actions pour {{ name }}",
       "deleteTitle": "Supprimer cette compétence ?",
       "deleteMessage": "{{ name }} sera retirée du monde.",
       "empty": "Aucune compétence trouvée.",

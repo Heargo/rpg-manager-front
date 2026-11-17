@@ -1060,6 +1060,7 @@
       "edit": "Edit",
       "duplicate": "Duplicate",
       "delete": "Delete",
+      "actions": "Actions for {{ name }}",
       "deleteTitle": "Delete this skill?",
       "deleteMessage": "{{ name }} will be removed from the world.",
       "empty": "No skill found.",
