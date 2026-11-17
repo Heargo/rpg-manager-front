@@ -19,6 +19,7 @@ import { MessageModule } from '@openng/optimus-ui/message';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
+import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { ITEM_RARITIES } from '../../../../core/models/item';
 import { MessageLevel } from '../../../../core/models/toast-level';
@@ -63,6 +64,7 @@ type PresetTarget = 'success' | number;
     SelectModule,
     TabsModule,
     TextareaModule,
+    TooltipModule,
   ],
   template: `
     <p-tabs value="form">
@@ -73,7 +75,7 @@ type PresetTarget = 'success' | number;
       <p-tabpanels>
         <p-tabpanel value="form">
           <div class="form">
-            <div class="toolbar">
+            <div class="toolbar" data-test="formula-tools">
               <button
                 pButton
                 type="button"
@@ -84,6 +86,8 @@ type PresetTarget = 'success' | number;
                 [text]="true"
                 [attr.aria-expanded]="helpOpen()"
                 [label]="'skill.variables.toggle' | translate"
+                [attr.aria-label]="'skill.variables.toggle' | translate"
+                [pTooltip]="'skill.variables.toggle' | translate"
                 (click)="helpOpen.set(!helpOpen())"
               ></button>
               <button
@@ -95,6 +99,8 @@ type PresetTarget = 'success' | number;
                 size="small"
                 [text]="true"
                 [label]="'skill.presets.manage' | translate"
+                [attr.aria-label]="'skill.presets.manage' | translate"
+                [pTooltip]="'skill.presets.manage' | translate"
                 (click)="managing.set(true)"
               ></button>
             </div>
@@ -859,9 +865,14 @@ type PresetTarget = 'success' | number;
     }
     .toolbar {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+      flex-wrap: nowrap;
+      justify-content: space-between;
       gap: 0.25rem;
+    }
+    @media (max-width: 40rem) {
+      .toolbar ::ng-deep .p-button-label {
+        display: none;
+      }
     }
 
     /* one card per section: icon, title and subtitle, then the fields */
@@ -1336,8 +1347,16 @@ export class SkillEditorComponent {
 
   /** A passive skill has no target, cost nor cooldown; an active one starts with a target. */
   protected setType(type: Skill['type']): void {
-    const { target, cost, cooldown, roll, success, actionType, range, ...rest } =
-      this.draft();
+    const {
+      target,
+      cost,
+      cooldown,
+      roll,
+      success,
+      actionType,
+      range,
+      ...rest
+    } = this.draft();
     void actionType;
     void range;
     void roll;
