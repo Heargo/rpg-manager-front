@@ -3,6 +3,7 @@ import { NpcVocabulary } from './npc-vocabulary';
 import { expandPhrase } from './phrase';
 import { pick } from './random';
 import { RandomSource } from './random-source';
+import { descriptionPool } from './shared-kinds';
 import { Gender, Noun } from './word-list';
 
 type Values = Partial<
@@ -14,7 +15,7 @@ export function drawNpcTexts(
   random: RandomSource,
   vocabulary: NpcVocabulary,
   kindId: string,
-): { name: string; description: string } {
+): { name: string; description: string; shared: Record<string, string> } {
   const person = vocabulary.kind(kindId)?.person ?? true;
   const params = vocabulary.params;
   const nouns = vocabulary.nouns(kindId);
@@ -29,12 +30,15 @@ export function drawNpcTexts(
       ? undefined
       : pick(random, person && sameGender.length ? sameGender : nouns);
   const speaker: Gender = givenName?.gender ?? gender(noun);
+  const shared = vocabulary.shared.draw(random, vocabulary.sharedFits(kindId));
+  const sharedWords = vocabulary.shared.words(random, shared, speaker, false);
 
   const usable = (template: string): boolean =>
     (nouns.length > 0 || !template.includes('{noun}')) &&
     (adjectives.length > 0 || !template.includes('{adjective}')) &&
     (epithets.length > 0 || !template.includes('{epithet}')) &&
-    (!!givenName || !template.includes('{given}'));
+    (!!givenName || !template.includes('{given}')) &&
+    !vocabulary.shared.undrawn(template, shared);
   const fromKind = vocabulary.names(kindId).filter(usable);
   const fallback = person ? vocabulary.templates().filter(usable) : [];
   const templates = fromKind.length > 0 ? fromKind : fallback;
@@ -53,16 +57,25 @@ export function drawNpcTexts(
   if (template.includes('{adjective}'))
     values.adjective = adjectiveForm(pick(random, adjectives), speaker);
 
-  const context = { params, gender: speaker, values };
+  const context = {
+    params,
+    gender: speaker,
+    values,
+    shared: sharedWords.values,
+  };
   const name =
     expandPhrase(random, template, context) ??
     values.given ??
     values.noun ??
     '';
   let description = '';
-  const descriptions = vocabulary.descriptions(kindId);
+  const descriptions = descriptionPool(
+    random,
+    vocabulary.descriptions(kindId),
+    sharedWords.descriptions,
+  );
   if (descriptions.length > 0)
     description =
       expandPhrase(random, pick(random, descriptions), context) ?? '';
-  return { name: capitalize(name), description };
+  return { name: capitalize(name), description, shared };
 }

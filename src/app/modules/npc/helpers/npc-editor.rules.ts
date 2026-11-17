@@ -299,6 +299,7 @@ export function generateNpc(
     name: texts.name,
     description: texts.description,
     kind: kindId,
+    ...(Object.keys(texts.shared).length > 0 ? { shared: texts.shared } : {}),
     roles: [role],
     inventory,
     money: randomInt(random, 0, level * 50),

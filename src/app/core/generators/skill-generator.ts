@@ -8,6 +8,7 @@ import { adjectiveForm, capitalize } from './name-generator';
 import { expandPhrase } from './phrase';
 import { pick, randomInt, shuffle, weightedPick } from './random';
 import { RandomSource } from './random-source';
+import { descriptionPool, keptShared } from './shared-kinds';
 import { RARITY_WEIGHTS } from './item-generator';
 import { SkillVocabulary } from './skill-vocabulary';
 import { Gender } from './word-list';
@@ -41,11 +42,12 @@ export function generateSkill(
   const info = vocabulary.kind(kindId)!;
   const type = info.type;
   const maxLevel = randomInt(source, 1, 3 + tier);
-  const { name, description } = skillTexts(source, vocabulary, kindId);
+  const { name, description, shared } = skillTexts(source, vocabulary, kindId);
   const base = {
     name,
     description,
     kind: kindId,
+    ...keptShared(shared),
     rarity,
     type,
     maxLevel,
@@ -104,14 +106,17 @@ export function skillTexts(
   source: RandomSource,
   vocabulary: SkillVocabulary,
   kindId: string,
-): { name: string; description: string } {
+): { name: string; description: string; shared: Record<string, string> } {
   const noun = pick(source, vocabulary.nouns(kindId));
   const gender: Gender = noun.gender ?? 'm';
+  const shared = vocabulary.shared.draw(source, vocabulary.sharedFits(kindId));
+  const sharedWords = vocabulary.shared.words(source, shared, gender, false);
   const adjectives = vocabulary.adjectives(kindId);
   const suffixes = vocabulary.suffixes(kindId);
   const usable = (template: string): boolean =>
     (adjectives.length > 0 || !template.includes('{adjective}')) &&
-    (suffixes.length > 0 || !template.includes('{suffix}'));
+    (suffixes.length > 0 || !template.includes('{suffix}')) &&
+    !vocabulary.shared.undrawn(template, shared);
 
   const fromKind = vocabulary.names(kindId).filter(usable);
   const templates =
@@ -125,12 +130,21 @@ export function skillTexts(
     values.adjective = adjectiveForm(pick(source, adjectives), gender);
   if (template.includes('{suffix}')) values.suffix = pick(source, suffixes);
 
-  const context = { params: vocabulary.params, gender, values };
+  const context = {
+    params: vocabulary.params,
+    gender,
+    values,
+    shared: sharedWords.values,
+  };
   const name = capitalize(expandPhrase(source, template, context) ?? noun.text);
-  const descriptions = vocabulary.descriptions(kindId);
+  const descriptions = descriptionPool(
+    source,
+    vocabulary.descriptions(kindId),
+    sharedWords.descriptions,
+  );
   const description =
     descriptions.length > 0
       ? (expandPhrase(source, pick(source, descriptions), context) ?? '')
       : '';
-  return { name, description };
+  return { name, description, shared };
 }

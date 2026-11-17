@@ -115,11 +115,16 @@ Et son `pack.json` :
       ]
     }
   },
+  "sharedKinds": {
+    "material": {},
+    "metal": { "parent": "material" },
+    "iron": { "parent": "metal" }
+  },
   "domains": {
     "items": {
       "kinds": {
         "equipment": { "type": "equipment" },
-        "weapon": { "parent": "equipment", "slot": "weapon1" },
+        "weapon": { "parent": "equipment", "slot": "weapon1", "shared": ["metal"] },
         "sword": { "parent": "weapon" },
         "rapier": { "parent": "sword" }
       },
@@ -150,8 +155,9 @@ Et son `pack.json` :
 | `version`, `author`, `license` | Des textes. |
 | `licenseUrl`, `homepage` | Des liens **https** (`homepage` est facultatif). |
 | `tints` | Les teintes du pack : un identifiant et un `gradient` (liste de `position` de 0 à 1 et de `color`). |
+| `sharedKinds` | L'arbre des types partagés : un identifiant et un `parent` facultatif, comme un arbre de catégories (identifiants en kebab-case, sans cycle ; un `parent` déclaré dans un autre pack est permis, et un pack neutre peut le déclarer). Ses mots sont dans `common.json`. |
 | `domains` | Le contenu par domaine : `items`, et `npcs`, `skills`, `classes`. Chacun peut avoir `kinds` (l'arbre des catégories) et `texts` (le chemin de son fichier de langue). Un domaine inconnu de l'application est ignoré avec un avertissement, mais un champ inconnu dans un domaine connu est une erreur (pour repérer les fautes de frappe). |
-| `common` | Le chemin de `generators/common.json` (les paramètres, partagés par tous les domaines). |
+| `common` | Le chemin de `generators/common.json` (les paramètres et les mots des types partagés, partagés par tous les domaines). |
 | `sprites` | La liste des sprites (voir ci-dessous). |
 
 **Catégories** (`domains.items.kinds`) : chaque entrée a un `parent` facultatif. Seules les racines déclarent un `type` (`item`, `consumable` ou `equipment`) ; `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` ou `weapon2`) se déclare sur un niveau de la chaîne d'équipement. L'arbre n'a pas de cycle et sa racine déclare un `type` ; un `parent` déclaré dans un autre pack est permis. Les identifiants sont propres à chaque domaine (`items` `guard` et `npcs` `guard` sont différents).
@@ -192,18 +198,29 @@ Et son `pack.json` :
 - `adjectives`, `suffixes` : les mots communs, pour tout objet, par rareté (`common`, `uncommon`, `rare`, `mythic`, `legendary`). Une catégorie peut aussi avoir ses `adjectives` et `suffixes` (ils s'additionnent le long de la chaîne), et une entrée peut porter une `tint`. Dans le manifeste, une teinte peut avoir `fits` : la liste des catégories qu'elle colore.
 - `templates` : les modèles de noms par rareté, avec `{base}` obligatoire (`{adjective}` et `{suffix}` facultatifs). Facultatifs : le Base de chaque langue les fournit ; à défaut, le nom est `{base}`.
 
-**`generators/common.json`** (paramètres, partagés par tous les domaines) :
+**Types partagés acceptés** : toute catégorie d'un domaine (objets, PNJ, compétences, classes) peut avoir `shared`, une liste d'identifiants de types partagés qu'elle accepte (`"shared": ["metal"]`). La liste est héritée le long de la chaîne ; sans liste, la catégorie ne prend aucun type partagé.
+
+**`generators/common.json`** (paramètres et mots des types partagés, partagés par tous les domaines ; version 2, la version 1 n'est plus acceptée) :
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "params": {
     "maker": ["un forgeron nain", "les moines de {place}", "un apprenti [maladroit|pressé]"],
     "place": ["Valombre", "la côte gelée"],
     "effect": ["soin", "vigueur"]
+  },
+  "kinds": {
+    "iron": {
+      "words": [{ "text": "fer", "gender": "m" }],
+      "adjectives": [{ "m": "ferré", "f": "ferrée" }, "de fer"]
+    },
+    "metal": { "descriptions": ["Quelques éclats de {material} brillent sous la poussière."] }
   }
 }
 ```
+
+`kinds` contient, par identifiant de type partagé, ses `words` (des noms : `text`, `gender`, `plural`), ses `adjectives` (une chaîne, ou `{ "m": …, "f": … }`) et ses `descriptions` (des phrases). Ils s'additionnent le long de la chaîne, et seule une feuille de l'arbre est tirée. Dans un modèle de nom, une description ou un paramètre, `{material}` (l'identifiant de la racine de l'arbre) insère le mot tiré et `{material:adjective}` son adjectif. Les textes d'un type qu'aucun pack actif ne déclare dans `sharedKinds` sont un avertissement.
 
 **Catégories de PNJ, de compétences et de classes** (`domains.npcs.kinds`, `domains.skills.kinds`, `domains.classes.kinds`) : même arbre, `parent` facultatif. PNJ : `roles` (liste de `story`, `merchant`, `enemy`) et `person` (booléen), hérités. Compétences : `type` (`active` ou `passive`, sur une racine) et `effect` (`damage`, `heal` ou `modify`). Classes : `skills`, une liste de catégories de compétences. Leurs fichiers `texts` sont en v2 (voir plus bas).
 

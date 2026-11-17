@@ -1,4 +1,5 @@
 import { GradientStop, PackTint } from './pack';
+import { SharedKindTexts } from '../generators/common-texts';
 import { KindSchema } from './pack-kinds';
 
 type Fields = Record<string, unknown>;
@@ -13,6 +14,10 @@ export interface PooledSource {
   texts?: Fields;
   tints?: Record<string, PackTint>;
   params?: Record<string, string[]>;
+  /** The shared kinds tree of the pack's manifest. */
+  sharedKinds?: Record<string, { parent?: string }>;
+  /** The parsed `common.json` (v2): the words, adjectives and descriptions of the shared kinds. */
+  sharedTexts?: { version?: number; kinds?: Record<string, SharedKindTexts> };
 }
 
 /** A kind of the pooled tree: the schema's fields resolved up the chain, and the chain from the kind to its root. */

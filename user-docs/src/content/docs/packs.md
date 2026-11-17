@@ -88,10 +88,19 @@ Les descriptions, les modèles de noms et les paramètres sont des **phrases** q
 | `{g:forgé\|forgée}` | Accord avec le genre du nom tiré (masculin\|féminin). |
 | `{g:forgé\|forgée\|forgés\|forgées}` | Même accord, avec le pluriel (masculin\|féminin\|masculin pluriel\|féminin pluriel), pour les noms pluriels comme « Gants ». |
 | `{base}`, `{adjective}`, `{suffix}` | Dans un modèle de nom : le nom tiré, l'adjectif et le suffixe. |
+| `{material}` | Le mot du **type partagé** tiré pour cette entrée (voir [Types partagés](#types-partagés)) ; `{material:adjective}` est son adjectif, accordé avec le nom. |
 
 Exemple : « Une arme [fiable\|redoutable], {g:forgé\|forgée} par {maker}. » Une phrase dont le paramètre n'est défini par aucun pack actif de la langue est laissée de côté (une autre est tirée) ; s'il n'en reste aucune, le texte est vide.
 
 Les **noms pluriels** (des gants, des bottes) se marquent dans le nom (case **Pluriel** dans le créateur) : l'adjectif prend alors sa forme plurielle (par défaut le singulier avec un `s`, sauf s'il finit par `s` ou `x`).
+
+### Types partagés
+
+Un pack peut déclarer un **arbre de types partagés** (`sharedKinds` dans `pack.json`) : un arbre où les noms et les descriptions de tous les générateurs peuvent puiser, par exemple `material` → `metal` → `iron`, `steel` ; `wood` → `oak`. L'arbre lui-même n'a pas de mots : les mots, adjectifs et descriptions de chaque type sont dans le `generators/common.json` de la langue (version 2), et ils s'additionnent le long de la chaîne.
+
+Une catégorie de n'importe quel domaine (objets, PNJ, compétences, classes) dit quels types partagés elle accepte avec `shared`, une liste d'identifiants de types partagés (une `weapon` prend `metal`, un `bow-long` prend `wood`). La liste est héritée le long de la chaîne, et celle d'un enfant remplace celle de son parent ; une catégorie sans liste (et sans liste au-dessus) ne prend aucun type partagé.
+
+Quand le générateur tire une catégorie qui accepte des types partagés, il tire **un type partagé par racine** (une feuille sous les identifiants listés, parmi tous les packs actifs) et le garde pour toute l'entrée, si bien que le nom et la description s'accordent : « Hache en fer » et « forgée en fer ». Les phrases utilisent alors la **racine** : `{material}` insère le mot tiré, `{material:adjective}` son adjectif. Une phrase qui utilise une racine que l'entrée n'a pas tirée est laissée de côté quand une autre est possible ; sinon l'élément est supprimé. L'objet, le PNJ, la compétence ou la classe généré **garde ses types partagés**, pour qu'un nouveau tirage de description reste cohérent. Les textes d'un type partagé qu'aucun pack actif ne déclare sont ignorés avec un avertissement.
 
 ### Conventions de nommage
 
@@ -99,7 +108,7 @@ Pour que les packs restent compatibles entre eux, suivez ces conventions ; les p
 
 - **Catégories** : en anglais, au singulier, en `kebab-case`, la chose concrète (`sword`, `war-hammer`, `healing-potion`). Une sous-catégorie reçoit un `parent` plutôt qu'un nom isolé.
 - **Teintes** : un matériau ou un élément (`steel`, `gold`, `fire`, `ice`, `rust`, `shadow`), pas une couleur brute.
-- **Paramètres** : nommés par leur **rôle dans la phrase** (`maker`, `owner`, `place`, `event`, `material`, `creature`, `effect`). Chaque entrée est un groupe nominal complet avec son article (« un forgeron nain »), pour s'insérer partout sans accord.
+- **Paramètres** : nommés par leur **rôle dans la phrase** (`maker`, `owner`, `place`, `event`, `creature`, `effect`). Chaque entrée est un groupe nominal complet avec son article (« un forgeron nain »), pour s'insérer partout sans accord.
 
 ### Ce que publient les packs Base
 
@@ -109,7 +118,8 @@ Les deux Base déclarent **les mêmes catégories et les mêmes teintes** (elles
 - **Emplacements d'équipement** : `head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon` (arme, emplacement `weapon1`) et `shield` (emplacement `weapon2`), tous enfants de `equipment`.
 - **Catégories** en dessous : par exemple `sword`, `rapier`, `dagger`, `axe`, `bow-long`, `staff`, `mace` sous `weapon` ; `helm`, `crown`, `hood` sous `head` ; `armor`, `cape`, `robe`, `tunic` sous `chest` ; `potion`, `elixir`, `bread`, `scroll` sous `consumable` ; `key`, `book`, `torch`, `gem`, `lantern` sous `item`. La liste complète est dans le `pack.json` de Base.
 - **Teintes** : `steel`, `wood`, `gold`, `ice`, `fire`, `leaf`, `arcane`, `rust`, `silver`, `shadow`.
-- **Paramètres** (`generators/common.json`) : `maker`, `owner`, `place`, `event`, `material`, `creature`, `effect`.
+- **Paramètres** (`generators/common.json`) : `maker`, `owner`, `place`, `event`, `creature`, `effect`.
+- **Types partagés** : l'arbre `material` (`metal`, `wood`, `leather`, `cloth`, `bone`, `stone`, chacun avec quelques feuilles comme `iron`, `oak`, `silk`, `marble`), avec ses mots dans `common.json`. Les armes prennent `metal`, les arcs et les bâtons `wood`, les armures `metal` ou `leather`, etc.
 
 Base publie aussi les catégories des trois autres domaines.
 

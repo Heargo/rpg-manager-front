@@ -17,6 +17,7 @@ import {
   TintTexts,
 } from './word-list';
 import { kindLookups } from './kind-lookups';
+import { buildSharedKinds, SharedKinds } from './shared-kinds';
 
 export interface ItemKindInfo {
   id: string;
@@ -45,6 +46,9 @@ export interface ItemVocabulary {
   /** The descriptions of a tint, empty when the tint does not fit the kind. */
   tintDescriptions(tint: string, kind?: string): string[];
   gradients(tint: string): GradientStop[][];
+  /** The pooled shared kinds, and the ones a kind takes (inherited down its chain). */
+  shared: SharedKinds;
+  sharedFits(id: string): string[];
   params: Record<string, string[]>;
   templates(rarity: ItemRarity): string[];
   conflicts: string[];
@@ -71,6 +75,7 @@ export function buildItemVocabulary(sources: PooledSource[]): ItemVocabulary {
   const pooled = poolDomain(sources, ITEM_KIND_SCHEMA);
   const gradients = poolTints(sources);
   const params = poolParams(sources);
+  const shared = buildSharedKinds(sources);
   const fits = poolTintFits(sources);
   const texts = (id: string): KindTexts => pooled.texts[id] as KindTexts;
   const section = <T>(name: string): T | undefined =>
@@ -184,6 +189,8 @@ export function buildItemVocabulary(sources: PooledSource[]): ItemVocabulary {
     tintDescriptions: (tint, kind) =>
       tintFits(tint, kind) ? (tintTexts[tint]?.descriptions ?? []) : [],
     gradients: (tint) => gradients[tint] ?? [],
+    shared,
+    sharedFits: (id) => (pooled.kinds[id]?.['shared'] as string[] | undefined) ?? [],
     params,
     templates: (rarity) =>
       section<PerRarity<string>>('templates')?.[rarity] ?? [],

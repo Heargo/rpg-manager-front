@@ -115,11 +115,16 @@ And its `pack.json`:
       ]
     }
   },
+  "sharedKinds": {
+    "material": {},
+    "metal": { "parent": "material" },
+    "iron": { "parent": "metal" }
+  },
   "domains": {
     "items": {
       "kinds": {
         "equipment": { "type": "equipment" },
-        "weapon": { "parent": "equipment", "slot": "weapon1" },
+        "weapon": { "parent": "equipment", "slot": "weapon1", "shared": ["metal"] },
         "sword": { "parent": "weapon" },
         "rapier": { "parent": "sword" }
       },
@@ -150,8 +155,9 @@ And its `pack.json`:
 | `version`, `author`, `license` | Texts. |
 | `licenseUrl`, `homepage` | **https** links (`homepage` is optional). |
 | `tints` | The pack's tints: an id and a `gradient` (a list of `position` from 0 to 1 and `color`). |
+| `sharedKinds` | The shared kinds tree: an id and an optional `parent`, like a kind tree (kebab-case ids, no cycle; a `parent` declared in another pack is allowed, and a neutral pack may declare it). Its words are in `common.json`. |
 | `domains` | The content per domain: `items`, and `npcs`, `skills`, `classes`. Each can have `kinds` (the kind tree) and `texts` (the path to its language file). A domain the app doesn't know is ignored with a warning, but an unknown field inside a known domain is an error (to catch typos). |
-| `common` | The path to `generators/common.json` (the params, shared by every domain). |
+| `common` | The path to `generators/common.json` (the params and the shared kinds' words, shared by every domain). |
 | `sprites` | The list of sprites (see below). |
 
 **Kinds** (`domains.items.kinds`): each entry has an optional `parent`. Only roots declare a `type` (`item`, `consumable` or `equipment`); `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` or `weapon2`) is declared on one level of the equipment chain. The tree has no cycle and its root declares a `type`; a `parent` declared in another pack is allowed. Ids are scoped by domain (`items` `guard` and `npcs` `guard` are different).
@@ -192,18 +198,29 @@ And its `pack.json`:
 - `adjectives`, `suffixes`: the common words, for any item, per rarity (`common`, `uncommon`, `rare`, `mythic`, `legendary`). A kind can also have its own `adjectives` and `suffixes` (they add up along the chain), and an entry may carry a `tint`. In the manifest, a tint may have `fits`: the kinds it colours.
 - `templates`: name templates per rarity, `{base}` required (`{adjective}` and `{suffix}` optional). Optional: each language's Base provides them; otherwise the name is `{base}`.
 
-**`generators/common.json`** (params, shared by every domain):
+**Shared fits**: any domain kind (items, NPCs, skills, classes) may have `shared`, a list of shared kind ids it takes (`"shared": ["metal"]`). The list is inherited down the chain; without one, the kind takes no shared kind.
+
+**`generators/common.json`** (params and shared kinds' words, shared by every domain; version 2, version 1 is no longer accepted):
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "params": {
     "maker": ["a dwarf smith", "the monks of {place}", "a [clumsy|hasty] apprentice"],
     "place": ["Duskhollow", "the frozen coast"],
     "effect": ["healing", "vigor"]
+  },
+  "kinds": {
+    "iron": {
+      "words": [{ "text": "iron" }],
+      "adjectives": ["iron", "ferrous"]
+    },
+    "metal": { "descriptions": ["Flecks of {material} glint under the dust."] }
   }
 }
 ```
+
+`kinds` holds, per shared kind id, its `words` (nouns: `text`, `gender`, `plural`), its `adjectives` (a string, or `{ "m": …, "f": … }`) and its `descriptions` (phrases). They add up along the chain, and only a leaf of the tree is drawn. In a name template, a description or a param, `{material}` (the tree's root id) inserts the drawn word and `{material:adjective}` its adjective. Texts for a kind that no active pack declares in `sharedKinds` are a warning.
 
 **NPC, skill and class kinds** (`domains.npcs.kinds`, `domains.skills.kinds`, `domains.classes.kinds`): same tree, `parent` optional. NPCs: `roles` (list of `story`, `merchant`, `enemy`) and `person` (boolean), inherited. Skills: `type` (`active` or `passive`, on a root) and `effect` (`damage`, `heal` or `modify`). Classes: `skills`, a list of skill kinds. Their `texts` files are v2 (below).
 

@@ -2,6 +2,7 @@ import { CLASS_KIND_SCHEMA } from '../packs/pack-kinds';
 import { poolDomain, PooledSource, poolParams } from '../packs/pooled-domain';
 import { ClassKindTexts } from './class-word-list';
 import { kindLookups } from './kind-lookups';
+import { buildSharedKinds, SharedKinds } from './shared-kinds';
 import { Adjective, Noun } from './word-list';
 
 export interface ClassKindInfo {
@@ -24,6 +25,9 @@ export interface ClassVocabulary {
   /** The kinds with a noun on their chain. */
   drawable(): string[];
   templates(): string[];
+  /** The pooled shared kinds, and the ones a kind takes (inherited down its chain). */
+  shared: SharedKinds;
+  sharedFits(id: string): string[];
   params: Record<string, string[]>;
   conflicts: string[];
 }
@@ -31,6 +35,7 @@ export interface ClassVocabulary {
 export function buildClassVocabulary(sources: PooledSource[]): ClassVocabulary {
   const pooled = poolDomain(sources, CLASS_KIND_SCHEMA);
   const params = poolParams(sources);
+  const shared = buildSharedKinds(sources);
   const lookups = kindLookups(pooled);
   const section = <T>(name: string): T[] =>
     (pooled.sections[name] as T[] | undefined) ?? [];
@@ -62,6 +67,8 @@ export function buildClassVocabulary(sources: PooledSource[]): ClassVocabulary {
     ],
     drawable: () => lookups.kindIds((id) => nouns(id).length > 0),
     templates: () => section<string>('templates'),
+    shared,
+    sharedFits: (id) => (pooled.kinds[id]?.['shared'] as string[] | undefined) ?? [],
     params,
     conflicts: pooled.conflicts,
   };

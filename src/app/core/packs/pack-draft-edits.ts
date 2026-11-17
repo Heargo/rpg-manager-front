@@ -305,9 +305,21 @@ function editParams(
       : {};
   const params = { ...(existing as Record<string, string[]>) };
   edit(params);
+  const kinds =
+    isRecord(draft.common) && isRecord(draft.common['kinds'])
+      ? draft.common['kinds']
+      : undefined;
   const { common: _common, ...rest } = draft;
-  if (Object.keys(params).length === 0) return rest;
-  return { ...rest, common: { version: COMMON_TEXTS_VERSION, params } };
+  const hasParams = Object.keys(params).length > 0;
+  if (!hasParams && !kinds) return rest;
+  return {
+    ...rest,
+    common: {
+      version: COMMON_TEXTS_VERSION,
+      ...(hasParams ? { params } : {}),
+      ...(kinds ? { kinds } : {}),
+    },
+  };
 }
 
 /** Sets the phrases of a shared param (creating it); no phrase removes it. */

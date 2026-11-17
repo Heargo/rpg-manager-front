@@ -48,6 +48,8 @@ export interface Skill {
   type: SkillType;
   /** The skill kind it was generated from (a kind id of the skill vocabulary). */
   kind?: string;
+  /** The shared kinds drawn for it (a leaf per root, e.g. `{ material: 'iron' }`). */
+  shared?: Record<string, string>;
   maxLevel: number;
   /** Skill points per level. */
   pointCost: number;

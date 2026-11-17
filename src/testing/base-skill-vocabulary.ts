@@ -20,6 +20,8 @@ export function baseSkillVocabulary(lang: 'en' | 'fr'): SkillVocabulary {
       kinds: (manifest.domains.skills as { kinds?: unknown }).kinds as PooledSource['kinds'],
       texts: (lang === 'en' ? enSkills : frSkills) as unknown as PooledSource['texts'],
       params: (lang === 'en' ? enCommon : frCommon).params,
+      sharedKinds: (manifest as { sharedKinds?: PooledSource['sharedKinds'] }).sharedKinds,
+      sharedTexts: (lang === 'en' ? enCommon : frCommon) as PooledSource['sharedTexts'],
     },
   ]);
 }

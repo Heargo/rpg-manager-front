@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "params": {
     "maker": [
       "a dwarven smith",
@@ -29,13 +29,6 @@
       "the endless winter",
       "the clan war"
     ],
-    "material": [
-      "black steel",
-      "boiled leather",
-      "polished horn",
-      "carved bone",
-      "willow wood"
-    ],
     "creature": [
       "a giant wolf",
       "a wyvern",
@@ -43,6 +36,220 @@
       "a marsh troll",
       "a griffin"
     ],
-    "effect": ["Healing", "Vigor", "Strength", "Swiftness", "Night Sight"]
+    "effect": [
+      "Healing",
+      "Vigor",
+      "Strength",
+      "Swiftness",
+      "Night Sight"
+    ]
+  },
+  "kinds": {
+    "metal": {
+      "descriptions": [
+        "The metal still bears the marks of the hammer and the quench.",
+        "Flecks of {material} glint under the dust."
+      ]
+    },
+    "wood": {
+      "descriptions": [
+        "The grain of the {material} shows through the varnish."
+      ]
+    },
+    "leather": {
+      "descriptions": [
+        "The leather is supple, worn in by use."
+      ]
+    },
+    "cloth": {
+      "descriptions": [
+        "The weave is tight and the seams are strong."
+      ]
+    },
+    "stone": {
+      "descriptions": [
+        "The stone is heavy and cold to the touch."
+      ]
+    },
+    "iron": {
+      "words": [
+        {
+          "text": "iron"
+        }
+      ],
+      "adjectives": [
+        "iron"
+      ]
+    },
+    "steel": {
+      "words": [
+        {
+          "text": "steel"
+        }
+      ],
+      "adjectives": [
+        "steel"
+      ]
+    },
+    "bronze": {
+      "words": [
+        {
+          "text": "bronze"
+        }
+      ],
+      "adjectives": [
+        "bronze"
+      ]
+    },
+    "copper": {
+      "words": [
+        {
+          "text": "copper"
+        }
+      ],
+      "adjectives": [
+        "copper"
+      ]
+    },
+    "oak": {
+      "words": [
+        {
+          "text": "oak"
+        }
+      ],
+      "adjectives": [
+        "oaken"
+      ]
+    },
+    "ash": {
+      "words": [
+        {
+          "text": "ash"
+        }
+      ],
+      "adjectives": [
+        "ashen"
+      ]
+    },
+    "yew": {
+      "words": [
+        {
+          "text": "yew"
+        }
+      ],
+      "adjectives": [
+        "yew"
+      ]
+    },
+    "willow": {
+      "words": [
+        {
+          "text": "willow"
+        }
+      ],
+      "adjectives": [
+        "willow"
+      ]
+    },
+    "tanned-leather": {
+      "words": [
+        {
+          "text": "tanned leather"
+        }
+      ],
+      "adjectives": [
+        "tanned"
+      ]
+    },
+    "boiled-leather": {
+      "words": [
+        {
+          "text": "boiled leather"
+        }
+      ],
+      "adjectives": [
+        "boiled"
+      ]
+    },
+    "linen": {
+      "words": [
+        {
+          "text": "linen"
+        }
+      ],
+      "adjectives": [
+        "linen"
+      ]
+    },
+    "wool": {
+      "words": [
+        {
+          "text": "wool"
+        }
+      ],
+      "adjectives": [
+        "woollen"
+      ]
+    },
+    "silk": {
+      "words": [
+        {
+          "text": "silk"
+        }
+      ],
+      "adjectives": [
+        "silken"
+      ]
+    },
+    "ivory": {
+      "words": [
+        {
+          "text": "ivory"
+        }
+      ],
+      "adjectives": [
+        "ivory"
+      ]
+    },
+    "horn": {
+      "words": [
+        {
+          "text": "horn"
+        }
+      ],
+      "adjectives": [
+        "horn"
+      ]
+    },
+    "granite": {
+      "words": [
+        {
+          "text": "granite"
+        }
+      ],
+      "adjectives": [
+        "granite"
+      ]
+    },
+    "obsidian": {
+      "words": [
+        {
+          "text": "obsidian"
+        }
+      ],
+      "adjectives": [
+        "obsidian"
+      ]
+    },
+    "marble": {
+      "words": [
+        {
+          "text": "marble"
+        }
+      ],
+      "adjectives": [
+        "marble"
+      ]
+    }
   }
 }

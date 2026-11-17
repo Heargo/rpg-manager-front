@@ -11,6 +11,7 @@ import { capitalize } from './name-generator';
 import { expandPhrase, pluralForm } from './phrase';
 import { chance, pick, randomInt, shuffle, Weighted, weightedPick } from './random';
 import { RandomSource } from './random-source';
+import { keptShared } from './shared-kinds';
 import { Adjective, Gender } from './word-list';
 
 export interface ItemGenerationOptions {
@@ -67,7 +68,7 @@ export function generateItem(
   const type = info.type;
   const slot = info.slot;
   const modifiers = type === 'item' ? [] : drawModifiers(source, options.attributes, rarity, type);
-  const { name, description, tints } = drawTexts(source, vocabulary, kind, rarity);
+  const { name, description, tints, shared } = drawTexts(source, vocabulary, kind, rarity);
 
   return {
     name,
@@ -79,6 +80,7 @@ export function generateItem(
     modifiers,
     kind,
     tints,
+    ...keptShared(shared),
   };
 }
 
@@ -115,11 +117,13 @@ function drawTexts(
   vocabulary: ItemVocabulary,
   kind: string,
   rarity: ItemRarity,
-): { name: string; description: string; tints: string[] } {
+): { name: string; description: string; tints: string[]; shared: Record<string, string> } {
   const noun = pick(source, vocabulary.nouns(kind));
   const gender: Gender = noun.gender ?? 'm';
   const plural = noun.plural ?? false;
   const params = vocabulary.params;
+  const shared = vocabulary.shared.draw(source, vocabulary.sharedFits(kind));
+  const sharedWords = vocabulary.shared.words(source, shared, gender, plural);
   const adjectives = vocabulary.adjectives(rarity, kind);
   const suffixes = vocabulary.suffixes(rarity, kind);
 
@@ -127,7 +131,8 @@ function drawTexts(
   const templates = (kindNames.length > 0 ? kindNames : vocabulary.templates(rarity)).filter(
     (template) =>
       (adjectives.length > 0 || !template.includes('{adjective}')) &&
-      (suffixes.length > 0 || !template.includes('{suffix}')),
+      (suffixes.length > 0 || !template.includes('{suffix}')) &&
+      !vocabulary.shared.undrawn(template, shared),
   );
   const template = templates.length > 0 ? pick(source, templates) : '{base}';
 
@@ -145,11 +150,14 @@ function drawTexts(
     if (text !== undefined && drawn.tint) tints.push(drawn.tint);
   }
 
-  const context = { params, gender, plural, values };
+  const context = { params, gender, plural, values, shared: sharedWords.values };
   const name = capitalize(expandPhrase(source, template, context) ?? noun.text);
 
   // The tint's own lines come first one time in two, otherwise the kind's.
-  const tintLines = tints.flatMap((tint) => vocabulary.tintDescriptions(tint, kind));
+  const tintLines = [
+    ...tints.flatMap((tint) => vocabulary.tintDescriptions(tint, kind)),
+    ...sharedWords.descriptions,
+  ];
   const kindLines = vocabulary.descriptions(kind);
   const fromTint = tintLines.length > 0 && (kindLines.length === 0 || chance(source, 1, 2));
   const pools = fromTint ? [tintLines, kindLines] : [kindLines];
@@ -164,7 +172,7 @@ function drawTexts(
     }
     if (description) break;
   }
-  return { name, description, tints };
+  return { name, description, tints, shared };
 }
 
 function drawModifiers(

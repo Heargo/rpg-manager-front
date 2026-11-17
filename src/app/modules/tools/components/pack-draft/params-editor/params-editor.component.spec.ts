@@ -18,7 +18,7 @@ describe('ParamsEditorComponent', () => {
   it('shows the params of the draft, one row each, with their entries', async () => {
     const view = await renderEditor(
       ParamsEditorComponent,
-      draftOf({ common: { version: 1, params: { maker: ['a hermit'] } } }),
+      draftOf({ common: { version: 2, params: { maker: ['a hermit'] } } }),
     );
 
     const row = view.$('param-row-maker')!;
@@ -35,7 +35,7 @@ describe('ParamsEditorComponent', () => {
   it('shows an issue next to the row of its param', async () => {
     const view = await renderEditor(
       ParamsEditorComponent,
-      draftOf({ common: { version: 1, params: { maker: ['a hermit'] } } }),
+      draftOf({ common: { version: 2, params: { maker: ['a hermit'] } } }),
       [{ level: 'warning', param: 'maker', message: 'param {maker} is not used' }],
     );
 
@@ -47,7 +47,7 @@ describe('ParamsEditorComponent', () => {
   it('removes a param', async () => {
     const view = await renderEditor(
       ParamsEditorComponent,
-      draftOf({ common: { version: 1, params: { maker: ['a hermit'] } } }),
+      draftOf({ common: { version: 2, params: { maker: ['a hermit'] } } }),
     );
 
     await view.click('remove-param');

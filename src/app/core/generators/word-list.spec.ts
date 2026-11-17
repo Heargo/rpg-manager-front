@@ -180,8 +180,11 @@ describe('the Base item word lists', () => {
   it.each([
     ['en', enItems, enPack, enCommon],
     ['fr', frItems, frPack, frCommon],
-  ])('%s is valid, with no warning once the Base params are known', (_lang, items, _pack, common) => {
-    const result = validateItemWordList(items, Object.keys(common.params));
+  ])('%s is valid, with no warning once the Base params are known', (_lang, items, pack, common) => {
+    const result = validateItemWordList(items, [
+      ...Object.keys(common.params),
+      ...Object.keys((pack as { sharedKinds: object }).sharedKinds),
+    ]);
     expect(result.ok ? [] : result.errors).toEqual([]);
     expect(result.ok ? result.warnings : []).toEqual([]);
   });

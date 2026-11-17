@@ -20,6 +20,8 @@ export function baseClassVocabulary(lang: 'en' | 'fr'): ClassVocabulary {
       kinds: (manifest.domains.classes as { kinds?: unknown }).kinds as PooledSource['kinds'],
       texts: (lang === 'en' ? enClasses : frClasses) as unknown as PooledSource['texts'],
       params: (lang === 'en' ? enCommon : frCommon).params,
+      sharedKinds: (manifest as { sharedKinds?: PooledSource['sharedKinds'] }).sharedKinds,
+      sharedTexts: (lang === 'en' ? enCommon : frCommon) as PooledSource['sharedTexts'],
     },
   ]);
 }

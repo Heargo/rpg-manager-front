@@ -27,6 +27,8 @@ export function baseItemVocabulary(lang: 'en' | 'fr'): ItemVocabulary {
       texts: (lang === 'en' ? enItems : frItems) as PooledSource['texts'],
       tints: manifest.tints as PooledSource['tints'],
       params: (lang === 'en' ? enCommon : frCommon).params,
+      sharedKinds: (manifest as { sharedKinds?: PooledSource['sharedKinds'] }).sharedKinds,
+      sharedTexts: (lang === 'en' ? enCommon : frCommon) as PooledSource['sharedTexts'],
     },
   ]);
 }
@@ -42,6 +44,8 @@ export function baseNpcVocabulary(lang: 'en' | 'fr'): NpcVocabulary {
       kinds: (manifest.domains.npcs as { kinds?: unknown }).kinds as PooledSource['kinds'],
       texts: (lang === 'en' ? enNpcs : frNpcs) as unknown as PooledSource['texts'],
       params: (lang === 'en' ? enCommon : frCommon).params,
+      sharedKinds: (manifest as { sharedKinds?: PooledSource['sharedKinds'] }).sharedKinds,
+      sharedTexts: (lang === 'en' ? enCommon : frCommon) as PooledSource['sharedTexts'],
     },
   ]);
 }

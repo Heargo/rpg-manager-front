@@ -72,7 +72,7 @@ describe('PackDraftFormBusiness.knownKeys', () => {
     const keys = await business.knownKeys(
       draft({
         tints: { neon: { gradient: GRADIENT } },
-        common: { version: 1, params: { spell: ['fireball'] } },
+        common: { version: 2, params: { spell: ['fireball'] } },
       }),
     );
 
@@ -203,7 +203,7 @@ describe('PackDraftFormBusiness.issues', () => {
             kinds: { orb: { nouns: [{ text: 'Orb' }], descriptions: ['Made by {maker}, seen by {spell}.'] } },
           },
         },
-        common: { version: 1, params: { spell: ['a mage'] } },
+        common: { version: 2, params: { spell: ['a mage'] } },
       }),
     );
 

@@ -78,10 +78,10 @@ const FILES: Record<string, unknown> = {
     version: 2,
     kinds: { wand: { nouns: [{ text: 'Wand' }] } },
   },
-  'packs/base-fr/texts/common.json': { version: 1, params: { maker: ['un forgeron'] } },
-  'packs/base-en/texts/common.json': { version: 1, params: { maker: ['a smith'] } },
-  'packs/extra/texts/common.json': { version: 1, params: { maker: ['une naine'] } },
-  'packs/extra-en/texts/common.json': { version: 1, params: { maker: ['a dwarf'] } },
+  'packs/base-fr/texts/common.json': { version: 2, params: { maker: ['un forgeron'] } },
+  'packs/base-en/texts/common.json': { version: 2, params: { maker: ['a smith'] } },
+  'packs/extra/texts/common.json': { version: 2, params: { maker: ['une naine'] } },
+  'packs/extra-en/texts/common.json': { version: 2, params: { maker: ['a dwarf'] } },
 };
 
 const entry = (id: string, language: string | undefined, builtIn: boolean) => ({

@@ -197,7 +197,7 @@ describe('pack draft edits: params and templates', () => {
   it('setParam writes the entries in the shared common texts', () => {
     const after = setParam(draft(), 'maker', ['a blacksmith', 'a hermit']);
 
-    expect(common(after)).toEqual({ version: 1, params: { maker: ['a blacksmith', 'a hermit'] } });
+    expect(common(after)).toEqual({ version: 2, params: { maker: ['a blacksmith', 'a hermit'] } });
   });
 
   it('removeParam removes it, and the last one removes the common texts', () => {

@@ -335,7 +335,7 @@ describe.each(['base-fr', 'base-en'] as const)('the real %s pack in format 2', (
       ['shield', 'weapon2'],
     ];
     for (const [kind, slot] of levels) {
-      expect(kinds[kind], kind).toEqual({ parent: 'equipment', slot });
+      expect(kinds[kind], kind).toMatchObject({ parent: 'equipment', slot });
     }
   });
 

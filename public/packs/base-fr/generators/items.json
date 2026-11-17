@@ -636,7 +636,7 @@
         "Une arme [fiable|redoutable], forgée par {maker}.",
         "On dit que l'arme a appartenu à {owner}.",
         "{g:Il|Elle} a survécu à {event}, et ça se voit.",
-        "{g:Il|Elle} est {g:façonné|façonnée} dans {material}."
+        "{g:Il|Elle} est {g:façonné|façonnée} en {material}."
       ],
       "adjectives": {
         "uncommon": [

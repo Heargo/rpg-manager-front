@@ -72,6 +72,7 @@ export class SkillVocabularyBusiness {
       isBase: isBasePack(id),
       ...(pack?.language ? { language: pack.language } : {}),
       kinds: pack?.skillKinds as PooledSource['kinds'],
+      ...(pack?.sharedKinds ? { sharedKinds: pack.sharedKinds } : {}),
     };
     if (!pack?.language || pack.language !== language) return source;
     if (pack.generators.skills) {
@@ -93,8 +94,10 @@ export class SkillVocabularyBusiness {
     if (pack.common) {
       try {
         const result = validateCommonTexts(await this.packs.commonTexts(id));
-        if (result.ok && result.value.params)
-          source.params = result.value.params;
+        if (result.ok) {
+          if (result.value.params) source.params = result.value.params;
+          source.sharedTexts = result.value;
+        }
       } catch (error) {
         console.warn(
           `Common texts of pack "${id}" could not be loaded:`,

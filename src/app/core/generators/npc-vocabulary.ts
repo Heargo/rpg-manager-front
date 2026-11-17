@@ -2,6 +2,7 @@ import { NpcRole } from '../../modules/npc/models/npc';
 import { NPC_KIND_SCHEMA } from '../packs/pack-kinds';
 import { poolDomain, PooledSource, poolParams } from '../packs/pooled-domain';
 import { kindLookups } from './kind-lookups';
+import { buildSharedKinds, SharedKinds } from './shared-kinds';
 import { GivenName, NpcKindTexts } from './npc-word-list';
 import { Adjective, Noun } from './word-list';
 
@@ -26,6 +27,9 @@ export interface NpcVocabulary {
   given(): GivenName[];
   epithets(): Adjective[];
   templates(): string[];
+  /** The pooled shared kinds, and the ones a kind takes (inherited down its chain). */
+  shared: SharedKinds;
+  sharedFits(id: string): string[];
   params: Record<string, string[]>;
   conflicts: string[];
 }
@@ -33,6 +37,7 @@ export interface NpcVocabulary {
 export function buildNpcVocabulary(sources: PooledSource[]): NpcVocabulary {
   const pooled = poolDomain(sources, NPC_KIND_SCHEMA);
   const params = poolParams(sources);
+  const shared = buildSharedKinds(sources);
   const lookups = kindLookups(pooled);
   const section = <T>(name: string): T[] =>
     (pooled.sections[name] as T[] | undefined) ?? [];
@@ -63,6 +68,8 @@ export function buildNpcVocabulary(sources: PooledSource[]): NpcVocabulary {
     given: () => section<GivenName>('given'),
     epithets: () => section<Adjective>('epithets'),
     templates: () => section<string>('templates'),
+    shared,
+    sharedFits: (id) => (pooled.kinds[id]?.['shared'] as string[] | undefined) ?? [],
     params,
     conflicts: pooled.conflicts,
   };
