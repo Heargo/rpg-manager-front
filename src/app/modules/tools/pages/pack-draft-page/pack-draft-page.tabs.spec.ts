@@ -54,7 +54,7 @@ describe('PackDraftPageComponent word list tabs', () => {
     await settle(() => {
       expect(has('app-params-editor')).toBe(true);
       expect(has('textarea[data-test="common-json"]')).toBe(true);
-      expect(has('app-kinds-editor')).toBe(false);
+      expect(has('app-kinds-tree-table')).toBe(false);
       expect(has('textarea[data-test="wordlist-items"]')).toBe(false);
       expect(has('textarea[data-test="wordlist-npcs"]')).toBe(false);
     });
@@ -65,7 +65,7 @@ describe('PackDraftPageComponent word list tabs', () => {
     await tab('Items');
 
     await settle(() => {
-      expect(has('app-kinds-editor')).toBe(true);
+      expect(has('app-kinds-tree-table')).toBe(true);
       expect(has('app-tints-editor')).toBe(true);
       expect(has('app-common-words-editor')).toBe(true);
       expect(has('app-templates-editor')).toBe(true);
@@ -81,14 +81,14 @@ describe('PackDraftPageComponent word list tabs', () => {
     ['Skills', 'skills'],
     ['Classes', 'classes'],
   ])('%s holds its kinds and texts editors and its own JSON only', async (label, domain) => {
-    const { tab, settle, has } = await render('en');
+    const { tab, settle, has, el } = await render('en');
     await tab(label);
 
     await settle(() => {
-      expect(has(`[data-test="domain-${domain}"] app-domain-kinds-editor`)).toBe(true);
+      expect(has(`[data-test="domain-${domain}"] app-kinds-tree-table`)).toBe(true);
       expect(has(`[data-test="domain-${domain}"] app-domain-texts-editor`)).toBe(true);
       expect(has(`textarea[data-test="wordlist-${domain}"]`)).toBe(true);
-      expect(has('app-kinds-editor')).toBe(false);
+      expect(el.querySelectorAll('app-kinds-tree-table')).toHaveLength(1);
       expect(has('app-params-editor')).toBe(false);
       for (const other of ['npcs', 'skills', 'classes'].filter((d) => d !== domain))
         expect(has(`[data-test="domain-${other}"]`)).toBe(false);
@@ -102,7 +102,7 @@ describe('PackDraftPageComponent word list tabs', () => {
     expect(labels()).toContain('NPCs');
     await tab('NPCs');
     await settle(() => {
-      expect(has('[data-test="domain-npcs"] app-domain-kinds-editor')).toBe(true);
+      expect(has('[data-test="domain-npcs"] app-kinds-tree-table')).toBe(true);
       expect(has('app-domain-texts-editor')).toBe(false);
     });
   });

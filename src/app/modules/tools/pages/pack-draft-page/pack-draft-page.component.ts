@@ -36,9 +36,8 @@ import {
   PackDraftFormBusiness,
 } from '../../../../core/business/pack-draft-form.business';
 import { CommonWordsEditorComponent } from '../../components/pack-draft/common-words-editor/common-words-editor.component';
-import { DomainKindsEditorComponent } from '../../components/pack-draft/domain-kinds-editor/domain-kinds-editor.component';
 import { DomainTextsEditorComponent } from '../../components/pack-draft/domain-texts-editor/domain-texts-editor.component';
-import { KindsEditorComponent } from '../../components/pack-draft/kinds-editor/kinds-editor.component';
+import { KindsTreeTableComponent } from '../../components/pack-draft/kinds-tree-table/kinds-tree-table.component';
 import { ParamsEditorComponent } from '../../components/pack-draft/params-editor/params-editor.component';
 import { TemplatesEditorComponent } from '../../components/pack-draft/templates-editor/templates-editor.component';
 import { TintsEditorComponent } from '../../components/pack-draft/tints-editor/tints-editor.component';
@@ -97,9 +96,8 @@ const SPRITES_PER_PAGE = 12;
     MessageModule,
     MultiSelectModule,
     CommonWordsEditorComponent,
-    DomainKindsEditorComponent,
     DomainTextsEditorComponent,
-    KindsEditorComponent,
+    KindsTreeTableComponent,
     PanelModule,
     PaginatorModule,
     ParamsEditorComponent,
@@ -395,9 +393,10 @@ const SPRITES_PER_PAGE = 12;
                 <p class="hint">{{ 'packs.creator.listsIntro' | translate }}</p>
                 <section class="list">
                   <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
-                  <app-kinds-editor
+                  <app-kinds-tree-table
                     [draft]="current"
                     [issues]="issues()"
+                    domain="items"
                     (changed)="edited($event)"
                   />
                   <h4>{{ 'packs.creator.tints.title' | translate }}</h4>
@@ -436,7 +435,7 @@ const SPRITES_PER_PAGE = 12;
                   </p>
                   <section class="list" [attr.data-test]="'domain-' + domain">
                     <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
-                    <app-domain-kinds-editor
+                    <app-kinds-tree-table
                       [draft]="current"
                       [issues]="issues()"
                       [domain]="domain"

@@ -135,18 +135,44 @@ export function renameKind(
   });
 }
 
-/** Removes a kind, its texts and its references in the sprites. */
+/** The id together with the ids of all its descendants, following `parent`. */
+export function withDescendants(
+  kinds: Record<string, { parent?: unknown }>,
+  id: string,
+): Set<string> {
+  const gone = new Set([id]);
+  let grew = true;
+  while (grew) {
+    grew = false;
+    for (const [kid, kind] of Object.entries(kinds))
+      if (
+        !gone.has(kid) &&
+        typeof kind.parent === 'string' &&
+        gone.has(kind.parent)
+      ) {
+        gone.add(kid);
+        grew = true;
+      }
+  }
+  return gone;
+}
+
+/** Removes a kind with its descendants, their texts and their references in the sprites. */
 export function removeKind(draft: PackDraft, id: string): PackDraft {
-  const { [id]: _removed, ...kinds } = draft.kinds;
+  const gone = withDescendants(draft.kinds, id);
   const result: PackDraft = {
     ...draft,
-    kinds,
+    kinds: Object.fromEntries(
+      Object.entries(draft.kinds).filter(([kid]) => !gone.has(kid)),
+    ),
     sprites: draft.sprites.map((sprite) => ({
       ...sprite,
-      kinds: sprite.kinds.filter((kind) => kind !== id),
+      kinds: sprite.kinds.filter((kind) => !gone.has(kind)),
     })),
   };
-  return editItems(result, (list) => setIn(list, 'kinds', id, undefined));
+  return editItems(result, (list) => {
+    for (const kid of gone) setIn(list, 'kinds', kid, undefined);
+  });
 }
 
 /** Sets the texts of a kind; each field given replaces the whole field, and an empty one is removed. */
@@ -537,16 +563,20 @@ export function renameDomainKind(
   });
 }
 
-/** Removes a domain kind and its texts. */
+/** Removes a domain kind with its descendants and their texts. */
 export function removeDomainKind(
   draft: PackDraft,
   domain: StructuredDomain,
   id: string,
 ): PackDraft {
-  const { [id]: _removed, ...kinds } = domainKindsOf(draft, domain);
-  return editList(withDomainKinds(draft, domain, kinds), domain, (list) =>
-    setIn(list, 'kinds', id, undefined),
+  const own = domainKindsOf(draft, domain);
+  const gone = withDescendants(own as Record<string, { parent?: unknown }>, id);
+  const kinds = Object.fromEntries(
+    Object.entries(own).filter(([kid]) => !gone.has(kid)),
   );
+  return editList(withDomainKinds(draft, domain, kinds), domain, (list) => {
+    for (const kid of gone) setIn(list, 'kinds', kid, undefined);
+  });
 }
 
 /** The texts of a domain kind. */
