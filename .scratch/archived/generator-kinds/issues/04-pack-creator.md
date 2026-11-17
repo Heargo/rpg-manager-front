@@ -1,6 +1,6 @@
 # Pack creator: NPC, skill and class kinds
 
-Status: claimed
+Status: resolved
 Type: task
 Blocked by: 01, 02, 03
 
@@ -51,3 +51,10 @@ Follow IC08/IA02 (archived `item-coherence/issues/08-*.md`, `item-adjectives/iss
   - `domain-kinds-editor.component.ts` — nouns/adjectives/descriptions/names/preview/add-noun code duplicates the Items `kinds-editor` (shotgun surgery risk); extract shared pieces later.
   - `pack-draft-form.business.ts` `issues()` calls `knownKeys(draft)` inside the domain loop, up to three times; hoist it.
   - Checked and fine: Optimus controls only (p-multiselect, p-select, pInputText, pTextarea, p-checkbox), signals/`input()`/`output()`, block control flow, all `packs.creator.domain.*` keys in en and fr, and the three domain sections reuse one component, so they match each other and Items. The orchestrator's spec fix is reasonable. No secrets, no invite-code changes.
+
+## Answer
+
+- The Word lists tab has an NPC, Skills and Classes section (one shared `domain-kinds-editor` and `domain-texts-editor`): kinds with parent and the domain fields (roles and person / type and effect / favoured skill kinds), texts per kind (nouns, descriptions, adjectives, suffixes for skills and classes, names), the top-level lists, a preview of a few draws per kind. Raw JSON follows the structured edits. Draft edits `setDomainKind`, `renameDomainKind` (follows parents, texts and classes' favoured skills), `removeDomainKind`, `setDomainKindTexts`, `setDomainTexts`.
+- The first green landed in the user's commit `25abdc2`; this commit adds the review fixes: per-kind suffixes, the NPC text drawer moved to `core/generators/npc-texts.ts` (layering), `knownKeys` computed once. A red-spec bug (`withFolk(undefined)` defaulting to English) was fixed by the orchestrator.
+- Checked: suite 289 files / 2840 tests, `ng build` clean; browser: the three sections render in the creator with no console error.
+- Not done (review Consider): the domain kinds editor duplicates parts of the Items kinds editor; extract shared pieces later.

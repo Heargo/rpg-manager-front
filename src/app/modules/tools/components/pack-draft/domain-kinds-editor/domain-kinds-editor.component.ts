@@ -332,6 +332,50 @@ const lines = (text: string): string[] =>
                   (onClick)="addAdjective(id)"
                 />
               </div>
+              @if (domain() !== 'npcs') {
+                <div class="nouns">
+                  <span class="label">{{
+                    'packs.creator.domain.top.suffixes' | translate
+                  }}</span>
+                  @for (
+                    suffix of textsOf(id).suffixes;
+                    track $index;
+                    let i = $index
+                  ) {
+                    <span class="chip">
+                      {{ suffix }}
+                      <p-button
+                        data-test="remove-suffix"
+                        severity="secondary"
+                        text
+                        size="small"
+                        icon="pi pi-times"
+                        [ariaLabel]="'packs.creator.kinds.remove' | translate"
+                        (onClick)="removeSuffix(id, i)"
+                      />
+                    </span>
+                  }
+                </div>
+                <div class="line">
+                  <input
+                    pInputText
+                    type="text"
+                    data-test="kind-new-suffix"
+                    [attr.aria-label]="'packs.creator.words.suffix' | translate"
+                    [placeholder]="'packs.creator.words.suffix' | translate"
+                    [ngModel]="newSuffix(id)"
+                    (ngModelChange)="setNewSuffix(id, $event)"
+                  />
+                  <p-button
+                    data-test="add-kind-suffix"
+                    icon="pi pi-plus"
+                    severity="secondary"
+                    [label]="'packs.creator.words.addSuffix' | translate"
+                    [disabled]="!newSuffix(id).trim()"
+                    (onClick)="addSuffix(id)"
+                  />
+                </div>
+              }
               <div class="line">
                 <p-button
                   data-test="toggle-names"
@@ -479,6 +523,7 @@ export class DomainKindsEditorComponent {
   protected readonly forms = ['m', 'f'] as const;
   protected readonly line = wordLine;
   private readonly newAdjectives = signal<Record<string, AdjectiveForms>>({});
+  private readonly newSuffixes = signal<Record<string, string>>({});
   private readonly newNouns = signal<Record<string, NewNoun>>({});
   private loads = 0;
 
@@ -713,6 +758,33 @@ export class DomainKindsEditorComponent {
     this.emit(
       setDomainKindTexts(this.draft(), this.domain(), id, {
         adjectives: this.textsOf(id).adjectives.filter((_, i) => i !== index),
+      }),
+    );
+  }
+
+  protected newSuffix(id: string): string {
+    return this.newSuffixes()[id] ?? '';
+  }
+
+  protected setNewSuffix(id: string, value: string): void {
+    this.newSuffixes.update((all) => ({ ...all, [id]: value }));
+  }
+
+  protected addSuffix(id: string): void {
+    const text = this.newSuffix(id).trim();
+    if (!text) return;
+    this.emit(
+      setDomainKindTexts(this.draft(), this.domain(), id, {
+        suffixes: [...this.textsOf(id).suffixes, text],
+      }),
+    );
+    this.newSuffixes.update((all) => ({ ...all, [id]: '' }));
+  }
+
+  protected removeSuffix(id: string, index: number): void {
+    this.emit(
+      setDomainKindTexts(this.draft(), this.domain(), id, {
+        suffixes: this.textsOf(id).suffixes.filter((_, i) => i !== index),
       }),
     );
   }

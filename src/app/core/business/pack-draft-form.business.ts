@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { drawNpcTexts } from '../../modules/npc/helpers/npc-editor.rules';
+import { drawNpcTexts } from '../generators/npc-texts';
 import { validateClassWordList } from '../generators/class-word-list';
 import { buildClassVocabulary } from '../generators/class-vocabulary';
 import { classTexts } from '../generators/class-generator';
@@ -240,9 +240,9 @@ export class PackDraftFormBusiness {
     if (!pack.ok) add('error', pack.errors);
     else add('warning', pack.warnings);
 
+    const known = await this.knownKeys(draft);
     const items = draft.generators.items;
     if (isRecord(items)) {
-      const known = await this.knownKeys(draft);
       const list = validateItemWordList(items, known.params);
       if (!list.ok) add('error', list.errors);
       else add('warning', list.warnings);
@@ -250,7 +250,6 @@ export class PackDraftFormBusiness {
     for (const domain of STRUCTURED_DOMAINS) {
       const file = draft.generators[domain];
       if (!isRecord(file)) continue;
-      const known = await this.knownKeys(draft);
       const list = WORD_LIST_VALIDATORS[domain](file, known.params);
       if (!list.ok) addFor(domain, 'error', list.errors);
       else addFor(domain, 'warning', list.warnings);

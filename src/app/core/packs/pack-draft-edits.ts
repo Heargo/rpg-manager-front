@@ -542,6 +542,8 @@ export interface DomainKindTexts {
   nouns?: Noun[];
   descriptions?: string[];
   adjectives?: Adjective[];
+  /** Skills and classes only. */
+  suffixes?: string[];
   names?: string[];
 }
 
@@ -562,6 +564,7 @@ export function setDomainKindTexts(
       'nouns',
       'descriptions',
       'adjectives',
+      'suffixes',
       'names',
     ] as const)
       if (field in texts)
@@ -598,6 +601,7 @@ export function domainKindTextsOf(
     nouns: (texts['nouns'] as Noun[] | undefined) ?? [],
     descriptions: (texts['descriptions'] as string[] | undefined) ?? [],
     adjectives: (texts['adjectives'] as Adjective[] | undefined) ?? [],
+    suffixes: (texts['suffixes'] as string[] | undefined) ?? [],
     names: (texts['names'] as string[] | undefined) ?? [],
   };
 }
