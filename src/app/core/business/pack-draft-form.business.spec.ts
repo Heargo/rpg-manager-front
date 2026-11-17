@@ -233,4 +233,36 @@ describe('PackDraftFormBusiness.issues', () => {
 
     expect(issues).toEqual([]);
   });
+
+  describe('common.json warnings', () => {
+    const commonOf = (...descriptions: string[]) =>
+      draft({
+        sharedKinds: { gem: {}, ruby: { parent: 'gem' } },
+        common: { version: 2, kinds: { ruby: { words: [{ text: 'Ruby' }], descriptions } } },
+      });
+    const messages = async (d: PackDraft) => (await setup().issues(d)).map((i) => i.message);
+
+    it('does not warn about a param that only an installed pack defines', async () => {
+      const found = await messages(commonOf('seen at {place}'));
+
+      expect(found.filter((m) => m.includes('{place}'))).toEqual([]);
+    });
+
+    it('still warns about a param defined nowhere', async () => {
+      const found = await messages(commonOf('seen at {nowhere}'));
+
+      expect(found.some((m) => m.includes('param {nowhere} is used but not defined'))).toBe(true);
+    });
+
+    it('still warns about texts for an undeclared shared kind', async () => {
+      const found = await messages(
+        draft({
+          sharedKinds: { gem: {} },
+          common: { version: 2, kinds: { ghost: { words: [{ text: 'Boo' }] } } },
+        }),
+      );
+
+      expect(found.some((m) => m.includes('shared kind "ghost" has texts but no active pack declares it'))).toBe(true);
+    });
+  });
 });

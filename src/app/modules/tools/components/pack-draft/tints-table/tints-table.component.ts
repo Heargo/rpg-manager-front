@@ -13,8 +13,6 @@ import { ConfirmationService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { DrawerModule } from '@openng/optimus-ui/drawer';
 import { MessageModule } from '@openng/optimus-ui/message';
-import { TagModule } from '@openng/optimus-ui/tag';
-import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { TableModule } from '@openng/optimus-ui/table';
 import { LanguageBusiness } from '../../../../../core/business/language.business';
 import {
@@ -37,6 +35,7 @@ import {
   setTintTexts,
 } from '../../../../../core/packs/pack-draft-edits';
 import { KIND_ID } from '../../../../../core/packs/pack-kinds';
+import { ChipListComponent } from '../chip-list/chip-list.component';
 import { TintDetailComponent } from './tint-detail.component';
 import {
   DEFAULT_GRADIENT,
@@ -60,8 +59,7 @@ import { TintFormComponent } from './tint-form.component';
     DrawerModule,
     MessageModule,
     TableModule,
-    TagModule,
-    TooltipModule,
+    ChipListComponent,
     TintDetailComponent,
     TintFormComponent,
   ],
@@ -113,23 +111,7 @@ import { TintFormComponent } from './tint-form.component';
             ></span>
           </td>
           <td class="extra" data-test="cell-fits">
-            <div class="chips">
-              @for (name of row.names.slice(0, 3); track $index) {
-                <p-tag
-                  data-test="fit-item"
-                  severity="secondary"
-                  [value]="name"
-                />
-              }
-              @if (row.names.length > 3) {
-                <p-tag
-                  data-test="fit-more"
-                  severity="secondary"
-                  [value]="'+' + (row.names.length - 3)"
-                  [pTooltip]="row.names.slice(3).join(', ')"
-                />
-              }
-            </div>
+            <app-chip-list [names]="row.names" />
           </td>
         </tr>
       </ng-template>
@@ -232,11 +214,6 @@ import { TintFormComponent } from './tint-form.component';
     }
     .gradient-col {
       width: 10rem;
-    }
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.25rem;
     }
     .swatch {
       display: block;

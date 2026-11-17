@@ -41,6 +41,8 @@ export interface KnownKeys {
   params: string[];
   /** The kinds of the NPC, skill and class trees, with their first noun. */
   domainKinds: Record<StructuredDomain, KindKey[]>;
+  /** The shared kinds of the installed packs and of the draft, with their first word. */
+  sharedKinds: KindKey[];
 }
 
 /** One draw of an NPC, skill or class kind in the preview. */
@@ -58,7 +60,7 @@ export interface DraftIssue {
   param?: string;
   rarity?: ItemRarity;
   /** Set on a message about the NPC, skill or class domain (its `kind` is a kind of that domain). */
-  domain?: StructuredDomain;
+  domain?: StructuredDomain | 'shared';
 }
 
 const FIELDS = {
@@ -85,6 +87,20 @@ function firstNouns(list: unknown): Map<string, string> {
   for (const [id, texts] of Object.entries(kinds)) {
     const nouns = isRecord(texts) ? texts['nouns'] : undefined;
     const first = Array.isArray(nouns) ? nouns[0] : undefined;
+    if (isRecord(first) && typeof first['text'] === 'string')
+      result.set(id, first['text']);
+  }
+  return result;
+}
+
+/** The first word of each shared kind of a (raw) `common.json`. */
+function firstWords(common: unknown): Map<string, string> {
+  const result = new Map<string, string>();
+  const kinds =
+    isRecord(common) && isRecord(common['kinds']) ? common['kinds'] : {};
+  for (const [id, texts] of Object.entries(kinds)) {
+    const words = isRecord(texts) ? texts['words'] : undefined;
+    const first = Array.isArray(words) ? words[0] : undefined;
     if (isRecord(first) && typeof first['text'] === 'string')
       result.set(id, first['text']);
   }
@@ -158,8 +174,18 @@ export class PackDraftFormBusiness {
         domainNouns.has(id) ? { id, noun: domainNouns.get(id) } : { id },
       );
     }
+    const sharedNouns = new Map(installed.sharedNouns);
+    for (const [id, noun] of firstWords(draft?.common))
+      sharedNouns.set(id, noun);
+    const sharedIds = new Set([
+      ...installed.sharedKinds,
+      ...Object.keys(draft?.sharedKinds ?? {}),
+    ]);
     return {
       domainKinds,
+      sharedKinds: [...sharedIds].map((id) =>
+        sharedNouns.has(id) ? { id, noun: sharedNouns.get(id) } : { id },
+      ),
       kinds: [...ids].map((id) =>
         nouns.has(id) ? { id, noun: nouns.get(id) } : { id },
       ),
@@ -255,8 +281,22 @@ export class PackDraftFormBusiness {
       else addFor(domain, 'warning', list.warnings);
     }
     if (draft.common !== undefined) {
-      const common = validateCommonTexts(draft.common);
+      const common = validateCommonTexts(
+        draft.common,
+        known.sharedKinds.map((kind) => kind.id),
+        known.params,
+      );
       if (!common.ok) add('error', common.errors);
+      else
+        for (const message of common.warnings) {
+          const shared = /^shared kind "([^"]+)"/.exec(message);
+          issues.push({
+            level: 'warning',
+            message,
+            ...fieldOf(message),
+            ...(shared ? { kind: shared[1], domain: 'shared' as const } : {}),
+          });
+        }
     }
     return issues;
   }
@@ -330,6 +370,8 @@ export class PackDraftFormBusiness {
       params: [],
       domainKinds: { npcs: [], skills: [], classes: [] },
       domainNouns: { npcs: new Map(), skills: new Map(), classes: new Map() },
+      sharedKinds: [],
+      sharedNouns: new Map(),
     };
     for (const pack of installed) {
       for (const [id, kind] of Object.entries(pack.kinds)) {
@@ -341,6 +383,7 @@ export class PackDraftFormBusiness {
         result.domainKinds[domain].push(
           ...Object.keys(pack[FIELDS[domain]] ?? {}),
         );
+      result.sharedKinds.push(...Object.keys(pack.sharedKinds ?? {}));
       result.tints.push(...Object.keys(pack.tints));
       for (const sprite of pack.sprites)
         if (sprite.domain === 'items') result.spriteKinds.push(...sprite.kinds);
@@ -351,6 +394,8 @@ export class PackDraftFormBusiness {
         .commonTexts(pack.id)
         .catch(() => undefined);
       result.params.push(...Object.keys(paramsOf(common)));
+      for (const [id, noun] of firstWords(common))
+        if (!result.sharedNouns.has(id)) result.sharedNouns.set(id, noun);
     }
     const speaking = installed.filter(
       (pack) => pack.language === packLanguageOf(language),
@@ -512,4 +557,6 @@ interface Installed {
   params: string[];
   domainKinds: Record<StructuredDomain, string[]>;
   domainNouns: Record<StructuredDomain, Map<string, string>>;
+  sharedKinds: string[];
+  sharedNouns: Map<string, string>;
 }

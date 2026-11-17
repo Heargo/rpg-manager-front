@@ -22,7 +22,11 @@ import {
   KnownKeys,
   PackDraftFormBusiness,
 } from '../../../../../core/business/pack-draft-form.business';
-import { KindKey, kindLabel } from '../../../../../core/packs/kind-label';
+import {
+  KindKey,
+  kindLabel,
+  kindOptions,
+} from '../../../../../core/packs/kind-label';
 import { PackDraft } from '../../../../../core/packs/pack-draft';
 import {
   domainKindsOf,
@@ -30,14 +34,19 @@ import {
   kindTextsOf,
   removeDomainKind,
   removeKind,
+  removeSharedKind,
   renameDomainKind,
   renameKind,
+  renameSharedKind,
   setDomainKind,
   setKind,
+  setSharedKind,
+  sharedKindTextsOf,
   StructuredDomain,
   withDescendants,
 } from '../../../../../core/packs/pack-draft-edits';
 import { KIND_ID } from '../../../../../core/packs/pack-kinds';
+import { ChipListComponent } from '../chip-list/chip-list.component';
 import { KindDetailComponent } from './kind-detail.component';
 import {
   Domain,
@@ -65,6 +74,7 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
     TagModule,
     TooltipModule,
     TreeTableModule,
+    ChipListComponent,
     KindDetailComponent,
     KindFormComponent,
   ],
@@ -74,7 +84,7 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
         data-test="add-kind"
         icon="pi pi-plus"
         severity="secondary"
-        [label]="'packs.creator.kinds.add' | translate"
+        [label]="addLabel() | translate"
         (onClick)="add(null)"
       />
     </div>
@@ -82,7 +92,7 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
       [value]="nodes()"
       (onNodeExpand)="setExpanded($event.node, true)"
       (onNodeCollapse)="setExpanded($event.node, false)"
-      [tableStyle]="{ 'min-width': '100%' }"
+      [tableStyle]="{ 'min-width': '100%', 'table-layout': 'fixed' }"
     >
       <ng-template #header>
         <tr>
@@ -92,6 +102,11 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
           <th class="extra">{{ 'packs.creator.kinds.id' | translate }}</th>
           @for (field of fields(); track field) {
             <th class="extra">{{ fieldLabel(field) | translate }}</th>
+          }
+          @if (showWords()) {
+            <th class="extra words-col">
+              {{ 'packs.creator.kinds.wordsCount' | translate }}
+            </th>
           }
           @if (domain() === 'items') {
             <th class="tag-cell tag-col"></th>
@@ -126,7 +141,16 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
           <td class="extra" data-test="cell-id">{{ row.id }}</td>
           @for (field of fields(); track field) {
             <td class="extra" [attr.data-test]="'cell-' + field">
-              {{ display(field, row.fields[field]) }}
+              @if (domain() === 'classes' && field === 'skills') {
+                <app-chip-list [names]="skillNames(row.fields[field])" />
+              } @else {
+                {{ display(field, row.fields[field]) }}
+              }
+            </td>
+          }
+          @if (showWords()) {
+            <td class="extra words-col" data-test="cell-words">
+              {{ row.words }}
             </td>
           }
           @if (domain() === 'items') {
@@ -149,12 +173,17 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
       </ng-template>
       <ng-template #emptymessage>
         <tr>
-          <td [attr.colspan]="fields().length + 3">
+          <td [attr.colspan]="fields().length + 4">
             {{ 'packs.creator.kinds.empty' | translate }}
           </td>
         </tr>
       </ng-template>
     </p-treetable>
+    @for (issue of orphanIssues(); track $index) {
+      <p-message data-test="issue" size="small" severity="warn">{{
+        issue.message
+      }}</p-message>
+    }
     @if (uncovered().length) {
       <p-message data-test="coverage" severity="info" size="small">{{
         'packs.creator.kinds.uncovered'
@@ -204,6 +233,7 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
           [error]="formError()"
           [candidates]="candidates()"
           [skillOptions]="skillOptions()"
+          [sharedOptions]="sharedOptions()"
           [drawn]="drawn()"
           (formChange)="form.set($event)"
           (preview)="preview()"
@@ -294,6 +324,9 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
     .tag-col {
       width: 8rem;
     }
+    .words-col {
+      width: 6rem;
+    }
     @media (max-width: 40rem) {
       .label-col {
         width: auto;
@@ -349,17 +382,35 @@ export class KindsTreeTableComponent {
     () => this.draft().details.language === undefined,
   );
 
-  private readonly kinds = computed<Record<string, Fields>>(() =>
-    this.domain() === 'items'
-      ? (this.draft().kinds as Record<string, Fields>)
-      : domainKindsOf(this.draft(), this.domain() as StructuredDomain),
+  protected readonly showWords = computed(
+    () => this.domain() === 'shared' && !this.neutral(),
   );
+  protected readonly addLabel = computed(() =>
+    this.domain() === 'shared'
+      ? 'packs.creator.kinds.addShared'
+      : 'packs.creator.kinds.add',
+  );
+
+  private readonly kinds = computed<Record<string, Fields>>(() => {
+    const domain = this.domain();
+    if (domain === 'items') return this.draft().kinds as Record<string, Fields>;
+    if (domain === 'shared')
+      return (this.draft().sharedKinds ?? {}) as Fields as Record<
+        string,
+        Fields
+      >;
+    return domainKindsOf(this.draft(), domain);
+  });
 
   private readonly rows = computed<Row[]>(() =>
     Object.entries(this.kinds()).map(([id, kind]) => ({
       id,
       label: this.labelFor(id),
       fields: kind,
+      words:
+        this.domain() === 'shared'
+          ? sharedKindTextsOf(this.draft(), id).words.length
+          : undefined,
     })),
   );
 
@@ -424,14 +475,34 @@ export class KindsTreeTableComponent {
   private readonly kindKeys = computed<KindKey[]>(() => {
     const known = this.known();
     if (!known) return [];
-    return this.domain() === 'items'
-      ? known.kinds
-      : known.domainKinds[this.domain() as StructuredDomain];
+    const domain = this.domain();
+    if (domain === 'items') return known.kinds;
+    if (domain === 'shared') return known.sharedKinds;
+    return known.domainKinds[domain];
   });
 
   protected readonly candidates = computed(() =>
     this.kindKeys().filter((kind) => !this.excluded().has(kind.id)),
   );
+
+  /** The shared kinds a domain kind may take: this draft's and those of the active packs. */
+  protected readonly sharedOptions = computed(() =>
+    kindOptions(
+      this.known()?.sharedKinds ?? [],
+      Object.keys(this.draft().sharedKinds ?? {}),
+    ),
+  );
+
+  private readonly skillLabels = computed(() => {
+    const labels = new Map<string, string>();
+    for (const key of this.known()?.domainKinds.skills ?? [])
+      if (key.noun) labels.set(key.id, key.noun);
+    for (const id of Object.keys(domainKindsOf(this.draft(), 'skills'))) {
+      const noun = domainKindTextsOf(this.draft(), 'skills', id).nouns[0]?.text;
+      if (noun) labels.set(id, noun);
+    }
+    return labels;
+  });
 
   protected readonly skillOptions = computed(() => {
     const keys = [...(this.known()?.domainKinds.skills ?? [])];
@@ -480,6 +551,17 @@ export class KindsTreeTableComponent {
     return (rowNode.node.children?.length ?? 0) > 0;
   }
 
+  /** Issues about shared kinds the tree does not hold (texts for an undeclared one), which no row can show. */
+  protected orphanIssues(): DraftIssue[] {
+    if (this.domain() !== 'shared') return [];
+    return this.issues().filter(
+      (issue) =>
+        issue.domain === 'shared' &&
+        issue.kind !== undefined &&
+        !(issue.kind in this.kinds()),
+    );
+  }
+
   protected issuesOf(id: string): DraftIssue[] {
     const domain = this.domain();
     return this.issues().filter(
@@ -489,6 +571,14 @@ export class KindsTreeTableComponent {
           ? issue.domain === undefined
           : issue.domain === domain),
     );
+  }
+
+  /** The labels of the skill kinds a class favours: the noun when there is one, else the id. */
+  protected skillNames(skills: unknown): string[] {
+    const labels = this.skillLabels();
+    return Array.isArray(skills)
+      ? skills.map((id: string) => labels.get(id) ?? id)
+      : [];
   }
 
   protected parentOf(id: string): string {
@@ -507,11 +597,13 @@ export class KindsTreeTableComponent {
   /** The first noun of the kind, or its id spelled out. */
   private labelFor(id: string): string {
     const domain = this.domain();
-    const noun = (
-      domain === 'items'
-        ? kindTextsOf(this.draft(), id)
-        : domainKindTextsOf(this.draft(), domain, id)
-    ).nouns[0]?.text;
+    const noun =
+      domain === 'shared'
+        ? sharedKindTextsOf(this.draft(), id).words[0]?.text
+        : (domain === 'items'
+            ? kindTextsOf(this.draft(), id)
+            : domainKindTextsOf(this.draft(), domain, id)
+          ).nouns[0]?.text;
     if (noun) return noun;
     const spaced = id.replace(/-/g, ' ');
     return spaced.charAt(0).toUpperCase() + spaced.slice(1);
@@ -606,6 +698,7 @@ export class KindsTreeTableComponent {
     for (const field of [
       ...FIELDS[domain],
       ...(domain === 'npcs' ? ['person'] : []),
+      ...(domain === 'shared' ? [] : ['shared']),
     ])
       patch[field] = form.fields[field];
     // A child inherits the fields only a root may carry.
@@ -618,11 +711,15 @@ export class KindsTreeTableComponent {
       draft =
         domain === 'items'
           ? renameKind(draft, form.original, id)
-          : renameDomainKind(draft, domain, form.original, id);
+          : domain === 'shared'
+            ? renameSharedKind(draft, form.original, id)
+            : renameDomainKind(draft, domain, form.original, id);
     draft =
       domain === 'items'
         ? setKind(draft, id, patch)
-        : setDomainKind(draft, domain, id, patch);
+        : domain === 'shared'
+          ? setSharedKind(draft, id, { parent })
+          : setDomainKind(draft, domain, id, patch);
     if (form.texts && JSON.stringify(form.texts) !== this.initialTexts)
       draft = writeTexts(draft, domain, id, form.texts);
     return draft;
@@ -643,6 +740,7 @@ export class KindsTreeTableComponent {
     if (!id || (editing && (!form || !this.canSave()))) return;
     const draft = editing ? this.applied(form!) : this.draft();
     const domain = this.domain();
+    if (domain === 'shared') return;
     const entries: Drawn[] =
       domain === 'items'
         ? await this.business.preview(draft, id)
@@ -674,7 +772,9 @@ export class KindsTreeTableComponent {
     this.changed.emit(
       domain === 'items'
         ? removeKind(this.draft(), id)
-        : removeDomainKind(this.draft(), domain, id),
+        : domain === 'shared'
+          ? removeSharedKind(this.draft(), id)
+          : removeDomainKind(this.draft(), domain, id),
     );
   }
 }

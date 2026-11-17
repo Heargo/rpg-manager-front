@@ -483,3 +483,59 @@ describe.each(CASES)('KindsTreeTableComponent on $domain', (c) => {
     }
   });
 });
+
+describe('KindsTreeTableComponent classes skills cell', () => {
+  const skillKinds = { blade: {}, bow: {}, orb: {}, shield: {}, staff: {} };
+  const open = (skills: string[]) =>
+    renderEditor(
+      KindsTreeTableComponent,
+      draftOf({
+        skillKinds,
+        classKinds: { knight: { skills }, drifter: {} },
+        generators: { skills: { version: 2, kinds: { blade: { nouns: [{ text: 'Blade' }] } } } },
+      }),
+      [],
+      { domain: 'classes' },
+    );
+  const chips = (view: Awaited<ReturnType<typeof open>>, row: string) =>
+    view.$(`kind-row-${row}`)!.querySelector('[data-test="cell-skills"]')!;
+
+  it('shows at most 3 fit-item chips (the noun, else the id) then a fit-more "+N" item', async () => {
+    const view = await open(['blade', 'bow', 'orb', 'shield', 'staff']);
+
+    const cell = chips(view, 'knight');
+    expect([...cell.querySelectorAll('[data-test="fit-item"]')].map((e) => e.textContent!.trim())).toEqual(['Blade', 'bow', 'orb']);
+    expect(cell.querySelector('[data-test="fit-more"]')!.textContent!.trim()).toBe('+2');
+    expect(cell.textContent).not.toContain('—');
+  });
+
+  it('has no fit-more with 3 skill kinds or fewer', async () => {
+    const view = await open(['blade', 'bow', 'orb']);
+
+    const cell = chips(view, 'knight');
+    expect(cell.querySelectorAll('[data-test="fit-item"]')).toHaveLength(3);
+    expect(cell.querySelector('[data-test="fit-more"]')).toBeNull();
+  });
+});
+
+describe('KindsTreeTableComponent detail of inherited shared kinds (items)', () => {
+  it('shows the shared kinds a child inherits from its parent, marked as inherited, not "None"', async () => {
+    const view = await renderEditor(
+      KindsTreeTableComponent,
+      draftOf({ kinds: { gear: { type: 'equipment', shared: ['metal'] }, blade: { parent: 'gear' } } }),
+      [],
+      { domain: 'items' },
+    );
+
+    view.$('kind-row-blade')!.click();
+    view.fixture.detectChanges();
+    await view.fixture.whenStable();
+    view.fixture.detectChanges();
+
+    const detail = document.querySelector<HTMLElement>('[data-test="kind-detail"]')!;
+    const inherited = detail.querySelector<HTMLElement>('[data-test="detail-shared-inherited"]');
+    expect(inherited).not.toBeNull();
+    expect(inherited!.textContent).toContain('metal');
+    expect(detail.querySelector('[data-test="detail-shared"]')!.textContent).not.toMatch(/none/i);
+  });
+});

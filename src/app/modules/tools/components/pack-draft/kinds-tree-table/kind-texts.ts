@@ -8,6 +8,8 @@ import {
   setDomainKindTexts,
   setKindTexts,
   setKindWords,
+  setSharedKindTexts,
+  sharedKindTextsOf,
   StructuredDomain,
 } from '../../../../../core/packs/pack-draft-edits';
 
@@ -25,7 +27,7 @@ export interface KindTexts {
   suffixes: Record<string, unknown[]>;
 }
 
-export type TextsDomain = 'items' | StructuredDomain;
+export type TextsDomain = 'items' | StructuredDomain | 'shared';
 
 export const scopesOf = (domain: TextsDomain): readonly string[] =>
   domain === 'items' ? ITEM_RARITIES : [ALL];
@@ -68,6 +70,16 @@ export function readTexts(
       suffixes: { ...words.suffixes },
     };
   }
+  if (domain === 'shared') {
+    const texts = sharedKindTextsOf(draft, id);
+    return {
+      nouns: texts.words,
+      descriptions: join(texts.descriptions),
+      names: {},
+      adjectives: { [ALL]: texts.adjectives },
+      suffixes: {},
+    };
+  }
   const texts = domainKindTextsOf(draft, domain, id);
   return {
     nouns: texts.nouns,
@@ -102,6 +114,12 @@ export function writeTexts(
       suffixes: texts.suffixes as never,
     });
   }
+  if (domain === 'shared')
+    return setSharedKindTexts(draft, id, {
+      words: texts.nouns,
+      descriptions: lines(texts.descriptions),
+      adjectives: (texts.adjectives[ALL] ?? []) as Adjective[],
+    });
   return setDomainKindTexts(draft, domain, id, {
     nouns: texts.nouns,
     descriptions: lines(texts.descriptions),

@@ -1653,6 +1653,7 @@
       "licenseUrl": "Lien de la licence",
       "homepage": "Page d'accueil (facultatif)",
       "listsIntro": "Remplissez les formulaires ; le JSON brut du fichier est dans Avancé : importez, exportez ou partez de celui de la Base de la langue du pack. Une liste vide n'est pas incluse dans le pack.",
+      "sharedNeutralIntro": "Ce pack n'a pas de langue : il ne déclare que l'arbre des types partagés. Les mots viennent avec un pack qui a une langue.",
       "importFile": "Importer un fichier",
       "copyBase": "Copier la liste de Base",
       "clear": "Vider",
@@ -1732,7 +1733,15 @@
         "nounsAndDescriptions": "Noms et descriptions",
         "parentCycle": "Une catégorie ne peut pas être sous elle-même ni sous un de ses enfants.",
         "noSprite": "Sans sprite",
-        "noSpriteHint": "Aucun sprite n’illustre cette catégorie ni une catégorie au-dessus."
+        "noSpriteHint": "Aucun sprite n’illustre cette catégorie ni une catégorie au-dessus.",
+        "sharedTitle": "Types partagés",
+        "sharedIntro": "Des catégories où tous les générateurs peuvent puiser (matière → métal → fer). Les catégories de chaque domaine y renvoient par leur champ « Types partagés ».",
+        "addShared": "Ajouter un type partagé",
+        "shared": "Types partagés",
+        "sharedHint": "Les types partagés que prend cette catégorie, de ce pack et des packs actifs. Les enfants les héritent.",
+        "wordsCount": "Mots",
+        "sharedInherited": "Types partagés hérités",
+        "sharedFrom": "de {{ kind }}"
       },
       "tints": {
         "title": "Teintes",

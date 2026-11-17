@@ -658,3 +658,164 @@ export function domainTopOf<T = unknown>(
   const list = isRecord(file) ? file[name] : undefined;
   return Array.isArray(list) ? (list as T[]) : [];
 }
+
+// --- the shared kinds ------------------------------------------------------------------------------------
+
+/** The domains whose kinds take `shared` fits. */
+export type SharedFitDomain = 'items' | StructuredDomain;
+
+const FIT_FIELDS = ['kinds', 'npcKinds', 'skillKinds', 'classKinds'] as const;
+
+/** The draft with the `shared` fits of every domain kind rewritten by `map`; an empty list goes. */
+function mapSharedFits(
+  draft: PackDraft,
+  map: (ids: string[]) => string[],
+): PackDraft {
+  const result: Json = { ...draft };
+  for (const field of FIT_FIELDS) {
+    const kinds = draft[field] as Record<string, Json> | undefined;
+    if (!kinds) continue;
+    result[field] = Object.fromEntries(
+      Object.entries(kinds).map(([id, kind]) => {
+        if (!Array.isArray(kind['shared'])) return [id, kind];
+        const { shared, ...rest } = kind;
+        const next = map(shared as string[]);
+        return [id, next.length > 0 ? { ...rest, shared: next } : rest];
+      }),
+    );
+  }
+  return result as unknown as PackDraft;
+}
+
+/** Applies `edit` to a copy of the texts of `common.json` (`kinds`); nothing is left of an empty `common`. */
+function editSharedTexts(
+  draft: PackDraft,
+  edit: (kinds: Json) => void,
+): PackDraft {
+  if (isNeutral(draft)) return draft;
+  const common: Json = isRecord(draft.common)
+    ? { ...draft.common }
+    : { version: COMMON_TEXTS_VERSION };
+  const kinds: Json = isRecord(common['kinds']) ? { ...common['kinds'] } : {};
+  edit(kinds);
+  if (Object.keys(kinds).length > 0) common['kinds'] = kinds;
+  else delete common['kinds'];
+  const { common: _common, ...rest } = draft;
+  if (!('kinds' in common) && !('params' in common))
+    return draft.common === undefined ? draft : rest;
+  return { ...rest, common };
+}
+
+/** Sets the parent of a shared kind (creating it); a parent given as `undefined` is cleared. */
+export function setSharedKind(
+  draft: PackDraft,
+  id: string,
+  patch: { parent?: string },
+): PackDraft {
+  const own = draft.sharedKinds ?? {};
+  const kind = assign((own[id] ?? {}) as Json, patch as Json) ?? {};
+  return { ...draft, sharedKinds: { ...own, [id]: kind } };
+}
+
+/** Renames a shared kind, and follows it in the parents, its texts and the shared fits of the domain kinds. */
+export function renameSharedKind(
+  draft: PackDraft,
+  from: string,
+  to: string,
+): PackDraft {
+  const own = draft.sharedKinds ?? {};
+  if (from === to || !(from in own) || to in own) return draft;
+  const sharedKinds: Record<string, { parent?: string }> = {};
+  for (const [id, kind] of Object.entries(own))
+    sharedKinds[id === from ? to : id] =
+      kind.parent === from ? { ...kind, parent: to } : kind;
+  const renamed = mapSharedFits({ ...draft, sharedKinds }, (ids) =>
+    ids.map((id) => (id === from ? to : id)),
+  );
+  return editSharedTexts(renamed, (kinds) => {
+    if (!(from in kinds)) return;
+    const moved = Object.entries(kinds);
+    for (const key of Object.keys(kinds)) delete kinds[key];
+    for (const [id, value] of moved) kinds[id === from ? to : id] = value;
+  });
+}
+
+/** Removes a shared kind with its descendants, their texts and their place in the shared fits. */
+export function removeSharedKind(draft: PackDraft, id: string): PackDraft {
+  const own = draft.sharedKinds ?? {};
+  const gone = withDescendants(own, id);
+  const kept = {
+    ...draft,
+    sharedKinds: Object.fromEntries(
+      Object.entries(own).filter(([kid]) => !gone.has(kid)),
+    ),
+  };
+  return editSharedTexts(
+    mapSharedFits(kept, (ids) => ids.filter((fit) => !gone.has(fit))),
+    (kinds) => {
+      for (const kid of gone) delete kinds[kid];
+    },
+  );
+}
+
+/** The texts of a shared kind in `common.json`. */
+export interface SharedKindTexts {
+  words?: Noun[];
+  adjectives?: Adjective[];
+  descriptions?: string[];
+}
+
+/** Sets the texts of a shared kind; each field given replaces the whole field, an empty one is removed, and nothing for a neutral draft. */
+export function setSharedKindTexts(
+  draft: PackDraft,
+  id: string,
+  texts: SharedKindTexts,
+): PackDraft {
+  return editSharedTexts(draft, (kinds) => {
+    const current = isRecord(kinds[id]) ? (kinds[id] as Json) : {};
+    const patch: Json = {};
+    for (const field of ['words', 'adjectives', 'descriptions'] as const)
+      if (field in texts)
+        patch[field] = listOrNothing(texts[field] as unknown[] | undefined);
+    const next = assign(current, patch);
+    if (next) kinds[id] = next;
+    else delete kinds[id];
+  });
+}
+
+/** The words, adjectives and descriptions of a shared kind (empty when there are none). */
+export function sharedKindTextsOf(
+  draft: PackDraft,
+  id: string,
+): Required<SharedKindTexts> {
+  const kinds =
+    isRecord(draft.common) && isRecord(draft.common['kinds'])
+      ? draft.common['kinds']
+      : {};
+  const texts = isRecord(kinds[id]) ? (kinds[id] as Json) : {};
+  return {
+    words: (texts['words'] as Noun[] | undefined) ?? [],
+    adjectives: (texts['adjectives'] as Adjective[] | undefined) ?? [],
+    descriptions: (texts['descriptions'] as string[] | undefined) ?? [],
+  };
+}
+
+/** Sets the shared kinds a domain kind takes; none removes the field. */
+export function setKindShared(
+  draft: PackDraft,
+  domain: SharedFitDomain,
+  id: string,
+  shared: string[],
+): PackDraft {
+  const patch = { shared: shared.length > 0 ? shared : undefined };
+  return domain === 'items'
+    ? ({
+        ...draft,
+        kinds: {
+          ...draft.kinds,
+          [id]: (assign((draft.kinds[id] ?? {}) as Json, patch) ??
+            {}) as ItemKindDef,
+        },
+      } as PackDraft)
+    : setDomainKind(draft, domain, id, patch);
+}

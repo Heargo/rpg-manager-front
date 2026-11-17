@@ -54,7 +54,7 @@ describe('PackDraftPageComponent word list tabs', () => {
     await settle(() => {
       expect(has('app-params-editor')).toBe(true);
       expect(has('textarea[data-test="common-json"]')).toBe(true);
-      expect(has('app-kinds-tree-table')).toBe(false);
+      expect(has('[data-test="domain-npcs"]')).toBe(false);
       expect(has('textarea[data-test="wordlist-items"]')).toBe(false);
       expect(has('textarea[data-test="wordlist-npcs"]')).toBe(false);
     });
@@ -95,10 +95,15 @@ describe('PackDraftPageComponent word list tabs', () => {
     });
   });
 
-  it('a neutral draft hides the Common tab and the texts editors', async () => {
+  it('a neutral draft shows the Common tab with the tree only, and hides the texts editors', async () => {
     const { labels, tab, settle, has } = await render(undefined);
 
-    expect(labels()).not.toContain('Common');
+    expect(labels()).toContain('Common');
+    await tab('Common');
+    await settle(() => {
+      expect(has('app-kinds-tree-table')).toBe(true);
+      expect(has('app-params-editor')).toBe(false);
+    });
     expect(labels()).toContain('NPCs');
     await tab('NPCs');
     await settle(() => {

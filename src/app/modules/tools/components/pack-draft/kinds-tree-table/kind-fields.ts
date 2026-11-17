@@ -2,7 +2,8 @@ import { StructuredDomain } from '../../../../../core/packs/pack-draft-edits';
 import { KindTexts } from './kind-texts';
 
 export type Fields = Record<string, unknown>;
-export type Domain = 'items' | StructuredDomain;
+/** The domains of the table: the items and structured ones, and the shared kinds tree of the Common tab. */
+export type Domain = 'items' | StructuredDomain | 'shared';
 
 /** The domain fields of a kind, shown as columns and in the detail. */
 export const FIELDS: Record<Domain, string[]> = {
@@ -10,6 +11,7 @@ export const FIELDS: Record<Domain, string[]> = {
   npcs: ['roles'],
   skills: ['type', 'effect'],
   classes: ['skills'],
+  shared: [],
 };
 
 export const FIELD_LABEL: Record<string, string> = {
@@ -18,6 +20,8 @@ export const FIELD_LABEL: Record<string, string> = {
   roles: 'packs.creator.domain.roles',
   effect: 'packs.creator.domain.effect',
   skills: 'packs.creator.domain.skills',
+  shared: 'packs.creator.kinds.shared',
+  words: 'packs.creator.kinds.wordsCount',
 };
 
 /** A kind of the table: its id, its label and the fields the draft holds for it. */
@@ -25,6 +29,8 @@ export interface Row {
   id: string;
   label: string;
   fields: Fields;
+  /** Shared kinds: how many words the kind has in `common.json`. */
+  words?: number;
 }
 
 /** The kind being edited in the drawer form. */

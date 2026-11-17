@@ -37,6 +37,8 @@ const PARAM_NAME = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 export function validateCommonTexts(
   json: unknown,
   declaredSharedKinds?: readonly string[],
+  /** Params defined elsewhere (installed packs): not warned about. */
+  knownParams: readonly string[] = [],
 ): CommonTextsValidation {
   const { errors, params } = checkLanguageFile(json, {
     version: COMMON_TEXTS_VERSION,
@@ -58,6 +60,7 @@ export function validateCommonTexts(
   const defined = [
     ...Object.keys(value.params ?? {}),
     ...(declaredSharedKinds ?? []),
+    ...knownParams,
   ];
   const warnings = params
     .filter((name) => !defined.includes(name))
