@@ -66,7 +66,7 @@ describe('PackDraftPageComponent word list tabs', () => {
 
     await settle(() => {
       expect(has('app-kinds-tree-table')).toBe(true);
-      expect(has('app-tints-editor')).toBe(true);
+      expect(has('app-tints-table')).toBe(true);
       expect(has('app-common-words-editor')).toBe(true);
       expect(has('app-templates-editor')).toBe(true);
       expect(has('textarea[data-test="wordlist-items"]')).toBe(true);

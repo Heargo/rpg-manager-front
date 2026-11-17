@@ -40,7 +40,7 @@ import { DomainTextsEditorComponent } from '../../components/pack-draft/domain-t
 import { KindsTreeTableComponent } from '../../components/pack-draft/kinds-tree-table/kinds-tree-table.component';
 import { ParamsEditorComponent } from '../../components/pack-draft/params-editor/params-editor.component';
 import { TemplatesEditorComponent } from '../../components/pack-draft/templates-editor/templates-editor.component';
-import { TintsEditorComponent } from '../../components/pack-draft/tints-editor/tints-editor.component';
+import { TintsTableComponent } from '../../components/pack-draft/tints-table/tints-table.component';
 import { kindOptions } from '../../../../core/packs/kind-label';
 import { SUPPORTED_LANGUAGES } from '../../../../core/constants/languages';
 import { downloadBlob } from '../../../../core/helpers/download';
@@ -103,7 +103,7 @@ const SPRITES_PER_PAGE = 12;
     ParamsEditorComponent,
     SelectModule,
     TemplatesEditorComponent,
-    TintsEditorComponent,
+    TintsTableComponent,
     TabsModule,
     TextareaModule,
   ],
@@ -400,7 +400,7 @@ const SPRITES_PER_PAGE = 12;
                     (changed)="edited($event)"
                   />
                   <h4>{{ 'packs.creator.tints.title' | translate }}</h4>
-                  <app-tints-editor
+                  <app-tints-table
                     [draft]="current"
                     [issues]="issues()"
                     (changed)="edited($event)"
