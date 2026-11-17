@@ -17,7 +17,7 @@ In **Worlds**, click **New world**. The wizard has three steps, with a preview o
 
 ![The Attributes step of the wizard](../../../assets/screens/en/worlds-wizard-attributes.png)
 
-**3. Rules**: progression, economy, skills, combat and the world's [content packs](/docs/en/packs/#a-worlds-packs) (by default, the Base in the app's language). You can also add the **default items** and the **default classes and skills** to have a playable world right away.
+**3. Rules**: progression, economy, skills, combat and the world's [content packs](/docs/en/packs/#a-worlds-packs) (by default, the Base in the app's language and Base assets for the sprites). You can also add the **default items** and the **default classes and skills** to have a playable world right away.
 
 ![The Rules step of the wizard](../../../assets/screens/en/worlds-wizard-rules.png)
 

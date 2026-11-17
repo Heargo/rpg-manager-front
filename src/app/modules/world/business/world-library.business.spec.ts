@@ -122,9 +122,9 @@ describe('WorldLibraryBusiness (IndexedDB)', () => {
 
   describe('active packs', () => {
     it.each([
-      ['fr', ['base-fr']],
-      ['en', ['base-en']],
-    ])('a new world in the %s app has the Base of that language active', async (lang, packs) => {
+      ['fr', ['base-fr', 'base-assets']],
+      ['en', ['base-en', 'base-assets']],
+    ])('a new world in the %s app has the Base of that language and base-assets active', async (lang, packs) => {
       TestBed.inject(LanguageBusiness).setLanguage(lang as 'fr' | 'en');
 
       const world = await library.create({ name: 'Eldoria', attributes: [] });

@@ -49,7 +49,7 @@ describe('PackBusiness unofficial packs', () => {
       expect(preview.counts.generators).toBe(2);
       expect(preview.counts.sprites).toMatchObject({ grayscale: 1, masked: 1, colored: 1 });
       expect(await storage.list()).toEqual([]);
-      expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en']);
+      expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'base-assets']);
     });
 
     it('fetches the manifest at the resolved URL and the files next to it', async () => {
@@ -236,7 +236,7 @@ describe('PackBusiness unofficial packs', () => {
       expect(stored).not.toHaveProperty('enabled');
       expect(stored.source).toEqual({ kind: 'unofficial', link: NEON_LINK, manifestUrl: NEON_LINK });
       expect(business.$installed().find((p) => p.id === 'neon')).toMatchObject({ builtIn: false });
-      await openWorldWithPacks(['base-fr', 'neon']);
+      await openWorldWithPacks(['base-fr', 'base-assets', 'neon']);
       const sprites = await business.sprites();
       expect(sprites).toHaveLength(BASE_SPRITES + 3);
       const glow = sprites.find((s) => s.id === 'glow')!;

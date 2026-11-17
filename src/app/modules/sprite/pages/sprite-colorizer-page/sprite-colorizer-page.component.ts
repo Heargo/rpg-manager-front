@@ -1,3 +1,4 @@
+import { SpriteLabelBusiness } from '../../../../core/business/sprite-label.business';
 import { Pack, SPRITE_KINDS, SpriteKind } from '../../../../core/packs/pack';
 import {
   BundledSprite,
@@ -46,7 +47,6 @@ import { SpriteColorizerBusiness } from '../../business/sprite-colorizer.busines
 import { brushCursor } from '../../helpers/brush-cursor';
 import {
   groupSpritesByPack,
-  searchSprites,
 } from '../../helpers/sprite-library';
 import { gradientColor } from '../../helpers/gradient-mapping';
 import { isBuiltInPreset } from '../../helpers/presets';
@@ -146,6 +146,7 @@ export class SpriteColorizerPageComponent {
   protected readonly business = inject(SpriteColorizerBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly packs = inject(PackBusiness);
+  private readonly spriteLabels = inject(SpriteLabelBusiness);
   private readonly bundled = signal<BundledSprite[]>([]);
   private readonly bundledPacks = signal<Pick<Pack, 'id' | 'name'>[]>([]);
   private readonly messages = inject(MessageService);
@@ -195,7 +196,7 @@ export class SpriteColorizerPageComponent {
   });
   protected readonly libraryGroups = computed(() => {
     const lang = this.language.$language() ?? 'fr';
-    const found = searchSprites(
+    const found = this.spriteLabels.search(
       this.bundled(),
       this.libraryQuery(),
       lang,
@@ -639,7 +640,7 @@ export class SpriteColorizerPageComponent {
     if (this.business.$currentSetId()) return name;
     const sprite = this.bundled().find((s) => s.id === name);
     if (!sprite) return name;
-    return sprite.label;
+    return this.spriteLabels.name(sprite);
   }
 
   protected async openSet(id: string): Promise<void> {

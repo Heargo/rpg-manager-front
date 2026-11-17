@@ -16,7 +16,7 @@ async function render(service = extraPackService()) {
   const el = fixture.nativeElement as HTMLElement;
   await vi.waitFor(async () => {
     await fixture.whenStable();
-    expect(el.querySelectorAll('[data-test="pack-card"]').length).toBe(3);
+    expect(el.querySelectorAll('[data-test="pack-card"]').length).toBe(4);
   });
   const card = (id: string) => el.querySelector<HTMLElement>(`[data-test="pack-card"][data-pack="${id}"]`)!;
   const download = (id: string) =>
@@ -52,10 +52,10 @@ describe('PacksToolPageComponent', () => {
     expect(card('base-fr').textContent).toContain('Base');
   });
 
-  it('shows each Base as always available, with no toggle and no remove button', async () => {
+  it('shows each built-in pack as always available, with no toggle and no remove button', async () => {
     const { card } = await render();
 
-    for (const id of ['base-fr', 'base-en']) {
+    for (const id of ['base-fr', 'base-en', 'base-assets']) {
       expect(card(id).textContent, id).toContain('Always available');
       expect(card(id).querySelector('p-toggleswitch'), id).toBeNull();
       expect(card(id).textContent, id).not.toContain('Remove from device');
@@ -69,6 +69,7 @@ describe('PacksToolPageComponent', () => {
     expect(tag('base-fr')).toContain('Français');
     expect(tag('base-en')).toContain('English');
     expect(tag('extra')).toContain('Français');
+    expect(tag('base-assets')).toBeUndefined();
   });
 
   it('shows no on/off toggle on any card', async () => {

@@ -51,7 +51,7 @@ import {
   attributeFormulaErrors,
   WORLD_NAME_MAX_LENGTH,
 } from '../../helpers/world-draft.rules';
-import { basePackId, packLanguageOf } from '../../../../core/business/pack.business';
+import { defaultPacks, packLanguageOf } from '../../../../core/business/pack.business';
 import { PackLanguage } from '../../../../core/packs/pack';
 import { RuleFieldsComponent } from '../../components/rule-fields/rule-fields.component';
 import { CombatRules, OfflineFeatures, WorldDraft } from '../../models/world';
@@ -151,10 +151,10 @@ export class WorldNewPageComponent {
   protected readonly offline = signal<OfflineFeatures>({
     ...DEFAULT_OFFLINE_FEATURES,
   });
-  /** Active packs: the Base of the app language to start with. */
-  protected readonly packs = signal<string[]>([
-    basePackId(this.language.$language()),
-  ]);
+  /** Active packs: the Base of the app language and the neutral assets to start with. */
+  protected readonly packs = signal<string[]>(
+    defaultPacks(this.language.$language()),
+  );
   /** The language of the world: the app language to start with. */
   protected readonly worldLanguage = signal<PackLanguage>(
     packLanguageOf(this.language.$language()),

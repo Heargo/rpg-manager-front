@@ -11,7 +11,7 @@ La page **Packs** installe et supprime les packs de l'appareil. Ce sont les **r�
 
 ## Les packs Base
 
-**Base (français)** et **Base (English)** contiennent les listes de mots, les catégories, les teintes et les 101 sprites d'objets fournis avec l'application, chacun dans sa langue. Ils sont **toujours disponibles** et ne peuvent pas être retirés. **Détails** montre la licence, les listes de mots et les sprites, rangés par coloration.
+**Base (français)** et **Base (English)** contiennent les listes de mots, les textes, les catégories, les teintes et le contenu fourni avec l'application, chacun dans sa langue. Les 101 sprites d'objets sont dans un pack neutre, **Base assets** (sans langue, licence CC BY 4.0), que tous les mondes utilisent quelle que soit leur langue. Ces trois packs sont **toujours disponibles** et ne peuvent pas être retirés. **Détails** montre la licence, les listes de mots et les sprites, rangés par coloration.
 
 ![Les détails d'un pack](../../assets/screens/fr/packs-details.png)
 
@@ -33,7 +33,7 @@ En plus des listes de mots et des sprites, un pack peut fournir du **contenu fix
 
 Les packs officiels sont listés sur la page, mais **leurs fichiers ne sont téléchargés que quand vous cliquez sur Télécharger** (ou **Installer** depuis les règles d'un monde qui l'utilise). Ils restent ensuite sur l'appareil et fonctionnent **hors ligne**. **Supprimer de l'appareil** les efface (vous pourrez le télécharger de nouveau) ; les mondes qui l'utilisaient le montrent alors comme manquant.
 
-Pour l'instant, les deux Base sont les seuls packs officiels.
+Pour l'instant, Base (français), Base (English) et Base assets sont les seuls packs officiels.
 
 ## Comment les objets sont composés
 
@@ -157,13 +157,13 @@ Les auteurs et licences des packs installés apparaissent dans les [crédits](/d
 
 ## Les packs d'un monde
 
-Dans l'assistant de création (étape **Règles**) et dans **Règles du monde**, la section **Packs** liste les packs installés avec leur langue. Cochez ceux que le monde utilise. Un nouveau monde commence avec le Base de la langue de l'application. Vous pouvez mélanger les langues, par exemple Base (français) et un pack de sprites anglais : seuls ses images, catégories et teintes servent (voir [la langue du monde](#la-langue-du-monde)).
+Dans l'assistant de création (étape **Règles**) et dans **Règles du monde**, la section **Packs** liste les packs installés avec leur langue. Cochez ceux que le monde utilise. Un nouveau monde commence avec le Base de la langue de l'application et Base assets (les sprites). Vous pouvez mélanger les langues, par exemple Base (français) et un pack de sprites anglais : seuls ses images, catégories et teintes servent (voir [la langue du monde](#la-langue-du-monde)).
 
 ![La section Packs des règles du monde](../../assets/screens/fr/worlds-rules-packs.png)
 
 Un pack coché mais absent de l'appareil (monde importé, pack supprimé) est marqué **manquant** : **Installer** le télécharge si c'est un pack officiel, sinon vous pouvez le retirer du monde.
 
-Dans les **Outils**, sans partie lancée, les générateurs utilisent les packs choisis dans **Outils › Règles du monde** (par défaut, le Base de la langue de l'application).
+Dans les **Outils**, sans partie lancée, les générateurs utilisent les packs choisis dans **Outils › Règles du monde** (par défaut, le Base de la langue de l'application et Base assets).
 
 ## Les packs dans les générateurs
 

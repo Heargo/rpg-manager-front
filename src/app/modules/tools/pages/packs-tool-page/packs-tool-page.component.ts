@@ -1,3 +1,4 @@
+import { SpriteLabelBusiness } from '../../../../core/business/sprite-label.business';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -84,11 +85,13 @@ export function formatSize(bytes: number): string {
                 <p-card>
                   <div class="head">
                     <h3>{{ entry.name }}</h3>
-                    <p-tag
-                      data-test="pack-language"
-                      severity="secondary"
-                      [value]="languageName(entry.language)"
-                    />
+                    @if (entry.language) {
+                      <p-tag
+                        data-test="pack-language"
+                        severity="secondary"
+                        [value]="languageName(entry.language)"
+                      />
+                    }
                     @if (entry.builtIn) {
                       <p-tag
                         severity="info"
@@ -129,8 +132,10 @@ export function formatSize(bytes: number): string {
                     }
                     <dt>{{ 'packs.detailsSprites' | translate }}</dt>
                     <dd>{{ entry.sprites }}</dd>
-                    <dt>{{ 'packs.language' | translate }}</dt>
-                    <dd>{{ languageName(entry.language) }}</dd>
+                    @if (entry.language) {
+                      <dt>{{ 'packs.language' | translate }}</dt>
+                      <dd>{{ languageName(entry.language) }}</dd>
+                    }
                   </dl>
                   <ng-template #footer>
                     <div class="actions">
@@ -457,7 +462,7 @@ export function formatSize(bytes: number): string {
                   width="48"
                   height="48"
                 />
-                <span>{{ sprite.label }}</span>
+                <span>{{ spriteName(sprite) }}</span>
               </li>
             }
           </ul>
@@ -596,6 +601,7 @@ export class PacksToolPageComponent {
   protected readonly unofficial = computed(() =>
     this.business.$installed().filter((p) => p.link || p.local),
   );
+  private readonly spriteLabels = inject(SpriteLabelBusiness);
   private readonly detailSprites = signal<BundledSprite[]>([]);
 
   protected readonly detailsTitle = computed(() => {
@@ -623,6 +629,10 @@ export class PacksToolPageComponent {
         () => this.fail(this.language.t('packs.loadFailed')),
       ),
     );
+  }
+
+  protected spriteName(sprite: BundledSprite): string {
+    return this.spriteLabels.name(sprite);
   }
 
   protected size(bytes: number): string {

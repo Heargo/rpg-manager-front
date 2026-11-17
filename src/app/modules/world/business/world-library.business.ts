@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { ImageBusiness } from '../../../core/business/image.business';
-import { basePackId, packLanguageOf } from '../../../core/business/pack.business';
+import { defaultPacks, packLanguageOf } from '../../../core/business/pack.business';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { ItemVocabularyBusiness } from '../../../core/business/item-vocabulary.business';
 import { seededRandomSource } from '../../../core/generators/random-source';
@@ -46,7 +46,7 @@ export class WorldLibraryBusiness {
   async create(draft: WorldDraft, options: { starterItems?: boolean; starterClasses?: boolean } = {}): Promise<World> {
     const appLanguage = packLanguageOf(this.language.$language());
     let world = createWorld(
-      { ...draft, packs: draft.packs ?? [basePackId(this.language.$language())], language: draft.language ?? appLanguage },
+      { ...draft, packs: draft.packs ?? defaultPacks(this.language.$language()), language: draft.language ?? appLanguage },
       () => crypto.randomUUID(), Date.now());
     if (options.starterItems) {
       const vocabulary = await this.wordLists.vocabulary();

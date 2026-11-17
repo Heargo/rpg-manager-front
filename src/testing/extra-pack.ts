@@ -1,5 +1,5 @@
 import { Provider } from '@angular/core';
-import { baseManifest } from './base-pack';
+import { builtInManifest } from './base-pack';
 import { PackService } from '../app/core/services/pack.service';
 
 const BASE_FR_ENTRY = {
@@ -10,7 +10,7 @@ const BASE_FR_ENTRY = {
   license: 'CC-BY-4.0',
   licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
   size: 100,
-  sprites: 101,
+  sprites: 0,
   language: 'fr',
   builtIn: true,
 };
@@ -21,6 +21,18 @@ const BASE_EN_ENTRY = {
   name: 'Base (English)',
   description: 'Core',
   language: 'en',
+};
+
+const BASE_ASSETS_ENTRY = {
+  id: 'base-assets',
+  name: 'Base assets',
+  description: 'Sprites',
+  author: 'Florian Sciberras',
+  license: 'CC-BY-4.0',
+  licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+  size: 100,
+  sprites: 101,
+  builtIn: true,
 };
 
 const EXTRA_ENTRY = {
@@ -35,15 +47,15 @@ const EXTRA_ENTRY = {
   language: 'fr',
 };
 
-/** The registry file with the two Bases alone. */
+/** The registry file with the built-in packs alone: the two Bases and the neutral assets pack. */
 export const BASE_ONLY_REGISTRY = {
   format: 1,
-  packs: [BASE_FR_ENTRY, BASE_EN_ENTRY],
+  packs: [BASE_FR_ENTRY, BASE_EN_ENTRY, BASE_ASSETS_ENTRY],
 };
-/** The registry file with the two Bases and the fixture official pack `extra` (French). */
+/** The registry file with the built-in packs and the fixture official pack `extra` (French). */
 export const EXTRA_REGISTRY = {
   format: 1,
-  packs: [BASE_FR_ENTRY, BASE_EN_ENTRY, EXTRA_ENTRY],
+  packs: [BASE_FR_ENTRY, BASE_EN_ENTRY, BASE_ASSETS_ENTRY, EXTRA_ENTRY],
 };
 
 /** The fixture official pack: French, one grayscale sprite and one items list. */
@@ -139,7 +151,7 @@ export function extraPackService(
   return {
     loadRegistry: vi.fn(async () => EXTRA_REGISTRY),
     loadManifest: vi.fn(async (id: string) =>
-      id === 'extra' ? structuredClone(EXTRA_MANIFEST) : baseManifest(id),
+      id === 'extra' ? structuredClone(EXTRA_MANIFEST) : builtInManifest(id),
     ),
     loadJson: vi.fn(async (url: string) =>
       url === 'packs/extra/generators/items.json'

@@ -40,18 +40,18 @@ describe('PackBusiness official packs', () => {
   };
   const ids = async (b: PackBusiness) => (await b.sprites()).map((s) => s.id);
 
-  it('lists the registry: both Bases and the fixture pack', async () => {
+  it('lists the registry: both Bases, the neutral assets pack and the fixture pack', async () => {
     const registry = await business.registry();
 
-    expect(registry.map((p) => p.id)).toEqual(['base-fr', 'base-en', 'extra']);
-    expect(registry[2]).toMatchObject({ size: 1234, sprites: 1, language: 'fr', author: 'Jane Doe' });
+    expect(registry.map((p) => p.id)).toEqual(['base-fr', 'base-en', 'base-assets', 'extra']);
+    expect(registry[3]).toMatchObject({ size: 1234, sprites: 1, language: 'fr', author: 'Jane Doe' });
   });
 
-  it('has only the two Bases installed and enabled until a pack is downloaded, and fetches nothing for it', async () => {
+  it('has only the built-in packs installed and enabled until a pack is downloaded, and fetches nothing for it', async () => {
     const sprites = await business.sprites();
 
     expect(sprites).toHaveLength(BASE_SPRITES);
-    expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en']);
+    expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'base-assets']);
     expect(service.loadBlob).not.toHaveBeenCalled();
     expect(service.loadManifest).not.toHaveBeenCalledWith('extra');
   });
@@ -62,16 +62,16 @@ describe('PackBusiness official packs', () => {
     expect(service.loadManifest).toHaveBeenCalledWith('extra');
     expect(service.loadBlob).toHaveBeenCalledWith('packs/extra/sprites/gem.png');
     expect(service.loadJson).toHaveBeenCalledWith('packs/extra/generators/items.json');
-    expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'extra']);
+    expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'base-assets', 'extra']);
   });
 
   it('serves the sprites of the world packs, with object URLs made from the stored blobs', async () => {
     await business.enable('extra');
-    await openWorldWithPacks(['base-fr', 'extra']);
+    await openWorldWithPacks(['base-fr', 'base-assets', 'extra']);
     const sprites = await business.sprites();
 
     expect(sprites).toHaveLength(BASE_SPRITES + 1);
-    expect(sprites[0].packId).toBe('base-fr');
+    expect(sprites[0].packId).toBe('base-assets');
     expect(sprites[sprites.length - 1]).toMatchObject({ id: 'gem', packId: 'extra', kind: 'grayscale' });
     expect(sprites[sprites.length - 1].imageUrl).toBe('blob:fake-1');
     await business.sprites();
@@ -102,7 +102,7 @@ describe('PackBusiness official packs', () => {
     const second = fresh(offline);
 
     expect((await second.spritesOf('extra')).map((x) => x.id)).toEqual(['gem']);
-    expect(second.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'extra']);
+    expect(second.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'base-assets', 'extra']);
     expect(await second.wordList('items', 'extra')).toEqual(EXTRA_ITEMS);
     expect(offline.loadBlob).not.toHaveBeenCalled();
   });
@@ -135,7 +135,7 @@ describe('PackBusiness official packs', () => {
     expect(await ids(business)).not.toContain('gem');
     const again = fresh(extraPackService());
     expect(await ids(again)).toHaveLength(BASE_SPRITES);
-    expect(await installed(again)).toEqual(['base-fr', 'base-en']);
+    expect(await installed(again)).toEqual(['base-fr', 'base-en', 'base-assets']);
     await expect(again.wordList('items', 'extra')).rejects.toThrow();
   });
 
@@ -149,9 +149,9 @@ describe('PackBusiness official packs', () => {
 
     await expect(b.enable('extra')).rejects.toThrow(/network down/);
 
-    expect(await installed(b)).toEqual(['base-fr', 'base-en']);
+    expect(await installed(b)).toEqual(['base-fr', 'base-en', 'base-assets']);
     const again = fresh(extraPackService());
-    expect(await installed(again)).toEqual(['base-fr', 'base-en']);
+    expect(await installed(again)).toEqual(['base-fr', 'base-en', 'base-assets']);
     expect(await ids(again)).toHaveLength(BASE_SPRITES);
   });
 
@@ -164,7 +164,7 @@ describe('PackBusiness official packs', () => {
     await expect(b.enable('extra')).rejects.toThrow(/format/);
 
     expect(bad.loadBlob).not.toHaveBeenCalled();
-    expect(await installed(fresh(extraPackService()))).toEqual(['base-fr', 'base-en']);
+    expect(await installed(fresh(extraPackService()))).toEqual(['base-fr', 'base-en', 'base-assets']);
   });
 
   it('gives the sprites of an active French pack their single label', async () => {
@@ -176,8 +176,8 @@ describe('PackBusiness official packs', () => {
     expect(gem?.label).toBe('Gemme');
   });
 
-  it('Neither Base can be removed', async () => {
-    for (const id of ['base-fr', 'base-en']) {
+  it('No built-in pack can be removed', async () => {
+    for (const id of ['base-fr', 'base-en', 'base-assets']) {
       await expect(business.remove(id)).rejects.toThrow();
     }
 

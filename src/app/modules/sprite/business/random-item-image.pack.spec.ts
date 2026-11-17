@@ -71,24 +71,24 @@ describe('RandomItemImageBusiness over the world packs', () => {
     expect(urls.every((url) => url.startsWith('blob:extra-'))).toBe(true);
   });
 
-  it('draws the Base sprites of the kind when the pack with the kind sprite is not active', async () => {
-    const { business, files } = await setup(['base-en']);
+  it('draws the base-assets sprites of the kind when the pack with the kind sprite is not active', async () => {
+    const { business, files } = await setup(['base-en', 'base-assets']);
 
     for (let i = 0; i < 10; i++)
       await business.create({ name: 'Hache', type: 'equipment', slot: 'weapon1', kind: 'axe' }, `seed-${i}`);
 
-    expect(urlsOf(files).every((url) => url === 'packs/base-en/sprites/axe.png')).toBe(true);
+    expect(urlsOf(files).every((url) => url === 'packs/base-assets/sprites/axe.png')).toBe(true);
   });
 
   it('draws from every active pack when the kind has no sprite anywhere', async () => {
-    const { business, files } = await setup(['base-en', 'extra']);
+    const { business, files } = await setup(['base-en', 'base-assets', 'extra']);
 
     for (let i = 0; i < 40; i++)
       await business.create({ name: 'Machin', type: 'item', slot: 'none' }, `seed-${i}`);
 
     const urls = urlsOf(files);
     expect(urls.some((url) => url.startsWith('blob:extra-'))).toBe(true);
-    expect(urls.some((url) => url.startsWith('packs/base-en/sprites/'))).toBe(true);
+    expect(urls.some((url) => url.startsWith('packs/base-assets/sprites/'))).toBe(true);
   });
 
   it('keeps the same result for the same seed', async () => {
@@ -113,7 +113,7 @@ describe('RandomItemImageBusiness over the world packs', () => {
     };
 
     it('uses a set tagged with the kind of the item', async () => {
-      const { business, storage, files } = await setup(['base-en'], [mine]);
+      const { business, storage, files } = await setup(['base-en', 'base-assets'], [mine]);
 
       await business.create(gem, 'k');
 
@@ -122,7 +122,7 @@ describe('RandomItemImageBusiness over the world packs', () => {
     });
 
     it('uses a set tagged with a parent kind of the item', async () => {
-      const { business, storage } = await setup(['base-en'], [{ ...mine, tags: { kinds: ['weapon'] } }]);
+      const { business, storage } = await setup(['base-en', 'base-assets'], [{ ...mine, tags: { kinds: ['weapon'] } }]);
 
       await business.create({ name: 'Bâton', type: 'equipment', slot: 'weapon1', kind: 'staff' }, 'k');
 
@@ -130,7 +130,7 @@ describe('RandomItemImageBusiness over the world packs', () => {
     });
 
     it('leaves the set aside when the pack gives a sprite of a nearer kind', async () => {
-      const { business, storage } = await setup(['base-en'], [{ ...mine, tags: { kinds: ['weapon'] } }]);
+      const { business, storage } = await setup(['base-en', 'base-assets'], [{ ...mine, tags: { kinds: ['weapon'] } }]);
 
       await business.create({ name: 'Hache', type: 'equipment', slot: 'weapon1', kind: 'axe' }, 'k');
 
@@ -147,7 +147,7 @@ describe('RandomItemImageBusiness over the world packs', () => {
     };
 
     it('colours the first part with the gradient of the first tint of the item', async () => {
-      const { business, files } = await setup(['base-en']);
+      const { business, files } = await setup(['base-en', 'base-assets']);
       const at = firstPart();
 
       for (const seed of ['a', 'b', 'c', 'd', 'e']) {

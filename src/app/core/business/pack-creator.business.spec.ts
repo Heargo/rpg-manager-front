@@ -2,9 +2,8 @@ import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { unzipSync } from 'fflate';
-import baseEnPack from '../../../../public/packs/base-en/pack.json';
-import baseFrPack from '../../../../public/packs/base-fr/pack.json';
-import glowMaterials from '../../../../public/packs/base-fr/sprites/axe.json';
+import baseAssetsPack from '../../../../public/packs/base-assets/pack.json';
+import glowMaterials from '../../../../public/packs/base-assets/sprites/axe.json';
 import { EXTRA_ITEMS } from '../../../testing/extra-pack';
 import { NEON_LINK, neonProviders, neonWorld } from '../../../testing/unofficial-pack';
 import { SpriteSet } from '../../modules/sprite/models/sprite-set';
@@ -207,7 +206,7 @@ describe('PackCreatorBusiness', () => {
 
       expect(added).toMatchObject({ kind: 'masked', kinds: ['axe'], id: 'blue-axe', label: 'Blue axe' });
       expect(added.materials).toBe(JSON.stringify(glowMaterials));
-      expect(s.service.loadBlob).toHaveBeenCalledWith('packs/base-en/sprites/axe.png');
+      expect(s.service.loadBlob).toHaveBeenCalledWith('packs/base-assets/sprites/axe.png');
       expect(added.image).toBeInstanceOf(Blob);
       expect((await s.creator.getDraft(draft.id))?.sprites.map((x) => x.id)).toEqual(['blue-axe']);
     });
@@ -269,7 +268,7 @@ describe('PackCreatorBusiness', () => {
       const [stored] = await s.storage.list();
       expect(stored).toMatchObject({ id: 'mine', source: { kind: 'local' } });
       expect(stored).not.toHaveProperty('enabled');
-      expect(s.packs.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'mine']);
+      expect(s.packs.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'base-assets', 'mine']);
       s.language.setLanguage('fr');
       await openWorldWithPacks(['base-fr', 'mine']);
       expect((await s.packs.sprites()).filter((x) => x.packId === 'mine').map((x) => [x.id, x.label])).toEqual([['spark', 'Etincelle']]);
@@ -515,9 +514,9 @@ describe('PackCreatorBusiness', () => {
     });
 
     it.each([
-      ['base-fr', 'fr', baseFrPack, 'Hache', 'base-fr-copie', /\(copie\)$/],
-      ['base-en', 'en', baseEnPack, 'Axe', 'base-en-copy', /\(copy\)$/],
-    ] as const)('copies %s: its language, four word lists and 101 sprites with their labels, read from the app', async (id, language, manifest, axeLabel, copyId, copyName) => {
+      ['base-fr', 'fr', 'base-fr-copie', /\(copie\)$/],
+      ['base-en', 'en', 'base-en-copy', /\(copy\)$/],
+    ] as const)('copies %s: its language and four word lists, and no sprite (they live in base-assets)', async (id, language, copyId, copyName) => {
       const s = setup();
 
       const draft = await s.creator.duplicate(id);
@@ -526,18 +525,28 @@ describe('PackCreatorBusiness', () => {
       expect(draft.generators.items).toEqual({ url: `packs/${id}/generators/items.json` });
       expect(draft.generators.classes).toEqual({ url: `packs/${id}/generators/classes.json` });
       expect(Object.keys(draft.generators).sort()).toEqual(['classes', 'items', 'npcs', 'skills']);
-      expect(draft.sprites.length).toBe(manifest.sprites.length);
+      expect(draft.sprites).toEqual([]);
+      expect(validatePack(buildPack(draft).manifest).ok).toBe(true);
+    });
+
+    it('copies base-assets: 101 sprites with their labels, read from the app', async () => {
+      const s = setup();
+
+      const draft = await s.creator.duplicate('base-assets');
+
+      expect(draft.details).toMatchObject({ license: 'CC-BY-4.0', version: '1.0.0' });
+      expect(draft.sprites.length).toBe(baseAssetsPack.sprites.length);
       expect(draft.sprites.length).toBe(101);
-      expect(draft.sprites.find((x) => x.id === 'axe')?.label).toBe(axeLabel);
+      expect(draft.sprites.find((x) => x.id === 'axe')?.label).toBe('Axe');
       expect(draft.sprites.every((x) => x.image instanceof Blob)).toBe(true);
       const masked = draft.sprites.filter((x) => x.kind === 'masked');
-      expect(masked.length).toBe(manifest.sprites.filter((x) => x.kind === 'masked').length);
+      expect(masked.length).toBe(baseAssetsPack.sprites.filter((x) => x.kind === 'masked').length);
       expect(masked.length).toBeGreaterThan(0);
       expect(masked.every((x) => !!x.materials)).toBe(true);
       expect(validatePack(buildPack(draft).manifest).ok).toBe(true);
     });
 
-    it('duplicating base-en gives an English draft with English lists and labels, in a French app too', async () => {
+    it('duplicating base-en gives an English draft with English lists, in a French app too', async () => {
       const s = setup();
       s.language.setLanguage('fr');
 
@@ -545,7 +554,6 @@ describe('PackCreatorBusiness', () => {
 
       expect(draft.details.language).toBe('en');
       expect(draft.details.name).toMatch(/\(copy\)$/);
-      expect(draft.sprites.find((x) => x.id === 'axe')?.label).toBe('Axe');
     });
 
     it('refuses an official pack that is not downloaded and an unknown id, saving nothing', async () => {

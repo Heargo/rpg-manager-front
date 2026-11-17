@@ -1,7 +1,7 @@
 import { effect, inject, untracked, Injectable, linkedSignal } from '@angular/core';
 import { ActivePacksBusiness } from '../../../core/business/active-packs.business';
 import { LanguageBusiness } from '../../../core/business/language.business';
-import { basePackId, packLanguageOf } from '../../../core/business/pack.business';
+import { defaultPacks, packLanguageOf } from '../../../core/business/pack.business';
 import { createSandboxWorld } from '../helpers/default-world';
 import { applyWorldRules } from '../helpers/world-rules.rules';
 import { Npc } from '../../npc/models/npc';
@@ -25,7 +25,7 @@ export class SandboxWorldBusiness {
   private readonly world = linkedSignal<World>(() => {
     const world = {
       ...createSandboxWorld((key) => this.language.t(key)),
-      packs: [basePackId(this.language.$language())],
+      packs: defaultPacks(this.language.$language()),
       language: packLanguageOf(this.language.$language()),
     };
     this.importBase(world).catch((error) => console.error('Sandbox: the Base import failed', error));

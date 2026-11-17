@@ -43,7 +43,11 @@ import {
   StoredPackFile,
 } from '../services/pack-storage.service';
 
-export const BASE_PACK_IDS = ['base-fr', 'base-en'] as const;
+/** The neutral built-in pack holding the item sprites shared by every language. */
+export const BASE_ASSETS_ID = 'base-assets';
+
+/** The built-in packs served with the app: the Base of each language and the neutral assets pack. */
+export const BASE_PACK_IDS = ['base-fr', 'base-en', BASE_ASSETS_ID] as const;
 
 /** The Base pack of a language (English for a language without a Base). */
 export const basePackId = (lang: string): string =>
@@ -52,6 +56,16 @@ export const basePackId = (lang: string): string =>
 /** The pack language matching an app language code. */
 export const packLanguageOf = (lang: string): PackLanguage =>
   lang === 'fr' ? 'fr' : 'en';
+
+/** The packs a new world starts with: the Base of the language and the neutral assets. */
+export const defaultPacks = (lang: string): string[] => [
+  basePackId(lang),
+  BASE_ASSETS_ID,
+];
+
+/** The language of a built-in pack id; none for the neutral assets pack. */
+export const baseLanguage = (id: string): PackLanguage | undefined =>
+  id === 'base-fr' ? 'fr' : id === 'base-en' ? 'en' : undefined;
 
 export const isBasePack = (id: string): boolean =>
   (BASE_PACK_IDS as readonly string[]).includes(id);
@@ -214,9 +228,10 @@ export class PackBusiness {
     const base = this.bases()[id];
     if (base) return installedOf(base, true);
     const entry = this.baseEntries.find((p) => p.id === id);
+    const language = entry?.language ?? baseLanguage(id);
     return {
       id,
-      language: entry?.language ?? (id === 'base-fr' ? 'fr' : 'en'),
+      ...(language ? { language } : {}),
       name: entry?.name ?? 'Base',
       description: entry?.description ?? '',
       author: entry?.author ?? '',
@@ -312,12 +327,13 @@ export class PackBusiness {
   }
 
   /**
-   * The pack ids to draw from: the packs of the open world (or the Base of the app language without one) that are
+   * The pack ids to draw from: the packs of the open world (or the Base of the app language and the neutral assets pack without one) that are
    * installed, in order; an id that is not installed is skipped.
    */
   private activeIds(): string[] {
     const world = this.activePacks.$worldPacks();
-    if (!world) return [basePackId(this.languageBusiness.$language())];
+    if (!world)
+      return defaultPacks(this.languageBusiness.$language());
     const stored = new Set(this.stored().map((p) => p.id));
     return world.filter((id) => isBasePack(id) || stored.has(id));
   }

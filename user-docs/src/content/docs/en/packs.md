@@ -11,7 +11,7 @@ The **Packs** page installs and removes packs on the device. Each **world's rule
 
 ## The Base packs
 
-**Base (English)** and **Base (français)** hold the word lists, kinds, tints and the 101 item sprites bundled with the app, each in its language. They are **always available** and cannot be removed. **Details** shows the license, the word lists and the sprites, grouped by colouring.
+**Base (English)** and **Base (français)** hold the word lists, texts, kinds, tints and content bundled with the app, each in its language. The 101 item sprites live in a neutral pack, **Base assets** (no language, CC BY 4.0), that every world uses whatever its language. These three packs are **always available** and cannot be removed. **Details** shows the license, the word lists and the sprites, grouped by colouring.
 
 ![A pack's details](../../../assets/screens/en/packs-details.png)
 
@@ -33,7 +33,7 @@ Besides word lists and sprites, a pack can ship **fixed content**: ready-made **
 
 Official packs are listed on the page, but **their files are only downloaded when you click Download** (or **Install** from the rules of a world that uses it). They then stay on the device and work **offline**. **Remove from device** deletes them (you can download it again); worlds that used it then show it as missing.
 
-For now, the two Bases are the only official packs.
+For now, Base (English), Base (français) and Base assets are the only official packs.
 
 ## How items are put together
 
@@ -157,13 +157,13 @@ The authors and licenses of installed packs are listed in the [credits](/docs/en
 
 ## A world's packs
 
-In the creation wizard (**Rules** step) and in **World rules**, the **Packs** section lists the installed packs with their language. Tick the ones the world uses. A new world starts with the Base in the app's language. You can mix languages, for example Base (English) and a French sprite pack: only its images, kinds and tints are used (see [the world language](#the-world-language)).
+In the creation wizard (**Rules** step) and in **World rules**, the **Packs** section lists the installed packs with their language. Tick the ones the world uses. A new world starts with the Base in the app's language and Base assets (the sprites). You can mix languages, for example Base (English) and a French sprite pack: only its images, kinds and tints are used (see [the world language](#the-world-language)).
 
 ![The Packs section of the world rules](../../../assets/screens/en/worlds-rules-packs.png)
 
 A ticked pack that isn't on the device (imported world, removed pack) is marked **missing**: **Install** downloads it if it is official, otherwise you can remove it from the world.
 
-In the **Tools**, with no game running, the generators use the packs chosen in **Tools › World rules** (by default, the Base in the app's language).
+In the **Tools**, with no game running, the generators use the packs chosen in **Tools › World rules** (by default, the Base in the app's language and Base assets).
 
 ## Packs in the generators
 

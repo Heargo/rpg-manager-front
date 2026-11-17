@@ -387,7 +387,7 @@ describe('SpriteColorizerBusiness', () => {
     it('loads a bundled sprite by id, named after it', async () => {
       const { business, files } = setupFiles();
       await business.loadLibrary('sword');
-      expect(files.fetchImage).toHaveBeenCalledWith('packs/base-en/sprites/sword.png');
+      expect(files.fetchImage).toHaveBeenCalledWith('packs/base-assets/sprites/sword.png');
       expect(business.$document()!.width).toBe(2);
       expect(business.$fileName()).toBe('sword');
     });
@@ -395,7 +395,7 @@ describe('SpriteColorizerBusiness', () => {
     it('loads the axe as the demo sprite', async () => {
       const { business, files } = setupFiles();
       await business.loadDemo();
-      expect(files.fetchImage).toHaveBeenCalledWith('packs/base-en/sprites/axe.png');
+      expect(files.fetchImage).toHaveBeenCalledWith('packs/base-assets/sprites/axe.png');
       expect(business.$fileName()).toBe('axe');
     });
   });
@@ -446,7 +446,7 @@ describe('SpriteColorizerBusiness', () => {
     it('opens a bundled sprite with its ready-made materials', async () => {
       const { business, files } = setupSets();
       await business.loadLibrary('axe');
-      expect(files.fetchText).toHaveBeenCalledWith('packs/base-en/sprites/axe.json');
+      expect(files.fetchText).toHaveBeenCalledWith('packs/base-assets/sprites/axe.json');
       expect(names(business)).toEqual(['Base', 'Part 1']);
       expect(business.$canUndo()).toBe(false);
     });
