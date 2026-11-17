@@ -31,8 +31,8 @@ Pour l'instant, les deux Base sont les seuls packs officiels.
 
 Les objets générés reposent sur quelques notions, communes à tous les packs.
 
-- **Domaine** : le type de contenu auquel s'appliquent les listes d'un pack. Aujourd'hui, les **objets** (`items`) utilisent les catégories, les teintes et les phrases décrites ici. Les PNJ, les compétences et les classes sont aussi des domaines, mais gardent pour l'instant leurs listes de mots simples ; ils passeront au même système plus tard.
-- **Catégorie** (*kind* dans les fichiers) : une chose concrète, sans langue : `sword`, `potion`, `key`. Le pack donne ses **noms** et ses **descriptions** (dans sa langue), et ses **sprites** disent quelles catégories ils illustrent. C'est ce lien qui rend l'image cohérente avec le nom : une Potion n'a plus l'image d'une pomme.
+- **Domaine** : le type de contenu auquel s'appliquent les listes d'un pack : les **objets** (`items`), les **PNJ** (`npcs`), les **compétences** (`skills`) et les **classes** (`classes`). Les quatre utilisent les catégories, les phrases et les paramètres décrits ici ; les teintes ne concernent que les objets.
+- **Catégorie** : une chose concrète, sans langue : `sword`, `potion`, `wolf`, `fire-spell`, `warrior`. Le pack donne ses **noms** et ses **descriptions** (dans sa langue). Pour les objets, ses **sprites** disent quelles catégories ils illustrent : ce lien garde l'image cohérente avec le nom. Une catégorie peut aussi porter des **champs** propres à son domaine (voir plus bas).
 - **Teinte** (*tint*) : un matériau ou un élément (`steel`, `fire`, `ice`…) avec un **dégradé** de couleurs. Les adjectifs et les suffixes d'un objet peuvent porter une teinte : « Rapière **ardente** » est colorée avec le dégradé `fire`.
 - **Paramètre** : une liste de groupes de mots à insérer dans les descriptions et les noms, par exemple `maker` (« un forgeron nain »). Voir [la syntaxe des phrases](#la-syntaxe-des-phrases).
 
@@ -103,6 +103,21 @@ Les deux Base déclarent **les mêmes catégories et les mêmes teintes** (elles
 - **Teintes** : `steel`, `wood`, `gold`, `ice`, `fire`, `leaf`, `arcane`, `rust`, `silver`, `shadow`.
 - **Paramètres** (`generators/common.json`) : `maker`, `owner`, `place`, `event`, `material`, `creature`, `effect`.
 
+Base publie aussi les catégories des trois autres domaines.
+
+- **PNJ** (20) : `townsfolk` (rôle `story` ; `peasant`, `noble`, `scholar`, `priest`), `trader` (rôle `merchant` ; `merchant`, `innkeeper`, `blacksmith`, `peddler`), `guard` (rôles `story`, `enemy`), `outlaw` (rôle `enemy` ; `bandit`, `cultist`, `mercenary`) et `beast` (rôle `enemy`, pas une personne ; `wolf`, `bear`, `giant-spider`, `boar`).
+- **Compétences** (20) : `attack` (active, dégâts ; `strike`, `shot`, `fire-spell`, `frost-spell`, `lightning-spell`, `shadow-spell`), `healing` (active, soin ; `prayer`, `remedy`), `support` (active, modification ; `blessing`, `curse`, `war-cry`, `song`) et `trait` (passive ; `toughness`, `focus`, `agility`, `presence`).
+- **Classes** (18) : `martial` (`warrior`, `berserker`, `knight`), `arcane` (`mage`, `warlock`, `sorcerer`), `divine` (`cleric`, `paladin`), `nature` (`druid`, `ranger`, `shaman`) et `cunning` (`rogue`, `assassin`, `bard`). Chaque famille liste ses catégories de compétences favorites, par exemple `martial` : `strike`, `shot`, `war-cry`, `toughness`.
+### Catégories de PNJ, de compétences et de classes
+
+Les trois autres domaines utilisent le même arbre et le même héritage (parent, le premier niveau qui a des mots l'emporte). Ce que porte une catégorie dépend du domaine.
+
+- **PNJ** : `roles` (`story`, `merchant`, `enemy` : les rôles que peut prendre un PNJ généré) et `person` (`false` pour une créature : son nom est alors un nom commun, sans prénom). Les rôles et `person` sont hérités du parent. Textes : `given` (prénoms avec un `gender`), `epithets` (épithètes), `templates` (`{given}`, `{epithet}`), puis par catégorie `nouns`, `descriptions`, `adjectives` et `names` (modèles de noms avec `{adjective}` et `{noun}`, pour les catégories qui ne sont pas des personnes).
+- **Compétences** : `type` (`active` ou `passive`, sur une racine) et `effect` (`damage`, `heal` ou `modify`, pour une compétence active). Textes : `templates`, `adjectives`, `suffixes`, puis par catégorie `nouns`, `descriptions`, `adjectives`, `suffixes` et `names`.
+- **Classes** : `skills`, les **catégories de compétences favorites**. L'arbre de compétences d'une classe est tiré parmi les compétences du monde dont la chaîne de catégories en contient une (quand il y en a au moins 3 ; sinon il est complété par d'autres compétences). Textes comme les compétences : `templates`, `adjectives`, `suffixes`, puis par catégorie `nouns`, `descriptions`, `adjectives`, `suffixes` et `names`.
+
+Pour les compétences et les classes, le générateur tire une catégorie, un nom, éventuellement un adjectif et un suffixe (ceux de la catégorie, puis ceux du niveau supérieur), et compose le nom avec un modèle (`{adjective}`, `{noun}`, `{suffix}`). La description vient du niveau le plus proche de la catégorie qui en a. Un PNJ, une compétence ou une classe **garde sa catégorie**.
+
 ## Ajouter un pack depuis un lien
 
 **Ajouter un pack** installe un pack fait par quelqu'un d'autre. Collez :
@@ -136,12 +151,6 @@ Dans les **Outils**, sans partie lancée, les générateurs utilisent les packs 
 
 ## Les packs dans les générateurs
 
-Les **objets** n'ont plus de menu **Pack** : l'éditeur et le générateur d'objets utilisent ensemble tous les packs actifs du monde (voir plus haut). La même graine, avec les mêmes packs et la même langue, donne toujours le même résultat.
-
-L'éditeur de PNJ garde son menu **Pack** à côté de la graine.
-
-![Le choix du pack à côté de la graine](../../assets/screens/fr/packs-choice.png)
-
-Il propose les packs du monde qui ont des listes pour les PNJ. **Aléatoire** (par défaut) tire le pack à partir de la graine ; un pack nommé utilise ses listes de mots. Si aucun pack du monde n'a de liste, le Base de la langue de l'application prend le relais. Les boutons **Aléatoire** des compétences et des classes choisissent un pack au hasard parmi ceux qui en proposent.
+Aucun générateur n'a plus de menu **Pack** : les objets, les PNJ, les compétences et les classes utilisent ensemble **tous les packs actifs du monde** (voir plus haut), donc un pack ajouté enrichit tous les générateurs d'un coup. La même graine, avec les mêmes packs et la même langue, donne toujours le même résultat.
 
 Pour faire votre propre pack, voir [Créer un pack](/docs/create-pack/).

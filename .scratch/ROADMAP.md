@@ -279,9 +279,9 @@ Tickets in `generator-kinds/` (GK). User request; shapes assumed from the item s
 
 | # | Ticket | Blocked by |
 | - | --- | --- |
-| 121 | **GK01** NPC generator on kinds | none |
-| 122 | **GK02** Skill generator on kinds | GK01 |
-| 123 | **GK03** Class generator on kinds | GK02 |
-| 124 | **GK04** Pack creator: NPC, skill and class kinds | GK01–GK03 |
-| 125 | **GK06** User docs: NPC, skill and class kinds | GK01–GK04 |
+| 121 | **GK01** NPC generator on kinds (done) | none |
+| 122 | **GK02** Skill generator on kinds (done) | GK01 |
+| 123 | **GK03** Class generator on kinds (done) | GK02 |
+| 124 | **GK04** Pack creator: NPC, skill and class kinds (done) | GK01–GK03 |
+| 125 | **GK06** User docs: NPC, skill and class kinds (done) | GK01–GK04 |
 | — | **GK05** Packs ship fixed items, skills and classes (needs triage, later) | GK04 |

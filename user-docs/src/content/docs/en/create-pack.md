@@ -30,9 +30,15 @@ The tab has three blocks, and its intro reminds you that empty lists are left ou
 
 **Shared** holds the **Params**: **Add a param** asks for its name (its **role in the sentence**: `maker`, `place`…), then its phrases one by one (**New phrase**). Each phrase is a complete noun phrase with its article. A pack with no language has no texts: the form asks you to choose one in **Details**.
 
-**NPCs**, **skills** and **classes** are still **JSON** word lists, in the pack's language: errors are shown as you type. **Copy Base's list** starts from the list of the Base in the pack's language; **Import a file** loads a `.json`. An empty box is left out.
+**NPCs**, **skills** and **classes** have the same two sections as items, filled with forms (empty lists are left out):
 
-**Advanced (JSON)** shows the raw `items.json` and `common.json` files: import, export or copy Base's. What you change there shows up in the forms, and the other way round.
+- **Kinds**: **Add a kind** asks for an id and a **Parent**, then the fields of the domain: for NPCs, the **Roles** and **Person** (untick it for a creature); for skills, the **Type** (active or passive) and the **Effect** (damage, heal, modify); for classes, the **Favoured skills**, picked among the known skill kinds. Renaming a kind follows its children, its texts and the classes that favour it. Ids already known from installed packs are offered by autocompletion.
+- **Texts**: per kind, the **Nouns**, **Descriptions** (one per line, [phrase syntax](/docs/en/packs/#the-phrase-syntax)) and **Adjectives**; for skills and classes also **Suffixes**; for NPC kinds that are not persons, the **Name templates**. Above, the top-level lists: for NPCs the **Given names** (with a gender), the **Epithets** and the **Templates**; for skills and classes the **Templates**, **Adjectives** and **Suffixes**.
+- **Preview**: under each kind, a few trial draws.
+
+**Copy Base's list** and **Import a file** remain in the **Advanced (JSON)** part of each domain; what you change there shows up in the forms, and the other way round.
+
+**Advanced (JSON)** shows the raw `items.json` and `common.json` files (and each domain's file in its section): import, export or copy Base's. What you change there shows up in the forms, and the other way round.
 
 ![A draft's word lists](../../../assets/screens/en/packs-creator-lists.png)
 
@@ -148,7 +154,7 @@ And its `pack.json`:
 | `common` | The path to `generators/common.json` (the params, shared by every domain). |
 | `sprites` | The list of sprites (see below). |
 
-**Kinds** (`domains.items.kinds`): each entry has an optional `parent`. Only roots declare a `type` (`item`, `consumable` or `equipment`); `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` or `weapon2`) is declared on one level of the equipment chain. The tree has no cycle and its root declares a `type`; a `parent` declared in another pack is allowed. Ids are scoped by domain (`items` `guard` and `npcs` `guard` are different). For now, `npcs`, `skills` and `classes` only hold `texts`, pointing at the plain word lists.
+**Kinds** (`domains.items.kinds`): each entry has an optional `parent`. Only roots declare a `type` (`item`, `consumable` or `equipment`); `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` or `weapon2`) is declared on one level of the equipment chain. The tree has no cycle and its root declares a `type`; a `parent` declared in another pack is allowed. Ids are scoped by domain (`items` `guard` and `npcs` `guard` are different).
 
 **Sprites**: `id`, `label` (in the pack's language), `domain` (`items`), `kinds` (the kinds it illustrates), `kind` (the colouring: `grayscale`, `masked` or `colored`), `image`, and `materials` for a `masked` sprite (the JSON the colorizer exports). Sprites no longer have a `type` or `slot`: they come from the kind.
 
@@ -197,6 +203,53 @@ And its `pack.json`:
     "effect": ["healing", "vigor"]
   }
 }
+```
+
+**NPC, skill and class kinds** (`domains.npcs.kinds`, `domains.skills.kinds`, `domains.classes.kinds`): same tree, `parent` optional. NPCs: `roles` (list of `story`, `merchant`, `enemy`) and `person` (boolean), inherited. Skills: `type` (`active` or `passive`, on a root) and `effect` (`damage`, `heal` or `modify`). Classes: `skills`, a list of skill kinds. Their `texts` files are v2 (below).
+
+**`generators/npcs.json`** (v2):
+
+```json
+{
+  "version": 2,
+  "given": [{ "text": "Brannoc", "gender": "m" }, { "text": "Mirelle", "gender": "f" }],
+  "epithets": ["the Wary", "Ashfoot"],
+  "templates": ["{given}", "{given} {epithet}"],
+  "kinds": {
+    "guard": { "nouns": [{ "text": "Guard" }], "descriptions": ["Posted near {place}, and bored of it."] },
+    "wolf": { "nouns": [{ "text": "Wolf" }], "adjectives": ["Grey", "Snow"], "descriptions": ["It howls at the moon."] },
+    "beast": { "names": ["{adjective} {noun}", "{noun}"] }
+  }
+}
+```
+
+`given` (`text`, `gender`), `epithets`, `templates` (`{given}`, `{epithet}`: a name for a person), then per kind `nouns`, `descriptions`, `adjectives` and `names` (`{adjective}`, `{noun}`: a name for a creature).
+
+**`generators/skills.json`** and **`generators/classes.json`** (v2, same shape):
+
+```json
+{
+  "version": 2,
+  "templates": ["{adjective} {noun}", "{noun} of {suffix}", "{noun}"],
+  "adjectives": ["Ancient", "Secret"],
+  "suffixes": ["the Oath", "Dawn"],
+  "kinds": {
+    "strike": {
+      "nouns": [{ "text": "Strike" }, { "text": "Cleave" }],
+      "descriptions": ["A clean blow, without a flicker of doubt."],
+      "adjectives": ["Brutal"],
+      "suffixes": ["Iron"]
+    }
+  }
+}
+```
+
+`templates` (`{noun}` required; `{adjective}`, `{suffix}` optional), top-level `adjectives` and `suffixes`, then per kind `nouns`, `descriptions`, `adjectives`, `suffixes` and `names`. Words add up along the chain of the kind.
+
+Classes use the same shape; their kinds carry the favoured skill kinds in the manifest:
+
+```json
+"classes": { "kinds": { "martial": { "skills": ["strike", "shot", "war-cry"] }, "warrior": { "parent": "martial" } }, "texts": "generators/classes.json" }
 ```
 
 Each file carries its own `version`, so a domain can change without touching the others. Pack validation only warns about params it uses without defining, since another pack in the same language may provide them.

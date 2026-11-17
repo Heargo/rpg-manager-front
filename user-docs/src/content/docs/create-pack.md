@@ -30,9 +30,15 @@ L'onglet a trois blocs, et le texte d'introduction rappelle que les listes vides
 
 **Partagé** contient les **Paramètres** : **Ajouter un paramètre** demande son nom (son **rôle dans la phrase** : `maker`, `place`…), puis ses expressions, une à une (**Nouvelle expression**). Chaque expression est un groupe nominal complet avec son article. Un pack sans langue n'a pas de textes : le formulaire demande d'en choisir une dans **Détails**.
 
-Les **PNJ**, les **compétences** et les **classes** restent des listes de mots en **JSON**, dans la langue du pack : les erreurs s'affichent pendant que vous écrivez. **Copier la liste de Base** part de la liste du Base de la langue du pack ; **Importer un fichier** charge un `.json`. Une case vide est laissée de côté.
+Les **PNJ**, les **compétences** et les **classes** ont les mêmes deux sections que les objets, remplies avec des formulaires (les listes vides sont laissées de côté) :
 
-**Avancé (JSON)** montre les fichiers bruts `items.json` et `common.json` : importer, exporter ou copier ceux de Base. Ce que vous y changez apparaît dans les formulaires, et inversement.
+- **Catégories** : **Ajouter une catégorie** demande un identifiant et un **Parent**, puis les champs du domaine : pour les PNJ, les **Rôles** et **Personne** (à décocher pour une créature) ; pour les compétences, le **Type** (active ou passive) et l'**Effet** (dégâts, soin, modification) ; pour les classes, les **Compétences favorites**, choisies parmi les catégories de compétences connues. Renommer une catégorie suit ses enfants, ses textes et les classes qui la favorisent. Les identifiants déjà connus des packs installés sont proposés par autocomplétion.
+- **Textes** : par catégorie, les **Noms**, les **Descriptions** (une par ligne, [syntaxe des phrases](/docs/packs/#la-syntaxe-des-phrases)) et les **Adjectifs** ; pour les compétences et les classes aussi les **Suffixes** ; pour les catégories de PNJ qui ne sont pas des personnes, les **Modèles de noms**. Au-dessus, les listes de niveau supérieur : pour les PNJ les **Prénoms** (avec un genre), les **Épithètes** et les **Modèles** ; pour les compétences et les classes les **Modèles**, **Adjectifs** et **Suffixes**.
+- **Aperçu** : sous chaque catégorie, quelques tirages d'essai.
+
+**Copier la liste de Base** et **Importer un fichier** restent dans la partie **Avancé (JSON)** de chaque domaine ; ce que vous y changez apparaît dans les formulaires, et inversement.
+
+**Avancé (JSON)** montre les fichiers bruts `items.json` et `common.json` (et celui de chaque domaine dans sa section) : importer, exporter ou copier ceux de Base. Ce que vous y changez apparaît dans les formulaires, et inversement.
 
 ![Les listes de mots d'un brouillon](../../assets/screens/fr/packs-creator-lists.png)
 
@@ -148,7 +154,7 @@ Et son `pack.json` :
 | `common` | Le chemin de `generators/common.json` (les paramètres, partagés par tous les domaines). |
 | `sprites` | La liste des sprites (voir ci-dessous). |
 
-**Catégories** (`domains.items.kinds`) : chaque entrée a un `parent` facultatif. Seules les racines déclarent un `type` (`item`, `consumable` ou `equipment`) ; `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` ou `weapon2`) se déclare sur un niveau de la chaîne d'équipement. L'arbre n'a pas de cycle et sa racine déclare un `type` ; un `parent` déclaré dans un autre pack est permis. Les identifiants sont propres à chaque domaine (`items` `guard` et `npcs` `guard` sont différents). Les `npcs`, `skills` et `classes` ne contiennent pour l'instant que `texts`, vers les listes de mots simples.
+**Catégories** (`domains.items.kinds`) : chaque entrée a un `parent` facultatif. Seules les racines déclarent un `type` (`item`, `consumable` ou `equipment`) ; `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` ou `weapon2`) se déclare sur un niveau de la chaîne d'équipement. L'arbre n'a pas de cycle et sa racine déclare un `type` ; un `parent` déclaré dans un autre pack est permis. Les identifiants sont propres à chaque domaine (`items` `guard` et `npcs` `guard` sont différents).
 
 **Sprites** : `id`, `label` (dans la langue du pack), `domain` (`items`), `kinds` (les catégories illustrées), `kind` (la coloration : `grayscale`, `masked` ou `colored`), `image`, et `materials` pour un sprite `masked` (le JSON exporté par le coloriseur). Plus de `type` ni de `slot` dans les sprites : ils viennent de la catégorie.
 
@@ -197,6 +203,53 @@ Et son `pack.json` :
     "effect": ["soin", "vigueur"]
   }
 }
+```
+
+**Catégories de PNJ, de compétences et de classes** (`domains.npcs.kinds`, `domains.skills.kinds`, `domains.classes.kinds`) : même arbre, `parent` facultatif. PNJ : `roles` (liste de `story`, `merchant`, `enemy`) et `person` (booléen), hérités. Compétences : `type` (`active` ou `passive`, sur une racine) et `effect` (`damage`, `heal` ou `modify`). Classes : `skills`, une liste de catégories de compétences. Leurs fichiers `texts` sont en v2 (voir plus bas).
+
+**`generators/npcs.json`** (v2) :
+
+```json
+{
+  "version": 2,
+  "given": [{ "text": "Brannoc", "gender": "m" }, { "text": "Mirelle", "gender": "f" }],
+  "epithets": ["le Prudent", "Pied-de-cendre"],
+  "templates": ["{given}", "{given} {epithet}"],
+  "kinds": {
+    "guard": { "nouns": [{ "text": "garde", "gender": "m" }, { "text": "garde", "gender": "f" }], "descriptions": ["{g:Posté|Postée} près de {place}, et {g:lassé|lassée} d'y être."] },
+    "wolf": { "nouns": [{ "text": "loup", "gender": "m" }, { "text": "louve", "gender": "f" }], "adjectives": [{ "m": "gris", "f": "grise" }, "des neiges"], "descriptions": ["{g:Il|Elle} hurle à la lune."] },
+    "beast": { "names": ["{noun} {adjective}", "{noun}"] }
+  }
+}
+```
+
+`given` (`text`, `gender`), `epithets`, `templates` (`{given}`, `{epithet}` : un nom de personne), puis par catégorie `nouns`, `descriptions`, `adjectives` et `names` (`{adjective}`, `{noun}` : un nom de créature).
+
+**`generators/skills.json`** et **`generators/classes.json`** (v2, même forme) :
+
+```json
+{
+  "version": 2,
+  "templates": ["{noun} {adjective}", "{noun} {suffix}", "{noun}"],
+  "adjectives": ["Ancien", "Secret"],
+  "suffixes": ["du Serment", "de l'Aube"],
+  "kinds": {
+    "strike": {
+      "nouns": [{ "text": "Frappe" }, { "text": "Fendoir" }],
+      "descriptions": ["Un coup net, sans l'ombre d'un doute."],
+      "adjectives": ["Brutale"],
+      "suffixes": ["de fer"]
+    }
+  }
+}
+```
+
+`templates` (`{noun}` obligatoire ; `{adjective}`, `{suffix}` facultatifs), `adjectives` et `suffixes` de niveau supérieur, puis par catégorie `nouns`, `descriptions`, `adjectives`, `suffixes` et `names`. Les mots s'additionnent le long de la chaîne de la catégorie.
+
+Les classes ont la même forme ; leurs catégories portent les catégories de compétences favorites dans le manifeste :
+
+```json
+"classes": { "kinds": { "martial": { "skills": ["strike", "shot", "war-cry"] }, "warrior": { "parent": "martial" } }, "texts": "generators/classes.json" }
 ```
 
 Chaque fichier a sa propre `version`, pour qu'un domaine évolue sans toucher aux autres. La validation d'un pack avertit seulement des paramètres qu'il n'utilise pas sans les définir, puisqu'un autre pack de la même langue peut les fournir.

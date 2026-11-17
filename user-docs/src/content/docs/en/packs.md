@@ -31,8 +31,8 @@ For now, the two Bases are the only official packs.
 
 Generated items rest on a few notions shared by every pack.
 
-- **Domain**: the type of content a pack's lists apply to. Today, **items** (`items`) use the kinds, tints and phrases described here. NPCs, skills and classes are domains too, but still keep their plain word lists for now; they will move to the same system later.
-- **Kind**: a concrete thing, with no language: `sword`, `potion`, `key`. The pack gives its **nouns** and **descriptions** (in its language), and its **sprites** say which kinds they illustrate. That link keeps the image consistent with the name: a Potion no longer gets the picture of an apple.
+- **Domain**: the type of content a pack's lists apply to: **items** (`items`), **NPCs** (`npcs`), **skills** (`skills`) and **classes** (`classes`). All four use the kinds, phrases and params described here; tints only concern items.
+- **Kind**: a concrete thing, with no language: `sword`, `potion`, `wolf`, `fire-spell`, `warrior`. The pack gives its **nouns** and **descriptions** (in its language). For items, its **sprites** say which kinds they illustrate: that link keeps the image consistent with the name. A kind can also carry **fields** that depend on its domain (see below).
 - **Tint**: a material or an element (`steel`, `fire`, `ice`…) with a colour **gradient**. An item's adjectives and suffixes can carry a tint: a "fiery" rapier is coloured with the `fire` gradient.
 - **Param**: a list of word groups to insert into descriptions and names, for example `maker` ("a dwarf smith"). See [the phrase syntax](#the-phrase-syntax).
 
@@ -103,6 +103,21 @@ Both Bases declare **the same kinds and the same tints** (they merge). If you na
 - **Tints**: `steel`, `wood`, `gold`, `ice`, `fire`, `leaf`, `arcane`, `rust`, `silver`, `shadow`.
 - **Params** (`generators/common.json`): `maker`, `owner`, `place`, `event`, `material`, `creature`, `effect`.
 
+Base also publishes the kinds of the three other domains.
+
+- **NPCs** (20): `townsfolk` (roles `story`; `peasant`, `noble`, `scholar`, `priest`), `trader` (role `merchant`; `merchant`, `innkeeper`, `blacksmith`, `peddler`), `guard` (roles `story`, `enemy`), `outlaw` (role `enemy`; `bandit`, `cultist`, `mercenary`) and `beast` (role `enemy`, not a person; `wolf`, `bear`, `giant-spider`, `boar`).
+- **Skills** (20): `attack` (active, damage; `strike`, `shot`, `fire-spell`, `frost-spell`, `lightning-spell`, `shadow-spell`), `healing` (active, heal; `prayer`, `remedy`), `support` (active, modify; `blessing`, `curse`, `war-cry`, `song`) and `trait` (passive; `toughness`, `focus`, `agility`, `presence`).
+- **Classes** (18): `martial` (`warrior`, `berserker`, `knight`), `arcane` (`mage`, `warlock`, `sorcerer`), `divine` (`cleric`, `paladin`), `nature` (`druid`, `ranger`, `shaman`) and `cunning` (`rogue`, `assassin`, `bard`). Each family lists its favoured skill kinds, for example `martial`: `strike`, `shot`, `war-cry`, `toughness`.
+### NPC, skill and class kinds
+
+The three other domains use the same tree and the same inheritance (parent, first level with words wins). What a kind carries depends on the domain.
+
+- **NPCs**: `roles` (`story`, `merchant`, `enemy`: the roles a generated NPC can take) and `person` (`false` for a creature: it then has a noun as its name, no given name). Roles and `person` are inherited from the parent. Texts: `given` (given names with a `gender`), `epithets`, `templates` (`{given}`, `{epithet}`), then per kind `nouns`, `descriptions`, `adjectives` and `names` (name templates with `{adjective}` and `{noun}`, for kinds that are not persons).
+- **Skills**: `type` (`active` or `passive`, on a root) and `effect` (`damage`, `heal` or `modify`, for an active skill). Texts: `templates`, `adjectives`, `suffixes`, then per kind `nouns`, `descriptions`, `adjectives`, `suffixes` and `names`.
+- **Classes**: `skills`, the **favoured skill kinds**. A class's skill tree is drawn from the world's skills whose kind chain holds one of them (when there are at least 3 of them; otherwise it is topped up with other skills). Texts like skills: `templates`, `adjectives`, `suffixes`, then per kind `nouns`, `descriptions`, `adjectives`, `suffixes` and `names`.
+
+For skills and classes, the generator picks a kind, a noun, maybe an adjective and a suffix (those of the kind, then the top-level ones), and builds the name with a template (`{adjective}`, `{noun}`, `{suffix}`). The description comes from the nearest level of the kind that has some. An NPC, skill or class **keeps its kind**.
+
 ## Add a pack from a link
 
 **Add a pack** installs a pack made by someone else. Paste:
@@ -136,12 +151,6 @@ In the **Tools**, with no game running, the generators use the packs chosen in *
 
 ## Packs in the generators
 
-**Items** no longer have a **Pack** menu: the item editor and generator use all the world's active packs together (see above). The same seed, with the same packs and language, always gives the same result.
-
-The NPC editor keeps its **Pack** menu next to the seed.
-
-![The pack choice next to the seed](../../../assets/screens/en/packs-choice.png)
-
-It offers the world's packs that have NPC lists. **Random** (the default) picks the pack from the seed; a named pack uses its word lists. If none of the world's packs has a list, the Base in the app's language takes over. The **Random** buttons for skills and classes pick a pack at random among those that have them.
+No generator has a **Pack** menu any more: items, NPCs, skills and classes all pool **all the world's active packs** together (see above), so a pack you add enriches every generator at once. The same seed, with the same packs and language, always gives the same result.
 
 To make your own pack, see [Create a pack](/docs/en/create-pack/).
