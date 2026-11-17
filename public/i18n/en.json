@@ -37,10 +37,8 @@
     "language": "Language",
     "dice": "Dice",
     "tools": "Tools",
-    "itemGenerator": "Item generator",
     "itemCatalogue": "Item catalogue",
     "externalTools": "External tools",
-    "characterSheet": "Character sheet",
     "itemEditor": "Item editor",
     "worldRules": "World rules",
     "npcCatalogue": "NPC catalogue",
@@ -48,9 +46,8 @@
     "skillCatalogue": "Skill catalogue",
     "classCatalogue": "Class catalogue",
     "spriteColorizer": "Sprite colorizer",
-    "combat": "Combat",
     "help": "Help",
-    "packs": "Content packs"
+    "packs": "Packs"
   },
   "play": {
     "title": "Worlds",
@@ -765,12 +762,8 @@
       }
     },
     "itemGenerator": {
-      "title": "Item generator",
-      "intro": "Draws a random item. Its modifiers use the default attributes: {{ attributes }}.",
-      "random": "Random",
       "seed": "Seed",
       "reroll": "Reroll",
-      "seedHint": "The same seed with the same options gives the same item. Paste a seed to get an item back.",
       "failed": "The word list couldn't be loaded. Check your connection and reload."
     },
     "external": {
@@ -789,19 +782,6 @@
         "name": "Squoosh",
         "description": "Shrink and convert pictures before adding them to your world."
       }
-    },
-    "sheet": {
-      "title": "Character sheet",
-      "intro": "A sample character on the default attributes, with the default items in the bag. Everything follows the game rules and stays on this page.",
-      "reset": "Start over"
-    },
-    "combat": {
-      "title": "Combat",
-      "intro": "The sample character against a catalogue enemy, with the game master's panel and the player's view on one screen. Nothing is saved.",
-      "start": "Fight the cave goblin",
-      "gm": "Game master",
-      "player": "Player",
-      "noEncounter": "Start an encounter to see the player's view."
     }
   },
   "home": {

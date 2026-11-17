@@ -1,9 +1,9 @@
 ---
 title: "Tools"
-description: "The sprite colorizer, the generators and the sandboxes."
+description: "The sprite colorizer and the external tools."
 ---
 
-**Tools** work without a game, from the **Tools** menu. The sample catalogues, sheet and combat run on a **sandbox world**: nothing is saved there.
+**Tools** work without a game, from the **Tools** menu. The sample catalogues run on a **sandbox world**: nothing is saved there.
 
 ## Sprite colorizer
 
@@ -19,12 +19,6 @@ The colorizer recolours a grayscale sprite **material by material** (blade, hand
 The library offers the 101 sprites of the "Fantasy items pack" (Florian Sciberras, CC BY 4.0), already split into materials, and your saved sprites (**My sprites**). Give a saved sprite an **item kind** so random item images can use it. More sprites can come from [content packs](/docs/en/packs/).
 
 ![The sprite library](../../../assets/screens/en/tools-sprite-library.png)
-
-## Item generator
-
-Draws items from a seed, with the rarity, type and slot you want. The same seed always gives the same item.
-
-![The item generator](../../../assets/screens/en/tools-item-generator.png)
 
 ## External tools
 

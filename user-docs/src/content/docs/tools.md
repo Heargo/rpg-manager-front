@@ -1,9 +1,9 @@
 ---
 title: "Outils"
-description: "Le coloriseur de sprites, les générateurs et les bacs à sable."
+description: "Le coloriseur de sprites et les outils externes."
 ---
 
-Les **outils** s'utilisent sans partie, depuis le menu **Outils**. Les catalogues, la fiche et le combat d'exemple fonctionnent sur un **monde bac à sable** : rien n'y est enregistré.
+Les **outils** s'utilisent sans partie, depuis le menu **Outils**. Les catalogues d'exemple fonctionnent sur un **monde bac à sable** : rien n'y est enregistré.
 
 ## Coloriseur de sprites
 
@@ -19,12 +19,6 @@ Le coloriseur recolore un sprite en niveaux de gris, **matériau par matériau**
 La bibliothèque propose les 101 sprites du « Fantasy items pack » (Florian Sciberras, CC BY 4.0), déjà découpés en matériaux, et vos sprites enregistrés (**Mes sprites**). Donnez un **type d'objet** à un sprite enregistré pour qu'il serve aux images aléatoires des objets. D'autres sprites peuvent venir des [packs de contenu](/docs/packs/).
 
 ![La bibliothèque de sprites](../../assets/screens/fr/tools-sprite-library.png)
-
-## Générateur d'objets
-
-Tire des objets à partir d'une graine, avec la rareté, le type et l'emplacement voulus. La même graine donne toujours le même objet.
-
-![Le générateur d'objets](../../assets/screens/fr/tools-item-generator.png)
 
 ## Outils externes
 

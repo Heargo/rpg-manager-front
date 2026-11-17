@@ -7,7 +7,7 @@ Un pack, ce sont des **données** : un fichier `pack.json` qui décrit le pack (
 
 ## Le créateur de pack
 
-**Outils › Packs de contenu › Créer un pack** ouvre la liste de vos **brouillons**. Ils sont enregistrés sur cet appareil au fil de vos modifications : vous pouvez partir et revenir. **Nouveau brouillon** en ouvre un, avec quatre onglets.
+**Packs › Créer un pack** ouvre la liste de vos **brouillons**. Ils sont enregistrés sur cet appareil au fil de vos modifications : vous pouvez partir et revenir. **Nouveau brouillon** en ouvre un, avec quatre onglets.
 
 ### Détails
 

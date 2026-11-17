@@ -30,6 +30,6 @@ Your profile, worlds and characters are stored **in this browser**. Clearing the
 
 ## The menu
 
-Outside a game, the top bar offers **Worlds** (your worlds and the ones you joined), **Dice**, **Catalogues** (try the catalogues on a sample world) and **Tools**. During a game it becomes **Table**, **Catalogues**, **Tools** and **World rules**, with a **Close the world** button.
+Outside a game, the top bar offers **Worlds** (your worlds and the ones you joined), **Dice**, **Catalogues** (try the catalogues on a sample world), **Packs** and **Tools**. During a game it becomes **Table**, **Catalogues**, **Packs**, **Tools** and **World rules**, with a **Close the world** button.
 
 Your avatar's menu holds your profile, this help and the language (French or English).

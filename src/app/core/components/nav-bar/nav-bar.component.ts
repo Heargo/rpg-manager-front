@@ -50,44 +50,17 @@ const PACKS: MenuItem = {
   icon: 'pi pi-th-large',
   routerLink: '/tools/packs',
 };
-const ITEM_GENERATOR: MenuItem = {
-  label: 'nav.itemGenerator',
-  icon: 'pi pi-sparkles',
-  routerLink: '/tools/item-generator',
-};
 const EXTERNAL_TOOLS: MenuItem = {
   label: 'nav.externalTools',
   icon: 'pi pi-external-link',
   routerLink: '/tools/links',
 };
 
-/** Out of a room: the sandbox character sheet stays; world rules only exist in a world. */
+/** Tools menu: the sprite colorizer and external links, in and out of a room. */
 const TOOLS: MenuItem = {
   label: 'nav.tools',
   icon: 'pi pi-wrench',
-  items: [
-    SPRITE_COLORIZER,
-    PACKS,
-    ITEM_GENERATOR,
-    {
-      label: 'nav.characterSheet',
-      icon: 'pi pi-id-card',
-      routerLink: '/tools/character-sheet',
-    },
-    {
-      label: 'nav.combat',
-      icon: 'pi pi-shield',
-      routerLink: '/tools/combat',
-    },
-    EXTERNAL_TOOLS,
-  ],
-};
-
-/** In a room the world has the real sheet and rules, so no sandbox for them. */
-const ROOM_TOOLS: MenuItem = {
-  label: 'nav.tools',
-  icon: 'pi pi-wrench',
-  items: [SPRITE_COLORIZER, PACKS, ITEM_GENERATOR, EXTERNAL_TOOLS],
+  items: [SPRITE_COLORIZER, EXTERNAL_TOOLS],
 };
 
 const OUT_OF_ROOM_ITEMS: MenuItem[] = [
@@ -119,6 +92,7 @@ const OUT_OF_ROOM_ITEMS: MenuItem[] = [
       },
     ],
   },
+  PACKS,
   TOOLS,
 ];
 
@@ -129,7 +103,8 @@ const ROOM_ITEMS: MenuItem[] = [
     icon: 'pi pi-book',
     items: CATALOGUES('/room', ['items', 'npcs', 'skills', 'classes']),
   },
-  ROOM_TOOLS,
+  PACKS,
+  TOOLS,
   {
     label: 'nav.roomRules',
     icon: 'pi pi-sliders-h',

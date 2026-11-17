@@ -5,7 +5,7 @@ description: "Add sprites and word lists to the generators, from official packs 
 
 A **pack** adds content to the app: **word lists** for the generators (items, NPCs, skills, classes), item **sprites**, and what ties them together: **kinds** and **tints**. A pack that has texts is written in **one language** (English or French), shown on its card. To translate a pack, you make a second one in the other language. A pack can also have **no language** (see [Neutral packs](#neutral-packs)).
 
-The **Tools › Content packs** page installs and removes packs on the device. Each **world's rules** choose the packs it uses (see below).
+The **Packs** page installs and removes packs on the device. Each **world's rules** choose the packs it uses (see below).
 
 ![The content packs page](../../../assets/screens/en/packs-page.png)
 

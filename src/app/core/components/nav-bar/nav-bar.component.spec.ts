@@ -58,9 +58,9 @@ function closeButton(el: HTMLElement): HTMLElement | undefined {
 }
 
 describe('NavBarComponent out of a room', () => {
-  it('lists Worlds, Dice, Catalogues and Tools in that order, with no Close the world button', async () => {
+  it('lists Worlds, Dice, Catalogues, Packs and Tools in that order, with no Close the world button', async () => {
     const { el } = await render('idle');
-    expect(rootLabels(el)).toEqual(['Worlds', 'Dice', 'Catalogues', 'Tools']);
+    expect(rootLabels(el)).toEqual(['Worlds', 'Dice', 'Catalogues', 'Packs', 'Tools']);
     expect(closeButton(el)).toBeUndefined();
     expect(rootItems(el)[0].querySelector('a')?.getAttribute('href')).toBe('/play');
   });
@@ -75,16 +75,15 @@ describe('NavBarComponent out of a room', () => {
     ]);
   });
 
-  it('puts the internal tools then External tools in the Tools submenu, without World rules', async () => {
+  it('links Packs as its own entry to the packs page', async () => {
     const { el } = await render('idle');
-    expect(subLabels(el, 'Tools')).toEqual([
-      'Sprite colorizer',
-      'Content packs',
-      'Item generator',
-      'Character sheet',
-      'Combat',
-      'External tools',
-    ]);
+    const packs = rootItems(el).find((li) => text(li.querySelector('.p-menubar-item-label')) === 'Packs');
+    expect(packs?.querySelector('a')?.getAttribute('href')).toBe('/tools/packs');
+  });
+
+  it('keeps only the Sprite colorizer and External tools in the Tools submenu', async () => {
+    const { el } = await render('idle');
+    expect(subLabels(el, 'Tools')).toEqual(['Sprite colorizer', 'External tools']);
   });
 });
 
@@ -94,14 +93,14 @@ describe.each([
 ])('NavBarComponent in a room as %s', (_who, isHost) => {
   const status: RoomStatus = isHost ? 'hosting' : 'connected';
 
-  it('lists Table, Catalogues, Tools, World rules in that order', async () => {
+  it('lists Table, Catalogues, Packs, Tools, World rules in that order', async () => {
     const { el } = await render(status, isHost);
-    expect(rootLabels(el)).toEqual(['Table', 'Catalogues', 'Tools', 'World rules']);
+    expect(rootLabels(el)).toEqual(['Table', 'Catalogues', 'Packs', 'Tools', 'World rules']);
   });
 
-  it('keeps the character sheet and world rules sandboxes out of the Tools submenu', async () => {
+  it('keeps only the Sprite colorizer and External tools in the Tools submenu', async () => {
     const { el } = await render(status, isHost);
-    expect(subLabels(el, 'Tools')).toEqual(['Sprite colorizer', 'Content packs', 'Item generator', 'External tools']);
+    expect(subLabels(el, 'Tools')).toEqual(['Sprite colorizer', 'External tools']);
   });
 
   it('shows the Close the world button after the menu and before the avatar', async () => {
@@ -165,7 +164,7 @@ describe('NavBarComponent room catalogues', () => {
 
   it('links the World rules item to the room world rules page', async () => {
     const { el } = await render('connected', false);
-    expect(rootItems(el)[3].querySelector('a')?.getAttribute('href')).toBe('/room/rules');
+    expect(rootItems(el)[4].querySelector('a')?.getAttribute('href')).toBe('/room/rules');
   });
 });
 
@@ -174,7 +173,7 @@ describe('NavBarComponent French labels', () => {
     const { el } = await render('idle');
     TestBed.inject(LanguageBusiness).setLanguage('fr');
     TestBed.inject(ApplicationRef).tick();
-    expect(rootLabels(el)).toEqual(['Mondes', 'Dés', 'Catalogues', 'Outils']);
+    expect(rootLabels(el)).toEqual(['Mondes', 'Dés', 'Catalogues', 'Packs', 'Outils']);
   });
 });
 

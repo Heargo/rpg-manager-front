@@ -37,10 +37,8 @@
     "language": "Langue",
     "dice": "Dés",
     "tools": "Outils",
-    "itemGenerator": "Générateur d'objets",
     "itemCatalogue": "Catalogue d'objets",
     "externalTools": "Outils externes",
-    "characterSheet": "Fiche de personnage",
     "itemEditor": "Éditeur d'objets",
     "worldRules": "Règles du monde",
     "npcCatalogue": "Catalogue de PNJ",
@@ -48,9 +46,8 @@
     "skillCatalogue": "Catalogue de compétences",
     "classCatalogue": "Catalogue de classes",
     "spriteColorizer": "Colorisation de sprites",
-    "combat": "Combat",
     "help": "Aide",
-    "packs": "Packs de contenu"
+    "packs": "Packs"
   },
   "play": {
     "title": "Mondes",
@@ -765,12 +762,8 @@
       }
     },
     "itemGenerator": {
-      "title": "Générateur d'objets",
-      "intro": "Tire un objet au hasard. Ses modificateurs utilisent les attributs par défaut : {{ attributes }}.",
-      "random": "Au hasard",
       "seed": "Graine",
       "reroll": "Relancer",
-      "seedHint": "La même graine avec les mêmes options donne le même objet. Collez une graine pour retrouver un objet.",
       "failed": "La liste de mots n'a pas pu être chargée. Vérifiez votre connexion et rechargez."
     },
     "external": {
@@ -789,19 +782,6 @@
         "name": "Squoosh",
         "description": "Réduire et convertir des images avant de les ajouter à votre monde."
       }
-    },
-    "sheet": {
-      "title": "Fiche de personnage",
-      "intro": "Un personnage d'exemple sur les attributs par défaut, avec les objets par défaut dans son sac. Tout suit les règles du jeu et reste sur cette page.",
-      "reset": "Recommencer"
-    },
-    "combat": {
-      "title": "Combat",
-      "intro": "Le personnage d'exemple contre un ennemi du catalogue, avec le panneau du MJ et la vue du joueur sur le même écran. Rien n'est enregistré.",
-      "start": "Affronter le gobelin des cavernes",
-      "gm": "Maître du jeu",
-      "player": "Joueur",
-      "noEncounter": "Lancez une rencontre pour voir la vue du joueur."
     }
   },
   "home": {

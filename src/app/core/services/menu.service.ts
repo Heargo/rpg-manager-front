@@ -19,16 +19,6 @@ export class MenuService {
     // Every tool works without a world or a room; they sit directly in the bar (user, 2026-11-08).
     { label: 'nav.dice', icon: 'pi pi-box', routerLink: '/dice' },
     {
-      label: 'nav.itemGenerator',
-      icon: 'pi pi-sparkles',
-      routerLink: '/tools/item-generator',
-    },
-    {
-      label: 'nav.characterSheet',
-      icon: 'pi pi-id-card',
-      routerLink: '/tools/character-sheet',
-    },
-    {
       label: 'nav.itemCatalogue',
       icon: 'pi pi-shopping-bag',
       routerLink: '/tools/item-catalogue',
@@ -63,7 +53,6 @@ export class MenuService {
       icon: 'pi pi-sitemap',
       routerLink: '/tools/classes',
     },
-    { label: 'nav.combat', icon: 'pi pi-shield', routerLink: '/tools/combat' },
     {
       label: 'nav.externalTools',
       icon: 'pi pi-external-link',

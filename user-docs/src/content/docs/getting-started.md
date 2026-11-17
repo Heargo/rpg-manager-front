@@ -30,6 +30,6 @@ Le profil, les mondes et les personnages sont enregistrés **dans ce navigateur*
 
 ## Le menu
 
-Hors d'une partie, la barre du haut propose **Mondes** (vos mondes et ceux que vous avez rejoints), **Dés**, **Catalogues** (essayer les catalogues sur un monde d'exemple) et **Outils**. Pendant une partie, elle devient **Table**, **Catalogues**, **Outils** et **Règles du monde**, avec un bouton **Fermer le monde**.
+Hors d'une partie, la barre du haut propose **Mondes** (vos mondes et ceux que vous avez rejoints), **Dés**, **Catalogues** (essayer les catalogues sur un monde d'exemple), **Packs** et **Outils**. Pendant une partie, elle devient **Table**, **Catalogues**, **Packs**, **Outils** et **Règles du monde**, avec un bouton **Fermer le monde**.
 
 Le menu de votre avatar regroupe votre profil, cette aide et le choix de la langue (français ou anglais).

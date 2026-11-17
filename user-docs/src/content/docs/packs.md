@@ -5,7 +5,7 @@ description: "Ajouter des sprites et des listes de mots aux générateurs, depui
 
 Un **pack** ajoute du contenu à l'application : des **listes de mots** pour les générateurs (objets, PNJ, compétences, classes), des **sprites** d'objets, et ce qui les relie : des **catégories** et des **teintes**. Un pack qui a des textes est écrit dans **une seule langue** (français ou anglais), affichée sur sa carte. Pour traduire un pack, on en fait un deuxième, dans l'autre langue. Un pack peut aussi n'avoir **aucune langue** (voir [Packs neutres](#packs-neutres)).
 
-La page **Outils › Packs de contenu** installe et supprime les packs de l'appareil. Ce sont les **règles de chaque monde** qui choisissent ceux qu'il utilise (voir plus bas).
+La page **Packs** installe et supprime les packs de l'appareil. Ce sont les **règles de chaque monde** qui choisissent ceux qu'il utilise (voir plus bas).
 
 ![La page des packs de contenu](../../assets/screens/fr/packs-page.png)
 

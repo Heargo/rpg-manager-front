@@ -7,7 +7,7 @@ A pack is **data**: a `pack.json` file that describes the pack (its kinds, tints
 
 ## The pack creator
 
-**Tools › Content packs › Create a pack** opens the list of your **drafts**. They are saved on this device as you edit: you can leave and come back. **New draft** opens one, with four tabs.
+**Packs › Create a pack** opens the list of your **drafts**. They are saved on this device as you edit: you can leave and come back. **New draft** opens one, with four tabs.
 
 ### Details
 
