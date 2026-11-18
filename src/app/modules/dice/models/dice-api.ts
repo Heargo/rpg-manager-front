@@ -9,6 +9,10 @@ export interface SharedRoll {
   /** Seed for the throw's look only. */
   seed: string;
   at: number;
+  /** A mixed pool (then `count`, `sides` and `values` are the first type's and all the values): each type's drawn values. */
+  pool?: { sides: number; count: number; values: number[] }[];
+  /** Added to the total (0 when absent). */
+  modifier?: number;
   /** Set for the dice of a combat action: what the recap banner shows (names, never attributes). */
   combat?: SharedCombatRoll;
 }
@@ -35,9 +39,12 @@ export interface SharedCombatRoll {
   success: boolean;
 }
 
+/** Either `count` and `sides`, or a `pool` with a `modifier`. */
 export interface SharedRollRequest {
-  count: number;
-  sides: number;
+  count?: number;
+  sides?: number;
+  pool?: { sides: number; count: number }[];
+  modifier?: number;
 }
 
 export const DICE_ROUTES = {

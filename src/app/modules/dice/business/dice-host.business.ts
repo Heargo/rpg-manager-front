@@ -36,15 +36,25 @@ export class DiceHostBusiness {
     if (!isValidRollRequest(payload))
       throw new PeerApiError('invalid', 'dice.errors.invalid');
     const by = this.roller(from);
-    const { count, sides } = payload;
+    const pool = payload.pool ?? [
+      { count: payload.count as number, sides: payload.sides as number },
+    ];
+    const groups = pool.map((entry) => ({
+      ...entry,
+      values: rollDice(this.random, entry.count, entry.sides),
+    }));
+    const values = groups.flatMap((group) => group.values);
     const roll: SharedRoll = {
       id: crypto.randomUUID(),
       by,
-      count,
-      sides,
-      values: rollDice(this.random, count, sides),
+      count: values.length,
+      sides: groups[0].sides,
+      values,
       seed: createSeed(this.random),
       at: Date.now(),
+      ...(payload.pool
+        ? { pool: groups, modifier: payload.modifier ?? 0 }
+        : {}),
     };
     this.rolls = addSharedRoll(this.rolls, roll);
     this.service.publishRolls(this.rolls);

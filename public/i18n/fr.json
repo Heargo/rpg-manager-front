@@ -557,6 +557,10 @@
     "skip": "Cliquez pour passer l'animation",
     "share": "Partager avec la table",
     "tableRolls": "Lancers de la table",
+    "poolMinus": "Retirer un d{{ sides }}",
+    "poolPlus": "Ajouter un d{{ sides }}",
+    "clear": "Vider",
+    "modifier": "Modificateur",
     "die": "Dé d{{ sides }}",
     "rolledBy": "{{ name }} a lancé",
     "errors": {

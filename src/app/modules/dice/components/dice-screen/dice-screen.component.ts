@@ -18,6 +18,14 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { MAX_DICE, MAX_SIDES } from '../../../../core/generators/dice';
 import { DICE_PRESETS } from '../../business/dice-roll.business';
+import {
+  addDie,
+  clearPool,
+  decrementDie,
+  DicePool,
+  incrementDie,
+  poolNotation,
+} from '../../helpers/dice-pool.rules';
 
 export interface DiceScreenStatus {
   overlay?: boolean;
@@ -31,6 +39,13 @@ export interface DiceScreenResult {
   count: number;
   sides: number;
   values: number[];
+  total: number;
+}
+
+/** A roll as the screen shows it when it mixes dice types and has a modifier. */
+export interface DiceScreenPoolResult {
+  groups: { sides: number; values: number[] }[];
+  modifier: number;
   total: number;
 }
 
@@ -58,10 +73,12 @@ export interface DiceScreenResult {
           }
           @if (status().rolling) {
             <span class="hint">{{ 'dice.rolling' | translate }}</span>
-          } @else if (result(); as roll) {
-            <span class="notation">{{ roll.count }}d{{ roll.sides }}</span>
-            @if (roll.values.length > 1) {
-              <span class="list">{{ roll.values.join(' + ') }} =</span>
+          } @else if (shown(); as roll) {
+            <span class="notation">{{ roll.notation }}</span>
+            @if (roll.values.length > 1 || roll.modifier !== 0) {
+              <span class="list" data-testid="dice-values"
+                >{{ roll.list }} =</span
+              >
             }
           }
         </div>
@@ -86,8 +103,9 @@ export interface DiceScreenResult {
                 [label]="'d' + s"
                 severity="secondary"
                 [fluid]="true"
-                [styleClass]="sides() === s ? 'die selected' : 'die'"
-                (onClick)="sides.set(s)"
+                styleClass="die"
+                [class.selected]="sides() === s"
+                (onClick)="onDie(s)"
               />
             }
           </div>
@@ -118,6 +136,65 @@ export interface DiceScreenResult {
               />
             </div>
           </div>
+          @if (pool().length) {
+            <div class="pool" data-testid="pool">
+              @for (entry of pool(); track entry.sides) {
+                <div
+                  class="pool-entry"
+                  data-testid="pool-entry"
+                  [attr.data-sides]="entry.sides"
+                >
+                  <p-button
+                    data-action="pool-minus"
+                    icon="pi pi-minus"
+                    severity="secondary"
+                    size="small"
+                    [ariaLabel]="
+                      'dice.poolMinus' | translate: { sides: entry.sides }
+                    "
+                    (onClick)="pool.set(minus(entry.sides))"
+                  />
+                  <span class="pool-label"
+                    ><strong data-testid="pool-count">{{ entry.count }}</strong
+                    >d{{ entry.sides }}</span
+                  >
+                  <p-button
+                    data-action="pool-plus"
+                    icon="pi pi-plus"
+                    severity="secondary"
+                    size="small"
+                    [ariaLabel]="
+                      'dice.poolPlus' | translate: { sides: entry.sides }
+                    "
+                    (onClick)="pool.set(plus(entry.sides))"
+                  />
+                </div>
+              }
+              <p-button
+                data-action="clear-pool"
+                icon="pi pi-trash"
+                severity="secondary"
+                size="small"
+                [label]="'dice.clear' | translate"
+                (onClick)="pool.set(empty())"
+              />
+            </div>
+          }
+          <div class="modifier" data-testid="dice-modifier">
+            <label for="dice-screen-modifier">{{
+              'dice.modifier' | translate
+            }}</label>
+            <p-inputnumber
+              inputId="dice-screen-modifier"
+              [showButtons]="true"
+              buttonLayout="horizontal"
+              [min]="-maxSides"
+              [max]="maxSides"
+              [ngModel]="modifier()"
+              (ngModelChange)="modifier.set($event ?? 0)"
+              inputStyleClass="modifier-input"
+            />
+          </div>
         </div>
       }
 
@@ -133,9 +210,7 @@ export interface DiceScreenResult {
             <p-button
               data-action="roll-dice"
               icon="pi pi-box"
-              [label]="
-                ('dice.roll' | translate) + ' ' + count() + 'd' + sides()
-              "
+              [label]="('dice.roll' | translate) + ' ' + rollNotation()"
               [loading]="busy()"
               size="large"
               styleClass="roll"
@@ -226,11 +301,36 @@ export interface DiceScreenResult {
       min-width: 2.75rem;
     }
     /* light beige chips like the toggle buttons used before; the chosen die looks pressed */
-    .grid ::ng-deep .die.selected {
+    .grid .selected ::ng-deep .die {
       background: var(--p-togglebutton-content-checked-background);
       border-color: var(--p-togglebutton-content-checked-background);
       color: var(--p-togglebutton-checked-color);
       box-shadow: var(--p-togglebutton-content-checked-shadow);
+    }
+    .pool {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: center;
+    }
+    .pool-entry {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .pool-label {
+      min-width: 2.5rem;
+      text-align: center;
+    }
+    .modifier {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .modifier ::ng-deep .modifier-input {
+      width: 5rem;
+      text-align: center;
     }
     .dice-input {
       display: flex;
@@ -332,7 +432,10 @@ export class DiceScreenComponent {
   readonly count = model(1);
   readonly sides = model(20);
   readonly editable = input(true);
-  readonly result = input<DiceScreenResult | null>(null);
+  /** The mixed pool being built (empty: roll `count` d `sides`) and the modifier added to the total. */
+  readonly pool = model<DicePool>([]);
+  readonly modifier = model(0);
+  readonly result = input<DiceScreenResult | DiceScreenPoolResult | null>(null);
   /** Where the bottom bar sits: inline, or fixed to the bottom of the screen below 40rem. */
   readonly dock = input<'fixed' | 'inline'>('inline');
   /** After a roll: Roll again / Close, or the `[diceActions]` slot. */
@@ -378,6 +481,62 @@ export class DiceScreenComponent {
   /** Top edge of the screen's card in the viewport, for the 3D table to keep the dice above it. */
   topEdge(): number | null {
     return this.card()?.nativeElement.getBoundingClientRect().top ?? null;
+  }
+
+  /** What the Roll button rolls: the pool, or `count` d `sides`, with the modifier. */
+  protected readonly rollNotation = computed(() =>
+    poolNotation(
+      this.pool().length
+        ? this.pool()
+        : [{ sides: this.sides(), count: this.count() }],
+      this.modifier(),
+    ),
+  );
+
+  /** The result as text: notation, every die and the modifier. */
+  protected readonly shown = computed(() => {
+    const result = this.result();
+    if (!result) return null;
+    const groups =
+      'groups' in result
+        ? result.groups
+        : [{ sides: result.sides, values: result.values }];
+    const modifier = 'modifier' in result ? result.modifier : 0;
+    const values = groups.flatMap((group) => group.values);
+    const suffix =
+      modifier === 0
+        ? ''
+        : ` ${modifier > 0 ? '+' : '-'} ${Math.abs(modifier)}`;
+    return {
+      notation: poolNotation(
+        groups.map((group) => ({
+          sides: group.sides,
+          count: group.values.length,
+        })),
+        modifier,
+      ),
+      values,
+      modifier,
+      list: values.join(' + ') + suffix,
+    };
+  });
+
+  /** A tap on a die picks its sides and adds one to the pool. */
+  protected onDie(sides: number): void {
+    this.sides.set(sides);
+    this.pool.update((pool) => addDie(pool, sides));
+  }
+
+  protected minus(sides: number): DicePool {
+    return decrementDie(this.pool(), sides);
+  }
+
+  protected plus(sides: number): DicePool {
+    return incrementDie(this.pool(), sides);
+  }
+
+  protected empty(): DicePool {
+    return clearPool();
   }
 
   protected onRoll(): void {

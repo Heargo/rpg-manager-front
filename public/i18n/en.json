@@ -557,6 +557,10 @@
     "skip": "Click to skip the animation",
     "share": "Share with the table",
     "tableRolls": "Table rolls",
+    "poolMinus": "Remove one d{{ sides }}",
+    "poolPlus": "Add one d{{ sides }}",
+    "clear": "Clear",
+    "modifier": "Modifier",
     "die": "Die d{{ sides }}",
     "rolledBy": "{{ name }} rolled",
     "errors": {

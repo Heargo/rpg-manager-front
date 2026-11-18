@@ -32,6 +32,8 @@ import { DiceScreenComponent } from '../dice-screen/dice-screen.component';
       dock="inline"
       [(count)]="dice.$count"
       [(sides)]="dice.$sides"
+      [(pool)]="dice.$pool"
+      [(modifier)]="dice.$modifier"
       [busy]="rolling()"
       (roll)="roll()"
     >
@@ -42,8 +44,8 @@ import { DiceScreenComponent } from '../dice-screen/dice-screen.component';
             @for (roll of rolls; track roll.id) {
               <li>
                 <span class="who">{{ roll.by.name }}</span>
-                <span class="muted">{{ roll.count }}d{{ roll.sides }}</span>
-                <strong>{{ total(roll.values) }}</strong>
+                <span class="muted">{{ dice.notationOf(roll) }}</span>
+                <strong>{{ dice.totalOf(roll) }}</strong>
               </li>
             }
           </ul>
@@ -131,16 +133,12 @@ export class DiceRollerComponent {
     this.rolling.set(true);
     this.error.set(null);
     try {
-      await this.dice.rollAtTable();
+      await this.dice.rollSelectionAtTable();
     } catch (error) {
       console.error('Shared roll failed', error);
       this.error.set(this.language.t('dice.errors.shareFailed'));
     } finally {
       this.rolling.set(false);
     }
-  }
-
-  protected total(values: number[]): number {
-    return values.reduce((sum, value) => sum + value, 0);
   }
 }

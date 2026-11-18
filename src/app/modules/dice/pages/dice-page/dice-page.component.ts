@@ -14,13 +14,13 @@ import { DiceOverlayComponent } from '../../components/dice-overlay/dice-overlay
     <div class="main-container dice">
       <h1>{{ 'dice.title' | translate }}</h1>
       <p-card>
-        <app-dice-screen dock="fixed" [(count)]="dice.$count" [(sides)]="dice.$sides" (roll)="dice.roll()">
+        <app-dice-screen dock="fixed" [(count)]="dice.$count" [(sides)]="dice.$sides" [(pool)]="dice.$pool" [(modifier)]="dice.$modifier" (roll)="dice.rollSelection()">
           @if (dice.$history().length) {
             <h2>{{ 'dice.history' | translate }}</h2>
             <ul class="history">
               @for (roll of dice.$history(); track roll.id) {
                 <li>
-                  <span class="muted">{{ roll.count }}d{{ roll.sides }}</span>
+                  <span class="muted">{{ roll.notation }}</span>
                   <span class="values">{{ roll.values.length > 1 ? roll.values.join(' + ') + ' =' : '' }}</span>
                   <strong>{{ roll.total }}</strong>
                   <small class="muted">{{ roll.at | localDate: 'dateTime' }}</small>
@@ -40,7 +40,8 @@ import { DiceOverlayComponent } from '../../components/dice-overlay/dice-overlay
     h2 { font-size: 1rem; }
     .history { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
     .history li { display: flex; gap: 0.75rem; align-items: baseline; flex-wrap: wrap; }
-    .values { flex: 1; overflow-wrap: anywhere; }
+    .values { flex: 1 1 12rem; min-width: 0; overflow-wrap: break-word; }
+    @media (max-width: 39.99rem) { .values { flex-basis: 100%; order: 3; } }
     .muted { color: var(--p-text-muted-color); }
   `,
 })

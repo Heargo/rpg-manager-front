@@ -31,6 +31,13 @@ export function planDice(sides: number, values: number[]): DiePlan[] {
   return dice.slice(0, sides === 100 ? MAX_THROWN_DICE - (MAX_THROWN_DICE % 2) : MAX_THROWN_DICE);
 }
 
+/** The dice to throw for a whole pool: every die of every type, in the pool's order. */
+export function planPool(groups: { sides: number; values: number[] }[]): DiePlan[] {
+  return groups
+    .flatMap((group) => planDice(group.sides, group.values))
+    .slice(0, MAX_THROWN_DICE);
+}
+
 /** 0 (lowest possible total) to 1 (highest), for colouring the total. */
 export function totalRatio(values: number[], sides: number): number {
   const count = values.length;
