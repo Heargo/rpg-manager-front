@@ -39,8 +39,10 @@ import { KindTextsFormComponent } from './kind-texts-form.component';
   ],
   template: `
     <div class="form" data-test="kind-form">
-      <section>
-        <h4>{{ 'packs.creator.kinds.generalTitle' | translate }}</h4>
+      <section data-test="section-identity">
+        <h4 data-test="section-title">
+          {{ 'packs.creator.kinds.sectionIdentity' | translate }}
+        </h4>
         <div class="field">
           <label for="kind-id-input">{{
             'packs.creator.kinds.id' | translate
@@ -91,8 +93,10 @@ import { KindTextsFormComponent } from './kind-texts-form.component';
           }
         </div>
       </section>
-      <section>
-        <h4>{{ 'packs.creator.kinds.fieldsTitle' | translate }}</h4>
+      <section data-test="section-generation">
+        <h4 data-test="section-title">
+          {{ 'packs.creator.kinds.sectionGeneration' | translate }}
+        </h4>
         @switch (domain()) {
           @case ('items') {
             @if (!form().parent) {
@@ -225,13 +229,20 @@ import { KindTextsFormComponent } from './kind-texts-form.component';
         }
       </section>
       @if (form().texts; as texts) {
-        <section>
-          <h4>{{ 'packs.creator.kinds.texts' | translate }}</h4>
+        <section data-test="section-texts">
+          <h4 data-test="section-title">
+            {{ 'packs.creator.kinds.sectionTexts' | translate }}
+          </h4>
           <app-kind-texts-form
             [value]="texts"
             [domain]="domain()"
             (valueChange)="patch({ texts: $event })"
           />
+        </section>
+        <section data-test="section-try">
+          <h4 data-test="section-title">
+            {{ 'packs.creator.kinds.sectionTry' | translate }}
+          </h4>
           <app-kind-preview
             [entries]="drawn()"
             [disabled]="error() !== null || !form().id.trim()"
@@ -261,6 +272,10 @@ import { KindTextsFormComponent } from './kind-texts-form.component';
       margin: 0;
       padding-bottom: 0.25rem;
       border-bottom: 1px solid var(--p-content-border-color);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--p-text-muted-color);
     }
     .field {
       display: flex;

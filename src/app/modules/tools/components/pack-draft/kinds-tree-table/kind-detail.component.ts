@@ -12,6 +12,11 @@ import { LanguageBusiness } from '../../../../../core/business/language.business
 import { DraftIssue } from '../../../../../core/business/pack-draft-form.business';
 import { domainKindsOf } from '../../../../../core/packs/pack-draft-edits';
 import { PackDraft } from '../../../../../core/packs/pack-draft';
+import { ChipListComponent } from '../chip-list/chip-list.component';
+import {
+  DetailText,
+  DetailTextsComponent,
+} from '../detail-texts/detail-texts.component';
 import { wordLine } from '../words';
 import {
   Domain,
@@ -28,35 +33,70 @@ import { readTexts, scopesOf } from './kind-texts';
 @Component({
   selector: 'app-kind-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, MessageModule, KindPreviewComponent],
+  imports: [
+    TranslatePipe,
+    MessageModule,
+    KindPreviewComponent,
+    ChipListComponent,
+    DetailTextsComponent,
+  ],
   template: `
     <div class="detail" data-test="kind-detail">
-      <h3>{{ kind().label }}</h3>
-      <dl>
-        <dt>{{ 'packs.creator.kinds.id' | translate }}</dt>
-        <dd>{{ kind().id }}</dd>
-        <dt>{{ 'packs.creator.kinds.parent' | translate }}</dt>
-        <dd>
-          {{ parent() || ('packs.creator.kinds.none' | translate) }}
-        </dd>
-        @for (field of fields(); track field) {
-          <dt>{{ fieldLabel(field) | translate }}</dt>
+      <section data-test="section-identity">
+        <h4 data-test="section-title">
+          {{ 'packs.creator.kinds.sectionIdentity' | translate }}
+        </h4>
+        <h3>{{ kind().label }}</h3>
+        <dl>
+          <dt>{{ 'packs.creator.kinds.id' | translate }}</dt>
+          <dd>{{ kind().id }}</dd>
+          <dt>{{ 'packs.creator.kinds.parent' | translate }}</dt>
           <dd>
-            {{ shown(field) || ('packs.creator.kinds.none' | translate) }}
-          </dd>
-        }
-      </dl>
-      @if (texted()) {
-        <h4>{{ 'packs.creator.kinds.texts' | translate }}</h4>
-        @if (textRows().length) {
-          <dl data-test="detail-texts">
-            @for (row of textRows(); track $index) {
-              <dt>{{ row.label }}</dt>
-              <dd>{{ row.value }}</dd>
+            @if (parent()) {
+              {{ parent() }}
+            } @else {
+              <span class="none" data-test="detail-none">{{
+                'packs.creator.kinds.none' | translate
+              }}</span>
             }
-          </dl>
-        }
-        <app-kind-preview [entries]="drawn()" (run)="preview.emit()" />
+          </dd>
+        </dl>
+      </section>
+      <section data-test="section-generation">
+        <h4 data-test="section-title">
+          {{ 'packs.creator.kinds.sectionGeneration' | translate }}
+        </h4>
+        <dl>
+          @for (field of fields(); track field) {
+            <dt>{{ fieldLabel(field) | translate }}</dt>
+            <dd>
+              @let values = shown(field);
+              @if (values.length > 1 || isList(field)) {
+                <app-chip-list [names]="values" />
+              } @else if (values.length) {
+                {{ values[0] }}
+              } @else {
+                <span class="none" data-test="detail-none">{{
+                  'packs.creator.kinds.none' | translate
+                }}</span>
+              }
+            </dd>
+          }
+        </dl>
+      </section>
+      @if (texted()) {
+        <section data-test="section-texts">
+          <h4 data-test="section-title">
+            {{ 'packs.creator.kinds.sectionTexts' | translate }}
+          </h4>
+          <app-detail-texts [rows]="textRows()" />
+        </section>
+        <section data-test="section-try">
+          <h4 data-test="section-title">
+            {{ 'packs.creator.kinds.sectionTry' | translate }}
+          </h4>
+          <app-kind-preview [entries]="drawn()" (run)="preview.emit()" />
+        </section>
       }
       @if (uncovered()) {
         <p-message data-test="kind-coverage" severity="info" size="small">{{
@@ -78,9 +118,25 @@ import { readTexts, scopesOf } from './kind-texts';
       flex-direction: column;
       gap: 0.75rem;
     }
-    h3,
+    section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--p-content-border-color);
+    }
+    h3 {
+      margin: 0;
+    }
     h4 {
       margin: 0;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--p-text-muted-color);
+    }
+    .none {
+      color: var(--p-text-muted-color);
     }
     dl {
       display: grid;
@@ -118,60 +174,65 @@ export class KindDetailComponent {
     return FIELD_LABEL[field];
   }
 
-  protected shown(field: string): string {
-    return displayField(
-      (key) => this.language.t(key),
-      this.domain(),
-      field,
-      this.kind().fields[field],
-    );
+  protected isList(field: string): boolean {
+    return Array.isArray(this.kind().fields[field]);
+  }
+
+  /** The displayed values of a field: one per list item, none when empty. */
+  protected shown(field: string): string[] {
+    const value = this.kind().fields[field];
+    const one = (v: unknown) =>
+      displayField((key) => this.language.t(key), this.domain(), field, v);
+    return (Array.isArray(value) ? value : [value])
+      .map(one)
+      .filter((text) => text !== '');
   }
 
   /** The texts of the kind as label / value lines; none for a pack without a language. */
-  protected readonly textRows = computed(() => {
+  protected readonly textRows = computed((): DetailText[] => {
     if (!this.texted()) return [];
     const domain = this.domain();
     const texts = readTexts(this.draft(), domain, this.kind().id);
-    const rows: { label: string; value: string }[] = [];
-    const add = (key: string, scope: string, value: string) => {
-      if (!value) return;
-      const rarity =
-        scope === 'all' ? '' : ` (${this.language.t(`item.rarity.${scope}`)})`;
-      rows.push({ label: this.language.t(key) + rarity, value });
-    };
-    add(
-      'packs.creator.kinds.nouns',
-      'all',
-      texts.nouns
-        .map(
+    const rows: DetailText[] = [];
+    const scoped = (key: string, scope: string) =>
+      this.language.t(key) +
+      (scope === 'all' ? '' : ` (${this.language.t(`item.rarity.${scope}`)})`);
+    const lines = (text: string) => text.split('\n').filter((l) => l.trim());
+    if (texts.nouns.length)
+      rows.push({
+        label: this.language.t('packs.creator.kinds.nouns'),
+        chips: texts.nouns.map(
           (n) =>
             n.text +
             (n.gender ? ` (${n.gender})` : '') +
             (n.plural ? ' pl.' : ''),
-        )
-        .join(', '),
-    );
-    add(
-      'packs.creator.kinds.descriptions',
-      'all',
-      texts.descriptions.split('\n').join(' / '),
-    );
+        ),
+      });
+    const descriptions = lines(texts.descriptions);
+    if (descriptions.length)
+      rows.push({
+        label: this.language.t('packs.creator.kinds.descriptions'),
+        lines: descriptions,
+      });
     for (const scope of scopesOf(domain)) {
-      add(
-        'packs.creator.kinds.names',
-        scope,
-        (texts.names[scope] ?? '').split('\n').join(' / '),
-      );
-      add(
-        'packs.creator.domain.adjectives',
-        scope,
-        (texts.adjectives[scope] ?? []).map(wordLine).join(', '),
-      );
-      add(
-        'packs.creator.domain.top.suffixes',
-        scope,
-        (texts.suffixes[scope] ?? []).map(wordLine).join(', '),
-      );
+      const names = lines(texts.names[scope] ?? '');
+      if (names.length)
+        rows.push({
+          label: scoped('packs.creator.kinds.names', scope),
+          lines: names,
+        });
+      const adjectives = (texts.adjectives[scope] ?? []).map(wordLine);
+      if (adjectives.length)
+        rows.push({
+          label: scoped('packs.creator.domain.adjectives', scope),
+          lines: adjectives,
+        });
+      const suffixes = (texts.suffixes[scope] ?? []).map(wordLine);
+      if (suffixes.length)
+        rows.push({
+          label: scoped('packs.creator.domain.top.suffixes', scope),
+          lines: suffixes,
+        });
     }
     return rows;
   });

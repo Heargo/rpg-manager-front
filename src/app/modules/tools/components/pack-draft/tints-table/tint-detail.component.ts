@@ -12,36 +12,58 @@ import { DraftIssue } from '../../../../../core/business/pack-draft-form.busines
 import { ITEM_RARITIES } from '../../../../../core/models/item';
 import { PackDraft } from '../../../../../core/packs/pack-draft';
 import { tintTextsOf } from '../../../../../core/packs/pack-draft-edits';
+import { ChipListComponent } from '../chip-list/chip-list.component';
+import {
+  DetailText,
+  DetailTextsComponent,
+} from '../detail-texts/detail-texts.component';
 import { TintRow, adjectiveLine, gradientCss } from './tint-fields';
 
 /** The read-only summary of a tint in the drawer: gradient, fits, texts and issues. */
 @Component({
   selector: 'app-tint-detail',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, MessageModule],
+  imports: [
+    TranslatePipe,
+    MessageModule,
+    ChipListComponent,
+    DetailTextsComponent,
+  ],
   template: `
     <div class="detail" data-test="tint-detail">
-      <h3>{{ tint().id }}</h3>
-      <span class="swatch" [attr.style]="'background:' + gradient()"></span>
-      <dl>
-        <dt>{{ 'packs.creator.tints.fits' | translate }}</dt>
-        <dd>
-          @for (fit of tint().fits; track fit) {
-            <div>{{ fit }}</div>
-          } @empty {
-            {{ 'packs.creator.tints.fitsAny' | translate }}
-          }
-        </dd>
-      </dl>
-      @if (textRows().length) {
-        <h4>{{ 'packs.creator.tints.textsTitle' | translate }}</h4>
-        <dl data-test="detail-texts">
-          @for (row of textRows(); track $index) {
-            <dt>{{ row.label }}</dt>
-            <dd>{{ row.value }}</dd>
-          }
+      <section data-test="section-identity">
+        <h4 data-test="section-title">
+          {{ 'packs.creator.kinds.sectionIdentity' | translate }}
+        </h4>
+        <dl>
+          <dt>{{ 'packs.creator.tints.id' | translate }}</dt>
+          <dd>{{ tint().id }}</dd>
         </dl>
-      }
+      </section>
+      <section data-test="section-generation">
+        <h4 data-test="section-title">
+          {{ 'packs.creator.kinds.sectionGeneration' | translate }}
+        </h4>
+        <span class="swatch" [attr.style]="'background:' + gradient()"></span>
+        <dl>
+          <dt>{{ 'packs.creator.tints.fits' | translate }}</dt>
+          <dd>
+            @if (tint().fits.length) {
+              <app-chip-list [names]="tint().fits" />
+            } @else {
+              <span class="none">{{
+                'packs.creator.tints.fitsAny' | translate
+              }}</span>
+            }
+          </dd>
+        </dl>
+      </section>
+      <section data-test="section-texts">
+        <h4 data-test="section-title">
+          {{ 'packs.creator.kinds.sectionTexts' | translate }}
+        </h4>
+        <app-detail-texts [rows]="textRows()" />
+      </section>
       @for (issue of issues(); track $index) {
         <p-message
           size="small"
@@ -57,9 +79,22 @@ import { TintRow, adjectiveLine, gradientCss } from './tint-fields';
       flex-direction: column;
       gap: 0.75rem;
     }
-    h3,
+    section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--p-content-border-color);
+    }
     h4 {
       margin: 0;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--p-text-muted-color);
+    }
+    .none {
+      color: var(--p-text-muted-color);
     }
     .swatch {
       height: 1.5rem;
@@ -90,32 +125,28 @@ export class TintDetailComponent {
 
   protected readonly gradient = computed(() => gradientCss(this.tint().stops));
 
-  /** The texts of the tint as label / value lines; none for a pack without a language. */
-  protected readonly textRows = computed(() => {
+  /** The texts of the tint as labelled lines; none for a pack without a language. */
+  protected readonly textRows = computed((): DetailText[] => {
     const draft = this.draft();
     if (draft.details.language === undefined) return [];
     const texts = tintTextsOf(draft, this.tint().id);
-    const rows: { label: string; value: string }[] = [];
-    const add = (key: string, rarity: string, value: string) => {
-      if (!value) return;
+    const rows: DetailText[] = [];
+    const add = (key: string, rarity: string, lines: string[]) => {
+      if (!lines.length) return;
       const scope = rarity
         ? ` (${this.language.t(`item.rarity.${rarity}`)})`
         : '';
-      rows.push({ label: this.language.t(key) + scope, value });
+      rows.push({ label: this.language.t(key) + scope, lines });
     };
     for (const rarity of ITEM_RARITIES) {
       add(
         'packs.creator.tints.adjectives',
         rarity,
-        (texts.adjectives[rarity] ?? []).map(adjectiveLine).join(', '),
+        (texts.adjectives[rarity] ?? []).map(adjectiveLine),
       );
-      add(
-        'packs.creator.tints.suffixes',
-        rarity,
-        (texts.suffixes[rarity] ?? []).join(', '),
-      );
+      add('packs.creator.tints.suffixes', rarity, texts.suffixes[rarity] ?? []);
     }
-    add('packs.creator.tints.descriptions', '', texts.descriptions.join(' / '));
+    add('packs.creator.tints.descriptions', '', texts.descriptions);
     return rows;
   });
 }

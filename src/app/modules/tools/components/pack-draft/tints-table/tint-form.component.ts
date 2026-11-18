@@ -35,8 +35,10 @@ type Stop = 'shadow' | 'mid' | 'light';
   ],
   template: `
     <div class="form" data-test="tint-form">
-      <section>
-        <h4>{{ 'packs.creator.kinds.generalTitle' | translate }}</h4>
+      <section data-test="section-identity">
+        <h4 data-test="section-title">
+          {{ 'packs.creator.kinds.sectionIdentity' | translate }}
+        </h4>
         <div class="field">
           <label for="tint-id-input">{{
             'packs.creator.tints.id' | translate
@@ -62,8 +64,13 @@ type Stop = 'shadow' | 'mid' | 'light';
           }
         </div>
       </section>
-      <section>
-        <h4>{{ 'packs.creator.tints.gradientTitle' | translate }}</h4>
+      <section data-test="section-generation">
+        <h4 data-test="section-title">
+          {{ 'packs.creator.kinds.sectionGeneration' | translate }}
+        </h4>
+        <span class="label">{{
+          'packs.creator.tints.gradientTitle' | translate
+        }}</span>
         <span class="swatch" [attr.style]="'background:' + gradient()"></span>
         <div class="colors">
           @for (which of whiches(); track which) {
@@ -79,10 +86,10 @@ type Stop = 'shadow' | 'mid' | 'light';
             </label>
           }
         </div>
-      </section>
-      <section>
-        <h4>{{ 'packs.creator.tints.fitsTitle' | translate }}</h4>
         <div class="field">
+          <span class="label">{{
+            'packs.creator.tints.fitsTitle' | translate
+          }}</span>
           <p-multiselect
             data-test="tint-fits"
             [options]="fitOptions()"
@@ -103,8 +110,10 @@ type Stop = 'shadow' | 'mid' | 'light';
         </div>
       </section>
       @if (form().texts; as texts) {
-        <section>
-          <h4>{{ 'packs.creator.tints.textsTitle' | translate }}</h4>
+        <section data-test="section-texts">
+          <h4 data-test="section-title">
+            {{ 'packs.creator.kinds.sectionTexts' | translate }}
+          </h4>
           <small class="hint">{{
             'packs.creator.tints.adjectivesHint' | translate
           }}</small>
@@ -190,6 +199,10 @@ type Stop = 'shadow' | 'mid' | 'light';
       margin: 0;
       padding-bottom: 0.25rem;
       border-bottom: 1px solid var(--p-content-border-color);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--p-text-muted-color);
     }
     .field {
       display: flex;
