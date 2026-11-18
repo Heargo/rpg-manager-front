@@ -240,4 +240,136 @@ describe('ParamsEditorComponent', () => {
 
     expect(view.$('add-param')).toBeNull();
   });
+
+  describe('detail panel', () => {
+    const sections = () => [...document.querySelectorAll('[data-test="param-detail"] [data-test="section-title"]')].map((t) => t.textContent!.trim());
+
+    it('shows titled sections Usage, Expressions (N) and Examples', async () => {
+      const view = await open();
+      await select(view, 'maker');
+
+      expect(sections()).toEqual(['Usage', 'Expressions (5)', 'Examples']);
+    });
+
+    it('Usage shows the param name as heading and the reference {maker}', async () => {
+      const view = await open();
+      await select(view, 'maker');
+
+      expect(doc('param-detail')!.querySelector('h4')!.textContent).toContain('maker');
+      expect(doc('param-reference')!.textContent).toContain('{maker}');
+    });
+
+    it('the copy button puts {maker} on the clipboard', async () => {
+      const writeText = vi.fn(() => Promise.resolve());
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+      const view = await open();
+      await select(view, 'maker');
+
+      await press(view, 'copy-reference');
+
+      expect(writeText).toHaveBeenCalledWith('{maker}');
+    });
+
+    it('Expressions go through the collapsed texts list with Show all', async () => {
+      const view = await open();
+      await select(view, 'maker');
+
+      const lines = () => [...document.querySelectorAll('[data-test="param-detail"] [data-test="text-line"]')].map((l) => l.textContent!.trim());
+      expect(lines()).toEqual(['a hermit', 'a queen', 'a fool']);
+      await press(view, 'show-all');
+      expect(lines()).toEqual(['a hermit', 'a queen', 'a fool', 'a thief', 'a monk']);
+    });
+
+    it('shows the issues of the param at the top of the detail', async () => {
+      const view = await open([{ level: 'warning', param: 'maker', message: 'param {maker} is not used' }]);
+      await select(view, 'maker');
+
+      const detail = doc('param-detail')!;
+      expect(detail.querySelectorAll('[data-test="issue"]')).toHaveLength(1);
+      const title = detail.querySelector('[data-test="section-title"]')!;
+      expect(detail.querySelector('[data-test="issue"]')!.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('Draw examples expands 5 phrases with the draft params resolved', async () => {
+      const view = await renderEditor(
+        ParamsEditorComponent,
+        draftOf({ common: { version: 2, params: { maker: ['monks of {place}', 'a [red|blue] fool'], place: ['the cave'] } } }),
+      );
+      await select(view, 'maker');
+      expect(doc('param-example')).toBeNull();
+
+      await press(view, 'draw-examples');
+
+      const shown = [...document.querySelectorAll('[data-test="param-example"]')].map((e) => e.textContent!.trim());
+      expect(shown).toHaveLength(5);
+      for (const text of shown) expect(['monks of the cave', 'a red fool', 'a blue fool']).toContain(text);
+    });
+
+    it('Draw examples skips an entry that fails to expand', async () => {
+      const view = await renderEditor(
+        ParamsEditorComponent,
+        draftOf({ common: { version: 2, params: { maker: ['a fool', 'the {ghost}'] } } }),
+      );
+      await select(view, 'maker');
+
+      await press(view, 'draw-examples');
+
+      const shown = [...document.querySelectorAll('[data-test="param-example"]')].map((e) => e.textContent!.trim());
+      expect(shown.length).toBeGreaterThan(0);
+      for (const text of shown) expect(text).toBe('a fool');
+    });
+
+    it('Draw examples says nothing could be drawn when no entry expands', async () => {
+      const view = await renderEditor(
+        ParamsEditorComponent,
+        draftOf({ common: { version: 2, params: { maker: ['the {ghost}'] } } }),
+      );
+      await select(view, 'maker');
+
+      await press(view, 'draw-examples');
+
+      expect(document.querySelectorAll('[data-test="param-example"]')).toHaveLength(0);
+      expect(doc('examples-empty')).not.toBeNull();
+    });
+  });
+
+  describe('form', () => {
+    it('explains the syntax in the hint: {param} and [a|b]', async () => {
+      const view = await open();
+      await edit(view, 'place');
+
+      const hint = doc('param-form')!.querySelector('.hint')!.textContent!;
+      expect(hint).toContain('{param}');
+      expect(hint).toContain('[a|b]');
+    });
+
+    it('a syntax error shows under the textarea naming the line and disables Save', async () => {
+      const view = await open();
+      await edit(view, 'place');
+
+      await type(view, 'param-entries', 'a cave\na [dark|damp hole');
+
+      const errors = [...document.querySelectorAll('[data-test="line-error"]')];
+      expect(errors).toHaveLength(1);
+      expect(errors[0].textContent).toContain('2');
+      const save = doc('form-save')!.querySelector('button') ?? doc('form-save')!;
+      expect((save as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('an unknown param shows an error naming the line and keeps Save enabled', async () => {
+      const view = await open();
+      await edit(view, 'place');
+
+      await type(view, 'param-entries', 'a cave\nnear {ghost}');
+
+      const errors = [...document.querySelectorAll('[data-test="line-error"]')];
+      expect(errors).toHaveLength(1);
+      expect(errors[0].textContent).toContain('2');
+      expect(errors[0].textContent).toContain('ghost');
+      const save = doc('form-save')!.querySelector('button') ?? doc('form-save')!;
+      expect((save as HTMLButtonElement).disabled).toBe(false);
+      await press(view, 'form-save');
+      expect((view.last().common as any).params.place).toEqual(['a cave', 'near {ghost}']);
+    });
+  });
 });

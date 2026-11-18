@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  DestroyRef,
   Component,
   computed,
   effect,
@@ -8,6 +9,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { DrawerDismissDirective, confirmWhileBusy } from '../drawer-dismiss';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService } from '@openng/optimus-ui/api';
@@ -27,6 +29,11 @@ import {
   setParam,
 } from '../../../../../core/packs/pack-draft-edits';
 import { ChipListComponent } from '../chip-list/chip-list.component';
+import { DetailTextsComponent } from '../detail-texts/detail-texts.component';
+import { checkParamLines } from '../../../../../core/packs/param-lines.rules';
+import { cryptoRandomSource } from '../../../../../core/generators/random-source';
+import { pick } from '../../../../../core/generators/random';
+import { expandPhrase } from '../../../../../core/generators/phrase';
 
 interface ParamForm {
   original: string | null;
@@ -39,6 +46,7 @@ interface ParamForm {
   selector: 'app-params-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    DrawerDismissDirective,
     FormsModule,
     TranslatePipe,
     ButtonModule,
@@ -48,6 +56,7 @@ interface ParamForm {
     TableModule,
     TextareaModule,
     ChipListComponent,
+    DetailTextsComponent,
   ],
   template: `
     @if (neutral()) {
@@ -119,6 +128,8 @@ interface ParamForm {
         [closable]="false"
         [dismissible]="false"
         [closeOnEscape]="false"
+        [appDrawerDismiss]="panel() !== null && !confirming()"
+        (dismiss)="requestClose()"
         [style]="{ width: 'min(32rem, 100vw)' }"
       >
         <ng-template #header>
@@ -136,12 +147,74 @@ interface ParamForm {
         </ng-template>
         @if (panel() === 'detail' && selectedId(); as id) {
           <div class="detail" data-test="param-detail">
-            <h4>{{ id }}</h4>
-            <ul>
-              @for (entry of entriesOf(id); track $index) {
-                <li>{{ entry }}</li>
+            @for (issue of issuesOf(id); track $index) {
+              <p-message
+                data-test="issue"
+                size="small"
+                [severity]="issue.level === 'error' ? 'error' : 'warn'"
+                >{{ issue.message }}</p-message
+              >
+            }
+            <section>
+              <h5 data-test="section-title">
+                {{ 'packs.creator.params.sectionUsage' | translate }}
+              </h5>
+              <h4>{{ id }}</h4>
+              <div class="reference-row">
+                <span>{{ 'packs.creator.params.usageHint' | translate }}</span>
+                <code data-test="param-reference">{{ '{' + id + '}' }}</code>
+                <p-button
+                  data-test="copy-reference"
+                  variant="text"
+                  size="small"
+                  icon="pi pi-copy"
+                  [label]="
+                    (copied()
+                      ? 'packs.creator.params.copied'
+                      : 'packs.creator.params.copy'
+                    ) | translate
+                  "
+                  (onClick)="copyReference(id)"
+                />
+              </div>
+            </section>
+            <section>
+              <h5 data-test="section-title">
+                {{
+                  'packs.creator.params.sectionEntries'
+                    | translate: { count: entriesOf(id).length }
+                }}
+              </h5>
+              <app-detail-texts
+                [rows]="[{ label: '', lines: entriesOf(id) }]"
+              />
+            </section>
+            <section>
+              <h5 data-test="section-title">
+                {{ 'packs.creator.params.sectionExamples' | translate }}
+              </h5>
+              <div>
+                <p-button
+                  data-test="draw-examples"
+                  severity="secondary"
+                  outlined
+                  icon="pi pi-eye"
+                  [label]="'packs.creator.kinds.preview' | translate"
+                  (onClick)="drawExamples(id)"
+                />
+              </div>
+              @if (examples(); as drawn) {
+                <ul class="examples">
+                  @for (text of drawn; track $index) {
+                    <li data-test="param-example">{{ text }}</li>
+                  } @empty {
+                    <li class="hint" data-test="examples-empty">
+                      {{ 'packs.creator.params.examplesEmpty' | translate }}
+                    </li>
+                  }
+                </ul>
               }
-            </ul>
+            </section>
           </div>
         }
         @if (panel() === 'form' && form(); as f) {
@@ -176,6 +249,14 @@ interface ParamForm {
                 [ngModel]="f.entries"
                 (ngModelChange)="patch({ entries: $event ?? '' })"
               ></textarea>
+              @for (problem of lineProblems().problems; track $index) {
+                <small class="error" data-test="line-error">{{
+                  (problem.kind === 'syntax'
+                    ? 'packs.creator.params.lineSyntax'
+                    : 'packs.creator.params.lineUnknown'
+                  ) | translate: { line: problem.line, param: problem.param }
+                }}</small>
+              }
               <small class="hint">{{
                 'packs.creator.params.entriesHint' | translate
               }}</small>
@@ -224,6 +305,46 @@ interface ParamForm {
   styles: `
     .toolbar {
       margin-bottom: 0.5rem;
+    }
+    .detail {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .detail section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--p-content-border-color);
+    }
+    h4 {
+      margin: 0;
+    }
+    h5 {
+      margin: 0;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--p-text-muted-color);
+    }
+    .reference-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem 0.5rem;
+    }
+    .examples {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      overflow-wrap: anywhere;
+    }
+    .hint {
+      color: var(--p-text-muted-color);
     }
     .param-row {
       cursor: pointer;
@@ -274,9 +395,13 @@ export class ParamsEditorComponent {
 
   private readonly language = inject(LanguageBusiness);
   private readonly confirmation = inject(ConfirmationService);
+  protected readonly confirming = signal(false);
 
   protected readonly panel = signal<'detail' | 'form' | null>(null);
   protected readonly selectedId = signal<string | null>(null);
+  protected readonly examples = signal<string[] | null>(null);
+  protected readonly copied = signal(false);
+  private copiedTimer: ReturnType<typeof setTimeout> | undefined;
   protected readonly form = signal<ParamForm | null>(null);
   private initial = '';
 
@@ -301,17 +426,23 @@ export class ParamsEditorComponent {
     return name !== form.original && name in paramsOf(this.draft());
   });
 
+  protected readonly lineProblems = computed(() =>
+    checkParamLines(this.form()?.entries ?? '', this.names()),
+  );
+
   protected readonly canSave = computed(() => {
     const form = this.form();
     return (
       !!form &&
       !!form.name.trim() &&
       !this.duplicate() &&
+      !this.lineProblems().blocksSave &&
       this.linesOf(form.entries).length > 0
     );
   });
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.copiedTimer));
     // The selected param went away: nothing left to show.
     effect(() => {
       const id = this.selectedId();
@@ -340,7 +471,32 @@ export class ParamsEditorComponent {
 
   // --- the drawer -------------------------------------------------------------------------------------------
 
+  protected copyReference(name: string): void {
+    navigator.clipboard.writeText(`{${name}}`).then(
+      () => {
+        this.copied.set(true);
+        clearTimeout(this.copiedTimer);
+        this.copiedTimer = setTimeout(() => this.copied.set(false), 2000);
+      },
+      () => undefined,
+    );
+  }
+
+  /** Expands 5 phrases of the param with the draft's params as context; entries that fail are skipped. */
+  protected drawExamples(name: string): void {
+    const entries = this.entriesOf(name);
+    const source = cryptoRandomSource();
+    const context = { params: paramsOf(this.draft()) };
+    const drawn: string[] = [];
+    for (let i = 0; i < 40 && drawn.length < 5 && entries.length > 0; i++) {
+      const text = expandPhrase(source, pick(source, entries), context);
+      if (text !== undefined) drawn.push(text);
+    }
+    this.examples.set(drawn);
+  }
+
   protected show(name: string): void {
+    this.examples.set(null);
     this.selectedId.set(name);
     this.form.set(null);
     this.panel.set('detail');
@@ -372,6 +528,7 @@ export class ParamsEditorComponent {
   }
 
   private close(): void {
+    this.examples.set(null);
     this.panel.set(null);
     this.form.set(null);
     this.selectedId.set(null);
@@ -386,7 +543,7 @@ export class ParamsEditorComponent {
       this.close();
       return;
     }
-    this.confirmation.confirm({
+    confirmWhileBusy(this.confirmation, this.confirming, {
       header: this.language.t('packs.creator.params.discardTitle'),
       message: this.language.t('packs.creator.params.discardMessage'),
       icon: 'pi pi-exclamation-triangle',
@@ -418,7 +575,7 @@ export class ParamsEditorComponent {
   }
 
   protected confirmDelete(name: string): void {
-    this.confirmation.confirm({
+    confirmWhileBusy(this.confirmation, this.confirming, {
       header: this.language.t('packs.creator.params.deleteTitle'),
       message: this.language.t('packs.creator.params.deleteMessage', { name }),
       icon: 'pi pi-trash',

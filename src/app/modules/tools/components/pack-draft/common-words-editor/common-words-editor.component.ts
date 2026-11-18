@@ -7,6 +7,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { DrawerDismissDirective, confirmWhileBusy } from '../drawer-dismiss';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService } from '@openng/optimus-ui/api';
@@ -49,6 +50,7 @@ interface WordForm {
   selector: 'app-common-words-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    DrawerDismissDirective,
     FormsModule,
     TranslatePipe,
     ButtonModule,
@@ -117,6 +119,8 @@ interface WordForm {
         [closable]="false"
         [dismissible]="false"
         [closeOnEscape]="false"
+        [appDrawerDismiss]="panel() !== null && !confirming()"
+        (dismiss)="requestClose()"
         [style]="{ width: 'min(32rem, 100vw)' }"
       >
         <ng-template #header>
@@ -288,6 +292,7 @@ export class CommonWordsEditorComponent {
 
   private readonly language = inject(LanguageBusiness);
   private readonly confirmation = inject(ConfirmationService);
+  protected readonly confirming = signal(false);
 
   protected readonly forms = ['m', 'f', 'mp', 'fp'] as const;
   protected readonly panel = signal<'detail' | 'form' | null>(null);
@@ -439,7 +444,7 @@ export class CommonWordsEditorComponent {
       this.close();
       return;
     }
-    this.confirmation.confirm({
+    confirmWhileBusy(this.confirmation, this.confirming, {
       header: this.language.t('packs.creator.words.discardTitle'),
       message: this.language.t('packs.creator.words.discardMessage'),
       icon: 'pi pi-exclamation-triangle',
@@ -499,7 +504,7 @@ export class CommonWordsEditorComponent {
   }
 
   protected confirmDelete(row: WordRow): void {
-    this.confirmation.confirm({
+    confirmWhileBusy(this.confirmation, this.confirming, {
       header: this.language.t('packs.creator.words.deleteTitle'),
       message: this.language.t('packs.creator.words.deleteMessage', {
         text: row.text,

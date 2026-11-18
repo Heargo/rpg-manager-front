@@ -8,6 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { DrawerDismissDirective, confirmWhileBusy } from '../drawer-dismiss';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -54,6 +55,7 @@ import { TintFormComponent } from './tint-form.component';
   selector: 'app-tints-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    DrawerDismissDirective,
     TranslatePipe,
     ButtonModule,
     DrawerModule,
@@ -130,6 +132,8 @@ import { TintFormComponent } from './tint-form.component';
       [closable]="false"
       [dismissible]="false"
       [closeOnEscape]="false"
+      [appDrawerDismiss]="panel() !== null && !confirming()"
+      (dismiss)="requestClose()"
       [style]="{ width: 'min(32rem, 100vw)' }"
     >
       <ng-template #header>
@@ -252,6 +256,7 @@ export class TintsTableComponent {
 
   private readonly language = inject(LanguageBusiness);
   private readonly confirmation = inject(ConfirmationService);
+  protected readonly confirming = signal(false);
   private readonly business = inject(PackDraftFormBusiness);
 
   protected readonly panel = signal<'detail' | 'form' | null>(null);
@@ -405,7 +410,7 @@ export class TintsTableComponent {
       this.close();
       return;
     }
-    this.confirmation.confirm({
+    confirmWhileBusy(this.confirmation, this.confirming, {
       header: this.language.t('packs.creator.tints.discardTitle'),
       message: this.language.t('packs.creator.tints.discardMessage'),
       icon: 'pi pi-exclamation-triangle',
@@ -440,7 +445,7 @@ export class TintsTableComponent {
   }
 
   protected confirmDelete(id: string): void {
-    this.confirmation.confirm({
+    confirmWhileBusy(this.confirmation, this.confirming, {
       header: this.language.t('packs.creator.tints.deleteTitle'),
       message: this.language.t('packs.creator.tints.deleteMessage', { id }),
       icon: 'pi pi-trash',

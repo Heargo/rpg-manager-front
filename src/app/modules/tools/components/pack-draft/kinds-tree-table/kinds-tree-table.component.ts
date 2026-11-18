@@ -8,6 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { DrawerDismissDirective, confirmWhileBusy } from '../drawer-dismiss';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService, TreeNode } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
@@ -59,6 +60,7 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
   selector: 'app-kinds-tree-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    DrawerDismissDirective,
     TranslatePipe,
     ButtonModule,
     DrawerModule,
@@ -176,6 +178,8 @@ import { emptyTexts, readTexts, writeTexts } from './kind-texts';
       [closable]="false"
       [dismissible]="false"
       [closeOnEscape]="false"
+      [appDrawerDismiss]="panel() !== null && !confirming()"
+      (dismiss)="requestClose()"
       [style]="{ width: 'min(32rem, 100vw)' }"
     >
       <ng-template #header>
@@ -338,6 +342,7 @@ export class KindsTreeTableComponent {
 
   private readonly language = inject(LanguageBusiness);
   private readonly confirmation = inject(ConfirmationService);
+  protected readonly confirming = signal(false);
   private readonly business = inject(PackDraftFormBusiness);
 
   protected readonly panel = signal<'detail' | 'form' | null>(null);
@@ -604,7 +609,7 @@ export class KindsTreeTableComponent {
       this.close();
       return;
     }
-    this.confirmation.confirm({
+    confirmWhileBusy(this.confirmation, this.confirming, {
       header: this.language.t('packs.creator.kinds.discardTitle'),
       message: this.language.t('packs.creator.kinds.discardMessage'),
       icon: 'pi pi-exclamation-triangle',
@@ -681,7 +686,7 @@ export class KindsTreeTableComponent {
   }
 
   protected confirmDelete(id: string): void {
-    this.confirmation.confirm({
+    confirmWhileBusy(this.confirmation, this.confirming, {
       header: this.language.t('packs.creator.kinds.deleteTitle'),
       message: this.language.t('packs.creator.kinds.deleteMessage', { id }),
       icon: 'pi pi-trash',

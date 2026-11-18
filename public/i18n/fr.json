@@ -1791,7 +1791,7 @@
         "name": "Nom du paramètre",
         "neutral": "Les textes demandent un pack avec une langue : choisissez-en une dans Détails.",
         "entries": "Expressions",
-        "entriesHint": "Une expression par ligne.",
+        "entriesHint": "Une expression par ligne. {param} insère un autre paramètre, [a|b] choisit une des options.",
         "empty": "Aucun paramètre.",
         "detailTitle": "Paramètre",
         "newTitle": "Nouveau paramètre",
@@ -1800,7 +1800,16 @@
         "deleteMessage": "Supprimer « {{ name }} » et toutes ses expressions ?",
         "discardTitle": "Abandonner les modifications ?",
         "discardMessage": "Les modifications de ce paramètre ne sont pas enregistrées.",
-        "countHeader": "Nombre"
+        "countHeader": "Nombre",
+        "sectionUsage": "Utilisation",
+        "usageHint": "À écrire dans une expression :",
+        "copy": "Copier",
+        "copied": "Copié",
+        "sectionEntries": "Expressions ({{ count }})",
+        "sectionExamples": "Exemples",
+        "examplesEmpty": "Rien n'a pu être tiré.",
+        "lineSyntax": "Ligne {{ line }} : erreur de syntaxe.",
+        "lineUnknown": "Ligne {{ line }} : paramètre inconnu {{ param }}."
       },
       "templates": {
         "title": "Modèles de noms (utiles seulement pour une Base)",

@@ -1791,7 +1791,7 @@
         "name": "Param name",
         "neutral": "Texts need a pack with a language: choose one in Details.",
         "entries": "Phrases",
-        "entriesHint": "One phrase per line.",
+        "entriesHint": "One expression per line. {param} inserts another param, [a|b] picks one of the options.",
         "empty": "No params yet.",
         "detailTitle": "Param",
         "newTitle": "New param",
@@ -1800,7 +1800,16 @@
         "deleteMessage": "Delete \"{{ name }}\" and all its phrases?",
         "discardTitle": "Discard the changes?",
         "discardMessage": "The changes to this param are not saved.",
-        "countHeader": "Count"
+        "countHeader": "Count",
+        "sectionUsage": "Usage",
+        "usageHint": "Type it in a phrase:",
+        "copy": "Copy",
+        "copied": "Copied",
+        "sectionEntries": "Expressions ({{ count }})",
+        "sectionExamples": "Examples",
+        "examplesEmpty": "Nothing could be drawn.",
+        "lineSyntax": "Line {{ line }}: syntax error.",
+        "lineUnknown": "Line {{ line }}: unknown param {{ param }}."
       },
       "templates": {
         "title": "Name templates (only needed for a Base)",

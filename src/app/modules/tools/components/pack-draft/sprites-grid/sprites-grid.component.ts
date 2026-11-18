@@ -10,6 +10,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { DrawerDismissDirective, confirmWhileBusy } from '../drawer-dismiss';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ConfirmationService } from '@openng/optimus-ui/api';
@@ -46,6 +47,7 @@ interface SpriteForm {
   selector: 'app-sprites-grid',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    DrawerDismissDirective,
     FormsModule,
     TranslatePipe,
     ButtonModule,
@@ -125,6 +127,8 @@ interface SpriteForm {
       [closable]="false"
       [dismissible]="false"
       [closeOnEscape]="false"
+      [appDrawerDismiss]="panel() !== null && !confirming()"
+      (dismiss)="requestClose()"
       [style]="{ width: 'min(32rem, 100vw)' }"
     >
       <ng-template #header>
@@ -396,6 +400,7 @@ export class SpritesGridComponent {
 
   private readonly language = inject(LanguageBusiness);
   private readonly confirmation = inject(ConfirmationService);
+  protected readonly confirming = signal(false);
   private readonly business = inject(PackDraftFormBusiness);
 
   protected readonly perPage = PER_PAGE;
@@ -572,7 +577,7 @@ export class SpritesGridComponent {
       this.close();
       return;
     }
-    this.confirmation.confirm({
+    confirmWhileBusy(this.confirmation, this.confirming, {
       header: this.language.t('packs.creator.sprites.discardTitle'),
       message: this.language.t('packs.creator.sprites.discardMessage'),
       icon: 'pi pi-exclamation-triangle',
@@ -613,7 +618,7 @@ export class SpritesGridComponent {
     const sprite = this.selected();
     const index = this.selectedIndex();
     if (!sprite || index === null) return;
-    this.confirmation.confirm({
+    confirmWhileBusy(this.confirmation, this.confirming, {
       header: this.language.t('packs.creator.sprites.deleteTitle'),
       message: this.language.t('packs.creator.sprites.deleteMessage', {
         id: sprite.id,
