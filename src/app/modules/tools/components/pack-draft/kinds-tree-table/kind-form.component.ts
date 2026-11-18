@@ -71,6 +71,8 @@ import { KindTextsFormComponent } from './kind-texts-form.component';
           <p-autocomplete
             data-test="kind-parent"
             inputId="kind-parent-input"
+            [forceSelection]="true"
+            [dropdown]="true"
             [ngModel]="form().parent"
             (ngModelChange)="patch({ parent: $event ?? '' })"
             [suggestions]="suggestions()"

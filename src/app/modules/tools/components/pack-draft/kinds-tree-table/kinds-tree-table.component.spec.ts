@@ -316,16 +316,83 @@ describe.each(CASES)('KindsTreeTableComponent on $domain', (c) => {
     for (const gone of ['folk', 'elder', 'sage']) expect(suggestions).not.toContain(gone);
   });
 
-  it('refuses to save a kind whose parent is one of its descendants', async () => {
+  describe('parent field picks from the list only', () => {
+    const editRoot = async (view: Awaited<ReturnType<typeof open>>, id: string) => {
+      await select(view, id);
+      await press(view, 'detail-edit');
+    };
+    const parentInstance = (view: Awaited<ReturnType<typeof open>>) =>
+      view.fixture.debugElement.query(By.css('[data-test="kind-parent"]')).componentInstance;
+    const read = (v: unknown) => (typeof v === 'function' ? (v as () => unknown)() : v);
+
+    it('forces a selection from the suggestions', async () => {
+      const view = await open();
+      await editRoot(view, 'other');
+
+      expect(read(parentInstance(view).forceSelection)).toBe(true);
+    });
+
+    it('shows the suggestions on focus too (dropdown or complete on focus)', async () => {
+      const view = await open();
+      await editRoot(view, 'other');
+
+      const p = parentInstance(view);
+      expect(read(p.dropdown) === true || read(p.completeOnFocus) === true).toBe(true);
+    });
+
+    it('clears a typed text that is not a suggestion on blur, so the saved kind has no parent', async () => {
+      const view = await open();
+      await editRoot(view, 'other');
+
+      await type(view, 'kind-parent', 'not-a-kind');
+      expect(doc('kind-parent')!.querySelector<HTMLInputElement>('input')!.value).toBe('');
+      await press(view, 'form-save');
+
+      expect(kindsOf(view.last())['other']['parent']).toBeUndefined();
+    });
+
+    it('saves a picked suggestion as the parent', async () => {
+      const view = await open();
+      await editRoot(view, 'other');
+
+      const p = parentInstance(view);
+      await vi.waitFor(() => {
+        p.triggerEventHandler?.('completeMethod', { query: '' });
+        view.fixture.debugElement
+          .query(By.css('[data-test="kind-parent"]'))
+          .triggerEventHandler('completeMethod', { query: '' });
+        view.fixture.detectChanges();
+        expect(read(p.suggestions)).toContain('folk');
+      });
+      view.fixture.debugElement.query(By.css('[data-test="kind-parent"]')).componentInstance.onOptionSelect(new Event('click'), 'folk');
+      view.fixture.detectChanges();
+      await view.fixture.whenStable();
+      await press(view, 'form-save');
+
+      expect(kindsOf(view.last())['other']['parent']).toBe('folk');
+    });
+
+    it('clearing the field still makes the kind a root kind', async () => {
+      const view = await open();
+      await editRoot(view, 'elder');
+
+      await type(view, 'kind-parent', '');
+      await press(view, 'form-save');
+
+      expect(kindsOf(view.last())['elder']['parent']).toBeUndefined();
+    });
+  });
+
+  it('never saves a descendant as the parent: typing it is cleared on blur and the kind stays a root kind', async () => {
     const view = await open();
     await select(view, 'folk');
     await press(view, 'detail-edit');
 
     await type(view, 'kind-parent', 'sage');
+    expect(doc('kind-parent')!.querySelector<HTMLInputElement>('input')!.value).toBe('');
     await press(view, 'form-save');
 
-    expect(view.emitted).toEqual([]);
-    expect(doc('kind-form')).not.toBeNull();
+    expect(kindsOf(view.last())['folk']['parent']).toBeUndefined();
   });
 
   it('closes the drawer when the selected kind goes with a removed ancestor', async () => {
