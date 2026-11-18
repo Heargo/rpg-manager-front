@@ -18,6 +18,7 @@ import { CardModule } from '@openng/optimus-ui/card';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { ProgressSpinnerModule } from '@openng/optimus-ui/progressspinner';
 import { TagModule } from '@openng/optimus-ui/tag';
+import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import {
   BundledSprite,
   InstalledPack,
@@ -56,6 +57,7 @@ export function formatSize(bytes: number): string {
     MessageModule,
     ProgressSpinnerModule,
     TagModule,
+    TooltipModule,
   ],
   template: `
     <div class="main-container packs">
@@ -83,8 +85,14 @@ export function formatSize(bytes: number): string {
             @for (entry of registry(); track entry.id) {
               <li data-test="pack-card" [attr.data-pack]="entry.id">
                 <p-card>
-                  <div class="head">
-                    <h3>{{ entry.name }}</h3>
+                  <h3
+                    class="name line-clamp-2"
+                    data-test="pack-name"
+                    [pTooltip]="entry.name"
+                  >
+                    {{ entry.name }}
+                  </h3>
+                  <div class="tags" data-test="pack-tags">
                     @if (entry.language) {
                       <p-tag
                         data-test="pack-language"
@@ -113,30 +121,40 @@ export function formatSize(bytes: number): string {
                       }
                     }
                   </div>
-                  <p class="desc">{{ entry.description }}</p>
-                  <dl>
-                    <dt>{{ 'packs.author' | translate }}</dt>
-                    <dd>{{ entry.author }}</dd>
-                    <dt>{{ 'packs.license' | translate }}</dt>
-                    <dd>
-                      <a
+                  <p class="desc line-clamp-3" data-test="pack-desc">
+                    {{ entry.description }}
+                  </p>
+                  <div class="meta" data-test="pack-meta">
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.author' | translate"
+                      ><i class="pi pi-user"></i>{{ entry.author }}</span
+                    >
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.license' | translate"
+                      ><i class="pi pi-shield"></i
+                      ><a
                         [href]="entry.licenseUrl"
                         target="_blank"
                         rel="noopener noreferrer"
                         >{{ entry.license }}</a
-                      >
-                    </dd>
+                      ></span
+                    >
                     @if (!entry.builtIn) {
-                      <dt>{{ 'packs.size' | translate }}</dt>
-                      <dd>{{ size(entry.size) }}</dd>
+                      <span
+                        data-test="pack-meta-item"
+                        [title]="'packs.size' | translate"
+                        ><i class="pi pi-database"></i
+                        >{{ size(entry.size) }}</span
+                      >
                     }
-                    <dt>{{ 'packs.detailsSprites' | translate }}</dt>
-                    <dd>{{ entry.sprites }}</dd>
-                    @if (entry.language) {
-                      <dt>{{ 'packs.language' | translate }}</dt>
-                      <dd>{{ languageName(entry.language) }}</dd>
-                    }
-                  </dl>
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.detailsSprites' | translate"
+                      ><i class="pi pi-images"></i>{{ entry.sprites }}</span
+                    >
+                  </div>
                   <ng-template #footer>
                     <div class="actions">
                       @if (isInstalled(entry.id)) {
@@ -190,8 +208,14 @@ export function formatSize(bytes: number): string {
             @for (pack of unofficial(); track pack.id) {
               <li data-test="unofficial-pack-card" [attr.data-pack]="pack.id">
                 <p-card>
-                  <div class="head">
-                    <h3>{{ pack.name }}</h3>
+                  <h3
+                    class="name line-clamp-2"
+                    data-test="pack-name"
+                    [pTooltip]="pack.name"
+                  >
+                    {{ pack.name }}
+                  </h3>
+                  <div class="tags" data-test="pack-tags">
                     <p-tag
                       data-test="pack-language"
                       severity="secondary"
@@ -211,35 +235,45 @@ export function formatSize(bytes: number): string {
                       />
                     }
                   </div>
-                  <p class="desc">{{ pack.description }}</p>
-                  <dl>
-                    <dt>{{ 'packs.author' | translate }}</dt>
-                    <dd>{{ pack.author }}</dd>
-                    <dt>{{ 'packs.license' | translate }}</dt>
-                    <dd>
-                      <a
+                  <p class="desc line-clamp-3" data-test="pack-desc">
+                    {{ pack.description }}
+                  </p>
+                  <div class="meta" data-test="pack-meta">
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.author' | translate"
+                      ><i class="pi pi-user"></i>{{ pack.author }}</span
+                    >
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.license' | translate"
+                      ><i class="pi pi-shield"></i
+                      ><a
                         [href]="pack.licenseUrl"
                         target="_blank"
                         rel="noopener noreferrer"
                         >{{ pack.license }}</a
-                      >
-                    </dd>
-                    <dt>{{ 'packs.version' | translate }}</dt>
-                    <dd>{{ pack.version }}</dd>
-                    <dt>{{ 'packs.source' | translate }}</dt>
-                    <dd>
-                      @if (pack.link) {
-                        <a
+                      ></span
+                    >
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.version' | translate"
+                      ><i class="pi pi-tag"></i>{{ pack.version }}</span
+                    >
+                    @if (pack.link) {
+                      <span
+                        data-test="pack-meta-item"
+                        [title]="'packs.source' | translate"
+                        ><i class="pi pi-link"></i
+                        ><a
                           [href]="pack.link"
                           target="_blank"
                           rel="noopener noreferrer"
                           >{{ pack.link }}</a
-                        >
-                      } @else {
-                        {{ 'packs.createdHere' | translate }}
-                      }
-                    </dd>
-                  </dl>
+                        ></span
+                      >
+                    }
+                  </div>
                   <ng-template #footer>
                     <div class="actions">
                       @if (pack.link) {
@@ -416,13 +450,21 @@ export function formatSize(bytes: number): string {
       </ng-template>
     </p-dialog>
     <p-dialog
-      [header]="detailsTitle()"
       [visible]="details() !== null"
       (visibleChange)="!$event && details.set(null)"
       [modal]="true"
       [dismissableMask]="true"
       [style]="{ width: 'min(40rem, calc(100vw - 2rem))' }"
     >
+      <ng-template #header>
+        <h2
+          class="line-clamp-2 details-title"
+          data-test="pack-details-title"
+          [pTooltip]="detailsTitle()"
+        >
+          {{ detailsTitle() }}
+        </h2>
+      </ng-template>
       @if (details(); as pack) {
         <p>{{ pack.description }}</p>
         <p>
@@ -515,35 +557,75 @@ export function formatSize(bytes: number): string {
       flex: 1;
       min-width: 0;
     }
-    .head {
+    .grid p-card ::ng-deep .p-card {
       display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+    .grid p-card ::ng-deep .p-card-body {
+      flex: 1;
+    }
+    .grid p-card ::ng-deep .p-card-caption {
+      flex: 1;
+    }
+    .grid p-card ::ng-deep .p-card-content {
+      flex: 1;
+    }
+    .grid p-card ::ng-deep .p-card-footer {
+      margin-top: auto;
+    }
+    .line-clamp-2,
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+      min-width: 0;
+    }
+    .line-clamp-2 {
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
+    .line-clamp-3 {
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+    }
+    .name {
+      margin: 0 0 0.5rem;
+      font-size: 1.125rem;
+    }
+    .details-title {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 0.5rem;
       margin-bottom: 0.75rem;
-    }
-    .head h3 {
-      flex: 1;
-      margin: 0;
-      font-size: 1.125rem;
-      overflow-wrap: anywhere;
     }
     .desc {
       margin: 0 0 1rem;
       color: var(--p-text-muted-color);
     }
-    dl {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0.5rem 1rem;
-      margin: 0;
-    }
-    dt {
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 1rem;
+      font-size: 0.8125rem;
       color: var(--p-text-muted-color);
     }
-    dd {
-      margin: 0;
+    .meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
       min-width: 0;
       overflow-wrap: anywhere;
+    }
+    .meta i {
+      font-size: 0.75rem;
     }
     .actions {
       display: flex;
