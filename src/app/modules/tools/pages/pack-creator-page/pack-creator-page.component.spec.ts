@@ -60,7 +60,7 @@ describe('PackCreatorPageComponent', () => {
     await settle(() => expect(el.querySelector('h1')).not.toBeNull());
 
     expect(el.querySelector('h1')!.textContent).toContain('My packs');
-    const back = [...el.querySelectorAll('a')].find((a) => a.textContent!.includes('Back to the packs'))!;
+    const back = [...el.querySelectorAll('button')].find((b) => b.textContent!.includes('Back to the packs'))!;
     expect(back).toBeDefined();
     back.click();
     await settle(() => expect(router.url).toBe('/tools/packs'));

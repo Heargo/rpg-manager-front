@@ -106,9 +106,13 @@ const SAVE_DELAY_MS = 500;
     <div class="main-container draft">
       <header>
         <h1>{{ 'packs.creator.editTitle' | translate }}</h1>
-        <a routerLink="/tools/pack-creator">{{
-          'packs.creator.backToDrafts' | translate
-        }}</a>
+        <p-button
+          icon="pi pi-arrow-left"
+          severity="secondary"
+          [text]="true"
+          [label]="'packs.creator.backToDrafts' | translate"
+          routerLink="/tools/pack-creator"
+        />
       </header>
       @if (draft(); as current) {
         <ng-template #advanced let-generator>

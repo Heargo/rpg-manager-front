@@ -39,10 +39,14 @@ import { LocalDatePipe } from '../../../../core/pipes/local-date.pipe';
   template: `
     <div class="main-container creator">
       <header>
-        <a routerLink="/tools/packs">{{
-          'packs.creator.backToPacks' | translate
-        }}</a>
         <h1>{{ 'packs.creator.title' | translate }}</h1>
+        <p-button
+          icon="pi pi-arrow-left"
+          severity="secondary"
+          [text]="true"
+          [label]="'packs.creator.backToPacks' | translate"
+          routerLink="/tools/packs"
+        />
         <p class="hint">{{ 'packs.creator.intro' | translate }}</p>
         <div>
           <p-button
