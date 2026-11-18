@@ -1,4 +1,3 @@
-import { SpriteLabelBusiness } from '../../../../core/business/sprite-label.business';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -21,6 +20,7 @@ import { TagModule } from '@openng/optimus-ui/tag';
 import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import {
   BundledSprite,
+  BundledWorldImage,
   InstalledPack,
   PackBusiness,
   PackUpdate,
@@ -29,11 +29,13 @@ import {
 import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { SUPPORTED_LANGUAGES } from '../../../../core/constants/languages';
+import { PACK_GENERATORS, SPRITE_KINDS } from '../../../../core/packs/pack';
 import {
-  PACK_GENERATORS,
-  SPRITE_KINDS,
-  SpriteKind,
-} from '../../../../core/packs/pack';
+  AssetKind,
+  assetKindRows,
+  assetPage,
+  showcaseOf,
+} from '../../../../core/packs/pack-showcase.rules';
 import { PackRegistryEntry } from '../../../../core/packs/pack-registry';
 import { MessageLevel } from '../../../../core/models/toast-level';
 
@@ -492,22 +494,68 @@ export function formatSize(bytes: number): string {
           <p class="hint">{{ 'packs.detailsNoGenerators' | translate }}</p>
         }
         <h3>{{ 'packs.detailsSprites' | translate }}</h3>
-        @for (group of spriteGroups(); track group.kind) {
-          <h4>{{ 'sprite.kind.' + group.kind | translate }}</h4>
-          <ul class="thumbs">
-            @for (sprite of group.sprites; track sprite.id) {
-              <li>
-                <img
-                  [src]="sprite.imageUrl"
-                  alt=""
-                  loading="lazy"
-                  width="48"
-                  height="48"
-                />
-                <span>{{ spriteName(sprite) }}</span>
-              </li>
+        <ul class="thumbs" data-test="pack-showcase">
+          @for (asset of showcase(); track asset.id) {
+            <li data-test="pack-showcase-item">
+              <img [src]="asset.imageUrl" alt="" width="48" height="48" />
+            </li>
+          }
+        </ul>
+        @for (row of assetRows(); track row.kind) {
+          <div data-test="pack-asset-row" [attr.data-kind]="row.kind">
+            <p>
+              <strong>{{ assetKindLabel(row.kind) }}</strong>: {{ row.count }}
+              @if (expandedKind() !== row.kind) {
+                <button
+                  pButton
+                  type="button"
+                  data-test="pack-asset-show-all"
+                  [text]="true"
+                  [label]="'packs.showAll' | translate"
+                  (click)="expand(row.kind)"
+                ></button>
+              }
+            </p>
+            @if (expandedKind() === row.kind) {
+              <ul class="thumbs">
+                @for (asset of assetPageData().items; track asset.id) {
+                  <li data-test="pack-asset-thumb">
+                    <img
+                      [src]="asset.imageUrl"
+                      alt=""
+                      loading="lazy"
+                      width="48"
+                      height="48"
+                    />
+                  </li>
+                }
+              </ul>
+              <div class="pager">
+                <button
+                  pButton
+                  type="button"
+                  data-test="pack-asset-prev"
+                  icon="pi pi-chevron-left"
+                  [text]="true"
+                  [disabled]="assetPageData().page <= 1"
+                  (click)="assetPageNumber.set(assetPageData().page - 1)"
+                ></button>
+                <span
+                  >{{ assetPageData().page }} /
+                  {{ assetPageData().pageCount }}</span
+                >
+                <button
+                  pButton
+                  type="button"
+                  data-test="pack-asset-next"
+                  icon="pi pi-chevron-right"
+                  [text]="true"
+                  [disabled]="assetPageData().page >= assetPageData().pageCount"
+                  (click)="assetPageNumber.set(assetPageData().page + 1)"
+                ></button>
+              </div>
             }
-          </ul>
+          </div>
         } @empty {
           <p class="hint">{{ 'packs.detailsNoSprites' | translate }}</p>
         }
@@ -594,6 +642,11 @@ export function formatSize(bytes: number): string {
     .name {
       margin: 0 0 0.5rem;
       font-size: 1.125rem;
+    }
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     .details-title {
       margin: 0;
@@ -683,7 +736,6 @@ export class PacksToolPageComponent {
   protected readonly unofficial = computed(() =>
     this.business.$installed().filter((p) => p.link || p.local),
   );
-  private readonly spriteLabels = inject(SpriteLabelBusiness);
   private readonly detailSprites = signal<BundledSprite[]>([]);
 
   protected readonly detailsTitle = computed(() => {
@@ -691,12 +743,35 @@ export class PacksToolPageComponent {
     return pack ? pack.name : '';
   });
 
-  protected readonly spriteGroups = computed(() =>
-    SPRITE_KINDS.map((kind: SpriteKind) => ({
-      kind,
-      sprites: this.detailSprites().filter((s) => s.kind === kind),
-    })).filter((group) => group.sprites.length),
+  private readonly detailWorldImages = signal<BundledWorldImage[]>([]);
+  protected readonly expandedKind = signal<AssetKind | null>(null);
+  protected readonly assetPageNumber = signal(1);
+
+  protected readonly showcase = computed(() =>
+    showcaseOf(this.detailSprites(), this.detailWorldImages()),
   );
+  protected readonly assetRows = computed(() =>
+    assetKindRows(this.detailSprites(), this.detailWorldImages()),
+  );
+  protected readonly assetPageData = computed(() =>
+    assetPage(
+      this.detailSprites(),
+      this.detailWorldImages(),
+      this.expandedKind() ?? 'masked',
+      this.assetPageNumber(),
+    ),
+  );
+
+  protected expand(kind: AssetKind): void {
+    this.assetPageNumber.set(1);
+    this.expandedKind.set(kind);
+  }
+
+  protected assetKindLabel(kind: AssetKind): string {
+    return this.language.t(
+      kind === 'world' ? 'packs.worldImages' : `sprite.kind.${kind}`,
+    );
+  }
 
   protected readonly generatorNames = computed(() => {
     const id = this.details()?.id;
@@ -711,10 +786,6 @@ export class PacksToolPageComponent {
         () => this.fail(this.language.t('packs.loadFailed')),
       ),
     );
-  }
-
-  protected spriteName(sprite: BundledSprite): string {
-    return this.spriteLabels.name(sprite);
   }
 
   protected size(bytes: number): string {
@@ -920,9 +991,16 @@ export class PacksToolPageComponent {
 
   protected async openDetails(entry: PackRegistryEntry): Promise<void> {
     this.detailSprites.set([]);
+    this.detailWorldImages.set([]);
+    this.expandedKind.set(null);
     this.details.set(entry);
     try {
-      this.detailSprites.set(await this.business.spritesOf(entry.id));
+      const [sprites, worldImages] = await Promise.all([
+        this.business.spritesOf(entry.id),
+        this.business.worldImagesOf(entry.id),
+      ]);
+      this.detailSprites.set(sprites);
+      this.detailWorldImages.set(worldImages);
     } catch (error) {
       this.fail(error);
     }

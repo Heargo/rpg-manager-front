@@ -1590,6 +1590,8 @@
     "loadFailed": "The list of packs could not be loaded.",
     "detailsSprites": "Sprites",
     "detailsNoSprites": "Download the pack to see its sprites.",
+    "showAll": "Show all",
+    "worldImages": "World images",
     "detailsGenerators": "Word lists",
     "detailsNoGenerators": "No word list.",
     "licenseLink": "Read the license",

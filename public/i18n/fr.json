@@ -1590,6 +1590,8 @@
     "loadFailed": "La liste des packs n'a pas pu être chargée.",
     "detailsSprites": "Sprites",
     "detailsNoSprites": "Téléchargez le pack pour voir ses sprites.",
+    "showAll": "Tout afficher",
+    "worldImages": "Images de monde",
     "detailsGenerators": "Listes de mots",
     "detailsNoGenerators": "Aucune liste de mots.",
     "licenseLink": "Lire la licence",
