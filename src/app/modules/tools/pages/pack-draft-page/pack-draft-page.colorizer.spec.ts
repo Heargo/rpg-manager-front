@@ -44,29 +44,36 @@ async function render() {
   await vi.waitFor(async () => {
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(el.querySelectorAll('[data-test="sprite-row"]')).toHaveLength(3);
+    expect(el.querySelectorAll('[data-test^="sprite-card-"]')).toHaveLength(3);
   });
-  const editButton = (index: number) =>
-    [...el.querySelectorAll('[data-test="sprite-row"]')[index].querySelectorAll('button')].find((b) =>
-      b.textContent!.trim().includes('Edit in the colorizer'),
-    );
+  /** Opens the drawer of a sprite and returns its "Edit in the colorizer" button (`detail-colorizer`), if any. */
+  const editButton = async (id: string) => {
+    el.querySelector<HTMLElement>(`[data-test="sprite-card-${id}"]`)!.click();
+    await vi.waitFor(async () => {
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(document.querySelector('[data-test="sprite-detail"]')).not.toBeNull();
+    });
+    const host = document.querySelector<HTMLElement>('[data-test="detail-colorizer"]');
+    return host ? (host.querySelector('button') ?? host) : undefined;
+  };
   const navigated = () => [...navigate.mock.calls, ...navigateByUrl.mock.calls];
   return { draft, editButton, navigate, navigateByUrl, navigated };
 }
 
 describe('PackDraftPageComponent: edit in the colorizer', () => {
-  it('offers "Edit in the colorizer" on grayscale and masked rows, not on colored ones', async () => {
+  it('offers "Edit in the colorizer" on grayscale and masked sprites in the drawer, not on colored ones', async () => {
     const { editButton } = await render();
 
-    expect(editButton(0)).toBeDefined();
-    expect(editButton(1)).toBeDefined();
-    expect(editButton(2)).toBeUndefined();
+    expect(await editButton('gray-one')).toBeDefined();
+    expect(await editButton('masked-one')).toBeDefined();
+    expect(await editButton('colored-one')).toBeUndefined();
   });
 
-  it('opens the colorizer on the draft and the sprite of the row', async () => {
+  it('opens the colorizer on the draft and the sprite of the sprite', async () => {
     const { draft, editButton, navigate, navigateByUrl } = await render();
 
-    editButton(1)!.click();
+    (await editButton('masked-one'))!.click();
 
     const url =
       navigateByUrl.mock.calls.length > 0
