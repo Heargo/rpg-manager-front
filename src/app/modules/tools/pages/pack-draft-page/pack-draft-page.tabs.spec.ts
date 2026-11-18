@@ -77,6 +77,18 @@ describe('PackDraftPageComponent word list tabs', () => {
     });
   });
 
+  it('Items orders tints, common words, name templates, then the kinds tree', async () => {
+    const { tab, settle, el } = await render('en');
+    await tab('Items');
+
+    await settle(() => {
+      const order = [...el.querySelectorAll('app-tints-table, app-common-words-editor, app-templates-editor, app-kinds-tree-table')].map(
+        (n) => n.tagName.toLowerCase(),
+      );
+      expect(order).toEqual(['app-tints-table', 'app-common-words-editor', 'app-templates-editor', 'app-kinds-tree-table']);
+    });
+  });
+
   it.each([
     ['NPCs', 'npcs'],
     ['Skills', 'skills'],

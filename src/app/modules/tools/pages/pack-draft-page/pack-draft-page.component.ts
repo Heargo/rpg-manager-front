@@ -403,13 +403,6 @@ const SPRITES_PER_PAGE = 12;
                     [issues]="issues()"
                     (changed)="edited($event)"
                   />
-                  <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
-                  <app-kinds-tree-table
-                    [draft]="current"
-                    [issues]="issues()"
-                    domain="items"
-                    (changed)="edited($event)"
-                  />
                   <p-panel
                     [header]="'packs.creator.templates.title' | translate"
                     [toggleable]="true"
@@ -421,6 +414,13 @@ const SPRITES_PER_PAGE = 12;
                       (changed)="edited($event)"
                     />
                   </p-panel>
+                  <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
+                  <app-kinds-tree-table
+                    [draft]="current"
+                    [issues]="issues()"
+                    domain="items"
+                    (changed)="edited($event)"
+                  />
                 </section>
                 <ng-container
                   *ngTemplateOutlet="advanced; context: { $implicit: 'items' }"
