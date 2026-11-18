@@ -3,6 +3,7 @@ import { IDBFactory } from 'fake-indexeddb';
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { MessageService } from '@openng/optimus-ui/api';
 import { PackBusiness } from '../../../../core/business/pack.business';
 import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
@@ -46,12 +47,44 @@ async function render() {
 }
 
 describe('PacksToolPageComponent pack creator', () => {
-  it('Create a pack opens the drafts list', async () => {
-    const { settle, button, router } = await render();
+  it('Create a pack creates a draft and opens it in the editor', async () => {
+    const { settle, button, creator, router } = await render();
 
     button('Create a pack')!.click();
 
+    await settle(async () => expect((await creator.listDrafts()).length).toBe(1));
+    const [draft] = await creator.listDrafts();
+    await settle(() => expect(router.url).toBe(`/tools/pack-creator/${draft.id}`));
+  });
+
+  it('Create a pack shows an error toast and stays on the page when the draft cannot be created', async () => {
+    const { settle, button, creator, router } = await render();
+    vi.spyOn(creator, 'createDraft').mockRejectedValue(new Error('disk full'));
+    const add = vi.spyOn(TestBed.inject(MessageService), 'add');
+
+    button('Create a pack')!.click();
+
+    await settle(() => expect(add).toHaveBeenCalled());
+    expect(add.mock.calls[0][0].severity).toBe('error');
+    expect(router.url).not.toContain('/tools/pack-creator');
+  });
+
+  it('My packs opens the drafts list', async () => {
+    const { settle, button, router } = await render();
+
+    button('My packs')!.click();
+
     await settle(() => expect(router.url).toBe('/tools/pack-creator'));
+  });
+
+  it('the buttons are in the order Add a pack, Create a pack, My packs', async () => {
+    const { el } = await render();
+    const labels = [...el.querySelectorAll('button')].map((b) => b.textContent!.trim());
+    const at = (t: string) => labels.findIndex((l) => l.includes(t));
+
+    expect(at('Add a pack')).toBeGreaterThanOrEqual(0);
+    expect(at('Add a pack')).toBeLessThan(at('Create a pack'));
+    expect(at('Create a pack')).toBeLessThan(at('My packs'));
   });
 
   it('a link pack card has Duplicate, which copies it into a new draft and opens it, and no Edit as a draft', async () => {

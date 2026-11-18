@@ -1625,10 +1625,11 @@
       "notJson": "The link must point to a pack.json file or a GitHub repository."
     },
     "creator": {
-      "title": "Pack creator",
-      "intro": "Make your own pack: details, word lists and sprites. Drafts are saved on this device.",
+      "title": "My packs",
+      "intro": "Your drafts are kept on this device.",
+      "backToPacks": "Back to the packs",
+      "neutral": "Neutral",
       "create": "Create a pack",
-      "newDraft": "New draft",
       "updated": "Updated",
       "open": "Open",
       "delete": "Delete",

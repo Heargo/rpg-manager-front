@@ -76,6 +76,13 @@ export function formatSize(bytes: number): string {
             severity="secondary"
             icon="pi pi-pencil"
             [label]="'packs.creator.create' | translate"
+            [loading]="creating()"
+            (onClick)="createPack()"
+          />
+          <p-button
+            severity="secondary"
+            icon="pi pi-folder"
+            [label]="'packs.creator.title' | translate"
             (onClick)="openCreator()"
           />
         </div>
@@ -732,6 +739,7 @@ export class PacksToolPageComponent {
   protected readonly installing = signal(false);
   protected readonly prepared = signal<PreparedPack | null>(null);
   protected readonly errors = signal<string[]>([]);
+  protected readonly creating = signal(false);
   protected readonly update = signal<{ update: PackUpdate } | null>(null);
   protected readonly unofficial = computed(() =>
     this.business.$installed().filter((p) => p.link || p.local),
@@ -825,6 +833,20 @@ export class PacksToolPageComponent {
 
   protected openCreator(): void {
     void this.router.navigate(['/tools/pack-creator']);
+  }
+
+  protected createPack(): Promise<void> {
+    return this.track(async () => {
+      this.creating.set(true);
+      try {
+        const draft = await this.creator.createDraft();
+        await this.router.navigate(['/tools/pack-creator', draft.id]);
+      } catch (error) {
+        this.fail(error);
+      } finally {
+        this.creating.set(false);
+      }
+    });
   }
 
   protected duplicate(id: string): Promise<void> {

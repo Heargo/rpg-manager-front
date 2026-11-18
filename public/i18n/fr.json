@@ -1625,10 +1625,11 @@
       "notJson": "Le lien doit pointer vers un fichier pack.json ou un dépôt GitHub."
     },
     "creator": {
-      "title": "Créateur de pack",
-      "intro": "Créez votre pack : détails, listes de mots et sprites. Les brouillons sont enregistrés sur cet appareil.",
+      "title": "Mes packs",
+      "intro": "Vos brouillons sont conservés sur cet appareil.",
+      "backToPacks": "Retour aux packs",
+      "neutral": "Neutre",
       "create": "Créer un pack",
-      "newDraft": "Nouveau brouillon",
       "updated": "Modifié le",
       "open": "Ouvrir",
       "delete": "Supprimer",
