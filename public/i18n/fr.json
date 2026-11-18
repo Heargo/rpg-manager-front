@@ -557,6 +557,7 @@
     "skip": "Cliquez pour passer l'animation",
     "share": "Partager avec la table",
     "tableRolls": "Lancers de la table",
+    "die": "Dé d{{ sides }}",
     "rolledBy": "{{ name }} a lancé",
     "errors": {
       "invalid": "Ces dés ne peuvent pas être lancés.",

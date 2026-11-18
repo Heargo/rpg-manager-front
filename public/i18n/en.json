@@ -557,6 +557,7 @@
     "skip": "Click to skip the animation",
     "share": "Share with the table",
     "tableRolls": "Table rolls",
+    "die": "Die d{{ sides }}",
     "rolledBy": "{{ name }} rolled",
     "errors": {
       "invalid": "These dice can't be rolled.",

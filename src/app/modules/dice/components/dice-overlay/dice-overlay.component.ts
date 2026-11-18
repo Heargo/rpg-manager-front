@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  computed,
   Component,
   DestroyRef,
   effect,
@@ -9,9 +10,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
-import { ButtonModule } from '@openng/optimus-ui/button';
 import { DICE_OVERLAY_Z_INDEX } from '../../models/dice-api';
 import { DiceRollBusiness } from '../../business/dice-roll.business';
+import { DiceScreenComponent, DiceScreenStatus } from '../dice-screen/dice-screen.component';
 
 type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
 
@@ -19,7 +20,7 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
 @Component({
   selector: 'app-dice-overlay',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, ButtonModule],
+  imports: [TranslatePipe, DiceScreenComponent],
   host: { '(document:keydown.escape)': 'escape()' },
   template: `
     @if (dice.$current(); as roll) {
@@ -37,47 +38,20 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
         @if (loading()) {
           <div class="loading"><i class="pi pi-spin pi-spinner"></i></div>
         }
-        <div class="bar" #bar [class.settled]="dice.$settled()">
-          <div class="values" aria-live="polite">
-            @if (roll.shared && !roll.shared.mine) {
-              <span class="by">{{
-                'dice.rolledBy' | translate: { name: roll.shared.name }
-              }}</span>
-            }
-            @if (dice.$settled()) {
-              <span class="notation">{{ roll.count }}d{{ roll.sides }}</span>
-              @if (roll.values.length > 1) {
-                <span class="list">{{ roll.values.join(' + ') }} =</span>
-              }
-              <strong class="total" [style.color]="totalColor(roll.ratio)">{{
-                roll.total
-              }}</strong>
-            } @else {
-              <span class="hint">{{ 'dice.rolling' | translate }}</span>
-            }
-          </div>
-          <div class="actions">
-            @if (!roll.combat && (!roll.shared || roll.shared.mine)) {
-              <p-button
-                data-action="again-dice"
-                icon="pi pi-refresh"
-                [label]="'dice.again' | translate"
-                (onClick)="again()"
-              />
-            }
-            @if (roll.combat) {
-              <ng-content select="[diceActions]" />
-            } @else {
-              <p-button
-                data-action="close-dice"
-                icon="pi pi-times"
-                [label]="'dice.close' | translate"
-                severity="secondary"
-                (onClick)="close()"
-              />
-            }
-          </div>
-        </div>
+        <app-dice-screen
+          dock="fixed"
+          [editable]="false"
+          [count]="roll.count"
+          [sides]="roll.sides"
+          [result]="dice.$settled() ? roll : null"
+          [status]="status()"
+          [canReroll]="!roll.shared || roll.shared.mine"
+          [actions]="roll.combat ? 'slot' : 'buttons'"
+          (reroll)="again()"
+          (close)="close()"
+        >
+          <ng-container diceActions><ng-content select="[diceActions]" /></ng-container>
+        </app-dice-screen>
       </div>
     }
   `,
@@ -102,52 +76,21 @@ type Scene = Awaited<ReturnType<DiceRollBusiness['createScene']>>;
       font-size: 2rem;
       color: var(--p-surface-0);
     }
-    .bar {
-      position: absolute;
-      left: 50%;
-      bottom: 1rem;
-      transform: translateX(-50%);
-      width: min(40rem, calc(100% - 2rem));
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 1rem;
-      border-radius: 12px;
-      background: var(--p-surface-0);
-      box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
-    }
-    .values {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      align-items: baseline;
-      min-width: 0;
-    }
-    .by {
-      font-weight: 600;
-    }
-    .notation,
-    .hint {
-      color: var(--p-text-muted-color);
-    }
-    .list {
-      overflow-wrap: anywhere;
-    }
-    .total {
-      font-size: 1.75rem;
-    }
-    .actions {
-      display: flex;
-      gap: 0.5rem;
-    }
   `,
 })
 export class DiceOverlayComponent {
   protected readonly dice = inject(DiceRollBusiness);
   private readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
-  private readonly bar = viewChild<ElementRef<HTMLElement>>('bar');
+  private readonly screen = viewChild(DiceScreenComponent);
+  protected readonly status = computed<DiceScreenStatus>(() => {
+    const roll = this.dice.$current();
+    return {
+      overlay: true,
+      rolling: !this.dice.$settled(),
+      by: roll?.shared && !roll.shared.mine ? roll.shared.name : null,
+      ratio: roll?.ratio ?? null,
+    };
+  });
   protected readonly loading = signal(false);
   private scene?: Scene;
   private sceneCanvas?: HTMLCanvasElement;
@@ -184,10 +127,8 @@ export class DiceOverlayComponent {
       '(prefers-reduced-motion: reduce)',
     ).matches;
     // Keep the dice out from under the result bar.
-    const bar = this.bar()?.nativeElement;
-    const bottomInsetPx = bar
-      ? window.innerHeight - bar.getBoundingClientRect().top + 8
-      : 0;
+    const top = this.screen()?.topEdge();
+    const bottomInsetPx = top == null ? 0 : window.innerHeight - top + 8;
     await this.scene.play(roll.plan, { reducedMotion, bottomInsetPx });
     if (this.dice.$current()?.id === rollId) this.dice.markSettled();
   }
@@ -215,8 +156,4 @@ export class DiceOverlayComponent {
     this.sceneCanvas = undefined;
   }
 
-  /** Red for low totals through amber to green for high ones. */
-  protected totalColor(ratio: number): string {
-    return `hsl(${Math.round(ratio * 120)} 65% 38%)`;
-  }
 }
