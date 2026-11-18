@@ -44,6 +44,8 @@ export interface Drawn {
   name: string;
   description: string;
   rarity?: string;
+  /** The label of the descendant kind the entry was drawn from; none when drawn from the kind itself. */
+  source?: string;
 }
 
 /** Why a form cannot be saved, if it cannot. */

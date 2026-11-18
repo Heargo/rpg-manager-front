@@ -158,6 +158,50 @@ describe('PackDraftFormBusiness.preview', () => {
   });
 });
 
+describe('PackDraftFormBusiness.preview of a kind without nouns of its own', () => {
+  const tree = (kinds: Record<string, unknown>, texts: Record<string, unknown>) =>
+    draft({
+      kinds: { tree: { type: 'equipment' }, ...kinds },
+      generators: { items: { version: 2, kinds: texts } },
+    });
+
+  it('draws each item from a descendant that has nouns, with its kind id', async () => {
+    const mine = tree(
+      { oak: { parent: 'tree' }, elm: { parent: 'tree' } },
+      { oak: { nouns: [{ text: 'Oakling' }] }, elm: { nouns: [{ text: 'Elmling' }] } },
+    );
+
+    const items = await setup().preview(mine, 'tree', 20);
+
+    expect(items).toHaveLength(20);
+    expect(new Set(items.map((item) => item.kind))).toEqual(new Set(['oak', 'elm']));
+    for (const item of items) expect(item.name.toLowerCase()).toContain(item.kind === 'oak' ? 'oakling' : 'elmling');
+  });
+
+  it('reaches descendants of any depth', async () => {
+    const mine = tree({ mid: { parent: 'tree' }, leaf: { parent: 'mid' } }, { leaf: { nouns: [{ text: 'Leafling' }] } });
+
+    const items = await setup().preview(mine, 'tree');
+
+    expect(items.map((item) => item.kind)).toEqual(['leaf', 'leaf', 'leaf']);
+  });
+
+  it('draws nothing when no descendant has nouns either', async () => {
+    expect(await setup().preview(tree({ oak: { parent: 'tree' } }, {}), 'tree')).toEqual([]);
+  });
+
+  it('still draws from the kind itself when it has nouns', async () => {
+    const mine = tree(
+      { oak: { parent: 'tree' } },
+      { tree: { nouns: [{ text: 'Treeling' }] }, oak: { nouns: [{ text: 'Oakling' }] } },
+    );
+
+    const items = await setup().preview(mine, 'tree');
+
+    expect(items.map((item) => item.kind)).toEqual(['tree', 'tree', 'tree']);
+  });
+});
+
 describe('PackDraftFormBusiness.issues', () => {
   it('maps a kind error to the kind id', async () => {
     const business = setup();

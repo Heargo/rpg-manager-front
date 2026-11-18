@@ -669,11 +669,15 @@ export class KindsTreeTableComponent {
     if (!id || (editing && (!form || !this.canSave()))) return;
     const draft = editing ? this.applied(form!) : this.draft();
     const domain = this.domain();
-    const entries: Drawn[] =
+    const entries: (Drawn & { kind?: string })[] =
       domain === 'items'
         ? await this.business.preview(draft, id)
         : await this.business.previewDomain(draft, domain, id);
-    this.drawn.set(entries);
+    this.drawn.set(
+      entries.map(({ kind, ...entry }) =>
+        kind && kind !== id ? { ...entry, source: this.labelFor(kind) } : entry,
+      ),
+    );
   }
 
   protected confirmDelete(id: string): void {

@@ -14,6 +14,7 @@ import {
   buildItemVocabulary,
   ItemVocabulary,
 } from '../generators/item-vocabulary';
+import { pick } from '../generators/random';
 import { seededRandomSource } from '../generators/random-source';
 import { validateItemWordList } from '../generators/word-list';
 import { ItemDraft, ITEM_RARITIES, ItemRarity } from '../models/item';
@@ -44,10 +45,29 @@ export interface KnownKeys {
   domainKinds: Record<StructuredDomain, KindKey[]>;
 }
 
+/** The drawable kinds below `kind`, at any depth, that pass `usable`. */
+function descendants(
+  vocabulary: {
+    kind(id: string): { chain: string[] } | undefined;
+    drawable(): string[];
+  },
+  kind: string,
+  usable: (id: string) => boolean,
+): string[] {
+  return vocabulary
+    .drawable()
+    .filter(
+      (id) =>
+        id !== kind && vocabulary.kind(id)?.chain.includes(kind) && usable(id),
+    );
+}
+
 /** One draw of an NPC, skill or class kind in the preview. */
 export interface DomainPreview {
   name: string;
   description: string;
+  /** The kind the entry was drawn from: the previewed kind or one of its descendants. */
+  kind: string;
 }
 
 /** A validation message of the draft, with the field it concerns. */
@@ -233,12 +253,19 @@ export class PackDraftFormBusiness {
   ): Promise<ItemDraft[]> {
     const vocabulary = await this.vocabulary(draft);
     const info = vocabulary.kind(kind);
-    if (!info || vocabulary.nouns(kind).length === 0) return [];
-    const only: ItemVocabulary = { ...vocabulary, drawable: () => [kind] };
+    if (!info) return [];
+    const own = vocabulary.nouns(kind).length > 0;
+    const below = own ? [] : descendants(vocabulary, kind, () => true);
+    if (!own && below.length === 0) return [];
     const source = seededRandomSource(`${draft.id}:${kind}`);
-    return Array.from({ length: count }, () =>
-      generateItem(source, only, { attributes: [], type: info.type }),
-    );
+    return Array.from({ length: count }, () => {
+      const target = own ? kind : pick(source, below);
+      const only: ItemVocabulary = { ...vocabulary, drawable: () => [target] };
+      return generateItem(source, only, {
+        attributes: [],
+        type: vocabulary.kind(target)!.type,
+      });
+    });
   }
 
   /** The errors and warnings of the draft, each with the kind, tint, param or rarity it is about. */
@@ -305,30 +332,38 @@ export class PackDraftFormBusiness {
   ): Promise<DomainPreview[]> {
     const sources = await this.domainSources(draft, domain);
     const random = seededRandomSource(`${draft.id}:${domain}:${kind}`);
-    const draw = (one: () => DomainPreview) =>
-      Array.from({ length: count }, one);
+    let vocabulary: {
+      kind(id: string): { chain: string[] } | undefined;
+      drawable(): string[];
+    };
+    let canDraw: (id: string) => boolean;
+    let one: (id: string) => { name: string; description: string };
     if (domain === 'npcs') {
-      const vocabulary = buildNpcVocabulary(sources);
-      const info = vocabulary.kind(kind);
-      if (
-        !info ||
-        (info.person
-          ? vocabulary.given().length === 0
-          : vocabulary.nouns(kind).length === 0)
-      )
-        return [];
-      return draw(() => drawNpcTexts(random, vocabulary, kind));
+      const npcs = buildNpcVocabulary(sources);
+      vocabulary = npcs;
+      canDraw = (id) =>
+        npcs.kind(id)!.person
+          ? npcs.given().length > 0
+          : npcs.nouns(id).length > 0;
+      one = (id) => drawNpcTexts(random, npcs, id);
+    } else if (domain === 'skills') {
+      const skills = buildSkillVocabulary(sources);
+      vocabulary = skills;
+      canDraw = (id) => skills.nouns(id).length > 0;
+      one = (id) => skillTexts(random, skills, id);
+    } else {
+      const classes = buildClassVocabulary(sources);
+      vocabulary = classes;
+      canDraw = (id) => classes.nouns(id).length > 0;
+      one = (id) => classTexts(random, classes, id);
     }
-    if (domain === 'skills') {
-      const vocabulary = buildSkillVocabulary(sources);
-      if (!vocabulary.kind(kind) || vocabulary.nouns(kind).length === 0)
-        return [];
-      return draw(() => skillTexts(random, vocabulary, kind));
-    }
-    const vocabulary = buildClassVocabulary(sources);
-    if (!vocabulary.kind(kind) || vocabulary.nouns(kind).length === 0)
-      return [];
-    return draw(() => classTexts(random, vocabulary, kind));
+    if (!vocabulary.kind(kind)) return [];
+    const below = canDraw(kind) ? [] : descendants(vocabulary, kind, canDraw);
+    if (!canDraw(kind) && below.length === 0) return [];
+    return Array.from({ length: count }, () => {
+      const target = below.length > 0 ? pick(random, below) : kind;
+      return { ...one(target), kind: target };
+    });
   }
 
   // --- the installed packs ----------------------------------------------------------------------------------

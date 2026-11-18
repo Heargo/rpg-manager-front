@@ -31,6 +31,12 @@ import { Drawn } from './kind-fields';
             @if (entry.rarity) {
               <small>{{ 'item.rarity.' + entry.rarity | translate }}</small>
             }
+            @if (entry.source) {
+              <small class="muted" data-test="preview-source">{{
+                'packs.creator.kinds.previewFrom'
+                  | translate: { kind: entry.source }
+              }}</small>
+            }
             <div>{{ entry.description }}</div>
           </li>
         } @empty {
@@ -47,6 +53,10 @@ import { Drawn } from './kind-fields';
       flex-direction: column;
       gap: 0.5rem;
       align-items: flex-start;
+    }
+    .muted {
+      color: var(--p-text-muted-color);
+      display: block;
     }
     .preview {
       margin: 0;

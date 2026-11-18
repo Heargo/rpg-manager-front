@@ -73,6 +73,67 @@ describe.each(DOMAIN_CASES)('PackDraftFormBusiness on $domain', (c) => {
     expect(await setup().previewDomain(zorb(), c.domain, 'ghost')).toEqual([]);
   });
 
+  describe('previewDomain on a kind without nouns of its own', () => {
+    const tree = (kinds: Record<string, unknown>, texts: Record<string, unknown>) =>
+      draftOf({
+        // A kind that is not a person: an NPC kind draws its nouns, not the given names.
+        [c.field]: Object.fromEntries(
+          Object.entries({ tree: c.root, ...kinds }).map(([id, kind]) => [
+            id,
+            c.domain === 'npcs' ? { ...(kind as object), person: false } : kind,
+          ]),
+        ),
+        generators: { [c.domain]: { version: 2, ...c.top, kinds: texts } },
+      });
+
+    it('draws each entry from a descendant that has nouns, with its kind id', async () => {
+      const draft = tree(
+        { oak: { parent: 'tree' }, elm: { parent: 'tree' } },
+        { oak: { ...c.texts, nouns: [{ text: 'Oakling' }] }, elm: { ...c.texts, nouns: [{ text: 'Elmling' }] } },
+      );
+
+      const drawn = await setup().previewDomain(draft, c.domain, 'tree', 20);
+
+      expect(drawn).toHaveLength(20);
+      expect(new Set(drawn.map((entry: any) => entry.kind))).toEqual(new Set(['oak', 'elm']));
+      for (const entry of drawn)
+        expect(entry.name).toContain(entry.kind === 'oak' ? 'Oakling' : 'Elmling');
+    });
+
+    it('reaches descendants of any depth', async () => {
+      const draft = tree(
+        { mid: { parent: 'tree' }, leaf: { parent: 'mid' } },
+        { leaf: { ...c.texts, nouns: [{ text: 'Leafling' }] } },
+      );
+
+      const drawn = await setup().previewDomain(draft, c.domain, 'tree');
+
+      expect(drawn).toHaveLength(3);
+      for (const entry of drawn) expect(entry.kind).toBe('leaf');
+    });
+
+    it('draws nothing when no descendant has nouns either', async () => {
+      const draft = tree({ oak: { parent: 'tree' } }, {});
+
+      expect(await setup().previewDomain(draft, c.domain, 'tree')).toEqual([]);
+    });
+
+    it('still draws from the kind itself when it has nouns', async () => {
+      const draft = tree(
+        { oak: { parent: 'tree' } },
+        { tree: { ...c.texts, nouns: [{ text: 'Treeling' }] }, oak: { ...c.texts, nouns: [{ text: 'Oakling' }] } },
+      );
+
+      const drawn = await setup().previewDomain(draft, c.domain, 'tree');
+
+      expect(drawn).toHaveLength(3);
+      for (const entry of drawn) {
+        expect(entry.kind).toBe('tree');
+        expect(entry.name).toContain('Treeling');
+      }
+    });
+  });
+
   it('issues maps a kind error to its domain and kind id, and is empty for a sound draft', async () => {
     const business = setup();
     const broken = draftOf({ [c.field]: { bad: { roles: [], type: 'nope', skills: ['Not Kebab'] } } });

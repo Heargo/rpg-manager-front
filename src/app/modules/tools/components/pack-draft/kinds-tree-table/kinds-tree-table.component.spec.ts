@@ -476,6 +476,65 @@ describe.each(CASES)('KindsTreeTableComponent on $domain', (c) => {
       expect(view.emitted).toEqual([]);
     });
 
+    describe('Preview of a kind without nouns of its own', () => {
+      // A kind that is not a person: an NPC kind draws its nouns, not the given names.
+      const field = Object.keys(c.seed)[0];
+      const seed =
+        c.domain === 'npcs'
+          ? {
+              [field]: Object.fromEntries(
+                Object.entries((c.seed as any)[field]).map(([id, kind]) => [id, { ...(kind as object), person: false }]),
+              ),
+            }
+          : c.seed;
+      const withNouns = (texts: Record<string, unknown>) =>
+        renderEditor(
+          KindsTreeTableComponent,
+          draftOf({ ...seed, generators: { [c.domain]: { version: 2, kinds: texts } } }),
+          [],
+          { domain: c.domain },
+        );
+      const previewOf = async (view: Awaited<ReturnType<typeof open>>, id: string) => {
+        await select(view, id);
+        await press(view, 'preview-kind');
+        await vi.waitFor(() => {
+          view.fixture.detectChanges();
+          expect(doc('preview-entries')).not.toBeNull();
+        });
+      };
+
+      it('labels each entry drawn from a descendant with its source kind', async () => {
+        const view = await withNouns({ sage: { nouns: [{ text: 'Sageling' }] } });
+
+        await previewOf(view, 'folk');
+
+        const entries = [...document.querySelectorAll('[data-test="preview-entry"]')];
+        expect(entries.length).toBeGreaterThan(0);
+        for (const entry of entries)
+          expect(entry.querySelector('[data-test="preview-source"]')!.textContent!.toLowerCase()).toContain('sage');
+      });
+
+      it('does not label an entry drawn from the kind itself', async () => {
+        const view = await withNouns({ folk: { nouns: [{ text: 'Folk' }] }, sage: { nouns: [{ text: 'Sageling' }] } });
+
+        await previewOf(view, 'folk');
+
+        expect(document.querySelectorAll('[data-test="preview-entry"]').length).toBeGreaterThan(0);
+        expect(document.querySelector('[data-test="preview-source"]')).toBeNull();
+      });
+
+      it('says nothing can be drawn when neither the kind nor its descendants have nouns', async () => {
+        const view = await withNouns({});
+
+        await previewOf(view, 'folk');
+
+        const shown = doc('preview-entries')!;
+        expect(shown.querySelectorAll('[data-test="preview-entry"]')).toHaveLength(0);
+        expect(shown.textContent).not.toContain('this kind needs a noun');
+        expect(shown.textContent).toMatch(/child/i);
+      });
+    });
+
     it('shows no texts section for a neutral draft', async () => {
       const view = await openSeeded(undefined);
       await editFolk(view);
