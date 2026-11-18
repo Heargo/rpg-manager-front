@@ -84,9 +84,9 @@ export interface DiceScreenResult {
                 [attr.aria-pressed]="sides() === s"
                 [ariaLabel]="'dice.die' | translate: { sides: s }"
                 [label]="'d' + s"
-                [outlined]="sides() !== s"
+                severity="secondary"
                 [fluid]="true"
-                styleClass="die"
+                [styleClass]="sides() === s ? 'die selected' : 'die'"
                 (onClick)="sides.set(s)"
               />
             }
@@ -224,6 +224,13 @@ export interface DiceScreenResult {
     .grid ::ng-deep .die {
       min-height: 2.75rem;
       min-width: 2.75rem;
+    }
+    /* light beige chips like the toggle buttons used before; the chosen die looks pressed */
+    .grid ::ng-deep .die.selected {
+      background: var(--p-togglebutton-content-checked-background);
+      border-color: var(--p-togglebutton-content-checked-background);
+      color: var(--p-togglebutton-checked-color);
+      box-shadow: var(--p-togglebutton-content-checked-shadow);
     }
     .dice-input {
       display: flex;
