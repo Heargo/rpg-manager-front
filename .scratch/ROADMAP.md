@@ -285,5 +285,60 @@ Tickets in `generator-kinds/` (GK). User request; shapes assumed from the item s
 | 124 | **GK04** Pack creator: NPC, skill and class kinds (done) | GK01–GK03 |
 | 125 | **GK06** User docs: NPC, skill and class kinds (done) | GK01–GK04 |
 | 126 | **GK05** Pack fixed content: format, validation, import rules (done) | GK04 |
-| 127 | **GK07** Pack fixed content reaches the catalogues (GM attribute dialog) | GK05 |
-| 128 | **GK08** Base ships the starter classes and skills | GK07 |
+| 127 | **GK07** Pack fixed content reaches the catalogues (GM attribute dialog) (done) | GK05 |
+| 128 | **GK08** Base ships the starter classes and skills (done) | GK07 |
+
+## Phase 19: pack editor made usable (2026-11-17)
+
+Tickets in `archived/pack-editor-ux/` (PE), from the quick notes. Navigation first, then the tabs the tables live in.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 129 | **PE01** Packs as a top-level menu, Tools cleanup (done) | none |
+| 130 | **PE02** Common word list v2: shared kinds (done) | none |
+| 131 | **PE03** Word lists split into five tabs (done) | none |
+| 132 | **PE04** Kinds as a tree table with a side panel (done) | PE03 |
+| 133 | **PE05** Items tab: tints table (done) | PE04 |
+| 133b | **PE06** Common tab: shared kinds tree table (done) | PE02, PE04 |
+| 133c | **PE07** Drop shared kinds; any phrase can use any kind (done) | none |
+
+## Phase 20: better phone layouts (2026-11-17)
+
+Tickets in `archived/mobile-layouts/` (ML). The default-content buttons go once the packs bring that content (GK07, GK08).
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 134 | **ML02** Class form: help and presets on one line (done) | none |
+| 135 | **ML03** Skill cards: actions in a "…" menu (done) | none |
+| 136 | **ML04** Dice screen for phones (layout, all three dice screens) (done) | none |
+| 136b | **ML06** Dice pool and modifier (done) | ML04 |
+| 137 | **ML05** Item catalogue on a phone, no default items button (done) | GK07 |
+| 138 | **ML01** Class catalogue on a phone, no default classes button (done) | GK08 |
+
+## Phase 21: default neutral asset pack (2026-11-17)
+
+Tickets in `neutral-pack/` (NP); NP01, NP03, NP04 archived.
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 139 | **NP01** Neutral Base assets pack, sprites moved out of Base FR/EN (done) | none |
+| 140 | **NP02** NPC, skill and class images from packs | NP01 |
+| 141 | **NP03** World images as a pack asset (done) | NP01 |
+| 142 | **NP04** Gather the Vecteezy landscapes (human) (done) | NP03 |
+
+## Phase 22: pack editor and catalogue polish (2026-11-18)
+
+Tickets in `pack-editor-ux/` (PE), from the quick notes. All ready for agent (triage answers recorded 2026-11-18).
+
+| # | Ticket | Blocked by |
+| - | --- | --- |
+| 143 | **PE08** Kind parent: pick from the list only (done) | none |
+| 144 | **PE09** Items tab: name templates after the common adjectives and suffixes (done) | none |
+| 145 | **PE13** Preview of a parent kind draws from its children (done) | none |
+| 146 | **PE14** Pack catalogue: cleaner cards, long names handled (done) | none |
+| 147 | **PE12** Side panel: clearer detail, Preview renamed (done) | none |
+| 148 | **PE10** Common tab and common words: fewer controls (done) | none |
+| 149 | **PE11** Sprites tab: fewer controls (done) | none |
+| 150 | **PE15** Pack details: five assets first, the rest on demand (done) | PE14 |
+| 151 | **PE16** Readable params panel; side panels close on outside click and Escape (done) | none |
+| 152 | **PE17** Create a pack opens a new draft, My packs lists the drafts (done) | none |
