@@ -1778,11 +1778,18 @@
         "title": "Params",
         "add": "Add a param",
         "name": "Param name",
-        "newEntry": "New phrase",
-        "addEntry": "Add",
-        "remove": "Remove",
-        "removeEntry": "Remove",
-        "neutral": "Texts need a pack with a language: choose one in Details."
+        "neutral": "Texts need a pack with a language: choose one in Details.",
+        "entries": "Phrases",
+        "entriesHint": "One phrase per line.",
+        "empty": "No params yet.",
+        "detailTitle": "Param",
+        "newTitle": "New param",
+        "editTitle": "Edit param",
+        "deleteTitle": "Delete this param?",
+        "deleteMessage": "Delete \"{{ name }}\" and all its phrases?",
+        "discardTitle": "Discard the changes?",
+        "discardMessage": "The changes to this param are not saved.",
+        "countHeader": "Count"
       },
       "templates": {
         "title": "Name templates (only needed for a Base)",
@@ -1795,11 +1802,26 @@
         "f": "Feminine",
         "mp": "Masculine plural",
         "fp": "Feminine plural",
-        "tint": "Tint (optional)",
-        "suffix": "New suffix",
+        "add": "Add a word",
+        "type": "Type",
+        "rarity": "Rarity",
+        "text": "Word",
+        "types": {
+          "adjective": "Adjective",
+          "suffix": "Suffix"
+        },
+        "suffixLabel": "Suffix",
+        "empty": "No common words yet.",
+        "detailTitle": "Word",
+        "newTitle": "New word",
+        "editTitle": "Edit word",
+        "deleteTitle": "Delete this word?",
+        "deleteMessage": "Delete \"{{ text }}\"?",
+        "discardTitle": "Discard the changes?",
+        "discardMessage": "The changes to this word are not saved.",
         "addAdjective": "Add adjective",
         "addSuffix": "Add suffix",
-        "remove": "Remove"
+        "suffix": "New suffix"
       },
       "domain": {
         "roles": "Roles",

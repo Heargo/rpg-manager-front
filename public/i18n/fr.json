@@ -1778,11 +1778,18 @@
         "title": "Paramètres",
         "add": "Ajouter un paramètre",
         "name": "Nom du paramètre",
-        "newEntry": "Nouvelle expression",
-        "addEntry": "Ajouter",
-        "remove": "Retirer",
-        "removeEntry": "Retirer",
-        "neutral": "Les textes demandent un pack avec une langue : choisissez-en une dans Détails."
+        "neutral": "Les textes demandent un pack avec une langue : choisissez-en une dans Détails.",
+        "entries": "Expressions",
+        "entriesHint": "Une expression par ligne.",
+        "empty": "Aucun paramètre.",
+        "detailTitle": "Paramètre",
+        "newTitle": "Nouveau paramètre",
+        "editTitle": "Modifier le paramètre",
+        "deleteTitle": "Supprimer ce paramètre ?",
+        "deleteMessage": "Supprimer « {{ name }} » et toutes ses expressions ?",
+        "discardTitle": "Abandonner les modifications ?",
+        "discardMessage": "Les modifications de ce paramètre ne sont pas enregistrées.",
+        "countHeader": "Nombre"
       },
       "templates": {
         "title": "Modèles de noms (utiles seulement pour une Base)",
@@ -1795,11 +1802,26 @@
         "f": "Féminin",
         "mp": "Masculin pluriel",
         "fp": "Féminin pluriel",
-        "tint": "Teinte (facultatif)",
-        "suffix": "Nouveau suffixe",
+        "add": "Ajouter un mot",
+        "type": "Type",
+        "rarity": "Rareté",
+        "text": "Mot",
+        "types": {
+          "adjective": "Adjectif",
+          "suffix": "Suffixe"
+        },
+        "suffixLabel": "Suffixe",
+        "empty": "Aucun mot commun.",
+        "detailTitle": "Mot",
+        "newTitle": "Nouveau mot",
+        "editTitle": "Modifier le mot",
+        "deleteTitle": "Supprimer ce mot ?",
+        "deleteMessage": "Supprimer « {{ text }} » ?",
+        "discardTitle": "Abandonner les modifications ?",
+        "discardMessage": "Les modifications de ce mot ne sont pas enregistrées.",
         "addAdjective": "Ajouter l’adjectif",
         "addSuffix": "Ajouter le suffixe",
-        "remove": "Retirer"
+        "suffix": "Nouveau suffixe"
       },
       "domain": {
         "roles": "Rôles",
