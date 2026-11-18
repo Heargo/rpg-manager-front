@@ -25,12 +25,12 @@ describe('the neutral base-assets pack', () => {
     expect(sprites.some((s: any) => s.id === 'amulet_1' && s.image === 'sprites/amulet_1.png' && s.materials === 'sprites/amulet_1.json')).toBe(true);
   });
 
-  it('keeps the CC BY 4.0 attribution of the sprites', () => {
+  it('keeps the CC BY 4.0 licence of the sprites', () => {
     const manifest = assets();
 
     expect(manifest.license).toBe('CC-BY-4.0');
     expect(manifest.licenseUrl).toBe('https://creativecommons.org/licenses/by/4.0/');
-    expect(manifest.author).toContain('Florian Sciberras');
+    expect(manifest.author).toBe('RPG Manager');
   });
 
   it('declares every kind its sprites point to, up to a root kind, without the Base', () => {

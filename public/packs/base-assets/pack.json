@@ -2,11 +2,12 @@
  "format": 2,
  "id": "base-assets",
  "name": "Base assets",
- "description": "The 101 item sprites bundled with the app, shared by every language.",
+ "description": "The 101 item sprites and 9 world landscapes bundled with the app, shared by every language.",
  "version": "1.0.0",
- "author": "RPG Manager (sprites: Florian Sciberras)",
+ "author": "RPG Manager",
  "license": "CC-BY-4.0",
  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+ "notice": "Item sprites: Fantasy items pack by Florian Sciberras (https://fscibe.itch.io/fantasy-items-pack), licensed CC BY 4.0. World landscapes: from Vecteezy, free licence with attribution; each image is credited with a link to its source page.",
  "domains": {
   "items": {
    "kinds": {
@@ -1392,6 +1393,106 @@
    "kind": "masked",
    "image": "sprites/warhammer.png",
    "materials": "sprites/warhammer.json"
+  }
+ ],
+ "worldImages": [
+  {
+   "id": "mountains-night",
+   "label": "Mountains at night",
+   "image": "worlds/mountains-night.webp",
+   "tags": [
+    "mountain",
+    "night"
+   ],
+   "source": "https://www.vecteezy.com/vector-art/7095576-mountains-in-the-night-sky-near-the-clouds-vector-flat-illustration-landscape"
+  },
+  {
+   "id": "blue-mountains-fog",
+   "label": "Blue mountains in the fog",
+   "image": "worlds/blue-mountains-fog.webp",
+   "tags": [
+    "mountain",
+    "fog",
+    "sunset"
+   ],
+   "source": "https://www.vecteezy.com/vector-art/7162595-beautiful-blue-mountain-landscape-silhouette-with-fog-and-sunrise-and-sunset-in-mountains-background-outdoor-and-hiking-concept-sun-in-the-sky-vector-good-for-wallpaper-site-banner-cover-poster"
+  },
+  {
+   "id": "arctic-iceberg-sunset",
+   "label": "Arctic iceberg at sunset",
+   "image": "worlds/arctic-iceberg-sunset.webp",
+   "tags": [
+    "ice",
+    "snow",
+    "ocean",
+    "sunset"
+   ],
+   "source": "https://www.vecteezy.com/vector-art/11513279-beautiful-sunset-arctic-or-antartic-iceberg-landscape-illustration"
+  },
+  {
+   "id": "desert-mountains",
+   "label": "Desert mountains",
+   "image": "worlds/desert-mountains.webp",
+   "tags": [
+    "desert",
+    "mountain"
+   ],
+   "source": "https://www.vecteezy.com/vector-art/23103479-abstract-flat-desert-mountain-landscape-vector-background-scenery-flat-desert-mountain-landscape-vector-background-earth-tone-scenery-flat-desert-mountain-landscape-vector"
+  },
+  {
+   "id": "green-valley-morning",
+   "label": "Green valley in the morning",
+   "image": "worlds/green-valley-morning.webp",
+   "tags": [
+    "plains",
+    "forest",
+    "mountain",
+    "morning"
+   ],
+   "source": "https://www.vecteezy.com/vector-art/12991429-cartoon-nature-landscape-early-morning-background"
+  },
+  {
+   "id": "underwater-wreck",
+   "label": "Underwater wreck",
+   "image": "worlds/underwater-wreck.webp",
+   "tags": [
+    "ocean",
+    "underwater"
+   ],
+   "source": "https://www.vecteezy.com/vector-art/273915-ocean-background"
+  },
+  {
+   "id": "pine-mountains-morning",
+   "label": "Pine mountains in the morning",
+   "image": "worlds/pine-mountains-morning.webp",
+   "tags": [
+    "mountain",
+    "forest",
+    "morning"
+   ],
+   "source": "https://www.vecteezy.com/vector-art/8277964-landscape-of-mountains-and-pine-forests-in-the-morning-or-evening"
+  },
+  {
+   "id": "pine-mountains-winter",
+   "label": "Pine mountains in winter",
+   "image": "worlds/pine-mountains-winter.webp",
+   "tags": [
+    "mountain",
+    "forest",
+    "winter"
+   ],
+   "source": "https://www.vecteezy.com/vector-art/8277965-mountain-landscape-with-pines-and-forests-under-winter-skies"
+  },
+  {
+   "id": "forest-mountains-silhouette",
+   "label": "Forest mountains silhouette",
+   "image": "worlds/forest-mountains-silhouette.webp",
+   "tags": [
+    "mountain",
+    "forest",
+    "river"
+   ],
+   "source": "https://www.vecteezy.com/vector-art/14487928-silhouette-of-nature-landscape-mountains-forest-in-background-blue-and-green-illustration"
   }
  ]
 }

@@ -153,10 +153,13 @@ And its `pack.json`:
 | `domains` | The content per domain: `items`, and `npcs`, `skills`, `classes`. Each can have `kinds` (the kind tree) and `texts` (the path to its language file). A domain the app doesn't know is ignored with a warning, but an unknown field inside a known domain is an error (to catch typos). |
 | `common` | The path to `generators/common.json` (the params, shared by every domain). |
 | `sprites` | The list of sprites (see below). |
+| `worldImages` | Optional list of landscapes a world can take as its picture (see below). |
 
 **Kinds** (`domains.items.kinds`): each entry has an optional `parent`. Only roots declare a `type` (`item`, `consumable` or `equipment`); `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` or `weapon2`) is declared on one level of the equipment chain. The tree has no cycle and its root declares a `type`; a `parent` declared in another pack is allowed. Ids are scoped by domain (`items` `guard` and `npcs` `guard` are different).
 
 **Sprites**: `id`, `label` (in the pack's language), `domain` (`items`), `kinds` (the kinds it illustrates), `kind` (the colouring: `grayscale`, `masked` or `colored`), `image`, and `materials` for a `masked` sprite (the JSON the colorizer exports). Sprites no longer have a `type` or `slot`: they come from the kind.
+
+**World images**: `id` (kebab-case, unique), `label` (plain text, used as alt text and tooltip), `image` (a WebP, PNG or JPEG path in the pack), optional `tags` (short lowercase words) and `source` (an https link to the original artwork, shown in the credits). They are offered in the world wizard; choosing one copies it into the world. The pack creator has no tab for them yet: write them in `pack.json`.
 
 **`generators/items.json`** (word list v2):
 

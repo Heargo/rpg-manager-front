@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { ImageBusiness } from '../../../core/business/image.business';
-import { defaultPacks, packLanguageOf } from '../../../core/business/pack.business';
+import { BundledWorldImage, defaultPacks, packLanguageOf } from '../../../core/business/pack.business';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { ItemVocabularyBusiness } from '../../../core/business/item-vocabulary.business';
 import { seededRandomSource } from '../../../core/generators/random-source';
@@ -11,6 +11,13 @@ import { createWorld, remapWorldImages, summarizeWorld, worldImageIds } from '..
 import { World, WorldDraft, WorldSummary } from '../models/world';
 import { PackContentApplier } from './pack-content-applier.business';
 import { WorldStorageService } from '../services/world-storage.service';
+
+const IMAGE_TYPES: Record<string, string> = {
+  webp: 'image/webp',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+};
 
 export class WorldImportError extends Error {
   constructor(readonly errors: string[]) {
@@ -72,6 +79,16 @@ export class WorldLibraryBusiness {
   /** Stores an uploaded picture (world icon…) and returns its image id. */
   uploadImage(file: Blob): Promise<string> {
     return this.imageBusiness.storeUpload(file);
+  }
+
+  /** Fetches a pack world image and stores a copy like an upload, so the world keeps it without the pack. Returns its image id. */
+  async chooseWorldImage(image: BundledWorldImage): Promise<string> {
+    const response = await fetch(image.imageUrl);
+    if (!response.ok) throw new Error(`${image.imageUrl}: ${response.status}`);
+    const blob = await response.blob();
+    const extension = image.imageUrl.split('.').pop()?.toLowerCase() ?? '';
+    const type = blob.type.startsWith('image/') ? blob.type : (IMAGE_TYPES[extension] ?? 'image/webp');
+    return this.uploadImage(new Blob([blob], { type }));
   }
 
   /** Saves changes and bumps `updatedAt`. */

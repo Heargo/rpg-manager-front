@@ -32,6 +32,19 @@ export interface PackSprite {
   materials?: string;
 }
 
+/** A landscape a world can take as its illustration; chosen in the world wizard (stored as a copy). */
+export interface PackWorldImage {
+  id: string;
+  /** Plain text, used as alt text and tooltip. */
+  label: string;
+  /** WebP, PNG or JPEG path inside the pack. */
+  image: string;
+  /** Short lowercase words (`mountain`, `night`). */
+  tags?: string[];
+  /** https URL of the original artwork, shown in the picker and the credits. */
+  source?: string;
+}
+
 export interface GradientStop {
   position: number;
   color: string;
@@ -104,6 +117,8 @@ export interface Pack {
   license: string;
   licenseUrl: string;
   homepage?: string;
+  /** Attribution text for the credits page (several licences, sources). */
+  notice?: string;
   tints?: Record<string, PackTint>;
   domains?: PackDomains;
   /** The attributes the pack's fixed content uses. */
@@ -111,6 +126,7 @@ export interface Pack {
   /** The shared language file (params). */
   common?: string;
   sprites: PackSprite[];
+  worldImages?: PackWorldImage[];
 }
 
 export type PackValidation =
@@ -143,11 +159,13 @@ const MANIFEST_FIELDS: readonly string[] = [
   'license',
   'licenseUrl',
   'homepage',
+  'notice',
   'tints',
   'domains',
   'attributes',
   'common',
   'sprites',
+  'worldImages',
 ];
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -298,6 +316,50 @@ function validateAttributes(attributes: unknown, errors: string[]): void {
   });
 }
 
+const WORLD_IMAGE_FILE = /\.(webp|png|jpe?g)$/i;
+const TAG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const MAX_TAG_LENGTH = 24;
+
+function validateWorldImages(worldImages: unknown, errors: string[]): void {
+  if (!Array.isArray(worldImages)) {
+    errors.push('worldImages must be a list');
+    return;
+  }
+  const seen = new Set<string>();
+  worldImages.forEach((entry, i) => {
+    const at = `worldImages[${i}]`;
+    if (!isObject(entry)) {
+      errors.push(`${at} must be an object`);
+      return;
+    }
+    const id = entry['id'];
+    const name = typeof id === 'string' && id ? `worldImages "${id}"` : at;
+    if (typeof id !== 'string' || !ID.test(id))
+      errors.push(`${name}: id must be kebab-case`);
+    else if (seen.has(id)) errors.push(`${name}: id is used twice`);
+    else seen.add(id);
+    if (!text(entry['label'])) errors.push(`${name}: label is required`);
+    const image = entry['image'];
+    if (!isRelativePath(image) || !WORLD_IMAGE_FILE.test(image))
+      errors.push(
+        `${name}: image must be a relative path to a WebP, PNG or JPEG file`,
+      );
+    const tags = entry['tags'];
+    if (
+      tags !== undefined &&
+      (!Array.isArray(tags) ||
+        !tags.every(
+          (t) =>
+            typeof t === 'string' && TAG.test(t) && t.length <= MAX_TAG_LENGTH,
+        ))
+    )
+      errors.push(`${name}: tags must be a list of short lowercase words`);
+    const source = entry['source'];
+    if (source !== undefined && !isHttpsUrl(source))
+      errors.push(`${name}: source must be an https URL`);
+  });
+}
+
 /** Checks a pack manifest read from JSON, listing every problem with the field it concerns. */
 export function validatePack(json: unknown): PackValidation {
   if (!isObject(json))
@@ -330,6 +392,9 @@ export function validatePack(json: unknown): PackValidation {
   if (json['homepage'] !== undefined && !text(json['homepage']))
     errors.push('homepage must be a text');
 
+  if (json['notice'] !== undefined && !text(json['notice']))
+    errors.push('notice must be a text');
+
   if (json['common'] !== undefined) {
     if (neutral) errors.push('common needs a pack with a language');
     else if (!isRelativePath(json['common']))
@@ -341,6 +406,8 @@ export function validatePack(json: unknown): PackValidation {
   for (const field of Object.keys(json))
     if (!MANIFEST_FIELDS.includes(field))
       errors.push(`unknown field "${field}"`);
+  if (json['worldImages'] !== undefined)
+    validateWorldImages(json['worldImages'], errors);
   const domains =
     json['domains'] !== undefined
       ? validateDomains(json['domains'], neutral, errors, warnings)

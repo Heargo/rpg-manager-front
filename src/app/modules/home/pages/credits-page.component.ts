@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TagModule } from '@openng/optimus-ui/tag';
-import { PackBusiness } from '../../../core/business/pack.business';
+import { BundledWorldImage, PackBusiness } from '../../../core/business/pack.business';
 import { SiteFooterComponent } from '../components/site-footer/site-footer.component';
 
 /** Libraries actually listed in package.json, with their licences. */
@@ -84,6 +84,20 @@ export const CREDIT_LIBRARIES = [
           >{{ 'credits.spritesSuffix' | translate }}
         </p>
       </div>
+      @if (notices().length || worldImages().length) {
+        <div class="card illustration" data-test="world-images">
+          @for (notice of notices(); track notice) {
+            <p>{{ notice }}</p>
+          }
+          <ul>
+            @for (image of worldImages(); track image.id) {
+              <li>
+                <a [href]="image.source" target="_blank" rel="noopener noreferrer">{{ image.label }}</a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
       @if (packs().length) {
         <h2>{{ 'credits.packsTitle' | translate }}</h2>
         <div class="card" data-test="packs">
@@ -147,8 +161,18 @@ export class CreditsPageComponent {
     return this.packBusiness.$installed().filter((p) => !p.builtIn);
   });
   protected readonly libraries = CREDIT_LIBRARIES;
+  /** Notices and landscapes of the built-in packs, listed whatever the open world uses (their licences ask for attribution). */
+  protected readonly notices = signal<string[]>([]);
+  protected readonly worldImages = signal<BundledWorldImage[]>([]);
   constructor() {
     void this.packBusiness.load().catch(() => undefined);
+    void this.packBusiness
+      .builtInCredits()
+      .then((credits) => {
+        this.notices.set(credits.notices);
+        this.worldImages.set(credits.worldImages.filter((image) => image.source));
+      })
+      .catch(() => undefined);
   }
 
   protected readonly yuumeiUrl = 'https://www.yuumeiart.com/';

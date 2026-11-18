@@ -65,6 +65,54 @@
                 (uploadHandler)="upload($event)"
               />
               <app-image-warning />
+              @if (worldImages().length) {
+                <span class="label">{{
+                  "world.fields.packImages" | translate
+                }}</span>
+                <ul class="world-images" data-test="world-images">
+                  @for (image of worldImages(); track image.packId + image.id) {
+                    <li>
+                      @if (image.source) {
+                        <a
+                          class="source"
+                          [href]="image.source"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          [attr.aria-label]="
+                            'world.fields.imageSource'
+                              | translate: { label: image.label }
+                          "
+                          [pTooltip]="
+                            'world.fields.imageSource'
+                              | translate: { label: image.label }
+                          "
+                          ><i class="pi pi-external-link"></i
+                        ></a>
+                      }
+                      <button
+                        type="button"
+                        class="world-image"
+                        [class.selected]="
+                          chosenWorldImage() === worldImageKey(image)
+                        "
+                        [attr.aria-pressed]="
+                          chosenWorldImage() === worldImageKey(image)
+                        "
+                        [attr.aria-label]="image.label"
+                        [pTooltip]="image.label"
+                        [disabled]="uploading()"
+                        (click)="chooseWorldImage(image)"
+                      >
+                        <img
+                          [src]="image.imageUrl"
+                          [alt]="image.label"
+                          loading="lazy"
+                        />
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
               <div class="actions">
                 <p-button
                   [label]="'world.new.next' | translate"

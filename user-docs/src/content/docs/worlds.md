@@ -19,6 +19,8 @@ Dans **Mondes**, cliquez sur **Nouveau monde**. L'assistant compte trois étapes
 
 **3. Règles** : progression, économie, compétences, combat et les [packs de contenu](/docs/packs/#les-packs-dun-monde) du monde (par défaut, le Base de la langue de l'application et Base assets pour les sprites). Vous pouvez aussi ajouter les **objets par défaut** et les **classes et compétences par défaut** pour avoir un monde jouable tout de suite.
 
+Sur l'étape **Identité**, en plus de téléverser une image, vous pouvez choisir une des **images de monde** des packs actifs (Base assets apporte neuf paysages) : l'image est copiée dans le monde, elle reste donc si le pack est désactivé et pour les joueurs qui rejoignent. La page **Règles du monde** n'a pas encore de sélecteur d'image.
+
 ![Étape Règles de l'assistant](../../assets/screens/fr/worlds-wizard-rules.png)
 
 ## Vos mondes

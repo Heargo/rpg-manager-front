@@ -124,6 +124,8 @@
       "image": "Image",
       "chooseImage": "Choisir une image",
       "changeImage": "Changer l'image",
+      "imageSource": "Source de {{label}}",
+      "packImages": "Ou choisissez-en une dans vos packs",
       "attributeName": "Attribut",
       "baseValue": "Valeur de base",
       "lifeBar": "Barre de vie",

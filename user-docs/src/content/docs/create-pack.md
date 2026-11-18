@@ -153,10 +153,13 @@ Et son `pack.json` :
 | `domains` | Le contenu par domaine : `items`, et `npcs`, `skills`, `classes`. Chacun peut avoir `kinds` (l'arbre des catégories) et `texts` (le chemin de son fichier de langue). Un domaine inconnu de l'application est ignoré avec un avertissement, mais un champ inconnu dans un domaine connu est une erreur (pour repérer les fautes de frappe). |
 | `common` | Le chemin de `generators/common.json` (les paramètres, partagés par tous les domaines). |
 | `sprites` | La liste des sprites (voir ci-dessous). |
+| `worldImages` | Liste facultative de paysages qu'un monde peut prendre comme image (voir ci-dessous). |
 
 **Catégories** (`domains.items.kinds`) : chaque entrée a un `parent` facultatif. Seules les racines déclarent un `type` (`item`, `consumable` ou `equipment`) ; `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` ou `weapon2`) se déclare sur un niveau de la chaîne d'équipement. L'arbre n'a pas de cycle et sa racine déclare un `type` ; un `parent` déclaré dans un autre pack est permis. Les identifiants sont propres à chaque domaine (`items` `guard` et `npcs` `guard` sont différents).
 
 **Sprites** : `id`, `label` (dans la langue du pack), `domain` (`items`), `kinds` (les catégories illustrées), `kind` (la coloration : `grayscale`, `masked` ou `colored`), `image`, et `materials` pour un sprite `masked` (le JSON exporté par le coloriseur). Plus de `type` ni de `slot` dans les sprites : ils viennent de la catégorie.
+
+**Images de monde** : `id` (kebab-case, unique), `label` (texte simple, utilisé comme texte alternatif et infobulle), `image` (un chemin WebP, PNG ou JPEG dans le pack), `tags` facultatifs (mots courts en minuscules) et `source` (un lien https vers l'œuvre d'origine, affiché dans les crédits). Elles sont proposées dans l'assistant de création de monde ; en choisir une la copie dans le monde. Le créateur de packs n'a pas encore d'onglet pour elles : écrivez-les dans `pack.json`.
 
 **`generators/items.json`** (liste de mots v2) :
 

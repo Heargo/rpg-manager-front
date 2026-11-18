@@ -12,6 +12,7 @@ import {
   PackLanguage,
   PackSprite,
   PackTint,
+  PackWorldImage,
   SPRITE_KINDS,
   textsPath,
   contentPath,
@@ -109,6 +110,13 @@ export interface BundledSprite extends PackSprite {
   packId: string;
   imageUrl: string;
   materialsUrl?: string;
+}
+
+/** A pack world image with the pack it comes from and the URL of its file. */
+export interface BundledWorldImage extends PackWorldImage {
+  tags: string[];
+  packId: string;
+  imageUrl: string;
 }
 
 /** A pack available on this device: Base, or an official pack that was downloaded. */
@@ -355,6 +363,50 @@ export class PackBusiness {
     return record ? this.storedSprites(record) : [];
   }
 
+  /** The world images of the active packs, in the world's order, with their file URLs. */
+  async worldImages(): Promise<BundledWorldImage[]> {
+    await this.ensureLoaded();
+    const result: BundledWorldImage[] = [];
+    for (const id of this.activeIds()) {
+      if (isBasePack(id)) {
+        const manifest = await this.manifest(id).catch(() => null);
+        const manifestUrl = `packs/${id}/pack.json`;
+        for (const entry of manifest?.worldImages ?? [])
+          result.push(this.bundleWorldImage(entry, id, packFileUrl(manifestUrl, entry.image)));
+        continue;
+      }
+      const record = this.stored().find((p) => p.id === id);
+      if (!record?.manifest.worldImages?.length) continue;
+      const urls = await this.objectUrls(record);
+      for (const entry of record.manifest.worldImages) {
+        const url = urls.get(entry.image);
+        if (url) result.push(this.bundleWorldImage(entry, id, url));
+      }
+    }
+    return result;
+  }
+
+  /**
+   * What the credits page owes the built-in packs' content, whatever the open world uses: their notices
+   * and their world images (with sources).
+   */
+  async builtInCredits(): Promise<{ notices: string[]; worldImages: BundledWorldImage[] }> {
+    const notices: string[] = [];
+    const worldImages: BundledWorldImage[] = [];
+    for (const id of BASE_PACK_IDS) {
+      const manifest = await this.manifest(id).catch(() => null);
+      if (!manifest) continue;
+      if (manifest.notice) notices.push(manifest.notice);
+      for (const entry of manifest.worldImages ?? [])
+        worldImages.push(this.bundleWorldImage(entry, id, packFileUrl(`packs/${id}/pack.json`, entry.image)));
+    }
+    return { notices, worldImages };
+  }
+
+  private bundleWorldImage(entry: PackWorldImage, packId: string, imageUrl: string): BundledWorldImage {
+    return { ...entry, tags: entry.tags ?? [], packId, imageUrl };
+  }
+
   /** The items kinds of the Bases, for a kind whose parent lives in another pack. */
   private async baseKinds(): Promise<Record<string, ItemKindDef>> {
     const own = basePackId(this.languageBusiness.$language());
@@ -431,19 +483,19 @@ export class PackBusiness {
 
   private async createUrls(record: StoredPack): Promise<Map<string, string>> {
     const urls = new Map<string, string>();
-    for (const sprite of record.manifest.sprites) {
-      for (const path of [sprite.image, sprite.materials]) {
-        if (!path || urls.has(path)) continue;
-        const file = await this.storage.getFile(record.id, path);
-        if (!file) continue;
-        const blob =
-          file.kind === 'blob'
-            ? new Blob([file.bytes], { type: file.type })
-            : new Blob([JSON.stringify(file.value)], {
-                type: 'application/json',
-              });
-        urls.set(path, URL.createObjectURL(blob));
-      }
+    const paths = [
+      ...record.manifest.sprites.flatMap((sprite) => [sprite.image, sprite.materials]),
+      ...(record.manifest.worldImages ?? []).map((image) => image.image),
+    ];
+    for (const path of paths) {
+      if (!path || urls.has(path)) continue;
+      const file = await this.storage.getFile(record.id, path);
+      if (!file) continue;
+      const blob =
+        file.kind === 'blob'
+          ? new Blob([file.bytes], { type: file.type })
+          : new Blob([JSON.stringify(file.value)], { type: 'application/json' });
+      urls.set(path, URL.createObjectURL(blob));
     }
     return urls;
   }
