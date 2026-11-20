@@ -9,6 +9,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { MessageModule } from '@openng/optimus-ui/message';
+import { PackImportFlowBusiness } from '../../../world/business/pack-import-flow.business';
+import { PackAttributeMappingComponent } from '../../../world/components/pack-attribute-mapping/pack-attribute-mapping.component';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { MessageLevel } from '../../../../core/models/toast-level';
 import { SkillCatalogueBusiness } from '../../business/skill-catalogue.business';
@@ -25,6 +27,7 @@ import { Skill } from '../../models/skill';
     TranslatePipe,
     ButtonModule,
     MessageModule,
+    PackAttributeMappingComponent,
     SkillCatalogueComponent,
     SkillEditorComponent,
   ],
@@ -59,13 +62,23 @@ import { Skill } from '../../models/skill';
             (save)="save($event)"
           />
         } @else {
-          <app-skill-catalogue
-            [skills]="world.skills"
-            (create)="editing.set('new')"
-            (edit)="editing.set($event)"
-            (duplicate)="run(catalogue.duplicate($event.id))"
-            (remove)="remove($event)"
-          />
+          @if (flow.$pending(); as pending) {
+            <app-pack-attribute-mapping
+              [missing]="pending.missing"
+              [attributes]="world.attributes"
+              (confirmed)="flow.confirm($event)"
+              (cancelled)="flow.cancel()"
+            />
+          } @else {
+            <app-skill-catalogue
+              (importPacks)="flow.run()"
+              [skills]="world.skills"
+              (create)="editing.set('new')"
+              (edit)="editing.set($event)"
+              (duplicate)="run(catalogue.duplicate($event.id))"
+              (remove)="remove($event)"
+            />
+          }
         }
       } @else {
         <p-message severity="info">{{
@@ -96,6 +109,7 @@ import { Skill } from '../../models/skill';
   `,
 })
 export class SkillCataloguePageComponent {
+  protected readonly flow = inject(PackImportFlowBusiness);
   protected readonly catalogue = inject(SkillCatalogueBusiness);
   protected readonly tool = !!inject(ActivatedRoute).snapshot.data['tool'];
   protected readonly editing = signal<Skill | 'new' | null>(null);

@@ -1,24 +1,12 @@
 import { BundledSprite } from '../../../core/business/pack.business';
-import { Pack, SpriteKind } from '../../../core/packs/pack';
+import { Pack } from '../../../core/packs/pack';
+
+export {
+  searchSprites,
+  spriteLabel,
+} from '../../../core/helpers/sprite-search';
 
 export const DEMO_SPRITE_ID = 'axe';
-
-/** The sprites whose label contains every word of `query`, accents and case ignored, by label. */
-export function searchSprites(
-  sprites: readonly BundledSprite[],
-  query: string,
-  lang: string,
-  kind: SpriteKind | null = null,
-): BundledSprite[] {
-  const words = fold(query).split(/\s+/).filter(Boolean);
-  return sprites
-    .filter((sprite) => {
-      if (kind && sprite.kind !== kind) return false;
-      const text = fold(sprite.label);
-      return words.every((word) => text.includes(word));
-    })
-    .sort((a, b) => a.label.localeCompare(b.label, lang));
-}
 
 export interface SpriteGroup {
   packId: string;
@@ -38,8 +26,4 @@ export function groupSpritesByPack(
       sprites: sprites.filter((s) => s.packId === pack.id),
     }))
     .filter((group) => group.sprites.length > 0);
-}
-
-function fold(text: string): string {
-  return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 }

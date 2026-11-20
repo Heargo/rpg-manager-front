@@ -1,0 +1,417 @@
+[
+ {
+  "id": "power-strike",
+  "name": "Power Strike",
+  "description": "A heavy blow on one enemy. Grows with strength.",
+  "kind": "strike",
+  "rarity": "common",
+  "type": "active",
+  "maxLevel": 5,
+  "pointCost": 1,
+  "target": "one-enemy",
+  "cooldown": 0,
+  "success": {
+   "mode": "threshold",
+   "value": 6
+  },
+  "effects": [
+   {
+    "kind": "damage",
+    "attribute": "life",
+    "amount": "[Strength] * 0.5 + skillLevel * 3"
+   }
+  ]
+ },
+ {
+  "id": "iron-skin",
+  "name": "Iron Skin",
+  "description": "Toughened by countless fights: permanently raises maximum life.",
+  "kind": "toughness",
+  "rarity": "common",
+  "type": "passive",
+  "maxLevel": 5,
+  "pointCost": 1,
+  "effects": [
+   {
+    "kind": "modify",
+    "attribute": "life",
+    "amount": "skillLevel * 5",
+    "duration": 0
+   }
+  ]
+ },
+ {
+  "id": "cleave",
+  "name": "Cleave",
+  "description": "A sweeping swing that hits every enemy.",
+  "kind": "strike",
+  "rarity": "uncommon",
+  "type": "active",
+  "maxLevel": 5,
+  "pointCost": 1,
+  "target": "all-enemies",
+  "cooldown": 2,
+  "success": {
+   "mode": "threshold",
+   "value": 8
+  },
+  "cost": {
+   "attribute": "mana",
+   "amount": 3
+  },
+  "effects": [
+   {
+    "kind": "damage",
+    "attribute": "life",
+    "amount": "[Strength] * 0.3 + skillLevel * 2"
+   }
+  ]
+ },
+ {
+  "id": "battle-cry",
+  "name": "Battle Cry",
+  "description": "Rallies the allies: their main attribute rises for three turns.",
+  "kind": "war-cry",
+  "rarity": "uncommon",
+  "type": "active",
+  "maxLevel": 3,
+  "pointCost": 1,
+  "target": "all-allies",
+  "cooldown": 3,
+  "cost": {
+   "attribute": "mana",
+   "amount": 4
+  },
+  "effects": [
+   {
+    "kind": "modify",
+    "attribute": "strength",
+    "amount": "skillLevel + 1",
+    "duration": 3
+   }
+  ]
+ },
+ {
+  "id": "second-wind",
+  "name": "Second Wind",
+  "description": "Catches your breath and recovers life.",
+  "kind": "remedy",
+  "rarity": "uncommon",
+  "type": "active",
+  "maxLevel": 5,
+  "pointCost": 1,
+  "target": "self",
+  "cooldown": 4,
+  "effects": [
+   {
+    "kind": "heal",
+    "attribute": "life",
+    "amount": "level * 2 + skillLevel * 5"
+   }
+  ]
+ },
+ {
+  "id": "mighty-blow",
+  "name": "Mighty Blow",
+  "description": "All the warrior's strength in a single, crushing strike.",
+  "kind": "strike",
+  "rarity": "rare",
+  "type": "active",
+  "maxLevel": 3,
+  "pointCost": 1,
+  "target": "one-enemy",
+  "cooldown": 3,
+  "success": {
+   "mode": "threshold",
+   "value": 10
+  },
+  "cost": {
+   "attribute": "mana",
+   "amount": 6
+  },
+  "effects": [
+   {
+    "kind": "damage",
+    "attribute": "life",
+    "amount": "[Strength] * 1.2 + skillLevel * 6"
+   }
+  ]
+ },
+ {
+  "id": "arcane-bolt",
+  "name": "Arcane Bolt",
+  "description": "A bolt of raw magic on one enemy.",
+  "kind": "lightning-spell",
+  "rarity": "common",
+  "type": "active",
+  "maxLevel": 5,
+  "pointCost": 1,
+  "target": "one-enemy",
+  "cooldown": 0,
+  "success": {
+   "mode": "threshold",
+   "value": 5
+  },
+  "cost": {
+   "attribute": "mana",
+   "amount": 2
+  },
+  "effects": [
+   {
+    "kind": "damage",
+    "attribute": "life",
+    "amount": "[Intelligence] * 0.6 + skillLevel * 3"
+   }
+  ]
+ },
+ {
+  "id": "healing-light",
+  "name": "Healing Light",
+  "description": "A soft light that closes the wounds of one ally.",
+  "kind": "healing",
+  "rarity": "common",
+  "type": "active",
+  "maxLevel": 5,
+  "pointCost": 1,
+  "target": "one-ally",
+  "cooldown": 1,
+  "cost": {
+   "attribute": "mana",
+   "amount": 3
+  },
+  "effects": [
+   {
+    "kind": "heal",
+    "attribute": "life",
+    "amount": "[Intelligence] * 0.5 + skillLevel * 4"
+   }
+  ]
+ },
+ {
+  "id": "arcane-focus",
+  "name": "Arcane Focus",
+  "description": "Disciplined study: permanently raises maximum mana.",
+  "kind": "focus",
+  "rarity": "common",
+  "type": "passive",
+  "maxLevel": 5,
+  "pointCost": 1,
+  "effects": [
+   {
+    "kind": "modify",
+    "attribute": "mana",
+    "amount": "skillLevel * 4",
+    "duration": 0
+   }
+  ]
+ },
+ {
+  "id": "fireball",
+  "name": "Fireball",
+  "description": "An explosion of flames that burns an area.",
+  "kind": "fire-spell",
+  "rarity": "uncommon",
+  "type": "active",
+  "maxLevel": 5,
+  "pointCost": 1,
+  "target": "area",
+  "cooldown": 2,
+  "roll": {
+   "count": 2,
+   "faces": 6
+  },
+  "success": {
+   "mode": "threshold",
+   "value": 6
+  },
+  "cost": {
+   "attribute": "mana",
+   "amount": 5
+  },
+  "effects": [
+   {
+    "kind": "damage",
+    "attribute": "life",
+    "amount": "[Intelligence] * 0.8 + skillLevel * 4"
+   }
+  ]
+ },
+ {
+  "id": "mana-shield",
+  "name": "Arcane Ward",
+  "description": "A shimmering barrier: your maximum life rises for three turns, more with intelligence.",
+  "kind": "blessing",
+  "rarity": "uncommon",
+  "type": "active",
+  "maxLevel": 3,
+  "pointCost": 1,
+  "target": "self",
+  "cooldown": 4,
+  "cost": {
+   "attribute": "mana",
+   "amount": 4
+  },
+  "effects": [
+   {
+    "kind": "modify",
+    "attribute": "life",
+    "amount": "[Intelligence] * 0.5 + skillLevel * 3",
+    "duration": 3
+   }
+  ]
+ },
+ {
+  "id": "meteor-storm",
+  "name": "Meteor Storm",
+  "description": "Calls down a rain of burning rock on every enemy.",
+  "kind": "fire-spell",
+  "rarity": "mythic",
+  "type": "active",
+  "maxLevel": 3,
+  "pointCost": 1,
+  "target": "all-enemies",
+  "cooldown": 4,
+  "roll": {
+   "count": 3,
+   "faces": 6
+  },
+  "success": {
+   "mode": "threshold",
+   "value": 10
+  },
+  "cost": {
+   "attribute": "mana",
+   "amount": 10
+  },
+  "effects": [
+   {
+    "kind": "damage",
+    "attribute": "life",
+    "amount": "[Intelligence] * 1.2 + skillLevel * 6"
+   }
+  ]
+ },
+ {
+  "id": "quick-stab",
+  "name": "Quick Stab",
+  "description": "A fast, precise stab on one enemy.",
+  "kind": "strike",
+  "rarity": "common",
+  "type": "active",
+  "maxLevel": 5,
+  "pointCost": 1,
+  "target": "one-enemy",
+  "cooldown": 0,
+  "success": {
+   "mode": "threshold",
+   "value": 5
+  },
+  "cost": {
+   "attribute": "mana",
+   "amount": 1
+  },
+  "effects": [
+   {
+    "kind": "damage",
+    "attribute": "life",
+    "amount": "[Agility] * 0.4 + skillLevel * 2"
+   }
+  ]
+ },
+ {
+  "id": "nimble",
+  "name": "Nimble",
+  "description": "Light on your feet: permanently raises your main attribute.",
+  "kind": "agility",
+  "rarity": "common",
+  "type": "passive",
+  "maxLevel": 5,
+  "pointCost": 1,
+  "effects": [
+   {
+    "kind": "modify",
+    "attribute": "agility",
+    "amount": "skillLevel",
+    "duration": 0
+   }
+  ]
+ },
+ {
+  "id": "poisoned-blade",
+  "name": "Poisoned Blade",
+  "description": "A coated blade that bites deeper than steel alone.",
+  "kind": "strike",
+  "rarity": "uncommon",
+  "type": "active",
+  "maxLevel": 5,
+  "pointCost": 1,
+  "target": "one-enemy",
+  "cooldown": 2,
+  "success": {
+   "mode": "threshold",
+   "value": 8
+  },
+  "cost": {
+   "attribute": "mana",
+   "amount": 2
+  },
+  "effects": [
+   {
+    "kind": "damage",
+    "attribute": "life",
+    "amount": "[Agility] * 0.3 + skillLevel * 2"
+   }
+  ]
+ },
+ {
+  "id": "shadow-step",
+  "name": "Shadow Step",
+  "description": "Slips into the shadows: your main attribute rises for two turns.",
+  "rarity": "uncommon",
+  "type": "active",
+  "maxLevel": 3,
+  "pointCost": 1,
+  "target": "self",
+  "cooldown": 3,
+  "movement": true,
+  "cost": {
+   "attribute": "mana",
+   "amount": 3
+  },
+  "effects": [
+   {
+    "kind": "modify",
+    "attribute": "agility",
+    "amount": "skillLevel * 2",
+    "duration": 2
+   }
+  ]
+ },
+ {
+  "id": "assassinate",
+  "name": "Assassinate",
+  "description": "A lethal strike on an enemy that never saw you coming.",
+  "kind": "strike",
+  "rarity": "rare",
+  "type": "active",
+  "maxLevel": 3,
+  "pointCost": 1,
+  "target": "one-enemy",
+  "cooldown": 4,
+  "success": {
+   "mode": "threshold",
+   "value": 12
+  },
+  "cost": {
+   "attribute": "mana",
+   "amount": 6
+  },
+  "effects": [
+   {
+    "kind": "damage",
+    "attribute": "life",
+    "amount": "[Agility] * 1.5 + skillLevel * 5"
+   }
+  ]
+ }
+]

@@ -107,11 +107,13 @@ export function skillTexts(
 ): { name: string; description: string } {
   const noun = pick(source, vocabulary.nouns(kindId));
   const gender: Gender = noun.gender ?? 'm';
+  const kindWord = vocabulary.refs.resolver(source, gender, false);
   const adjectives = vocabulary.adjectives(kindId);
   const suffixes = vocabulary.suffixes(kindId);
   const usable = (template: string): boolean =>
     (adjectives.length > 0 || !template.includes('{adjective}')) &&
-    (suffixes.length > 0 || !template.includes('{suffix}'));
+    (suffixes.length > 0 || !template.includes('{suffix}')) &&
+    vocabulary.refs.usable(template, vocabulary.params);
 
   const fromKind = vocabulary.names(kindId).filter(usable);
   const templates =
@@ -125,7 +127,12 @@ export function skillTexts(
     values.adjective = adjectiveForm(pick(source, adjectives), gender);
   if (template.includes('{suffix}')) values.suffix = pick(source, suffixes);
 
-  const context = { params: vocabulary.params, gender, values };
+  const context = {
+    params: vocabulary.params,
+    gender,
+    values,
+    kindWord,
+  };
   const name = capitalize(expandPhrase(source, template, context) ?? noun.text);
   const descriptions = vocabulary.descriptions(kindId);
   const description =

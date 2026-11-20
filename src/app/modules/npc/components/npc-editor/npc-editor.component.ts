@@ -19,6 +19,7 @@ import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
+import { RandomItemImageBusiness } from '../../../sprite/business/random-item-image.business';
 import { ImageBusiness } from '../../../../core/business/image.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { CoinInputComponent } from '../../../../core/components/coin-input/coin-input.component';
@@ -74,6 +75,17 @@ import { Npc, NPC_ROLES, NpcRole } from '../../models/npc';
                   (removed)="patch({ portraitId: undefined })"
                 />
               </span>
+              <button
+                pButton
+                type="button"
+                data-action="random-image"
+                icon="pi pi-sparkles"
+                severity="secondary"
+                size="small"
+                [loading]="drawingImage()"
+                [label]="'npc.editor.randomImage' | translate"
+                (click)="randomImage()"
+              ></button>
             </div>
             <div class="field">
               <label for="npc-name">{{
@@ -524,6 +536,7 @@ export class NpcEditorComponent {
   private readonly editor = inject(NpcEditorBusiness);
   private readonly language = inject(LanguageBusiness);
   private readonly images = inject(ImageBusiness);
+  private readonly randomImages = inject(RandomItemImageBusiness);
   private readonly messages = inject(MessageService);
 
   /** The world whose attributes, level rules and item catalogue the NPC is built on. */
@@ -547,6 +560,7 @@ export class NpcEditorComponent {
   });
   protected readonly seed = signal(this.editor.newSeed());
   protected readonly generateClassId = signal<string | null>(null);
+  protected readonly drawingImage = signal(false);
 
   private readonly attributeNames = computed(() =>
     this.world().attributes.map((attribute) => attribute.name),
@@ -688,6 +702,25 @@ export class NpcEditorComponent {
       this.generateClassId() ?? undefined,
     );
     this.setDraft({ ...generated, id: this.draft().id });
+    await this.drawPortrait(this.seed());
+  }
+
+  /** A new random portrait from the NPC sprites of the active packs. */
+  protected randomImage(): Promise<void> {
+    return this.drawPortrait(this.editor.newSeed());
+  }
+
+  /** Keeps the current portrait when no NPC sprite can be drawn. */
+  private async drawPortrait(seed: string): Promise<void> {
+    this.drawingImage.set(true);
+    try {
+      const portraitId = await this.randomImages.createNpc(this.draft(), seed);
+      this.patch({ portraitId });
+    } catch {
+      /* the NPC keeps its portrait */
+    } finally {
+      this.drawingImage.set(false);
+    }
   }
 
   protected reroll(): Promise<void> {

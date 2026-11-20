@@ -67,13 +67,6 @@ test('packs: list, details, add a pack, pack choice, creator', async ({ page, co
   await shot(page, lang, 'packs-add-preview');
   await page.keyboard.press('Escape');
 
-  await page.goto('/tools/item-generator');
-  await expect(page.locator('app-item-card')).toBeVisible();
-  await page.locator('p-select[data-field="pack"]').click();
-  await expect(page.getByRole('option').first()).toBeVisible();
-  await shot(page, lang, 'packs-choice');
-  await page.keyboard.press('Escape');
-
   await page.goto('/tools/packs');
   await page.getByRole('button', { name: t(lang, 'packs.creator.create') }).click();
   await page.getByRole('button', { name: t(lang, 'packs.creator.newDraft') }).click();

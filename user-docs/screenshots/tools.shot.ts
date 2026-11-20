@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { langOf, prepareContext, shot, t } from './helpers';
 
-test('tools: sprite colorizer, item generator, links', async ({ page, context }, info) => {
+test('tools: sprite colorizer, links', async ({ page, context }, info) => {
   const lang = langOf(info);
   await prepareContext(context, lang);
 
@@ -16,10 +16,6 @@ test('tools: sprite colorizer, item generator, links', async ({ page, context },
   await page.waitForTimeout(500);
   await shot(page, lang, 'tools-sprite-library');
   await page.keyboard.press('Escape');
-
-  await page.goto('/tools/item-generator');
-  await expect(page.locator('app-item-card')).toBeVisible();
-  await shot(page, lang, 'tools-item-generator');
 
   await page.goto('/tools/links');
   await shot(page, lang, 'tools-links');

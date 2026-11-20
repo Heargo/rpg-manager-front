@@ -1,4 +1,9 @@
 import { normalizeName } from '../../../core/helpers/formula';
+import {
+  entryHash,
+  IMPORT_MARK,
+  PackEntry as Entry,
+} from '../../../core/packs/pack-content';
 import { levelProgress } from '../../character/helpers/level.rules';
 import {
   Item,
@@ -65,6 +70,14 @@ export function applyWorldRules<T extends World>(
         })),
     };
   };
+  /** A pack copy the GM never edited stays untouched in the eyes of the import: its mark follows the fix. */
+  const fixCatalogueItem = (item: Item): Item => {
+    const fixed = fixItem(item);
+    const mark = (item as Entry)[IMPORT_MARK];
+    return fixed !== item && mark !== undefined && mark === entryHash(item)
+      ? ({ ...fixed, [IMPORT_MARK]: entryHash(fixed) } as Item)
+      : fixed;
+  };
   const curveChanged =
     JSON.stringify(rules.levelCurve) !== JSON.stringify(world.levelCurve) ||
     rules.maxLevel !== world.maxLevel;
@@ -120,7 +133,7 @@ export function applyWorldRules<T extends World>(
     merchantSellRatio: rules.merchantSellRatio ?? world.merchantSellRatio,
     npcVisibility: rules.npcVisibility ?? world.npcVisibility,
     combat: { ...combat, lifeAttribute: life },
-    items: world.items.map(fixItem),
+    items: world.items.map(fixCatalogueItem),
     characters: world.characters.map(fixSheet),
   };
 }

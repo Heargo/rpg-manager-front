@@ -6,7 +6,14 @@ import {
   createSeed,
   cryptoRandomSource,
 } from '../../../core/generators/random-source';
-import { planDice, ThrowPlan, totalRatio } from '../helpers/dice-plan';
+import { planPool, ThrowPlan } from '../helpers/dice-plan';
+import {
+  DiceGroup,
+  DicePool,
+  poolNotation,
+  poolRatio,
+  rollTotal,
+} from '../helpers/dice-pool.rules';
 import { SharedRoll } from '../models/dice-api';
 import { DiceService } from '../services/dice.service';
 
@@ -20,6 +27,12 @@ export interface DiceRoll {
   count: number;
   sides: number;
   values: number[];
+  /** Each type of die and what it drew; `count`, `sides` and `values` are the first type's (all values for `values`). */
+  groups: DiceGroup[];
+  modifier: number;
+  /** "2d6+1d4+3". */
+  notation: string;
+  /** The dice and the modifier. */
   total: number;
   /** 0 (worst) to 1 (best), for colouring. */
   ratio: number;
@@ -40,6 +53,9 @@ export class DiceRollBusiness {
 
   readonly $count = signal(1);
   readonly $sides = signal(20);
+  /** The mixed pool being built on the dice screen (empty: roll `$count` d `$sides`). */
+  readonly $pool = signal<DicePool>([]);
+  readonly $modifier = signal(0);
   /** Roll for the whole table (off by default): the host draws and every player sees the throw. */
   readonly $shareWithTable = signal(false);
   /** True in a room whose host is reachable. */
@@ -62,15 +78,38 @@ export class DiceRollBusiness {
 
   /** Draws the values (cryptographically, unbiased) and opens the table to show them. */
   roll(count = this.$count(), sides = this.$sides()): DiceRoll {
-    const values = rollDice(this.random, count, sides);
+    return this.rollPool([{ sides, count }], 0);
+  }
+
+  /** Draws every die of the pool and opens the table to show them. */
+  rollPool(pool: DicePool, modifier = 0): DiceRoll {
     return this.present({
       id: crypto.randomUUID(),
-      count,
-      sides,
-      values,
+      groups: pool.map(({ sides, count }) => ({
+        sides,
+        count,
+        values: rollDice(this.random, count, sides),
+      })),
+      modifier,
       seed: createSeed(this.random),
       at: Date.now(),
     });
+  }
+
+  /** Rolls what the dice screen holds: the pool when there is one, otherwise `$count` d `$sides`. */
+  rollSelection(): DiceRoll {
+    const pool = this.$pool();
+    return pool.length
+      ? this.rollPool(pool, this.$modifier())
+      : this.roll(this.$count(), this.$sides());
+  }
+
+  /** `rollSelection`, for the table when sharing is on. */
+  rollSelectionAtTable(): Promise<DiceRoll> {
+    const pool = this.$pool();
+    return pool.length
+      ? this.rollPoolAtTable(pool, this.$modifier())
+      : this.rollAtTable();
   }
 
   /** Rolls for the table when sharing is on and the host is reachable (the host draws), otherwise here. */
@@ -78,20 +117,39 @@ export class DiceRollBusiness {
     count = this.$count(),
     sides = this.$sides(),
   ): Promise<DiceRoll> {
+    return this.rollPoolAtTable([{ sides, count }], 0);
+  }
+
+  /** `rollPool` for the table when sharing is on and the host is reachable (the host draws), otherwise here. */
+  async rollPoolAtTable(pool: DicePool, modifier = 0): Promise<DiceRoll> {
     if (!this.$shareWithTable() || !this.$canShare())
-      return this.roll(count, sides);
-    const shared = await this.service.roll({ count, sides });
+      return this.rollPool(pool, modifier);
+    const shared = await this.service.roll({ pool, modifier });
     this.seenTableRolls.add(shared.id);
     return this.presentShared(shared);
+  }
+
+  /** "2d6+1d4+3" for a roll the table shared. */
+  notationOf(roll: SharedRoll): string {
+    const groups = roll.pool ?? [
+      { sides: roll.sides, count: roll.count, values: roll.values },
+    ];
+    return poolNotation(groups, roll.modifier ?? 0);
+  }
+
+  /** The total of a roll the table shared, modifier included. */
+  totalOf(roll: SharedRoll): number {
+    return rollTotal(roll.values, roll.modifier ?? 0);
   }
 
   /** Rolls the same dice again, the same way as the roll being shown. */
   rollAgain(): Promise<DiceRoll> {
     const current = this.current();
     if (!current) return this.rollAtTable();
+    const pool = current.groups.map(({ sides, count }) => ({ sides, count }));
     return current.shared
-      ? this.rollAtTable(current.count, current.sides)
-      : Promise.resolve(this.roll(current.count, current.sides));
+      ? this.rollPoolAtTable(pool, current.modifier)
+      : Promise.resolve(this.rollPool(pool, current.modifier));
   }
 
   /**
@@ -124,9 +182,8 @@ export class DiceRollBusiness {
     const { id, count, sides, values, seed, at } = roll;
     return this.present({
       id,
-      count,
-      sides,
-      values,
+      groups: roll.pool ?? [{ sides, count, values }],
+      modifier: roll.modifier ?? 0,
       seed,
       at,
       shared: { name: roll.by.name, mine },
@@ -137,15 +194,20 @@ export class DiceRollBusiness {
   private present(
     input: Pick<
       DiceRoll,
-      'id' | 'count' | 'sides' | 'values' | 'at' | 'shared' | 'combat'
+      'id' | 'groups' | 'modifier' | 'at' | 'shared' | 'combat'
     > & { seed: string },
   ): DiceRoll {
     const { seed, ...rest } = input;
+    const values = input.groups.flatMap((group) => group.values);
     const roll: DiceRoll = {
       ...rest,
-      total: input.values.reduce((sum, value) => sum + value, 0),
-      ratio: totalRatio(input.values, input.sides),
-      plan: { dice: planDice(input.sides, input.values), seed },
+      count: values.length,
+      sides: input.groups[0].sides,
+      values,
+      notation: poolNotation(input.groups, input.modifier),
+      total: rollTotal(values, input.modifier),
+      ratio: poolRatio(input.groups),
+      plan: { dice: planPool(input.groups), seed },
     };
     this.settled.set(false);
     this.current.set(roll);

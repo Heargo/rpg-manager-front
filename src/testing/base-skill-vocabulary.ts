@@ -7,6 +7,7 @@ import {
   SkillVocabulary,
 } from '../app/core/generators/skill-vocabulary';
 import { PooledSource } from '../app/core/packs/pooled-domain';
+import { baseOtherDomains } from './base-other-domains';
 import { baseManifest } from './base-pack';
 
 /** The skill vocabulary of the real Base pack of a language, pooled alone. */
@@ -20,6 +21,7 @@ export function baseSkillVocabulary(lang: 'en' | 'fr'): SkillVocabulary {
       kinds: (manifest.domains.skills as { kinds?: unknown }).kinds as PooledSource['kinds'],
       texts: (lang === 'en' ? enSkills : frSkills) as unknown as PooledSource['texts'],
       params: (lang === 'en' ? enCommon : frCommon).params,
+      otherDomains: baseOtherDomains(lang, 'skills'),
     },
   ]);
 }

@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
+import { ConfirmationService } from '@openng/optimus-ui/api';
 import { TEST_PROVIDERS } from '../../../../../testing/test-providers';
 import { neonProviders } from '../../../../../testing/unofficial-pack';
 import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
@@ -46,10 +47,21 @@ async function render(
       check();
     });
   const rows = () => [
-    ...el.querySelectorAll<HTMLElement>('[data-test="sprite-row"]'),
+    ...el.querySelectorAll<HTMLElement>('[data-test^="sprite-card-"]'),
   ];
   const rowIds = () =>
-    rows().map((r) => r.querySelector<HTMLInputElement>('input')!.value);
+    rows().map((r) => r.getAttribute('data-test')!.replace('sprite-card-', ''));
+  const doc = (hook: string) =>
+    document.querySelector<HTMLElement>(`[data-test="${hook}"]`);
+  const press = async (hook: string) => {
+    await settle(() => expect(doc(hook)).not.toBeNull());
+    const host = doc(hook)!;
+    (host.querySelector('button') ?? host).click();
+  };
+  const openCard = async (id: string) => {
+    el.querySelector<HTMLElement>(`[data-test="sprite-card-${id}"]`)!.click();
+    await settle(() => expect(doc('sprite-detail')).not.toBeNull());
+  };
   const tab = async (label: string) => {
     [...el.querySelectorAll<HTMLElement>('[role="tab"]')]
       .find((t) => t.textContent!.trim() === label)!
@@ -74,6 +86,9 @@ async function render(
     settle,
     rows,
     rowIds,
+    doc,
+    press,
+    openCard,
     tab,
     goToPage,
     saved,
@@ -85,7 +100,7 @@ describe('PackDraftPageComponent: sprites tab on a large draft', () => {
     const { el, rows, tab, settle } = await render(30);
 
     expect(rows()).toHaveLength(0);
-    await tab('Word lists');
+    await tab('Items');
     await tab('Publish');
     expect(rows()).toHaveLength(0);
     expect(el.querySelector('p-paginator')).toBeNull();
@@ -94,7 +109,7 @@ describe('PackDraftPageComponent: sprites tab on a large draft', () => {
     await settle(() => expect(rows()).toHaveLength(12));
   });
 
-  it('shows 12 rows and a paginator on the first page', async () => {
+  it('shows 12 cards and a paginator on the first page', async () => {
     const { el, rows, rowIds, tab, settle } = await render(30);
 
     await tab('Sprites');
@@ -116,20 +131,23 @@ describe('PackDraftPageComponent: sprites tab on a large draft', () => {
     expect(rowIds()).toEqual(['s25', 's26', 's27', 's28', 's29', 's30']);
   });
 
-  it('edits the right sprite of the draft from page 2', async () => {
-    const { rows, tab, goToPage, settle, saved } = await render(30);
+  it('edits the right sprite of the draft from page 2 through the drawer', async () => {
+    const { rows, tab, goToPage, settle, saved, openCard, press, doc } =
+      await render(30);
     await tab('Sprites');
     await settle(() => expect(rows()).toHaveLength(12));
     await goToPage(2);
-    await settle(() =>
-      expect(rows()[0].querySelector<HTMLInputElement>('input')!.value).toBe(
-        's13',
-      ),
-    );
+    await settle(() => expect(rows()[0].getAttribute('data-test')).toBe('sprite-card-s13'));
 
-    const inputs = rows()[1].querySelectorAll<HTMLInputElement>('input');
-    inputs[1].value = 'Renamed';
-    inputs[1].dispatchEvent(new Event('input'));
+    await openCard('s14');
+    await press('detail-edit');
+    await settle(() => expect(doc('sprite-label')).not.toBeNull());
+    const host = doc('sprite-label')!;
+    const input = host instanceof HTMLInputElement ? host : host.querySelector('input')!;
+    input.value = 'Renamed';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    await press('form-save');
 
     await vi.waitFor(
       async () => {
@@ -141,24 +159,23 @@ describe('PackDraftPageComponent: sprites tab on a large draft', () => {
     );
   });
 
-  it('removes the right sprite from page 2', async () => {
-    const { rows, tab, goToPage, settle, creator, draft } = await render(30);
+  it('removes the right sprite from page 2 through the drawer', async () => {
+    const { rows, tab, goToPage, settle, creator, draft, openCard, press } =
+      await render(30);
+    const ask = vi.spyOn(TestBed.inject(ConfirmationService), 'confirm');
     await tab('Sprites');
     await settle(() => expect(rows()).toHaveLength(12));
     await goToPage(2);
-    await settle(() =>
-      expect(rows()[0].querySelector<HTMLInputElement>('input')!.value).toBe(
-        's13',
-      ),
-    );
+    await settle(() => expect(rows()[0].getAttribute('data-test')).toBe('sprite-card-s13'));
 
-    [...rows()[2].querySelectorAll('button')].at(-1)!.click();
+    await openCard('s15');
+    await press('detail-delete');
+    await settle(() => expect(ask).toHaveBeenCalled());
+    (ask.mock.calls[0][0] as { accept: () => void }).accept();
 
     await vi.waitFor(
       async () => {
-        const ids = (await creator.getDraft(draft.id))!.sprites.map(
-          (s) => s.id,
-        );
+        const ids = (await creator.getDraft(draft.id))!.sprites.map((s) => s.id);
         expect(ids).toHaveLength(29);
         expect(ids).not.toContain('s15');
       },
@@ -167,13 +184,18 @@ describe('PackDraftPageComponent: sprites tab on a large draft', () => {
   });
 
   it('goes back a page when the only sprite of the last page is removed', async () => {
-    const { rows, rowIds, tab, goToPage, settle } = await render(25);
+    const { rows, rowIds, tab, goToPage, settle, openCard, press } =
+      await render(25);
+    const ask = vi.spyOn(TestBed.inject(ConfirmationService), 'confirm');
     await tab('Sprites');
     await settle(() => expect(rows()).toHaveLength(12));
     await goToPage(3);
     await settle(() => expect(rowIds()).toEqual(['s25']));
 
-    [...rows()[0].querySelectorAll('button')].at(-1)!.click();
+    await openCard('s25');
+    await press('detail-delete');
+    await settle(() => expect(ask).toHaveBeenCalled());
+    (ask.mock.calls[0][0] as { accept: () => void }).accept();
 
     await settle(() => expect(rows()).toHaveLength(12));
     expect(rowIds()[0]).toBe('s13');
@@ -186,6 +208,7 @@ describe('PackDraftPageComponent: sprites tab on a large draft', () => {
     await tab('Sprites');
     await settle(() => expect(rows()).toHaveLength(12));
 
+    // The "Add a PNG image" menu entry drives a hidden file input.
     const input = el.querySelector<HTMLInputElement>('input[type="file"]')!;
     Object.defineProperty(input, 'files', {
       value: [new File(['png'], 'new.png', { type: 'image/png' })],
@@ -213,10 +236,12 @@ describe('PackDraftPageComponent: sprites tab on a large draft', () => {
     await tab('Sprites');
     await settle(() => expect(rows()).toHaveLength(12));
 
-    expect(rows()[0].querySelector('.error')).not.toBeNull();
-    expect(el.querySelectorAll('[data-test="sprite-row"] .error')).toHaveLength(
-      1,
-    );
+    expect(
+      el.querySelectorAll('[data-test="sprite-duplicate-id"]'),
+    ).toHaveLength(1);
+    expect(
+      rows()[0].querySelector('[data-test="sprite-duplicate-id"]'),
+    ).not.toBeNull();
   });
 
   it('has no paginator on a draft of 12 sprites or fewer', async () => {

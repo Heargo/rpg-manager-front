@@ -4,7 +4,15 @@
     <p class="hint">{{ "world.rules.intro" | translate }}</p>
   </header>
 
-  @if (world()) {
+  @if (world(); as current) {
+    @if (flow.$pending(); as pending) {
+      <app-pack-attribute-mapping
+        [missing]="pending.missing"
+        [attributes]="current.attributes"
+        (confirmed)="flow.confirm($event)"
+        (cancelled)="flow.cancel()"
+      />
+    }
     <p-tabs [value]="tab()" (valueChange)="openTab($event)">
       <p-tablist>
         <p-tab

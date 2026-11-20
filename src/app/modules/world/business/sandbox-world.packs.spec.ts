@@ -62,12 +62,12 @@ describe('the sandbox world gives its packs to the generators', () => {
   it('offers the packs chosen in the sandbox rules', async () => {
     await values(['base-fr']);
 
-    sandbox.applyRules(rules(['base-fr', 'base-en']));
+    sandbox.applyRules(rules(['base-fr', 'base-en', 'base-assets']));
 
     await values(['base-fr', 'base-en']);
     expect(
       (await TestBed.inject(PackBusiness).sprites()).some(
-        (s) => s.packId === 'base-en',
+        (s) => s.packId === 'base-assets',
       ),
     ).toBe(true);
   });

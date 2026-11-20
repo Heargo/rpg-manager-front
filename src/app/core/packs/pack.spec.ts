@@ -186,9 +186,9 @@ describe('packFileUrl', () => {
 });
 
 describe.each([
-  ['base-fr', 'fr', 'Hache'],
-  ['base-en', 'en', 'Axe'],
-] as const)('the real %s pack (public/packs/%s/pack.json)', (id, language, axeLabel) => {
+  ['base-fr', 'fr'],
+  ['base-en', 'en'],
+] as const)('the real %s pack (public/packs/%s/pack.json)', (id, language) => {
   const read = (): unknown => JSON.parse(readFileSync(BASE_JSON(id), 'utf8'));
 
   it(`is a valid manifest with id "${id}" and language "${language}"`, () => {
@@ -199,15 +199,10 @@ describe.each([
     expect(result.value.format).toBe(2);
   });
 
-  it('lists 101 masked sprites, each id once, with a label in its language', () => {
+  it('lists no sprite: they live in the neutral base-assets pack', () => {
     const result = validatePack(read());
     if (!result.ok) throw new Error(result.errors.join('\n'));
-    const sprites = result.value.sprites;
-    expect(sprites).toHaveLength(101);
-    expect(new Set(sprites.map((s) => s.id)).size).toBe(101);
-    expect(sprites.every((s) => s.kind === 'masked')).toBe(true);
-    const axe = sprites.find((s) => s.id === 'axe');
-    expect(axe).toMatchObject({ label: axeLabel, domain: 'items', kinds: ['axe'], image: 'sprites/axe.png', materials: 'sprites/axe.json' });
+    expect(result.value.sprites).toEqual([]);
   });
 
   it('provides the four generators once', () => {
@@ -226,9 +221,34 @@ describe.each([
       ...(['items', 'npcs', 'skills', 'classes'] as const).map((g) => result.value.domains?.[g]?.texts),
       ...result.value.sprites.flatMap((s) => [s.image, s.materials ?? '']),
     ].filter(Boolean) as string[];
-    expect(files.length).toBe(4 + 202);
+    expect(files.length).toBe(4);
     for (const file of files) expect(existsSync(join(dir, file)), file).toBe(true);
     expect(statSync(BASE_JSON(id)).size).toBeLessThan(64 * 1024);
+  });
+});
+
+describe('the real base-assets pack (public/packs/base-assets/pack.json)', () => {
+  const path = join(process.cwd(), 'public/packs/base-assets/pack.json');
+  const read = (): unknown => JSON.parse(readFileSync(path, 'utf8'));
+
+  it('lists 101 masked sprites, each id once, with a label', () => {
+    const result = validatePack(read());
+    if (!result.ok) throw new Error(result.errors.join('\n'));
+    const sprites = result.value.sprites;
+    expect(sprites).toHaveLength(101);
+    expect(new Set(sprites.map((s) => s.id)).size).toBe(101);
+    expect(sprites.every((s) => s.kind === 'masked')).toBe(true);
+    const axe = sprites.find((s) => s.id === 'axe');
+    expect(axe).toMatchObject({ label: 'Axe', domain: 'items', kinds: ['axe'], image: 'sprites/axe.png', materials: 'sprites/axe.json' });
+  });
+
+  it('has every listed file on disk', () => {
+    const result = validatePack(read());
+    if (!result.ok) throw new Error(result.errors.join('\n'));
+    const files = result.value.sprites.flatMap((s) => [s.image, s.materials ?? '']).filter(Boolean);
+    expect(files.length).toBe(202);
+    for (const file of files) expect(existsSync(join(dirname(path), file)), file).toBe(true);
+    expect(statSync(path).size).toBeLessThan(64 * 1024);
   });
 });
 

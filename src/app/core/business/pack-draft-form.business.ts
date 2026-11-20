@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { drawNpcTexts } from '../../modules/npc/helpers/npc-editor.rules';
+import { drawNpcTexts } from '../generators/npc-texts';
 import { validateClassWordList } from '../generators/class-word-list';
 import { buildClassVocabulary } from '../generators/class-vocabulary';
 import { classTexts } from '../generators/class-generator';
@@ -14,6 +14,7 @@ import {
   buildItemVocabulary,
   ItemVocabulary,
 } from '../generators/item-vocabulary';
+import { pick } from '../generators/random';
 import { seededRandomSource } from '../generators/random-source';
 import { validateItemWordList } from '../generators/word-list';
 import { ItemDraft, ITEM_RARITIES, ItemRarity } from '../models/item';
@@ -25,7 +26,8 @@ import {
   STRUCTURED_DOMAINS,
   StructuredDomain,
 } from '../packs/pack-draft-edits';
-import { PooledSource } from '../packs/pooled-domain';
+import { KindDomain, PooledSource } from '../packs/pooled-domain';
+import { PackKindSourcesBusiness } from './pack-kind-sources.business';
 import { LanguageBusiness } from './language.business';
 import {
   basePackId,
@@ -43,10 +45,29 @@ export interface KnownKeys {
   domainKinds: Record<StructuredDomain, KindKey[]>;
 }
 
+/** The drawable kinds below `kind`, at any depth, that pass `usable`. */
+function descendants(
+  vocabulary: {
+    kind(id: string): { chain: string[] } | undefined;
+    drawable(): string[];
+  },
+  kind: string,
+  usable: (id: string) => boolean,
+): string[] {
+  return vocabulary
+    .drawable()
+    .filter(
+      (id) =>
+        id !== kind && vocabulary.kind(id)?.chain.includes(kind) && usable(id),
+    );
+}
+
 /** One draw of an NPC, skill or class kind in the preview. */
 export interface DomainPreview {
   name: string;
   description: string;
+  /** The kind the entry was drawn from: the previewed kind or one of its descendants. */
+  kind: string;
 }
 
 /** A validation message of the draft, with the field it concerns. */
@@ -124,11 +145,36 @@ function domainOf(message: string): Pick<DraftIssue, 'domain'> {
   return domain ? { domain: domain[1] as StructuredDomain } : {};
 }
 
+const DRAFT_DOMAINS: Record<KindDomain, (draft: PackDraft) => unknown> = {
+  items: (draft) => draft.kinds,
+  npcs: (draft) => domainKindsOf(draft, 'npcs'),
+  skills: (draft) => domainKindsOf(draft, 'skills'),
+  classes: (draft) => domainKindsOf(draft, 'classes'),
+};
+
+/** The kinds and texts of the draft's domains other than `own`, for `{kind id}` in a phrase. */
+function draftOtherDomains(
+  draft: PackDraft,
+  own: KindDomain,
+): NonNullable<PooledSource['otherDomains']> {
+  const result: NonNullable<PooledSource['otherDomains']> = {};
+  for (const domain of Object.keys(DRAFT_DOMAINS) as KindDomain[]) {
+    if (domain === own) continue;
+    const texts = draft.generators[domain];
+    result[domain] = {
+      kinds: DRAFT_DOMAINS[domain](draft) as PooledSource['kinds'],
+      ...(isRecord(texts) ? { texts } : {}),
+    };
+  }
+  return result;
+}
+
 /** What the pack form needs beyond editing the draft: known keys, sprite coverage, previews and field-level issues. */
 @Injectable({ providedIn: 'root' })
 export class PackDraftFormBusiness {
   private readonly packs = inject(PackBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly kindSources = inject(PackKindSourcesBusiness);
   private cache: {
     installed: InstalledPack[];
     language: string;
@@ -207,12 +253,19 @@ export class PackDraftFormBusiness {
   ): Promise<ItemDraft[]> {
     const vocabulary = await this.vocabulary(draft);
     const info = vocabulary.kind(kind);
-    if (!info || vocabulary.nouns(kind).length === 0) return [];
-    const only: ItemVocabulary = { ...vocabulary, drawable: () => [kind] };
+    if (!info) return [];
+    const own = vocabulary.nouns(kind).length > 0;
+    const below = own ? [] : descendants(vocabulary, kind, () => true);
+    if (!own && below.length === 0) return [];
     const source = seededRandomSource(`${draft.id}:${kind}`);
-    return Array.from({ length: count }, () =>
-      generateItem(source, only, { attributes: [], type: info.type }),
-    );
+    return Array.from({ length: count }, () => {
+      const target = own ? kind : pick(source, below);
+      const only: ItemVocabulary = { ...vocabulary, drawable: () => [target] };
+      return generateItem(source, only, {
+        attributes: [],
+        type: vocabulary.kind(target)!.type,
+      });
+    });
   }
 
   /** The errors and warnings of the draft, each with the kind, tint, param or rarity it is about. */
@@ -240,24 +293,32 @@ export class PackDraftFormBusiness {
     if (!pack.ok) add('error', pack.errors);
     else add('warning', pack.warnings);
 
+    const known = await this.knownKeys(draft);
+    // A placeholder names a param, or a kind of any domain of the active packs.
+    const names = [
+      ...known.params,
+      ...known.kinds.map((kind) => kind.id),
+      ...STRUCTURED_DOMAINS.flatMap((domain) =>
+        known.domainKinds[domain].map((kind) => kind.id),
+      ),
+    ];
     const items = draft.generators.items;
     if (isRecord(items)) {
-      const known = await this.knownKeys(draft);
-      const list = validateItemWordList(items, known.params);
+      const list = validateItemWordList(items, names);
       if (!list.ok) add('error', list.errors);
       else add('warning', list.warnings);
     }
     for (const domain of STRUCTURED_DOMAINS) {
       const file = draft.generators[domain];
       if (!isRecord(file)) continue;
-      const known = await this.knownKeys(draft);
-      const list = WORD_LIST_VALIDATORS[domain](file, known.params);
+      const list = WORD_LIST_VALIDATORS[domain](file, names);
       if (!list.ok) addFor(domain, 'error', list.errors);
       else addFor(domain, 'warning', list.warnings);
     }
     if (draft.common !== undefined) {
-      const common = validateCommonTexts(draft.common);
+      const common = validateCommonTexts(draft.common, names);
       if (!common.ok) add('error', common.errors);
+      else add('warning', common.warnings);
     }
     return issues;
   }
@@ -271,30 +332,38 @@ export class PackDraftFormBusiness {
   ): Promise<DomainPreview[]> {
     const sources = await this.domainSources(draft, domain);
     const random = seededRandomSource(`${draft.id}:${domain}:${kind}`);
-    const draw = (one: () => DomainPreview) =>
-      Array.from({ length: count }, one);
+    let vocabulary: {
+      kind(id: string): { chain: string[] } | undefined;
+      drawable(): string[];
+    };
+    let canDraw: (id: string) => boolean;
+    let one: (id: string) => { name: string; description: string };
     if (domain === 'npcs') {
-      const vocabulary = buildNpcVocabulary(sources);
-      const info = vocabulary.kind(kind);
-      if (
-        !info ||
-        (info.person
-          ? vocabulary.given().length === 0
-          : vocabulary.nouns(kind).length === 0)
-      )
-        return [];
-      return draw(() => drawNpcTexts(random, vocabulary, kind));
+      const npcs = buildNpcVocabulary(sources);
+      vocabulary = npcs;
+      canDraw = (id) =>
+        npcs.kind(id)!.person
+          ? npcs.given().length > 0
+          : npcs.nouns(id).length > 0;
+      one = (id) => drawNpcTexts(random, npcs, id);
+    } else if (domain === 'skills') {
+      const skills = buildSkillVocabulary(sources);
+      vocabulary = skills;
+      canDraw = (id) => skills.nouns(id).length > 0;
+      one = (id) => skillTexts(random, skills, id);
+    } else {
+      const classes = buildClassVocabulary(sources);
+      vocabulary = classes;
+      canDraw = (id) => classes.nouns(id).length > 0;
+      one = (id) => classTexts(random, classes, id);
     }
-    if (domain === 'skills') {
-      const vocabulary = buildSkillVocabulary(sources);
-      if (!vocabulary.kind(kind) || vocabulary.nouns(kind).length === 0)
-        return [];
-      return draw(() => skillTexts(random, vocabulary, kind));
-    }
-    const vocabulary = buildClassVocabulary(sources);
-    if (!vocabulary.kind(kind) || vocabulary.nouns(kind).length === 0)
-      return [];
-    return draw(() => classTexts(random, vocabulary, kind));
+    if (!vocabulary.kind(kind)) return [];
+    const below = canDraw(kind) ? [] : descendants(vocabulary, kind, canDraw);
+    if (!canDraw(kind) && below.length === 0) return [];
+    return Array.from({ length: count }, () => {
+      const target = below.length > 0 ? pick(random, below) : kind;
+      return { ...one(target), kind: target };
+    });
   }
 
   // --- the installed packs ----------------------------------------------------------------------------------
@@ -398,6 +467,11 @@ export class PackDraftFormBusiness {
         isBase: true,
         language,
         kinds: base[FIELDS[domain]] as PooledSource['kinds'],
+        otherDomains: await this.kindSources.otherDomains(
+          base.id,
+          language,
+          domain,
+        ),
       };
       const list = base.generators[domain]
         ? await this.packs.wordList(domain, base.id).catch(() => undefined)
@@ -430,6 +504,7 @@ export class PackDraftFormBusiness {
       isBase: false,
       language,
       kinds: domainKindsOf(draft, domain) as PooledSource['kinds'],
+      otherDomains: draftOtherDomains(draft, domain),
     };
     const file = draft.generators[domain];
     const checked = isRecord(file) ? validate(file) : undefined;
@@ -455,6 +530,11 @@ export class PackDraftFormBusiness {
         language,
         kinds: base.kinds as PooledSource['kinds'],
         tints: base.tints,
+        otherDomains: await this.kindSources.otherDomains(
+          base.id,
+          language,
+          'items',
+        ),
       };
       const list = base.generators.items
         ? await this.packs.wordList('items', base.id).catch(() => undefined)
@@ -492,6 +572,7 @@ export class PackDraftFormBusiness {
       language,
       kinds: draft.kinds as PooledSource['kinds'],
       tints: draft.tints,
+      otherDomains: draftOtherDomains(draft, 'items'),
     };
     const items = draft.generators.items;
     const checked = isRecord(items) ? validateItemWordList(items) : undefined;

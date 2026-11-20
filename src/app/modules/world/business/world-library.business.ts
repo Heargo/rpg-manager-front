@@ -1,6 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { ImageBusiness } from '../../../core/business/image.business';
-import { basePackId, packLanguageOf } from '../../../core/business/pack.business';
+import { BundledWorldImage, defaultPacks, packLanguageOf } from '../../../core/business/pack.business';
 import { LanguageBusiness } from '../../../core/business/language.business';
 import { ItemVocabularyBusiness } from '../../../core/business/item-vocabulary.business';
 import { seededRandomSource } from '../../../core/generators/random-source';
@@ -9,7 +9,15 @@ import { validateWorldDraft, WorldDraftErrors } from '../helpers/world-draft.rul
 import { buildWorldExport, ExportedImage, parseWorldExport, WorldExport } from '../helpers/world-export';
 import { createWorld, remapWorldImages, summarizeWorld, worldImageIds } from '../helpers/world.factory';
 import { World, WorldDraft, WorldSummary } from '../models/world';
+import { PackContentApplier } from './pack-content-applier.business';
 import { WorldStorageService } from '../services/world-storage.service';
+
+const IMAGE_TYPES: Record<string, string> = {
+  webp: 'image/webp',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+};
 
 export class WorldImportError extends Error {
   constructor(readonly errors: string[]) {
@@ -24,6 +32,7 @@ export class WorldLibraryBusiness {
   private readonly imageBusiness = inject(ImageBusiness);
   private readonly wordLists = inject(ItemVocabularyBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly contentApplier = inject(PackContentApplier);
 
   private readonly worlds = signal<WorldSummary[]>([]);
   /** Most recently changed first. */
@@ -40,11 +49,11 @@ export class WorldLibraryBusiness {
     return world && { ...world, packs: world.packs ?? [], language: world.language ?? appLanguage };
   }
 
-  /** Creates a world, optionally with the default items and the starter classes and skills built on its own attributes (in the active language). */
+  /** Creates a world, optionally with the default items and the classes and skills of its packs (imported on its own attributes). */
   async create(draft: WorldDraft, options: { starterItems?: boolean; starterClasses?: boolean } = {}): Promise<World> {
     const appLanguage = packLanguageOf(this.language.$language());
     let world = createWorld(
-      { ...draft, packs: draft.packs ?? [basePackId(this.language.$language())], language: draft.language ?? appLanguage },
+      { ...draft, packs: draft.packs ?? defaultPacks(this.language.$language()), language: draft.language ?? appLanguage },
       () => crypto.randomUUID(), Date.now());
     if (options.starterItems) {
       const vocabulary = await this.wordLists.vocabulary();
@@ -56,8 +65,7 @@ export class WorldLibraryBusiness {
       world = { ...world, items: items.map((item) => ({ ...item, id: crypto.randomUUID() })) };
     }
     if (options.starterClasses) {
-      const { buildStarterClasses } = await import('../helpers/starter-classes');
-      world = { ...world, ...buildStarterClasses(world, this.language.$language(), () => crypto.randomUUID()) };
+      world = await this.contentApplier.applyAndSkipMissing(world, { domains: ['skills', 'classes'] });
     }
     await this.persist(world);
     return world;
@@ -71,6 +79,16 @@ export class WorldLibraryBusiness {
   /** Stores an uploaded picture (world icon…) and returns its image id. */
   uploadImage(file: Blob): Promise<string> {
     return this.imageBusiness.storeUpload(file);
+  }
+
+  /** Fetches a pack world image and stores a copy like an upload, so the world keeps it without the pack. Returns its image id. */
+  async chooseWorldImage(image: BundledWorldImage): Promise<string> {
+    const response = await fetch(image.imageUrl);
+    if (!response.ok) throw new Error(`${image.imageUrl}: ${response.status}`);
+    const blob = await response.blob();
+    const extension = image.imageUrl.split('.').pop()?.toLowerCase() ?? '';
+    const type = blob.type.startsWith('image/') ? blob.type : (IMAGE_TYPES[extension] ?? 'image/webp');
+    return this.uploadImage(new Blob([blob], { type }));
   }
 
   /** Saves changes and bumps `updatedAt`. */

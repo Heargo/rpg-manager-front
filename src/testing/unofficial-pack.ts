@@ -1,5 +1,5 @@
 import { Provider } from '@angular/core';
-import glowMaterials from '../../public/packs/base-fr/sprites/axe.json';
+import glowMaterials from '../../public/packs/base-assets/sprites/axe.json';
 import { ImageProcessingService } from '../app/core/services/image-processing.service';
 import { PackService } from '../app/core/services/pack.service';
 import { EXTRA_ITEMS, EXTRA_NPCS, ExtraPackFake, extraPackService } from './extra-pack';

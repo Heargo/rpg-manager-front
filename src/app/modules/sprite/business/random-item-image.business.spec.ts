@@ -34,7 +34,7 @@ function setup(saved: SpriteSet[] = []) {
       { provide: ImageStorageService, useValue: storage },
     ],
   });
-  // The item names of these specs are French, and so is the app: sprites come from base-fr.
+  // The item names of these specs are French, and so is the app; the sprites come from the neutral base-assets pack.
   TestBed.inject(LanguageBusiness).setLanguage('fr');
   return { business: TestBed.inject(RandomItemImageBusiness), files, images, storage };
 }
@@ -45,7 +45,7 @@ describe('RandomItemImageBusiness', () => {
     const id = await business.create({ name: 'Hache du nord', type: 'equipment', slot: 'weapon1', kind: 'axe' }, 'seed');
     expect(id).toBe('stored-1');
     const url = (files.fetchImage.mock.calls[0] as unknown[])[0];
-    expect(url).toBe('packs/base-fr/sprites/axe.png');
+    expect(url).toBe('packs/base-assets/sprites/axe.png');
     expect(files.fetchText).toHaveBeenCalledWith(String(url).replace('.png', '.json'));
     expect(files.encodePng).toHaveBeenCalled();
     expect(images.storeUpload).toHaveBeenCalled();

@@ -335,7 +335,7 @@ describe.each(['base-fr', 'base-en'] as const)('the real %s pack in format 2', (
       ['shield', 'weapon2'],
     ];
     for (const [kind, slot] of levels) {
-      expect(kinds[kind], kind).toEqual({ parent: 'equipment', slot });
+      expect(kinds[kind], kind).toMatchObject({ parent: 'equipment', slot });
     }
   });
 
@@ -354,7 +354,33 @@ describe.each(['base-fr', 'base-en'] as const)('the real %s pack in format 2', (
     expect(domains.classes?.texts).toBe('generators/classes.json');
   });
 
-  it('gives every one of the 101 sprites the domain items and kinds that exist in its tree', () => {
+  it('lists files that exist on disk', () => {
+    const { value } = validated();
+    const dir = dirname(BASE_JSON(id));
+    const d = value.domains ?? {};
+    const files = [d.items?.texts, d.npcs?.texts, d.skills?.texts, d.classes?.texts, value.common].filter(Boolean) as string[];
+    expect(files.length).toBeGreaterThanOrEqual(4);
+    for (const file of files) expect(existsSync(join(dir, file)), file).toBe(true);
+  });
+});
+
+describe('the real base-assets pack in format 2', () => {
+  const read = (): Record<string, any> => JSON.parse(readFileSync(BASE_JSON('base-assets'), 'utf8'));
+
+  const validated = () => {
+    const result = validatePack(read());
+    if (!result.ok) throw new Error(result.errors.join('\n'));
+    return result;
+  };
+
+  it('is a valid format 2 manifest without warnings or language', () => {
+    const result = validated();
+    expect(result.value.format).toBe(2);
+    expect(result.warnings).toEqual([]);
+    expect(result.value.language).toBeUndefined();
+  });
+
+  it('gives every one of the 101 sprites the domain items and kinds that exist in its own tree', () => {
     const { value } = validated();
     const kinds = value.domains?.items?.kinds ?? {};
     expect(value.sprites).toHaveLength(101);
@@ -390,15 +416,6 @@ describe.each(['base-fr', 'base-en'] as const)('the real %s pack in format 2', (
       expect(resolve(sprite!.kinds[0]), spriteId).toEqual(want);
     }
   });
-
-  it('lists files that exist on disk', () => {
-    const { value } = validated();
-    const dir = dirname(BASE_JSON(id));
-    const d = value.domains ?? {};
-    const files = [d.items?.texts, d.npcs?.texts, d.skills?.texts, d.classes?.texts, value.common].filter(Boolean) as string[];
-    expect(files.length).toBeGreaterThanOrEqual(4);
-    for (const file of files) expect(existsSync(join(dir, file)), file).toBe(true);
-  });
 });
 
 describe('the two real Bases together', () => {
@@ -411,12 +428,10 @@ describe('the two real Bases together', () => {
     expect(fr['tints']).toEqual(en['tints']);
   });
 
-  it('give each sprite the same kinds in both languages', () => {
-    const fr = read('base-fr');
-    const en = read('base-en');
-    const kindsOf = (pack: Record<string, any>) =>
-      Object.fromEntries(pack['sprites'].map((s: any) => [s.id, s.kinds]));
-    expect(kindsOf(fr)['axe']).toBeDefined();
-    expect(kindsOf(fr)).toEqual(kindsOf(en));
+  it('declare the kinds base-assets repeats for its sprites exactly like base-assets does', () => {
+    const assets = read('base-assets')['domains'].items.kinds as Record<string, unknown>;
+    const fr = read('base-fr')['domains'].items.kinds as Record<string, unknown>;
+    expect(Object.keys(assets).length).toBeGreaterThan(0);
+    for (const [id, kind] of Object.entries(assets)) expect(fr[id], id).toEqual(kind);
   });
 });

@@ -8,7 +8,7 @@ import { COMMON_TEXTS_VERSION, validateCommonTexts } from './common-texts';
 type Json = Record<string, any>;
 
 const valid = (): Json => ({
-  version: 1,
+  version: 2,
   params: {
     maker: ['un forgeron nain', 'les moines de {place}', 'un apprenti [maladroit|pressé]'],
     place: ['Valombre', 'la côte gelée'],
@@ -21,8 +21,8 @@ const errorsOf = (json: unknown): string[] => {
 };
 
 describe('validateCommonTexts', () => {
-  it('is version 1', () => {
-    expect(COMMON_TEXTS_VERSION).toBe(1);
+  it('is version 2', () => {
+    expect(COMMON_TEXTS_VERSION).toBe(2);
   });
 
   it('accepts params and gives the value back, with no warning', () => {
@@ -36,12 +36,17 @@ describe('validateCommonTexts', () => {
   });
 
   it('rejects a wrong version and a file that gives nothing', () => {
-    expect(errorsOf({ ...valid(), version: 2 })).toContain('version must be 1');
-    expect(validateCommonTexts({ version: 1 }).ok).toBe(false);
+    expect(errorsOf({ ...valid(), version: 1 })).toContain('version must be 2');
+    expect(validateCommonTexts({ version: 2 }).ok).toBe(false);
   });
 
   it('rejects unknown fields', () => {
-    expect(errorsOf({ ...valid(), kinds: {} }).some((e) => e.includes('kinds'))).toBe(true);
+    expect(errorsOf({ ...valid(), colour: {} }).some((e) => e.includes('colour'))).toBe(true);
+  });
+
+  it('rejects the kinds of the former common.json as an unknown field', () => {
+    const errors = errorsOf({ ...valid(), kinds: { iron: { words: [{ text: 'fer' }] } } });
+    expect(errors.some((e) => e.includes('kinds'))).toBe(true);
   });
 
   it('rejects a bad param name and bad entries, with their path', () => {
@@ -79,13 +84,13 @@ describe('validateCommonTexts', () => {
 
 describe('the Base common texts', () => {
   it.each([
-    ['en', enCommon],
-    ['fr', frCommon],
-  ])('%s is valid, with the standard params of 5 entries or more', (_lang, json) => {
+    ['en', enCommon, enPack],
+    ['fr', frCommon, frPack],
+  ])('%s is valid, with the standard params, material included, of 5 entries or more', (_lang, json, pack) => {
     const result = validateCommonTexts(json);
     expect(result.ok ? [] : result.errors).toEqual([]);
     expect(result.ok ? result.warnings : []).toEqual([]);
-    for (const name of ['maker', 'owner', 'place', 'event', 'material', 'creature', 'effect']) {
+    for (const name of ['maker', 'owner', 'place', 'event', 'creature', 'effect', 'material']) {
       const entries: string[] = (json as Json)['params'][name] ?? [];
       expect(entries.length, name).toBeGreaterThanOrEqual(5);
       for (const entry of entries) expect(checkPhrase(entry).errors).toEqual([]);

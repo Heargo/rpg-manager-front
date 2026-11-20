@@ -1,29 +1,40 @@
 {
-  "format": 1,
-  "packs": [
-    {
-      "id": "base-fr",
-      "name": "Base (français)",
-      "description": "Les listes de mots et les 101 sprites d'objets fournis avec l'application.",
-      "author": "RPG Manager (sprites: Florian Sciberras)",
-      "license": "CC-BY-4.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
-      "size": 0,
-      "sprites": 101,
-      "language": "fr",
-      "builtIn": true
-    },
-    {
-      "id": "base-en",
-      "name": "Base (English)",
-      "description": "The word lists and the 101 item sprites bundled with the app.",
-      "author": "RPG Manager (sprites: Florian Sciberras)",
-      "license": "CC-BY-4.0",
-      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
-      "size": 0,
-      "sprites": 101,
-      "language": "en",
-      "builtIn": true
-    }
-  ]
+ "format": 1,
+ "packs": [
+  {
+   "id": "base-fr",
+   "name": "Base (français)",
+   "description": "Les listes de mots, textes et contenus fournis avec l'application.",
+   "author": "RPG Manager",
+   "license": "CC-BY-4.0",
+   "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "size": 0,
+   "sprites": 0,
+   "language": "fr",
+   "builtIn": true
+  },
+  {
+   "id": "base-en",
+   "name": "Base (English)",
+   "description": "The word lists, texts and content bundled with the app.",
+   "author": "RPG Manager",
+   "license": "CC-BY-4.0",
+   "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "size": 0,
+   "sprites": 0,
+   "language": "en",
+   "builtIn": true
+  },
+  {
+   "id": "base-assets",
+   "name": "Base assets",
+   "description": "The 101 item sprites bundled with the app, shared by every language.",
+   "author": "RPG Manager (sprites: Florian Sciberras)",
+   "license": "CC-BY-4.0",
+   "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+   "size": 0,
+   "sprites": 101,
+   "builtIn": true
+  }
+ ]
 }

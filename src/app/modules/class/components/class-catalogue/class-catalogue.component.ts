@@ -34,9 +34,10 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
     SkillTreeComponent,
   ],
   template: `
-    <div class="toolbar">
+    <div class="toolbar" data-field="toolbar">
       <input
         pInputText
+        class="search"
         data-field="search"
         type="search"
         [attr.aria-label]="'class.catalogue.search' | translate"
@@ -47,6 +48,7 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
       />
       <button
         pButton
+        class="create"
         type="button"
         data-action="create"
         icon="pi pi-plus"
@@ -56,11 +58,11 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
       <button
         pButton
         type="button"
-        data-action="add-defaults"
-        icon="pi pi-plus"
+        data-action="import-packs"
+        icon="pi pi-download"
         severity="secondary"
-        [label]="'class.catalogue.addDefaults' | translate"
-        (click)="addDefaults.emit()"
+        [label]="'packImport.import' | translate"
+        (click)="importPacks.emit()"
       ></button>
     </div>
 
@@ -234,6 +236,14 @@ import { SkillTreeComponent } from '../skill-tree/skill-tree.component';
       gap: 0.75rem;
       align-items: center;
     }
+    /* phone: search and New class stacked at full width */
+    @media (max-width: 40rem) {
+      .toolbar .search,
+      .toolbar .create {
+        flex: 1 1 100%;
+        width: 100%;
+      }
+    }
     /* one card per entry, so a long list keeps some relief */
     .list {
       display: flex;
@@ -379,7 +389,7 @@ export class ClassCatalogueComponent {
   readonly items = input<Item[]>([]);
 
   readonly create = output<void>();
-  readonly addDefaults = output<void>();
+  readonly importPacks = output<void>();
   readonly edit = output<CharacterClass>();
   readonly duplicate = output<CharacterClass>();
   readonly remove = output<CharacterClass>();

@@ -71,7 +71,7 @@ describe('validateRegistry', () => {
 });
 
 describe('the real registry (public/packs/index.json)', () => {
-  it('lists base-fr and base-en, both built in, each with its language', () => {
+  it('lists base-fr and base-en with their language and no sprite, and the neutral base-assets with the 101 sprites, all built in', () => {
     const json = JSON.parse(readFileSync(join(process.cwd(), 'public/packs/index.json'), 'utf8'));
 
     const result = validateRegistry(json);
@@ -79,8 +79,9 @@ describe('the real registry (public/packs/index.json)', () => {
     if (!result.ok) throw new Error(result.errors.join('\n'));
     const bases = result.value.packs.filter((p) => p.builtIn);
     expect(bases.map((p) => [p.id, p.language, p.sprites])).toEqual([
-      ['base-fr', 'fr', 101],
-      ['base-en', 'en', 101],
+      ['base-fr', 'fr', 0],
+      ['base-en', 'en', 0],
+      ['base-assets', undefined, 101],
     ]);
   });
 });

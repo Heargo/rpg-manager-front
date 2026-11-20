@@ -5,13 +5,13 @@ description: "Ajouter des sprites et des listes de mots aux générateurs, depui
 
 Un **pack** ajoute du contenu à l'application : des **listes de mots** pour les générateurs (objets, PNJ, compétences, classes), des **sprites** d'objets, et ce qui les relie : des **catégories** et des **teintes**. Un pack qui a des textes est écrit dans **une seule langue** (français ou anglais), affichée sur sa carte. Pour traduire un pack, on en fait un deuxième, dans l'autre langue. Un pack peut aussi n'avoir **aucune langue** (voir [Packs neutres](#packs-neutres)).
 
-La page **Outils › Packs de contenu** installe et supprime les packs de l'appareil. Ce sont les **règles de chaque monde** qui choisissent ceux qu'il utilise (voir plus bas).
+La page **Packs** installe et supprime les packs de l'appareil. Ce sont les **règles de chaque monde** qui choisissent ceux qu'il utilise (voir plus bas).
 
 ![La page des packs de contenu](../../assets/screens/fr/packs-page.png)
 
 ## Les packs Base
 
-**Base (français)** et **Base (English)** contiennent les listes de mots, les catégories, les teintes et les 101 sprites d'objets fournis avec l'application, chacun dans sa langue. Ils sont **toujours disponibles** et ne peuvent pas être retirés. **Détails** montre la licence, les listes de mots et les sprites, rangés par coloration.
+**Base (français)** et **Base (English)** contiennent les listes de mots, les textes, les catégories, les teintes et le contenu fourni avec l'application, chacun dans sa langue. Les 101 sprites d'objets sont dans un pack neutre, **Base assets** (sans langue, licence CC BY 4.0), que tous les mondes utilisent quelle que soit leur langue. Ces trois packs sont **toujours disponibles** et ne peuvent pas être retirés. **Détails** montre la licence, les listes de mots et les sprites, rangés par coloration.
 
 ![Les détails d'un pack](../../assets/screens/fr/packs-details.png)
 
@@ -21,18 +21,26 @@ Un sprite peut être de trois **colorations** :
 - **Avec masques** : une image en niveaux de gris livrée avec ses matériaux, prête à recolorer.
 - **Coloré** : une image déjà en couleurs, utilisée telle quelle. Le coloriseur la refuse.
 
+## Contenu fixe
+
+En plus des listes de mots et des sprites, un pack peut fournir du **contenu fixe** : des **objets**, **compétences** et **classes** prêts à l'emploi, copiés tels quels dans les catalogues d'un monde au lieu d'être tirés par un générateur. Le pack déclare les **attributs** que son contenu utilise (Vie, Force…).
+
+- **Importer depuis les packs** (dans les catalogues d'objets, de compétences et de classes) copie le contenu fixe des packs actifs du monde. Importer de nouveau met à jour les copies que vous n'avez pas modifiées et laisse les vôtres tranquilles.
+- Quand le monde n'a pas un attribut utilisé par le pack, vous choisissez pour chacun : utiliser un de vos attributs, l'ajouter au monde, ou l'ignorer. Ignorer retire les modificateurs qui le visent, et une **compétence qui a besoin d'un attribut ignoré** (dans un effet ou une formule) est écartée, avec sa place dans les arbres de classe. Une compétence dont le **coût** porte sur un attribut ignoré est gardée, et devient gratuite.
+- Les packs Base fournissent les **classes et compétences de départ** (Guerrier, Mage et Voleur avec leurs arbres de compétences), écrites sur les attributs par défaut (Vie, Mana, Force, Agilité, Intelligence). Un nouveau monde où **Ajouter des classes et compétences par défaut** est coché, et le bac à sable des outils, les reçoivent de Base ; un monde qui a renommé ou n'a pas un de ces attributs reçoit simplement les compétences qui n'en ont pas besoin. Les compétences actives utilisent le premier type d'action du monde (son compteur de mouvement pour les compétences de déplacement).
+
 ## Packs officiels
 
 Les packs officiels sont listés sur la page, mais **leurs fichiers ne sont téléchargés que quand vous cliquez sur Télécharger** (ou **Installer** depuis les règles d'un monde qui l'utilise). Ils restent ensuite sur l'appareil et fonctionnent **hors ligne**. **Supprimer de l'appareil** les efface (vous pourrez le télécharger de nouveau) ; les mondes qui l'utilisaient le montrent alors comme manquant.
 
-Pour l'instant, les deux Base sont les seuls packs officiels.
+Pour l'instant, Base (français), Base (English) et Base assets sont les seuls packs officiels.
 
 ## Comment les objets sont composés
 
 Les objets générés reposent sur quelques notions, communes à tous les packs.
 
-- **Domaine** : le type de contenu auquel s'appliquent les listes d'un pack. Aujourd'hui, les **objets** (`items`) utilisent les catégories, les teintes et les phrases décrites ici. Les PNJ, les compétences et les classes sont aussi des domaines, mais gardent pour l'instant leurs listes de mots simples ; ils passeront au même système plus tard.
-- **Catégorie** (*kind* dans les fichiers) : une chose concrète, sans langue : `sword`, `potion`, `key`. Le pack donne ses **noms** et ses **descriptions** (dans sa langue), et ses **sprites** disent quelles catégories ils illustrent. C'est ce lien qui rend l'image cohérente avec le nom : une Potion n'a plus l'image d'une pomme.
+- **Domaine** : le type de contenu auquel s'appliquent les listes d'un pack : les **objets** (`items`), les **PNJ** (`npcs`), les **compétences** (`skills`) et les **classes** (`classes`). Les quatre utilisent les catégories, les phrases et les paramètres décrits ici ; les teintes ne concernent que les objets.
+- **Catégorie** : une chose concrète, sans langue : `sword`, `potion`, `wolf`, `fire-spell`, `warrior`. Le pack donne ses **noms** et ses **descriptions** (dans sa langue). Pour les objets, ses **sprites** disent quelles catégories ils illustrent : ce lien garde l'image cohérente avec le nom. Une catégorie peut aussi porter des **champs** propres à son domaine (voir plus bas).
 - **Teinte** (*tint*) : un matériau ou un élément (`steel`, `fire`, `ice`…) avec un **dégradé** de couleurs. Les adjectifs et les suffixes d'un objet peuvent porter une teinte : « Rapière **ardente** » est colorée avec le dégradé `fire`.
 - **Paramètre** : une liste de groupes de mots à insérer dans les descriptions et les noms, par exemple `maker` (« un forgeron nain »). Voir [la syntaxe des phrases](#la-syntaxe-des-phrases).
 
@@ -80,10 +88,17 @@ Les descriptions, les modèles de noms et les paramètres sont des **phrases** q
 | `{g:forgé\|forgée}` | Accord avec le genre du nom tiré (masculin\|féminin). |
 | `{g:forgé\|forgée\|forgés\|forgées}` | Même accord, avec le pluriel (masculin\|féminin\|masculin pluriel\|féminin pluriel), pour les noms pluriels comme « Gants ». |
 | `{base}`, `{adjective}`, `{suffix}` | Dans un modèle de nom : le nom tiré, l'adjectif et le suffixe. |
+| `{kind id}` | Un nom de cette catégorie, tiré dans la catégorie ou l'un de ses descendants (voir [Références de catégories](#références-de-catégories)) ; `{kind id:adjective}` est l'un de ses adjectifs, accordé avec le nom de l'entrée. Un paramètre du même nom l'emporte. |
 
 Exemple : « Une arme [fiable\|redoutable], {g:forgé\|forgée} par {maker}. » Une phrase dont le paramètre n'est défini par aucun pack actif de la langue est laissée de côté (une autre est tirée) ; s'il n'en reste aucune, le texte est vide.
 
 Les **noms pluriels** (des gants, des bottes) se marquent dans le nom (case **Pluriel** dans le créateur) : l'adjectif prend alors sa forme plurielle (par défaut le singulier avec un `s`, sauf s'il finit par `s` ou `x`).
+
+### Références de catégories
+
+Un modèle de nom, une description ou un paramètre peut utiliser l'identifiant d'une **catégorie de n'importe quel domaine** (objets, PNJ, compétences, classes) comme élément : une description d'objet peut dire « Forgée par {blacksmith}. » avec `blacksmith` une catégorie du domaine des PNJ. `{blacksmith}` insère un nom de cette catégorie, tiré dans la catégorie ou l'un de ses descendants qui a des noms, parmi tous les packs actifs ; `{blacksmith:adjective}` insère l'un des adjectifs de la catégorie, accordé avec le nom de l'entrée.
+
+Le tirage a lieu une fois par identifiant et par entrée générée, si bien qu'un nom et une description qui utilisent le même identifiant s'accordent. Quand un identifiant existe dans plusieurs domaines, on cherche d'abord dans le domaine de l'entrée, puis les objets, les PNJ, les compétences et les classes. Un paramètre qui porte le nom d'une catégorie reste un paramètre. Un identifiant qui n'est ni un paramètre ni une catégorie d'un pack actif est un avertissement dans le créateur de packs.
 
 ### Conventions de nommage
 
@@ -91,7 +106,7 @@ Pour que les packs restent compatibles entre eux, suivez ces conventions ; les p
 
 - **Catégories** : en anglais, au singulier, en `kebab-case`, la chose concrète (`sword`, `war-hammer`, `healing-potion`). Une sous-catégorie reçoit un `parent` plutôt qu'un nom isolé.
 - **Teintes** : un matériau ou un élément (`steel`, `gold`, `fire`, `ice`, `rust`, `shadow`), pas une couleur brute.
-- **Paramètres** : nommés par leur **rôle dans la phrase** (`maker`, `owner`, `place`, `event`, `material`, `creature`, `effect`). Chaque entrée est un groupe nominal complet avec son article (« un forgeron nain »), pour s'insérer partout sans accord.
+- **Paramètres** : nommés par leur **rôle dans la phrase** (`maker`, `owner`, `place`, `event`, `creature`, `effect`). Chaque entrée est un groupe nominal complet avec son article (« un forgeron nain »), pour s'insérer partout sans accord.
 
 ### Ce que publient les packs Base
 
@@ -101,7 +116,23 @@ Les deux Base déclarent **les mêmes catégories et les mêmes teintes** (elles
 - **Emplacements d'équipement** : `head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon` (arme, emplacement `weapon1`) et `shield` (emplacement `weapon2`), tous enfants de `equipment`.
 - **Catégories** en dessous : par exemple `sword`, `rapier`, `dagger`, `axe`, `bow-long`, `staff`, `mace` sous `weapon` ; `helm`, `crown`, `hood` sous `head` ; `armor`, `cape`, `robe`, `tunic` sous `chest` ; `potion`, `elixir`, `bread`, `scroll` sous `consumable` ; `key`, `book`, `torch`, `gem`, `lantern` sous `item`. La liste complète est dans le `pack.json` de Base.
 - **Teintes** : `steel`, `wood`, `gold`, `ice`, `fire`, `leaf`, `arcane`, `rust`, `silver`, `shadow`.
-- **Paramètres** (`generators/common.json`) : `maker`, `owner`, `place`, `event`, `material`, `creature`, `effect`.
+- **Paramètres** (`generators/common.json`) : `maker`, `owner`, `place`, `event`, `creature`, `effect`.
+- **Référence entre domaines** : une description d'arme utilise `{blacksmith}`, une catégorie des PNJ de Base ; le paramètre `material` contient les matières.
+
+Base publie aussi les catégories des trois autres domaines.
+
+- **PNJ** (20) : `townsfolk` (rôle `story` ; `peasant`, `noble`, `scholar`, `priest`), `trader` (rôle `merchant` ; `merchant`, `innkeeper`, `blacksmith`, `peddler`), `guard` (rôles `story`, `enemy`), `outlaw` (rôle `enemy` ; `bandit`, `cultist`, `mercenary`) et `beast` (rôle `enemy`, pas une personne ; `wolf`, `bear`, `giant-spider`, `boar`).
+- **Compétences** (20) : `attack` (active, dégâts ; `strike`, `shot`, `fire-spell`, `frost-spell`, `lightning-spell`, `shadow-spell`), `healing` (active, soin ; `prayer`, `remedy`), `support` (active, modification ; `blessing`, `curse`, `war-cry`, `song`) et `trait` (passive ; `toughness`, `focus`, `agility`, `presence`).
+- **Classes** (18) : `martial` (`warrior`, `berserker`, `knight`), `arcane` (`mage`, `warlock`, `sorcerer`), `divine` (`cleric`, `paladin`), `nature` (`druid`, `ranger`, `shaman`) et `cunning` (`rogue`, `assassin`, `bard`). Chaque famille liste ses catégories de compétences favorites, par exemple `martial` : `strike`, `shot`, `war-cry`, `toughness`.
+### Catégories de PNJ, de compétences et de classes
+
+Les trois autres domaines utilisent le même arbre et le même héritage (parent, le premier niveau qui a des mots l'emporte). Ce que porte une catégorie dépend du domaine.
+
+- **PNJ** : `roles` (`story`, `merchant`, `enemy` : les rôles que peut prendre un PNJ généré) et `person` (`false` pour une créature : son nom est alors un nom commun, sans prénom). Les rôles et `person` sont hérités du parent. Textes : `given` (prénoms avec un `gender`), `epithets` (épithètes), `templates` (`{given}`, `{epithet}`), puis par catégorie `nouns`, `descriptions`, `adjectives` et `names` (modèles de noms avec `{adjective}` et `{noun}`, pour les catégories qui ne sont pas des personnes).
+- **Compétences** : `type` (`active` ou `passive`, sur une racine) et `effect` (`damage`, `heal` ou `modify`, pour une compétence active). Textes : `templates`, `adjectives`, `suffixes`, puis par catégorie `nouns`, `descriptions`, `adjectives`, `suffixes` et `names`.
+- **Classes** : `skills`, les **catégories de compétences favorites**. L'arbre de compétences d'une classe est tiré parmi les compétences du monde dont la chaîne de catégories en contient une (quand il y en a au moins 3 ; sinon il est complété par d'autres compétences). Textes comme les compétences : `templates`, `adjectives`, `suffixes`, puis par catégorie `nouns`, `descriptions`, `adjectives`, `suffixes` et `names`.
+
+Pour les compétences et les classes, le générateur tire une catégorie, un nom, éventuellement un adjectif et un suffixe (ceux de la catégorie, puis ceux du niveau supérieur), et compose le nom avec un modèle (`{adjective}`, `{noun}`, `{suffix}`). La description vient du niveau le plus proche de la catégorie qui en a. Un PNJ, une compétence ou une classe **garde sa catégorie**.
 
 ## Ajouter un pack depuis un lien
 
@@ -126,22 +157,16 @@ Les auteurs et licences des packs installés apparaissent dans les [crédits](/d
 
 ## Les packs d'un monde
 
-Dans l'assistant de création (étape **Règles**) et dans **Règles du monde**, la section **Packs** liste les packs installés avec leur langue. Cochez ceux que le monde utilise. Un nouveau monde commence avec le Base de la langue de l'application. Vous pouvez mélanger les langues, par exemple Base (français) et un pack de sprites anglais : seuls ses images, catégories et teintes servent (voir [la langue du monde](#la-langue-du-monde)).
+Dans l'assistant de création (étape **Règles**) et dans **Règles du monde**, la section **Packs** liste les packs installés avec leur langue. Cochez ceux que le monde utilise. Un nouveau monde commence avec le Base de la langue de l'application et Base assets (les sprites). Vous pouvez mélanger les langues, par exemple Base (français) et un pack de sprites anglais : seuls ses images, catégories et teintes servent (voir [la langue du monde](#la-langue-du-monde)).
 
 ![La section Packs des règles du monde](../../assets/screens/fr/worlds-rules-packs.png)
 
 Un pack coché mais absent de l'appareil (monde importé, pack supprimé) est marqué **manquant** : **Installer** le télécharge si c'est un pack officiel, sinon vous pouvez le retirer du monde.
 
-Dans les **Outils**, sans partie lancée, les générateurs utilisent les packs choisis dans **Outils › Règles du monde** (par défaut, le Base de la langue de l'application).
+Dans les **Outils**, sans partie lancée, les générateurs utilisent les packs choisis dans **Outils › Règles du monde** (par défaut, le Base de la langue de l'application et Base assets).
 
 ## Les packs dans les générateurs
 
-Les **objets** n'ont plus de menu **Pack** : l'éditeur et le générateur d'objets utilisent ensemble tous les packs actifs du monde (voir plus haut). La même graine, avec les mêmes packs et la même langue, donne toujours le même résultat.
-
-L'éditeur de PNJ garde son menu **Pack** à côté de la graine.
-
-![Le choix du pack à côté de la graine](../../assets/screens/fr/packs-choice.png)
-
-Il propose les packs du monde qui ont des listes pour les PNJ. **Aléatoire** (par défaut) tire le pack à partir de la graine ; un pack nommé utilise ses listes de mots. Si aucun pack du monde n'a de liste, le Base de la langue de l'application prend le relais. Les boutons **Aléatoire** des compétences et des classes choisissent un pack au hasard parmi ceux qui en proposent.
+Aucun générateur n'a plus de menu **Pack** : les objets, les PNJ, les compétences et les classes utilisent ensemble **tous les packs actifs du monde** (voir plus haut), donc un pack ajouté enrichit tous les générateurs d'un coup. La même graine, avec les mêmes packs et la même langue, donne toujours le même résultat.
 
 Pour faire votre propre pack, voir [Créer un pack](/docs/create-pack/).

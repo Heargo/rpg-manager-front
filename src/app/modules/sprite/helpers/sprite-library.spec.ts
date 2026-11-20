@@ -1,48 +1,36 @@
-import baseEn from '../../../../../public/packs/base-en/pack.json';
-import baseFr from '../../../../../public/packs/base-fr/pack.json';
+import baseAssets from '../../../../../public/packs/base-assets/pack.json';
 import { DEMO_SPRITE_ID, groupSpritesByPack, searchSprites } from './sprite-library';
 
-/** A Base pack's sprites, as PackBusiness exposes them. */
-const bundled = (pack: typeof baseFr | typeof baseEn) =>
-  pack.sprites.map((s) => ({
-    ...s,
-    packId: pack.id,
-    imageUrl: `packs/${pack.id}/${s.image}`,
-  }));
-const frSprites = bundled(baseFr);
-const enSprites = bundled(baseEn);
-const searchFr = (query: string) => searchSprites(frSprites as never, query, 'fr');
-const searchEn = (query: string) => searchSprites(enSprites as never, query, 'en');
+/** The neutral pack's sprites, as PackBusiness exposes them. */
+const sprites = baseAssets.sprites.map((s) => ({
+  ...s,
+  packId: baseAssets.id,
+  imageUrl: `packs/${baseAssets.id}/${s.image}`,
+}));
+const search = (query: string, lang = 'en') => searchSprites(sprites as never, query, lang);
 
 describe('sprite library', () => {
   it('uses the axe as the demo sprite', () => {
     expect(DEMO_SPRITE_ID).toBe('axe');
-    expect(frSprites.some((s) => s.id === DEMO_SPRITE_ID)).toBe(true);
-    expect(enSprites.some((s) => s.id === DEMO_SPRITE_ID)).toBe(true);
+    expect(sprites.some((s) => s.id === DEMO_SPRITE_ID)).toBe(true);
   });
 
   it('returns every sprite, sorted by its label, for an empty query', () => {
-    const fr = searchFr('');
-    expect(fr).toHaveLength(101);
-    const labels = fr.map((s) => s.label);
-    expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b, 'fr')));
-    expect(searchEn('')).toHaveLength(101);
+    const all = search('');
+    expect(all).toHaveLength(101);
+    const labels = all.map((s) => s.label);
+    expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b, 'en')));
+    expect(search('', 'fr')).toHaveLength(101);
   });
 
   it('matches the single label of the pack', () => {
-    expect(searchFr('hache').map((s) => s.id)).toEqual(['axe', 'waraxe']);
-    expect(searchEn('axe').map((s) => s.id)).toEqual(['axe', 'pick', 'waraxe']);
-  });
-
-  it('does not match the label of the other language', () => {
-    expect(searchEn('hache')).toEqual([]);
-    expect(searchFr('sword')).toEqual([]);
+    expect(search('axe').map((s) => s.id)).toEqual(['axe', 'pick', 'waraxe']);
   });
 
   it('ignores case and accents, and needs every word', () => {
-    expect(searchFr('EPEE').map((s) => s.id)).toEqual(['sword']);
-    expect(searchFr('hache guerre').map((s) => s.id)).toEqual(['waraxe']);
-    expect(searchEn('zzz')).toEqual([]);
+    expect(search('SWORD').map((s) => s.id)).toEqual(['sword']);
+    expect(search('war axe').map((s) => s.id)).toEqual(['waraxe']);
+    expect(search('zzz')).toEqual([]);
   });
 
   describe('kinds and packs', () => {

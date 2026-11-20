@@ -107,7 +107,7 @@ describe.each(DOMAIN_CASES)('pack draft edits and build: $domain', (c) => {
 
     const removed = e.removeDomainKind(draft, c.domain, 'folk');
 
-    expect((removed as any)[c.field]).toEqual({ elder: { parent: 'folk' } });
+    expect((removed as any)[c.field]).toEqual({}); // its child elder goes with it
     expect((removed.generators as any)[c.domain] ?? {}).not.toHaveProperty('kinds');
     expect(removed.kinds).toEqual({ orb: { type: 'item' } });
     expect((removed.generators as any).items.kinds.orb).toBeDefined();

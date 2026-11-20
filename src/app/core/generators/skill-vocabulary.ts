@@ -2,6 +2,7 @@ import { SkillType } from '../../modules/skill/models/skill';
 import { SKILL_KIND_SCHEMA } from '../packs/pack-kinds';
 import { poolDomain, PooledSource, poolParams } from '../packs/pooled-domain';
 import { kindLookups } from './kind-lookups';
+import { buildKindRefs, KindRefs } from './cross-domain-kinds';
 import { SkillKindTexts } from './skill-word-list';
 import { Adjective, Noun } from './word-list';
 
@@ -28,6 +29,8 @@ export interface SkillVocabulary {
   /** The kinds with a noun on their chain. */
   drawable(): string[];
   templates(): string[];
+  /** The kinds of every domain that a phrase can refer to. */
+  refs: KindRefs;
   params: Record<string, string[]>;
   conflicts: string[];
 }
@@ -35,6 +38,7 @@ export interface SkillVocabulary {
 export function buildSkillVocabulary(sources: PooledSource[]): SkillVocabulary {
   const pooled = poolDomain(sources, SKILL_KIND_SCHEMA);
   const params = poolParams(sources);
+  const refs = buildKindRefs(sources, 'skills');
   const lookups = kindLookups(pooled);
   const section = <T>(name: string): T[] =>
     (pooled.sections[name] as T[] | undefined) ?? [];
@@ -71,6 +75,7 @@ export function buildSkillVocabulary(sources: PooledSource[]): SkillVocabulary {
     ],
     drawable: () => lookups.kindIds((id) => nouns(id).length > 0),
     templates: () => section<string>('templates'),
+    refs,
     params,
     conflicts: pooled.conflicts,
   };

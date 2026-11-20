@@ -58,7 +58,7 @@ describe('PackBusiness concurrency (K03 review fixes)', () => {
       service.loadManifest.mock.calls.filter(([id]) => id === 'extra'),
     ).toHaveLength(1);
     expect(service.loadBlob).toHaveBeenCalledTimes(1);
-    expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'extra']);
+    expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'base-assets', 'extra']);
   });
 
   it('an official download fetches at most 4 files at a time', async () => {

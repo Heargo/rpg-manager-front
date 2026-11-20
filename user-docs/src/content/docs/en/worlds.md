@@ -17,7 +17,9 @@ In **Worlds**, click **New world**. The wizard has three steps, with a preview o
 
 ![The Attributes step of the wizard](../../../assets/screens/en/worlds-wizard-attributes.png)
 
-**3. Rules**: progression, economy, skills, combat and the world's [content packs](/docs/en/packs/#a-worlds-packs) (by default, the Base in the app's language). You can also add the **default items** and the **default classes and skills** to have a playable world right away.
+**3. Rules**: progression, economy, skills, combat and the world's [content packs](/docs/en/packs/#a-worlds-packs) (by default, the Base in the app's language and Base assets for the sprites). You can also add the **default items** and the **default classes and skills** to have a playable world right away.
+
+On the **Identity** step, besides uploading a picture, you can pick one of the **world images** of the active packs (Base assets brings nine landscapes): the picture is copied into the world, so it stays when the pack is turned off and for players who join. The **World rules** page has no picture picker yet.
 
 ![The Rules step of the wizard](../../../assets/screens/en/worlds-wizard-rules.png)
 

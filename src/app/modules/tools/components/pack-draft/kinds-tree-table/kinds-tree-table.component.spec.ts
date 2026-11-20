@@ -1,0 +1,680 @@
+import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { ConfirmationService } from '@openng/optimus-ui/api';
+import { DOMAIN_CASES } from '../../../../../../testing/pack-draft-domains';
+import { draftOf, renderEditor } from '../../../../../../testing/pack-draft-editor';
+import { KindsTreeTableComponent } from './kinds-tree-table.component';
+
+/**
+ * Contract of `app-kinds-tree-table`: inputs `draft`, `issues`, `domain` ('items' | 'npcs' | 'skills' | 'classes'), output
+ * `changed`. Hooks (data-test): `kind-row-<id>` (tr, tree rows start expanded), `cell-label`, `cell-id` and `cell-<field>` per
+ * domain field in each row, `edit-<id>`, `add-child-<id>`, `delete-<id>`, toolbar `add-kind`; the drawer content
+ * `kind-detail` (with `detail-edit`) or `kind-form` (with `kind-id`, `kind-parent`, the domain controls, `form-save`,
+ * `form-cancel`); `issue`. Delete and discard go through `ConfirmationService.confirm`.
+ */
+interface Case {
+  domain: string;
+  seed: Record<string, unknown>;
+  cells: string[];
+  control: { hook: string; value: unknown; result: Record<string, unknown> };
+  root: Record<string, unknown>;
+  noCells: string[];
+}
+
+const ITEMS: Case = {
+  domain: 'items',
+  seed: { kinds: { folk: { type: 'equipment' }, elder: { parent: 'folk' }, sage: { parent: 'elder' }, other: { type: 'item' } } },
+  cells: ['type', 'slot'],
+  control: { hook: 'kind-slot', value: 'hand', result: { slot: 'hand' } },
+  root: { type: 'equipment' },
+  noCells: ['roles', 'effect', 'skills'],
+};
+
+const CASES: Case[] = [
+  ITEMS,
+  ...DOMAIN_CASES.map((c) => ({
+    domain: c.domain,
+    seed: { [c.field]: { folk: c.root, elder: { parent: 'folk' }, sage: { parent: 'elder' }, other: c.root } },
+    cells: { npcs: ['roles'], skills: ['type', 'effect'], classes: ['skills'] }[c.domain],
+    control: c.control,
+    root: c.root,
+    noCells: ['slot'],
+  })),
+];
+
+const fieldOf = (domain: string) =>
+  domain === 'items' ? 'kinds' : DOMAIN_CASES.find((c) => c.domain === domain)!.field;
+
+describe.each(CASES)('KindsTreeTableComponent on $domain', (c) => {
+  const open = (issues: unknown[] = []) =>
+    renderEditor(KindsTreeTableComponent, draftOf(c.seed), issues, { domain: c.domain });
+  const confirm = () => vi.spyOn(TestBed.inject(ConfirmationService), 'confirm');
+  const doc = (hook: string) => document.querySelector<HTMLElement>(`[data-test="${hook}"]`);
+  const kindsOf = (draft: unknown) => (draft as any)[fieldOf(c.domain)] as Record<string, Record<string, unknown>>;
+  const level = (view: Awaited<ReturnType<typeof open>>, id: string) => view.$(`kind-row-${id}`)!.getAttribute('aria-level');
+  const type = async (view: Awaited<ReturnType<typeof open>>, hook: string, value: string) => {
+    const host = doc(hook)!;
+    const input = host instanceof HTMLInputElement ? host : host.querySelector('input')!;
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    input.dispatchEvent(new Event('blur'));
+    view.fixture.detectChanges();
+    await view.fixture.whenStable();
+  };
+  const setControl = async (view: Awaited<ReturnType<typeof open>>) => {
+    view.fixture.debugElement
+      .query(By.css(`[data-test="${c.control.hook}"]`))
+      .triggerEventHandler('onChange', { value: c.control.value });
+    view.fixture.detectChanges();
+    await view.fixture.whenStable();
+  };
+  const select = async (view: Awaited<ReturnType<typeof open>>, id: string) => {
+    view.$(`kind-row-${id}`)!.click();
+    view.fixture.detectChanges();
+    await view.fixture.whenStable();
+    view.fixture.detectChanges();
+  };
+  const press = async (view: Awaited<ReturnType<typeof open>>, hook: string) => {
+    const host = doc(hook);
+    if (!host) throw new Error(`no [data-test="${hook}"]`);
+    (host instanceof HTMLButtonElement ? host : (host.querySelector('button') ?? host)).click();
+    view.fixture.detectChanges();
+    await view.fixture.whenStable();
+    view.fixture.detectChanges();
+  };
+
+  it('builds the tree from parent: roots at level 1, children under their parent at deeper levels', async () => {
+    const view = await open();
+
+    const rows = [...view.el.querySelectorAll('[data-test^="kind-row-"]')];
+    expect(rows.map((r) => r.getAttribute('data-test'))).toEqual([
+      'kind-row-folk',
+      'kind-row-elder',
+      'kind-row-sage',
+      'kind-row-other',
+    ]);
+    expect([level(view, 'folk'), level(view, 'elder'), level(view, 'sage'), level(view, 'other')]).toEqual(['1', '2', '3', '1']);
+  });
+
+  it('shows label, id and this domain’s fields as columns, and no other domain’s', async () => {
+    const view = await open();
+    const row = view.$('kind-row-folk')!;
+
+    expect(row.querySelector('[data-test="cell-label"]')!.textContent).toContain('Folk');
+    expect(row.querySelector('[data-test="cell-id"]')!.textContent).toContain('folk');
+    for (const cell of c.cells) expect(row.querySelector(`[data-test="cell-${cell}"]`)).not.toBeNull();
+    for (const cell of c.noCells) expect(row.querySelector(`[data-test="cell-${cell}"]`)).toBeNull();
+  });
+
+  it('has no Edit / Add child / Delete actions in the table rows or an actions column', async () => {
+    const view = await open();
+
+    for (const id of ['folk', 'elder', 'sage', 'other']) {
+      const row = view.$(`kind-row-${id}`)!;
+      expect(row.querySelector('[data-test^="edit-"], [data-test^="add-child-"], [data-test^="delete-"]')).toBeNull();
+      for (const action of ['edit', 'add-child', 'delete']) expect(view.$(`${action}-${id}`)).toBeNull();
+    }
+    expect(view.el.querySelector('th[data-test="actions-header"], th[data-test="cell-actions"]')).toBeNull();
+    const headers = [...view.el.querySelectorAll('th')].map((th) => th.textContent!.trim().toLowerCase());
+    expect(headers.some((h) => h.includes('action'))).toBe(false);
+  });
+
+  it('marks parent rows (kinds with children) with data-kind-parent="true" and not the leaf rows', async () => {
+    const view = await open();
+
+    const marked = (id: string) => view.$(`kind-row-${id}`)!.getAttribute('data-kind-parent') === 'true';
+    expect([marked('folk'), marked('elder'), marked('sage'), marked('other')]).toEqual([true, true, false, false]);
+  });
+
+  it('the detail offers Edit, Add child and Delete', async () => {
+    const view = await open();
+
+    await select(view, 'elder');
+
+    for (const action of ['detail-edit', 'detail-add-child', 'detail-delete']) expect(doc(action)).not.toBeNull();
+  });
+
+  it('the drawer blocks the page scroll', async () => {
+    const view = await open();
+
+    const drawer = view.fixture.debugElement.query(By.css('p-drawer')).componentInstance;
+    const blocked = typeof drawer.blockScroll === 'function' ? drawer.blockScroll() : drawer.blockScroll;
+    expect(blocked).toBe(true);
+  });
+
+  it('opens nothing until a row is clicked, then opens the detail of that kind in a drawer', async () => {
+    const view = await open();
+    expect(doc('kind-detail')).toBeNull();
+
+    view.$('kind-row-elder')!.click();
+    view.fixture.detectChanges();
+    await view.fixture.whenStable();
+    view.fixture.detectChanges();
+
+    expect(doc('kind-detail')!.textContent).toContain('elder');
+    expect(doc('kind-form')).toBeNull();
+    expect(view.emitted).toEqual([]);
+  });
+
+  it('Edit on the detail switches the drawer to the form of that kind', async () => {
+    const view = await open();
+    view.$('kind-row-elder')!.click();
+    view.fixture.detectChanges();
+    await view.fixture.whenStable();
+    view.fixture.detectChanges();
+
+    await press(view, 'detail-edit');
+
+    expect(doc('kind-detail')).toBeNull();
+    expect(doc('kind-form')!.querySelector<HTMLInputElement>('[data-test="kind-id"] input')!.value).toBe('elder');
+  });
+
+  it('Save emits the draft with the edited fields of the kind and nothing before', async () => {
+    const view = await open();
+    await select(view, 'folk');
+    await press(view, 'detail-edit');
+
+    await setControl(view);
+    expect(view.emitted).toEqual([]);
+    await press(view, 'form-save');
+
+    expect(kindsOf(view.last())['folk']).toEqual({ ...c.root, ...c.control.result });
+    expect(Object.keys(kindsOf(view.last()))).toEqual(['folk', 'elder', 'sage', 'other']);
+    expect(doc('kind-form')).toBeNull();
+  });
+
+  it('Cancel without changes closes the drawer without asking', async () => {
+    const view = await open();
+    const ask = confirm();
+    await select(view, 'folk');
+    await press(view, 'detail-edit');
+
+    await press(view, 'form-cancel');
+
+    expect(ask).not.toHaveBeenCalled();
+    expect(doc('kind-form')).toBeNull();
+    expect(view.emitted).toEqual([]);
+  });
+
+  it('Cancel with changes asks to discard, keeps the form until accepted, and never emits', async () => {
+    const view = await open();
+    const ask = confirm();
+    await select(view, 'folk');
+    await press(view, 'detail-edit');
+    await setControl(view);
+
+    await press(view, 'form-cancel');
+
+    expect(ask).toHaveBeenCalledTimes(1);
+    expect(doc('kind-form')).not.toBeNull();
+    (ask.mock.calls[0][0] as { accept: () => void }).accept();
+    view.fixture.detectChanges();
+    await view.fixture.whenStable();
+    view.fixture.detectChanges();
+    expect(doc('kind-form')).toBeNull();
+    expect(view.emitted).toEqual([]);
+  });
+
+  it('closing the drawer with changes asks to discard too', async () => {
+    const view = await open();
+    const ask = confirm();
+    await select(view, 'folk');
+    await press(view, 'detail-edit');
+    await setControl(view);
+
+    view.fixture.debugElement.query(By.css('p-drawer')).triggerEventHandler('visibleChange', false);
+    view.fixture.detectChanges();
+    await view.fixture.whenStable();
+
+    expect(ask).toHaveBeenCalledTimes(1);
+    expect(view.emitted).toEqual([]);
+  });
+
+  it('Add kind opens an empty form and Save adds a root kind', async () => {
+    const view = await open();
+
+    await view.click('add-kind');
+    expect(doc('kind-form')!.querySelector<HTMLInputElement>('[data-test="kind-id"] input')!.value).toBe('');
+    await type(view, 'kind-id', 'newbie');
+    await setControl(view);
+    await press(view, 'form-save');
+
+    const added = kindsOf(view.last())['newbie'];
+    expect(added['parent']).toBeUndefined();
+    expect(added).toEqual(expect.objectContaining(c.control.result));
+    expect(Object.keys(kindsOf(view.last()))).toContain('folk');
+  });
+
+  it('Add child opens a form with the parent pre-filled and Save adds the kind under it', async () => {
+    const view = await open();
+
+    await select(view, 'elder');
+    await press(view, 'detail-add-child');
+    expect(doc('kind-form')!.querySelector<HTMLInputElement>('[data-test="kind-parent"] input')!.value).toBe('elder');
+    await type(view, 'kind-id', 'novice');
+    await press(view, 'form-save');
+
+    expect(kindsOf(view.last())['novice']).toEqual({ parent: 'elder' });
+  });
+
+  it('Delete asks first, says the children go too, and removes the kind with its descendants once accepted', async () => {
+    const view = await open();
+    const ask = confirm();
+
+    await select(view, 'folk');
+    await press(view, 'detail-delete');
+
+    expect(ask).toHaveBeenCalledTimes(1);
+    expect((ask.mock.calls[0][0] as { message: string }).message).toMatch(/child/i);
+    expect(view.emitted).toEqual([]);
+    (ask.mock.calls[0][0] as { accept: () => void }).accept();
+    expect(Object.keys(kindsOf(view.last()))).toEqual(['other']);
+  });
+
+  it('Delete not accepted leaves the draft alone', async () => {
+    const view = await open();
+    const ask = confirm();
+
+    await select(view, 'other');
+    await press(view, 'detail-delete');
+    (ask.mock.calls[0][0] as { reject?: () => void }).reject?.();
+
+    expect(view.emitted).toEqual([]);
+  });
+
+  it('shows an issue on the row of its kind in this domain and nowhere else', async () => {
+    const other = DOMAIN_CASES.find((d) => d.domain !== c.domain)!.domain;
+    const view = await open([
+      { level: 'error', ...(c.domain === 'items' ? {} : { domain: c.domain }), kind: 'folk', message: 'a root kind needs something' },
+      { level: 'error', domain: other, kind: 'folk', message: 'belongs to another domain' },
+    ]);
+
+    const row = view.$('kind-row-folk')!;
+    expect(row.querySelectorAll('[data-test="issue"]')).toHaveLength(1);
+    expect(row.textContent).toContain('a root kind needs something');
+    expect(row.textContent).not.toContain('belongs to another domain');
+  });
+
+  it('suggests no kind, itself or descendant as the parent of a kind', async () => {
+    const view = await open();
+    await select(view, 'folk');
+    await press(view, 'detail-edit');
+
+    const parent = view.fixture.debugElement.query(By.css('[data-test="kind-parent"]'));
+    const suggested = () => {
+      const held = parent.componentInstance.suggestions;
+      return (typeof held === 'function' ? held() : held) as string[];
+    };
+    await vi.waitFor(() => {
+      parent.triggerEventHandler('completeMethod', { query: '' });
+      view.fixture.detectChanges();
+      expect(suggested()).toContain('other');
+    });
+    const suggestions = suggested();
+    expect(suggestions).toContain('other');
+    for (const gone of ['folk', 'elder', 'sage']) expect(suggestions).not.toContain(gone);
+  });
+
+  describe('parent field picks from the list only', () => {
+    const editRoot = async (view: Awaited<ReturnType<typeof open>>, id: string) => {
+      await select(view, id);
+      await press(view, 'detail-edit');
+    };
+    const parentInstance = (view: Awaited<ReturnType<typeof open>>) =>
+      view.fixture.debugElement.query(By.css('[data-test="kind-parent"]')).componentInstance;
+    const read = (v: unknown) => (typeof v === 'function' ? (v as () => unknown)() : v);
+
+    it('forces a selection from the suggestions', async () => {
+      const view = await open();
+      await editRoot(view, 'other');
+
+      expect(read(parentInstance(view).forceSelection)).toBe(true);
+    });
+
+    it('shows the suggestions on focus too (dropdown or complete on focus)', async () => {
+      const view = await open();
+      await editRoot(view, 'other');
+
+      const p = parentInstance(view);
+      expect(read(p.dropdown) === true || read(p.completeOnFocus) === true).toBe(true);
+    });
+
+    it('clears a typed text that is not a suggestion on blur, so the saved kind has no parent', async () => {
+      const view = await open();
+      await editRoot(view, 'other');
+
+      await type(view, 'kind-parent', 'not-a-kind');
+      expect(doc('kind-parent')!.querySelector<HTMLInputElement>('input')!.value).toBe('');
+      await press(view, 'form-save');
+
+      expect(kindsOf(view.last())['other']['parent']).toBeUndefined();
+    });
+
+    it('saves a picked suggestion as the parent', async () => {
+      const view = await open();
+      await editRoot(view, 'other');
+
+      const p = parentInstance(view);
+      await vi.waitFor(() => {
+        p.triggerEventHandler?.('completeMethod', { query: '' });
+        view.fixture.debugElement
+          .query(By.css('[data-test="kind-parent"]'))
+          .triggerEventHandler('completeMethod', { query: '' });
+        view.fixture.detectChanges();
+        expect(read(p.suggestions)).toContain('folk');
+      });
+      view.fixture.debugElement.query(By.css('[data-test="kind-parent"]')).componentInstance.onOptionSelect(new Event('click'), 'folk');
+      view.fixture.detectChanges();
+      await view.fixture.whenStable();
+      await press(view, 'form-save');
+
+      expect(kindsOf(view.last())['other']['parent']).toBe('folk');
+    });
+
+    it('clearing the field still makes the kind a root kind', async () => {
+      const view = await open();
+      await editRoot(view, 'elder');
+
+      await type(view, 'kind-parent', '');
+      await press(view, 'form-save');
+
+      expect(kindsOf(view.last())['elder']['parent']).toBeUndefined();
+    });
+  });
+
+  it('never saves a descendant as the parent: typing it is cleared on blur and the kind stays a root kind', async () => {
+    const view = await open();
+    await select(view, 'folk');
+    await press(view, 'detail-edit');
+
+    await type(view, 'kind-parent', 'sage');
+    expect(doc('kind-parent')!.querySelector<HTMLInputElement>('input')!.value).toBe('');
+    await press(view, 'form-save');
+
+    expect(kindsOf(view.last())['folk']['parent']).toBeUndefined();
+  });
+
+  it('closes the drawer when the selected kind goes with a removed ancestor', async () => {
+    const view = await open();
+    await select(view, 'sage');
+    expect(doc('kind-detail')).not.toBeNull();
+
+    const field = fieldOf(c.domain);
+    const { folk: _f, elder: _e, sage: _s, ...rest } = (c.seed as any)[field];
+    view.fixture.componentRef.setInput('draft', draftOf({ [field]: rest }));
+    view.fixture.detectChanges();
+    await view.fixture.whenStable();
+    view.fixture.detectChanges();
+
+    expect(doc('kind-detail')).toBeNull();
+    expect(doc('kind-form')).toBeNull();
+  });
+
+  describe('texts in the drawer form', () => {
+    const suffixHook = c.domain === 'items' ? 'kind-new-suffix-common' : 'kind-new-suffix-all';
+    const addSuffix = c.domain !== 'npcs';
+    const seeded = (...rest: [language?: string]) =>
+      draftOf(
+        { ...c.seed, generators: { [c.domain]: { version: 2, kinds: { folk: { nouns: [{ text: 'Folk' }] } } } } },
+        ...rest,
+      );
+    const openSeeded = (...rest: [language?: string]) =>
+      renderEditor(KindsTreeTableComponent, seeded(...rest), [], { domain: c.domain });
+    const texts = (draft: unknown) => (draft as any).generators[c.domain].kinds.folk;
+    const editFolk = async (view: Awaited<ReturnType<typeof open>>) => {
+      await select(view, 'folk');
+      await press(view, 'detail-edit');
+    };
+
+    it('Save emits the edited noun' + (addSuffix ? ' and suffix' : ''), async () => {
+      const view = await openSeeded();
+      await editFolk(view);
+
+      await type(view, 'kind-new-noun', 'Elder');
+      await press(view, 'add-noun');
+      if (addSuffix) {
+        await type(view, suffixHook, 'of Fire');
+        await press(view, c.domain === 'items' ? 'add-kind-suffix-common' : 'add-kind-suffix-all');
+      }
+      expect(view.emitted).toEqual([]);
+      await press(view, 'form-save');
+
+      const held = texts(view.last());
+      expect(held.nouns.map((n: { text: string }) => n.text)).toEqual(['Folk', 'Elder']);
+      if (addSuffix) expect(held.suffixes).toEqual(c.domain === 'items' ? { common: ['of Fire'] } : ['of Fire']);
+    });
+
+    it('leaves the texts untouched when only a field is edited', async () => {
+      const view = await openSeeded();
+      await editFolk(view);
+
+      await setControl(view);
+      await press(view, 'form-save');
+
+      expect((view.last() as any).generators).toEqual((seeded() as any).generators);
+    });
+
+    it('Preview in the form draws entries with the pending texts, without saving', async () => {
+      const view = await openSeeded();
+      await editFolk(view);
+
+      await press(view, 'remove-noun');
+      await type(view, 'kind-new-noun', 'Zorbling');
+      await press(view, 'add-noun');
+      const lore = doc('kind-descriptions')!;
+      (lore as HTMLTextAreaElement).value = 'Zorbling lore.';
+      lore.dispatchEvent(new Event('input', { bubbles: true }));
+      await press(view, 'preview-kind');
+      await vi.waitFor(() => {
+        view.fixture.detectChanges();
+        expect(document.querySelectorAll('[data-test="preview-entry"]').length).toBeGreaterThan(0);
+      });
+
+      for (const entry of document.querySelectorAll('[data-test="preview-entry"]'))
+        expect(entry.textContent).toContain(c.domain === 'npcs' ? 'Zorbling lore' : 'Zorbling');
+      expect(view.emitted).toEqual([]);
+    });
+
+    describe('Preview of a kind without nouns of its own', () => {
+      // A kind that is not a person: an NPC kind draws its nouns, not the given names.
+      const field = Object.keys(c.seed)[0];
+      const seed =
+        c.domain === 'npcs'
+          ? {
+              [field]: Object.fromEntries(
+                Object.entries((c.seed as any)[field]).map(([id, kind]) => [id, { ...(kind as object), person: false }]),
+              ),
+            }
+          : c.seed;
+      const withNouns = (texts: Record<string, unknown>) =>
+        renderEditor(
+          KindsTreeTableComponent,
+          draftOf({ ...seed, generators: { [c.domain]: { version: 2, kinds: texts } } }),
+          [],
+          { domain: c.domain },
+        );
+      const previewOf = async (view: Awaited<ReturnType<typeof open>>, id: string) => {
+        await select(view, id);
+        await press(view, 'preview-kind');
+        await vi.waitFor(() => {
+          view.fixture.detectChanges();
+          expect(doc('preview-entries')).not.toBeNull();
+        });
+      };
+
+      it('labels each entry drawn from a descendant with its source kind', async () => {
+        const view = await withNouns({ sage: { nouns: [{ text: 'Sageling' }] } });
+
+        await previewOf(view, 'folk');
+
+        const entries = [...document.querySelectorAll('[data-test="preview-entry"]')];
+        expect(entries.length).toBeGreaterThan(0);
+        for (const entry of entries)
+          expect(entry.querySelector('[data-test="preview-source"]')!.textContent!.toLowerCase()).toContain('sage');
+      });
+
+      it('does not label an entry drawn from the kind itself', async () => {
+        const view = await withNouns({ folk: { nouns: [{ text: 'Folk' }] }, sage: { nouns: [{ text: 'Sageling' }] } });
+
+        await previewOf(view, 'folk');
+
+        expect(document.querySelectorAll('[data-test="preview-entry"]').length).toBeGreaterThan(0);
+        expect(document.querySelector('[data-test="preview-source"]')).toBeNull();
+      });
+
+      it('says nothing can be drawn when neither the kind nor its descendants have nouns', async () => {
+        const view = await withNouns({});
+
+        await previewOf(view, 'folk');
+
+        const shown = doc('preview-entries')!;
+        expect(shown.querySelectorAll('[data-test="preview-entry"]')).toHaveLength(0);
+        expect(shown.textContent).not.toContain('this kind needs a noun');
+        expect(shown.textContent).toMatch(/child/i);
+      });
+    });
+
+    it('shows no texts section for a neutral draft', async () => {
+      const view = await openSeeded(undefined);
+      await editFolk(view);
+
+      expect(doc('kind-form')).not.toBeNull();
+      expect(doc('kind-texts')).toBeNull();
+      expect(doc('kind-new-noun')).toBeNull();
+    });
+  });
+
+  describe('missing sprite tag', () => {
+    const sprite = (kinds: string[]) => ({
+      id: 's',
+      label: 'S',
+      kinds,
+      kind: 'grayscale',
+      image: new Blob(['x'], { type: 'image/png' }),
+    });
+    const tagged = async (sprites: unknown[], ...rest: [language?: string]) => {
+      const view = await renderEditor(KindsTreeTableComponent, draftOf({ ...c.seed, sprites }, ...rest), [], {
+        domain: c.domain,
+      });
+      const ids = ['folk', 'elder', 'sage', 'other'];
+      await vi.waitFor(() => {
+        view.fixture.detectChanges();
+        // The coverage line shows once the (async) coverage is known and something is uncovered.
+        if (c.domain === 'items' && !(sprites as any[]).some((x) => x.kinds.includes('folk')))
+          expect(view.el.querySelector('[data-test="coverage"]')).not.toBeNull();
+      });
+      await view.fixture.whenStable();
+      view.fixture.detectChanges();
+      return { view, ids, has: (id: string) => view.$(`missing-sprite-${id}`) !== null };
+    };
+
+    if (c.domain === 'items') {
+      it('tags every kind whose chain has no sprite (parents included) and not the covered ones', async () => {
+        const { has } = await tagged([sprite(['elder'])]);
+
+        // elder covers itself and its child sage; folk (its parent) and other have no sprite in their chain.
+        expect([has('folk'), has('elder'), has('sage'), has('other')]).toEqual([true, false, false, true]);
+      });
+
+      it('a sprite on a root covers its whole subtree', async () => {
+        const { has } = await tagged([sprite(['folk', 'other'])]);
+
+        expect([has('folk'), has('elder'), has('sage'), has('other')]).toEqual([false, false, false, false]);
+      });
+
+      it('is a warn p-tag in the last cell of the row', async () => {
+        const { view } = await tagged([]);
+
+        const tag = view.$('missing-sprite-sage')!;
+        expect(tag.tagName.toLowerCase()).toBe('p-tag');
+        const instance = view.fixture.debugElement.query(By.css('[data-test="missing-sprite-sage"]')).componentInstance;
+        const severity = typeof instance.severity === 'function' ? instance.severity() : instance.severity;
+        expect(severity).toBe('warn');
+        const cells = view.$('kind-row-sage')!.querySelectorAll(':scope > td');
+        expect(cells[cells.length - 1].contains(tag)).toBe(true);
+      });
+
+      it('follows the coverage rule for a neutral draft too', async () => {
+        const { has } = await tagged([sprite(['elder'])], undefined);
+
+        expect([has('folk'), has('elder'), has('sage'), has('other')]).toEqual([true, false, false, true]);
+      });
+    } else {
+      it('shows no missing sprite tag in a domain without sprites', async () => {
+        const { view } = await tagged([]);
+
+        expect(view.el.querySelector('[data-test^="missing-sprite-"]')).toBeNull();
+      });
+    }
+  });
+});
+
+describe('KindsTreeTableComponent classes skills cell', () => {
+  const skillKinds = { blade: {}, bow: {}, orb: {}, shield: {}, staff: {} };
+  const open = (skills: string[]) =>
+    renderEditor(
+      KindsTreeTableComponent,
+      draftOf({
+        skillKinds,
+        classKinds: { knight: { skills }, drifter: {} },
+        generators: { skills: { version: 2, kinds: { blade: { nouns: [{ text: 'Blade' }] } } } },
+      }),
+      [],
+      { domain: 'classes' },
+    );
+  const chips = (view: Awaited<ReturnType<typeof open>>, row: string) =>
+    view.$(`kind-row-${row}`)!.querySelector('[data-test="cell-skills"]')!;
+
+  it('shows at most 3 fit-item chips (the noun, else the id) then a fit-more "+N" item', async () => {
+    const view = await open(['blade', 'bow', 'orb', 'shield', 'staff']);
+
+    const cell = chips(view, 'knight');
+    expect([...cell.querySelectorAll('[data-test="fit-item"]')].map((e) => e.textContent!.trim())).toEqual(['Blade', 'bow', 'orb']);
+    expect(cell.querySelector('[data-test="fit-more"]')!.textContent!.trim()).toBe('+2');
+    expect(cell.textContent).not.toContain('—');
+  });
+
+  it('has no fit-more with 3 skill kinds or fewer', async () => {
+    const view = await open(['blade', 'bow', 'orb']);
+
+    const cell = chips(view, 'knight');
+    expect(cell.querySelectorAll('[data-test="fit-item"]')).toHaveLength(3);
+    expect(cell.querySelector('[data-test="fit-more"]')).toBeNull();
+  });
+});
+
+describe('KindsTreeTableComponent without shared kinds (items)', () => {
+  const open = () =>
+    renderEditor(KindsTreeTableComponent, draftOf({ kinds: { gear: { type: 'equipment' }, blade: { parent: 'gear' } } }), [], {
+      domain: 'items',
+    });
+  const settle = async (view: Awaited<ReturnType<typeof open>>) => {
+    view.fixture.detectChanges();
+    await view.fixture.whenStable();
+    view.fixture.detectChanges();
+  };
+
+  it('shows no Shared kinds line in the detail of a kind', async () => {
+    const view = await open();
+    view.$('kind-row-blade')!.click();
+    await settle(view);
+
+    const detail = document.querySelector<HTMLElement>('[data-test="kind-detail"]')!;
+    expect(detail).not.toBeNull();
+    expect(detail.querySelector('[data-test="detail-shared"]')).toBeNull();
+    expect(detail.querySelector('[data-test="detail-shared-inherited"]')).toBeNull();
+  });
+
+  it('has no Shared kinds multiselect in the form of a kind', async () => {
+    const view = await open();
+    view.$('kind-row-blade')!.click();
+    await settle(view);
+    const edit = document.querySelector<HTMLElement>('[data-test="detail-edit"]')!;
+    (edit instanceof HTMLButtonElement ? edit : (edit.querySelector('button') ?? edit)).click();
+    await settle(view);
+
+    expect(document.querySelector('[data-test="kind-form"]')).not.toBeNull();
+    expect(document.querySelector('[data-test="kind-shared"]')).toBeNull();
+  });
+});

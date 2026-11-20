@@ -51,7 +51,12 @@ import {
   attributeFormulaErrors,
   WORLD_NAME_MAX_LENGTH,
 } from '../../helpers/world-draft.rules';
-import { basePackId, packLanguageOf } from '../../../../core/business/pack.business';
+import {
+  BundledWorldImage,
+  defaultPacks,
+  PackBusiness,
+  packLanguageOf,
+} from '../../../../core/business/pack.business';
 import { PackLanguage } from '../../../../core/packs/pack';
 import { RuleFieldsComponent } from '../../components/rule-fields/rule-fields.component';
 import { CombatRules, OfflineFeatures, WorldDraft } from '../../models/world';
@@ -105,6 +110,7 @@ import { DEFAULT_ATTRIBUTES } from '../../helpers/default-world';
 export class WorldNewPageComponent {
   private readonly library = inject(WorldLibraryBusiness);
   private readonly language = inject(LanguageBusiness);
+  private readonly packBusiness = inject(PackBusiness);
   private readonly messages = inject(MessageService);
   private readonly router = inject(Router);
 
@@ -117,6 +123,10 @@ export class WorldNewPageComponent {
   protected readonly description = signal('');
   protected readonly imageId = signal<string | undefined>(undefined);
   protected readonly uploading = signal(false);
+  /** The active packs' world images, offered next to the upload. */
+  protected readonly worldImages = signal<BundledWorldImage[]>([]);
+  /** `pack/id` of the pack image the picture comes from; none after an upload. */
+  protected readonly chosenWorldImage = signal<string | undefined>(undefined);
   protected readonly attributes = signal<AttributeRow[]>(
     this.defaultAttributes(),
   );
@@ -151,10 +161,10 @@ export class WorldNewPageComponent {
   protected readonly offline = signal<OfflineFeatures>({
     ...DEFAULT_OFFLINE_FEATURES,
   });
-  /** Active packs: the Base of the app language to start with. */
-  protected readonly packs = signal<string[]>([
-    basePackId(this.language.$language()),
-  ]);
+  /** Active packs: the Base of the app language and the neutral assets to start with. */
+  protected readonly packs = signal<string[]>(
+    defaultPacks(this.language.$language()),
+  );
   /** The language of the world: the app language to start with. */
   protected readonly worldLanguage = signal<PackLanguage>(
     packLanguageOf(this.language.$language()),
@@ -269,12 +279,41 @@ export class WorldNewPageComponent {
     () => Object.keys(this.errors()).length === 0,
   );
 
+  constructor() {
+    void this.packBusiness
+      .worldImages()
+      .then((images) => this.worldImages.set(images))
+      .catch(() => undefined);
+  }
+
+  protected worldImageKey(image: BundledWorldImage): string {
+    return `${image.packId}/${image.id}`;
+  }
+
+  protected async chooseWorldImage(image: BundledWorldImage): Promise<void> {
+    this.uploading.set(true);
+    try {
+      this.imageId.set(await this.library.chooseWorldImage(image));
+      this.chosenWorldImage.set(this.worldImageKey(image));
+    } catch (error) {
+      console.error('World image failed', error);
+      this.messages.add({
+        severity: MessageLevel.Error,
+        summary: this.language.t('world.errors.image'),
+        life: 4000,
+      });
+    } finally {
+      this.uploading.set(false);
+    }
+  }
+
   protected async upload(event: FileUploadHandlerEvent): Promise<void> {
     const file = event.files[0];
     if (!file) return;
     this.uploading.set(true);
     try {
       this.imageId.set(await this.library.uploadImage(file));
+      this.chosenWorldImage.set(undefined);
     } catch (error) {
       console.error('Image upload failed', error);
       this.messages.add({

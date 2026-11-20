@@ -18,7 +18,8 @@ const toughness: Skill = {
 /**
  * Hooks: one `[data-field="skill"]` row per skill holding `[data-field="skill-name"]`, `skill-type`, `skill-cost`
  * (attribute and amount, active skills with a cost), `skill-cooldown` (turns, active skills), `skill-description`,
- * and the row actions `[data-action]` `edit`, `duplicate`, `delete`. Toolbar: `[data-field="search"]`, `create`.
+ * and the row's "…" button `[data-test="card-menu-<id>"]` opening a body-level menu whose entries are
+ * `[data-automationid]` `edit`, `duplicate`, `delete` (the menu itself is covered by skill-catalogue.menu.spec.ts). Toolbar: `[data-field="search"]`, `create`.
  */
 describe('SkillCatalogueComponent', () => {
   async function setup() {
@@ -66,15 +67,32 @@ describe('SkillCatalogueComponent', () => {
     expect(q('[data-field="skill-name"]')[0].textContent).toContain('Toughness');
   });
 
-  it('emits the skill to edit and to duplicate from its row', async () => {
+  const settle = async (fixture: { whenStable(): Promise<unknown> }) => {
+    for (let i = 0; i < 3; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await fixture.whenStable();
+    }
+  };
+  const pick = (action: string) => document.body.querySelector<HTMLElement>(`[data-automationid="${action}"]`)!;
+
+  afterEach(() => {
+    document.body.querySelectorAll('.p-menu, .p-menu-overlay').forEach((n) => n.remove());
+  });
+
+  it('emits the skill to edit and to duplicate from its row menu', async () => {
     const { fixture, q, component } = await setup();
     const edited: Skill[] = [];
     const copied: Skill[] = [];
     component.edit.subscribe((s: Skill) => edited.push(s));
     component.duplicate.subscribe((s: Skill) => copied.push(s));
-    q('[data-field="skill"]')[1].querySelector<HTMLElement>('[data-action="edit"]')!.click();
-    q('[data-field="skill"]')[0].querySelector<HTMLElement>('[data-action="duplicate"]')!.click();
-    await fixture.whenStable();
+    q('[data-test="card-menu-tg"]')[0].click();
+    await settle(fixture);
+    pick('edit').click();
+    await settle(fixture);
+    q('[data-test="card-menu-fb"]')[0].click();
+    await settle(fixture);
+    pick('duplicate').click();
+    await settle(fixture);
     expect(edited).toEqual([toughness]);
     expect(copied).toEqual([fireball]);
   });
@@ -86,8 +104,10 @@ describe('SkillCatalogueComponent', () => {
       .mockImplementation(() => TestBed.inject(ConfirmationService));
     const removed: Skill[] = [];
     component.remove.subscribe((s: Skill) => removed.push(s));
-    q('[data-field="skill"]')[0].querySelector<HTMLElement>('[data-action="delete"]')!.click();
-    await fixture.whenStable();
+    q('[data-test="card-menu-fb"]')[0].click();
+    await settle(fixture);
+    pick('delete').click();
+    await settle(fixture);
     expect(confirm).toHaveBeenCalledTimes(1);
     expect(removed).toEqual([]);
     confirm.mock.calls[0][0].accept!();

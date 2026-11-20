@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "params": {
     "maker": [
       "a dwarven smith",
@@ -29,13 +29,6 @@
       "the endless winter",
       "the clan war"
     ],
-    "material": [
-      "black steel",
-      "boiled leather",
-      "polished horn",
-      "carved bone",
-      "willow wood"
-    ],
     "creature": [
       "a giant wolf",
       "a wyvern",
@@ -43,6 +36,19 @@
       "a marsh troll",
       "a griffin"
     ],
-    "effect": ["Healing", "Vigor", "Strength", "Swiftness", "Night Sight"]
+    "effect": [
+      "Healing",
+      "Vigor",
+      "Strength",
+      "Swiftness",
+      "Night Sight"
+    ],
+    "material": [
+      "black steel",
+      "boiled leather",
+      "polished horn",
+      "carved bone",
+      "willow wood"
+    ]
   }
 }

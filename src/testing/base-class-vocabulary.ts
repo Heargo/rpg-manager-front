@@ -7,6 +7,7 @@ import {
   ClassVocabulary,
 } from '../app/core/generators/class-vocabulary';
 import { PooledSource } from '../app/core/packs/pooled-domain';
+import { baseOtherDomains } from './base-other-domains';
 import { baseManifest } from './base-pack';
 
 /** The class vocabulary of the real Base pack of a language, pooled alone. */
@@ -20,6 +21,7 @@ export function baseClassVocabulary(lang: 'en' | 'fr'): ClassVocabulary {
       kinds: (manifest.domains.classes as { kinds?: unknown }).kinds as PooledSource['kinds'],
       texts: (lang === 'en' ? enClasses : frClasses) as unknown as PooledSource['texts'],
       params: (lang === 'en' ? enCommon : frCommon).params,
+      otherDomains: baseOtherDomains(lang, 'classes'),
     },
   ]);
 }

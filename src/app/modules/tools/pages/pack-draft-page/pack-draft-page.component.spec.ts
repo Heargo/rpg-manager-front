@@ -61,12 +61,12 @@ async function render(prepare: (draft: PackDraft) => PackDraft = (d) => d) {
 }
 
 describe('PackDraftPageComponent', () => {
-  it('has the four tabs: Details, Word lists, Sprites, Publish', async () => {
+  it('has the tabs Details, Common, Items, NPCs, Skills, Classes, Sprites, Publish', async () => {
     const { el } = await render();
 
     const labels = [...el.querySelectorAll('[role="tab"]')].map((t) => t.textContent!.trim());
 
-    expect(labels).toEqual(['Details', 'Word lists', 'Sprites', 'Publish']);
+    expect(labels).toEqual(['Details', 'Common', 'Items', 'NPCs', 'Skills', 'Classes', 'Sprites', 'Publish']);
   });
 
   it('has one name and one description field, and no per-language ones', async () => {
@@ -91,9 +91,13 @@ describe('PackDraftPageComponent', () => {
 
   it('shows four word list slots, one per generator', async () => {
     const { el, tab } = await render();
-    await tab('Word lists');
-
-    const slots = [...el.querySelectorAll('textarea[data-test^="wordlist-"]')].map((t) => t.getAttribute('data-test'));
+    const slots: (string | null)[] = [];
+    for (const label of ['Items', 'NPCs', 'Skills', 'Classes']) {
+      await tab(label);
+      slots.push(
+        ...[...el.querySelectorAll('textarea[data-test^="wordlist-"]')].map((t) => t.getAttribute('data-test')),
+      );
+    }
 
     expect(slots).toEqual(['wordlist-items', 'wordlist-npcs', 'wordlist-skills', 'wordlist-classes']);
   });
@@ -116,7 +120,7 @@ describe('PackDraftPageComponent', () => {
 
   it('shows the validators error live under an invalid word list, and none once it is valid', async () => {
     const { settle, $, tab, type } = await render();
-    await tab('Word lists');
+    await tab('Items');
 
     type('textarea[data-test="wordlist-items"]', '{');
     await settle(() => expect($('[data-test="wordlist-error-items"]')!.textContent).toContain('JSON'));

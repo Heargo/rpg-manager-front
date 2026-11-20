@@ -77,15 +77,16 @@ describe('PackBusiness: the two Bases', () => {
     expect(basePackId('en')).toBe('base-en');
   });
 
-  it('installs base-fr and base-en, built in, each with its language', async () => {
+  it('installs base-fr and base-en, built in, each with its language, and the neutral base-assets without one', async () => {
     await business.load();
 
     const bases = business.$installed().filter((p) => p.builtIn);
     expect(bases.map((p) => [p.id, p.language])).toEqual([
       ['base-fr', 'fr'],
       ['base-en', 'en'],
+      ['base-assets', undefined],
     ]);
-    expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en']);
+    expect(business.$installed().map((p) => p.id)).toEqual(['base-fr', 'base-en', 'base-assets']);
   });
 
   it('lists a pack with a single name and description', async () => {

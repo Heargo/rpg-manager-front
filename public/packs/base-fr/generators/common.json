@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "params": {
     "maker": [
       "un forgeron nain",
@@ -29,13 +29,6 @@
       "l'hiver sans fin",
       "la guerre des clans"
     ],
-    "material": [
-      "l'acier noir",
-      "le cuir bouilli",
-      "la corne polie",
-      "l'os sculpté",
-      "le bois de saule"
-    ],
     "creature": [
       "un loup géant",
       "une vouivre",
@@ -43,6 +36,19 @@
       "un troll des marais",
       "un griffon"
     ],
-    "effect": ["soin", "vigueur", "force", "célérité", "vision nocturne"]
+    "effect": [
+      "soin",
+      "vigueur",
+      "force",
+      "célérité",
+      "vision nocturne"
+    ],
+    "material": [
+      "l'acier noir",
+      "le cuir bouilli",
+      "la corne polie",
+      "l'os sculpté",
+      "le bois de saule"
+    ]
   }
 }

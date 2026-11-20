@@ -13,6 +13,7 @@ import {
   NpcVocabulary,
 } from '../app/core/generators/npc-vocabulary';
 import { PooledSource } from '../app/core/packs/pooled-domain';
+import { baseOtherDomains } from './base-other-domains';
 import { baseManifest } from './base-pack';
 
 /** The item vocabulary of the real Base pack of a language, pooled alone. */
@@ -27,6 +28,7 @@ export function baseItemVocabulary(lang: 'en' | 'fr'): ItemVocabulary {
       texts: (lang === 'en' ? enItems : frItems) as PooledSource['texts'],
       tints: manifest.tints as PooledSource['tints'],
       params: (lang === 'en' ? enCommon : frCommon).params,
+      otherDomains: baseOtherDomains(lang, 'items'),
     },
   ]);
 }
@@ -42,6 +44,7 @@ export function baseNpcVocabulary(lang: 'en' | 'fr'): NpcVocabulary {
       kinds: (manifest.domains.npcs as { kinds?: unknown }).kinds as PooledSource['kinds'],
       texts: (lang === 'en' ? enNpcs : frNpcs) as unknown as PooledSource['texts'],
       params: (lang === 'en' ? enCommon : frCommon).params,
+      otherDomains: baseOtherDomains(lang, 'npcs'),
     },
   ]);
 }

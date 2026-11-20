@@ -539,7 +539,8 @@
         "A [reliable|fearsome] weapon, forged by {maker}.",
         "They say it once belonged to {owner}.",
         "It survived {event}, and it shows.",
-        "It is shaped from {material}."
+        "It is shaped from {material}.",
+        "The mark of the {blacksmith} guild is stamped near the hilt."
       ],
       "adjectives": {
         "uncommon": [

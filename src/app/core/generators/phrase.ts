@@ -23,12 +23,15 @@ export interface PhraseContext {
   plural?: boolean;
   /** Replacements for `{base}`, `{adjective}`, `{suffix}` and, for NPCs, `{given}`, `{epithet}` and `{noun}`. */
   values?: Partial<Record<ValueName, string>>;
+  /** What `{kind id}` and `{kind id:adjective}` insert when the id is not a param: a noun or an adjective of that kind. */
+  kindWord?: (id: string, form: 'word' | 'adjective') => string | undefined;
 }
 
 type Node =
   | { kind: 'text'; text: string }
   | { kind: 'variant'; options: Node[][] }
   | { kind: 'param'; name: string }
+  | { kind: 'adjective'; name: string }
   | { kind: 'value'; name: ValueName }
   | { kind: 'gender'; options: string[] };
 
@@ -107,6 +110,8 @@ function parse(phrase: string): Parsed {
     const colon = content.indexOf(':');
     if (colon >= 0) {
       const prefix = content.slice(0, colon);
+      if (content.slice(colon + 1) === 'adjective' && PARAM_NAME.test(prefix))
+        return { kind: 'adjective', name: prefix };
       if (prefix !== 'g') {
         errors.push(`Unknown prefix "${prefix}:"`);
         return undefined;
@@ -130,12 +135,18 @@ function parse(phrase: string): Parsed {
   return { nodes, errors };
 }
 
-function usedParams(nodes: readonly Node[], found: string[]): void {
+function usedParams(
+  nodes: readonly Node[],
+  found: string[],
+  adjectives: string[],
+): void {
   for (const node of nodes) {
     if (node.kind === 'param' && !found.includes(node.name))
       found.push(node.name);
+    else if (node.kind === 'adjective' && !adjectives.includes(node.name))
+      adjectives.push(node.name);
     else if (node.kind === 'variant')
-      for (const option of node.options) usedParams(option, found);
+      for (const option of node.options) usedParams(option, found, adjectives);
   }
 }
 
@@ -146,8 +157,20 @@ export function checkPhrase(phrase: string): {
 } {
   const { nodes, errors } = parse(phrase);
   const params: string[] = [];
-  usedParams(nodes, params);
+  usedParams(nodes, params, []);
   return { errors, params };
+}
+
+/** The names a phrase uses, as `{name}` (words) or `{name:adjective}` (adjectives): what it needs from the params and the kinds. */
+export function phraseRefs(phrase: string): {
+  words: string[];
+  adjectives: string[];
+} {
+  const { nodes } = parse(phrase);
+  const words: string[] = [];
+  const adjectives: string[] = [];
+  usedParams(nodes, words, adjectives);
+  return { words, adjectives };
 }
 
 /** Expands a phrase, or returns `undefined` when it fails (missing param or value, depth over 5, syntax error). */
@@ -198,12 +221,15 @@ function render(
       case 'value':
         part = context.values?.[node.name];
         break;
+      case 'adjective':
+        part = context.kindWord?.(node.name, 'adjective');
+        break;
       case 'param': {
         const entries = context.params?.[node.name];
         part =
           entries && entries.length > 0
             ? expand(source, pick(source, entries), context, depth + 1)
-            : undefined;
+            : context.kindWord?.(node.name, 'word');
         break;
       }
     }

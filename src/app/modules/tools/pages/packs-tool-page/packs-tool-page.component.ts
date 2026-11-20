@@ -17,8 +17,10 @@ import { CardModule } from '@openng/optimus-ui/card';
 import { DialogModule } from '@openng/optimus-ui/dialog';
 import { ProgressSpinnerModule } from '@openng/optimus-ui/progressspinner';
 import { TagModule } from '@openng/optimus-ui/tag';
+import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import {
   BundledSprite,
+  BundledWorldImage,
   InstalledPack,
   PackBusiness,
   PackUpdate,
@@ -27,11 +29,13 @@ import {
 import { PackCreatorBusiness } from '../../../../core/business/pack-creator.business';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { SUPPORTED_LANGUAGES } from '../../../../core/constants/languages';
+import { PACK_GENERATORS, SPRITE_KINDS } from '../../../../core/packs/pack';
 import {
-  PACK_GENERATORS,
-  SPRITE_KINDS,
-  SpriteKind,
-} from '../../../../core/packs/pack';
+  AssetKind,
+  assetKindRows,
+  assetPage,
+  showcaseOf,
+} from '../../../../core/packs/pack-showcase.rules';
 import { PackRegistryEntry } from '../../../../core/packs/pack-registry';
 import { MessageLevel } from '../../../../core/models/toast-level';
 
@@ -55,6 +59,7 @@ export function formatSize(bytes: number): string {
     MessageModule,
     ProgressSpinnerModule,
     TagModule,
+    TooltipModule,
   ],
   template: `
     <div class="main-container packs">
@@ -71,6 +76,13 @@ export function formatSize(bytes: number): string {
             severity="secondary"
             icon="pi pi-pencil"
             [label]="'packs.creator.create' | translate"
+            [loading]="creating()"
+            (onClick)="createPack()"
+          />
+          <p-button
+            severity="secondary"
+            icon="pi pi-folder"
+            [label]="'packs.creator.title' | translate"
             (onClick)="openCreator()"
           />
         </div>
@@ -82,13 +94,21 @@ export function formatSize(bytes: number): string {
             @for (entry of registry(); track entry.id) {
               <li data-test="pack-card" [attr.data-pack]="entry.id">
                 <p-card>
-                  <div class="head">
-                    <h3>{{ entry.name }}</h3>
-                    <p-tag
-                      data-test="pack-language"
-                      severity="secondary"
-                      [value]="languageName(entry.language)"
-                    />
+                  <h3
+                    class="name line-clamp-2"
+                    data-test="pack-name"
+                    [pTooltip]="entry.name"
+                  >
+                    {{ entry.name }}
+                  </h3>
+                  <div class="tags" data-test="pack-tags">
+                    @if (entry.language) {
+                      <p-tag
+                        data-test="pack-language"
+                        severity="secondary"
+                        [value]="languageName(entry.language)"
+                      />
+                    }
                     @if (entry.builtIn) {
                       <p-tag
                         severity="info"
@@ -110,28 +130,40 @@ export function formatSize(bytes: number): string {
                       }
                     }
                   </div>
-                  <p class="desc">{{ entry.description }}</p>
-                  <dl>
-                    <dt>{{ 'packs.author' | translate }}</dt>
-                    <dd>{{ entry.author }}</dd>
-                    <dt>{{ 'packs.license' | translate }}</dt>
-                    <dd>
-                      <a
+                  <p class="desc line-clamp-3" data-test="pack-desc">
+                    {{ entry.description }}
+                  </p>
+                  <div class="meta" data-test="pack-meta">
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.author' | translate"
+                      ><i class="pi pi-user"></i>{{ entry.author }}</span
+                    >
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.license' | translate"
+                      ><i class="pi pi-shield"></i
+                      ><a
                         [href]="entry.licenseUrl"
                         target="_blank"
                         rel="noopener noreferrer"
                         >{{ entry.license }}</a
-                      >
-                    </dd>
+                      ></span
+                    >
                     @if (!entry.builtIn) {
-                      <dt>{{ 'packs.size' | translate }}</dt>
-                      <dd>{{ size(entry.size) }}</dd>
+                      <span
+                        data-test="pack-meta-item"
+                        [title]="'packs.size' | translate"
+                        ><i class="pi pi-database"></i
+                        >{{ size(entry.size) }}</span
+                      >
                     }
-                    <dt>{{ 'packs.detailsSprites' | translate }}</dt>
-                    <dd>{{ entry.sprites }}</dd>
-                    <dt>{{ 'packs.language' | translate }}</dt>
-                    <dd>{{ languageName(entry.language) }}</dd>
-                  </dl>
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.detailsSprites' | translate"
+                      ><i class="pi pi-images"></i>{{ entry.sprites }}</span
+                    >
+                  </div>
                   <ng-template #footer>
                     <div class="actions">
                       @if (isInstalled(entry.id)) {
@@ -185,8 +217,14 @@ export function formatSize(bytes: number): string {
             @for (pack of unofficial(); track pack.id) {
               <li data-test="unofficial-pack-card" [attr.data-pack]="pack.id">
                 <p-card>
-                  <div class="head">
-                    <h3>{{ pack.name }}</h3>
+                  <h3
+                    class="name line-clamp-2"
+                    data-test="pack-name"
+                    [pTooltip]="pack.name"
+                  >
+                    {{ pack.name }}
+                  </h3>
+                  <div class="tags" data-test="pack-tags">
                     <p-tag
                       data-test="pack-language"
                       severity="secondary"
@@ -206,35 +244,45 @@ export function formatSize(bytes: number): string {
                       />
                     }
                   </div>
-                  <p class="desc">{{ pack.description }}</p>
-                  <dl>
-                    <dt>{{ 'packs.author' | translate }}</dt>
-                    <dd>{{ pack.author }}</dd>
-                    <dt>{{ 'packs.license' | translate }}</dt>
-                    <dd>
-                      <a
+                  <p class="desc line-clamp-3" data-test="pack-desc">
+                    {{ pack.description }}
+                  </p>
+                  <div class="meta" data-test="pack-meta">
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.author' | translate"
+                      ><i class="pi pi-user"></i>{{ pack.author }}</span
+                    >
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.license' | translate"
+                      ><i class="pi pi-shield"></i
+                      ><a
                         [href]="pack.licenseUrl"
                         target="_blank"
                         rel="noopener noreferrer"
                         >{{ pack.license }}</a
-                      >
-                    </dd>
-                    <dt>{{ 'packs.version' | translate }}</dt>
-                    <dd>{{ pack.version }}</dd>
-                    <dt>{{ 'packs.source' | translate }}</dt>
-                    <dd>
-                      @if (pack.link) {
-                        <a
+                      ></span
+                    >
+                    <span
+                      data-test="pack-meta-item"
+                      [title]="'packs.version' | translate"
+                      ><i class="pi pi-tag"></i>{{ pack.version }}</span
+                    >
+                    @if (pack.link) {
+                      <span
+                        data-test="pack-meta-item"
+                        [title]="'packs.source' | translate"
+                        ><i class="pi pi-link"></i
+                        ><a
                           [href]="pack.link"
                           target="_blank"
                           rel="noopener noreferrer"
                           >{{ pack.link }}</a
-                        >
-                      } @else {
-                        {{ 'packs.createdHere' | translate }}
-                      }
-                    </dd>
-                  </dl>
+                        ></span
+                      >
+                    }
+                  </div>
                   <ng-template #footer>
                     <div class="actions">
                       @if (pack.link) {
@@ -411,13 +459,21 @@ export function formatSize(bytes: number): string {
       </ng-template>
     </p-dialog>
     <p-dialog
-      [header]="detailsTitle()"
       [visible]="details() !== null"
       (visibleChange)="!$event && details.set(null)"
       [modal]="true"
       [dismissableMask]="true"
       [style]="{ width: 'min(40rem, calc(100vw - 2rem))' }"
     >
+      <ng-template #header>
+        <h2
+          class="line-clamp-2 details-title"
+          data-test="pack-details-title"
+          [pTooltip]="detailsTitle()"
+        >
+          {{ detailsTitle() }}
+        </h2>
+      </ng-template>
       @if (details(); as pack) {
         <p>{{ pack.description }}</p>
         <p>
@@ -445,22 +501,68 @@ export function formatSize(bytes: number): string {
           <p class="hint">{{ 'packs.detailsNoGenerators' | translate }}</p>
         }
         <h3>{{ 'packs.detailsSprites' | translate }}</h3>
-        @for (group of spriteGroups(); track group.kind) {
-          <h4>{{ 'sprite.kind.' + group.kind | translate }}</h4>
-          <ul class="thumbs">
-            @for (sprite of group.sprites; track sprite.id) {
-              <li>
-                <img
-                  [src]="sprite.imageUrl"
-                  alt=""
-                  loading="lazy"
-                  width="48"
-                  height="48"
-                />
-                <span>{{ sprite.label }}</span>
-              </li>
+        <ul class="thumbs" data-test="pack-showcase">
+          @for (asset of showcase(); track asset.id) {
+            <li data-test="pack-showcase-item">
+              <img [src]="asset.imageUrl" alt="" width="48" height="48" />
+            </li>
+          }
+        </ul>
+        @for (row of assetRows(); track row.kind) {
+          <div data-test="pack-asset-row" [attr.data-kind]="row.kind">
+            <p>
+              <strong>{{ assetKindLabel(row.kind) }}</strong>: {{ row.count }}
+              @if (expandedKind() !== row.kind) {
+                <button
+                  pButton
+                  type="button"
+                  data-test="pack-asset-show-all"
+                  [text]="true"
+                  [label]="'packs.showAll' | translate"
+                  (click)="expand(row.kind)"
+                ></button>
+              }
+            </p>
+            @if (expandedKind() === row.kind) {
+              <ul class="thumbs">
+                @for (asset of assetPageData().items; track asset.id) {
+                  <li data-test="pack-asset-thumb">
+                    <img
+                      [src]="asset.imageUrl"
+                      alt=""
+                      loading="lazy"
+                      width="48"
+                      height="48"
+                    />
+                  </li>
+                }
+              </ul>
+              <div class="pager">
+                <button
+                  pButton
+                  type="button"
+                  data-test="pack-asset-prev"
+                  icon="pi pi-chevron-left"
+                  [text]="true"
+                  [disabled]="assetPageData().page <= 1"
+                  (click)="assetPageNumber.set(assetPageData().page - 1)"
+                ></button>
+                <span
+                  >{{ assetPageData().page }} /
+                  {{ assetPageData().pageCount }}</span
+                >
+                <button
+                  pButton
+                  type="button"
+                  data-test="pack-asset-next"
+                  icon="pi pi-chevron-right"
+                  [text]="true"
+                  [disabled]="assetPageData().page >= assetPageData().pageCount"
+                  (click)="assetPageNumber.set(assetPageData().page + 1)"
+                ></button>
+              </div>
             }
-          </ul>
+          </div>
         } @empty {
           <p class="hint">{{ 'packs.detailsNoSprites' | translate }}</p>
         }
@@ -510,35 +612,80 @@ export function formatSize(bytes: number): string {
       flex: 1;
       min-width: 0;
     }
-    .head {
+    .grid p-card ::ng-deep .p-card {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+    .grid p-card ::ng-deep .p-card-body {
+      flex: 1;
+    }
+    .grid p-card ::ng-deep .p-card-caption {
+      flex: 1;
+    }
+    .grid p-card ::ng-deep .p-card-content {
+      flex: 1;
+    }
+    .grid p-card ::ng-deep .p-card-footer {
+      margin-top: auto;
+    }
+    .line-clamp-2,
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+      min-width: 0;
+    }
+    .line-clamp-2 {
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
+    .line-clamp-3 {
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+    }
+    .name {
+      margin: 0 0 0.5rem;
+      font-size: 1.125rem;
+    }
+    .pager {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      margin-bottom: 0.75rem;
     }
-    .head h3 {
-      flex: 1;
+    .details-title {
       margin: 0;
-      font-size: 1.125rem;
-      overflow-wrap: anywhere;
+      font-size: 1.25rem;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
     }
     .desc {
       margin: 0 0 1rem;
       color: var(--p-text-muted-color);
     }
-    dl {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0.5rem 1rem;
-      margin: 0;
-    }
-    dt {
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 1rem;
+      font-size: 0.8125rem;
       color: var(--p-text-muted-color);
     }
-    dd {
-      margin: 0;
+    .meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
       min-width: 0;
       overflow-wrap: anywhere;
+    }
+    .meta i {
+      font-size: 0.75rem;
     }
     .actions {
       display: flex;
@@ -592,6 +739,7 @@ export class PacksToolPageComponent {
   protected readonly installing = signal(false);
   protected readonly prepared = signal<PreparedPack | null>(null);
   protected readonly errors = signal<string[]>([]);
+  protected readonly creating = signal(false);
   protected readonly update = signal<{ update: PackUpdate } | null>(null);
   protected readonly unofficial = computed(() =>
     this.business.$installed().filter((p) => p.link || p.local),
@@ -603,12 +751,35 @@ export class PacksToolPageComponent {
     return pack ? pack.name : '';
   });
 
-  protected readonly spriteGroups = computed(() =>
-    SPRITE_KINDS.map((kind: SpriteKind) => ({
-      kind,
-      sprites: this.detailSprites().filter((s) => s.kind === kind),
-    })).filter((group) => group.sprites.length),
+  private readonly detailWorldImages = signal<BundledWorldImage[]>([]);
+  protected readonly expandedKind = signal<AssetKind | null>(null);
+  protected readonly assetPageNumber = signal(1);
+
+  protected readonly showcase = computed(() =>
+    showcaseOf(this.detailSprites(), this.detailWorldImages()),
   );
+  protected readonly assetRows = computed(() =>
+    assetKindRows(this.detailSprites(), this.detailWorldImages()),
+  );
+  protected readonly assetPageData = computed(() =>
+    assetPage(
+      this.detailSprites(),
+      this.detailWorldImages(),
+      this.expandedKind() ?? 'masked',
+      this.assetPageNumber(),
+    ),
+  );
+
+  protected expand(kind: AssetKind): void {
+    this.assetPageNumber.set(1);
+    this.expandedKind.set(kind);
+  }
+
+  protected assetKindLabel(kind: AssetKind): string {
+    return this.language.t(
+      kind === 'world' ? 'packs.worldImages' : `sprite.kind.${kind}`,
+    );
+  }
 
   protected readonly generatorNames = computed(() => {
     const id = this.details()?.id;
@@ -662,6 +833,20 @@ export class PacksToolPageComponent {
 
   protected openCreator(): void {
     void this.router.navigate(['/tools/pack-creator']);
+  }
+
+  protected createPack(): Promise<void> {
+    return this.track(async () => {
+      this.creating.set(true);
+      try {
+        const draft = await this.creator.createDraft();
+        await this.router.navigate(['/tools/pack-creator', draft.id]);
+      } catch (error) {
+        this.fail(error);
+      } finally {
+        this.creating.set(false);
+      }
+    });
   }
 
   protected duplicate(id: string): Promise<void> {
@@ -828,9 +1013,16 @@ export class PacksToolPageComponent {
 
   protected async openDetails(entry: PackRegistryEntry): Promise<void> {
     this.detailSprites.set([]);
+    this.detailWorldImages.set([]);
+    this.expandedKind.set(null);
     this.details.set(entry);
     try {
-      this.detailSprites.set(await this.business.spritesOf(entry.id));
+      const [sprites, worldImages] = await Promise.all([
+        this.business.spritesOf(entry.id),
+        this.business.worldImagesOf(entry.id),
+      ]);
+      this.detailSprites.set(sprites);
+      this.detailWorldImages.set(worldImages);
     } catch (error) {
       this.fail(error);
     }

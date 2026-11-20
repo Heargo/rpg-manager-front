@@ -7,17 +7,11 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { ButtonModule } from '@openng/optimus-ui/button';
-import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { MessageModule } from '@openng/optimus-ui/message';
-import { SelectModule } from '@openng/optimus-ui/select';
 import { ToggleSwitchModule } from '@openng/optimus-ui/toggleswitch';
 import { LanguageBusiness } from '../../../../core/business/language.business';
-import { MAX_DICE } from '../../../../core/generators/dice';
-import {
-  DICE_PRESETS,
-  DiceRollBusiness,
-} from '../../business/dice-roll.business';
+import { DiceRollBusiness } from '../../business/dice-roll.business';
+import { DiceScreenComponent } from '../dice-screen/dice-screen.component';
 
 /**
  * Compact roller for the game table: dice, Roll, the "share with the table" toggle and the table's recent rolls.
@@ -29,73 +23,50 @@ import {
   imports: [
     FormsModule,
     TranslatePipe,
-    ButtonModule,
-    InputNumberModule,
     MessageModule,
-    SelectModule,
+    DiceScreenComponent,
     ToggleSwitchModule,
   ],
   template: `
-    <form class="roller" (ngSubmit)="roll()">
-      <div class="notation">
-        <p-inputnumber
-          inputId="table-dice-count"
-          [min]="1"
-          [max]="maxDice"
-          [showButtons]="true"
-          buttonLayout="horizontal"
-          [ngModel]="dice.$count()"
-          (ngModelChange)="dice.$count.set($event ?? 1)"
-          name="count"
-          [ariaLabel]="'dice.count' | translate"
-          inputStyleClass="count"
-        />
-        <p-select
-          [options]="presets"
-          optionLabel="label"
-          optionValue="value"
-          [ngModel]="dice.$sides()"
-          (ngModelChange)="dice.$sides.set($event)"
-          name="sides"
-          [ariaLabel]="'dice.sides' | translate"
-        />
-        <p-button
-          type="submit"
-          icon="pi pi-box"
-          [label]="'dice.roll' | translate"
-          [loading]="rolling()"
-        />
+    <app-dice-screen
+      dock="inline"
+      [(count)]="dice.$count"
+      [(sides)]="dice.$sides"
+      [(pool)]="dice.$pool"
+      [(modifier)]="dice.$modifier"
+      [busy]="rolling()"
+      (roll)="roll()"
+    >
+      @if (dice.$tableRolls(); as rolls) {
+        @if (rolls.length) {
+          <h3>{{ 'dice.tableRolls' | translate }}</h3>
+          <ul class="rolls">
+            @for (roll of rolls; track roll.id) {
+              <li>
+                <span class="who">{{ roll.by.name }}</span>
+                <span class="muted">{{ dice.notationOf(roll) }}</span>
+                <strong>{{ dice.totalOf(roll) }}</strong>
+              </li>
+            }
+          </ul>
+        }
+      }
+      <div diceOptions class="options">
+        @if (dice.$canShare()) {
+          <div class="share">
+            <p-toggleswitch
+              inputId="share-roll"
+              [ngModel]="dice.$shareWithTable()"
+              (ngModelChange)="dice.$shareWithTable.set($event)"
+            />
+            <label for="share-roll">{{ 'dice.share' | translate }}</label>
+          </div>
+        }
+        @if (error()) {
+          <p-message severity="error" size="small">{{ error() }}</p-message>
+        }
       </div>
-      @if (dice.$canShare()) {
-        <div class="share">
-          <p-toggleswitch
-            inputId="share-roll"
-            [ngModel]="dice.$shareWithTable()"
-            (ngModelChange)="dice.$shareWithTable.set($event)"
-            name="share"
-          />
-          <label for="share-roll">{{ 'dice.share' | translate }}</label>
-        </div>
-      }
-      @if (error()) {
-        <p-message severity="error" size="small">{{ error() }}</p-message>
-      }
-    </form>
-
-    @if (dice.$tableRolls(); as rolls) {
-      @if (rolls.length) {
-        <h3>{{ 'dice.tableRolls' | translate }}</h3>
-        <ul class="rolls">
-          @for (roll of rolls; track roll.id) {
-            <li>
-              <span class="who">{{ roll.by.name }}</span>
-              <span class="muted">{{ roll.count }}d{{ roll.sides }}</span>
-              <strong>{{ total(roll.values) }}</strong>
-            </li>
-          }
-        </ul>
-      }
-    }
+    </app-dice-screen>
   `,
   styles: `
     :host {
@@ -103,20 +74,10 @@ import {
       flex-direction: column;
       gap: 0.75rem;
     }
-    .roller {
+    .options {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
-    }
-    .notation {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    :host ::ng-deep .count {
-      width: 3rem;
-      text-align: center;
     }
     .share {
       display: flex;
@@ -157,11 +118,6 @@ import {
 export class DiceRollerComponent {
   protected readonly dice = inject(DiceRollBusiness);
   private readonly language = inject(LanguageBusiness);
-  protected readonly maxDice = MAX_DICE;
-  protected readonly presets = DICE_PRESETS.map((value) => ({
-    value,
-    label: `d${value}`,
-  }));
   protected readonly rolling = signal(false);
   protected readonly error = signal<string | null>(null);
 
@@ -177,16 +133,12 @@ export class DiceRollerComponent {
     this.rolling.set(true);
     this.error.set(null);
     try {
-      await this.dice.rollAtTable();
+      await this.dice.rollSelectionAtTable();
     } catch (error) {
       console.error('Shared roll failed', error);
       this.error.set(this.language.t('dice.errors.shareFailed'));
     } finally {
       this.rolling.set(false);
     }
-  }
-
-  protected total(values: number[]): number {
-    return values.reduce((sum, value) => sum + value, 0);
   }
 }

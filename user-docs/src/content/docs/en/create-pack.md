@@ -7,7 +7,7 @@ A pack is **data**: a `pack.json` file that describes the pack (its kinds, tints
 
 ## The pack creator
 
-**Tools › Content packs › Create a pack** opens the list of your **drafts**. They are saved on this device as you edit: you can leave and come back. **New draft** opens one, with four tabs.
+**Packs › Create a pack** opens the list of your **drafts**. They are saved on this device as you edit: you can leave and come back. **New draft** opens one, with eight tabs: **Details**, **Common**, **Items**, **NPCs**, **Skills**, **Classes**, **Sprites** and **Publish**.
 
 ### Details
 
@@ -15,24 +15,30 @@ The **pack language** (English or French, by default the app's), the name, the d
 
 ![A pack draft's details](../../../assets/screens/en/packs-creator-details.png)
 
-### Word lists
+### Word lists (Common, Items, NPCs, Skills, Classes)
 
-The tab has three blocks, and its intro reminds you that empty lists are left out of the pack.
+The word lists are split in five tabs; each intro reminds you that empty lists are left out of the pack. **Common** (for a pack with a language) holds the **Params** and the `common.json` file; **Items**, **NPCs**, **Skills** and **Classes** each hold their forms and their raw file.
 
 **Items** is filled with forms:
 
-- **Kinds**: **Add a kind** asks for an id (English, lowercase letters, digits and dashes, for example `sabre`), a **Parent** and, for a root, a **Type**; the **Slot** is chosen on the level where it applies. Each kind has its **Nouns** (with the **Gender** masculine or feminine, and **Plural** for a noun such as "Gloves"), its **Descriptions** (one per line, using the [phrase syntax](/docs/en/packs/#the-phrase-syntax)) and, if needed, its **Name templates** (one per line, each with `{base}`) and its **Adjectives** and **Suffixes** per rarity (collapsed). These words add up along the chain: a sword gets those of `sword`, `weapon` and `equipment`, plus the common words. Put "sharpened" on `weapon` rather than in the common words, so no hood is "sharpened". Ids already known from installed packs are offered by autocompletion, so you can reuse the standard kinds.
-- **Preview**: under each kind, draws a few trial items with its nouns and descriptions. A kind with no noun says "Nothing to draw: this kind needs a noun".
+- **Kinds**: a tree table (parent, then children) with the label, id, **Type** and **Slot** of each kind. Click a row to see its detail in a side panel; **Edit** opens the form. **Add a kind** (above the table) adds a root, and **Add child** on a row adds a kind under it. **Delete** asks first and removes the kind **with its children** and their texts. Closing the panel with unsaved changes asks whether to discard them. The form asks for an id (English, lowercase letters, digits and dashes, for example `sabre`), a **Parent** and, for a root, a **Type**; the **Slot** is chosen on the level where it applies. Nothing is applied until **Save**. Each kind has its **Nouns** (with the **Gender** masculine or feminine, and **Plural** for a noun such as "Gloves"), its **Descriptions** (one per line, using the [phrase syntax](/docs/en/packs/#the-phrase-syntax)) and, if needed, its **Name templates** (one per line, each with `{base}`) and its **Adjectives** and **Suffixes** per rarity (collapsed). These words add up along the chain: a sword gets those of `sword`, `weapon` and `equipment`, plus the common words. Put "sharpened" on `weapon` rather than in the common words, so no hood is "sharpened". Ids already known from installed packs are offered by autocompletion, so you can reuse the standard kinds.
+- **Preview**: in the side panel of a kind, draws a few trial items with its nouns and descriptions. A kind with no noun says "Nothing to draw: this kind needs a noun".
 - **Coverage line**: "No sprite yet for: …" lists the pack's kinds that no sprite illustrates yet. It blocks nothing: a pack can have no sprites, and a kind with no sprite gets an image by type and slot.
 - **Tints**: **Add a tint** asks for an id (`fire`, `rust`…) and the three colours of the gradient (**Shadow**, **Middle**, **Light**), then its **Adjectives** (one per line; a gendered adjective is written `masculine|feminine`, followed by the plurals if they are irregular), its **Suffixes** and its **Descriptions**. **Fits kinds** picks the kinds the tint can colour (empty: all); its words and descriptions are only drawn for those items, and a tint description is drawn one time in two.
 - **Common adjectives and suffixes** (collapsed): words that fit any item ("ancient", "legendary"…), per rarity.
 - **Name templates** (collapsed): the templates per rarity, only needed for a language Base. Untinted adjectives and suffixes stay in the raw file (see Advanced).
 
-**Shared** holds the **Params**: **Add a param** asks for its name (its **role in the sentence**: `maker`, `place`…), then its phrases one by one (**New phrase**). Each phrase is a complete noun phrase with its article. A pack with no language has no texts: the form asks you to choose one in **Details**.
+**Common** holds the **Params**: **Add a param** asks for its name (its **role in the sentence**: `maker`, `place`…), then its phrases one by one (**New phrase**). Each phrase is a complete noun phrase with its article. A pack with no language has no texts: the form asks you to choose one in **Details**.
 
-**NPCs**, **skills** and **classes** are still **JSON** word lists, in the pack's language: errors are shown as you type. **Copy Base's list** starts from the list of the Base in the pack's language; **Import a file** loads a `.json`. An empty box is left out.
+**NPCs**, **skills** and **classes** have the same two sections as items, filled with forms (empty lists are left out):
 
-**Advanced (JSON)** shows the raw `items.json` and `common.json` files: import, export or copy Base's. What you change there shows up in the forms, and the other way round.
+- **Kinds**: a tree table like the items', with the fields of the domain as columns and the same side panel (detail, **Edit**, **Add a kind**, **Add child**, **Delete** with its children). The form asks for an id and a **Parent**, then the fields of the domain: for NPCs, the **Roles** and **Person** (untick it for a creature); for skills, the **Type** (active or passive) and the **Effect** (damage, heal, modify); for classes, the **Favoured skills**, picked among the known skill kinds. Renaming a kind follows its children, its texts and the classes that favour it. Ids already known from installed packs are offered by autocompletion.
+- **Texts**: per kind, the **Nouns**, **Descriptions** (one per line, [phrase syntax](/docs/en/packs/#the-phrase-syntax)) and **Adjectives**; for skills and classes also **Suffixes**; for NPC kinds that are not persons, the **Name templates**. Above, the top-level lists: for NPCs the **Given names** (with a gender), the **Epithets** and the **Templates**; for skills and classes the **Templates**, **Adjectives** and **Suffixes**.
+- **Preview**: in the side panel of a kind, a few trial draws.
+
+**Copy Base's list** and **Import a file** remain in the **Advanced (JSON)** part of each domain; what you change there shows up in the forms, and the other way round.
+
+**Advanced (JSON)** shows the raw `items.json` and `common.json` files (and each domain's file in its section): import, export or copy Base's. What you change there shows up in the forms, and the other way round.
 
 ![A draft's word lists](../../../assets/screens/en/packs-creator-lists.png)
 
@@ -147,10 +153,13 @@ And its `pack.json`:
 | `domains` | The content per domain: `items`, and `npcs`, `skills`, `classes`. Each can have `kinds` (the kind tree) and `texts` (the path to its language file). A domain the app doesn't know is ignored with a warning, but an unknown field inside a known domain is an error (to catch typos). |
 | `common` | The path to `generators/common.json` (the params, shared by every domain). |
 | `sprites` | The list of sprites (see below). |
+| `worldImages` | Optional list of landscapes a world can take as its picture (see below). |
 
-**Kinds** (`domains.items.kinds`): each entry has an optional `parent`. Only roots declare a `type` (`item`, `consumable` or `equipment`); `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` or `weapon2`) is declared on one level of the equipment chain. The tree has no cycle and its root declares a `type`; a `parent` declared in another pack is allowed. Ids are scoped by domain (`items` `guard` and `npcs` `guard` are different). For now, `npcs`, `skills` and `classes` only hold `texts`, pointing at the plain word lists.
+**Kinds** (`domains.items.kinds`): each entry has an optional `parent`. Only roots declare a `type` (`item`, `consumable` or `equipment`); `slot` (`head`, `earring`, `necklace`, `ring`, `chest`, `hand`, `legs`, `foot`, `weapon1` or `weapon2`) is declared on one level of the equipment chain. The tree has no cycle and its root declares a `type`; a `parent` declared in another pack is allowed. Ids are scoped by domain (`items` `guard` and `npcs` `guard` are different).
 
 **Sprites**: `id`, `label` (in the pack's language), `domain` (`items`), `kinds` (the kinds it illustrates), `kind` (the colouring: `grayscale`, `masked` or `colored`), `image`, and `materials` for a `masked` sprite (the JSON the colorizer exports). Sprites no longer have a `type` or `slot`: they come from the kind.
+
+**World images**: `id` (kebab-case, unique), `label` (plain text, used as alt text and tooltip), `image` (a WebP, PNG or JPEG path in the pack), optional `tags` (short lowercase words) and `source` (an https link to the original artwork, shown in the credits). They are offered in the world wizard; choosing one copies it into the world. The pack creator has no tab for them yet: write them in `pack.json`.
 
 **`generators/items.json`** (word list v2):
 
@@ -186,17 +195,66 @@ And its `pack.json`:
 - `adjectives`, `suffixes`: the common words, for any item, per rarity (`common`, `uncommon`, `rare`, `mythic`, `legendary`). A kind can also have its own `adjectives` and `suffixes` (they add up along the chain), and an entry may carry a `tint`. In the manifest, a tint may have `fits`: the kinds it colours.
 - `templates`: name templates per rarity, `{base}` required (`{adjective}` and `{suffix}` optional). Optional: each language's Base provides them; otherwise the name is `{base}`.
 
-**`generators/common.json`** (params, shared by every domain):
+**`generators/common.json`** (the params, shared by every domain; version 2, version 1 is no longer accepted):
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "params": {
     "maker": ["a dwarf smith", "the monks of {place}", "a [clumsy|hasty] apprentice"],
     "place": ["Duskhollow", "the frozen coast"],
     "effect": ["healing", "vigor"]
   }
 }
+```
+
+In a name template, a description or a param, `{kind id}` inserts a noun of a kind of any domain (the kind or one of its descendants that has nouns, from the active packs) and `{kind id:adjective}` one of its adjectives, agreed with the noun of the entry. The draw happens once per id for each entry, so a name and a description agree. Example: an item description `"Forged by {blacksmith}."` where `blacksmith` is an NPC kind. A param named like a kind stays a param; an id that is neither a param nor a kind of an active pack is a warning. A `common.json` with `kinds`, or a manifest with a shared kinds tree, is rejected as an unknown field.
+
+**NPC, skill and class kinds** (`domains.npcs.kinds`, `domains.skills.kinds`, `domains.classes.kinds`): same tree, `parent` optional. NPCs: `roles` (list of `story`, `merchant`, `enemy`) and `person` (boolean), inherited. Skills: `type` (`active` or `passive`, on a root) and `effect` (`damage`, `heal` or `modify`). Classes: `skills`, a list of skill kinds. Their `texts` files are v2 (below).
+
+**`generators/npcs.json`** (v2):
+
+```json
+{
+  "version": 2,
+  "given": [{ "text": "Brannoc", "gender": "m" }, { "text": "Mirelle", "gender": "f" }],
+  "epithets": ["the Wary", "Ashfoot"],
+  "templates": ["{given}", "{given} {epithet}"],
+  "kinds": {
+    "guard": { "nouns": [{ "text": "Guard" }], "descriptions": ["Posted near {place}, and bored of it."] },
+    "wolf": { "nouns": [{ "text": "Wolf" }], "adjectives": ["Grey", "Snow"], "descriptions": ["It howls at the moon."] },
+    "beast": { "names": ["{adjective} {noun}", "{noun}"] }
+  }
+}
+```
+
+`given` (`text`, `gender`), `epithets`, `templates` (`{given}`, `{epithet}`: a name for a person), then per kind `nouns`, `descriptions`, `adjectives` and `names` (`{adjective}`, `{noun}`: a name for a creature).
+
+**`generators/skills.json`** and **`generators/classes.json`** (v2, same shape):
+
+```json
+{
+  "version": 2,
+  "templates": ["{adjective} {noun}", "{noun} of {suffix}", "{noun}"],
+  "adjectives": ["Ancient", "Secret"],
+  "suffixes": ["the Oath", "Dawn"],
+  "kinds": {
+    "strike": {
+      "nouns": [{ "text": "Strike" }, { "text": "Cleave" }],
+      "descriptions": ["A clean blow, without a flicker of doubt."],
+      "adjectives": ["Brutal"],
+      "suffixes": ["Iron"]
+    }
+  }
+}
+```
+
+`templates` (`{noun}` required; `{adjective}`, `{suffix}` optional), top-level `adjectives` and `suffixes`, then per kind `nouns`, `descriptions`, `adjectives`, `suffixes` and `names`. Words add up along the chain of the kind.
+
+Classes use the same shape; their kinds carry the favoured skill kinds in the manifest:
+
+```json
+"classes": { "kinds": { "martial": { "skills": ["strike", "shot", "war-cry"] }, "warrior": { "parent": "martial" } }, "texts": "generators/classes.json" }
 ```
 
 Each file carries its own `version`, so a domain can change without touching the others. Pack validation only warns about params it uses without defining, since another pack in the same language may provide them.

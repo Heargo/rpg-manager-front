@@ -8,8 +8,8 @@ import { PackCreatorBusiness } from '../../../../core/business/pack-creator.busi
 import { PackDraft } from '../../../../core/packs/pack-draft';
 import { PackDraftPageComponent } from './pack-draft-page.component';
 
-/** Renders the editor on a saved draft with the given NPC, skill and class kinds, on the Word lists tab. */
-async function render(domainDraft: (draft: PackDraft) => Record<string, unknown>) {
+/** Renders the editor on a saved draft with the given NPC, skill and class kinds, on the domain's tab. */
+async function render(domainDraft: (draft: PackDraft) => Record<string, unknown>, tabLabel: string) {
   globalThis.indexedDB = new IDBFactory();
   URL.createObjectURL = vi.fn(() => 'blob:fake');
   URL.revokeObjectURL = vi.fn();
@@ -31,11 +31,13 @@ async function render(domainDraft: (draft: PackDraft) => Record<string, unknown>
       check();
     });
   await settle(() => expect(el.querySelector('[role="tab"]')).not.toBeNull());
-  [...el.querySelectorAll<HTMLElement>('[role="tab"]')].find((t) => t.textContent!.trim() === 'Word lists')!.click();
+  [...el.querySelectorAll<HTMLElement>('[role="tab"]')].find((t) => t.textContent!.trim() === tabLabel)!.click();
   fixture.detectChanges();
   await fixture.whenStable();
   return { fixture, el, settle };
 }
+
+const LABELS = { npcs: 'NPCs', skills: 'Skills', classes: 'Classes' };
 
 describe.each(DOMAIN_CASES)('PackDraftPageComponent structured $domain section', (c) => {
   const folkDraft = () => ({
@@ -44,7 +46,7 @@ describe.each(DOMAIN_CASES)('PackDraftPageComponent structured $domain section',
   });
 
   it('renders the kinds of the draft in its own section, with their nouns', async () => {
-    const { el, settle } = await render(folkDraft);
+    const { el, settle } = await render(folkDraft, LABELS[c.domain]);
 
     await settle(() => {
       const section = el.querySelector(`[data-test="domain-${c.domain}"]`);
@@ -54,7 +56,7 @@ describe.each(DOMAIN_CASES)('PackDraftPageComponent structured $domain section',
   });
 
   it('exports the kinds texts in the raw JSON, and importing raw JSON updates the structured section', async () => {
-    const { el, fixture, settle } = await render(folkDraft);
+    const { el, fixture, settle } = await render(folkDraft, LABELS[c.domain]);
     const raw = () => el.querySelector<HTMLTextAreaElement>(`textarea[data-test="wordlist-${c.domain}"]`)!;
 
     await settle(() => expect(JSON.parse(raw().value).kinds.folk.nouns).toEqual([{ text: 'Folk' }]));

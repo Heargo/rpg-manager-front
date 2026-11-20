@@ -4,17 +4,19 @@ import {
   computed,
   DestroyRef,
   effect,
+  ElementRef,
   inject,
   input,
   PendingTasks,
   signal,
   untracked,
+  viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { MessageService } from '@openng/optimus-ui/api';
+import { MenuItem, MessageService } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import {
   FileUploadHandlerEvent,
@@ -22,9 +24,8 @@ import {
 } from '@openng/optimus-ui/fileupload';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { MessageModule } from '@openng/optimus-ui/message';
-import { MultiSelectModule } from '@openng/optimus-ui/multiselect';
+import { MenuModule } from '@openng/optimus-ui/menu';
 import { PanelModule } from '@openng/optimus-ui/panel';
-import { PaginatorModule } from '@openng/optimus-ui/paginator';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { TabsModule } from '@openng/optimus-ui/tabs';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
@@ -36,21 +37,16 @@ import {
   PackDraftFormBusiness,
 } from '../../../../core/business/pack-draft-form.business';
 import { CommonWordsEditorComponent } from '../../components/pack-draft/common-words-editor/common-words-editor.component';
-import { DomainKindsEditorComponent } from '../../components/pack-draft/domain-kinds-editor/domain-kinds-editor.component';
 import { DomainTextsEditorComponent } from '../../components/pack-draft/domain-texts-editor/domain-texts-editor.component';
-import { KindsEditorComponent } from '../../components/pack-draft/kinds-editor/kinds-editor.component';
+import { KindsTreeTableComponent } from '../../components/pack-draft/kinds-tree-table/kinds-tree-table.component';
+import { SpritesGridComponent } from '../../components/pack-draft/sprites-grid/sprites-grid.component';
 import { ParamsEditorComponent } from '../../components/pack-draft/params-editor/params-editor.component';
 import { TemplatesEditorComponent } from '../../components/pack-draft/templates-editor/templates-editor.component';
-import { TintsEditorComponent } from '../../components/pack-draft/tints-editor/tints-editor.component';
-import { kindOptions } from '../../../../core/packs/kind-label';
+import { TintsTableComponent } from '../../components/pack-draft/tints-table/tints-table.component';
 import { SUPPORTED_LANGUAGES } from '../../../../core/constants/languages';
 import { downloadBlob } from '../../../../core/helpers/download';
 import { MessageLevel } from '../../../../core/models/toast-level';
-import {
-  PACK_GENERATORS,
-  PackGenerator,
-  SPRITE_KINDS,
-} from '../../../../core/packs/pack';
+import { PACK_GENERATORS, PackGenerator } from '../../../../core/packs/pack';
 import {
   DraftDetails,
   DraftSprite,
@@ -60,11 +56,25 @@ import {
 import { STRUCTURED_DOMAINS } from '../../../../core/packs/pack-draft-edits';
 import { SpriteSet } from '../../../sprite/models/sprite-set';
 
-type Tab = 'details' | 'lists' | 'sprites' | 'publish';
+type Tab =
+  | 'details'
+  | 'common'
+  | 'items'
+  | 'npcs'
+  | 'skills'
+  | 'classes'
+  | 'sprites'
+  | 'publish';
+
+const LIST_TABS: readonly Tab[] = [
+  'common',
+  'items',
+  'npcs',
+  'skills',
+  'classes',
+];
 
 const SAVE_DELAY_MS = 500;
-/** Sprites shown per page: a row holds three selects, so all of them at once freezes the editor. */
-const SPRITES_PER_PAGE = 12;
 
 /** The pack editor: details, word lists, sprites, then install or export. Changes are saved as they are made. */
 @Component({
@@ -79,17 +89,16 @@ const SPRITES_PER_PAGE = 12;
     FileUploadModule,
     InputTextModule,
     MessageModule,
-    MultiSelectModule,
-    CommonWordsEditorComponent,
-    DomainKindsEditorComponent,
-    DomainTextsEditorComponent,
-    KindsEditorComponent,
-    PanelModule,
-    PaginatorModule,
-    ParamsEditorComponent,
+    MenuModule,
     SelectModule,
+    CommonWordsEditorComponent,
+    DomainTextsEditorComponent,
+    KindsTreeTableComponent,
+    PanelModule,
+    ParamsEditorComponent,
     TemplatesEditorComponent,
-    TintsEditorComponent,
+    TintsTableComponent,
+    SpritesGridComponent,
     TabsModule,
     TextareaModule,
   ],
@@ -97,19 +106,92 @@ const SPRITES_PER_PAGE = 12;
     <div class="main-container draft">
       <header>
         <h1>{{ 'packs.creator.editTitle' | translate }}</h1>
-        <a routerLink="/tools/pack-creator">{{
-          'packs.creator.backToDrafts' | translate
-        }}</a>
+        <p-button
+          icon="pi pi-arrow-left"
+          severity="secondary"
+          [text]="true"
+          [label]="'packs.creator.backToDrafts' | translate"
+          routerLink="/tools/pack-creator"
+        />
       </header>
       @if (draft(); as current) {
+        <ng-template #advanced let-generator>
+          <section class="list">
+            <p-panel
+              [header]="'packs.creator.lists.advanced' | translate"
+              [toggleable]="true"
+              [collapsed]="true"
+            >
+              <p class="hint">
+                {{ 'packs.creator.lists.advancedHint' | translate }}
+              </p>
+              <section class="list">
+                <h3>{{ 'packs.generator.' + generator | translate }}</h3>
+                <textarea
+                  pTextarea
+                  class="json"
+                  rows="6"
+                  [attr.data-test]="'wordlist-' + generator"
+                  [attr.aria-label]="'packs.generator.' + generator | translate"
+                  [ngModel]="text(generator)"
+                  (ngModelChange)="setText(generator, $event)"
+                ></textarea>
+                @if (listErrors(generator); as errors) {
+                  <ul
+                    class="errors"
+                    [attr.data-test]="'wordlist-error-' + generator"
+                  >
+                    @for (error of errors; track error) {
+                      <li>{{ error }}</li>
+                    }
+                  </ul>
+                }
+                <div class="actions">
+                  <p-fileupload
+                    mode="basic"
+                    accept=".json,application/json"
+                    [auto]="true"
+                    [customUpload]="true"
+                    chooseIcon="pi pi-upload"
+                    [chooseLabel]="'packs.creator.importFile' | translate"
+                    (uploadHandler)="importFile(generator, $event)"
+                  />
+                  <p-button
+                    severity="secondary"
+                    icon="pi pi-copy"
+                    [label]="'packs.creator.copyBase' | translate"
+                    (onClick)="copyBase(generator)"
+                  />
+                  <p-button
+                    severity="secondary"
+                    outlined
+                    icon="pi pi-times"
+                    [label]="'packs.creator.clear' | translate"
+                    (onClick)="setText(generator, '')"
+                  />
+                </div>
+              </section>
+            </p-panel>
+          </section>
+        </ng-template>
         <p-tabs [value]="tab()" (valueChange)="tab.set($any($event))">
           <p-tablist>
             <p-tab value="details">{{
               'packs.creator.tabs.details' | translate
             }}</p-tab>
-            <p-tab value="lists">{{
-              'packs.creator.tabs.lists' | translate
+            @if (current.details.language !== undefined) {
+              <p-tab value="common">{{
+                'packs.creator.tabs.common' | translate
+              }}</p-tab>
+            }
+            <p-tab value="items">{{
+              'packs.generator.items' | translate
             }}</p-tab>
+            @for (domain of structuredDomains; track domain) {
+              <p-tab [value]="domain">{{
+                'packs.generator.' + domain | translate
+              }}</p-tab>
+            }
             <p-tab value="sprites">{{
               'packs.creator.tabs.sprites' | translate
             }}</p-tab>
@@ -119,188 +201,136 @@ const SPRITES_PER_PAGE = 12;
           </p-tablist>
           <p-tabpanels>
             <p-tabpanel value="details">
-              <div class="form">
-                <label for="draft-language">{{
-                  'packs.creator.language' | translate
-                }}</label>
-                <p-select
-                  inputId="draft-language"
-                  data-test="draft-language"
-                  [options]="languageOptions"
-                  optionLabel="label"
-                  optionValue="code"
-                  [ngModel]="current.details.language"
-                  (ngModelChange)="patchDetails({ language: $event })"
-                />
-                <label for="draft-name">{{
-                  'packs.creator.name' | translate
-                }}</label>
-                <input
-                  pInputText
-                  id="draft-name"
-                  data-test="draft-name"
-                  type="text"
-                  [ngModel]="current.details.name"
-                  (ngModelChange)="setName($event)"
-                />
-                <label for="draft-id">{{
-                  'packs.creator.packId' | translate
-                }}</label>
-                <div class="stack">
+              @if (tab() === 'details') {
+                <div class="form">
+                  <label for="draft-language">{{
+                    'packs.creator.language' | translate
+                  }}</label>
+                  <p-select
+                    inputId="draft-language"
+                    data-test="draft-language"
+                    [options]="languageOptions"
+                    optionLabel="label"
+                    optionValue="code"
+                    [ngModel]="current.details.language"
+                    (ngModelChange)="patchDetails({ language: $event })"
+                  />
+                  <label for="draft-name">{{
+                    'packs.creator.name' | translate
+                  }}</label>
                   <input
                     pInputText
-                    id="draft-id"
-                    data-test="draft-id"
+                    id="draft-name"
+                    data-test="draft-name"
                     type="text"
-                    [ngModel]="current.details.id"
-                    (ngModelChange)="patchDetails({ id: $event })"
+                    [ngModel]="current.details.name"
+                    (ngModelChange)="setName($event)"
                   />
-                  <small class="hint">{{
-                    'packs.creator.packIdHint' | translate
-                  }}</small>
-                  @if (idWarning(); as warning) {
-                    <p-message data-test="draft-id-warning" severity="warn">{{
-                      'packs.creator.idWarning.' + warning | translate
-                    }}</p-message>
-                  }
+                  <label for="draft-id">{{
+                    'packs.creator.packId' | translate
+                  }}</label>
+                  <div class="stack">
+                    <input
+                      pInputText
+                      id="draft-id"
+                      data-test="draft-id"
+                      type="text"
+                      [ngModel]="current.details.id"
+                      (ngModelChange)="patchDetails({ id: $event })"
+                    />
+                    <small class="hint">{{
+                      'packs.creator.packIdHint' | translate
+                    }}</small>
+                    @if (idWarning(); as warning) {
+                      <p-message data-test="draft-id-warning" severity="warn">{{
+                        'packs.creator.idWarning.' + warning | translate
+                      }}</p-message>
+                    }
+                  </div>
+                  <label for="draft-description">{{
+                    'packs.creator.description' | translate
+                  }}</label>
+                  <textarea
+                    pTextarea
+                    id="draft-description"
+                    data-test="draft-description"
+                    rows="3"
+                    [ngModel]="current.details.description"
+                    (ngModelChange)="patchDetails({ description: $event })"
+                  ></textarea>
+                  <label for="draft-version">{{
+                    'packs.creator.version' | translate
+                  }}</label>
+                  <input
+                    pInputText
+                    id="draft-version"
+                    data-test="draft-version"
+                    type="text"
+                    [ngModel]="current.details.version"
+                    (ngModelChange)="patchDetails({ version: $event })"
+                  />
+                  <label for="draft-author">{{
+                    'packs.creator.author' | translate
+                  }}</label>
+                  <input
+                    pInputText
+                    id="draft-author"
+                    data-test="draft-author"
+                    type="text"
+                    [ngModel]="current.details.author"
+                    (ngModelChange)="patchDetails({ author: $event })"
+                  />
+                  <label for="draft-license">{{
+                    'packs.creator.license' | translate
+                  }}</label>
+                  <input
+                    pInputText
+                    id="draft-license"
+                    data-test="draft-license"
+                    type="text"
+                    [ngModel]="current.details.license"
+                    (ngModelChange)="patchDetails({ license: $event })"
+                  />
+                  <label for="draft-license-url">{{
+                    'packs.creator.licenseUrl' | translate
+                  }}</label>
+                  <input
+                    pInputText
+                    id="draft-license-url"
+                    data-test="draft-license-url"
+                    type="url"
+                    [ngModel]="current.details.licenseUrl"
+                    (ngModelChange)="patchDetails({ licenseUrl: $event })"
+                  />
+                  <label for="draft-homepage">{{
+                    'packs.creator.homepage' | translate
+                  }}</label>
+                  <input
+                    pInputText
+                    id="draft-homepage"
+                    data-test="draft-homepage"
+                    type="url"
+                    [ngModel]="current.details.homepage ?? ''"
+                    (ngModelChange)="patchDetails({ homepage: $event })"
+                  />
                 </div>
-                <label for="draft-description">{{
-                  'packs.creator.description' | translate
-                }}</label>
-                <textarea
-                  pTextarea
-                  id="draft-description"
-                  data-test="draft-description"
-                  rows="3"
-                  [ngModel]="current.details.description"
-                  (ngModelChange)="patchDetails({ description: $event })"
-                ></textarea>
-                <label for="draft-version">{{
-                  'packs.creator.version' | translate
-                }}</label>
-                <input
-                  pInputText
-                  id="draft-version"
-                  data-test="draft-version"
-                  type="text"
-                  [ngModel]="current.details.version"
-                  (ngModelChange)="patchDetails({ version: $event })"
-                />
-                <label for="draft-author">{{
-                  'packs.creator.author' | translate
-                }}</label>
-                <input
-                  pInputText
-                  id="draft-author"
-                  data-test="draft-author"
-                  type="text"
-                  [ngModel]="current.details.author"
-                  (ngModelChange)="patchDetails({ author: $event })"
-                />
-                <label for="draft-license">{{
-                  'packs.creator.license' | translate
-                }}</label>
-                <input
-                  pInputText
-                  id="draft-license"
-                  data-test="draft-license"
-                  type="text"
-                  [ngModel]="current.details.license"
-                  (ngModelChange)="patchDetails({ license: $event })"
-                />
-                <label for="draft-license-url">{{
-                  'packs.creator.licenseUrl' | translate
-                }}</label>
-                <input
-                  pInputText
-                  id="draft-license-url"
-                  data-test="draft-license-url"
-                  type="url"
-                  [ngModel]="current.details.licenseUrl"
-                  (ngModelChange)="patchDetails({ licenseUrl: $event })"
-                />
-                <label for="draft-homepage">{{
-                  'packs.creator.homepage' | translate
-                }}</label>
-                <input
-                  pInputText
-                  id="draft-homepage"
-                  data-test="draft-homepage"
-                  type="url"
-                  [ngModel]="current.details.homepage ?? ''"
-                  (ngModelChange)="patchDetails({ homepage: $event })"
-                />
-              </div>
+              }
             </p-tabpanel>
-            <p-tabpanel value="lists">
-              @if (tab() === 'lists') {
-                <p class="hint">{{ 'packs.creator.listsIntro' | translate }}</p>
-                <!-- Advanced comes before the other generators in the DOM and after them on screen (CSS order). -->
-                <div class="lists">
+            @if (current.details.language !== undefined) {
+              <p-tabpanel value="common">
+                @if (tab() === 'common') {
+                  <p class="hint">
+                    {{ 'packs.creator.listsIntro' | translate }}
+                  </p>
                   <section class="list">
-                    <h3>{{ 'packs.creator.lists.items' | translate }}</h3>
-                    <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
-                    <app-kinds-editor
-                      [draft]="current"
-                      [issues]="issues()"
-                      (changed)="edited($event)"
-                    />
-                    <h4>{{ 'packs.creator.tints.title' | translate }}</h4>
-                    <app-tints-editor
-                      [draft]="current"
-                      [issues]="issues()"
-                      (changed)="edited($event)"
-                    />
-                    <app-common-words-editor
-                      [draft]="current"
-                      [issues]="issues()"
-                      (changed)="edited($event)"
-                    />
-                    <p-panel
-                      [header]="'packs.creator.templates.title' | translate"
-                      [toggleable]="true"
-                      [collapsed]="true"
-                    >
-                      <app-templates-editor
-                        [draft]="current"
-                        [issues]="issues()"
-                        (changed)="edited($event)"
-                      />
-                    </p-panel>
-                  </section>
-                  @for (domain of structuredDomains; track domain) {
-                    <section class="list" [attr.data-test]="'domain-' + domain">
-                      <h3>{{ 'packs.generator.' + domain | translate }}</h3>
-                      <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
-                      <app-domain-kinds-editor
-                        [draft]="current"
-                        [issues]="issues()"
-                        [domain]="domain"
-                        (changed)="edited($event)"
-                      />
-                      @if (current.details.language !== undefined) {
-                        <h4>
-                          {{ 'packs.creator.domain.textsTitle' | translate }}
-                        </h4>
-                        <app-domain-texts-editor
-                          [draft]="current"
-                          [issues]="issues()"
-                          [domain]="domain"
-                          (changed)="edited($event)"
-                        />
-                      }
-                    </section>
-                  }
-                  <section class="list">
-                    <h3>{{ 'packs.creator.lists.shared' | translate }}</h3>
-                    <h4>{{ 'packs.creator.params.title' | translate }}</h4>
+                    <h3>{{ 'packs.creator.params.title' | translate }}</h3>
                     <app-params-editor
                       [draft]="current"
                       [issues]="issues()"
                       (changed)="edited($event)"
                     />
                   </section>
-                  <section class="list advanced">
+                  <section class="list">
                     <p-panel
                       [header]="'packs.creator.lists.advanced' | translate"
                       [toggleable]="true"
@@ -309,12 +339,6 @@ const SPRITES_PER_PAGE = 12;
                       <p class="hint">
                         {{ 'packs.creator.lists.advancedHint' | translate }}
                       </p>
-                      <ng-container
-                        *ngTemplateOutlet="
-                          json;
-                          context: { $implicit: 'items' }
-                        "
-                      />
                       <section class="list">
                         <h3>common.json</h3>
                         <textarea
@@ -362,102 +386,104 @@ const SPRITES_PER_PAGE = 12;
                       </section>
                     </p-panel>
                   </section>
-                  <div class="list others">
-                    @for (generator of otherGenerators; track generator) {
-                      <ng-container
-                        *ngTemplateOutlet="
-                          json;
-                          context: { $implicit: generator }
-                        "
-                      />
-                    }
-                  </div>
-                </div>
-                <ng-template #json let-generator>
-                  <section class="list">
-                    <h3>
-                      {{ 'packs.generator.' + generator | translate }}
-                    </h3>
-                    <textarea
-                      pTextarea
-                      class="json"
-                      rows="6"
-                      [attr.data-test]="'wordlist-' + generator"
-                      [attr.aria-label]="
-                        'packs.generator.' + generator | translate
-                      "
-                      [ngModel]="text(generator)"
-                      (ngModelChange)="setText(generator, $event)"
-                    ></textarea>
-                    @if (listErrors(generator); as errors) {
-                      <ul
-                        class="errors"
-                        [attr.data-test]="'wordlist-error-' + generator"
-                      >
-                        @for (error of errors; track error) {
-                          <li>{{ error }}</li>
-                        }
-                      </ul>
-                    }
-                    <div class="actions">
-                      <p-fileupload
-                        mode="basic"
-                        accept=".json,application/json"
-                        [auto]="true"
-                        [customUpload]="true"
-                        chooseIcon="pi pi-upload"
-                        [chooseLabel]="'packs.creator.importFile' | translate"
-                        (uploadHandler)="importFile(generator, $event)"
-                      />
-                      <p-button
-                        severity="secondary"
-                        icon="pi pi-copy"
-                        [label]="'packs.creator.copyBase' | translate"
-                        (onClick)="copyBase(generator)"
-                      />
-                      <p-button
-                        severity="secondary"
-                        outlined
-                        icon="pi pi-times"
-                        [label]="'packs.creator.clear' | translate"
-                        (onClick)="setText(generator, '')"
-                      />
-                    </div>
-                  </section>
-                </ng-template>
+                }
+              </p-tabpanel>
+            }
+            <p-tabpanel value="items">
+              @if (tab() === 'items') {
+                <p class="hint">{{ 'packs.creator.listsIntro' | translate }}</p>
+                <section class="list">
+                  <h4>{{ 'packs.creator.tints.title' | translate }}</h4>
+                  <app-tints-table
+                    [draft]="current"
+                    [issues]="issues()"
+                    (changed)="edited($event)"
+                  />
+                  <app-common-words-editor
+                    [draft]="current"
+                    [issues]="issues()"
+                    (changed)="edited($event)"
+                  />
+                  <p-panel
+                    [header]="'packs.creator.templates.title' | translate"
+                    [toggleable]="true"
+                    [collapsed]="true"
+                  >
+                    <app-templates-editor
+                      [draft]="current"
+                      [issues]="issues()"
+                      (changed)="edited($event)"
+                    />
+                  </p-panel>
+                  <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
+                  <app-kinds-tree-table
+                    [draft]="current"
+                    [issues]="issues()"
+                    domain="items"
+                    (changed)="edited($event)"
+                  />
+                </section>
+                <ng-container
+                  *ngTemplateOutlet="advanced; context: { $implicit: 'items' }"
+                />
               }
             </p-tabpanel>
+            @for (domain of structuredDomains; track domain) {
+              <p-tabpanel [value]="domain">
+                @if (tab() === domain) {
+                  <p class="hint">
+                    {{ 'packs.creator.listsIntro' | translate }}
+                  </p>
+                  <section class="list" [attr.data-test]="'domain-' + domain">
+                    <h4>{{ 'packs.creator.kinds.title' | translate }}</h4>
+                    <app-kinds-tree-table
+                      [draft]="current"
+                      [issues]="issues()"
+                      [domain]="domain"
+                      (changed)="edited($event)"
+                    />
+                    @if (current.details.language !== undefined) {
+                      <h4>
+                        {{ 'packs.creator.domain.textsTitle' | translate }}
+                      </h4>
+                      <app-domain-texts-editor
+                        [draft]="current"
+                        [issues]="issues()"
+                        [domain]="domain"
+                        (changed)="edited($event)"
+                      />
+                    }
+                  </section>
+                  <ng-container
+                    *ngTemplateOutlet="advanced; context: { $implicit: domain }"
+                  />
+                }
+              </p-tabpanel>
+            }
             <p-tabpanel value="sprites">
               @if (tab() === 'sprites') {
                 <p class="hint">
                   {{ 'packs.creator.spritesIntro' | translate }}
                 </p>
                 <div class="actions">
-                  <p-fileupload
-                    mode="basic"
-                    accept="image/png"
-                    [auto]="true"
-                    [customUpload]="true"
-                    chooseIcon="pi pi-image"
-                    [chooseLabel]="'packs.creator.addPng' | translate"
-                    (uploadHandler)="addPng($event)"
-                  />
-                  <p-select
-                    [options]="spriteSets()"
-                    optionLabel="name"
-                    optionValue="id"
-                    [ngModel]="chosenSet()"
-                    (ngModelChange)="chosenSet.set($event)"
-                    [placeholder]="'packs.creator.fromMine' | translate"
-                    [emptyMessage]="'packs.creator.noSets' | translate"
-                    [ariaLabel]="'packs.creator.fromMine' | translate"
-                  />
                   <p-button
-                    severity="secondary"
+                    data-test="add-sprite"
                     icon="pi pi-plus"
-                    [label]="'packs.creator.addSet' | translate"
-                    [disabled]="!chosenSet()"
-                    (onClick)="addSet()"
+                    [label]="'packs.creator.addSprite' | translate"
+                    (onClick)="addMenu.toggle($event)"
+                  />
+                  <p-menu
+                    #addMenu
+                    [popup]="true"
+                    appendTo="body"
+                    [model]="addItems()"
+                  />
+                  <input
+                    #png
+                    type="file"
+                    accept="image/png"
+                    hidden
+                    (change)="addPng($event)"
                   />
                 </div>
                 @if (spriteErrors().length) {
@@ -467,99 +493,12 @@ const SPRITES_PER_PAGE = 12;
                     }
                   </ul>
                 }
-                @if (current.sprites.length > perPage) {
-                  <p-paginator
-                    [rows]="perPage"
-                    [first]="firstSprite()"
-                    [totalRecords]="current.sprites.length"
-                    (onPageChange)="spriteFirst.set($event.first ?? 0)"
-                  />
-                }
-                <ul class="sprites">
-                  @for (entry of pageSprites(); track entry.index) {
-                    <li class="sprite" data-test="sprite-row">
-                      <img
-                        [src]="preview(entry.sprite.image)"
-                        alt=""
-                        width="64"
-                        height="64"
-                      />
-                      <div class="sprite-form">
-                        <label>
-                          {{ 'packs.creator.spriteId' | translate }}
-                          <input
-                            pInputText
-                            type="text"
-                            [ngModel]="entry.sprite.id"
-                            (ngModelChange)="
-                              patchSprite(entry.index, { id: $event })
-                            "
-                          />
-                        </label>
-                        @if (duplicateId(entry.sprite.id)) {
-                          <small class="error">{{
-                            'packs.creator.duplicateId' | translate
-                          }}</small>
-                        }
-                        <label>
-                          {{ 'packs.creator.label' | translate }}
-                          <input
-                            pInputText
-                            type="text"
-                            [ngModel]="entry.sprite.label"
-                            (ngModelChange)="
-                              patchSprite(entry.index, { label: $event })
-                            "
-                          />
-                        </label>
-                        <label>
-                          {{ 'packs.creator.spriteKinds' | translate }}
-                          <p-multiselect
-                            [options]="itemKindOptions()"
-                            optionLabel="label"
-                            optionValue="value"
-                            [ngModel]="entry.sprite.kinds"
-                            (ngModelChange)="
-                              patchSprite(entry.index, { kinds: $event ?? [] })
-                            "
-                            [showToggleAll]="false"
-                            [filter]="true"
-                          />
-                        </label>
-                        <label>
-                          {{ 'packs.creator.spriteKind' | translate }}
-                          <p-select
-                            [options]="kindOptions(entry.sprite)"
-                            optionLabel="label"
-                            optionValue="value"
-                            [ngModel]="entry.sprite.kind"
-                            (ngModelChange)="
-                              patchSprite(entry.index, { kind: $event })
-                            "
-                          />
-                        </label>
-                      </div>
-                      @if (entry.sprite.kind !== 'colored') {
-                        <p-button
-                          severity="secondary"
-                          icon="pi pi-palette"
-                          [label]="'packs.creator.editInColorizer' | translate"
-                          (onClick)="editInColorizer(entry.sprite.id)"
-                        />
-                      }
-                      <p-button
-                        severity="danger"
-                        icon="pi pi-trash"
-                        [label]="'packs.creator.removeSprite' | translate"
-                        (onClick)="removeSprite(entry.index)"
-                      />
-                    </li>
-                  } @empty {
-                    <li class="hint">
-                      {{ 'packs.creator.noSprites' | translate }}
-                    </li>
-                  }
-                </ul>
+                <app-sprites-grid
+                  [draft]="current"
+                  [issues]="issues()"
+                  (changed)="replaceSprites($event)"
+                  (colorize)="editInColorizer($event)"
+                />
               }
             </p-tabpanel>
             <p-tabpanel value="publish">
@@ -610,14 +549,11 @@ const SPRITES_PER_PAGE = 12;
       padding-top: 0.5rem;
     }
     .form > *,
-    .sprite-form > *,
     .stack > * {
       min-width: 0;
     }
     .form input,
-    .form textarea,
-    .sprite-form input,
-    .sprite-form p-select {
+    .form textarea {
       width: 100%;
       box-sizing: border-box;
     }
@@ -629,28 +565,11 @@ const SPRITES_PER_PAGE = 12;
       .form label {
         padding-top: 0.5rem;
       }
-      .sprite {
-        flex-wrap: wrap;
-      }
-      .sprite-form {
-        flex-basis: 100%;
-        grid-template-columns: minmax(0, 1fr);
-      }
     }
     .stack {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
-    }
-    .lists {
-      display: flex;
-      flex-direction: column;
-    }
-    .lists .others {
-      order: 1;
-    }
-    .lists .advanced {
-      order: 2;
     }
     .list {
       margin-bottom: 1.5rem;
@@ -670,34 +589,6 @@ const SPRITES_PER_PAGE = 12;
     .error {
       color: var(--p-red-500);
     }
-    .sprites {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin: 1rem 0 0;
-      padding: 0;
-      list-style: none;
-    }
-    .sprite {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-    .sprite img {
-      object-fit: contain;
-      image-rendering: pixelated;
-    }
-    .sprite-form {
-      flex: 1;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
-      gap: 0.5rem;
-    }
-    .sprite-form label {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
   `,
 })
 export class PackDraftPageComponent {
@@ -713,39 +604,44 @@ export class PackDraftPageComponent {
 
   protected readonly languageOptions = [...SUPPORTED_LANGUAGES];
   protected readonly structuredDomains = STRUCTURED_DOMAINS;
-  protected readonly otherGenerators = PACK_GENERATORS.filter(
-    (generator) => generator !== 'items',
-  );
   protected readonly tab = signal<Tab>('details');
   protected readonly draft = signal<PackDraft | null>(null);
   protected readonly missing = signal(false);
   protected readonly idWarning = signal<'official' | 'link' | null>(null);
   protected readonly spriteSets = signal<SpriteSet[]>([]);
-  protected readonly chosenSet = signal<string | null>(null);
+  /** The "Add" menu of the Sprites tab: upload a PNG, or one of the sprites saved in the colorizer. */
+  protected readonly addItems = computed<MenuItem[]>(() => {
+    const sets = this.spriteSets();
+    return [
+      {
+        label: this.language.t('packs.creator.addPng'),
+        icon: 'pi pi-image',
+        command: () => this.pngInput()?.nativeElement.click(),
+      },
+      {
+        label: this.language.t('packs.creator.fromMine'),
+        items: sets.length
+          ? sets.map((set) => ({
+              label: set.name,
+              command: () => void this.addSet(set.id),
+            }))
+          : [
+              {
+                label: this.language.t('packs.creator.noSets'),
+                disabled: true,
+              },
+            ],
+      },
+    ];
+  });
+  private readonly pngInput = viewChild<ElementRef<HTMLInputElement>>('png');
   protected readonly spriteErrors = signal<string[]>([]);
   protected readonly publishErrors = signal<string[]>([]);
   protected readonly publishing = signal<'install' | 'export' | null>(null);
   /** The word list text of each language and generator, as typed. */
   private readonly texts = signal<Record<string, string>>({});
-  protected readonly perPage = SPRITES_PER_PAGE;
-  protected readonly spriteFirst = signal(0);
-  /** Index of the first sprite shown, kept inside the draft when sprites are removed. */
-  protected readonly firstSprite = computed(() => {
-    const count = this.draft()?.sprites.length ?? 0;
-    const last = Math.max(0, Math.ceil(count / SPRITES_PER_PAGE) - 1);
-    return Math.min(this.spriteFirst(), last * SPRITES_PER_PAGE);
-  });
-  /** The sprites of the current page, with their index in the draft. */
-  protected readonly pageSprites = computed(() => {
-    const first = this.firstSprite();
-    return (this.draft()?.sprites ?? [])
-      .slice(first, first + SPRITES_PER_PAGE)
-      .map((sprite, i) => ({ sprite, index: first + i }));
-  });
-
   private saveTimer: ReturnType<typeof setTimeout> | undefined;
   private queue: Promise<unknown> = Promise.resolve();
-  private readonly previews = new Map<Blob, string>();
   private readonly checked = new Map<
     string,
     { text: string; errors: string[] | null }
@@ -763,14 +659,6 @@ export class PackDraftPageComponent {
   /** The text of `common.json` as typed. */
   protected readonly commonText = signal('');
   private issueLoads = 0;
-  /** The kinds a sprite can have, as `id — first noun`. */
-  protected readonly itemKindOptions = computed(() =>
-    kindOptions(
-      this.known().kinds,
-      this.draft()?.sprites.flatMap((s) => s.kinds) ?? [],
-    ),
-  );
-
   constructor() {
     effect(() => {
       const id = this.draftId();
@@ -790,7 +678,7 @@ export class PackDraftPageComponent {
         (known) => load === this.issueLoads && this.known.set(known),
         () => undefined,
       );
-      if (this.tab() === 'lists')
+      if (LIST_TABS.includes(this.tab()))
         void this.form.issues(draft).then(
           (issues) => load === this.issueLoads && this.issues.set(issues),
           () => undefined,
@@ -802,14 +690,11 @@ export class PackDraftPageComponent {
     );
     inject(DestroyRef).onDestroy(() => {
       if (this.saveTimer !== undefined) void this.flush();
-      for (const url of this.previews.values()) URL.revokeObjectURL(url);
-      this.previews.clear();
     });
   }
 
   private async load(id: string): Promise<void> {
     this.missing.set(false);
-    this.spriteFirst.set(0);
     try {
       const draft = await this.creator.getDraft(id);
       if (!draft) {
@@ -1028,52 +913,18 @@ export class PackDraftPageComponent {
 
   // --- sprites ----------------------------------------------------------------------------------------------
 
-  protected preview(image: Blob): string {
-    let url = this.previews.get(image);
-    if (!url) {
-      url = URL.createObjectURL(image);
-      this.previews.set(image, url);
-    }
-    return url;
-  }
-
-  protected duplicateId(id: string): boolean {
-    return (this.draft()?.sprites.filter((s) => s.id === id).length ?? 0) > 1;
-  }
-
-  protected kindOptions(sprite: DraftSprite) {
-    return SPRITE_KINDS.filter(
-      (kind) => kind !== 'masked' || sprite.materials !== undefined,
-    ).map((value) => ({
-      value,
-      label: this.language.t(`sprite.kind.${value}`),
-    }));
-  }
-
-  protected patchSprite(index: number, patch: Partial<DraftSprite>): void {
-    this.change((d) => ({
-      ...d,
-      sprites: d.sprites.map((s, i) => (i === index ? { ...s, ...patch } : s)),
-    }));
-  }
-
-  protected removeSprite(index: number): void {
-    this.change((d) => ({
-      ...d,
-      sprites: d.sprites.filter((_, i) => i !== index),
-    }));
+  protected replaceSprites(next: PackDraft): void {
+    this.change(() => next);
   }
 
   private adopt(sprite: DraftSprite): void {
     this.change((d) => ({ ...d, sprites: [...d.sprites, sprite] }));
-    const count = this.draft()?.sprites.length ?? 0;
-    this.spriteFirst.set(
-      Math.floor((count - 1) / SPRITES_PER_PAGE) * SPRITES_PER_PAGE,
-    );
   }
 
-  protected async addPng(event: FileUploadHandlerEvent): Promise<void> {
-    const file = event.files[0];
+  protected async addPng(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
     if (!file) return;
     this.spriteErrors.set([]);
     const name = file.name.replace(/\.[^.]*$/, '');
@@ -1096,14 +947,11 @@ export class PackDraftPageComponent {
     }
   }
 
-  protected async addSet(): Promise<void> {
-    const id = this.chosenSet();
-    if (!id) return;
+  protected async addSet(id: string): Promise<void> {
     this.spriteErrors.set([]);
     try {
       await this.flush();
       this.adopt(await this.creator.addFromSpriteSet(this.draftId(), id));
-      this.chosenSet.set(null);
     } catch (error) {
       this.spriteErrors.set(this.errorList(error));
     }

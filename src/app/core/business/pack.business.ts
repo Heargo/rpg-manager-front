@@ -12,8 +12,10 @@ import {
   PackLanguage,
   PackSprite,
   PackTint,
+  PackWorldImage,
   SPRITE_KINDS,
   textsPath,
+  contentPath,
   PACK_GENERATORS,
   SpriteKind,
   validatePack,
@@ -32,6 +34,7 @@ import {
   MAX_PACK_BYTES,
 } from '../packs/pack-files';
 import { resolvePackLink } from '../packs/pack-link';
+import { validatePackContent, CONTENT_DOMAINS } from '../packs/pack-content';
 import { PackRegistryEntry, validateRegistry } from '../packs/pack-registry';
 import { ImageProcessingService } from '../services/image-processing.service';
 import { PackService } from '../services/pack.service';
@@ -41,7 +44,11 @@ import {
   StoredPackFile,
 } from '../services/pack-storage.service';
 
-export const BASE_PACK_IDS = ['base-fr', 'base-en'] as const;
+/** The neutral built-in pack holding the item sprites shared by every language. */
+export const BASE_ASSETS_ID = 'base-assets';
+
+/** The built-in packs served with the app: the Base of each language and the neutral assets pack. */
+export const BASE_PACK_IDS = ['base-fr', 'base-en', BASE_ASSETS_ID] as const;
 
 /** The Base pack of a language (English for a language without a Base). */
 export const basePackId = (lang: string): string =>
@@ -50,6 +57,16 @@ export const basePackId = (lang: string): string =>
 /** The pack language matching an app language code. */
 export const packLanguageOf = (lang: string): PackLanguage =>
   lang === 'fr' ? 'fr' : 'en';
+
+/** The packs a new world starts with: the Base of the language and the neutral assets. */
+export const defaultPacks = (lang: string): string[] => [
+  basePackId(lang),
+  BASE_ASSETS_ID,
+];
+
+/** The language of a built-in pack id; none for the neutral assets pack. */
+export const baseLanguage = (id: string): PackLanguage | undefined =>
+  id === 'base-fr' ? 'fr' : id === 'base-en' ? 'en' : undefined;
 
 export const isBasePack = (id: string): boolean =>
   (BASE_PACK_IDS as readonly string[]).includes(id);
@@ -93,6 +110,20 @@ export interface BundledSprite extends PackSprite {
   packId: string;
   imageUrl: string;
   materialsUrl?: string;
+}
+
+/** A pack sprite of the `npcs` domain with the pack it comes from and the URLs of its files. */
+export interface BundledNpcSprite extends PackSprite {
+  packId: string;
+  imageUrl: string;
+  materialsUrl?: string;
+}
+
+/** A pack world image with the pack it comes from and the URL of its file. */
+export interface BundledWorldImage extends PackWorldImage {
+  tags: string[];
+  packId: string;
+  imageUrl: string;
 }
 
 /** A pack available on this device: Base, or an official pack that was downloaded. */
@@ -212,9 +243,10 @@ export class PackBusiness {
     const base = this.bases()[id];
     if (base) return installedOf(base, true);
     const entry = this.baseEntries.find((p) => p.id === id);
+    const language = entry?.language ?? baseLanguage(id);
     return {
       id,
-      language: entry?.language ?? (id === 'base-fr' ? 'fr' : 'en'),
+      ...(language ? { language } : {}),
       name: entry?.name ?? 'Base',
       description: entry?.description ?? '',
       author: entry?.author ?? '',
@@ -310,12 +342,12 @@ export class PackBusiness {
   }
 
   /**
-   * The pack ids to draw from: the packs of the open world (or the Base of the app language without one) that are
+   * The pack ids to draw from: the packs of the open world (or the Base of the app language and the neutral assets pack without one) that are
    * installed, in order; an id that is not installed is skipped.
    */
   private activeIds(): string[] {
     const world = this.activePacks.$worldPacks();
-    if (!world) return [basePackId(this.languageBusiness.$language())];
+    if (!world) return defaultPacks(this.languageBusiness.$language());
     const stored = new Set(this.stored().map((p) => p.id));
     return world.filter((id) => isBasePack(id) || stored.has(id));
   }
@@ -335,6 +367,132 @@ export class PackBusiness {
     if (isBasePack(id)) return this.baseSprites(id).catch(() => []);
     const record = this.stored().find((p) => p.id === id);
     return record ? this.storedSprites(record) : [];
+  }
+
+  /** The NPC sprites of the active packs, with their file URLs; empty when none has any. */
+  async npcSprites(): Promise<BundledNpcSprite[]> {
+    await this.ensureLoaded();
+    const result: BundledNpcSprite[] = [];
+    for (const id of this.activeIds()) {
+      if (isBasePack(id)) {
+        const manifest = await this.manifest(id).catch(() => null);
+        if (!manifest) continue;
+        const manifestUrl = `packs/${id}/pack.json`;
+        for (const sprite of manifest.sprites)
+          if (sprite.domain === 'npcs')
+            result.push({
+              ...sprite,
+              packId: id,
+              imageUrl: packFileUrl(manifestUrl, sprite.image),
+              ...(sprite.materials
+                ? { materialsUrl: packFileUrl(manifestUrl, sprite.materials) }
+                : {}),
+            });
+        continue;
+      }
+      const record = this.stored().find((p) => p.id === id);
+      if (!record) continue;
+      const urls = await this.objectUrls(record);
+      for (const sprite of record.manifest.sprites) {
+        if (sprite.domain !== 'npcs') continue;
+        const materialsUrl = sprite.materials
+          ? urls.get(sprite.materials)
+          : undefined;
+        result.push({
+          ...sprite,
+          packId: id,
+          imageUrl: urls.get(sprite.image) ?? '',
+          ...(materialsUrl ? { materialsUrl } : {}),
+        });
+      }
+    }
+    return result;
+  }
+
+  /** The world images of the active packs, in the world's order, with their file URLs. */
+  async worldImages(): Promise<BundledWorldImage[]> {
+    await this.ensureLoaded();
+    const result: BundledWorldImage[] = [];
+    for (const id of this.activeIds()) {
+      if (isBasePack(id)) {
+        const manifest = await this.manifest(id).catch(() => null);
+        const manifestUrl = `packs/${id}/pack.json`;
+        for (const entry of manifest?.worldImages ?? [])
+          result.push(
+            this.bundleWorldImage(
+              entry,
+              id,
+              packFileUrl(manifestUrl, entry.image),
+            ),
+          );
+        continue;
+      }
+      const record = this.stored().find((p) => p.id === id);
+      if (!record?.manifest.worldImages?.length) continue;
+      const urls = await this.objectUrls(record);
+      for (const entry of record.manifest.worldImages) {
+        const url = urls.get(entry.image);
+        if (url) result.push(this.bundleWorldImage(entry, id, url));
+      }
+    }
+    return result;
+  }
+
+  /** The world images of one pack (installed or built-in), with their file URLs. */
+  async worldImagesOf(packId: string): Promise<BundledWorldImage[]> {
+    await this.ensureLoaded();
+    if (isBasePack(packId)) {
+      const manifest = await this.manifest(packId).catch(() => null);
+      const manifestUrl = `packs/${packId}/pack.json`;
+      return (manifest?.worldImages ?? []).map((entry) =>
+        this.bundleWorldImage(
+          entry,
+          packId,
+          packFileUrl(manifestUrl, entry.image),
+        ),
+      );
+    }
+    const record = this.stored().find((p) => p.id === packId);
+    if (!record?.manifest.worldImages?.length) return [];
+    const urls = await this.objectUrls(record);
+    return record.manifest.worldImages.flatMap((entry) => {
+      const url = urls.get(entry.image);
+      return url ? [this.bundleWorldImage(entry, packId, url)] : [];
+    });
+  }
+
+  /**
+   * What the credits page owes the built-in packs' content, whatever the open world uses: their notices
+   * and their world images (with sources).
+   */
+  async builtInCredits(): Promise<{
+    notices: string[];
+    worldImages: BundledWorldImage[];
+  }> {
+    const notices: string[] = [];
+    const worldImages: BundledWorldImage[] = [];
+    for (const id of BASE_PACK_IDS) {
+      const manifest = await this.manifest(id).catch(() => null);
+      if (!manifest) continue;
+      if (manifest.notice) notices.push(manifest.notice);
+      for (const entry of manifest.worldImages ?? [])
+        worldImages.push(
+          this.bundleWorldImage(
+            entry,
+            id,
+            packFileUrl(`packs/${id}/pack.json`, entry.image),
+          ),
+        );
+    }
+    return { notices, worldImages };
+  }
+
+  private bundleWorldImage(
+    entry: PackWorldImage,
+    packId: string,
+    imageUrl: string,
+  ): BundledWorldImage {
+    return { ...entry, tags: entry.tags ?? [], packId, imageUrl };
   }
 
   /** The items kinds of the Bases, for a kind whose parent lives in another pack. */
@@ -413,19 +571,24 @@ export class PackBusiness {
 
   private async createUrls(record: StoredPack): Promise<Map<string, string>> {
     const urls = new Map<string, string>();
-    for (const sprite of record.manifest.sprites) {
-      for (const path of [sprite.image, sprite.materials]) {
-        if (!path || urls.has(path)) continue;
-        const file = await this.storage.getFile(record.id, path);
-        if (!file) continue;
-        const blob =
-          file.kind === 'blob'
-            ? new Blob([file.bytes], { type: file.type })
-            : new Blob([JSON.stringify(file.value)], {
-                type: 'application/json',
-              });
-        urls.set(path, URL.createObjectURL(blob));
-      }
+    const paths = [
+      ...record.manifest.sprites.flatMap((sprite) => [
+        sprite.image,
+        sprite.materials,
+      ]),
+      ...(record.manifest.worldImages ?? []).map((image) => image.image),
+    ];
+    for (const path of paths) {
+      if (!path || urls.has(path)) continue;
+      const file = await this.storage.getFile(record.id, path);
+      if (!file) continue;
+      const blob =
+        file.kind === 'blob'
+          ? new Blob([file.bytes], { type: file.type })
+          : new Blob([JSON.stringify(file.value)], {
+              type: 'application/json',
+            });
+      urls.set(path, URL.createObjectURL(blob));
     }
     return urls;
   }
@@ -477,6 +640,10 @@ export class PackBusiness {
     }
     for (const generator of PACK_GENERATORS) {
       const path = textsPath(manifest, generator);
+      if (path) jsons.add(path);
+    }
+    for (const domain of CONTENT_DOMAINS) {
+      const path = contentPath(manifest, domain);
       if (path) jsons.add(path);
     }
     if (manifest.common) jsons.add(manifest.common);
@@ -563,6 +730,10 @@ export class PackBusiness {
       if (path) lists.set(path, listChecker(generator));
     }
     if (manifest.common) lists.set(manifest.common, commonChecker);
+    for (const domain of CONTENT_DOMAINS) {
+      const path = contentPath(manifest, domain);
+      if (path) lists.set(path, () => []);
+    }
 
     const tasks: (() => Promise<void>)[] = [
       ...[...images].map((path) => async () => {
@@ -606,6 +777,7 @@ export class PackBusiness {
       const problem = checkMaterialsFile(sprite.materials, file.value, dims);
       if (problem) errors.push(problem);
     }
+    errors.push(...this.contentErrors(manifest, files));
     if (size > MAX_PACK_BYTES) errors.push('pack: larger than 20 MB in total');
     if (errors.length) throw new PackError([...new Set(errors)].sort());
 
@@ -618,6 +790,34 @@ export class PackBusiness {
       if (n) counts.sprites[kind] = n;
     }
     return { manifest, source, manifestUrl, size, counts, files };
+  }
+
+  /** The problems of the content files of a pack, each prefixed by its path (cross-file: attributes, pack skills). */
+  private contentErrors(
+    manifest: Pack,
+    files: Map<string, StoredPackFile>,
+  ): string[] {
+    const listOf = (path: string | undefined): unknown => {
+      const file = path ? files.get(path) : undefined;
+      return file?.kind === 'json' ? file.value : undefined;
+    };
+    const skills = listOf(contentPath(manifest, 'skills'));
+    const context = {
+      attributeIds: (manifest.attributes ?? []).map((a) => a.id),
+      attributeNames: (manifest.attributes ?? []).map((a) => a.name),
+      skillIds: (Array.isArray(skills) ? skills : [])
+        .map((s) => (s as { id?: unknown })?.id)
+        .filter((id): id is string => typeof id === 'string'),
+    };
+    const errors: string[] = [];
+    for (const domain of CONTENT_DOMAINS) {
+      const path = contentPath(manifest, domain);
+      const value = listOf(path);
+      if (!path || value === undefined) continue;
+      const result = validatePackContent(domain, value, context);
+      if (!result.ok) errors.push(...result.errors.map((e) => `${path}: ${e}`));
+    }
+    return errors;
   }
 
   /** Refuses an id of an official pack, or already installed from another link (`source` null: created here). */
@@ -763,9 +963,7 @@ export class PackBusiness {
    * The items kinds of a pack and of the Bases (for a kind whose parent lives in another pack), to resolve the
    * type and slot of a kind.
    */
-  async itemKinds(
-    packId: string,
-  ): Promise<{
+  async itemKinds(packId: string): Promise<{
     own: Record<string, ItemKindDef>;
     fallback: Record<string, ItemKindDef>;
   }> {
@@ -797,5 +995,27 @@ export class PackBusiness {
     return this.service.loadJson(
       packFileUrl(`packs/${packId}/pack.json`, path),
     );
+  }
+
+  /** The raw fixed content (a list of entries) of a domain in a pack; rejects when the pack has none. */
+  async content(domain: PackGenerator, packId: string): Promise<unknown[]> {
+    const missing = () =>
+      new Error(`Pack "${packId}" has no ${domain} content`);
+    if (!isBasePack(packId)) {
+      await this.ensureLoaded();
+      const record = this.stored().find((p) => p.id === packId);
+      const path = record && contentPath(record.manifest, domain);
+      const file = path ? await this.storage.getFile(packId, path) : undefined;
+      if (file?.kind !== 'json' || !Array.isArray(file.value)) throw missing();
+      return file.value;
+    }
+    const pack = await this.manifest(packId);
+    const path = contentPath(pack, domain);
+    if (!path) throw missing();
+    const value = await this.service.loadJson(
+      packFileUrl(`packs/${packId}/pack.json`, path),
+    );
+    if (!Array.isArray(value)) throw missing();
+    return value;
   }
 }

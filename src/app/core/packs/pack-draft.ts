@@ -18,7 +18,9 @@ import {
 export interface DraftSprite {
   id: string;
   label: string;
-  /** Kinds of the items tree (domain `items`); the first one decides. */
+  /** The domain whose kinds tree `kinds` belong to; items when missing. */
+  domain?: 'items' | 'npcs';
+  /** Kinds of the domain's tree; the first one decides. */
   kinds: readonly string[];
   kind: SpriteKind;
   image: Blob;
@@ -115,7 +117,7 @@ export function buildPack(draft: PackDraft): {
     const entry: PackSprite = {
       id: sprite.id,
       label: sprite.label,
-      domain: 'items',
+      domain: sprite.domain ?? 'items',
       kinds: [...sprite.kinds],
       kind: sprite.kind,
       image,

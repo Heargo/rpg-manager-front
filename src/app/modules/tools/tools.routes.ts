@@ -4,14 +4,6 @@ import { NavigationGuard } from '../../core/guards/navigation.guard';
 /** Tools work without a world or a room. */
 export const routesTools: Routes = [
   {
-    path: 'tools/item-generator',
-    canActivate: [NavigationGuard],
-    loadComponent: () =>
-      import('./pages/item-generator-page/item-generator-page.component').then(
-        (m) => m.ItemGeneratorPageComponent,
-      ),
-  },
-  {
     path: 'tools/item-catalogue',
     canActivate: [NavigationGuard],
     loadComponent: () =>
@@ -25,14 +17,6 @@ export const routesTools: Routes = [
     loadComponent: () =>
       import('./pages/item-editor-tool-page/item-editor-tool-page.component').then(
         (m) => m.ItemEditorToolPageComponent,
-      ),
-  },
-  {
-    path: 'tools/character-sheet',
-    canActivate: [NavigationGuard],
-    loadComponent: () =>
-      import('./pages/sheet-tool-page/sheet-tool-page.component').then(
-        (m) => m.SheetToolPageComponent,
       ),
   },
   {
@@ -86,14 +70,6 @@ export const routesTools: Routes = [
     loadComponent: () =>
       import('./pages/class-catalogue-tool-page/class-catalogue-tool-page.component').then(
         (m) => m.ClassCatalogueToolPageComponent,
-      ),
-  },
-  {
-    path: 'tools/combat',
-    canActivate: [NavigationGuard],
-    loadComponent: () =>
-      import('./pages/combat-sandbox-tool-page/combat-sandbox-tool-page.component').then(
-        (m) => m.CombatSandboxToolPageComponent,
       ),
   },
   {

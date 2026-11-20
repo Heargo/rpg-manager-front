@@ -107,14 +107,15 @@ export const SKILL_KIND_SCHEMA: KindSchema = {
 export const CLASS_KIND_SCHEMA: KindSchema = {
   fields: ['skills'],
   check(kind) {
+    const errors: string[] = [];
     const skills = kind['skills'];
-    if (skills === undefined) return [];
     if (
-      !Array.isArray(skills) ||
-      !skills.every((id) => typeof id === 'string' && KIND_ID.test(id))
+      skills !== undefined &&
+      (!Array.isArray(skills) ||
+        !skills.every((id) => typeof id === 'string' && KIND_ID.test(id)))
     )
-      return ['skills must be a list of kebab-case skill kind ids'];
-    return [];
+      errors.push('skills must be a list of kebab-case skill kind ids');
+    return errors;
   },
 };
 
@@ -126,8 +127,8 @@ export function validateKindTree(
   domain: string,
   kinds: unknown,
   schema: KindSchema,
+  where = `domains.${domain}.kinds`,
 ): string[] {
-  const where = `domains.${domain}.kinds`;
   if (!isObject(kinds)) return [`${where} must be an object`];
   const errors: string[] = [];
   const valid = new Map<string, Fields>();

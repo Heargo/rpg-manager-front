@@ -6,26 +6,30 @@ import {
   input,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { ConfirmationService } from '@openng/optimus-ui/api';
+import { ConfirmationService, MenuItem } from '@openng/optimus-ui/api';
 import { ButtonModule } from '@openng/optimus-ui/button';
+import { Menu, MenuModule } from '@openng/optimus-ui/menu';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { SelectModule } from '@openng/optimus-ui/select';
 import { LanguageBusiness } from '../../../../core/business/language.business';
 import { filterSkills } from '../../helpers/skill.rules';
 import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
 
-/** A world's skill catalogue: search and type filter, a list row per skill, with edit, duplicate and delete. */
+/** A world's skill catalogue: search and type filter, a list row per skill, with a "…" menu for edit, duplicate and delete. */
 @Component({
   selector: 'app-skill-catalogue',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(document:keydown.escape)': 'closeMenu()' },
   imports: [
     FormsModule,
     TranslatePipe,
     ButtonModule,
     InputTextModule,
+    MenuModule,
     SelectModule,
   ],
   template: `
@@ -57,6 +61,15 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
         icon="pi pi-plus"
         [label]="'skill.catalogue.create' | translate"
         (click)="create.emit()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        data-action="import-packs"
+        icon="pi pi-download"
+        severity="secondary"
+        [label]="'packImport.import' | translate"
+        (click)="importPacks.emit()"
       ></button>
     </div>
 
@@ -90,32 +103,15 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
               <button
                 pButton
                 type="button"
-                data-action="edit"
-                icon="pi pi-pencil"
+                [attr.data-test]="'card-menu-' + skill.id"
+                icon="pi pi-ellipsis-v"
                 severity="secondary"
                 [text]="true"
-                [attr.aria-label]="'skill.catalogue.edit' | translate"
-                (click)="edit.emit(skill)"
-              ></button>
-              <button
-                pButton
-                type="button"
-                data-action="duplicate"
-                icon="pi pi-copy"
-                severity="secondary"
-                [text]="true"
-                [attr.aria-label]="'skill.catalogue.duplicate' | translate"
-                (click)="duplicate.emit(skill)"
-              ></button>
-              <button
-                pButton
-                type="button"
-                data-action="delete"
-                icon="pi pi-trash"
-                severity="danger"
-                [text]="true"
-                [attr.aria-label]="'skill.catalogue.delete' | translate"
-                (click)="askDelete(skill)"
+                aria-haspopup="menu"
+                [attr.aria-label]="
+                  'skill.catalogue.actions' | translate: { name: skill.name }
+                "
+                (click)="openMenu($event, skill, cardMenu)"
               ></button>
             </div>
           </li>
@@ -124,6 +120,15 @@ import { Skill, SKILL_TYPES, SkillType } from '../../models/skill';
     } @else {
       <p class="hint">{{ 'skill.catalogue.empty' | translate }}</p>
     }
+
+    <p-menu
+      #cardMenu
+      [model]="menuModel()"
+      [popup]="true"
+      appendTo="body"
+      [motionOptions]="{ duration: 0 }"
+      (onHide)="menuClosed()"
+    />
   `,
   styles: `
     :host {
@@ -200,6 +205,7 @@ export class SkillCatalogueComponent {
   readonly skills = input.required<Skill[]>();
 
   readonly create = output<void>();
+  readonly importPacks = output<void>();
   readonly edit = output<Skill>();
   readonly duplicate = output<Skill>();
   readonly remove = output<Skill>();
@@ -216,6 +222,69 @@ export class SkillCatalogueComponent {
       label: this.language.t('skill.type.' + value),
     })),
   );
+
+  private readonly menuSkill = signal<Skill | null>(null);
+  private readonly popup = viewChild(Menu);
+  private menuButton: HTMLElement | null = null;
+
+  /** The actions on the skill the menu was opened from. */
+  protected readonly menuModel = computed<MenuItem[]>(() => {
+    const skill = this.menuSkill();
+    if (!skill) return [];
+    return [
+      {
+        label: this.language.t('skill.catalogue.edit'),
+        icon: 'pi pi-pencil',
+        automationId: 'edit',
+        command: () => this.edit.emit(skill),
+      },
+      {
+        label: this.language.t('skill.catalogue.duplicate'),
+        icon: 'pi pi-copy',
+        automationId: 'duplicate',
+        command: () => this.duplicate.emit(skill),
+      },
+      { separator: true },
+      {
+        label: this.language.t('skill.catalogue.delete'),
+        icon: 'pi pi-trash',
+        automationId: 'delete',
+        command: () => this.askDelete(skill),
+      },
+    ];
+  });
+
+  /** Opens the actions menu under the "…" button of the card. */
+  protected openMenu(event: Event, skill: Skill, menu: Menu): void {
+    const button = event.currentTarget as HTMLElement;
+    if (menu.visible && this.menuSkill() === skill) {
+      menu.hide();
+      return;
+    }
+    this.menuSkill.set(skill);
+    this.menuButton = button;
+    const anchor = {
+      currentTarget: button,
+      target: button,
+    } as unknown as Event;
+    if (!menu.visible) {
+      menu.show(anchor);
+      return;
+    }
+    menu.hide();
+    setTimeout(() => menu.show(anchor));
+  }
+
+  /** Escape closes the open menu wherever the focus is. */
+  protected closeMenu(): void {
+    const menu = this.popup();
+    if (menu?.visible) menu.hide();
+  }
+
+  /** Focus goes back to the "…" button (Escape, outside click, after an action). */
+  protected menuClosed(): void {
+    this.menuButton?.focus();
+  }
 
   protected askDelete(skill: Skill): void {
     this.confirmation.confirm({

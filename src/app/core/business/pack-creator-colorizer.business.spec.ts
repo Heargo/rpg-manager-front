@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 import { TestBed } from '@angular/core/testing';
 import { provideTestTranslations } from '../../../testing/test-providers';
-import glowMaterials from '../../../../public/packs/base-fr/sprites/axe.json';
+import glowMaterials from '../../../../public/packs/base-assets/sprites/axe.json';
 import { neonProviders, neonWorld } from '../../../testing/unofficial-pack';
 import { ImageProcessingService } from '../services/image-processing.service';
 import { PackCreatorBusiness } from './pack-creator.business';

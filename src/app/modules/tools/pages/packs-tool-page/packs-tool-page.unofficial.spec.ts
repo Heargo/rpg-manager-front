@@ -23,7 +23,7 @@ async function render(world: NeonWorld = neonWorld()) {
       await fixture.whenStable();
       check();
     });
-  await settle(() => expect(el.querySelectorAll('[data-test="pack-card"]').length).toBe(3));
+  await settle(() => expect(el.querySelectorAll('[data-test="pack-card"]').length).toBe(4));
   /** Dialogs may be rendered inside the page or in the document body. */
   const root = () => document.body;
   const button = (text: string) =>

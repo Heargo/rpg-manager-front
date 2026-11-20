@@ -72,7 +72,7 @@ describe('PackDraftFormBusiness.knownKeys', () => {
     const keys = await business.knownKeys(
       draft({
         tints: { neon: { gradient: GRADIENT } },
-        common: { version: 1, params: { spell: ['fireball'] } },
+        common: { version: 2, params: { spell: ['fireball'] } },
       }),
     );
 
@@ -158,6 +158,50 @@ describe('PackDraftFormBusiness.preview', () => {
   });
 });
 
+describe('PackDraftFormBusiness.preview of a kind without nouns of its own', () => {
+  const tree = (kinds: Record<string, unknown>, texts: Record<string, unknown>) =>
+    draft({
+      kinds: { tree: { type: 'equipment' }, ...kinds },
+      generators: { items: { version: 2, kinds: texts } },
+    });
+
+  it('draws each item from a descendant that has nouns, with its kind id', async () => {
+    const mine = tree(
+      { oak: { parent: 'tree' }, elm: { parent: 'tree' } },
+      { oak: { nouns: [{ text: 'Oakling' }] }, elm: { nouns: [{ text: 'Elmling' }] } },
+    );
+
+    const items = await setup().preview(mine, 'tree', 20);
+
+    expect(items).toHaveLength(20);
+    expect(new Set(items.map((item) => item.kind))).toEqual(new Set(['oak', 'elm']));
+    for (const item of items) expect(item.name.toLowerCase()).toContain(item.kind === 'oak' ? 'oakling' : 'elmling');
+  });
+
+  it('reaches descendants of any depth', async () => {
+    const mine = tree({ mid: { parent: 'tree' }, leaf: { parent: 'mid' } }, { leaf: { nouns: [{ text: 'Leafling' }] } });
+
+    const items = await setup().preview(mine, 'tree');
+
+    expect(items.map((item) => item.kind)).toEqual(['leaf', 'leaf', 'leaf']);
+  });
+
+  it('draws nothing when no descendant has nouns either', async () => {
+    expect(await setup().preview(tree({ oak: { parent: 'tree' } }, {}), 'tree')).toEqual([]);
+  });
+
+  it('still draws from the kind itself when it has nouns', async () => {
+    const mine = tree(
+      { oak: { parent: 'tree' } },
+      { tree: { nouns: [{ text: 'Treeling' }] }, oak: { nouns: [{ text: 'Oakling' }] } },
+    );
+
+    const items = await setup().preview(mine, 'tree');
+
+    expect(items.map((item) => item.kind)).toEqual(['tree', 'tree', 'tree']);
+  });
+});
+
 describe('PackDraftFormBusiness.issues', () => {
   it('maps a kind error to the kind id', async () => {
     const business = setup();
@@ -203,7 +247,7 @@ describe('PackDraftFormBusiness.issues', () => {
             kinds: { orb: { nouns: [{ text: 'Orb' }], descriptions: ['Made by {maker}, seen by {spell}.'] } },
           },
         },
-        common: { version: 1, params: { spell: ['a mage'] } },
+        common: { version: 2, params: { spell: ['a mage'] } },
       }),
     );
 
@@ -232,5 +276,74 @@ describe('PackDraftFormBusiness.issues', () => {
     );
 
     expect(issues).toEqual([]);
+  });
+
+  describe('placeholders and common.json warnings', () => {
+    const commonOf = (...descriptions: string[]) =>
+      draft({ common: { version: 2, params: { spell: descriptions } } });
+    const itemWith = (description: string, over: Record<string, unknown> = {}) =>
+      draft({
+        kinds: { orb: { type: 'item' } },
+        generators: {
+          items: { version: 2, kinds: { orb: { nouns: [{ text: 'Orb' }], descriptions: [description] } } },
+        },
+        ...over,
+      });
+    const messages = async (d: PackDraft) => (await setup().issues(d)).map((i) => i.message);
+
+    it('does not warn about a param that only an installed pack defines', async () => {
+      const found = await messages(commonOf('seen at {place}'));
+
+      expect(found.filter((m) => m.includes('{place}'))).toEqual([]);
+    });
+
+    it('still warns about a param defined nowhere', async () => {
+      const found = await messages(commonOf('seen at {nowhere}'));
+
+      expect(found.some((m) => m.includes('param {nowhere} is used but not defined'))).toBe(true);
+    });
+
+    it('does not warn about an id that is a kind of another domain in the draft', async () => {
+      const found = await messages(
+        itemWith('Made by {smith}.', { npcKinds: { smith: { roles: ['merchant'] } } }),
+      );
+
+      expect(found.filter((m) => m.includes('{smith}'))).toEqual([]);
+    });
+
+    it('does not warn about an id that is a kind of another domain in an installed pack', async () => {
+      const found = await messages(itemWith('Made by {blacksmith}, kept by {guard:adjective}.'));
+
+      expect(found.filter((m) => m.includes('{blacksmith}') || m.includes('{guard}'))).toEqual([]);
+    });
+
+    it('warns about an id that is neither a param nor a kind of any active pack', async () => {
+      const found = await messages(
+        itemWith('Made by {smith} and {ghost}.', { npcKinds: { smith: { roles: ['merchant'] } } }),
+      );
+
+      expect(found.some((m) => m.includes('{ghost}') && m.includes('not defined'))).toBe(true);
+      expect(found.filter((m) => m.includes('{smith}'))).toEqual([]);
+    });
+
+    it('warns about an unknown id used in a param of common.json, and not about a kind of the draft', async () => {
+      const found = await messages(
+        draft({
+          skillKinds: { smite: { type: 'active', effect: 'damage' } },
+          common: { version: 2, params: { spell: ['{smite} and {ghost}'] } },
+        }),
+      );
+
+      expect(found.some((m) => m.includes('{ghost}'))).toBe(true);
+      expect(found.filter((m) => m.includes('{smite}'))).toEqual([]);
+    });
+
+    it('rejects a common.json that still has kinds, as an unknown field', async () => {
+      const issues = await setup().issues(
+        draft({ common: { version: 2, kinds: { ruby: { words: [{ text: 'Ruby' }] } } } }),
+      );
+
+      expect(issues.some((i) => i.level === 'error' && i.message.includes('kinds'))).toBe(true);
+    });
   });
 });

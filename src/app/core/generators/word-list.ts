@@ -75,7 +75,7 @@ export type ItemWordListValidation =
   | { ok: true; value: ItemWordList; warnings: string[] }
   | { ok: false; errors: string[] };
 
-const noun: Section = (value, path, context) => {
+export const noun: Section = (value, path, context) => {
   if (!isRecord(value) || !nonEmptyString(value['text']))
     context.error(`${path} needs a "text"`);
   else if (
@@ -102,7 +102,7 @@ export function isAdjective(value: unknown): value is Adjective {
   );
 }
 
-const adjective: Section = (value, path, context) => {
+export const adjective: Section = (value, path, context) => {
   if (!isAdjective(value))
     context.error(
       `${path} must be a string or { "m": …, "f": …, "mp"?: …, "fp"?: … }`,

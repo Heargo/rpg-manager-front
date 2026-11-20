@@ -32,6 +32,19 @@ export interface PackSprite {
   materials?: string;
 }
 
+/** A landscape a world can take as its illustration; chosen in the world wizard (stored as a copy). */
+export interface PackWorldImage {
+  id: string;
+  /** Plain text, used as alt text and tooltip. */
+  label: string;
+  /** WebP, PNG or JPEG path inside the pack. */
+  image: string;
+  /** Short lowercase words (`mountain`, `night`). */
+  tags?: string[];
+  /** https URL of the original artwork, shown in the picker and the credits. */
+  source?: string;
+}
+
 export interface GradientStop {
   position: number;
   color: string;
@@ -73,6 +86,16 @@ export interface ClassKindDef {
 export interface PackDomainDef<K = never> {
   kinds?: Record<string, K>;
   texts?: string;
+  /** A JSON list of fixed entries (items, skills, classes) in the pack's language. */
+  content?: string;
+}
+
+/** An attribute the pack's fixed content uses. */
+export interface PackAttribute {
+  id: string;
+  name: string;
+  max?: number;
+  formula?: string;
 }
 
 export interface PackDomains {
@@ -94,11 +117,16 @@ export interface Pack {
   license: string;
   licenseUrl: string;
   homepage?: string;
+  /** Attribution text for the credits page (several licences, sources). */
+  notice?: string;
   tints?: Record<string, PackTint>;
   domains?: PackDomains;
+  /** The attributes the pack's fixed content uses. */
+  attributes?: PackAttribute[];
   /** The shared language file (params). */
   common?: string;
   sprites: PackSprite[];
+  worldImages?: PackWorldImage[];
 }
 
 export type PackValidation =
@@ -111,7 +139,34 @@ export const textsPath = (
   generator: PackGenerator,
 ): string | undefined => pack.domains?.[generator]?.texts;
 
+/** The path of the fixed content file of a domain in a pack, if it has one. */
+export const contentPath = (
+  pack: Pack,
+  domain: PackDomain,
+): string | undefined => pack.domains?.[domain]?.content;
+
 const ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/** The top-level fields of `pack.json`; any other is an error (a typo, or a field of an older format). */
+const MANIFEST_FIELDS: readonly string[] = [
+  'format',
+  'id',
+  'language',
+  'name',
+  'description',
+  'version',
+  'author',
+  'license',
+  'licenseUrl',
+  'homepage',
+  'notice',
+  'tints',
+  'domains',
+  'attributes',
+  'common',
+  'sprites',
+  'worldImages',
+];
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -140,7 +195,8 @@ function isRelativePath(path: unknown): path is string {
 }
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
-const DOMAIN_KEY_FIELDS = ['kinds', 'texts'] as const;
+const DOMAIN_KEY_FIELDS = ['kinds', 'texts', 'content'] as const;
+const CONTENT_DOMAIN_NAMES: readonly string[] = ['items', 'skills', 'classes'];
 /** The kind schema of each domain. */
 const KIND_SCHEMAS: Record<PackDomain, KindSchema> = {
   items: ITEM_KIND_SCHEMA,
@@ -209,6 +265,8 @@ function validateDomains(
     for (const field of Object.keys(def))
       if (!(DOMAIN_KEY_FIELDS as readonly string[]).includes(field))
         errors.push(`domains.${domain}: unknown field "${field}"`);
+    if (def['content'] !== undefined && !CONTENT_DOMAIN_NAMES.includes(domain))
+      errors.push(`domains.${domain}: unknown field "content"`);
     if (def['kinds'] !== undefined && schema)
       errors.push(...validateKindTree(domain, def['kinds'], schema));
     if (def['texts'] !== undefined) {
@@ -219,8 +277,87 @@ function validateDomains(
           `domains.${domain}.texts must be a relative path inside the pack`,
         );
     }
+    if (def['content'] !== undefined && CONTENT_DOMAIN_NAMES.includes(domain)) {
+      if (neutral)
+        errors.push(`domains.${domain}.content needs a pack with a language`);
+      else if (!isRelativePath(def['content']))
+        errors.push(
+          `domains.${domain}.content must be a relative path inside the pack`,
+        );
+    }
   }
   return known as PackDomains;
+}
+
+function validateAttributes(attributes: unknown, errors: string[]): void {
+  if (!Array.isArray(attributes)) {
+    errors.push('attributes must be a list');
+    return;
+  }
+  const seen = new Set<string>();
+  attributes.forEach((attribute, i) => {
+    const at = `attributes[${i}]`;
+    if (!isObject(attribute)) {
+      errors.push(`${at} must be an object`);
+      return;
+    }
+    const id = attribute['id'];
+    if (typeof id !== 'string' || !ID.test(id))
+      errors.push(`${at}: id must be kebab-case`);
+    else if (seen.has(id)) errors.push(`attributes "${id}": id is used twice`);
+    else seen.add(id);
+    if (!text(attribute['name']))
+      errors.push(`${at}: name is required (a text)`);
+    const max = attribute['max'];
+    if (max !== undefined && (typeof max !== 'number' || !(max >= 1)))
+      errors.push(`${at}: max must be a number, 1 or more`);
+    if (attribute['formula'] !== undefined && !text(attribute['formula']))
+      errors.push(`${at}: formula must be a text`);
+  });
+}
+
+const WORLD_IMAGE_FILE = /\.(webp|png|jpe?g)$/i;
+const TAG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const MAX_TAG_LENGTH = 24;
+
+function validateWorldImages(worldImages: unknown, errors: string[]): void {
+  if (!Array.isArray(worldImages)) {
+    errors.push('worldImages must be a list');
+    return;
+  }
+  const seen = new Set<string>();
+  worldImages.forEach((entry, i) => {
+    const at = `worldImages[${i}]`;
+    if (!isObject(entry)) {
+      errors.push(`${at} must be an object`);
+      return;
+    }
+    const id = entry['id'];
+    const name = typeof id === 'string' && id ? `worldImages "${id}"` : at;
+    if (typeof id !== 'string' || !ID.test(id))
+      errors.push(`${name}: id must be kebab-case`);
+    else if (seen.has(id)) errors.push(`${name}: id is used twice`);
+    else seen.add(id);
+    if (!text(entry['label'])) errors.push(`${name}: label is required`);
+    const image = entry['image'];
+    if (!isRelativePath(image) || !WORLD_IMAGE_FILE.test(image))
+      errors.push(
+        `${name}: image must be a relative path to a WebP, PNG or JPEG file`,
+      );
+    const tags = entry['tags'];
+    if (
+      tags !== undefined &&
+      (!Array.isArray(tags) ||
+        !tags.every(
+          (t) =>
+            typeof t === 'string' && TAG.test(t) && t.length <= MAX_TAG_LENGTH,
+        ))
+    )
+      errors.push(`${name}: tags must be a list of short lowercase words`);
+    const source = entry['source'];
+    if (source !== undefined && !isHttpsUrl(source))
+      errors.push(`${name}: source must be an https URL`);
+  });
 }
 
 /** Checks a pack manifest read from JSON, listing every problem with the field it concerns. */
@@ -255,12 +392,22 @@ export function validatePack(json: unknown): PackValidation {
   if (json['homepage'] !== undefined && !text(json['homepage']))
     errors.push('homepage must be a text');
 
+  if (json['notice'] !== undefined && !text(json['notice']))
+    errors.push('notice must be a text');
+
   if (json['common'] !== undefined) {
     if (neutral) errors.push('common needs a pack with a language');
     else if (!isRelativePath(json['common']))
       errors.push('common must be a relative path inside the pack');
   }
+  if (json['attributes'] !== undefined)
+    validateAttributes(json['attributes'], errors);
   if (json['tints'] !== undefined) validateTints(json['tints'], errors);
+  for (const field of Object.keys(json))
+    if (!MANIFEST_FIELDS.includes(field))
+      errors.push(`unknown field "${field}"`);
+  if (json['worldImages'] !== undefined)
+    validateWorldImages(json['worldImages'], errors);
   const domains =
     json['domains'] !== undefined
       ? validateDomains(json['domains'], neutral, errors, warnings)

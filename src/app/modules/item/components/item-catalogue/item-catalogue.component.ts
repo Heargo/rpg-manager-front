@@ -54,6 +54,7 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       <input
         pInputText
         data-field="search"
+        class="search"
         type="search"
         [attr.aria-label]="'item.catalogue.search' | translate"
         [placeholder]="'item.catalogue.search' | translate"
@@ -61,28 +62,34 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         (input)="search.set($any($event.target).value)"
         autocomplete="off"
       />
-      <p-multiselect
-        [options]="rarityOptions()"
-        optionLabel="label"
-        optionValue="value"
-        [ngModel]="rarities()"
-        (ngModelChange)="rarities.set($event ?? [])"
-        [placeholder]="'item.fields.rarity' | translate"
-        [showToggleAll]="false"
-        display="chip"
-      />
-      <p-multiselect
-        [options]="typeOptions()"
-        optionLabel="label"
-        optionValue="value"
-        [ngModel]="types()"
-        (ngModelChange)="types.set($event ?? [])"
-        [placeholder]="'item.fields.type' | translate"
-        [showToggleAll]="false"
-        display="chip"
-      />
-      <div class="price-filter">
-        <span class="price-label">{{ 'item.catalogue.price' | translate }}</span>
+      <div class="filters" data-field="filters">
+        <p-multiselect
+          data-field="rarity-filter"
+          [options]="rarityOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="rarities()"
+          (ngModelChange)="rarities.set($event ?? [])"
+          [placeholder]="'item.fields.rarity' | translate"
+          [showToggleAll]="false"
+          display="chip"
+        />
+        <p-multiselect
+          data-field="type-filter"
+          [options]="typeOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="types()"
+          (ngModelChange)="types.set($event ?? [])"
+          [placeholder]="'item.fields.type' | translate"
+          [showToggleAll]="false"
+          display="chip"
+        />
+      </div>
+      <div class="price-filter" data-field="price-filter">
+        <span class="price-label">{{
+          'item.catalogue.price' | translate
+        }}</span>
         <p-slider
           [range]="true"
           [min]="bounds().min"
@@ -94,7 +101,9 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         />
         <span class="price-ends">
           <app-coin-display [copper]="range()[0]" />
-          <span class="price-to">{{ 'item.catalogue.priceTo' | translate }}</span>
+          <span class="price-to">{{
+            'item.catalogue.priceTo' | translate
+          }}</span>
           <app-coin-display [copper]="range()[1]" />
         </span>
       </div>
@@ -102,6 +111,7 @@ import { ItemCardComponent } from '../item-card/item-card.component';
         pButton
         type="button"
         data-action="create"
+        class="create"
         icon="pi pi-plus-circle"
         [label]="'item.catalogue.create' | translate"
         (click)="create.emit()"
@@ -109,11 +119,11 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       <button
         pButton
         type="button"
-        data-action="add-defaults"
-        icon="pi pi-plus"
+        data-action="import-packs"
+        icon="pi pi-download"
         severity="secondary"
-        [label]="'item.catalogue.addDefaults' | translate"
-        (click)="addDefaults.emit()"
+        [label]="'packImport.import' | translate"
+        (click)="importPacks.emit()"
       ></button>
     </div>
 
@@ -157,7 +167,6 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       } @else {
         <p class="empty">{{ 'item.catalogue.empty' | translate }}</p>
       }
-
     </div>
 
     <p-menu
@@ -200,6 +209,31 @@ import { ItemCardComponent } from '../item-card/item-card.component';
       flex: 0 1 15rem;
       min-width: min(13rem, 100%);
       padding-inline: 0.5rem;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      min-width: 0;
+    }
+    @media (max-width: 40rem) {
+      .search,
+      .create {
+        flex: 1 1 100%;
+      }
+      .filters {
+        flex: 1 1 100%;
+        flex-wrap: nowrap;
+      }
+      .filters > * {
+        flex: 1 1 0;
+        min-width: 0;
+        width: 100%;
+      }
+      .price-filter {
+        flex: 1 1 100%;
+      }
     }
     .price-label {
       font-size: 0.875rem;
@@ -323,7 +357,7 @@ export class ItemCatalogueComponent {
   readonly edit = output<Item>();
   readonly create = output<void>();
   readonly remove = output<Item>();
-  readonly addDefaults = output<void>();
+  readonly importPacks = output<void>();
 
   protected readonly kindIcons: Record<ItemType, string> = {
     item: 'pi pi-box',
