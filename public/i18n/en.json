@@ -891,17 +891,7 @@
     "searchMessage": "{0} results are available",
     "selectionMessage": "{0} items selected",
     "pending": "Pending",
-    "fileSizeTypes": [
-      "B",
-      "KB",
-      "MB",
-      "GB",
-      "TB",
-      "PB",
-      "EB",
-      "ZB",
-      "YB"
-    ]
+    "fileSizeTypes": ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
   },
   "formula": {
     "errors": {
@@ -983,6 +973,7 @@
       "tabJson": "JSON",
       "tabGenerate": "Generate",
       "jsonHint": "Edit the NPC as JSON; it is applied to the form while it is valid.",
+      "randomImage": "Random image",
       "generateHint": "Draw a random NPC (name, level, attributes, equipment) from a seed; the form is replaced.",
       "save": "Save",
       "equipped": "Equipped",
@@ -1675,7 +1666,9 @@
       "noSprites": "No sprite yet.",
       "spriteId": "Id",
       "label": "Label",
-      "spriteKinds": "Item kinds",
+      "spriteKinds": "Kinds",
+      "spriteDomain": "Sprite for",
+      "spriteDomains": { "items": "Items", "npcs": "NPCs" },
       "spriteKind": "Colouring",
       "sprites": {
         "filter": "Colouring",

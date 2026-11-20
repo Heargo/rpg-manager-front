@@ -173,8 +173,29 @@ export class PackCreatorBusiness {
     const draft = await this.draftOrThrow(draftId);
     if (draft.sprites.some((s) => s.id === sprite.id))
       throw new PackError([`sprite "${sprite.id}": id is used twice`]);
+    await this.checkSpriteKinds(draft, sprite);
     await this.saveDraft({ ...draft, sprites: [...draft.sprites, sprite] });
     return sprite;
+  }
+
+  /** The kinds of a sprite must belong to its domain's kinds: the Base's plus the draft's own. */
+  private async checkSpriteKinds(
+    draft: PackDraft,
+    sprite: DraftSprite,
+  ): Promise<void> {
+    const domain = sprite.domain ?? 'items';
+    const base = await this.packs
+      .manifest(basePackId(draft.details.language))
+      .catch(() => null);
+    const known = new Set([
+      ...Object.keys(base?.domains?.[domain]?.kinds ?? {}),
+      ...Object.keys(domain === 'npcs' ? (draft.npcKinds ?? {}) : draft.kinds),
+    ]);
+    const unknown = sprite.kinds.filter((kind) => !known.has(kind));
+    if (unknown.length)
+      throw new PackError([
+        `sprite "${sprite.id}": ${unknown.join(', ')} is not a kind of ${domain}`,
+      ]);
   }
 
   /** Adds an uploaded PNG as a sprite: at most 1 MB, readable, at most 256 x 256. Rejects with the reason. */
@@ -474,6 +495,7 @@ export class PackCreatorBusiness {
       sprites[i] = {
         id: sprite.id,
         label: sprite.label,
+        domain: sprite.domain === 'npcs' ? 'npcs' : 'items',
         kinds: sprite.kinds,
         kind: sprite.kind as SpriteKind,
         image,

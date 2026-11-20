@@ -112,6 +112,13 @@ export interface BundledSprite extends PackSprite {
   materialsUrl?: string;
 }
 
+/** A pack sprite of the `npcs` domain with the pack it comes from and the URLs of its files. */
+export interface BundledNpcSprite extends PackSprite {
+  packId: string;
+  imageUrl: string;
+  materialsUrl?: string;
+}
+
 /** A pack world image with the pack it comes from and the URL of its file. */
 export interface BundledWorldImage extends PackWorldImage {
   tags: string[];
@@ -360,6 +367,46 @@ export class PackBusiness {
     if (isBasePack(id)) return this.baseSprites(id).catch(() => []);
     const record = this.stored().find((p) => p.id === id);
     return record ? this.storedSprites(record) : [];
+  }
+
+  /** The NPC sprites of the active packs, with their file URLs; empty when none has any. */
+  async npcSprites(): Promise<BundledNpcSprite[]> {
+    await this.ensureLoaded();
+    const result: BundledNpcSprite[] = [];
+    for (const id of this.activeIds()) {
+      if (isBasePack(id)) {
+        const manifest = await this.manifest(id).catch(() => null);
+        if (!manifest) continue;
+        const manifestUrl = `packs/${id}/pack.json`;
+        for (const sprite of manifest.sprites)
+          if (sprite.domain === 'npcs')
+            result.push({
+              ...sprite,
+              packId: id,
+              imageUrl: packFileUrl(manifestUrl, sprite.image),
+              ...(sprite.materials
+                ? { materialsUrl: packFileUrl(manifestUrl, sprite.materials) }
+                : {}),
+            });
+        continue;
+      }
+      const record = this.stored().find((p) => p.id === id);
+      if (!record) continue;
+      const urls = await this.objectUrls(record);
+      for (const sprite of record.manifest.sprites) {
+        if (sprite.domain !== 'npcs') continue;
+        const materialsUrl = sprite.materials
+          ? urls.get(sprite.materials)
+          : undefined;
+        result.push({
+          ...sprite,
+          packId: id,
+          imageUrl: urls.get(sprite.image) ?? '',
+          ...(materialsUrl ? { materialsUrl } : {}),
+        });
+      }
+    }
+    return result;
   }
 
   /** The world images of the active packs, in the world's order, with their file URLs. */

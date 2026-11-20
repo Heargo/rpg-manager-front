@@ -891,17 +891,7 @@
     "searchMessage": "{0} résultats disponibles",
     "selectionMessage": "{0} éléments sélectionnés",
     "pending": "En attente",
-    "fileSizeTypes": [
-      "o",
-      "Ko",
-      "Mo",
-      "Go",
-      "To",
-      "Po",
-      "Eo",
-      "Zo",
-      "Yo"
-    ]
+    "fileSizeTypes": ["o", "Ko", "Mo", "Go", "To", "Po", "Eo", "Zo", "Yo"]
   },
   "formula": {
     "errors": {
@@ -983,6 +973,7 @@
       "tabJson": "JSON",
       "tabGenerate": "Générer",
       "jsonHint": "Modifiez le PNJ en JSON ; il est appliqué au formulaire tant qu'il est valide.",
+      "randomImage": "Image aléatoire",
       "generateHint": "Tire un PNJ au hasard (nom, niveau, attributs, équipement) depuis une graine ; le formulaire est remplacé.",
       "save": "Enregistrer",
       "equipped": "Équipé",
@@ -1676,6 +1667,8 @@
       "spriteId": "Identifiant",
       "label": "Libellé",
       "spriteKinds": "Catégories",
+      "spriteDomain": "Sprite pour",
+      "spriteDomains": { "items": "Objets", "npcs": "PNJ" },
       "spriteKind": "Coloration",
       "sprites": {
         "filter": "Coloration",

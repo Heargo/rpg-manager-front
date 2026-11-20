@@ -322,7 +322,7 @@ Tickets in `neutral-pack/` (NP); NP01, NP03, NP04 archived.
 | # | Ticket | Blocked by |
 | - | --- | --- |
 | 139 | **NP01** Neutral Base assets pack, sprites moved out of Base FR/EN (done) | none |
-| 140 | **NP02** NPC portraits from pack sprites | NP01 |
+| 140 | **NP02** NPC portraits from pack sprites (done) | NP01 |
 | 140b | **NP05** Skill and class images from pack sprites | NP02 |
 | 141 | **NP03** World images as a pack asset (done) | NP01 |
 | 142 | **NP04** Gather the Vecteezy landscapes (human) (done) | NP03 |

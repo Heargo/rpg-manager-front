@@ -38,6 +38,7 @@ const PER_PAGE = 12;
 interface SpriteForm {
   id: string;
   label: string;
+  domain: 'items' | 'npcs';
   kinds: string[];
   kind: SpriteKind;
 }
@@ -169,6 +170,8 @@ interface SpriteForm {
               {{ 'packs.creator.kinds.sectionGeneration' | translate }}
             </h4>
             <dl>
+              <dt>{{ 'packs.creator.spriteDomain' | translate }}</dt>
+              <dd>{{ domainName(sprite.domain ?? 'items') }}</dd>
               <dt>{{ 'packs.creator.spriteKinds' | translate }}</dt>
               <dd><app-chip-list [names]="sprite.kinds" /></dd>
               <dt>{{ 'packs.creator.spriteKind' | translate }}</dt>
@@ -220,13 +223,25 @@ interface SpriteForm {
               {{ 'packs.creator.kinds.sectionGeneration' | translate }}
             </h4>
             <div class="field">
+              <label>{{ 'packs.creator.spriteDomain' | translate }}</label>
+              <p-select
+                data-test="sprite-domain"
+                optionLabel="label"
+                optionValue="value"
+                appendTo="body"
+                [options]="domainOptions()"
+                [ngModel]="f.domain"
+                (ngModelChange)="patch({ domain: $event, kinds: [] })"
+              />
+            </div>
+            <div class="field">
               <label>{{ 'packs.creator.spriteKinds' | translate }}</label>
               <p-multiselect
                 data-test="sprite-kinds"
                 optionLabel="label"
                 optionValue="value"
                 appendTo="body"
-                [options]="itemKindOptions()"
+                [options]="spriteKindOptions()"
                 [ngModel]="f.kinds"
                 (ngModelChange)="patch({ kinds: $event ?? [] })"
                 [showToggleAll]="false"
@@ -411,6 +426,7 @@ export class SpritesGridComponent {
   private readonly selectedIndex = signal<number | null>(null);
   protected readonly form = signal<SpriteForm | null>(null);
   private readonly known = signal<KnownKeys['kinds']>([]);
+  private readonly knownNpcs = signal<KnownKeys['kinds']>([]);
   private initial = '';
   private loads = 0;
   private count = -1;
@@ -444,11 +460,22 @@ export class SpritesGridComponent {
     }));
   });
 
-  protected readonly itemKindOptions = computed(() =>
-    kindOptions(this.known(), [
-      ...this.draft().sprites.flatMap((s) => s.kinds),
+  /** The kinds of the form's domain: the items tree, or the NPC tree. */
+  protected readonly spriteKindOptions = computed(() => {
+    const domain = this.form()?.domain ?? 'items';
+    return kindOptions(domain === 'npcs' ? this.knownNpcs() : this.known(), [
+      ...this.draft()
+        .sprites.filter((s) => (s.domain ?? 'items') === domain)
+        .flatMap((s) => s.kinds),
       ...(this.form()?.kinds ?? []),
-    ]),
+    ]);
+  });
+
+  protected readonly domainOptions = computed(() =>
+    (['items', 'npcs'] as const).map((value) => ({
+      value,
+      label: this.domainName(value),
+    })),
   );
 
   protected readonly colouringOptions = computed(() => {
@@ -483,7 +510,11 @@ export class SpritesGridComponent {
       const draft = this.draft();
       const load = ++this.loads;
       void this.business.knownKeys(draft).then(
-        (keys) => load === this.loads && this.known.set(keys.kinds),
+        (keys) => {
+          if (load !== this.loads) return;
+          this.known.set(keys.kinds);
+          this.knownNpcs.set(keys.domainKinds.npcs);
+        },
         () => undefined,
       );
     });
@@ -530,6 +561,10 @@ export class SpritesGridComponent {
     this.first.set(0);
   }
 
+  protected domainName(domain: 'items' | 'npcs'): string {
+    return this.language.t(`packs.creator.spriteDomains.${domain}`);
+  }
+
   protected patch(change: Partial<SpriteForm>): void {
     this.form.update((form) => (form ? { ...form, ...change } : form));
   }
@@ -548,6 +583,7 @@ export class SpritesGridComponent {
     const form: SpriteForm = {
       id: sprite.id,
       label: sprite.label,
+      domain: sprite.domain ?? 'items',
       kinds: [...sprite.kinds],
       kind: sprite.kind,
     };
@@ -601,6 +637,7 @@ export class SpritesGridComponent {
     const patch: Partial<DraftSprite> = {
       id: form.id.trim(),
       label: form.label,
+      domain: form.domain,
       kinds: form.kinds,
       kind: form.kind,
     };

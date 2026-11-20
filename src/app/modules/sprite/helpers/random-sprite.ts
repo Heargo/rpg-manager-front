@@ -1,6 +1,7 @@
 import { pick, shuffle } from '../../../core/generators/random';
 import { RandomSource } from '../../../core/generators/random-source';
 import { ItemVocabulary } from '../../../core/generators/item-vocabulary';
+import { NpcVocabulary } from '../../../core/generators/npc-vocabulary';
 import { ItemSlot, ItemType } from '../../../core/models/item';
 import { GradientStop, SpriteDocument } from '../models/sprite';
 import { PRESETS } from './presets';
@@ -8,12 +9,20 @@ import { PRESETS } from './presets';
 /** A sprite set that can illustrate an item: a pack sprite or a tagged set saved on the device. */
 export interface SpriteCandidate {
   key: string;
-  /** The item kinds it illustrates. */
+  /** What it illustrates; items when missing. */
+  domain?: 'items' | 'npcs';
+  /** The kinds it illustrates, in its domain's tree. */
   kinds: string[];
-  type: ItemType;
-  slot: ItemSlot;
+  type?: ItemType;
+  slot?: ItemSlot;
   /** Wins over the others of the same kind: a sprite set of the user, a sprite of a pack other than the Base. */
   own?: boolean;
+}
+
+/** What an NPC needs to draw its portrait. */
+export interface NpcLook {
+  domain: 'npcs';
+  kind?: string;
 }
 
 export interface ItemLook {
@@ -31,6 +40,45 @@ export interface ItemLook {
  * Undefined when there is no candidate.
  */
 export function pickSprite(
+  candidates: readonly SpriteCandidate[],
+  item: ItemLook | NpcLook,
+  vocabulary: ItemVocabulary | NpcVocabulary,
+  random: RandomSource,
+): SpriteCandidate | undefined {
+  if ('domain' in item && item.domain === 'npcs')
+    return pickNpcSprite(candidates, item, vocabulary as NpcVocabulary, random);
+  return pickItemSprite(
+    candidates.filter((c) => (c.domain ?? 'items') === 'items'),
+    item as ItemLook,
+    vocabulary as ItemVocabulary,
+    random,
+  );
+}
+
+/** An NPC sprite of the NPC's kind, else of the nearest parent kind, else any NPC sprite. */
+function pickNpcSprite(
+  candidates: readonly SpriteCandidate[],
+  npc: NpcLook,
+  vocabulary: NpcVocabulary,
+  random: RandomSource,
+): SpriteCandidate | undefined {
+  const sprites = candidates.filter((c) => c.domain === 'npcs');
+  const chain =
+    (npc.kind && vocabulary.kind(npc.kind)?.chain) ||
+    (npc.kind ? [npc.kind] : []);
+  const tiers = [
+    ...chain.map((level) => {
+      const found = sprites.filter((c) => c.kinds.includes(level));
+      const own = found.filter((c) => c.own);
+      return own.length ? own : found;
+    }),
+    sprites,
+  ];
+  const best = tiers.find((tier) => tier.length);
+  return best ? pick(random, best) : undefined;
+}
+
+function pickItemSprite(
   candidates: readonly SpriteCandidate[],
   item: ItemLook,
   vocabulary: ItemVocabulary,
